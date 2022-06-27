@@ -10,8 +10,6 @@ import BeamCore
 
 struct AutocompleteItemView: View {
 
-    @Environment(\.colorScheme) var colorScheme
-
     static let defaultHeight: CGFloat = 38
 
     @State var item: AutocompleteResult

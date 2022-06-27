@@ -12,22 +12,62 @@ struct TabClusteringGroupCapsuleView: View {
 
     var title: String
     var color: TabGroupingColor
+    var collapsed = false
+    var itemsCount: Int = 0
+    var onTap: ((Bool, NSEvent?) -> Void)?
+
+    @State private var isHovering = false
+    @State private var isTouchDown = false
+
     private var mainColor: Color {
         color.mainColor?.swiftUI ?? .clear
     }
+
     private var borderColor: Color {
-        mainColor.opacity(colorScheme == .dark ? 0.24 : 0.2)
+        var opacity: Double = 0
+        if colorScheme == .dark {
+            opacity = isTouchDown ? 0.5 : (isHovering ? 0.36 : 0.24)
+        } else {
+            opacity = isTouchDown ? 0.44 : (isHovering ? 0.3 : 0.2)
+        }
+        return mainColor.opacity(opacity)
     }
     private var textColor: Color {
         color.textColor?.swiftUI ?? .white
     }
 
+    private var displayedText: String {
+        if title.isEmpty && collapsed && itemsCount > 0 {
+            return "\(itemsCount)"
+        }
+        return title
+    }
+
+    @ViewBuilder
+    private var interactionOverlay: some View {
+        if isTouchDown || isHovering {
+            let baseColor = colorScheme == .dark ? Color.white : Color.black
+            let hoverOpacity = colorScheme == .dark ? 0.1 : 0.15
+            let touchOpacity = colorScheme == .dark ? 0.15 : 0.2
+            baseColor.opacity(isTouchDown ? touchOpacity : hoverOpacity)
+        }
+    }
+
+    @ViewBuilder
     private var renderTitle: some View {
-        Text(title)
-            .frame(height: 22)
-            .frame(minWidth: 6, maxWidth: .infinity)
-            .padding(.horizontal, title.isEmpty ? 0 : BeamSpacing._50)
-            .font(BeamFont.medium(size: 11).swiftUI)
+        Group {
+            let displayedText = displayedText
+            if title.isEmpty && collapsed && itemsCount >= 1000 {
+                Icon(name: "nav-pivot-infinite", size: CGSize(width: 12, height: 6),
+                     color: textColor, invertBlendMode: true)
+            } else {
+                Text(displayedText)
+            }
+        }
+        .frame(height: 22)
+        .padding(.horizontal, displayedText.isEmpty ? 0 : BeamSpacing._50)
+        .frame(minWidth: 16, maxWidth: .infinity)
+        .font(BeamFont.medium(size: 11).swiftUI)
     }
 
     var body: some View {
@@ -35,7 +75,9 @@ struct TabClusteringGroupCapsuleView: View {
             .foregroundColor(textColor)
             .blendModeLightMultiplyDarkScreen(invert: true)
             .background(
-                mainColor.cornerRadius(3)
+                mainColor
+                    .overlay(interactionOverlay)
+                    .cornerRadius(3)
                     .blendModeLightMultiplyDarkScreen()
             )
             .padding(3)
@@ -57,6 +99,17 @@ struct TabClusteringGroupCapsuleView: View {
 
                     .blendModeLightMultiplyDarkScreen()
             })
+            .onHover { isHovering = $0 }
+            .onTouchDown { isTouchDown = $0 }
+            .simultaneousGesture(TapGesture().onEnded({ _ in
+                // We can't use the ClickCatchingView for the left click because of the parent drag gesture.
+                // But we still need it for right click and control-click, which could end up here.
+                guard NSApp.currentEvent?.isRightClick != true else { return }
+                onTap?(false, nil)
+            }))
+            .background(ClickCatchingView(onRightTap: { event in
+                onTap?(true, event)
+            }))
     }
 }
 
@@ -88,21 +141,23 @@ struct TabViewGroupUnderline: View {
 }
 
 struct TabClusteringGroupCapsuleView_Previews: PreviewProvider {
+
+    static func renderGroup(_ title: String, color: TabGroupingColor, collapsed: Bool = false, count: Int = 0) -> some View {
+        TabClusteringGroupCapsuleView(title: title, color: color,
+                                      collapsed: collapsed, itemsCount: count)
+            .fixedSize()
+            .overlay(
+                TabViewGroupUnderline(color: color),
+                alignment: .bottom
+            )
+    }
     static var previews: some View {
         HStack {
-            TabClusteringGroupCapsuleView(title: "Group", color: TabGroupingColor(designColor: .yellow))
-                .fixedSize()
-                .overlay(
-                    TabViewGroupUnderline(color: TabGroupingColor(designColor: .yellow)),
-                    alignment: .bottom
-                )
-            TabClusteringGroupCapsuleView(title: "", color: TabGroupingColor(designColor: .green))
-                .fixedSize()
-                .overlay(
-                    TabViewGroupUnderline(color: TabGroupingColor(designColor: .green)),
-                    alignment: .bottom
-                )
-        }
-            .padding()
+            renderGroup("Group", color: TabGroupingColor(designColor: .yellow))
+            renderGroup("", color: TabGroupingColor(designColor: .green), collapsed: false, count: 9)
+            renderGroup("", color: TabGroupingColor(designColor: .green), collapsed: true, count: 9)
+            renderGroup("", color: TabGroupingColor(designColor: .blue), collapsed: true, count: 909)
+            renderGroup("", color: TabGroupingColor(designColor: .birgit), collapsed: true, count: 1009)
+        }.padding()
     }
 }
