@@ -220,7 +220,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
             canReplaceBase = false
             canMatchInside = false
             isNote = true
-        case .searchEngine, .action:
+        case .searchEngine, .tabGroup, .action:
             canReplaceBase = false
         default:
             break
