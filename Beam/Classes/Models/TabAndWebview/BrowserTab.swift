@@ -107,13 +107,18 @@ import Promises
     }
 
     // MARK: - WebPage properties
-    @Published public var webView: BeamWebView {
+
+    /// Content View container of the tab. WebKit can insert content to the parent of the ``webView`` so we need to hold it.
+    private(set) var contentView: NSViewContainerView<BeamWebView>
+    /// The raw ``BeamWebView`` managed by the tab. For display purposes, prefer to use ``contentView``.
+    @Published private(set) var webView: BeamWebView {
         didSet {
             observeWebView()
         }
     }
     var webviewWindow: NSWindow? { webView.window }
     var frame: NSRect { webView.frame }
+
     @Published var title: String = ""
     @Published var originalQuery: String?
     @Published var url: URL?
@@ -205,9 +210,15 @@ import Promises
 
         if let suppliedWebView = webView {
             self.webView = suppliedWebView
+            self.contentView = NSViewContainerView(contentView: suppliedWebView)
             backForwardList = suppliedWebView.backForwardList
         } else {
-            self.webView = BeamWebView(frame: .zero, configuration: state.isIncognito ? BrowserTab.incognitoWebViewConfiguration : BrowserTab.webViewConfiguration)
+            let beamWebView = BeamWebView(
+                frame: .zero,
+                configuration: state.isIncognito ? BrowserTab.incognitoWebViewConfiguration : BrowserTab.webViewConfiguration
+            )
+            self.webView = beamWebView
+            self.contentView = NSViewContainerView(contentView: beamWebView)
         }
 
         browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin, isIncognito: state.isIncognito)
@@ -236,7 +247,10 @@ import Promises
         self.title = title
         self.isPinned = true
         self.originMode = .web
-        self.webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
+
+        let beamWebView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
+        self.webView = beamWebView
+        self.contentView = NSViewContainerView(contentView: beamWebView)
 
         browsingTree = Self.newBrowsingTree(origin: .pinnedTab(url: url), isIncognito: false)
         noteController = WebNoteController(note: nil, rootElement: nil)
@@ -265,7 +279,7 @@ import Promises
         fatalError("init(coder:) has not been implemented")
     }
 
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case id
         case title
         case originalQuery
@@ -299,7 +313,9 @@ import Promises
 
         originMode = .web
 
-        webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
+        let beamWebView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
+        webView = beamWebView
+        contentView = NSViewContainerView(contentView: beamWebView)
 
         super.init()
     }
