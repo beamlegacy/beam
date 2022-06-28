@@ -30,6 +30,7 @@ class GoogleEvent: Codable {
     let attendees: [GoogleEventAttendee]?
     let htmlLink: String?
     let hangoutLink: String?
+    let conferenceData: GoogleEventConferenceData?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -40,6 +41,7 @@ class GoogleEvent: Codable {
         case attendees
         case htmlLink
         case hangoutLink
+        case conferenceData
     }
 
     required public init(from decoder: Decoder) throws {
@@ -53,6 +55,7 @@ class GoogleEvent: Codable {
         attendees = try? container.decode([GoogleEventAttendee].self, forKey: .attendees)
         htmlLink = try? container.decode(String.self, forKey: .htmlLink)
         hangoutLink = try? container.decode(String.self, forKey: .hangoutLink)
+        conferenceData = try? container.decode(GoogleEventConferenceData.self, forKey: .conferenceData)
     }
 }
 
@@ -72,4 +75,20 @@ class GoogleEventAttendee: Codable {
     private enum CodingKeys: String, CodingKey {
         case email, displayName, organizer, responseStatus, isSelf = "self"
     }
+}
+
+class GoogleEventConferenceData: Codable {
+    let entryPoints: [ConferenceDataEntryPoints]
+
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        entryPoints = try container.decode([ConferenceDataEntryPoints].self, forKey: .entryPoints)
+    }
+}
+
+class ConferenceDataEntryPoints: Codable {
+    let entryPointType: String?
+    let uri: String?
+    let meetingCode: String?
+    let passcode: String?
 }
