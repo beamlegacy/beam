@@ -17,8 +17,8 @@ private enum MenuEnablingConditionTag: Int {
 
     // other conditions
     case hasBrowserTab = 1001 // enable only if browser tabs are open
-    case hasTabGroupingWindowPrefOn = 1011
-    case hasTabGroupingColoringPrefOn = 1101
+    case hasClusteringSettingsOn = 1011
+    case hasTabGroupingFeedbackOn = 1101
     case isDebugMode = 1111
     case sidebarEnabled = 2000
 }
@@ -54,7 +54,7 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
     private func toggleVisibility(_ visible: Bool, ofAlternatesKeyEquivalentsItems items: [NSMenuItem]) {
         for item in items.filter({ $0.tag < 0 }) {
             item.isHidden = !visible
-            if item.tag == -MenuEnablingConditionTag.isDebugMode.rawValue || item.tag == -MenuEnablingConditionTag.hasTabGroupingColoringPrefOn.rawValue {
+            if item.tag == -MenuEnablingConditionTag.isDebugMode.rawValue || item.tag == -MenuEnablingConditionTag.hasTabGroupingFeedbackOn.rawValue {
                 item.isHidden = Configuration.branchType != .develop
             } else if item.tag == -MenuEnablingConditionTag.sidebarEnabled.rawValue {
                 item.isHidden = Configuration.branchType != .develop
@@ -73,15 +73,15 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             return rawTag & mode.rawValue != 0
         } else if tagEnum == .hasBrowserTab {
             return state?.hasBrowserTabs ?? false
-        } else if tagEnum == .hasTabGroupingWindowPrefOn {
-            return PreferencesManager.showTabGrougpingMenuItem
+        } else if tagEnum == .hasClusteringSettingsOn {
+            return PreferencesManager.showClusteringSettingsMenu
         } else if tagEnum == .isDebugMode {
             if Configuration.branchType != .develop {
                 return false
             }
             return true
-        } else if tagEnum == .hasTabGroupingColoringPrefOn {
-            return PreferencesManager.showTabsColoring
+        } else if tagEnum == .hasTabGroupingFeedbackOn {
+            return PreferencesManager.enableTabGroupingFeedback
         } else if tagEnum == .sidebarEnabled {
             return state?.useSidebar ?? false
         }

@@ -35,8 +35,7 @@ struct AdvancedPreferencesView: View {
     @State var browsingSessionCollectionIsOn = PreferencesManager.browsingSessionCollectionIsOn
     @State var showDebugSection = PreferencesManager.showDebugSection
     @State var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
-    @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
-    @State var showTabsColoring = PreferencesManager.showTabsColoring
+    @State var showClusteringSettingsMenu = PreferencesManager.showClusteringSettingsMenu
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
     @State var isDirectUploadOn = Configuration.beamObjectDataUploadOnSeparateCall
     @State var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
@@ -222,11 +221,8 @@ struct AdvancedPreferencesView: View {
                         .frame(maxWidth: 387)
                 }
 
-                Preferences.Section(title: "TabGrouping Window menu") {
-                    EnableTabGroupingWindowCheckbox
-                }
-                Preferences.Section(title: "TabGrouping Colors", bottomDivider: true) {
-                    EnableTabsColoringCheckbox
+                Preferences.Section(title: "Clustering Settings menu", bottomDivider: true) {
+                    EnableClusteringSettingsCheckbox
                 }
 
                 Preferences.Section(title: "Database", bottomDivider: true) {
@@ -656,28 +652,15 @@ struct AdvancedPreferencesView: View {
             }
     }
 
-    private var EnableTabGroupingWindowCheckbox: some View {
-        return Toggle(isOn: $showTabGrougpingMenuItem) {
+    private var EnableClusteringSettingsCheckbox: some View {
+        return Toggle(isOn: $showClusteringSettingsMenu) {
             Text("Enabled")
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showTabGrougpingMenuItem].publisher.first()) {
-                PreferencesManager.showTabGrougpingMenuItem = $0
+            .onReceive([showClusteringSettingsMenu].publisher.first()) {
+                PreferencesManager.showClusteringSettingsMenu = $0
             }
-
-    }
-
-    private var EnableTabsColoringCheckbox: some View {
-        return Toggle(isOn: $showTabsColoring) {
-            Text("Enabled")
-        }.toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showTabsColoring].publisher.first()) {
-                PreferencesManager.showTabsColoring = $0
-            }
-
     }
 
     private var DirectDownload: some View {
