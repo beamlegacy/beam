@@ -6,14 +6,13 @@
 //
 
 import SwiftUI
-import Combine
 import WebKit
 
 /// A container for using a WKWebView in SwiftUI
 public struct WebView: View, NSViewRepresentable {
     /// The WKWebView to display
-    var webView: WKWebView
-    var topContentInset: CGFloat?
+    let webView: WKWebView
+    let topContentInset: CGFloat?
 
     public typealias NSViewType = NSViewContainerView<WKWebView>
 
