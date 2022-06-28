@@ -176,9 +176,9 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         var takeOverCandidate = false
     }
 
-    private static func scoreWeight(canMatchInside: Bool, isURL: Bool, isNote: Bool, hasBothTextAndInfo: Bool) -> Float {
+    private static func scoreWeight(canMatchInside: Bool, isURLOrNoteOrTabGroup: Bool, hasBothTextAndInfo: Bool) -> Float {
         var booster: Float
-        if isURL || isNote {
+        if isURLOrNoteOrTabGroup {
             booster = 0.1
         } else {
             booster = 0.05
@@ -191,13 +191,13 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
 
         // some results only have text (no information).
         // This additional boost compensate the score they could have with an info score
-        if !hasBothTextAndInfo && (isNote || isURL) {
+        if !hasBothTextAndInfo && isURLOrNoteOrTabGroup {
             booster *= 1.25
         }
         return booster
     }
 
-    private static func simpleBoosterScore(prefix: String?, base: String?, isURL: Bool, isNote: Bool, hasBothTextAndInfo: Bool) -> BoosterResult {
+    private static func simpleBoosterScore(prefix: String?, base: String?, isURLOrNoteOrTabGroup: Bool, hasBothTextAndInfo: Bool) -> BoosterResult {
         guard let lcbase = base?.lowercased(),
               !lcbase.isEmpty,
               let comp = prefix?.lowercased()
@@ -205,7 +205,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
             return BoosterResult(base: base, score: 0.0, boostedScore: 0.0)
         }
 
-        let weight = scoreWeight(canMatchInside: false, isURL: isURL, isNote: isNote, hasBothTextAndInfo: hasBothTextAndInfo)
+        let weight = scoreWeight(canMatchInside: false, isURLOrNoteOrTabGroup: isURLOrNoteOrTabGroup, hasBothTextAndInfo: hasBothTextAndInfo)
         let hsr = lcbase.commonPrefix(with: comp)
         let score = Float(hsr.count) / Float(comp.count)
         return BoosterResult(base: base, score: score, boostedScore: weight * score, takeOverCandidate: score >= 1.0)
@@ -214,19 +214,23 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     private static func boosterScore(prefix: String?, base: String?, source: Source, isURL: Bool, hasBothTextAndInfo: Bool) -> BoosterResult {
         var canMatchInside = !isURL
         var canReplaceBase = true
-        var isNote = false
+        var isURLOrNoteOrTabGroup = isURL
         switch source {
         case .note, .createNote:
             canReplaceBase = false
             canMatchInside = false
-            isNote = true
-        case .searchEngine, .tabGroup, .action:
+            isURLOrNoteOrTabGroup = true
+        case .tabGroup:
+            isURLOrNoteOrTabGroup = true
+            canReplaceBase = false
+        case .searchEngine, .action:
             canReplaceBase = false
         default:
             break
         }
 
-        guard canMatchInside else { return simpleBoosterScore(prefix: prefix, base: base, isURL: isURL, isNote: isNote,
+        guard canMatchInside else { return simpleBoosterScore(prefix: prefix, base: base,
+                                                              isURLOrNoteOrTabGroup: isURLOrNoteOrTabGroup,
                                                               hasBothTextAndInfo: hasBothTextAndInfo) }
 
         guard let base = base,
@@ -241,7 +245,8 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         let maxSubstringIndex = 10
 
         let skipScoreWeight = Float(canMatchInside ? 0.1 : 0)
-        let typeWeight = scoreWeight(canMatchInside: canMatchInside, isURL: isURL, isNote: isNote, hasBothTextAndInfo: hasBothTextAndInfo)
+        let typeWeight = scoreWeight(canMatchInside: canMatchInside, isURLOrNoteOrTabGroup: isURLOrNoteOrTabGroup,
+                                     hasBothTextAndInfo: hasBothTextAndInfo)
         // Skip score, [0-1] is a penalty computed on the position of the substring in the main string.
         let fullMatch = hsr?.count == comp.count
         let matchInRange = (hsr?.lowerBound ?? maxSubstringIndex + 1) <= maxSubstringIndex
