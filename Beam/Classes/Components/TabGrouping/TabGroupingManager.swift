@@ -244,6 +244,7 @@ extension TabGroupingManager {
         let clusteringPageGroups = clusteringPageGroups
         var newClusteringPageGroups = [PageID: TabGroup]()
 
+        // SO HERE A newly forced group is already in manual page group ...
         for cluster in clusters {
 
             // First, find existing group that have some of these pages
@@ -286,12 +287,10 @@ extension TabGroupingManager {
                         guard forcedOutOfGroups[pageId] != manualGroupWithMostMatches.group else { return }
                         temporaryInManualPageGroups[pageId] = manualGroupWithMostMatches.group
                     }
-                    unassignedPages.removeAll()
                     finalGroup = manualGroupWithMostMatches.group
                 } else {
                     // no group? create one for leftovers.
                     finalGroup = .init(pageIds: [])
-                    unassignedPages = leftovers
                 }
 
             } else if suggestedGroupsFound.count == 1, let first = suggestedGroupsFound.first {

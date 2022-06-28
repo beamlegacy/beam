@@ -94,6 +94,40 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertEqual(sut.builtPagesGroups.values.first?.title, "Renamed Group")
     }
 
+    func testBuildTabGroupsAddRemovePageToClusterGroup() async {
+        setupDefaultOpenPages()
+        clusters = [ [pageIds[4], pageIds[5], pageIds[6]] ]
+        await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
+        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1) // only one group was created
+        let group = sut.builtPagesGroups.values.first
+        XCTAssertEqual(group?.pageIds.count, 3)
+
+        // add page1 to the group
+        let page1 = pageIds[1]
+        let tab1 = await tab(withPageId: page1)
+        tabGroupingDelegate.tabs.append(tab1)
+        sut.moveTab(tab1, inGroup: group)
+        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1)
+        XCTAssertEqual(sut.builtPagesGroups[page1], group)
+
+        // redo a clustering update
+        clusters = [ [pageIds[4], pageIds[5], pageIds[6], pageIds[1]] ]
+        await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
+        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1)
+        XCTAssertEqual(sut.builtPagesGroups[page1], group)
+
+        // remove page1 from the group
+        sut.moveTab(tab1, inGroup: nil, outOfGroup: group)
+        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1)
+        XCTAssertNil(sut.builtPagesGroups[page1])
+
+        // redo a clustering update
+        clusters = [ [pageIds[4], pageIds[5], pageIds[6]] ]
+        await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
+        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1)
+        XCTAssertNil(sut.builtPagesGroups[tab1.pageId])
+    }
+
     func testBuildTabGroupsWith1ManualGroup1Cluster() async {
         setupDefaultOpenPages()
         setupClusters()
@@ -185,5 +219,4 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertEqual(sut.builtPagesGroups.count, 5)
         XCTAssertEqual(sut.builtPagesGroups[pageIds[4]], page1Group)
     }
-
 }
