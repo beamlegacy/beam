@@ -222,16 +222,16 @@ struct OmniboxSearchField: View {
             }
         } else {
             if query.isEmpty {
-                autocompleteManager.mode = .general
+                autocompleteManager.resetAutocompleteMode()
+            } else {
+                autocompleteManager.setQuery("", updateAutocompleteResults: true)
             }
-            autocompleteManager.setQuery("", updateAutocompleteResults: true)
         }
     }
 
     private func onBackspacePressed() {
         if autocompleteManager.searchQuery.isEmpty && (autocompleteManager.mode != state.omniboxInfo.wasFocusedDirectlyFromMode) {
-            autocompleteManager.mode = .general
-            autocompleteManager.setQuery("", updateAutocompleteResults: true)
+            autocompleteManager.resetAutocompleteMode()
         }
     }
 }
