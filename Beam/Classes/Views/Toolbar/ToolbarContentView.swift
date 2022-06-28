@@ -151,7 +151,7 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
             CustomPopoverPresenter.shared.dismissPopoverWindow(downloaderWindow)
         } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true, movable: false) {
             let downloaderView = DownloaderView(downloadList: downloadList) {
-                CustomPopoverPresenter.shared.dismissPopovers()
+                CustomPopoverPresenter.shared.dismissPopovers(animated: false)
             }
             let toolbarFrame = containerGeometry.safeTopLeftGlobalFrame(in: window.parent)
             var origin = CGPoint(x: toolbarFrame.origin.x + toolbarFrame.width - downloaderView.preferredWidth - 18, y: toolbarFrame.maxY)

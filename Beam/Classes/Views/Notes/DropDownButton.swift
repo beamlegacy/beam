@@ -52,12 +52,12 @@ struct DropDownButton: View {
         let point = origin.flippedPointToTopLeftOrigin(in: window)
         var finalPoint: CGPoint = window.parent?.convertPoint(fromScreen: window.convertPoint(toScreen: point) ) ?? point
 
-        CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier)
+        CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier, animated: false)
         let menuView = ContextMenuFormatterView(key: Self.dropDownMenuIdentifier, items: items, direction: .bottom, sizeToFit: false, forcedWidth: menuForcedWidth, origin: finalPoint, canBecomeKey: true) {
-            CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier)
+            CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier, animated: false)
         } onClosing: {
             forceClickedState = false
-            CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier)
+            CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier, animated: false)
         }
 
         if anchorPoint.contains(.top) {
