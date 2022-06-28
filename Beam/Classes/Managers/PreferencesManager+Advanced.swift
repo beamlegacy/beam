@@ -10,7 +10,7 @@ import Foundation
 // MARK: - Keys
 extension PreferencesManager {
     private static let browsingSessionCollectionIsOnKey = "browsingSessionCollectionIsOn"
-    private static let showTabGrougpingMenuItemKey = "showTabGrougpingMenuItem"
+    private static let showClusteringSettingsMenuKey = "showClusteringSettingsMenuKey"
     private static let showDebugSectionKey = "showDebugSection"
     private static let showOmniboxScoreSectionKey = "showOmnibarScoreSection"
     private static let showPNSKey = "showPNSview"
@@ -18,7 +18,7 @@ extension PreferencesManager {
     private static let SpaIndexingKey = "SpaIndexing"
     private static let collectFeedbackKey = "collectFeedback"
     private static let showsCollectFeedbackAlertKey = "showsCollectFeedbackAlert"
-    private static let showTabsColoringKey = "showTabsColoring"
+    private static let enableTabGroupingKey = "enableTabGrouping"
     private static let showWebOnLaunchIfTabsKey = "showWebOnLaunchIfTabs"
     private static let createJournalOncePerWindowKey = "createJournalOncePerWindow"
     private static let useSidebarKey = "useSidebar"
@@ -32,14 +32,14 @@ extension PreferencesManager {
     private static let browsingSessionCollectionIsOnDefault = true
     #endif
     private static let browsingSessionCollectionIsOnDefault = false
-    private static let showTabGrougpingMenuItemDefault = Configuration.branchType == .develop
+    private static let showClusteringSettingsMenuDefault = Configuration.branchType == .develop
     private static let showDebugSectionDefault = false
     private static let showOmniboxScoreSectionDefault = false
     private static let showPNSDefault = true
     private static let PnsJSIsOnDefault = true
     private static let collectFeedbackDefault = true
     private static let showsCollectFeedbackAlertDefault = true
-    private static let showTabsColoringDefault = Configuration.branchType == .develop
+    private static let enableTabGroupingDefault = true
     private static let showWebOnLaunchIfTabsDefault = true
     private static let createJournalOncePerWindowDefault = true
     private static let useSidebarDefault = false
@@ -51,8 +51,8 @@ extension PreferencesManager {
     @UserDefault(key: browsingSessionCollectionIsOnKey, defaultValue: browsingSessionCollectionIsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var browsingSessionCollectionIsOn: Bool
 
-    @UserDefault(key: showTabGrougpingMenuItemKey, defaultValue: showTabGrougpingMenuItemDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
-    static var showTabGrougpingMenuItem: Bool
+    @UserDefault(key: showClusteringSettingsMenuKey, defaultValue: showClusteringSettingsMenuDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
+    static var showClusteringSettingsMenu: Bool
 
     @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showDebugSection: Bool
@@ -72,8 +72,11 @@ extension PreferencesManager {
     @UserDefault(key: showsCollectFeedbackAlertKey, defaultValue: showsCollectFeedbackAlertDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var showsCollectFeedbackAlert: Bool
 
-    @UserDefault(key: showTabsColoringKey, defaultValue: showTabsColoringDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
-    static var showTabsColoring: Bool
+    @UserDefault(key: enableTabGroupingKey, defaultValue: enableTabGroupingDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
+    static var enableTabGrouping: Bool
+    static var enableTabGroupingFeedback: Bool {
+        Configuration.branchType == .develop && Configuration.env != .test && enableTabGrouping
+    }
 
     @UserDefault(key: showWebOnLaunchIfTabsKey, defaultValue: showWebOnLaunchIfTabsDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var showWebOnLaunchIfTabs: Bool

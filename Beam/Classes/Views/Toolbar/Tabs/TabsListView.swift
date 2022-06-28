@@ -640,28 +640,26 @@ extension TabsListView {
         }
     }
 
+    @ViewBuilder
     private func contextMenuItemCloseGroup(forTabAtIndex index: Int) -> some View {
-        Group {
-            Button("Close Tab") {
-                onItemClose(at: index, fromContextMenu: true)
-            }
-            Button("Close Other Tabs") {
-                guard let tabIndex = state.browserTabsManager.tabIndex(forListIndex: index) else { return }
-                state.closeAllTabs(exceptedTabAt: tabIndex)
-            }.disabled(sections.unpinnedItems.isEmpty || sections.allItems.count <= 1)
-            Button("Close Tabs to the Right") {
-                guard let tabIndex = state.browserTabsManager.tabIndex(forListIndex: index) else { return }
-                state.closeTabsToTheRight(of: tabIndex)
-            }.disabled(index + 1 >= sections.allItems.count || sections.unpinnedItems.isEmpty)
+        Button("Close Tab") {
+            onItemClose(at: index, fromContextMenu: true)
         }
+        Button("Close Other Tabs") {
+            guard let tabIndex = state.browserTabsManager.tabIndex(forListIndex: index) else { return }
+            state.closeAllTabs(exceptedTabAt: tabIndex)
+        }.disabled(sections.unpinnedItems.isEmpty || sections.allItems.count <= 1)
+        Button("Close Tabs to the Right") {
+            guard let tabIndex = state.browserTabsManager.tabIndex(forListIndex: index) else { return }
+            state.closeTabsToTheRight(of: tabIndex)
+        }.disabled(index + 1 >= sections.allItems.count || sections.unpinnedItems.isEmpty)
     }
 
+    @ViewBuilder
     private func contextMenuItemDebugGroup() -> some View {
-        Group {
-            if PreferencesManager.showTabsColoring {
-                Button("Tab Grouping Feedback") {
-                    AppDelegate.main.showTabGroupingFeedbackWindow(self)
-                }
+        if PreferencesManager.enableTabGroupingFeedback {
+            Button("Tab Grouping Feedback") {
+                AppDelegate.main.showTabGroupingFeedbackWindow(self)
             }
         }
     }

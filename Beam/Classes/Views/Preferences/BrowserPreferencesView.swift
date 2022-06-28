@@ -282,47 +282,50 @@ struct TabsSection: View {
     @State private var cmdNumberSwitchTabs = PreferencesManager.cmdNumberSwitchTabs
     @State private var showWebsiteIconTab = PreferencesManager.showWebsiteIconTab
     @State private var restoreLastBeamSession = PreferencesManager.restoreLastBeamSession
+    @State private var enableTabGrouping = PreferencesManager.enableTabGrouping
 
     var body: some View {
-        Toggle(isOn: $cmdClickOpenTab) {
-            Text("⌘-click opens a link in a new tab")
-        }.accessibilityIdentifier("cmd-click-checkbox")
-            .toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([cmdClickOpenTab].publisher.first()) {
-                PreferencesManager.cmdClickOpenTab = $0
-            }
-//        Toggle(isOn: $newTabWindowMakeActive) {
-//            Text("When a new tab or window opens, make it active")
-//        }.toggleStyle(CheckboxToggleStyle())
-//            .font(BeamFont.regular(size: 13).swiftUI)
-//            .foregroundColor(BeamColor.Generic.text.swiftUI)
+        Group {
+            Toggle(isOn: $enableTabGrouping) {
+                Text("Group tabs automatically")
+            }.accessibilityIdentifier("group-tabs-checkbox")
+                .toggleStyle(CheckboxToggleStyle())
+                .onReceive([enableTabGrouping].publisher.first()) {
+                    PreferencesManager.enableTabGrouping = $0
+                }
 
-        Toggle(isOn: $cmdNumberSwitchTabs) {
-            Text("Use ⌘1 to ⌘9 to switch tabs")
-        }.accessibilityIdentifier("switch-tabs-checkbox")
-            .toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([cmdNumberSwitchTabs].publisher.first()) {
-                PreferencesManager.cmdNumberSwitchTabs = $0
-            }
-//        Toggle(isOn: $showWebsiteIconTab) {
-//            Text("Show website icons in tabs")
-//        }.toggleStyle(CheckboxToggleStyle())
-//            .font(BeamFont.regular(size: 13).swiftUI)
-//            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            Toggle(isOn: $cmdClickOpenTab) {
+                Text("⌘-click opens a link in a new tab")
+            }.accessibilityIdentifier("cmd-click-checkbox")
+                .toggleStyle(CheckboxToggleStyle())
+                .onReceive([cmdClickOpenTab].publisher.first()) {
+                    PreferencesManager.cmdClickOpenTab = $0
+                }
+    //        Toggle(isOn: $newTabWindowMakeActive) {
+    //            Text("When a new tab or window opens, make it active")
+    //        }.toggleStyle(CheckboxToggleStyle())
 
-        Toggle(isOn: $restoreLastBeamSession) {
-            Text("Restore all tabs from last session")
-        }.accessibilityIdentifier("restore-tabs-checkbox")
-            .toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([restoreLastBeamSession].publisher.first()) {
-                PreferencesManager.restoreLastBeamSession = $0
-            }
+            Toggle(isOn: $cmdNumberSwitchTabs) {
+                Text("Use ⌘1 to ⌘9 to switch tabs")
+            }.accessibilityIdentifier("switch-tabs-checkbox")
+                .toggleStyle(CheckboxToggleStyle())
+                .onReceive([cmdNumberSwitchTabs].publisher.first()) {
+                    PreferencesManager.cmdNumberSwitchTabs = $0
+                }
+    //        Toggle(isOn: $showWebsiteIconTab) {
+    //            Text("Show website icons in tabs")
+    //        }.toggleStyle(CheckboxToggleStyle())
+
+            Toggle(isOn: $restoreLastBeamSession) {
+                Text("Restore all tabs from last session")
+            }.accessibilityIdentifier("restore-tabs-checkbox")
+                .toggleStyle(CheckboxToggleStyle())
+                .onReceive([restoreLastBeamSession].publisher.first()) {
+                    PreferencesManager.restoreLastBeamSession = $0
+                }
+        }
+        .font(BeamFont.regular(size: 13).swiftUI)
+        .foregroundColor(BeamColor.Generic.text.swiftUI)
     }
 }
 
