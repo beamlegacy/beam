@@ -66,8 +66,10 @@ private extension EKEvent {
         for match in matches {
             guard let range = Range(match.range, in: notes) else { continue }
             let url = notes[range]
-            // TODO: Investigate how Zoom and others proceeds for the url in notes
             if url.contains("meet.google") {
+                return String(url)
+            }
+            if url.contains("zoom.us") {
                 return String(url)
             }
         }
