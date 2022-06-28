@@ -35,6 +35,8 @@ class AutocompleteManager: ObservableObject {
     }
 
     @Published var animateInputingCharacter = false
+
+    @Published var queryBeforeModeChange: (text: String, selection: Range<Int>?)?
     @Published var isPreparingForAnimatingToMode = false
     @Published var animatingToMode: Mode?
 
@@ -329,6 +331,15 @@ extension AutocompleteManager {
         }
         mode = .general
         stopCurrentCompletionWork()
+    }
+
+    func resetAutocompleteMode() {
+        mode = .general
+        setQuery(queryBeforeModeChange?.text ?? "", updateAutocompleteResults: true)
+        if let selection = queryBeforeModeChange?.selection {
+            searchQuerySelectedRange = selection
+        }
+        queryBeforeModeChange = nil
     }
 
     func setQuery(_ query: String, updateAutocompleteResults: Bool) {

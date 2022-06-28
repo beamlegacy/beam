@@ -28,6 +28,7 @@ extension AutocompleteManager {
     func animateToMode(_ mode: AutocompleteManager.Mode, updateResults: Bool = false) {
         let animationIn = BeamAnimation.spring(stiffness: 420, damping: 24)
         let animationOut = BeamAnimation.spring(stiffness: 420, damping: 34)
+        queryBeforeModeChange = (searchQuery, searchQuerySelectedRange)
         withAnimation(animationIn) {
             self.isPreparingForAnimatingToMode = true
         }
