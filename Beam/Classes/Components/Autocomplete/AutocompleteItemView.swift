@@ -146,15 +146,17 @@ struct AutocompleteItemView: View {
         if case let .tabGroup(group) = item.source, let group = group {
             HStack(spacing: BeamSpacing._100) {
                 HStack(spacing: BeamSpacing._20) {
-                    ForEach(group.pageIds, id: \.self) { _ in
+                    ForEach(group.pageIds.prefix(11), id: \.self) { _ in
                         Capsule()
                             .fill(group.color?.mainColor?.swiftUI ?? Color.clear)
+                            .opacity(0.4)
                             .frame(height: 4)
                     }
                 }
                 .frame(width: 64)
-                Icon(name: "tool-go", width: 12, color: secondaryTextColor)
-                    .padding(3)
+                ShortcutView(shortcut: Shortcut(modifiers: [], keys: [.right]), spacing: 1, withBackground: !selected)
+                    .frame(height: 18)
+                    .blendModeLightMultiplyDarkScreen()
             }
             .blendModeLightMultiplyDarkScreen()
         } else if let shortcut = shortcut {
@@ -272,8 +274,10 @@ extension AutocompleteItemView {
         return AutocompleteItemColorPalette(
             informationTextColor: mainColor,
             informationLinkColor: mainColor,
-            selectedBackgroundColor: mainColor.alpha(0.1),
-            touchdownBackgroundColor: mainColor.alpha(0.16)
+            selectedBackgroundColor: BeamColor.combining(lightColor: mainColor, lightAlpha: 0.14,
+                                                         darkColor: mainColor, darkAlpha: 0.16),
+            touchdownBackgroundColor: BeamColor.combining(lightColor: mainColor, lightAlpha: 0.2,
+                                                          darkColor: mainColor, darkAlpha: 0.34)
         )
     }
 }
