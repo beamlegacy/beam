@@ -782,6 +782,9 @@ extension TabsListView {
     }
 
     private func dragGestureOnEnded(gestureValue: TabGestureValue) {
+        defer {
+            externalDragModel.clearExternalDragging()
+        }
         guard let currentTab = currentTab,
               let dragStartIndex = self.dragModel.dragStartIndex,
               let firstGestureValue = viewModel.firstDragGestureValue,

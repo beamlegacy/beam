@@ -32,6 +32,11 @@ class TabsListExternalDragViewModel: ObservableObject {
         data?.currentDraggingSession = .init(draggedObject: tab, draggingSource: dragSource, draggingItem: dragItem)
     }
 
+    func clearExternalDragging() {
+        (data?.currentDraggingSession?.draggingSource as? TabExternalDraggingSource)?.endDraggingItem()
+        data?.currentDraggingSession = nil
+    }
+
     /// Triggers the actual dragging session with the previously prepared dragging source and item
     func startExternalDraggingOfCurrentTab(atLocation location: CGPoint) {
         guard !isDraggingTabOutside else { return }
