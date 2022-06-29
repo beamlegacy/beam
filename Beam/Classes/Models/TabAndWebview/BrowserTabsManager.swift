@@ -17,6 +17,7 @@ protocol BrowserTabsManagerDelegate: AnyObject {
 
     func tabsManagerDidUpdateTabs(_ tabs: [BrowserTab])
     func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?, previousTab: BrowserTab?)
+    func tabsManagerCurrentTabDidChangeDisplayInformation(_ currentTab: BrowserTab?)
     func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool)
 }
 
@@ -123,8 +124,13 @@ class BrowserTabsManager: ObservableObject {
             guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: tab.canGoBack, canGoForward: v)
         }.store(in: &currentTabScope)
-        currentTab?.$title.receive(on: DispatchQueue.main).sink { [unowned self] _ in
-            self.state?.updateWindowTitle()
+        currentTab?.$title.receive(on: DispatchQueue.main).removeDuplicates()
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main).sink { [unowned self] _ in
+            self.delegate?.tabsManagerCurrentTabDidChangeDisplayInformation(currentTab)
+        }.store(in: &currentTabScope)
+        currentTab?.$url.receive(on: DispatchQueue.main).removeDuplicates()
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main).sink { [unowned self] _ in
+            self.delegate?.tabsManagerCurrentTabDidChangeDisplayInformation(currentTab)
         }.store(in: &currentTabScope)
     }
 
