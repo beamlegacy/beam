@@ -12,7 +12,7 @@ class ReferencesTests: BaseTest {
     
     let noteName1 = "Note Reference 1"
     let noteName2 = "Note Reference 2"
-    var noteView: NoteTestView?
+    var noteView: NoteTestView!
 
     private func createNotesAndReferenceThem() -> NoteTestView {
         let journalView = launchApp()
@@ -124,7 +124,7 @@ class ReferencesTests: BaseTest {
         let textToType = " some text"
         let renamedNote1 = noteName1 + textToType
         noteView = createNotesAndReferenceThem()
-        BeamUITestsHelper(noteView!.app).tapCommand(.resizeWindowLandscape)
+        uiMenu.resizeWindowLandscape()
         noteView!.openNoteFromAllNotesList(noteTitleToOpen: noteName1)
         
         step ("Given I rename note 1 to \(noteName1)\(textToType)"){

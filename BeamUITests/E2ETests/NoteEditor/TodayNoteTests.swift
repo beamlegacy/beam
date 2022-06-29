@@ -34,12 +34,11 @@ class TodayNoteTests: BaseTest {
     
     func testCannotDeleteTodayNoteDeletingAll() throws {
         try XCTSkipIf(true, "to activate once https://linear.app/beamapp/issue/BE-4327/distinguish-all-notes-editor-option-for-all-notes-and-single-note is fixed")
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
+        launchApp()
         
         step ("Given I navigate to All Note") {
+            uiMenu.create10Notes()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            helper.tapCommand(.create10Notes)
         }
         
         step ("Then I cannot delete Today Note from All Notes") {

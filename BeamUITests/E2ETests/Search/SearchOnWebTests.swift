@@ -11,13 +11,13 @@ import XCTest
 class SearchOnWebTests: BaseTest {
     
     let waitForCountValueTimeout = TimeInterval(2)
-
+    let searchView = SearchTestView()
+    
     func testSearchViewAppearance() {
-        let helper = BeamUITestsHelper(launchApp().app)
-        let searchView = SearchTestView()
         
         step("Given I open a test page"){
-            helper.openTestPage(page: .page2)
+            launchApp()
+            uiMenu.loadUITestPage2()
         }
         
         step("Then by default search field is unavailable"){
@@ -56,11 +56,11 @@ class SearchOnWebTests: BaseTest {
     }
     
     func testSearchResultsCounter() {
-        let helper = BeamUITestsHelper(launchApp().app)
-        let searchView = SearchTestView()
         
         step("Given I open a test page"){
-            helper.openTestPage(page: .page2)
+            launchApp()
+            uiMenu.loadUITestPage2()
+            webView.waitForWebViewToLoad()
         }
         
         step("When I search for available letter in text"){
@@ -127,11 +127,10 @@ class SearchOnWebTests: BaseTest {
     
     func SKIPtestSearchFieldPasteAndTypeText() throws {
         try XCTSkipIf(true, "WIP. Test is blocked by https://linear.app/beamapp/issue/BE-1849/no-search-results-displayed-for-the-string-longer-than-visible-part-of")
-        let helper = BeamUITestsHelper(launchApp().app)
-        let searchView = SearchTestView()
         
         step("Given I open a test page"){
-            helper.openTestPage(page: .page2)
+            launchApp()
+            uiMenu.loadUITestPage2()
         }
         
         let textToPaste1 = "Spanish, Italian"
@@ -162,15 +161,15 @@ class SearchOnWebTests: BaseTest {
     }
     
     func testSearchResultsHighlights() {
-        let helper = BeamUITestsHelper(launchApp().app)
-        let searchView = SearchTestView()
+        launchApp()
         let firstSearch = "test"
         let additionalWord = "Confirm"
         let secondSearch = firstSearch + " " + additionalWord
         let thirdSearch = additionalWord + " " + firstSearch
         
         step("Given I open a test page"){
-            helper.openTestPage(page: .alerts)
+            uiMenu.loadUITestPageAlerts()
+            webView.waitForWebViewToLoad()
         }
         
         step("When I search for \(firstSearch)"){
@@ -206,15 +205,15 @@ class SearchOnWebTests: BaseTest {
     }
     
     func testSearchKeywordCaseSensitivityAndSearchAfterReopen() {
-        let helper = BeamUITestsHelper(launchApp().app)
-        let searchView = SearchTestView()
+        launchApp()
         let firstSearch = "buTTOn"
         let secondSearch = "cLIcK"
         let expectedFirstResult = firstSearch.lowercased()
         let expectedSecondResult = "Click"
         
         step("Given I open a test page"){
-            helper.openTestPage(page: .alerts)
+            uiMenu.loadUITestPageAlerts()
+            webView.waitForWebViewToLoad()
         }
         
         step("When I search for \(firstSearch)"){

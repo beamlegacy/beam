@@ -17,8 +17,7 @@ class BrowserTabViewTests: BaseTest {
     override func setUp() {
         step("Given I open a web page"){
             journalView = launchApp()
-            let helper = BeamUITestsHelper(journalView.app)
-            helper.openTestPage(page: .page1)
+            uiMenu.loadUITestPage1()
         }
         
     }

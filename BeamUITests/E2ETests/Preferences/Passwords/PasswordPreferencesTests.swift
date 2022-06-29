@@ -265,7 +265,6 @@ class PasswordPreferencesTests: BaseTest {
     func testAutofillUsernameAndPasswords() throws {
         // Test deactivated on Test Plan because we don't have an easy way to restore preferences settings after this test
         // Especially in case of failure at the middle of the test
-        let helper = BeamUITestsHelper(launchApp().app)
         
         step ("GIVEN I open password preferences"){
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
@@ -283,7 +282,7 @@ class PasswordPreferencesTests: BaseTest {
         
         step ("WHEN I go to Password Manager Test page"){
             XCUIApplication().windows["Passwords"].buttons[XCUIIdentifierCloseWindow].clickOnExistence()
-            helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.password)
+            uiMenu.loadUITestPagePassword()
             testPage.clickInputField(.username)
         }
         
@@ -303,7 +302,7 @@ class PasswordPreferencesTests: BaseTest {
         }
 
         step ("AND Autofill is not proposed anymore"){
-            helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.password)
+            uiMenu.loadUITestPagePassword()
             testPage.clickInputField(.username)
             XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }

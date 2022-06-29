@@ -9,20 +9,20 @@ import Foundation
 import XCTest
 
 class SyncTests: BaseTest {
-
-    var helper: BeamUITestsHelper!
     
     func testMergeNotesForNewlyCreatedAccount() {
         var notesBeforeSync: AllNotesTestTable!
         
         step("GIVEN I setup staging environment") {
-            helper = BeamUITestsHelper(setupStaging().app)
+            setupStaging()
         }
         
         step("WHEN I start using app without being signed in") {
             XCTAssertTrue(OnboardingLandingTestView().waitForLandingViewToLoad(), "Onboarding view wasn't loaded")
-            OnboardingLandingTestView().signUpLater().clickSkipButton()
-            helper.tapCommand(.create10Notes)
+            OnboardingLandingTestView()
+                .signUpLater()
+                .clickSkipButton()
+            uiMenu.create10Notes()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             notesBeforeSync = AllNotesTestTable()
         }
