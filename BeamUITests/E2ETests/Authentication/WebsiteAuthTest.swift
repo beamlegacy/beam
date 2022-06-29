@@ -18,7 +18,8 @@ class WebsiteAuthTest: BaseTest {
     
     func testAuthPopUpView() {
         let journalView = launchApp()
-        OmniBoxUITestsHelper(journalView.app).tapCommand(.omniboxFillHistory)
+        uiMenu.omniboxFillHistory()
+
         step("Given I open \(searchAppWebsite) link"){
             journalView.openWebsite(searchAppWebsite)
         }
@@ -44,7 +45,7 @@ class WebsiteAuthTest: BaseTest {
     
     func testAuthenticateSuccessfully() {
         let journalView = launchApp()
-        OmniBoxUITestsHelper(journalView.app).tapCommand(.omniboxFillHistory)
+        uiMenu.omniboxFillHistory()
         step("Given I open \(searchAppWebsite) link"){
             journalView.openWebsite(searchAppWebsite)
         }
@@ -62,7 +63,8 @@ class WebsiteAuthTest: BaseTest {
     func SKIPtestAuthenticationFailure() throws {
         try XCTSkipIf(true, "Skipped due to unknown false failure on server side. To be fixed soon")
         let journalView = launchApp()
-        OmniBoxUITestsHelper(journalView.app).tapCommand(.omniboxFillHistory)
+        uiMenu.omniboxFillHistory()
+        
         step("Given I open \(searchAppWebsite) link"){
             journalView.openWebsite(searchAppWebsite)
         }

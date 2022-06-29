@@ -107,11 +107,11 @@ class SignInAutocompleteTests: BaseTest {
 
     func testOtherPasswordsAppearanceRemovalFill() {
         let login = "qa@beamapp.co"
-        let journalView = launchApp()
+        launchApp()
         
         step("Given I populate passwords and load a test page"){
             uiMenu.populatePasswordsDB()
-            OmniBoxUITestsHelper(journalView.app).tapCommand(.loadUITestPagePassword)
+            uiMenu.loadUITestPagePassword()
         }
         let passwordPage = UITestPagePasswordManager()
         
@@ -187,11 +187,11 @@ class SignInAutocompleteTests: BaseTest {
     }
 
     func testOtherPasswordsSearch() {
-        let journalView = launchApp()
+        launchApp()
 
         step("Given I populate passwords and load a test page"){
             uiMenu.populatePasswordsDB()
-            OmniBoxUITestsHelper(journalView.app).tapCommand(.loadUITestPagePassword)
+            uiMenu.loadUITestPagePassword()
         }
         let passwordPage = UITestPagePasswordManager()
 

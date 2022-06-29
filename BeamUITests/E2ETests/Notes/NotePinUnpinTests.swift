@@ -38,10 +38,10 @@ class NotePinUnpinTests: BaseTest {
     }
     
     func testMax5PinnedNotes() {
-        let journalView = launchApp()
         
         step("Given I pin 6 notes") {
-            BeamUITestsHelper(journalView.app).tapCommand(.create10Notes)
+            launchApp()
+            uiMenu.create10Notes()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             for i in 0...5 {
                 allNotesView.openMenuForSingleNote(i)

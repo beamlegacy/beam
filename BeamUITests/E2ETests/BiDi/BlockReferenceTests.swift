@@ -99,8 +99,7 @@ class BlockReferenceTests: BaseTest {
     func createBlockRefForTwoNotes(_ view: JournalTestView, _ noteName1: String, _ noteName2: String) -> String {
         view.createNoteViaOmniboxSearch(noteName1)
         view.createNoteViaOmniboxSearch(noteName2)
-        let helper = BeamUITestsHelper(view.app)
-        helper.tapCommand(.insertTextInCurrentNote)
+        uiMenu.insertTextInCurrentNote()
         
         let noteForReference = noteView.getNoteNodesForVisiblePart()[1].getStringValue()
         let referencePart = (noteForReference.substring(from: 0, to: 6))
