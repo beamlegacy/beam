@@ -26,12 +26,6 @@ struct TabGroupingColor: Identifiable, Hashable {
             }
             return c
         }
-        var textColor: BeamColor {
-            guard let c = Self.textColors[self] else {
-                fatalError("Missing text color for DesignColor value for '\(self)'")
-            }
-            return c
-        }
 
         static var colors: [DesignColor: BeamColor] = [
             .red: .TabGrouping.red,
@@ -43,17 +37,6 @@ struct TabGroupingColor: Identifiable, Hashable {
             .purple: .TabGrouping.purple,
             .birgit: .TabGrouping.birgit,
             .gray: .TabGrouping.gray
-        ]
-        static var textColors: [DesignColor: BeamColor] = [
-            .red: .TabGrouping.redText,
-            .yellow: .TabGrouping.yellowText,
-            .green: .TabGrouping.greenText,
-            .cyan: .TabGrouping.cyanText,
-            .blue: .TabGrouping.blueText,
-            .pink: .TabGrouping.pinkText,
-            .purple: .TabGrouping.purpleText,
-            .birgit: .TabGrouping.birgitText,
-            .gray: .TabGrouping.grayText
         ]
     }
 
@@ -85,14 +68,14 @@ struct TabGroupingColor: Identifiable, Hashable {
         self.randomColorHueTint = randomColorHueTint
         if let designColor = designColor {
             mainColor = designColor.color
-            textColor = designColor.textColor
+            var hue: CGFloat = 0
+            designColor.color.nsColor.usingColorSpace(.deviceRGB)?.getHue(&hue, saturation: nil, brightness: nil, alpha: nil)
+            textColor = BeamColor.From(color: NSColor(hue: hue, saturation: 1, brightness: 0.18, alpha: 1))
         } else if let hue = randomColorHueTint {
-            let light = BeamColor.From(color: NSColor(hue: hue, saturation: 0.58, brightness: 0.96, alpha: 1))
-            let dark = BeamColor.From(color: NSColor(hue: hue, saturation: 0.58, brightness: 0.86, alpha: 1))
+            let light = BeamColor.From(color: NSColor(hue: hue, saturation: 0.63, brightness: 0.99, alpha: 1))
+            let dark = BeamColor.From(color: NSColor(hue: hue, saturation: 0.63, brightness: 0.85, alpha: 1))
             mainColor = BeamColor.combining(lightColor: light, darkColor: dark)
-            let lightText = BeamColor.From(color: .white)
-            let darkText = BeamColor.From(color: NSColor(hue: hue, saturation: 0.5, brightness: 0.36, alpha: 1))
-            textColor = BeamColor.combining(lightColor: lightText, darkColor: darkText)
+            textColor = BeamColor.From(color: NSColor(hue: hue, saturation: 1, brightness: 0.18, alpha: 1))
         }
     }
 
