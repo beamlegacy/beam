@@ -38,6 +38,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
     private var trafficLights: [NSButton?]?
     private var trafficLightLeftMargin: CGFloat = 20
+    private(set) var touchBarController: TouchBarController?
 
     // swiftlint:disable:next function_body_length
     init(contentRect: NSRect, data: BeamData, title: String? = nil, isIncognito: Bool = false, minimumSize: CGSize? = nil) {
@@ -178,6 +179,11 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         set {
             _isMovable = newValue
         }
+    }
+
+    override func makeTouchBar() -> NSTouchBar? {
+        if touchBarController == nil { touchBarController = .init(window: self) }
+        return touchBarController?.makeTouchBar()
     }
 
     // MARK: - Animations
