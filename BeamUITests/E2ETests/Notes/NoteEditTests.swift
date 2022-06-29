@@ -106,7 +106,8 @@ class NoteEditTests: BaseTest {
         let pnsView = PnSTestView()
         
         step("When I add image to a note"){
-            BeamUITestsHelper(launchApp().app).openTestPage(page: .page4)
+            launchApp()
+            uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
         }
@@ -133,7 +134,8 @@ class NoteEditTests: BaseTest {
         let pnsView = PnSTestView()
 
         step("When I add image to a note"){
-            BeamUITestsHelper(launchApp().app).openTestPage(page: .page4)
+            launchApp()
+            uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
         }
@@ -151,9 +153,10 @@ class NoteEditTests: BaseTest {
     func testMoveBulletsUsingShortcuts() {
         var nodesBeforeChange = [String]()
         step("GIVEN I populate today's note with the rows") {
-            let journalView = launchApp()
-            noteView = journalView.createNoteViaOmniboxSearch("Bullets")
-            BeamUITestsHelper(journalView.app).tapCommand(.insertTextInCurrentNote)
+            noteView = launchApp()
+                .createNoteViaOmniboxSearch("Bullets")
+            uiMenu.insertTextInCurrentNote()
+            waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5, elementQuery: noteView.getNoteNodesElementQuery())
             nodesBeforeChange = noteView.getNoteTextsForVisiblePart()
         }
         

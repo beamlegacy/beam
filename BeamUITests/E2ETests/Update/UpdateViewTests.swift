@@ -11,16 +11,14 @@ import XCTest
 class UpdateViewTests: BaseTest {
 
     private var journalView: JournalTestView!
-    private var helper: BeamUITestsHelper!
 
     override func setUp() {
         journalView = launchApp()
-        helper = BeamUITestsHelper(journalView.app)
     }
     
     func testUpdateViewAppearance() {
         step ("Given I enable Update for the app"){
-            helper.tapCommand(.setAutoUpdateToMock)
+            uiMenu.setAutoUpdateToMock()
         }
         
         step ("Then I can open and close it. It has required items"){
@@ -33,7 +31,7 @@ class UpdateViewTests: BaseTest {
     
     func testUpdateAvailableEverywhereInNoteView() {
         step ("Given I enable Update for the app"){
-            helper.tapCommand(.setAutoUpdateToMock)
+            uiMenu.setAutoUpdateToMock()
             XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             journalView.createNoteViaOmniboxSearch("Update")
         }

@@ -58,6 +58,7 @@ class BaseTest: XCTestCase {
         if isAppRunning() {
             storeScreenshot()
             uiMenu.destroyDB()
+            sleep(1) //wait untill DB is destroyed to be used
         }
         if deletePK {
             uiMenu.deletePrivateKeys()

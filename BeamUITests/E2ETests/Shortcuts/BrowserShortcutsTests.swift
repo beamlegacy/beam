@@ -15,20 +15,18 @@ class BrowserShortcutsTests: BaseTest {
     var journalView = JournalTestView()
     var testHelper = BeamUITestsHelper(JournalTestView().app)
     
-    override func setUpWithError() throws{
-        try super.setUpWithError()
+    override func setUp() {
         journalView = launchApp()
-        testHelper = BeamUITestsHelper(journalView.app)
     }
     
     func testWebTabsJumpOpenCloseReopen() {
         step ("Given I open a web page"){
-            testHelper.openTestPage(page: .password)
+            uiMenu.loadUITestPagePassword()
             XCTAssertTrue(testPage.isPasswordPageOpened())
         }
         
         step ("Given I open a second web page"){
-            testHelper.openTestPage(page: .password)
+            uiMenu.loadUITestPagePassword()
             XCTAssertTrue(testPage.isPasswordPageOpened())
         }
 
@@ -55,9 +53,9 @@ class BrowserShortcutsTests: BaseTest {
     
     func testJumpBetweenWebTabs() {
         step ("Given I open web pages"){
-            testHelper.openTestPage(page: .password)
-            testHelper.openTestPage(page: .media)
-            testHelper.openTestPage(page: .alerts)
+            uiMenu.loadUITestPagePassword()
+                .loadUITestPageMedia()
+                .loadUITestPageAlerts()
         }
     
         step ("Then I can jump between tabs using shortcuts"){
@@ -84,8 +82,9 @@ class BrowserShortcutsTests: BaseTest {
     }
     
     func testWebPageReload() {
+        
         step ("Given I open a web page"){
-            testHelper.openTestPage(page: .password)
+            uiMenu.loadUITestPagePassword()
         }
         
         step ("Then I can reload webpage using shortcuts"){
@@ -108,9 +107,9 @@ class BrowserShortcutsTests: BaseTest {
         }
         
         step ("Given I open web pages"){
-            testHelper.openTestPage(page: .password)
-            testHelper.openTestPage(page: .media)
-            testHelper.openTestPage(page: .alerts)
+            uiMenu.loadUITestPagePassword()
+                .loadUITestPageMedia()
+                .loadUITestPageAlerts()
         }
         
         step ("When I quit the app"){
@@ -148,7 +147,7 @@ class BrowserShortcutsTests: BaseTest {
         let expectedSearchTextPart2 = "Google"
         
         step("GIVEN I open test page") {
-            testHelper.openTestPage(page: .page2)
+            uiMenu.loadUITestPage2()
         }
         
         step("WHEN I select \(textToSelect) and press CMD+Return") {
