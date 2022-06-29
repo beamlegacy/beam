@@ -30,10 +30,10 @@ public extension URL {
     }
 
     var urlWithScheme: URL {
-        if scheme != nil {
+        if scheme != "localhost" && scheme != nil {
             return self
         }
-        return URL(string: "https://\(absoluteString)") ?? self
+        return URL(string: "http://\(absoluteString)") ?? self
     }
 
     static var browserSchemes: [String?] {

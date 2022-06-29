@@ -89,8 +89,8 @@ class String_URLTests: XCTestCase {
     func testUrlWithScheme() {
         XCTAssertEqual(URL(string: "http://google.com/testing")!.urlWithScheme.absoluteString, "http://google.com/testing")
         XCTAssertEqual(URL(string: "test://www.google.com/testing")!.urlWithScheme.absoluteString, "test://www.google.com/testing")
-        XCTAssertEqual(URL(string: "google.com/testing")!.urlWithScheme.absoluteString, "https://google.com/testing")
-        XCTAssertEqual(URL(string: "google")!.urlWithScheme.absoluteString, "https://google")
+        XCTAssertEqual(URL(string: "google.com/testing")!.urlWithScheme.absoluteString, "http://google.com/testing")
+        XCTAssertEqual(URL(string: "google")!.urlWithScheme.absoluteString, "http://google")
     }
 
     func testUrlWithoutScheme() {
