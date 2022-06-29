@@ -97,8 +97,8 @@ class NavigationHandlerMock: WebViewNavigationHandler {
 
     func webView(_ webView: WKWebView, didFinishNavigationToURL url: URL, source: WebViewControllerNavigationSource) {
         var replace = false
-        if case .javascript(let replacing) = source {
-            replace = replacing
+        if case .javascript(let event) = source {
+            replace = event == .replaceState
         }
         events.append("navigatedTo \(url) \(replace)")
     }

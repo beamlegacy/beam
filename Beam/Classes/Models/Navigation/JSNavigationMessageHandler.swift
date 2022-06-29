@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+import WebKit
 
 private enum NavigationMessages: String, CaseIterable {
     /**
@@ -48,9 +49,9 @@ class JSNavigationMessageHandler: SimpleBeamMessageHandler {
                 }
                 url = webViewURL
             }
-            guard let navigationHandler = webPage.webViewNavigationHandler else { return }
-            let replace: Bool = type == "replaceState" ? true : false
-            navigationHandler.webView(webPage.webView, didFinishNavigationToURL: url, source: .javascript(replacing: replace))
+            guard let navigationHandler = webPage.webViewNavigationHandler,
+                  let jsEvent = WebViewControllerNavigationSource.JavacriptEvent(rawValue: type) else { return }
+            navigationHandler.webView(webPage.webView, didFinishNavigationToURL: url, source: .javascript(event: jsEvent))
             webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: frameInfo)
         }
     }
