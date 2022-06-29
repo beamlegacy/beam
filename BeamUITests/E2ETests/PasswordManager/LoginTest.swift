@@ -22,7 +22,7 @@ class LoginTest: BaseTest {
         let helper = BeamUITestsHelper(launchApp().app)
         email = helper.randomEmail()
         password = helper.randomPassword()
-        helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.password)
+        uiMenu.loadUITestPagePassword()
         testPage.enterInput(password, .password) //password first to avoid Other Passwords cover over the Submit button
         testPage.enterInput(email, .username)
         // close Other Passwords if it still covers Submit button

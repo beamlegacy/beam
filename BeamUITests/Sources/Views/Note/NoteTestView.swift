@@ -134,6 +134,10 @@ class NoteTestView: TextEditorContextTestView {
         return names
     }
     
+    func getNoteNodesElementQuery() -> XCUIElementQuery {
+        return app.windows.textViews.matching(identifier:NoteViewLocators.TextFields.textNode.accessibilityIdentifier)
+    }
+    
     func getNumberOfVisibleNotes() -> Int {
         return self.getNoteNodesForVisiblePart().count
     }

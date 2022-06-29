@@ -11,14 +11,11 @@ import XCTest
 class BrowserPinnedTabTests: BaseTest {
     
     let newTabToOpen = "google.com"
-    var journalView: JournalTestView!
-    var helper: BeamUITestsHelper!
     
     override func setUp() {
         step("Given I open a web page"){
-            journalView = launchApp()
-            helper = BeamUITestsHelper(journalView.app)
-            helper.openTestPage(page: .page1)
+            launchApp()
+            uiMenu.loadUITestPage1()
         }
     }
     
@@ -78,7 +75,7 @@ class BrowserPinnedTabTests: BaseTest {
     func testPinMultipleTabs() throws {
         try XCTSkipIf(isBigSurOS(), "No accessibility to tab to right click on it")
         step("And I open a second tab"){
-            helper.openTestPage(page: .page1)
+            uiMenu.loadUITestPage1()
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 0)
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
         }

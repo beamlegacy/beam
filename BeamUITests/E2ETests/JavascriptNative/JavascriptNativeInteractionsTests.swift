@@ -14,10 +14,9 @@ class JavascriptNativeInteractionsTests: BaseTest {
     @discardableResult
     func prepareTest(_ buttonTitle: String) -> (XCUIElement, XCUIElement, XCUIElement) {
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
         
         step("Given I open a test page to \(buttonTitle)"){
-            helper.openTestPage(page: .alerts)
+            uiMenu.loadUITestPageAlerts()
         }
         
         let webViewElement = journalView.app.webViews.containing(.button, identifier: buttonTitle).element
@@ -89,7 +88,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
         var webView: XCUIElement?
         
         step("Given I open a test page with Upload File dialog"){
-            BeamUITestsHelper(journalView.app).openTestPage(page: .alerts)
+            uiMenu.loadUITestPageAlerts()
             webView = journalView.app.webViews.containing(.button, identifier: message).element
             XCTAssert(webView!.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(webView!.staticTexts[fileExistanceLabel].waitForExistence(timeout: BaseTest.minimumWaitTimeout))

@@ -26,8 +26,7 @@ class DailySummaryTests: BaseTest {
         journalView = launchApp()
 
         step("Given I populate daily summary"){
-            helper = BeamUITestsHelper(journalView.app)
-            helper.tapCommand(.createFakeDailySummary)
+            uiMenu.createFakeDailySummary()
             restartApp()
         }
     }

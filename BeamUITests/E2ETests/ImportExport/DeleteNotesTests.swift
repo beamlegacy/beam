@@ -27,13 +27,12 @@ class DeleteNotesTests: BaseTest {
     private func runDeleteNoteTest(isLocalContentsTest: Bool) {
         let expectedNumberOfNotesAfterPopulatingDB = 11
         let expectedNumberOfNotesAfterClearingDB = 1
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
+        launchApp()
         step("Given I populate the app with random notes"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.openFirstNote()
-            helper.tapCommand(.insertTextInCurrentNote)
-            helper.tapCommand(.create10Notes)
+            uiMenu.insertTextInCurrentNote()
+            uiMenu.create10Notes()
         }
         
         step("When I open All notes"){
