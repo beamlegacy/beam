@@ -38,15 +38,15 @@ struct EnhancedWebView: View {
                         ).padding(.top, topContentInset)
 
                     default:
-                        WebView(webView: tab.webView, topContentInset: topContentInset)
+                        WebViewContainer(contentView: tab.contentView, topContentInset: topContentInset)
                             .webViewStatusBar(isVisible: tab.showsStatusBar) {
                                 WebViewStatusText(mouseHoveringLocation: tab.mouseHoveringLocation)
                             }
-                        .if(!tab.webView.supportsTopContentInset) { $0.padding(.top, topContentInset) }
+                            .if(!tab.webView.supportsTopContentInset) { $0.padding(.top, topContentInset) }
                     }
 
                     ZStack {
-                        if let pns = tab.pointAndShoot, PreferencesManager.showPNSView == true {
+                        if let pns = tab.pointAndShoot, PreferencesManager.showPNSView {
                             PointAndShootView(pns: pns)
                         }
                         if let viewModel = tab.authenticationViewModel {
@@ -108,5 +108,31 @@ struct EnhancedWebView: View {
                 }
             }
         }
+    }
+}
+
+/// Container specialized for webviews.
+/// The content view needs to be wrapped in another container to avoid glitching issues and frame resets due to the creation
+/// of the `NSViewRepresentable` conforming struct.
+///
+/// Fixes https://linear.app/beamapp/issue/BE-4286/video-in-full-screen-switch-tab-doesnt-display-tab-and-dismiss-full
+struct WebViewContainer: View, NSViewRepresentable {
+    typealias ContentView = NSViewContainerView<BeamWebView>
+    typealias NSViewType = NSViewContainerView<ContentView>
+
+    let contentView: NSViewContainerView<BeamWebView>
+    let topContentInset: CGFloat
+
+    func makeNSView(context: Context) -> NSViewType {
+        return NSViewType()
+    }
+
+    func updateNSView(_ nsView: NSViewContainerView<ContentView>, context: Context) {
+        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+        if let webView = contentView.contentView, webView.supportsTopContentInset, !webView._isInFullscreen {
+            webView.setTopContentInset(topContentInset)
+        }
+        #endif
+        nsView.contentView = contentView
     }
 }

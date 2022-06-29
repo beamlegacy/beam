@@ -17,6 +17,7 @@
 @end
 
 @interface WKWebView ()
+@property (nonatomic, readonly) BOOL _isInFullscreen;
 @property (nonatomic, readonly) NSString *_MIMEType;
 
 - (void)_setAddsVisitedLinks:(BOOL)addsVisitedLinks;
