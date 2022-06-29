@@ -9,18 +9,13 @@ import SwiftUI
 
 private struct BlendModeMultiplyScreenModifier: ViewModifier {
     @Environment(\.colorScheme) var colorScheme
+    var lightBlendingMode: BlendMode
+    var darkBlendingMode: BlendMode
+
     var invert: Bool = false
     func body(content: Content) -> some View {
         content
-            .blendMode(colorScheme == .dark ? darkMode : lightMode)
-    }
-
-    private var lightMode: BlendMode {
-        invert ? .screen : .multiply
-    }
-
-    private var darkMode: BlendMode {
-        invert ? .multiply : .screen
+            .blendMode(colorScheme == .dark ? darkBlendingMode : lightBlendingMode)
     }
 }
 
@@ -29,6 +24,13 @@ extension View {
     ///
     /// This is our most common usage of blend modes in the app.
     func blendModeLightMultiplyDarkScreen(invert: Bool = false) -> some View {
-        self.modifier(BlendModeMultiplyScreenModifier(invert: invert))
+        self.modifier(BlendModeMultiplyScreenModifier(lightBlendingMode: invert ? .screen : .multiply,
+                                                      darkBlendingMode: invert ? .multiply : .screen))
+    }
+
+    /// Applies a different blend mode depending on the color scheme
+    func blendMode(forLightScheme: BlendMode, forDarkScheme: BlendMode) -> some View {
+        self.modifier(BlendModeMultiplyScreenModifier(lightBlendingMode: forLightScheme,
+                                                      darkBlendingMode: forDarkScheme))
     }
 }

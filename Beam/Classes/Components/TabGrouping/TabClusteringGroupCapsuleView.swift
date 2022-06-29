@@ -47,8 +47,8 @@ struct TabClusteringGroupCapsuleView: View {
     private var interactionOverlay: some View {
         if isTouchDown || isHovering {
             let baseColor = colorScheme == .dark ? Color.white : Color.black
-            let hoverOpacity = colorScheme == .dark ? 0.1 : 0.15
-            let touchOpacity = colorScheme == .dark ? 0.15 : 0.2
+            let hoverOpacity = colorScheme == .dark ? 0.25 : 0.1
+            let touchOpacity = colorScheme == .dark ? 0.32 : 0.15
             baseColor.opacity(isTouchDown ? touchOpacity : hoverOpacity)
         }
     }
@@ -58,8 +58,11 @@ struct TabClusteringGroupCapsuleView: View {
         Group {
             let displayedText = displayedText
             if title.isEmpty && collapsed && itemsCount >= 1000 {
-                Icon(name: "nav-pivot-infinite", size: CGSize(width: 12, height: 6),
-                     color: textColor, invertBlendMode: true)
+                Image("nav-pivot-infinite")
+                    .resizable()
+                    .scaledToFill()
+                    .foregroundColor(textColor)
+                    .frame(width: 12, height: 6)
             } else {
                 Text(displayedText)
             }
@@ -73,12 +76,11 @@ struct TabClusteringGroupCapsuleView: View {
     var body: some View {
         renderTitle
             .foregroundColor(textColor)
-            .blendModeLightMultiplyDarkScreen(invert: true)
             .background(
                 mainColor
                     .overlay(interactionOverlay)
                     .cornerRadius(3)
-                    .blendModeLightMultiplyDarkScreen()
+                    .blendMode(forLightScheme: .normal, forDarkScheme: .screen)
             )
             .padding(3)
             .background(GeometryReader { proxy in
@@ -97,7 +99,7 @@ struct TabClusteringGroupCapsuleView: View {
                             )
                     )
 
-                    .blendModeLightMultiplyDarkScreen()
+                    .blendMode(forLightScheme: .normal, forDarkScheme: .screen)
             })
             .onHover { isHovering = $0 }
             .onTouchDown { isTouchDown = $0 }
