@@ -114,6 +114,10 @@ class TabExternalDraggingSource: NSObject {
         return dragItem
     }
 
+    func endDraggingItem() {
+        cancellables.removeAll()
+    }
+
     func updateInitialDragginItemLocation(_ dragItem: NSDraggingItem, location: CGPoint) {
         let itemFrame = draggingItemFrame(location: location, convertToWindow: state?.associatedWindow)
         dragItem.setDraggingFrame(itemFrame, contents: self.draggingImage)
@@ -142,6 +146,7 @@ extension TabExternalDraggingSource: NSDraggingSource {
     func draggingSession(_ session: NSDraggingSession, movedTo screenPoint: NSPoint) { }
 
     func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
+        self.endDraggingItem()
         state?.data.currentDraggingSession = nil
         delegate?.tabExternalDragSessionEnded()
         guard let tab = self.browserTab, !self.isDropHandledByBeamUI else {
