@@ -894,6 +894,11 @@ extension BeamState: BrowserTabsManagerDelegate {
         updateCanGoBackForward()
     }
 
+    func tabsManagerCurrentTabDidChangeDisplayInformation(_ currentTab: BrowserTab?) {
+        updateWindowTitle()
+        (associatedWindow as? BeamWindow)?.touchBarController?.updateForBrowserTabChange()
+    }
+
     private func setDefaultDisplayMode() {
         if PreferencesManager.showWebOnLaunchIfTabs {
             let openTabs = browserTabsManager.tabs
