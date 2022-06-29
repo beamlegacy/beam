@@ -112,3 +112,11 @@ extension WebView {
     }
 
 }
+
+extension WebViewContainer {
+
+    func webViewStatusBar<Content: View>(isVisible: Bool = true, @ViewBuilder content: () -> Content) -> some View {
+        modifier(WebViewStatusBarModifier(isVisible: isVisible, content: content()))
+    }
+
+}
