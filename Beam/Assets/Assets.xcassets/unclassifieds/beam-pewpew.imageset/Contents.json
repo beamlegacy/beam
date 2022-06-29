@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "beam-pewpew.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
