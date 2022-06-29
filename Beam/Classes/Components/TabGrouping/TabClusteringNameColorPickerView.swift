@@ -73,7 +73,7 @@ struct TabClusteringNameColorPickerView: View {
                               font: BeamFont.regular(size: 13).nsFont,
                               textColor: BeamColor.Generic.text.nsColor,
                               placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                              selectedRangeColor: nscolor,
+                              selectedRangeColor: nscolor.withAlphaComponent(0.14),
                               caretColor: nscolor,
                               onCommit: { _ in
                     onChange?((groupName, selectedTabGroupingColor))
