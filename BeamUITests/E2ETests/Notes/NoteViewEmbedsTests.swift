@@ -19,7 +19,8 @@ class NoteViewEmbedsTests: BaseTest {
         var expandButton: XCUIElement?
         
         step("When I add image to a note"){
-            BeamUITestsHelper(launchApp().app).openTestPage(page: .page4)
+            launchApp()
+            uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
         }
@@ -66,18 +67,16 @@ class NoteViewEmbedsTests: BaseTest {
     }
 
     func testEmbedVideoMediaControlOld() {
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        helper.tapCommand(.disableCreateJournalOnce)
+        launchApp()
+        uiMenu.disableCreateJournalOnce()
         _testEmbedVideoMediaControl(expectedWebViewCount: 1)
     }
 
     func testEmbedVideoMediaControlNew() {
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        helper.tapCommand(.enableCreateJournalOnce)
+        launchApp()
+        uiMenu.enableCreateJournalOnce()
         _testEmbedVideoMediaControl(expectedWebViewCount: 1)
-        helper.tapCommand(.disableCreateJournalOnce)
+        uiMenu.disableCreateJournalOnce()
     }
 
     func _testEmbedVideoMediaControl(expectedWebViewCount: Int) {

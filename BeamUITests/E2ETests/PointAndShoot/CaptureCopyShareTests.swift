@@ -32,8 +32,7 @@ class CaptureCopyShareTests: BaseTest {
     
     func testCopyCapturedText() {
         launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        helper.openTestPage(page: .page3)
+        uiMenu.loadUITestPage3()
         
         step ("When I capture text and click Copy") {
             let textElementToAdd = pnsView.staticText(textToCapture)
@@ -54,11 +53,10 @@ class CaptureCopyShareTests: BaseTest {
     
     func testCopyCapturedImage() {
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        helper.tapCommand(.resizeSquare1000)
+        uiMenu.resizeSquare1000()
         
         step ("When I capture text and click Copy") {
-            helper.openTestPage(page: .page4)
+            uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.pointAndShootElement(imageItemToAdd)
                 .getCopyButton()
@@ -77,8 +75,7 @@ class CaptureCopyShareTests: BaseTest {
     
     func testShareCapturedText() {
         launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        helper.openTestPage(page: .page3)
+        uiMenu.loadUITestPage3()
         let windows = ["Twitter", "Facebook", "LinkedIn", "Reddit"]
         let apps = ["Email", "Messages"]
         

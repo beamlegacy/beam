@@ -4,13 +4,11 @@ import XCTest
 class BrowserStatusBarTests: BaseTest {
 
     func testShowStatusBar() throws {
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-
-        helper.tapCommand(.resizeSquare1000)
 
         step("Given I open a web page"){
-            helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
+            launchApp()
+            uiMenu.resizeSquare1000()
+            uiMenu.loadUITestPage1()
         }
 
         let link = webView.staticText("on Twitter")
@@ -33,15 +31,13 @@ class BrowserStatusBarTests: BaseTest {
     }
 
     func testShowStatusBarForLinkOpeningInNewTab() throws {
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
 
         step("Given I open a web page"){
-            helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
+            launchApp()
+            uiMenu.loadUITestPage1()
         }
-
+        
         let link = webView.staticText("new-tab-beam")
-
         step("Given I enable the status bar"){
             uiMenu.menuItem("Show Status Bar").clickIfExists()
         }
@@ -61,15 +57,13 @@ class BrowserStatusBarTests: BaseTest {
     }
 
     func testDisableStatusBar() {
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
 
         step("Given I open a web page"){
-            helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
+            launchApp()
+            uiMenu.loadUITestPage1()
         }
 
         let opensInNewTabLink = webView.staticText("new-tab-beam")
-
         step("Given I disable the status bar"){
             uiMenu.menuItem("Hide Status Bar").clickIfExists()
         }

@@ -10,7 +10,6 @@ import XCTest
 
 class AllNotesSortingTests: BaseTest {
     
-    var helper: BeamUITestsHelper!
     var allNotesView: AllNotesTestView!
     var table: AllNotesTestTable!
     
@@ -47,8 +46,8 @@ class AllNotesSortingTests: BaseTest {
     func testSortNotesByWordsAndLinks() {
         
         step("GIVEN I setup staging environment and open All cards") {
-            helper = BeamUITestsHelper(setupStaging(withRandomAccount: true).app)
-            helper.tapCommand(.create10Notes)
+            setupStaging(withRandomAccount: true)
+            uiMenu.create10Notes()
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView = AllNotesTestView()

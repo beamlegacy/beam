@@ -32,8 +32,6 @@ class NoteEditorTests: BaseTest {
     
     func testTypeTextInNote() {
         let journalView = launchApp()
-        BeamUITestsHelper(journalView.app).tapCommand(.destroyDB)
-        launchApp()
         let firstJournalEntry = journalView.getNoteByIndex(1)
         firstJournalEntry.clear()
         
@@ -67,8 +65,6 @@ class NoteEditorTests: BaseTest {
     func testSlashCommandsView() {
         let journalView = launchApp()
         let contextMenuTriggerKey = "/"
-        BeamUITestsHelper(journalView.app).tapCommand(.destroyDB)
-        launchApp()
         
         step("Given I type \(contextMenuTriggerKey) char"){
             noteTestView.getNoteNodesForVisiblePart().first?.clickOnExistence()
