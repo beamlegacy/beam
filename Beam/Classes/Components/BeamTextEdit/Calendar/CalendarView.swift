@@ -110,8 +110,16 @@ struct CalendarView: View {
             }.frame(width: 21)
             if isHoveringNotConnect {
                 VStack(alignment: .leading, spacing: 4.5) {
-                    connectCalendarButton(service: .appleCalendar, label: "Connect macOS Calendar")
-                    connectCalendarButton(service: .googleCalendar, label: "Connect Google Calendar")
+                    ButtonLabel(customView: { hovered, _ in
+                        AnyView(
+                            Text("Connect your Calendar")
+                                .font(BeamFont.medium(size: 12).swiftUI)
+                                .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.Generic.placeholder.swiftUI)
+                        )
+                    }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
+                        openAccountPreferences()
+                    })
+
                     Text("Write a meeting note or join a video call")
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
@@ -124,19 +132,8 @@ struct CalendarView: View {
         }
     }
 
-    private func connectCalendarButton(service: CalendarServices, label: String) -> some View {
-        Button {
-            viewModel.calendarManager.requestAccess(from: service) { connected in
-                if connected {
-                    viewModel.calendarManager.updated = true
-                    isHoveringConnect = true
-                }
-            }
-        } label: {
-            Text(label)
-                .font(BeamFont.medium(size: 12).swiftUI)
-                .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
-        }.buttonStyle(.plain)
+    private func openAccountPreferences() {
+        (NSApp.delegate as? AppDelegate)?.openPreferencesWindow(to: .accounts)
     }
 
     private func prompt(_ meeting: Meeting) {
