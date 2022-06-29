@@ -1076,6 +1076,7 @@
 		A52B5022271DCB950078670C /* TabsDragModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52B5021271DCB950078670C /* TabsDragModel.swift */; };
 		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
 		A52BFE63260901980028D3F3 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFE62260901980028D3F3 /* Separator.swift */; };
+		A52E73F72865B4E600D0E2AF /* LightBeamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52E73F62865B4E500D0E2AF /* LightBeamView.swift */; };
 		A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */; };
 		A5316A192667B9110039ED9C /* Range+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5316A182667B9110039ED9C /* Range+BeamTests.swift */; };
 		A53345C427FAE421005E8528 /* WebViewControllerRedirectionHandlingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53345C327FAE421005E8528 /* WebViewControllerRedirectionHandlingTests.swift */; };
@@ -1206,6 +1207,7 @@
 		A5E3F16326F1ECBE007B1CAB /* String+RangesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */; };
 		A5E408C527F4591F00641413 /* AutocompleteManager+Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E408C427F4591F00641413 /* AutocompleteManager+Mocks.swift */; };
 		A5E408D327F4D0A100641413 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E408D227F4D0A100641413 /* WebViewController.swift */; };
+		A5E497DF286B745800B8A4B7 /* TouchBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E497DE286B745800B8A4B7 /* TouchBarController.swift */; };
 		A5E4AF69282AD5F40087FAF4 /* TabClusteringGroupCapsuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E4AF68282AD5F40087FAF4 /* TabClusteringGroupCapsuleView.swift */; };
 		A5E7330827E21263000F3B2D /* AllNotesPageContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E7330727E21263000F3B2D /* AllNotesPageContentViewModel.swift */; };
 		A5E9D38F27293A260064E255 /* FaviconProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E9D38E27293A260064E255 /* FaviconProviderTests.swift */; };
@@ -2968,6 +2970,7 @@
 		A52B5021271DCB950078670C /* TabsDragModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsDragModel.swift; sourceTree = "<group>"; };
 		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
 		A52BFE62260901980028D3F3 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
+		A52E73F62865B4E500D0E2AF /* LightBeamView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LightBeamView.swift; sourceTree = "<group>"; };
 		A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLinesDecorationLayer.swift; sourceTree = "<group>"; };
 		A5316A182667B9110039ED9C /* Range+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Range+BeamTests.swift"; sourceTree = "<group>"; };
 		A53345C327FAE421005E8528 /* WebViewControllerRedirectionHandlingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewControllerRedirectionHandlingTests.swift; sourceTree = "<group>"; };
@@ -3096,6 +3099,7 @@
 		A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RangesTests.swift"; sourceTree = "<group>"; };
 		A5E408C427F4591F00641413 /* AutocompleteManager+Mocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Mocks.swift"; sourceTree = "<group>"; };
 		A5E408D227F4D0A100641413 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
+		A5E497DE286B745800B8A4B7 /* TouchBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchBarController.swift; sourceTree = "<group>"; };
 		A5E4AF68282AD5F40087FAF4 /* TabClusteringGroupCapsuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabClusteringGroupCapsuleView.swift; sourceTree = "<group>"; };
 		A5E7330727E21263000F3B2D /* AllNotesPageContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesPageContentViewModel.swift; sourceTree = "<group>"; };
 		A5E9D38E27293A260064E255 /* FaviconProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconProviderTests.swift; sourceTree = "<group>"; };
@@ -4265,6 +4269,7 @@
 				8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */,
 				52ECE01D272970260010E223 /* UserAlert.swift */,
 				370794BE27D7A21A00D2768B /* FloatingToolbar.swift */,
+				A5E497DE286B745800B8A4B7 /* TouchBarController.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -6953,6 +6958,7 @@
 				A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */,
 				A0440E51282DC7AE00464AAC /* ToggleView.swift */,
 				87CF1CCA282404CB00FB0530 /* BeamControlGroup.swift */,
+				A52E73F62865B4E500D0E2AF /* LightBeamView.swift */,
 			);
 			path = UIElements;
 			sourceTree = "<group>";
@@ -9161,6 +9167,7 @@
 				52B17AC3262446B200CB4728 /* AppDelegate+Database.swift in Sources */,
 				A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */,
 				418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */,
+				A52E73F72865B4E600D0E2AF /* LightBeamView.swift in Sources */,
 				37520B0B27EAA40000A1C20B /* ElementNodeDisplaySizeCache.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				A54A45422768A72400B9AE1B /* ImportsManager.swift in Sources */,
@@ -9276,6 +9283,7 @@
 				A5C9F01126136B5F0096380F /* AllNotesPageContentView.swift in Sources */,
 				52A8698D26CBB3C000FCCC69 /* AppDelegate+ShowError.swift in Sources */,
 				52842D4E2715B3180099602C /* FilesWindow.swift in Sources */,
+				A5E497DF286B745800B8A4B7 /* TouchBarController.swift in Sources */,
 				A5946804265CE5B30044A892 /* DeleteDocumentCommand.swift in Sources */,
 				A55A019427DF49BF002403D5 /* BeamTableCellLottieView.swift in Sources */,
 				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,
