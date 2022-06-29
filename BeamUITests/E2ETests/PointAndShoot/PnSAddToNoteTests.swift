@@ -23,13 +23,12 @@ class PnSAddToNoteTests: BaseTest {
     func SKIPtestAddTextToTodaysNote() throws {
         try XCTSkipIf(true, "Skipped so far, to replace NavigationCollectUITests")
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(pnsView.app)
         let expectedItemText1 = "Point And Shoot Test Fixture Cursor"
         let expectedItemText2 = "Go to UITests-1"
         var todaysDateInNoteTitleFormat: String?
         
         step("Given I open Test page"){
-            helper.openTestPage(page: .page3)
+            uiMenu.loadUITestPage3()
         }
         
         step("When I point and shoot the following text and add it to Todays note"){
@@ -58,10 +57,9 @@ class PnSAddToNoteTests: BaseTest {
     
     func testAddTextToNewNote() {
         launchApp()
-        let helper = BeamUITestsHelper(pnsView.app)
         
         step("Given I open Test page"){
-            helper.openTestPage(page: .page3)
+            uiMenu.loadUITestPage3()
             let textElementToAdd = pnsView.staticText(" capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime")
             pnsView.addToNoteByName(textElementToAdd, noteNameToBeCreated, true)
         }
@@ -82,14 +80,13 @@ class PnSAddToNoteTests: BaseTest {
     
     func testAddTextToExistingNote() {
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(pnsView.app)
         step("Given I create \(noteNameToBeCreated) note"){
             //To be replaced with UITests helper - note creation
             noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
         }
         
         step("Given I open Test page"){
-            helper.openTestPage(page: .page3)
+            uiMenu.loadUITestPage3()
             let textElementToAdd = pnsView.staticText(". The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.")
             pnsView.addToNoteByName(textElementToAdd, noteNameToBeCreated)
         }
@@ -117,14 +114,13 @@ class PnSAddToNoteTests: BaseTest {
     
     func testAddTextUsingNotes() {
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(pnsView.app)
         step("Given I create \(noteNameToBeCreated) note"){
             //To be replaced with UITests helper - note creation
             noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
         }
         
         step("Given I open Test page"){
-            helper.openTestPage(page: .page3)
+            uiMenu.loadUITestPage3()
         }
         
         step ("When I collect a text via PnS"){
@@ -143,14 +139,13 @@ class PnSAddToNoteTests: BaseTest {
     
     func testCollectImage() {
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        helper.tapCommand(.resizeSquare1000)
+        uiMenu.resizeSquare1000()
         step("Given I create \(noteNameToBeCreated) note"){
             journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
         }
         
         step ("Then I successfully collect gif"){
-            helper.openTestPage(page: .page2)
+            uiMenu.loadUITestPage2()
             let gifItemToAdd = pnsView.image("File:Beam mode 2.gif")
             pnsView.addToNoteByName(gifItemToAdd, noteNameToBeCreated)
             noteView = webView.openDestinationNote()
@@ -158,7 +153,7 @@ class PnSAddToNoteTests: BaseTest {
         }
 
         step ("Then I successfully collect image"){
-            helper.openTestPage(page: .page4)
+            uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToNoteByName(imageItemToAdd, noteNameToBeCreated)
             webView.openDestinationNote()
@@ -169,8 +164,7 @@ class PnSAddToNoteTests: BaseTest {
     
     func testCollectVideo() throws {
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(pnsView.app)
-        helper.openTestPage(page: .media)
+        uiMenu.loadUITestPageMedia()
         
         let itemToCollect = pnsView.app.groups.containing(.button, identifier:"Play Video").children(matching: .group).element.children(matching: .group).element
         pnsView.addToTodayNote(itemToCollect)
@@ -190,10 +184,10 @@ class PnSAddToNoteTests: BaseTest {
     }
     
     func testCollectSVG() throws {
-        
-        let helper = BeamUITestsHelper(launchApp().app)
-        helper.openTestPage(page: .svg)
+        launchApp()
+        uiMenu.loadUITestSVG()
         uiMenu.resetCollectAllert()
+        webView.waitForWebViewToLoad()
         
         step ("THEN SVG image is succeffully captured"){
             let itemToCollect = webView.image("svgimage")
@@ -220,15 +214,14 @@ class PnSAddToNoteTests: BaseTest {
     func testFailedToCollect() throws {
         // If this test is flakey, make sure browsing collect is disabled first
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(pnsView.app)
-        helper.tapCommand(.resetCollectAlert)
+        uiMenu.resetCollectAllert()
 
         step ("When the journal is first loaded the note is empty by default"){
             noteView = NoteTestView()
             let beforeNoteNodes = noteView.getNoteNodesForVisiblePart()
             XCTAssertEqual(beforeNoteNodes.count, 1)
             XCTAssertEqual(beforeNoteNodes[0].getStringValue(), emptyString)
-            helper.openTestPage(page: .media)
+            uiMenu.loadUITestPageMedia()
             let itemToCollect = pnsView.app.windows.groups["Audio Controls"].children(matching: .group).element(boundBy: 1).children(matching: .slider).element
             pnsView.addToTodayNote(itemToCollect)
         }
@@ -252,11 +245,10 @@ class PnSAddToNoteTests: BaseTest {
     
     func testCollectFullPage() {
         launchApp()
-        let helper = BeamUITestsHelper(pnsView.app)
         let expectedNoteText = "Point And Shoot Test Fixture Cursor"
         
         step ("Given I open Test page"){
-            helper.openTestPage(page: .page3)
+            uiMenu.loadUITestPage3()
         }
         
         step ("When I collect full page"){
@@ -280,8 +272,8 @@ class PnSAddToNoteTests: BaseTest {
     func testFramePositionPlacementOnSelect() {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(journalView.app)
-        helper.tapCommand(.resizeWindowLandscape)
-        helper.openTestPage(page: .page1)
+        uiMenu.resizeWindowLandscape()
+        uiMenu.loadUITestPage1()
         let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
         let parentElement = pnsView.staticText(searchText).firstMatch
 
@@ -317,7 +309,7 @@ class PnSAddToNoteTests: BaseTest {
         }
 
         step ("And I see Shoot Frame Selection remained after window resize"){
-            helper.tapCommand(.resizeWindowPortrait)
+            uiMenu.resizeWindowPortrait()
             XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
         }
 
@@ -334,8 +326,9 @@ class PnSAddToNoteTests: BaseTest {
         let helper = BeamUITestsHelper(launchApp().app)
         var center: XCUICoordinate?
         step ("Given I open test page in landscape mode"){
-            helper.tapCommand(.resizeWindowLandscape)
-            helper.openTestPage(page: .page1)
+            uiMenu
+                .resizeWindowLandscape()
+                .loadUITestPage1()
             
             let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
             let parent = webView.staticText(searchText).firstMatch
@@ -373,7 +366,7 @@ class PnSAddToNoteTests: BaseTest {
             
             // Resize window
                 step ("And point Frame is available after resizing"){
-                    helper.tapCommand(.resizeWindowPortrait)
+                    uiMenu.resizeWindowPortrait()
                     center!.hover()
                     XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
                     // Shoot
@@ -406,9 +399,8 @@ class PnSAddToNoteTests: BaseTest {
     func SKIPtestDismissShootCardPicker() throws {
         try XCTSkipIf(true, "Skipped due to PointFrame cannot be detected BE-2591")
        //Shoot "dismiss shootCardPicker by clicking on page and pressing escape"
-       let journalView = launchApp()
-       let helper = BeamUITestsHelper(journalView.app)
-       helper.openTestPage(page: .page1)
+       launchApp()
+       uiMenu.loadUITestPage1()
        let searchText = "Ultralight Beam, Kanye West"
        let parent = webView.app.webViews.containing(.staticText,
                                             identifier: searchText).element
@@ -452,11 +444,10 @@ class PnSAddToNoteTests: BaseTest {
     
     func testOpensShootCardPickerWithoutNavigatingPage() {
         //"opens ShootCardPicker and not navigate the page"
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
+        launchApp()
 
         step ("Given I open a test page"){
-            helper.openTestPage(page: .page1)
+            uiMenu.loadUITestPage1()
         }
 
         step ("Then I'm not redireceted after pointing a URL"){
@@ -482,7 +473,7 @@ class PnSAddToNoteTests: BaseTest {
 
         let journalChildren = journalScrollView.children(matching: .textView)
             .matching(identifier: "TextNode")
-        helper.openTestPage(page: .page3)
+        uiMenu.loadUITestPage3()
 
         let prefix = "Go to "
         let linkText = "UITests-1"

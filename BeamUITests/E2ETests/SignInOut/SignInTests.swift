@@ -17,8 +17,8 @@ class SigninTests: BaseTest {
     override func setUpWithError() throws {
         try super.setUpWithError()
         step("Given I enable onboarding") {
-            let journalView = launchApp()
-            BeamUITestsHelper(journalView.app).tapCommand(.showOnboarding)
+            launchApp()
+            uiMenu.showOnboarding()
         }
     }
     

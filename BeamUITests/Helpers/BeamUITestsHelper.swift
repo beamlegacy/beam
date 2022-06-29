@@ -29,61 +29,10 @@ class BeamUITestsHelper {
         self.app = app
     }
 
-    func tapCommand(_ command: UITestMenuAvailableCommands, autoTrigger: Bool = true) {
-        let beeper: CrossTargetBeeper = CrossTargetNotificationCenterBeeper()
-        UITestMenuAvailableCommands.allCases.forEach {
-            if $0 == command {
-                if autoTrigger {
-                    beeper.beep(identifier: $0.rawValue)
-                } else {
-                    let menu = XCUIApplication().menuItems[$0.rawValue]
-                    menu.tap()
-                }
-                moveMouseOutOfTheWay()
-                return
-            }
-        }
-    }
-
     func moveMouseOutOfTheWay() {
         app.windows.firstMatch.coordinate(withNormalizedOffset: .zero).hover()
     }
-
-    enum UITestsPageCommand {
-        case page1
-        case page2
-        case page3
-        case page4
-        case password
-        case alerts
-        case media
-        case svg
-    }
-
-    func openTestPage(page: UITestsPageCommand) {
-        switch page {
-        case .page1:
-            tapCommand(.loadUITestPage1)
-        case .page2:
-            tapCommand(.loadUITestPage2)
-        case .page3:
-            tapCommand(.loadUITestPage3)
-        case .page4:
-            tapCommand(.loadUITestPage4)
-        case .password:
-            tapCommand(.loadUITestPagePassword)
-        case .alerts:
-            tapCommand(.loadUITestPageAlerts)
-        case .media:
-            tapCommand(.loadUITestPageMedia)
-        case .svg:
-            tapCommand(.loadUITestSVG)
-        }
-        _ = WebTestView().waitForWebViewToLoad()
-        let centerOfPage = self.app.webViews.element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
-        centerOfPage.hover()
-    }
-
+    
     func showLogs() {
         let menu = XCUIApplication().menuItems["Show Logs"]
         menu.tap()

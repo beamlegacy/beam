@@ -139,14 +139,14 @@ class UITestsMenuBar: BaseMenuBar {
     }
     
     @discardableResult
-    func loadUITestPage4() -> UITestsMenuBar {
-        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage4.rawValue)
+    func createFakeDailySummary() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.createFakeDailySummary.rawValue)
         return self
     }
-    
+
     @discardableResult
-    func loadUITestPage3() -> UITestsMenuBar {
-        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage3.rawValue)
+    func loadUITestPage1() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage1.rawValue)
         return self
     }
     
@@ -157,8 +157,92 @@ class UITestsMenuBar: BaseMenuBar {
     }
     
     @discardableResult
-    func loadUITestPage1() -> UITestsMenuBar {
-        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage1.rawValue)
+    func loadUITestPage3() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage3.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func loadUITestPage4() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage4.rawValue)
+        return self
+    }
+
+    @discardableResult
+    func loadUITestPageAlerts() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPageAlerts.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func loadUITestPageMedia() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPageMedia.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func loadUITestSVG() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestSVG.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func loadUITestPagePassword() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPagePassword.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func insertTextInCurrentNote() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.insertTextInCurrentNote.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func setAutoUpdateToMock() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.setAutoUpdateToMock.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func resizeWindowLandscape() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.resizeWindowLandscape.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func resizeWindowPortrait() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.resizeWindowPortrait.rawValue)
+        return self
+    }
+
+    @discardableResult
+    func disableCreateJournalOnce() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.disableCreateJournalOnce.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func enableCreateJournalOnce() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.enableCreateJournalOnce.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func omniboxFillHistory() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.omniboxFillHistory.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func omniboxDisableSearchInHistoryContent() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.omniboxDisableSearchInHistoryContent.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func omniboxEnableSearchInHistoryContent() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.omniboxEnableSearchInHistoryContent.rawValue)
         return self
     }
 }

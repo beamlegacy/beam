@@ -13,8 +13,7 @@ class HelpAndFeedbackTests: BaseTest {
     
     func testHelpAndFeedbackAppearance() {
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        helper.tapCommand(.resizeSquare1000)
+        uiMenu.resizeSquare1000()
 
         let expectedCannyLink = "beamapp.canny.io"
         
@@ -65,8 +64,7 @@ class HelpAndFeedbackTests: BaseTest {
     
     func testHelpShortcutsView() {
         let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        helper.tapCommand(.resizeSquare1000)
+        uiMenu.resizeSquare1000()
         
         step("Given I open shortcuts help menu"){
             helpView = journalView.openHelpMenu().openShortcuts()

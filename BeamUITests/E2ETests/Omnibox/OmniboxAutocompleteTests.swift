@@ -168,8 +168,9 @@ class OmniboxAutocompleteTests: BaseTest {
         let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
         let deletePressRepeatTimes = 2
     
-        helper.tapCommand(.omniboxEnableSearchInHistoryContent)
-        helper.tapCommand(.omniboxFillHistory)
+        uiMenu
+            .omniboxEnableSearchInHistoryContent()
+            .omniboxFillHistory()
 
         step("When I type: \(partiallyTypedSearchText)"){
             omniboxView.getOmniBoxSearchField().clickOnExistence()
@@ -228,7 +229,7 @@ class OmniboxAutocompleteTests: BaseTest {
         step("Then search field value is updated accordingly and there is 1 selected result"){
             XCTAssertTrue(waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
-            helper.tapCommand(.omniboxDisableSearchInHistoryContent)
+            uiMenu.omniboxDisableSearchInHistoryContent()
         }
     }
 
@@ -236,8 +237,7 @@ class OmniboxAutocompleteTests: BaseTest {
         let partiallyTypedSearchText = "alter"
         let expectedSearchFieldText = "alternateurl.com"
         let expectedURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: expectedSearchFieldText)
-
-        helper.tapCommand(.omniboxFillHistory)
+        uiMenu.omniboxFillHistory()
 
         step("When I type: \(partiallyTypedSearchText)"){
             omniboxView.getOmniBoxSearchField().clickOnExistence()
@@ -256,8 +256,9 @@ class OmniboxAutocompleteTests: BaseTest {
         let expectedURL = "fr.wikipedia.org/wiki/Hello_world"
     
         launchApp()
-        helper.tapCommand(.omniboxEnableSearchInHistoryContent)
-        helper.tapCommand(.omniboxFillHistory)
+        uiMenu
+            .omniboxDisableSearchInHistoryContent()
+            .omniboxFillHistory()
 
         step("When I type: \(partiallyTypedSearchText)"){
             omniboxView.getOmniBoxSearchField().clickOnExistence()
@@ -301,7 +302,7 @@ class OmniboxAutocompleteTests: BaseTest {
 
         step("Then search field value is \(partiallyTypedSearchText)"){
             XCTAssertTrue(waitForStringValueEqual(partiallyTypedSearchText, omniboxView.getOmniBoxSearchField()))
-            helper.tapCommand(.omniboxDisableSearchInHistoryContent)
+            uiMenu.omniboxDisableSearchInHistoryContent()
         }
     }
     

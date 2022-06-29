@@ -190,12 +190,12 @@ class SearchOnNoteTests: BaseTest {
     }
     
     func prepareTest(populateNoteTimes: Int) -> SearchTestView {
-        let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
-        JournalTestView().createNoteViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
+        launchApp().createNoteViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
         step("Given I populate the note"){
             for _ in 1...populateNoteTimes {
-                helper.tapCommand(.insertTextInCurrentNote)
+                uiMenu.insertTextInCurrentNote()
+                NoteTestView().waitForNoteViewToLoad() 
             }
         }
         

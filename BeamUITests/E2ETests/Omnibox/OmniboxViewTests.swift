@@ -68,8 +68,8 @@ class OmniboxViewTests: BaseTest {
         let journalView = launchApp()
         
         step("Given I open 2 test pages"){
-            BeamUITestsHelper(journalView.app).openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
-            BeamUITestsHelper(journalView.app).openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
+            uiMenu.loadUITestPage1()
+            uiMenu.loadUITestPage1()
         }
 
         step("Then Webview is opened and browser tab bar is visible"){
@@ -156,7 +156,7 @@ class OmniboxViewTests: BaseTest {
 
         // In Web
         step("When I open omnibox in web mode"){
-            helper.openTestPage(page: .page1)
+            uiMenu.loadUITestPage1()
             omniboxView.focusOmniBoxSearchField()
         }
 

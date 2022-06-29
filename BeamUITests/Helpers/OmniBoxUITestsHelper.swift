@@ -25,9 +25,9 @@ class OmniBoxUITestsHelper : BeamUITestsHelper {
 
     func cleanupDB(logout: Bool) {
         if logout {
-            self.tapCommand(.logout)
+            UITestsMenuBar().logout()
         }
-        self.tapCommand(.destroyDB)
+        UITestsMenuBar().destroyDB()
     }
 
     func focusSearchField() {
