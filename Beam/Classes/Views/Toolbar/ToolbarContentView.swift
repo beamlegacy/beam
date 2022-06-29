@@ -75,7 +75,7 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
                     .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.description)
                     .accessibilityIdentifier("journal")
                     .animation(nil)
-            } else {
+            } else if state.useSidebar {
                 Spacer().frame(width: 28, height: 28) // Spacer to ensure no overlap between sidebar buttons and chevrons
             }
             ToolbarChevrons()
