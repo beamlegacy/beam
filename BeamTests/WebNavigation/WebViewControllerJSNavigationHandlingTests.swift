@@ -18,7 +18,7 @@ import WebKit
  */
 class WebViewControllerJSNavigationHandlingTests: XCTestCase {
 
-    var webView: WKWebView!
+    var webView: BeamWebView!
     var sut: WebViewController!
     private var mockPage: TestWebPageWithNavigation!
     private let navigationTimeout: TimeInterval = 4
@@ -36,10 +36,11 @@ class WebViewControllerJSNavigationHandlingTests: XCTestCase {
     override func setUp() {
         let JSHandler = JSNavigationMessageHandler()
         let configuration = BeamWebViewConfigurationBase(handlers: [JSHandler])
-        webView = WKWebView(frame: .zero, configuration: configuration)
+        webView = BeamWebView(frame: .zero, configuration: configuration)
         destinationURL = redirectURL(for: .none)
         sut = WebViewController(with: webView)
         mockPage = TestWebPageWithNavigation(webViewController: sut)
+        mockPage.webView = webView
         JSHandler.webPage = mockPage
     }
 
@@ -88,7 +89,7 @@ class WebViewControllerJSNavigationHandlingTests: XCTestCase {
 
         // Then I receive a navigation event
         XCTAssertEqual(lastNavigationDescription?.url.absoluteString.hasSuffix(url2), true)
-        XCTAssertEqual(lastNavigationDescription?.source, WebViewControllerNavigationSource.javascript(replacing: false))
+        XCTAssertEqual(lastNavigationDescription?.source, WebViewControllerNavigationSource.javascript(event: .pushState))
         XCTAssertEqual(lastNavigationDescription?.isLinkActivation, true)
         XCTAssertNil(lastNavigationDescription?.requestedURL)
 
@@ -104,7 +105,7 @@ class WebViewControllerJSNavigationHandlingTests: XCTestCase {
 
         // Then I receive another navigation event
         XCTAssertEqual(lastNavigationDescription?.url.absoluteString.hasSuffix(url3), true)
-        XCTAssertEqual(lastNavigationDescription?.source, WebViewControllerNavigationSource.javascript(replacing: false))
+        XCTAssertEqual(lastNavigationDescription?.source, WebViewControllerNavigationSource.javascript(event: .pushState))
         XCTAssertEqual(lastNavigationDescription?.isLinkActivation, true)
         XCTAssertNil(lastNavigationDescription?.requestedURL)
 
@@ -147,7 +148,7 @@ class WebViewControllerJSNavigationHandlingTests: XCTestCase {
 
         // Then I receive a navigation event
         XCTAssertEqual(lastNavigationDescription?.url.absoluteString.hasSuffix(url2), true)
-        XCTAssertEqual(lastNavigationDescription?.source, WebViewControllerNavigationSource.javascript(replacing: true))
+        XCTAssertEqual(lastNavigationDescription?.source, WebViewControllerNavigationSource.javascript(event: .replaceState))
         XCTAssertEqual(lastNavigationDescription?.isLinkActivation, false)
         XCTAssertEqual(lastNavigationDescription?.requestedURL, initialURL)
 
@@ -163,7 +164,7 @@ class WebViewControllerJSNavigationHandlingTests: XCTestCase {
 
         // Then I receive another navigation event
         XCTAssertEqual(lastNavigationDescription?.url.absoluteString.hasSuffix(url3), true)
-        XCTAssertEqual(lastNavigationDescription?.source, WebViewControllerNavigationSource.javascript(replacing: true))
+        XCTAssertEqual(lastNavigationDescription?.source, WebViewControllerNavigationSource.javascript(event: .replaceState))
         XCTAssertEqual(lastNavigationDescription?.isLinkActivation, false)
         XCTAssertEqual(lastNavigationDescription?.requestedURL, initialURL)
 
