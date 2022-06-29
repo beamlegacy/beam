@@ -56,7 +56,7 @@ export class BeamNavigation {
    */
   locationChanged(e): void {
     const args = e.arguments
-    const stateUrl = args[2]
+    const stateUrl = args?.[2]
     if (stateUrl) {
       const location = this.win.location
       let href = location.href
@@ -71,12 +71,26 @@ export class BeamNavigation {
     }
   }
 
+  locationChangedBackwards(e): void {
+    const href = this.win.location.href
+    const type = e.type
+    this.win.webkit.messageHandlers.nav_locationChanged.postMessage({
+      href,
+      type
+    })
+  }
+
   startHistoryHandling(): void {
     history.pushState = this.decorate(history, "pushState")
     history.replaceState = this.decorate(history, "replaceState")
 
+    // Move in place
     this.win.addEventListener("replaceState", this.locationChanged.bind(this))
+
+    // Go forward either with link or forward in history
     this.win.addEventListener("pushState", this.locationChanged.bind(this))
-    this.win.addEventListener("popstate", this.locationChanged.bind(this))
+
+    // Go back in history
+    this.win.addEventListener("popstate", this.locationChangedBackwards.bind(this))
   }
 }
