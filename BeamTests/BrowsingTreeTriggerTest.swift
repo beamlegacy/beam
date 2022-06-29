@@ -70,6 +70,35 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         XCTAssertEqual(current.parent?.events.last?.type, .exitForward)
     }
 
+    func testJsBackwardForward() {
+        let url0 = "http://localhost:8080/"
+        let indexExpectations = (0...2).map { expectation(description: "page indexing \($0)") }
+        var expectationIndex = 0
+        mockIndexingDelegate?.onIndexingFinished = { _ in
+            indexExpectations[expectationIndex].fulfill()
+            expectationIndex += 1
+        }
+        tab.load(request: URLRequest(url: URL(string: url0)!))
+        wait(for: [indexExpectations[0]], timeout: 1)
+        let jsHistoryScript = """
+        history.pushState({page: 1}, "", "?page=1");
+        history.pushState({page: 2}, "", "?page=2");
+        """
+        let jsExpectation = expectation(description: "jsExpectation")
+        tab.webView.evaluateJavaScript(jsHistoryScript) { (result, error) in
+            jsExpectation.fulfill()
+        }
+        wait(for: [jsExpectation, indexExpectations[1], indexExpectations[2]], timeout: 1, enforceOrder: true)
+        XCTAssertEqual(tab.browsingTree.currentLink, "http://localhost:8080/?page=2")
+        tab.goBack()
+        expect(self.tab.browsingTree.currentLink).toEventually(equal("http://localhost:8080/?page=1"))
+        XCTAssertEqual(tab.browsingTree.current.children.last?.events.last?.type, .exitBackward)
+        tab.goForward()
+        expect(self.tab.browsingTree.currentLink).toEventually(equal("http://localhost:8080/?page=2"))
+        XCTAssertEqual(tab.browsingTree.current.parent?.events.last?.type, .exitForward)
+
+    }
+
     func testSwitchTo() {
         let indexExpectations = (0...1).map { i in expectation(description: "index \(i)") }
         var indexExpectation = indexExpectations[0]
