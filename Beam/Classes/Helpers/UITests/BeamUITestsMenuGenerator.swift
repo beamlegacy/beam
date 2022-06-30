@@ -497,8 +497,9 @@ class BeamUITestsMenuGenerator {
         }
         for (index, urlId) in urlIdsToday.enumerated() {
             storage.apply(to: urlId) {
-                $0.readingTimeToLastEvent = 100 + Double(index)
+                $0.readingTimeToLastEvent = 100 + (Double(index) * 10)
                 $0.textAmount = 1000 + index
+                $0.scrollRatioY = 100 + (Float(index) * 10)
             }
         }
     }
