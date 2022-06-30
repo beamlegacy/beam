@@ -106,35 +106,12 @@ export class MediaPlayer<UI extends MediaPlayerUI> {
     return MediaPlayState.paused
   }
 
-  media_toggleMute() {
-      this.media_isPageMuted = !this.media_isPageMuted
-      const tags = this.media_htmlMediaTags()
-      for (let i = 0; i < tags.length; i++) {
-          const tag = tags[i]
-          tag.muted = this.media_isPageMuted
-      }
-  }
-
   media_elemenSupportsPictureInPicture(element) {
       return element.webkitSupportsPresentationMode !== undefined && typeof element.webkitSetPresentationMode === "function"
   }
 
   media_elemenIsInPictureInPicture(element) {
       return this.media_elemenSupportsPictureInPicture(element) && element.webkitPresentationMode === "picture-in-picture"
-  }
-
-  media_togglePictureInPicture() {
-      const tags = this.media_htmlMediaTags()
-      if (tags.length == 0) { return }
-      for (let i = 0; i < tags.length; i++) {
-          const tag = tags[i]
-          if (this.media_elemenSupportsPictureInPicture(tag)) {
-              const isInPip = this.media_elemenIsInPictureInPicture(tag)
-              const presentationMode = isInPip ? BeamWebkitPresentationMode.inline : BeamWebkitPresentationMode.pip
-              tag.webkitSetPresentationMode(presentationMode)
-              return
-          }
-      }
   }
 
   media_onPlaying(event) {
@@ -165,5 +142,28 @@ export class MediaPlayer<UI extends MediaPlayerUI> {
 
   toString(): string {
     return this.constructor.name
+  }
+
+  toggleMute() {
+    this.media_isPageMuted = !this.media_isPageMuted
+    const tags = this.media_htmlMediaTags()
+    for (let i = 0; i < tags.length; i++) {
+        const tag = tags[i]
+        tag.muted = this.media_isPageMuted
+    }
+  }
+
+  togglePictureInPicture() {
+    const tags = this.media_htmlMediaTags()
+    if (tags.length == 0) { return }
+    for (let i = 0; i < tags.length; i++) {
+        const tag = tags[i]
+        if (this.media_elemenSupportsPictureInPicture(tag)) {
+            const isInPip = this.media_elemenIsInPictureInPicture(tag)
+            const presentationMode = isInPip ? BeamWebkitPresentationMode.inline : BeamWebkitPresentationMode.pip
+            tag.webkitSetPresentationMode(presentationMode)
+            return
+        }
+    }
   }
 }
