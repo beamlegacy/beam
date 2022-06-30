@@ -50,7 +50,7 @@ extension PreferencesManager {
     static let editorCardTopPaddingDefault: CGFloat = 20
     static let editorToolbarOverlayOpacityDefault: CGFloat = 0.4
 
-    static let editorMinWidthDefault: CGFloat = 450
+    static let editorMinWidthDefault: CGFloat = 400
     static let editorMaxWidthDefault: CGFloat = 670
     static let editorParentSpacingDefault: CGFloat = 2
     static let editorChildSpacingDefault: CGFloat = 1

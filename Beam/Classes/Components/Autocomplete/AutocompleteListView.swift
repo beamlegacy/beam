@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AppKit
+import BeamCore
 
 struct AutocompleteListView: View {
     @EnvironmentObject var state: BeamState
@@ -61,7 +62,7 @@ struct AutocompleteListView: View {
                     .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
-                            state.startOmniboxQuery(selectingNewIndex: indexFor(item: item))
+                            state.startOmniboxQuery(selectingNewIndex: indexFor(item: item), modifierFlags: modifierFlagsPressed)
                         }
                     )
                     .onHoverOnceVisible { hovering in
@@ -70,6 +71,11 @@ struct AutocompleteListView: View {
                             hoveredItemIndex = index
                         } else if hoveredItemIndex == index {
                             hoveredItemIndex = nil
+                        }
+                    }
+                    .contextMenu {
+                        if let noteId = item.source.noteId {
+                            BeamNote.contextMenu(for: noteId, state: state)
                         }
                     }
             }
