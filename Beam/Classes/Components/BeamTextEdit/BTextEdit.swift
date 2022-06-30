@@ -26,7 +26,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     var onScroll: ((CGPoint) -> Void)?
     var onSearchToggle: (SearchViewModel?) -> Void = { _ in }
 
-    var minimumWidth: CGFloat = 800
+    var minimumWidth: CGFloat = 480
     var maximumWidth: CGFloat = 1024
     var topOffset = CGFloat(28)
     var scrollViewTopInset: CGFloat = 0

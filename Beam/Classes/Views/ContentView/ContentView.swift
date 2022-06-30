@@ -61,7 +61,6 @@ struct ContentView: View {
             OverlayViewCenter(viewModel: state.overlayViewModel)
                 .edgesIgnoringSafeArea(.top)
                 .zIndex(1)
-
         }
         .environment(\.isMainWindow, windowInfo.windowIsMain)
         .environment(\.windowFrame, windowInfo.windowFrame)

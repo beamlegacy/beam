@@ -42,6 +42,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
+
+    var panels: [BeamNote: MiniEditorPanel] = [:]
+
     var data: BeamData!
     var cancellableScope = Set<AnyCancellable>()
     var importCancellables = Set<AnyCancellable>()
@@ -546,6 +549,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             window.reOpenClosedTab(nil)
         }
         return window
+    }
+
+    static func minimumSize(for window: NSWindow?) -> CGSize {
+        if window is MiniEditorPanel {
+            return CGSize(width: MiniEditorPanel.minimumPanelWidth, height: defaultWindowMinimumSize.height)
+        } else {
+            return defaultWindowMinimumSize
+        }
     }
 
     // MARK: - Tabs
