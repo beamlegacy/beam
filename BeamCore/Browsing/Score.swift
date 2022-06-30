@@ -13,9 +13,15 @@ private func aggregateLastEvent(event: ReadingEvent?, otherEvent: ReadingEvent?)
     guard let unwrappedEvent = event, let unwrappedOtherEvent = otherEvent else { return event ?? otherEvent }
     return unwrappedEvent.date > unwrappedOtherEvent.date ? unwrappedEvent : unwrappedOtherEvent
 }
-public func nilMax(date: Date?, otherDate: Date?) -> Date? {
-    guard let unwrappedDate = date, let unwrappedOtherDate = otherDate else { return date ?? otherDate }
-    return max(unwrappedDate, unwrappedOtherDate)
+
+public func nilMax<T: Comparable>(_ lhs: T?, _ rhs: T?) -> T? {
+    guard let lhs = lhs, let rhs = rhs else { return lhs ?? rhs }
+    return max(lhs, rhs)
+}
+
+public func nilMin<T: Comparable>(_ lhs: T?, _ rhs: T?) -> T? {
+    guard let lhs = lhs, let rhs = rhs else { return lhs ?? rhs }
+    return min(lhs, rhs)
 }
 
 extension Float {
@@ -39,6 +45,7 @@ public protocol UrlScoreProtocol: AnyObject {
     var scrollRatioY: Float { get set }
     var textAmount: Int { get set }
     var area: Float { get set }
+    var navigationCountSinceLastSearch: Int? { get set }
 }
 
 public class Score: Codable, Equatable {
@@ -54,6 +61,7 @@ public class Score: Codable, Equatable {
         && lhs.inbounds == rhs.inbounds
         && lhs.videoTotalDuration.almostEqual(rhs.videoTotalDuration)
         && lhs.videoReadingDuration.almostEqual(rhs.videoReadingDuration)
+        && lhs.navigationCountSinceLastSearch == rhs.navigationCountSinceLastSearch
         && lhs.id == rhs.id
     }
 
@@ -72,6 +80,7 @@ public class Score: Codable, Equatable {
         case videoReadingDuration
         case visitCount
         case lastCreationDate
+        case navigationCountSinceLastSearch
         case id
     }
     public var score: Float {
@@ -99,6 +108,7 @@ public class Score: Codable, Equatable {
     public var lastEvent: ReadingEvent?
     public var isForeground: Bool = false
     public var lastCreationDate: Date?
+    public var navigationCountSinceLastSearch: Int?
 
     init() {}
 
@@ -118,6 +128,7 @@ public class Score: Codable, Equatable {
         videoTotalDuration = try container.decode(Double.self, forKey: .videoTotalDuration)
         videoReadingDuration = try container.decode(Double.self, forKey: .videoReadingDuration)
         lastCreationDate = try container.decodeIfPresent(Date.self, forKey: .lastCreationDate)
+        navigationCountSinceLastSearch = try container.decodeIfPresent(Int.self, forKey: .navigationCountSinceLastSearch)
     }
 
     public func readingTimeScore(toDate: Date = BeamDate.now) -> Float {
@@ -165,7 +176,8 @@ public class Score: Codable, Equatable {
         aggregated.videoReadingDuration = videoReadingDuration + other.videoReadingDuration
         aggregated.lastEvent = aggregateLastEvent(event: lastEvent, otherEvent: other.lastEvent)
         aggregated.isForeground = isForeground || other.isForeground
-        aggregated.lastCreationDate = nilMax(date: lastCreationDate, otherDate: other.lastCreationDate)
+        aggregated.lastCreationDate = nilMax(lastCreationDate, other.lastCreationDate)
+        aggregated.navigationCountSinceLastSearch = nilMin(navigationCountSinceLastSearch, other.navigationCountSinceLastSearch)
         return aggregated
     }
     public func clusteringScore(date: Date) -> Float {
