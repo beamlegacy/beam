@@ -61,6 +61,7 @@ struct TabGroupingColor: Identifiable, Hashable {
 
     var mainColor: BeamColor?
     var textColor: BeamColor?
+    var textSelectionColor: BeamColor?
 
     internal init(designColor: DesignColor? = nil, randomColorHueTint: Double? = nil) {
         let designColor = designColor ?? (randomColorHueTint == nil ? DesignColor.allCases.first : nil)
@@ -77,6 +78,7 @@ struct TabGroupingColor: Identifiable, Hashable {
             mainColor = BeamColor.combining(lightColor: light, darkColor: dark)
             textColor = BeamColor.From(color: NSColor(hue: hue, saturation: 1, brightness: 0.18, alpha: 1))
         }
+        textSelectionColor = mainColor?.alpha(0.14)
     }
 
 }
