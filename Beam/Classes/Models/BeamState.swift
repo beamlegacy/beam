@@ -395,10 +395,8 @@ import Sentry
         if let index = index {
             tabIdToKeep = browserTabsManager.tabs[index].id
         }
-        cmdManager.beginGroup(with: "CloseAllTabs")
         let tabs = browserTabsManager.tabs.filter { $0.id != tabIdToKeep && (closePinnedTabs || !$0.isPinned) }
-        closeTabs(tabs)
-        cmdManager.endGroup(forceGroup: true)
+        closeTabs(tabs, groupName: "CloseAllTabs")
     }
 
     func closeTabsToTheRight(of tabIndex: Int) {
@@ -408,18 +406,17 @@ import Sentry
             guard rightTabIndex > tabIndex, !browserTabsManager.tabs[rightTabIndex].isPinned else { continue }
             rightTabs.append(browserTabsManager.tabs[rightTabIndex])
         }
-
-        cmdManager.beginGroup(with: "CloseTabsToTheRightCmdGrp")
-        closeTabs(rightTabs)
-        cmdManager.endGroup(forceGroup: true)
+        closeTabs(rightTabs, groupName: "CloseTabsToTheRightCmdGrp")
     }
 
-    func closeTabs(_ tabs: [BrowserTab]) {
+    func closeTabs(_ tabs: [BrowserTab], groupName: String = "CloseMultipleTabs") {
+        cmdManager.beginGroup(with: groupName)
         for tab in tabs {
             guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
             cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab),
                            on: self)
         }
+        cmdManager.endGroup(forceGroup: true)
     }
 
     @discardableResult
