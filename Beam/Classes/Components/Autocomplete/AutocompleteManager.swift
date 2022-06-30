@@ -36,7 +36,7 @@ class AutocompleteManager: ObservableObject {
 
     @Published var animateInputingCharacter = false
 
-    @Published var queryBeforeModeChange: (text: String, selection: Range<Int>?)?
+    @Published var stateBeforeModeChange: AutocompleteManagerState?
     @Published var isPreparingForAnimatingToMode = false
     @Published var animatingToMode: Mode?
 
@@ -119,7 +119,7 @@ class AutocompleteManager: ObservableObject {
             #endif
         }
 
-        Logger.shared.logInfo("------------------- ✳️ Start of autocomplete for \(receivedQueryString) -------------------", category: .autocompleteManager)
+        logAutocompleteResultStarted(for: receivedQueryString)
 
         Publishers.MergeMany(publishers).collect().receive(on: DispatchQueue.main).sink { [weak self] publishersResults in
                 defer { completion?() }
@@ -142,31 +142,6 @@ class AutocompleteManager: ObservableObject {
     private func shouldDisplayDefaultSuggestions(for searchText: String) -> Bool {
         searchText.isEmpty ||
         (beamState?.omniboxInfo.wasFocusedFromTab == true && searchText == beamState?.browserTabsManager.currentTab?.url?.absoluteString)
-    }
-
-    private func logAutocompleteResultFinished(for searchText: String, finalResults: [AutocompleteResult], startedAt: DispatchTime) {
-        if !finalResults.isEmpty {
-            Logger.shared.logDebug("------------------- Autosuggest results for `\(searchText)` -------------------", category: .autocompleteManager)
-            for result in finalResults {
-                Logger.shared.logDebug("\(String(describing: result))", category: .autocompleteManager)
-            }
-        }
-        let (elapsedTime, timeUnit) = startedAt.endChrono()
-        Logger.shared.logInfo("------------------- ✅ End of autocomplete. results in \(elapsedTime) \(timeUnit) -------------------", category: .autocompleteManager)
-    }
-
-    static func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult], limit: Int = 10, startedAt: DispatchTime) {
-
-        let (elapsedTime, timeUnit) = startedAt.endChrono()
-        Logger.shared.logDebug("-------------------\(step)-------------------", category: .autocompleteManager)
-        Logger.shared.logDebug("------------------- Took \(elapsedTime) \(timeUnit)-------------------", category: .autocompleteManager)
-
-        for res in results.prefix(limit) {
-            Logger.shared.logDebug("\(stepShortName): \(String(describing: res))", category: .autocompleteManager)
-        }
-        if results.count > limit {
-            Logger.shared.logDebug("\(stepShortName): truncated results: \(results.count - limit)", category: .autocompleteManager)
-        }
     }
 
     private func shouldResetSelectionBeforeNewResults() -> Bool {
@@ -208,7 +183,14 @@ class AutocompleteManager: ObservableObject {
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
         guard let i = selectedIndex, i >= 0, i < autocompleteResults.count else { return }
         let result = autocompleteResults[i]
-        guard mode.shouldUpdateSearchQueryOnSelection(for: result) else { return }
+        let modeShouldUpdate = mode.shouldUpdateSearchQueryOnSelection(for: result)
+        guard modeShouldUpdate.allow else {
+            if let replacement = modeShouldUpdate.replacement {
+                setQuery(replacement, updateAutocompleteResults: false)
+                searchQuerySelectedRange = replacement.count..<replacement.count
+            }
+            return
+        }
 
         let resultText = result.textFieldText
 
@@ -335,11 +317,16 @@ extension AutocompleteManager {
 
     func resetAutocompleteMode() {
         mode = .general
-        setQuery(queryBeforeModeChange?.text ?? "", updateAutocompleteResults: true)
-        if let selection = queryBeforeModeChange?.selection {
-            searchQuerySelectedRange = selection
+        if let stateBeforeModeChange = stateBeforeModeChange {
+            resetAutocompleteToState(stateBeforeModeChange)
+            self.stateBeforeModeChange = nil
         }
-        queryBeforeModeChange = nil
+    }
+
+    func resetAutocompleteToState(_ state: AutocompleteManagerState) {
+        setQuery(state.searchQuery, updateAutocompleteResults: false)
+        autocompleteResults = state.results
+        autocompleteSelectedIndex = state.selectedIndex
     }
 
     func setQuery(_ query: String, updateAutocompleteResults: Bool) {
@@ -388,4 +375,10 @@ extension AutocompleteManager {
     func isSentence(_ query: String) -> Bool {
         query.numberOfWords > 1
     }
+}
+
+struct AutocompleteManagerState {
+    var searchQuery: String
+    var selectedIndex: Int?
+    var results: [AutocompleteResult] = []
 }

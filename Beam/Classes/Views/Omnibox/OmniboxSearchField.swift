@@ -100,7 +100,12 @@ struct OmniboxSearchField: View {
         return BeamColor.Autocomplete.link
     }
     private var textSelectionColor: BeamColor {
-        BeamColor.Generic.blueTextSelection
+        if case .tabGroup(let group) = autocompleteManager.mode {
+            return group.color?.textSelectionColor ?? BeamColor.CharmedGreen
+        } else if case .tabGroup(let group) = selectedAutocompleteResult?.source {
+            return group?.color?.textSelectionColor ?? BeamColor.CharmedGreen
+        }
+        return BeamColor.Generic.blueTextSelection
     }
     private let textFont = BeamFont.regular(size: 17)
     private let placeholderFont = BeamFont.light(size: 17)
