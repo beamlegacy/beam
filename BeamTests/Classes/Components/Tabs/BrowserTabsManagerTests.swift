@@ -54,7 +54,7 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[2].id: groupA
         ]
         sut.tabs = tabs
-        sut._testSetTabsClusteringGroup(tabGroups)
+        sut._testSetLocalTabsGroups(tabGroups)
 
         XCTAssertEqual(sut.listItems.allItems.count, 5)
         XCTAssertTrue(sut.listItems.allItems[1].isAGroupCapsule)
@@ -71,7 +71,7 @@ class BrowserTabsManagerTests: XCTestCase {
 
         sut.moveListItem(atListIndex: 0, toListIndex: 4, changeGroup: groupA)
         tabGroups[tabs[0].id] = groupA // we mock clustering group change
-        sut._testSetTabsClusteringGroup(tabGroups)
+        sut._testSetLocalTabsGroups(tabGroups)
         XCTAssertEqual(sut.tabs, [tabs[3], tabs[1], tabs[2], tabs[0]])
         XCTAssertEqual(sut.listItems.allItems.map { $0.group }, [nil, groupA, groupA, groupA, groupA])
 
@@ -80,19 +80,19 @@ class BrowserTabsManagerTests: XCTestCase {
 
         sut.moveListItem(atListIndex: 4, toListIndex: 0, changeGroup: nil)
         tabGroups[tabs[0].id] = nil // we mock clustering group change
-        sut._testSetTabsClusteringGroup(tabGroups)
+        sut._testSetLocalTabsGroups(tabGroups)
         XCTAssertEqual(sut.tabs, [tabs[0], tabs[3], tabs[2], tabs[1]])
 
         sut.moveListItem(atListIndex: 0, toListIndex: 2, changeGroup: groupA)
         tabGroups[tabs[0].id] = groupA // we mock clustering group change
-        sut._testSetTabsClusteringGroup(tabGroups)
+        sut._testSetLocalTabsGroups(tabGroups)
         XCTAssertEqual(sut.tabs, [tabs[3], tabs[0], tabs[2], tabs[1]])
         XCTAssertTrue(sut.listItems.allItems[1].isAGroupCapsule)
         XCTAssertEqual(sut.listItems.allItems[2].tab, tabs[0])
 
         sut.moveListItem(atListIndex: 2, toListIndex: 1, changeGroup: nil)
         tabGroups[tabs[0].id] = nil // we mock clustering group change
-        sut._testSetTabsClusteringGroup(tabGroups)
+        sut._testSetLocalTabsGroups(tabGroups)
         XCTAssertEqual(sut.tabs, [tabs[3], tabs[0], tabs[2], tabs[1]])
         XCTAssertTrue(sut.listItems.allItems[2].isAGroupCapsule)
         XCTAssertEqual(sut.listItems.allItems[1].tab, tabs[0])
@@ -130,7 +130,7 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[2].id: groupA
         ]
         sut.tabs = tabs
-        sut._testSetTabsClusteringGroup(tabGroups)
+        sut._testSetLocalTabsGroups(tabGroups)
         sut.setCurrentTab(at: 0)
         sut.showNextTab()
         sut.showNextTab()
@@ -155,7 +155,7 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[2].id: groupA
         ]
         sut.tabs = tabs
-        sut._testSetTabsClusteringGroup(tabGroups)
+        sut._testSetLocalTabsGroups(tabGroups)
         sut.toggleGroupCollapse(groupA)
         XCTAssertEqual(sut.listItems.allItems.count, 3)
         sut.setCurrentTab(at: 0)
@@ -199,7 +199,7 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[2].id: groupA
         ]
         sut.tabs = tabs
-        sut._testSetTabsClusteringGroup(tabGroups)
+        sut._testSetLocalTabsGroups(tabGroups)
         sut.toggleGroupCollapse(groupA)
         sut.setCurrentTab(at: 0)
         XCTAssertEqual(sut.currentTab, tabs[0])
@@ -228,7 +228,7 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[3].id: groupA
         ]
         sut.tabs = tabs
-        sut._testSetTabsClusteringGroup(tabGroups)
+        sut._testSetLocalTabsGroups(tabGroups)
         XCTAssertEqual(sut.listItems.allItems.count, 5)
         XCTAssertEqual(sut.listItems.allItems[2].tab, tabs[1])
         XCTAssertEqual(sut.listItems.allItems[4].tab, tabs[3])

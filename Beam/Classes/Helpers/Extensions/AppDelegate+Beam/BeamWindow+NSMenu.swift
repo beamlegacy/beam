@@ -62,7 +62,8 @@ extension BeamWindow {
     }
 
     @IBAction func reOpenClosedTab(_ sender: Any?) {
-        if state.cmdManager.canUndo, state.cmdManager.lastCmd is CloseTab {
+        if state.cmdManager.canUndo,
+            (state.cmdManager.lastCmd is CloseTab || (state.cmdManager.lastCmd as? GroupCommand)?.commands.first is CloseTab) {
             if state.mode != .web {
                 state.mode = .web
             }

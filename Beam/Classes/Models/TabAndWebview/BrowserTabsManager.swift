@@ -60,11 +60,9 @@ class BrowserTabsManager: ObservableObject {
     private var tabPinSuggester = TabPinSuggester(storage: DomainPath0TreeStatsStorage())
 
     /// Dictionary of `key`: BrowserTab.TabID, `value`: Group to which this tab belongs
-    @Published private(set) var tabsClusteringGroups = [BrowserTab.TabID: TabGroup]() {
-        didSet {
-            guard tabsClusteringGroups != oldValue else { return }
-        }
-    }
+    /// Only inside this TabsManager, aka only for the window it belongs to.
+    @Published private var localTabsGroup = [BrowserTab.TabID: TabGroup]()
+
     /// We collapsed only the tabs visible when collapsing a group.
     /// If a tab is added to the group while it is collapsed, it will still be displayed.
     private var collapsedTabsInGroup = [TabGroup.GroupID: [BrowserTab.TabID]]()
@@ -136,7 +134,7 @@ class BrowserTabsManager: ObservableObject {
 
     private func updateListItems() {
         var sections = TabsListItemsSections()
-        let groups = tabsClusteringGroups
+        let groups = localTabsGroup
         var previousGroup: TabGroup?
         var alreadyAddedGroups: [UUID: Bool] = [:]
         var visibleTabs: [BrowserTab] = []
@@ -204,6 +202,7 @@ class BrowserTabsManager: ObservableObject {
         if setCurrent || currentTab == nil {
             currentTab = tab
         }
+        updateLocalTabsGroups(withTabs: tabs, pagesGroups: tabGroupingManager.builtPagesGroups)
         data.sessionLinkRanker.addTree(tree: tab.browsingTree)
     }
 
@@ -479,13 +478,13 @@ extension BrowserTabsManager {
     }
 
     private func updateTabsClusteringGroupsAfterTabsChange(withTabs tabs: [BrowserTab]) {
-        self.tabsClusteringGroups = tabsClusteringGroups.filter { (key, _) in
+        self.localTabsGroup = localTabsGroup.filter { (key, _) in
             guard let tab = tabs.first(where: { $0.id == key }) else { return false }
             return !tab.isPinned
         }
     }
 
-    private func updateReceivedTabsClusteringGroups(withTabs tabs: [BrowserTab], pagesGroups: [ClusteringManager.PageID: TabGroup]) {
+    private func updateLocalTabsGroups(withTabs tabs: [BrowserTab], pagesGroups: [ClusteringManager.PageID: TabGroup]) {
         let tabsPerPageId = Dictionary(grouping: tabs, by: { $0.pageId })
         var tabsGroups = [BrowserTab.TabID: TabGroup]()
         pagesGroups.forEach { (pageId, group) in
@@ -494,22 +493,21 @@ extension BrowserTabsManager {
                 tabsGroups[tab.id] = group
             }
         }
-        self.tabsClusteringGroups = tabsGroups
+        if localTabsGroup != tabsGroups {
+            localTabsGroup = tabsGroups
+            updateListItems()
+        }
     }
 
     private func setupTabsClustering() {
         tabGroupingManager.$builtPagesGroups.receive(on: DispatchQueue.main).sink { [weak self] pagesGroups in
             guard let self = self else { return }
-            let previousGroups = self.tabsClusteringGroups
-            self.updateReceivedTabsClusteringGroups(withTabs: self.tabs, pagesGroups: pagesGroups)
-            if previousGroups != self.tabsClusteringGroups {
-                self.updateListItems()
-            }
+            self.updateLocalTabsGroups(withTabs: self.tabs, pagesGroups: pagesGroups)
         }.store(in: &dataScope)
     }
 
     private func tabsIds(inGroup group: TabGroup) -> [BrowserTab.TabID] {
-        let clusteringTabs: [BrowserTab.TabID] = tabsClusteringGroups.compactMap { (key: BrowserTab.TabID, value: TabGroup) in
+        let clusteringTabs: [BrowserTab.TabID] = localTabsGroup.compactMap { (key: BrowserTab.TabID, value: TabGroup) in
             guard tabGroupingManager.forcedTabsGroup[key]?.outOfGroup != value else { return nil }
             return value.id == group.id ? key : nil
         }
@@ -590,10 +588,7 @@ extension BrowserTabsManager {
 
     func closeTabsInGroup(_ group: TabGroup) {
         let tabs = tabs(inGroup: group)
-        guard let state = state else { return }
-        state.cmdManager.beginGroup(with: "CloseTabsInGroup")
-        state.closeTabs(tabs)
-        state.cmdManager.endGroup(forceGroup: true)
+        state?.closeTabs(tabs, groupName: "CloseTabsInGroup")
     }
 
     func moveGroupToNewWindow(_ group: TabGroup) {
@@ -659,8 +654,8 @@ extension BrowserTab {
 
 // MARK: - Tests helpers
 extension BrowserTabsManager {
-    internal func _testSetTabsClusteringGroup(_ tabsClusteringGroups: [BrowserTab.TabID: TabGroup]) {
-        self.tabsClusteringGroups = tabsClusteringGroups
+    internal func _testSetLocalTabsGroups(_ tabsGroups: [BrowserTab.TabID: TabGroup]) {
+        self.localTabsGroup = tabsGroups
         self.updateListItems()
     }
 }
