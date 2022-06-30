@@ -16,6 +16,7 @@ struct NoteHeaderView: View {
     @ObservedObject var model: NoteHeaderView.ViewModel
     @ObservedObject var pinnedManager: PinnedNotesManager
     @EnvironmentObject var data: BeamData
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     var topPadding: CGFloat = Self.topPadding
     private let errorColor = BeamColor.Shiraz
@@ -124,7 +125,7 @@ struct NoteHeaderView: View {
                 if model.publishState == .isPublic {
                     HStack(spacing: BeamSpacing._10) {
                         notePublishButton(style: style, forceHovering: forceHovering)
-                        DropDownButton(parentWindow: AppDelegate.main.window, items: publishedContextItems, customStyle: .rightFilledStyle, menuForcedWidth: 180, forceMenuToAppear: forceDropDownMenu)
+                        DropDownButton(parentWindow: windowInfo.window, items: publishedContextItems, customStyle: .rightFilledStyle, menuForcedWidth: 180, forceMenuToAppear: forceDropDownMenu)
                     }
                     .offset(x: -7, y: 0)
                     .onAppear {

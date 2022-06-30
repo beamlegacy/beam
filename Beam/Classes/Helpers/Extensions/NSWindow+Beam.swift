@@ -8,8 +8,9 @@
 import Foundation
 
 extension NSWindow {
-    func highestParent() -> NSWindow {
+    func highestParentOrClosestMiniEditor() -> NSWindow {
+        guard !(self is MiniEditorPanel) else { return self }
         guard let parent = self.parent else { return self }
-        return parent.highestParent()
+        return parent.highestParentOrClosestMiniEditor()
     }
 }
