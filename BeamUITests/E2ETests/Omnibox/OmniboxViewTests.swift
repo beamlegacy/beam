@@ -69,7 +69,7 @@ class OmniboxViewTests: BaseTest {
         
         step("Given I open 2 test pages"){
             uiMenu.loadUITestPage1()
-            uiMenu.loadUITestPage1()
+            uiMenu.loadUITestPage2()
         }
 
         step("Then Webview is opened and browser tab bar is visible"){

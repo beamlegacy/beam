@@ -26,6 +26,7 @@ struct TabsListItem: Identifiable, CustomStringConvertible {
     }
     var tab: BrowserTab?
     var group: TabGroup?
+    var count: Int?
 
     var description: String {
         if let tab = tab {
@@ -211,7 +212,8 @@ struct TabsListView: View {
                             onClose: { onItemClose(at: index) }, onCopy: { onItemCopy(at: index)},
                             onToggleMute: { onTabToggleMute(at: index) })
                 } else if let group = item.group, let color = group.color {
-                    TabClusteringGroupCapsuleView(title: group.title ?? "", color: color, collapsed: group.collapsed, itemsCount: group.pageIds.count,
+                    TabClusteringGroupCapsuleView(title: group.title ?? "", color: color,
+                                                  collapsed: group.collapsed, itemsCount: item.count ?? group.pageIds.count,
                                                   onTap: { (isRightMouse, event) in
                         if isRightMouse {
                             showContextMenu(forGroup: group, atLocation: event?.locationInWindow ?? .zero)

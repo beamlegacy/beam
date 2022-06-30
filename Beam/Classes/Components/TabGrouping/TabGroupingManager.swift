@@ -188,17 +188,16 @@ extension TabGroupingManager {
         return newUrlGroups
     }
 
-    func removeSingles(urlGroups: [[ClusteringManager.PageID]]) -> [[ClusteringManager.PageID]] {
-        var newUrlGroups = [[ClusteringManager.PageID]]()
-        for group in urlGroups {
-            switch group.count {
-            case 0, 1:
-                break
-            default:
-                newUrlGroups.append(group)
-            }
+    func removeSingles(urlGroups: [[ClusteringManager.PageID]], openTabs: [BrowserTab]) -> [[ClusteringManager.PageID]] {
+        var urlGroups = urlGroups
+        if urlGroups.count == 1 {
+            // we have one group with all tabs in it, let's split into groups of 1 page
+            urlGroups = urlGroups.first?.map { [$0] } ?? []
         }
-        return newUrlGroups
+        return urlGroups.filter { group in
+            guard group.count > 1 || openTabs.filter({ $0.pageId == group.first }).count > 1 else { return false }
+            return true
+        }
     }
 
     func updateAutomaticClustering(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageID?]? = nil) async {
@@ -208,7 +207,7 @@ extension TabGroupingManager {
                 var groupsOfOpen = urlGroups
                 if let openPages = openPages {
                     groupsOfOpen = self.removeClosedPages(urlGroups: urlGroups, openPages: openPages)
-                    groupsOfOpen = self.removeSingles(urlGroups: groupsOfOpen)
+                    groupsOfOpen = self.removeSingles(urlGroups: groupsOfOpen, openTabs: openTabs)
                     // TODO: Consider coloring lone tabs that are in a group with a note
                     // TODO: Consider merging groups based on active sources as well
                     // TODO: Consider using similarity scores with notes/active-sources to split groups (similar to sources that are not to be suggested despite being in the correct group)
@@ -244,7 +243,6 @@ extension TabGroupingManager {
         let clusteringPageGroups = clusteringPageGroups
         var newClusteringPageGroups = [PageID: TabGroup]()
 
-        // SO HERE A newly forced group is already in manual page group ...
         for cluster in clusters {
 
             // First, find existing group that have some of these pages
