@@ -51,7 +51,7 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     var clusteredPagesId: [[PageID]] = [[]] {
         didSet {
             transformToClusteredPages()
-            if clusteredPagesId.count > 1 && PreferencesManager.enableTabGrouping {
+            if clusteredPagesId.count > 0 && PreferencesManager.enableTabGrouping {
                 updateTabGroupsWithOpenPages()
             }
         }
