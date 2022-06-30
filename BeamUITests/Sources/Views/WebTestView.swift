@@ -83,9 +83,13 @@ class WebTestView: BaseView {
     func getNumberOfTabs(wait: Bool = true) -> Int {
         return getTabs(wait: wait).count
     }
+
+    func getNumberOfUnpinnedTabs(wait: Bool = true) -> Int {
+        return getTabs(wait: wait, pinned: false).count
+    }
     
     func getNumberOfPinnedTabs(wait: Bool = true) -> Int {
-        return getPinnedTabs(wait: wait).count
+        return getTabs(wait: wait, pinned: true).count
     }
 
     func getNumberOfWebViewInMemory() -> Int {
@@ -105,7 +109,7 @@ class WebTestView: BaseView {
     }
     
     func getPinnedTabByIndex(index: Int) -> XCUIElement {
-        getPinnedTabs().element(boundBy: index)
+        getTabs(pinned: true).element(boundBy: index)
     }
     
     func focusTabByIndex(index: Int, isPinnedTab: Bool = false) -> XCUIElement {
@@ -157,28 +161,42 @@ class WebTestView: BaseView {
         return app.windows.scrollViews.webViews.firstMatch.waitForExistence(timeout: implicitWaitTimeout)
     }
 
-    private let tabPredicate = NSPredicate(format: "identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPrefix.accessibilityIdentifier)'")
+    private let anyTabPredicate = NSPredicate(format: "identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPrefix.accessibilityIdentifier)'")
     func getAnyTab() -> XCUIElement {
-        app.groups.matching(tabPredicate).firstMatch
+        app.groups.matching(anyTabPredicate).firstMatch
+    }
+
+    private let tabUnpinnedPredicate = NSPredicate(format: """
+        identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPrefix.accessibilityIdentifier)' \
+        && NOT (identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPinnedPrefix.accessibilityIdentifier)')
+    """)
+    func getAnyUnpinnedTab() -> XCUIElement {
+        app.groups.matching(tabUnpinnedPredicate).firstMatch
     }
         
     private let tabPinnedPredicate = NSPredicate(format: "identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPinnedPrefix.accessibilityIdentifier)'")
     func getAnyPinnedTab() -> XCUIElement {
         app.groups.matching(tabPinnedPredicate).firstMatch
     }
-    
-    func getTabs(wait: Bool = true) -> XCUIElementQuery {
-        if wait {
-            _ = getAnyTab().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+
+    /// use pinned: nil to get any tabs
+    func getTabs(wait: Bool = true, pinned: Bool? = nil) -> XCUIElementQuery {
+        if pinned == true {
+            if wait {
+                _ = getAnyPinnedTab().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+            }
+            return app.groups.matching(tabPinnedPredicate)
+        } else if pinned == false {
+            if wait {
+                _ = getAnyUnpinnedTab().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+            }
+            return app.groups.matching(tabUnpinnedPredicate)
+        } else {
+            if wait {
+                _ = getAnyTab().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+            }
+            return app.groups.matching(anyTabPredicate)
         }
-        return app.groups.matching(tabPredicate)
-    }
-    
-    func getPinnedTabs(wait: Bool = true) -> XCUIElementQuery {
-        if wait {
-            _ = getAnyPinnedTab().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-        }
-        return app.groups.matching(tabPinnedPredicate)
     }
 
     func getNumberOfWindows() -> Int {
