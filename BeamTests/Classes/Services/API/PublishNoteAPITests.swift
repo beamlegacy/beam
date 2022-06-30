@@ -23,8 +23,9 @@ class PublishNoteAPITests: XCTestCase {
     override func setUpWithError() throws {
         BeamTestsHelper.logout()
         BeamDate.freeze("2022-04-18T06:00:03Z")
+        APIRequest.networkCallFiles = []
         beamTestHelper.beginNetworkRecording(test: self)
-        BeamObjectManager.disableSendingObjects = false
+        BeamObjectManager.disableSendingObjects = true
 
         LoggerRecorder.shared.reset()
 
