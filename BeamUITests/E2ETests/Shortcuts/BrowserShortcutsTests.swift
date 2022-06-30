@@ -26,8 +26,8 @@ class BrowserShortcutsTests: BaseTest {
         }
         
         step ("Given I open a second web page"){
-            uiMenu.loadUITestPagePassword()
-            XCTAssertTrue(testPage.isPasswordPageOpened())
+            uiMenu.loadUITestPageAlerts()
+            XCTAssertTrue(testPage.isAlertPageOpened())
         }
 
         step ("Then I can open tabs using shortcuts"){
@@ -35,18 +35,21 @@ class BrowserShortcutsTests: BaseTest {
             omniboxView.searchInOmniBox(testHelper.randomSearchTerm(), true)
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 3)
             XCTAssertFalse(testPage.isPasswordPageOpened())
+            XCTAssertFalse(testPage.isAlertPageOpened())
         }
         
         step ("Then I can close tabs using shortcuts"){
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: 2)
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             XCTAssertTrue(testPage.isPasswordPageOpened())
+            XCTAssertFalse(testPage.isAlertPageOpened())
         }
         
         step ("Then I can reopen tabs using shortcuts"){
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .reOpenClosedTab, numberOfTimes: 1)
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
-            XCTAssertTrue(testPage.isPasswordPageOpened())
+            XCTAssertTrue(testPage.isAlertPageOpened())
+            XCTAssertFalse(testPage.isPasswordPageOpened())
         }
 
     }
