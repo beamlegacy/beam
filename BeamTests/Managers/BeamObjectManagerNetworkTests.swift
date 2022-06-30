@@ -17,6 +17,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
         let beamHelper = BeamTestsHelper()
 
         beforeEach {
+            MyRemoteObjectManager.receivedMyRemoteObjects = []
             Configuration.networkEnabled = true
             // Need to freeze date to compare objects, as `createdAt` would be different from the network stubs we get
             // back from Vinyl
@@ -53,6 +54,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 //            if !sut.isAllNetworkCallsCompleted() {
 //                fail("not all network calls are completed")
 //            }
+            MyRemoteObjectManager.receivedMyRemoteObjects = []
         }
 
         describe("fetchAllFromAPI()") {
@@ -135,6 +137,9 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                 _ = beamObjectHelper.saveOnAPI(object1)
                 _ = beamObjectHelper.saveOnAPI(object2)
+
+                Persistence.Sync.BeamObjects.last_received_at = nil
+                try? BeamObjectChecksum.deletePreviousChecksums(type: .myRemoteObject)
             }
 
             afterEach {
