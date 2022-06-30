@@ -49,11 +49,10 @@ struct DropDownButton: View {
     func showDropDownContextMenu(geometryProxy: GeometryProxy, with items: [ContextMenuItem]) {
         guard let window = self.parentWindow else { return }
         let origin = geometryProxy.safeTopLeftGlobalFrame(in: window).origin
-        let point = origin.flippedPointToTopLeftOrigin(in: window)
-        var finalPoint: CGPoint = window.parent?.convertPoint(fromScreen: window.convertPoint(toScreen: point) ) ?? point
+        var point = origin.flippedPointToTopLeftOrigin(in: window)
 
         CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier, animated: false)
-        let menuView = ContextMenuFormatterView(key: Self.dropDownMenuIdentifier, items: items, direction: .bottom, sizeToFit: false, forcedWidth: menuForcedWidth, origin: finalPoint, canBecomeKey: true) {
+        let menuView = ContextMenuFormatterView(key: Self.dropDownMenuIdentifier, items: items, direction: .bottom, sizeToFit: false, forcedWidth: menuForcedWidth, origin: point, canBecomeKey: true) {
             CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier, animated: false)
         } onClosing: {
             forceClickedState = false
@@ -61,20 +60,20 @@ struct DropDownButton: View {
         }
 
         if anchorPoint.contains(.top) {
-            finalPoint.y += menuView.idealSize.height + verticalPadding
+            point.y += menuView.idealSize.height + verticalPadding
         }
 
         if anchorPoint.contains(.bottom) {
-            finalPoint.y -= geometryProxy.size.height + verticalPadding
+            point.y -= geometryProxy.size.height + verticalPadding
         }
 
         if anchorPoint.contains(.trailing) {
-            finalPoint.x -= (menuForcedWidth ?? menuView.idealSize.width) - geometryProxy.size.width
+            point.x -= (menuForcedWidth ?? menuView.idealSize.width) - geometryProxy.size.width
         }
 
-        menuView.origin = finalPoint
+        menuView.origin = point
         forceClickedState = true
-        CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: finalPoint)
+        CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: point, in: window)
     }
 }
 

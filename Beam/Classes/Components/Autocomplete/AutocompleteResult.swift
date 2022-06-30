@@ -91,6 +91,13 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
                 return String(describing: self)
             }
         }
+
+        var noteId: UUID? {
+            if case .note(let id, _) = self {
+                return id
+            }
+            return nil
+        }
     }
 
     var id: String {

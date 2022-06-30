@@ -195,7 +195,7 @@ struct OmniboxSearchField: View {
             }
         }
         guard !autocompleteManager.searchQuery.isEmpty || autocompleteManager.autocompleteSelectedIndex != nil else { return }
-        state.startOmniboxQuery()
+        state.startOmniboxQuery(modifierFlags: modifierFlags)
     }
 
     func unfocusField() {

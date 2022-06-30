@@ -89,7 +89,7 @@ struct CardSwitcher: View {
                         state.navigateToNote(note)
                     }
                     .accessibilityIdentifier("card-switcher")
-                    .contextMenu { SidebarListNoteButton.contextualMenu(for: note, state: state) }
+                    .contextMenu { BeamNote.contextualMenu(for: note, state: state) }
                 }
             }
         }

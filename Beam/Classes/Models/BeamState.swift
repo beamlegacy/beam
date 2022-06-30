@@ -97,6 +97,9 @@ import Sentry
     var associatedWindow: NSWindow? {
         AppDelegate.main.windows.first { $0.state === self }
     }
+    func associatedPanel(for note: BeamNote) -> NSPanel? {
+        AppDelegate.main.panels[note]
+    }
 
     @Published var mode: Mode = .today {
         didSet {
@@ -226,6 +229,28 @@ import Sentry
             let forceForward = shouldForceShowBackForward.forward || canGoBackForward.forward || browserTabsManager.tabs.first { $0.canGoForward } != nil
             shouldForceShowBackForward = (forceBack, forceForward)
         }
+    }
+
+    @discardableResult func openNoteInMiniEditor(id: UUID) -> Bool {
+        EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
+        guard let note = BeamNote.fetch(id: id, includeDeleted: false), let window = associatedWindow as? BeamWindow else {
+            return false
+        }
+
+        MiniEditorPanel.presentMiniEditor(from: window, with: note)
+        stopFocusOmnibox()
+        return true
+    }
+
+    @discardableResult func openNoteInNewWindow(id: UUID) -> Bool {
+        EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
+
+        guard let window = AppDelegate.main.createWindow(frame: nil) else { return false }
+        window.state.navigateToNote(id: id)
+        window.makeMain()
+
+        stopFocusOmnibox()
+        return true
     }
 
     @available(*, deprecated, message: "Using title might navigate to a different note if multiple databases, use ID if possible.")
@@ -521,7 +546,7 @@ import Sentry
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func selectAutocompleteResult(_ result: AutocompleteResult) {
+    private func selectAutocompleteResult(_ result: AutocompleteResult, modifierFlags: NSEvent.ModifierFlags? = nil) {
         EventsTracker.logBreadcrumb(message: "\(#function) - \(result)", category: "BeamState")
         switch result.source {
         case .searchEngine:
@@ -563,8 +588,14 @@ import Sentry
             }
 
         case .note(let noteId, _):
-            navigateToNote(id: noteId ?? result.uuid)
-
+            let noteId = noteId ?? result.uuid
+            if let flags = modifierFlags, flags.contains(.shift) {
+                openNoteInNewWindow(id: noteId)
+            } else if let flags = modifierFlags, flags.contains(.command) {
+                openNoteInMiniEditor(id: noteId)
+            } else {
+                navigateToNote(id: noteId)
+            }
         case .action, .tabGroup:
             result.handler?(self)
         case .createNote:
@@ -576,14 +607,14 @@ import Sentry
         }
     }
 
-    func startOmniboxQuery(selectingNewIndex: Int? = nil, navigate: Bool = true) {
+    func startOmniboxQuery(selectingNewIndex: Int? = nil, navigate: Bool = true, modifierFlags: NSEvent.ModifierFlags? = nil) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let index = selectingNewIndex ?? autocompleteManager.autocompleteSelectedIndex
         if let result = autocompleteManager.autocompleteResult(at: index) {
             autocompleteManager.recordItemSelection(index: index, source: result.source)
-            selectAutocompleteResult(result)
+            selectAutocompleteResult(result, modifierFlags: modifierFlags)
             return
         }
         stopFocusOmnibox(sendAnalyticsEvent: false)
