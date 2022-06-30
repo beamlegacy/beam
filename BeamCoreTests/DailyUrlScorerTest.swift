@@ -93,6 +93,7 @@ class DailyUrlScorerTest: XCTestCase {
         score0.textAmount = 2
         score0.readingTimeToLastEvent = 1.0
         score0.area = 1
+        score0.navigationCountSinceLastSearch = 4
         let score1 = DailyURLScore(urlId: urlIds[1], localDay: "2020-01-01")
         score1.visitCount = 1
         score1.scrollRatioX = 0.5
@@ -102,6 +103,7 @@ class DailyUrlScorerTest: XCTestCase {
         score1.textAmount = 3
         score1.readingTimeToLastEvent = 1.0
         score1.area = 2
+        score1.navigationCountSinceLastSearch = 2
         let score2 = DailyURLScore(urlId: urlIds[2], localDay: "2020-01-01")
         score2.visitCount = 2
 
@@ -122,6 +124,7 @@ class DailyUrlScorerTest: XCTestCase {
         XCTAssertEqual(aggScore0.textAmount, 3)
         XCTAssertEqual(aggScore0.readingTimeToLastEvent, 2.0)
         XCTAssertEqual(aggScore0.area, 2)
+        XCTAssertEqual(aggScore0.navigationCountSinceLastSearch, 2)
 
         let aggScore1 = try XCTUnwrap(aggregated[URL(string: "http://def.fr")!])
         XCTAssertEqual(aggScore1.visitCount, 2)
@@ -132,6 +135,7 @@ class DailyUrlScorerTest: XCTestCase {
         XCTAssertEqual(aggScore1.textAmount, 0)
         XCTAssertEqual(aggScore1.readingTimeToLastEvent, 0)
         XCTAssertEqual(aggScore1.area, 0)
+        XCTAssertNil(aggScore1.navigationCountSinceLastSearch)
     }
 
     func testTitleLastDate() {

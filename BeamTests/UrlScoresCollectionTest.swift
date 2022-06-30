@@ -58,6 +58,7 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(score.textAmount, 50)
         XCTAssertEqual(score.area, 0)
         XCTAssertEqual(score.lastCreationDate, firstNode.events.first?.date)
+        XCTAssertEqual(score.navigationCountSinceLastSearch, 0)
 
         XCTAssertEqual(dailyScore.urlId, firstLink)
         XCTAssertEqual(dailyScore.visitCount, 1)
@@ -67,6 +68,7 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(dailyScore.scrollRatioY, 0)
         XCTAssertEqual(dailyScore.textAmount, 50)
         XCTAssertEqual(dailyScore.area, 0)
+        XCTAssertEqual(dailyScore.navigationCountSinceLastSearch, 0)
 
         tree.navigateTo(url: secondUrl, title: nil, startReading: true, isLinkActivation: false)
         tree.update(for: firstUrl, readCount: 100)
@@ -92,6 +94,7 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(score.textAmount, 100)
         XCTAssertEqual(score.area, 0)
         XCTAssertEqual(score.lastCreationDate, secondNode.events.first?.date)
+        XCTAssertEqual(score.navigationCountSinceLastSearch, 0)
 
         XCTAssertEqual(dailyScore.urlId, firstLink)
         XCTAssertEqual(dailyScore.visitCount, 2)
@@ -101,6 +104,7 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(dailyScore.scrollRatioY, 0)
         XCTAssertEqual(dailyScore.textAmount, 100)
         XCTAssertEqual(dailyScore.area, 0)
+        XCTAssertEqual(dailyScore.navigationCountSinceLastSearch, 0)
     }
 
     func testJsRelatedScores() throws {

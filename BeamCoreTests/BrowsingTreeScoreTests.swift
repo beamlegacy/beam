@@ -184,4 +184,22 @@ class BrowsingTreeScoreTests: XCTestCase {
         testCall(call: updateScoreCalls[5], expectedUrlId: child1.link, expectedValue: readDuration1, expectedEventType: .webSearchBar, expectedDate: readStart1, expectedKey: .webReadingTime30d0)
         testCall(call: updateScoreCalls[6], expectedUrlId: domainLink, expectedValue: readDuration1, expectedEventType: .webDomainIncrement, expectedDate: readStart1, expectedKey: .webReadingTime30d0)
     }
+
+    func testNavigationCountSinceLastSearch() {
+        let tree = BrowsingTree(nil)
+        let urls = [
+            "http://a.com/",
+            "http://b.com/",
+            "http://c.com/"
+        ]
+        tree.navigateTo(url: urls[0], title: nil, startReading: true, isLinkActivation: false)
+        tree.navigateTo(url: urls[1], title: nil, startReading: true, isLinkActivation: true)
+        tree.navigateTo(url: urls[2], title: nil, startReading: true, isLinkActivation: false)
+        tree.navigateTo(url: urls[0], title: nil, startReading: true, isLinkActivation: true)
+
+        XCTAssertEqual(tree.scoreFor(link: LinkStore.getOrCreateIdFor(urls[0])).navigationCountSinceLastSearch, 0)
+        XCTAssertEqual(tree.scoreFor(link: LinkStore.getOrCreateIdFor(urls[1])).navigationCountSinceLastSearch, 1)
+        XCTAssertEqual(tree.scoreFor(link: LinkStore.getOrCreateIdFor(urls[2])).navigationCountSinceLastSearch, 0)
+
+    }
 }
