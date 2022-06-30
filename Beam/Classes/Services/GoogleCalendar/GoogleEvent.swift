@@ -25,6 +25,7 @@ class GoogleEvent: Codable {
     let id: String
     let summary: String?
     let description: String?
+    let location: String?
     let startDate: EventDate?
     let endDate: EventDate?
     let attendees: [GoogleEventAttendee]?
@@ -36,6 +37,7 @@ class GoogleEvent: Codable {
         case id
         case summary
         case description
+        case location
         case startDate = "start"
         case endDate = "end"
         case attendees
@@ -50,6 +52,7 @@ class GoogleEvent: Codable {
         id = try container.decode(String.self, forKey: .id)
         summary = try? container.decode(String.self, forKey: .summary)
         description = try? container.decode(String.self, forKey: .description)
+        location = try? container.decode(String.self, forKey: .location)
         startDate = try? container.decode(EventDate.self, forKey: .startDate)
         endDate = try? container.decode(EventDate.self, forKey: .endDate)
         attendees = try? container.decode([GoogleEventAttendee].self, forKey: .attendees)
