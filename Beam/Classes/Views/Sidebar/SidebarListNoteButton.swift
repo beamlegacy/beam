@@ -72,31 +72,11 @@ struct SidebarListNoteButton: View {
             if !$0 {
                 isPressed = false
             }
-        }.contextMenu { Self.contextualMenu(for: note, state: state) }
+        }.contextMenu { BeamNote.contextualMenu(for: note, state: state) }
         .overlay(!isHoveringTrailingIcon ? nil : Tooltip(title: justCopied ? "Link Copied" : "Copy Link", icon: justCopied ? "tool-keep" : nil)
                     .fixedSize()
                     .offset(x: -30, y: 0)
                     .transition(Tooltip.defaultTransition), alignment: .trailing)
-    }
-
-    @ViewBuilder static func contextualMenu(for note: BeamNote, state: BeamState) -> some View {
-        let isPinned = state.data.pinnedManager.isPinned(note)
-        Button(isPinned ? "Unpin" : "Pin") {
-            state.data.pinnedManager.togglePin(note)
-        }
-        Button(note.publicationStatus.isPublic ? "Unpublish" : "Publish") {
-            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: !note.publicationStatus.isPublic) { _ in }
-        }
-        Divider()
-        Menu("Export") {
-            Button("beamNote…") {
-                AppDelegate.main.exportOneNoteToBeamNote(note: note)
-            }
-        }
-        Divider()
-        Button("Delete…") {
-            note.promptConfirmDelete(for: state)
-        }
     }
 
     private var textFont: Font {

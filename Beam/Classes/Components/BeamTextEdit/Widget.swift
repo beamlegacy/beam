@@ -1355,7 +1355,7 @@ extension Widget {
         let point = CGPoint(x: offsetInDocument.x + at.x, y: offsetInDocument.y + at.y)
         let atPoint = editor.convert(point, to: nil)
         editor.inlineFormatter = menuView
-        CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: atPoint)
+        CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: atPoint, in: editor.window)
     }
 }
 

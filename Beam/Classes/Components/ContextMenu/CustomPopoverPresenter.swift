@@ -117,8 +117,10 @@ final class CustomPopoverPresenter {
         window.hasShadow = withShadow
         window.isMovable = movable
 
-        if let parentMenuWindow = parentMenuWindow {
-            parentMenuWindow.highestParent().addChildWindow(window, ordered: .above)
+        if let parentMenuWindow = parentMenuWindow as? MiniEditorPanel { // If the provided window is a MiniEditorPanel display the menu in it
+            parentMenuWindow.addChildWindow(window, ordered: .above)
+        } else if let parentMenuWindow = parentMenuWindow { // But if it's not, we probably want to get the parent window instead
+            parentMenuWindow.highestParentOrClosestMiniEditor().addChildWindow(window, ordered: .above)
         } else {
             guard let mainWindow = AppDelegate.main.window else { return nil }
             mainWindow.addChildWindow(window, ordered: .above)

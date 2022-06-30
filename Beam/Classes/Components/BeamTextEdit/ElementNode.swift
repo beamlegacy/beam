@@ -591,7 +591,7 @@ public class ElementNode: Widget {
 
     public func layoutCursor(_ cursorRect: NSRect) {
         guard let editor = self.editor else { return }
-        let on = AppDelegate.main.isActive && AppDelegate.main.window?.isKeyWindow == true
+        let on = AppDelegate.main.isActive && editor.window?.isKeyWindow == true
             && editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
 
         let layer = self.cursorLayer
@@ -605,7 +605,7 @@ public class ElementNode: Widget {
 
     public func updateElementCursor() {
         guard let editor = self.editor else { return }
-        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
+        let on = editor.hasFocus && isFocused && editor.blinkPhase && (root?.state.nodeSelection?.nodes.isEmpty ?? true) && editor.window?.isKeyWindow == true
         let cursorRect = NSRect(x: caretIndex == 0 ? (contentsLead - 5) : (availableWidth - contentsLead + 3), y: 0, width: 2, height: frame.height )//rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
 
