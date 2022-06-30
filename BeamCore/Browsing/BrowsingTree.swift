@@ -601,10 +601,18 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         Logger.shared.logInfo("goForward to \(currentLink)", category: .web)
         return current
     }
-
+    private var navigationCountSinceLastSearch = 0
+    private func updateNavigationCountSinceLastSearch(isLinkActivation: Bool) {
+        if isLinkActivation {
+            navigationCountSinceLastSearch += 1
+        } else {
+            navigationCountSinceLastSearch = 0
+        }
+    }
     public func navigateTo(url link: String, title: String?, startReading: Bool, isLinkActivation: Bool) {
         guard current.link != linkStore.getOrCreateId(for: link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
+        updateNavigationCountSinceLastSearch(isLinkActivation: isLinkActivation)
         let event = isLinkActivation ? ReadingEventType.navigateToLink : ReadingEventType.searchBarNavigation
         current.addEvent(event)
         let node = BrowsingNode(tree: self, parent: current, linkStore: linkStore, url: link, title: title, isLinkActivation: isLinkActivation)
@@ -613,6 +621,8 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         if startReading {
             current.addEvent(.startReading)
         }
+        scoreApply(to: current.link) { $0.navigationCountSinceLastSearch = nilMin($0.navigationCountSinceLastSearch, navigationCountSinceLastSearch) }
+        current.score.navigationCountSinceLastSearch = nilMin(current.score.navigationCountSinceLastSearch, navigationCountSinceLastSearch)
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
     }
     public func update(for url: String, readCount: Int) {

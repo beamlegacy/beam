@@ -537,6 +537,14 @@ struct GRDBDatabase {
                 table.add(column: "isPinned", .boolean).defaults(to: false)
             }
         }
+        migrator.registerMigration("addNavigationCountToUrlScores") { db in
+            try db.alter(table: "DailyUrlScore") { table in
+                table.add(column: "navigationCountSinceLastSearch", .integer)
+            }
+            try db.alter(table: "LongTermUrlScore") { table in
+                table.add(column: "navigationCountSinceLastSearch", .integer)
+            }
+        }
 
         TabGroupsStore.registerMigration(with: &migrator)
 
