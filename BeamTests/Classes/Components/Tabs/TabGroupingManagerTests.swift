@@ -96,7 +96,7 @@ class TabGroupingManagerTests: XCTestCase {
 
     func testBuildTabGroupsAddRemovePageToClusterGroup() async {
         setupDefaultOpenPages()
-        clusters = [ [pageIds[4], pageIds[5], pageIds[6]] ]
+        clusters = [ [pageIds[4], pageIds[5], pageIds[6]], [pageIds[0]] ]
         await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
         XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1) // only one group was created
         let group = sut.builtPagesGroups.values.first
@@ -111,7 +111,7 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertEqual(sut.builtPagesGroups[page1], group)
 
         // redo a clustering update
-        clusters = [ [pageIds[4], pageIds[5], pageIds[6], pageIds[1]] ]
+        clusters = [ [pageIds[4], pageIds[5], pageIds[6], pageIds[1]], [pageIds[0]] ]
         await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
         XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1)
         XCTAssertEqual(sut.builtPagesGroups[page1], group)
@@ -122,7 +122,7 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertNil(sut.builtPagesGroups[page1])
 
         // redo a clustering update
-        clusters = [ [pageIds[4], pageIds[5], pageIds[6]] ]
+        clusters = [ [pageIds[4], pageIds[5], pageIds[6]], [pageIds[0]] ]
         await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
         XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1)
         XCTAssertNil(sut.builtPagesGroups[tab1.pageId])

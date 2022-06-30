@@ -136,7 +136,7 @@ class BrowserTabsManager: ObservableObject {
         var sections = TabsListItemsSections()
         let groups = localTabsGroup
         var previousGroup: TabGroup?
-        var alreadyAddedGroups: [UUID: Bool] = [:]
+        var alreadyAddedGroups: [UUID: Int] = [:]
         var visibleTabs: [BrowserTab] = []
         tabs.forEach { tab in
             let forcedGroups = tabGroupingManager.forcedTabsGroup[tab.id]
@@ -158,11 +158,13 @@ class BrowserTabsManager: ObservableObject {
                 visibleTabs.append(tab)
             } else {
                 let tabItem = TabsListItem(tab: tab, group: currentGroup)
-                if let currentGroup = currentGroup, currentGroup != previousGroup && alreadyAddedGroups[currentGroup.id] != true {
-                    alreadyAddedGroups[currentGroup.id] = true
-                    let groupItem = TabsListItem(group: currentGroup)
-                    sections.allItems.append(groupItem)
-                    sections.unpinnedItems.append(groupItem)
+                if let currentGroup = currentGroup {
+                    if currentGroup != previousGroup && alreadyAddedGroups[currentGroup.id] == nil {
+                        let groupItem = TabsListItem(group: currentGroup)
+                        sections.allItems.append(groupItem)
+                        sections.unpinnedItems.append(groupItem)
+                    }
+                    alreadyAddedGroups[currentGroup.id, default: 0] += 1
                 }
                 previousGroup = currentGroup
                 if currentGroup?.collapsed != true || collapsedTabsInGroup[currentGroup?.id ?? UUID()]?.contains(tab.id) != true {
@@ -171,6 +173,12 @@ class BrowserTabsManager: ObservableObject {
                     sections.allItems.append(tabItem)
                 }
             }
+        }
+        sections.unpinnedItems = sections.unpinnedItems.map { item in
+            guard item.isAGroupCapsule, let group = item.group else { return item }
+            var item = item
+            item.count = alreadyAddedGroups[group.id] ?? group.pageIds.count
+            return item
         }
         self.visibleTabs = visibleTabs
         self.listItems = sections
