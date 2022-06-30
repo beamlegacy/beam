@@ -16,6 +16,7 @@ private struct DailyUrlStatsRow: CsvRow {
     let textAmount: Int
     let textSelections: Int
     let scrollRatioY: Float
+    let navigationCountSinceLastSearch: Int
     let score: Float
     let isPinned: Bool
     let isSearchEngine: Bool
@@ -27,6 +28,7 @@ private struct DailyUrlStatsRow: CsvRow {
             "\(textAmount)",
             "\(textSelections)",
             "\(scrollRatioY)",
+            "\(navigationCountSinceLastSearch)",
             "\(score)",
             "\(isPinned)",
             "\(isSearchEngine)"
@@ -39,6 +41,7 @@ private struct DailyUrlStatsRow: CsvRow {
         "textAmount",
         "textSelections",
         "scrollRatioY",
+        "navigationCountSinceLastSearch",
         "score",
         "isPinned",
         "isSearchEngine"
@@ -51,6 +54,7 @@ private struct DailyUrlStatsRow: CsvRow {
         textAmount = scoredUrl.score.textAmount
         textSelections = scoredUrl.score.textSelections
         scrollRatioY = scoredUrl.score.scrollRatioY
+        navigationCountSinceLastSearch = scoredUrl.score.navigationCountSinceLastSearch ?? 0
         score = scoredUrl.score.score
         isPinned = scoredUrl.score.isPinned
         isSearchEngine = scoredUrl.url.isSearchEngineResultPage

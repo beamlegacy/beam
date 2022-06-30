@@ -124,12 +124,13 @@ class BrowsingTreeProcessorTest: XCTestCase {
         let tree = BrowsingTree(nil)
         let id0 = tree.current.link
         let creationDate0 = try XCTUnwrap(tree.current.events.first?.date)
-        tree.navigateTo(url: "https://fruit.org/orange", title: nil, startReading: false, isLinkActivation: false)
+        tree.navigateTo(url: "https://fruit.org/orange", title: nil, startReading: false, isLinkActivation: true)
         let id1 = tree.current.link
         let creationDate1 = try XCTUnwrap(tree.current.events.first?.date)
         let treeScore0 = tree.scoreFor(link: id0)
         treeScore0.scrollRatioX = 0.2
         treeScore0.readingTimeToLastEvent = 100
+        treeScore0.navigationCountSinceLastSearch = 2
         let treeScore1 = tree.scoreFor(link: id1)
         treeScore1.scrollRatioY = 0.5
         treeScore1.area = 1000
@@ -138,6 +139,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
         longTermScore0.scrollRatioX = 0.5
         longTermScore0.readingTimeToLastEvent = 50
         longTermScore0.lastCreationDate = creationDate0 - Double(2)
+        longTermScore0.navigationCountSinceLastSearch = 5
         store.save(scores: [longTermScore0])
 
         updater.update(using: tree)
@@ -151,6 +153,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
         XCTAssertEqual(updatedScores[id0]?.textAmount, 0)
         XCTAssertEqual(updatedScores[id0]?.textSelections, 0)
         XCTAssertEqual(updatedScores[id0]?.area, 0)
+        XCTAssertEqual(updatedScores[id0]?.navigationCountSinceLastSearch, 2)
         let savedLastCreationDate0 = try XCTUnwrap(updatedScores[id0]?.lastCreationDate)
         XCTAssert(abs(savedLastCreationDate0.timeIntervalSince(creationDate0)) < 0.001)
 
@@ -161,6 +164,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
         XCTAssertEqual(updatedScores[id1]?.textAmount, 0)
         XCTAssertEqual(updatedScores[id1]?.textSelections, 0)
         XCTAssertEqual(updatedScores[id1]?.area, 1000)
+        XCTAssertEqual(updatedScores[id1]?.navigationCountSinceLastSearch, 1)
         let savedLastCreationDate1 = try XCTUnwrap(updatedScores[id1]?.lastCreationDate)
         XCTAssert(abs(savedLastCreationDate1.timeIntervalSince(creationDate1)) < 0.001)
     }

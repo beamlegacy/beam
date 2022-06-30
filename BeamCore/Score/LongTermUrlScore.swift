@@ -20,6 +20,7 @@ public class LongTermUrlScore: Codable, UrlScoreProtocol {
         case textAmount
         case area
         case lastCreationDate
+        case navigationCountSinceLastSearch
     }
 
     public let urlId: UUID
@@ -31,6 +32,7 @@ public class LongTermUrlScore: Codable, UrlScoreProtocol {
     public var textAmount: Int = 0
     public var area: Float = 0
     public var lastCreationDate: Date?
+    public var navigationCountSinceLastSearch: Int?
 
     public init(urlId: UUID) {
         self.urlId = urlId
@@ -53,7 +55,8 @@ public class LongTermUrlScore: Codable, UrlScoreProtocol {
         scrollRatioY = max(scrollRatioY, treeScore.scrollRatioY)
         textAmount = max(textAmount, treeScore.textAmount)
         area = max(area, treeScore.area)
-        lastCreationDate = nilMax(date: lastCreationDate, otherDate: treeScore.lastCreationDate)
+        lastCreationDate = nilMax(lastCreationDate, treeScore.lastCreationDate)
+        navigationCountSinceLastSearch = nilMin(navigationCountSinceLastSearch, treeScore.navigationCountSinceLastSearch)
     }
 }
 
