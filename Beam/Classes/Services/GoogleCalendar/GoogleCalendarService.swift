@@ -320,7 +320,9 @@ final class GoogleCalendarService {
                 }
             }
             // This supports hangoutLinks and ZoomLinks but probably many more
-            let meetingLink = event.hangoutLink ?? event.conferenceData?.entryPoints.first(where: {$0.entryPointType == "video"})?.uri
+            let isWebURLLocation = event.location?.mayBeWebURL == true
+            let possibleMeetingLink = event.hangoutLink ?? event.conferenceData?.entryPoints.first(where: {$0.entryPointType == "video"})?.uri
+            let meetingLink = isWebURLLocation ? event.location : possibleMeetingLink
 
             meetings.append(Meeting(name: eventSummary, startTime: startDate, endTime: endDate, allDayEvent: allDayEvent, attendees: meetingAttendees, htmlLink: event.htmlLink, meetingLink: meetingLink, linkCards: true))
         }
