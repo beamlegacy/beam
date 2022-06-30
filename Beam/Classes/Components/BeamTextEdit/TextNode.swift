@@ -452,7 +452,8 @@ public class TextNode: ElementNode {
 
     public override func updateCursor() {
         guard let editor = self.editor else { return }
-        let on = AppDelegate.main.isActive && AppDelegate.main.window?.isKeyWindow == true
+        let on = AppDelegate.main.isActive
+            && editor.window?.isKeyWindow ?? false
             && !readOnly && editor.hasFocus && isFocused && editor.blinkPhase
             && (root?.state.nodeSelection?.nodes.isEmpty ?? true)
             && !isCursorInsideUneditableRange(caretIndex: caretIndex)

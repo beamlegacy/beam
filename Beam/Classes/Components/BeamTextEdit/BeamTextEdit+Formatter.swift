@@ -94,7 +94,7 @@ extension BeamTextEdit {
         atPoint: CGPoint,
         originParameters: (shouldAdjust: Bool, offset: CGFloat) = (false, .zero)
     ) {
-        CustomPopoverPresenter.shared.presentFormatterView(view, atPoint: atPoint, from: self, animated: false, originParameters: originParameters)
+        CustomPopoverPresenter.shared.presentFormatterView(view, atPoint: atPoint, from: self, animated: false, in: window, originParameters: originParameters)
     }
 
     private func showInlineTextFormatterIfNeeded() -> Bool {

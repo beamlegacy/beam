@@ -144,6 +144,7 @@
 		338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */; };
 		3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392E56C269D82FE000FA401 /* ClickCatchingView.swift */; };
 		339D193926AED9E1006DE745 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339D193826AED9E1006DE745 /* AuthenticationView.swift */; };
+		33A6EDBF286B3A7E00905057 /* BeamNote+Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A6EDBE286B3A7E00905057 /* BeamNote+Views.swift */; };
 		33AA4EB4270C3DC100B74868 /* ExtraAsserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4EB3270C3DC100B74868 /* ExtraAsserts.swift */; };
 		33AA4ED2270DD43900B74868 /* String+SearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4ED1270DD43900B74868 /* String+SearchTests.swift */; };
 		33AA4EDF270DF5D200B74868 /* ResizableNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4EDE270DF5D200B74868 /* ResizableNode.swift */; };
@@ -159,6 +160,7 @@
 		33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 33B2FF2C274C3F8500518F12 /* Lottie */; };
 		33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */ = {isa = PBXBuildFile; fileRef = 33BBA504274423E200FE92DB /* editor-embed_collapse.json */; };
 		33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */ = {isa = PBXBuildFile; fileRef = 33BBA506274423E700FE92DB /* editor-embed_expand.json */; };
+		33CC156C28660F9E008A82D9 /* MiniEditorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC156B28660F9E008A82D9 /* MiniEditorPanel.swift */; };
 		33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CCBFA526A61C14004B6236 /* PopoverWindow.swift */; };
 		33D0D90B2732BFAB00D6C924 /* FullPageCollectAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D0D90A2732BFAB00D6C924 /* FullPageCollectAnimator.swift */; };
 		33D5F85A2697478E002C4F25 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D5F8592697478E002C4F25 /* PopupView.swift */; };
@@ -1734,6 +1736,7 @@
 		338F276D26DD14B900D4AC97 /* Test.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Test.xcconfig; sourceTree = "<group>"; };
 		3392E56C269D82FE000FA401 /* ClickCatchingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickCatchingView.swift; sourceTree = "<group>"; };
 		339D193826AED9E1006DE745 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
+		33A6EDBE286B3A7E00905057 /* BeamNote+Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+Views.swift"; sourceTree = "<group>"; };
 		33AA4EB3270C3DC100B74868 /* ExtraAsserts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtraAsserts.swift; sourceTree = "<group>"; };
 		33AA4ED1270DD43900B74868 /* String+SearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SearchTests.swift"; sourceTree = "<group>"; };
 		33AA4EDE270DF5D200B74868 /* ResizableNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResizableNode.swift; sourceTree = "<group>"; };
@@ -1747,6 +1750,7 @@
 		33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallUpdateIndicatorView.swift; sourceTree = "<group>"; };
 		33BBA504274423E200FE92DB /* editor-embed_collapse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-embed_collapse.json"; sourceTree = "<group>"; };
 		33BBA506274423E700FE92DB /* editor-embed_expand.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-embed_expand.json"; sourceTree = "<group>"; };
+		33CC156B28660F9E008A82D9 /* MiniEditorPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniEditorPanel.swift; sourceTree = "<group>"; };
 		33CCBFA526A61C14004B6236 /* PopoverWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverWindow.swift; sourceTree = "<group>"; };
 		33D0D90A2732BFAB00D6C924 /* FullPageCollectAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullPageCollectAnimator.swift; sourceTree = "<group>"; };
 		33D5F8592697478E002C4F25 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
@@ -4265,11 +4269,13 @@
 				370794C627D7AA0300D2768B /* PDFDocumentView */,
 				3312202D2809736D006A5EA1 /* Update */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
+				33CC156B28660F9E008A82D9 /* MiniEditorPanel.swift */,
 				A58F0100282E58E000221DB0 /* BeamHostingView.swift */,
 				8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */,
 				52ECE01D272970260010E223 /* UserAlert.swift */,
 				370794BE27D7A21A00D2768B /* FloatingToolbar.swift */,
 				A5E497DE286B745800B8A4B7 /* TouchBarController.swift */,
+				33A6EDBE286B3A7E00905057 /* BeamNote+Views.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -8924,6 +8930,7 @@
 				414B98FE25A27930002E81A3 /* FormatterType.swift in Sources */,
 				5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */,
 				A52596E7273EB87F004B27E4 /* OnboardingProfileCreationView.swift in Sources */,
+				33A6EDBF286B3A7E00905057 /* BeamNote+Views.swift in Sources */,
 				DA3239DE269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift in Sources */,
 				DA23C74F27F1B316005508EB /* DailyUrlScore.swift in Sources */,
 				962AC88C27909C44001B7142 /* AutocompleteResultDebugView.swift in Sources */,
@@ -9273,6 +9280,7 @@
 				879CA7162819BEC300D1C395 /* CreditCardsMenu.swift in Sources */,
 				A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */,
 				A5DA47EC285B8997005E744B /* TabGroupingStore.swift in Sources */,
+				33CC156C28660F9E008A82D9 /* MiniEditorPanel.swift in Sources */,
 				414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
 				032562B326051D3B006513E4 /* RBDateRange.m in Sources */,

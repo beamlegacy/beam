@@ -342,7 +342,7 @@ public extension CALayer {
     }
     var maximumWidth: CGFloat = 1024 {
         didSet {
-            if oldValue != minimumWidth {
+            if oldValue != maximumWidth {
                 invalidateLayout()
             }
         }
@@ -402,7 +402,7 @@ public extension CALayer {
         return rootNode?.selectedText ?? ""
     }
 
-    static let smallTreshold = CGFloat(800)
+    static let smallTreshold = CGFloat(500)
     static let bigThreshold = CGFloat(1024)
     var isBig: Bool {
         frame.width >= Self.bigThreshold
@@ -482,7 +482,7 @@ public extension CALayer {
             let x = (frame.width - textNodeWidth) / 2
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         } else {
-            let x = (frame.width - textNodeWidth) * (leadingPercentage / 100)
+            let x = (frame.width - textNodeWidth) * (leadingPercentage / 100) + 20
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         }
         return rect
@@ -524,7 +524,7 @@ public extension CALayer {
     static func textNodeWidth(for containerSize: CGSize) -> CGFloat {
         let clampedWidth = containerSize.width.clamp(Self.smallTreshold, Self.bigThreshold) - Self.smallTreshold
         let clampedRatio = clampedWidth / (Self.bigThreshold - Self.smallTreshold)
-        let adjustmentAmplitude = maximumEmptyEditorWidth - Self.minimumEmptyEditorWidth
+        let adjustmentAmplitude = maximumEmptyEditorWidth - minimumEmptyEditorWidth
         let computedWidth = Self.minimumEmptyEditorWidth + clampedRatio * adjustmentAmplitude
         let result = max(computedWidth, Self.minimumEmptyEditorWidth)
         return result
@@ -628,7 +628,7 @@ public extension CALayer {
         rootNode.availableWidth = textNodeWidth
         let noteHeight = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
         let leadingGutterHeight = leadingGutterSize.height + topOffsetActual + footerHeight + cardTopSpace + cardHeaderPosY
-        realContentSize = NSSize(width: max(AppDelegate.defaultWindowMinimumSize.width, textNodeWidth), height: max(noteHeight, leadingGutterHeight))
+        realContentSize = NSSize(width: max(AppDelegate.minimumSize(for: window).width, textNodeWidth), height: max(noteHeight, leadingGutterHeight))
         safeContentSize = realContentSize
         if !journalMode {
             safeContentSize.height = max(visibleRect.maxY, safeContentSize.height)

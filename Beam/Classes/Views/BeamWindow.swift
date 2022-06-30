@@ -50,6 +50,8 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
 
+        windowInfo.window = self
+
         self.delegate = self
         self.toolbar?.isVisible = false
         self.titlebarAppearsTransparent = true
@@ -155,6 +157,13 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             }
             return window === self
         }
+
+        AppDelegate.main.panels.forEach { (_, panel) in
+            if panel.state === state {
+                panel.close()
+            }
+        }
+
         super.close()
     }
 
@@ -308,6 +317,15 @@ extension BeamWindow: NSWindowDelegate {
     func windowDidResize(_ notification: Notification) {
         self.setTrafficLightsLayout()
         self.windowInfo.windowFrame = self.frame
+
+        if let childWindows = childWindows, windowInfo.windowIsResizing {
+            for panel in childWindows where panel is MiniEditorPanel {
+                let position = MiniEditorPanel.dockedPanelOrigin(from: self.frame)
+                let width = MiniEditorPanel.panelWidth(for: self)
+                let rect = CGRect(origin: position, size: CGSize(width: width, height: self.frame.height))
+                panel.setFrame(rect, display: false, animate: false)
+            }
+        }
     }
 
     func windowWillEnterFullScreen(_ notification: Notification) {
