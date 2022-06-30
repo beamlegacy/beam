@@ -45,5 +45,9 @@ class UITestPagePasswordManager: BaseView {
     func isPasswordPageOpened() -> Bool {
         return self.button("Submit").waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
-    
+
+    func isAlertPageOpened() -> Bool {
+        return self.button("Trigger an alert").waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
+
 }
