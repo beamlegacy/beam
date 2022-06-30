@@ -205,7 +205,7 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
         if became && !ignoreResponderChanges {
             parent?.onFocusChanged(true)
         }
-        updateTextSelectionColor()
+        updateTextSelectionColor(_selectionRangeColor)
     }
 
     func handleResignFirstResponder(resigned: Bool) {
@@ -218,7 +218,7 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
         if let range = selectedRange {
             parent?.onSelectionChanged(range)
         }
-        updateTextSelectionColor()
+        updateTextSelectionColor(_selectionRangeColor)
     }
 }
 

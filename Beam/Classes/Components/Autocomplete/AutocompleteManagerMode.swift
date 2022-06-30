@@ -23,10 +23,13 @@ extension AutocompleteManager {
             return false
         }
 
-        func shouldUpdateSearchQueryOnSelection(for result: AutocompleteResult) -> Bool {
+        func shouldUpdateSearchQueryOnSelection(for result: AutocompleteResult) -> (allow: Bool, replacement: String?) {
             switch self {
-            case .noteCreation, .tabGroup: return false
-            case .general: return true
+            case .noteCreation: return (false, nil)
+            case .tabGroup:
+                let isAction = result.source == .action
+                return (!isAction, isAction ? "" : nil)
+            case .general: return (true, nil)
             }
         }
     }
