@@ -21,6 +21,7 @@ public class DailyURLScore: Codable, UrlScoreProtocol {
     public var textAmount: Int = 0
     public var area: Float = 0
     public var isPinned: Bool = false //true if isPinned at least once during period
+    public var navigationCountSinceLastSearch: Int?
 
     public init(urlId: UUID, localDay: String) {
         self.urlId = urlId
@@ -32,6 +33,7 @@ public class DailyURLScore: Codable, UrlScoreProtocol {
             + log(1 + Float(readingTimeToLastEvent))
             + log(1 + Float(textAmount))
             + log(1 + Float(textSelections))
+            + log(1 + Float(navigationCountSinceLastSearch ?? 0))
     }
     public func merge(other: AggregatedURLScore) -> AggregatedURLScore {
         return AggregatedURLScore(
@@ -42,7 +44,8 @@ public class DailyURLScore: Codable, UrlScoreProtocol {
             scrollRatioY: max(other.scrollRatioY, self.scrollRatioY),
             textAmount: max(other.textAmount, self.textAmount),
             area: max(other.area, self.area),
-            isPinned: other.isPinned || self.isPinned
+            isPinned: other.isPinned || self.isPinned,
+            navigationCountSinceLastSearch: nilMin(navigationCountSinceLastSearch, self.navigationCountSinceLastSearch)
         )
     }
 }
@@ -61,12 +64,14 @@ public struct AggregatedURLScore {
     public var textAmount: Int = 0
     public var area: Float = 0
     public var isPinned: Bool = false //true if isPinned at least once during period
+    public var navigationCountSinceLastSearch: Int?
 
     public var score: Float {
         return scrollRatioY
             + log(1 + Float(readingTimeToLastEvent))
             + log(1 + Float(textAmount))
             + log(1 + Float(textSelections))
+            + log(1 + Float(navigationCountSinceLastSearch ?? 0))
     }
     func isSummaryEligible(minReadingTime: Double, minTextAmount: Int) -> Bool {
         !(isPinned

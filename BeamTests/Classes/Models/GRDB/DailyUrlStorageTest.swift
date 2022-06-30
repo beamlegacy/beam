@@ -23,6 +23,7 @@ class DailyUrlStorageTest: XCTestCase {
         //upserting and fetching
         db.updateDailyUrlScore(urlId: id, day: day0) {
             $0.readingTimeToLastEvent += 5
+            $0.navigationCountSinceLastSearch = 2
         }
         BeamDate.travel(1)
         let t1 = BeamDate.now
@@ -40,6 +41,7 @@ class DailyUrlStorageTest: XCTestCase {
         XCTAssertFalse(record.isPinned)
         XCTAssertEqual(record.createdAt, t0)
         XCTAssertEqual(record.updatedAt, t1)
+        XCTAssertEqual(record.navigationCountSinceLastSearch, 2)
 
         var records1 = db.getDailyUrlScores(day: day1)
         XCTAssertEqual(records1.count, 1)
@@ -49,6 +51,7 @@ class DailyUrlStorageTest: XCTestCase {
         try db.clearDailyUrlScores(toDay: "2020-01-01")
         XCTAssertEqual(record.createdAt, t1)
         XCTAssertEqual(record.updatedAt, t1)
+        XCTAssertNil(record.navigationCountSinceLastSearch)
 
         //clearing records older than 1 day
         records0 = db.getDailyUrlScores(day: day0)

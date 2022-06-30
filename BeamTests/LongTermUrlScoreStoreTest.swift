@@ -38,16 +38,21 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         var score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
         XCTAssertEqual(score.textSelections, 1)
         XCTAssertNil(score.lastCreationDate)
+        XCTAssertNil(score.navigationCountSinceLastSearch)
         assertZeroValues(score: score)
         try assertCount(urlId: urlId, count: 1)
 
         //when the urlId's record already exists, it's updated
         let date = BeamDate.now
-        db.updateLongTermUrlScore(urlId: urlId) { $0.lastCreationDate = date }
+        db.updateLongTermUrlScore(urlId: urlId) {
+            $0.lastCreationDate = date
+            $0.navigationCountSinceLastSearch = 2
+        }
         score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
         XCTAssertEqual(score.textSelections, 1)
         let fetchedDate = try XCTUnwrap(score.lastCreationDate)
         XCTAssertEqual(fetchedDate.timeIntervalSince1970, date.timeIntervalSince1970, accuracy: 1.0/1000.0)
+        XCTAssertEqual(score.navigationCountSinceLastSearch, 2)
         assertZeroValues(score: score)
         try assertCount(urlId: urlId, count: 1)
         
