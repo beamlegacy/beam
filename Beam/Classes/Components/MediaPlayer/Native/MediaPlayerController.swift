@@ -16,7 +16,7 @@ enum MediaPlayState: String {
 
 struct MediaPlayerController: WebPageRelated {
 
-    private let JSObjectName = "MDPLR"
+    private let JSObjectName = "MediaPlayer"
     weak var page: WebPage?
     var isPlaying: Bool {
         switch playState {
@@ -43,12 +43,12 @@ struct MediaPlayerController: WebPageRelated {
     mutating func setMuted(_ muted: Bool) {
         if isMuted != muted {
             isMuted = muted
-            self.page?.executeJS("media_toggleMute()", objectName: JSObjectName, frameInfo: frameInfo)
+            self.page?.executeJS("toggleMute()", objectName: JSObjectName, frameInfo: frameInfo)
         }
     }
 
     mutating func togglePiP() {
         isInPiP = !isInPiP
-        self.page?.executeJS("media_togglePictureInPicture()", objectName: JSObjectName, frameInfo: frameInfo)
+        self.page?.executeJS("togglePictureInPicture()", objectName: JSObjectName, frameInfo: frameInfo)
     }
 }
