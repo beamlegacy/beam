@@ -31,6 +31,7 @@ export class MouseOverAndSelection<UI extends MouseOverAndSelectionUI> {
     this.win.addEventListener("mouseover", this.mouseover.bind(this))
     this.win.addEventListener("mouseout", this.mouseout.bind(this))
     this.win.document.addEventListener("selectionchange", this.selectionchange.bind(this))
+    this.win.addEventListener("keydown", this.onKeyDown.bind(this))
   }
 
   mouseover(event) {
@@ -58,9 +59,20 @@ export class MouseOverAndSelection<UI extends MouseOverAndSelectionUI> {
   }
 
   selectionchange() {
-    var selection = document.getSelection().toString()
+    const selection = this.win.document.getSelection().toString()
     const message = { selection: selection }
     this.ui.sendSelectionChange(message)
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.keyCode == 13 && event.metaKey) {
+      const selection = this.win.document.getSelection().toString()
+      if (selection == null || selection.length == 0) {
+        return
+      }
+      const message = { selection: selection }
+      this.ui.sendSelectionAndShortcutHit(message)
+    }
   }
 
   findParentAnchorElement(element) {

@@ -7,6 +7,7 @@ enum MouseOverAndSelectionMessage: String, CaseIterable {
     case MouseOverAndSelection_linkMouseOver
     case MouseOverAndSelection_linkMouseOut
     case MouseOverAndSelection_selectionChange
+    case MouseOverAndSelection_selectionAndShortcutHit
 
 }
 
@@ -44,7 +45,7 @@ final class MouseOverAndSelectionMessageHandler: SimpleBeamMessageHandler {
         case .MouseOverAndSelection_linkMouseOut:
             webPage.mouseHoveringLocation = .none
 
-        case .MouseOverAndSelection_selectionChange:
+        case .MouseOverAndSelection_selectionChange, .MouseOverAndSelection_selectionAndShortcutHit:
             guard let messageBody = messageBody else {
                 Logger.shared.logError("Missing body in MouseOverAndSelection message handler", category: .web)
                 break
@@ -52,6 +53,10 @@ final class MouseOverAndSelectionMessageHandler: SimpleBeamMessageHandler {
             do {
                 let textSelection = try TextSelection(from: messageBody)
                 webPage.textSelection = textSelection.selection
+
+                if case .MouseOverAndSelection_selectionAndShortcutHit = messageKey {
+                    webPage.quickSearchQueryWithSelection()
+                }
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .web)
             }

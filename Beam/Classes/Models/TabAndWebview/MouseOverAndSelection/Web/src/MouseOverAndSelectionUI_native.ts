@@ -51,6 +51,10 @@ export class MouseOverAndSelectionUI_native implements MouseOverAndSelectionUI {
     }
   }
 
+  sendSelectionAndShortcutHit(message: { selection: string }) {
+    this.native.sendMessage("selectionAndShortcutHit", message)
+  }
+
   toString(): string {
     return this.constructor.name
   }

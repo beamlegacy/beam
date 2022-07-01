@@ -47,6 +47,8 @@ export class MouseOverAndSelectionUI_web implements MouseOverAndSelectionUI {
 
   sendSelectionChange(message: { selection: string }) {}
 
+  sendSelectionAndShortcutHit(message: { selection: string }) {}
+
   toString() {
     return this.constructor.name
   }
