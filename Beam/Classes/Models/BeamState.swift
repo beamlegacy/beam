@@ -94,6 +94,8 @@ import Sentry
     @Published var destinationCardNameSelectedRange: Range<Int>?
     var keepDestinationNote = false
 
+    @Published var sideNote: BeamNote?
+
     var associatedWindow: NSWindow? {
         AppDelegate.main.windows.first { $0.state === self }
     }
@@ -238,6 +240,17 @@ import Sentry
         }
 
         MiniEditorPanel.presentMiniEditor(from: window, with: note)
+        stopFocusOmnibox()
+        return true
+    }
+
+    @discardableResult func openNoteInSplitView(id: UUID) -> Bool {
+        EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
+        guard let note = BeamNote.fetch(id: id, includeDeleted: false) else {
+            return false
+        }
+
+        sideNote = note
         stopFocusOmnibox()
         return true
     }
@@ -595,7 +608,7 @@ import Sentry
             if let flags = modifierFlags, flags.contains(.shift) {
                 openNoteInNewWindow(id: noteId)
             } else if let flags = modifierFlags, flags.contains(.command) {
-                openNoteInMiniEditor(id: noteId)
+                openNoteInSplitView(id: noteId)
             } else {
                 navigateToNote(id: noteId)
             }

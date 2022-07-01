@@ -25,8 +25,13 @@ extension BeamNote {
             Button("Open in New Window") {
                 state.openNoteInNewWindow(id: note.id)
             }
-            Button("Open in Side Window") {
-                state.openNoteInMiniEditor(id: note.id)
+            if Configuration.branchType == .develop {
+                Button("Open in Side Window") {
+                    state.openNoteInMiniEditor(id: note.id)
+                }
+                Button("Open in Split View") {
+                    state.sideNote = note
+                }
             }
         }
         Divider()
