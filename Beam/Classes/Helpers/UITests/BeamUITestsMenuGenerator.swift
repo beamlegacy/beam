@@ -372,7 +372,7 @@ class BeamUITestsMenuGenerator {
     }
 
     private func startMockHttpServer() {
-        MockHttpServer.start(port: 8080)
+        MockHttpServer.start(port: Configuration.MockHttpServer.port)
     }
 
     private func stopMockHttpServer() {

@@ -7,10 +7,11 @@
 
 import Foundation
 import XCTest
+import BeamCore
 
 class OneFieldAutofillTests: BaseTest {
 
-    let baseURL = "http://form.lvh.me:8080/custom"
+    let baseURL = "http://form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/custom"
 
     override func setUpWithError() throws {
         launchApp()

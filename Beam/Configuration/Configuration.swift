@@ -331,3 +331,9 @@ extension Configuration {
         static let daysToKeep = branchType == .develop ? 60 : 2
     }
 }
+
+extension Configuration {
+    struct MockHttpServer {
+        static let port = EnvironmentVariables.MockHttpServer.port
+    }
+}
