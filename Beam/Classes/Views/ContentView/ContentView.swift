@@ -12,6 +12,8 @@ struct ContentView: View {
     @EnvironmentObject var windowInfo: BeamWindowInfo
 
     @State private var contentIsScrolled = false
+    @State var sideNoteWidth: CGFloat = 600
+
     private var isToolbarAboveContent: Bool {
         contentIsScrolled && [.note, .today].contains(state.mode)
     }
@@ -50,14 +52,42 @@ struct ContentView: View {
         }
     }
 
+    @ViewBuilder var sideNote: some View {
+        if let sideNote = state.sideNote {
+            MiniEditor(note: sideNote)
+        }
+    }
+
     var body: some View {
         ZStack {
-            mainAppContent
-                .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
-                .frame(minWidth: 800)
-                .background(BeamColor.Generic.background.swiftUI)
-                .edgesIgnoringSafeArea(.top)
-                .zIndex(0)
+            HStack(spacing: 0) {
+                mainAppContent
+                    .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
+                    .frame(minWidth: 800)
+                    .background(BeamColor.Generic.background.swiftUI)
+                    .roundedCorners(radius: 10, corners: [.topRight, .bottomRight])
+                    .edgesIgnoringSafeArea(.top)
+                    .zIndex(0)
+                if state.sideNote != nil {
+                    Rectangle()
+                        .frame(width: 4)
+                        .foregroundColor(.clear)
+                        .cursorOverride(.resizeLeftRight)
+                        .gesture(DragGesture().onChanged { value in
+                            let newWidth = sideNoteWidth - value.translation.width
+                            sideNoteWidth = newWidth.clamp(400, 800)
+                        })
+                }
+                sideNote
+                    .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
+                    .frame(width: sideNoteWidth)
+                    .background(BeamColor.Generic.background.swiftUI)
+                    .zIndex(0)
+                    .cornerRadius(10)
+                    .padding(.trailing, 4)
+                    .padding(.vertical, 4)
+                    .edgesIgnoringSafeArea(.top)
+            }
             OverlayViewCenter(viewModel: state.overlayViewModel)
                 .edgesIgnoringSafeArea(.top)
                 .zIndex(1)
