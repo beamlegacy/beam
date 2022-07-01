@@ -19,3 +19,12 @@ extension WKWindowFeatures {
         return NSRect(x: x, y: y, width: width, height: height)
     }
 }
+
+class BeamWindowFeatures: WKWindowFeatures {
+    override var allowsResizing: NSNumber? { 1 }
+    override var statusBarVisibility: NSNumber? { 1 }
+    override var menuBarVisibility: NSNumber? { 1 }
+    override var toolbarsVisibility: NSNumber? { 1 }
+
+    var origin: CGPoint?
+}
