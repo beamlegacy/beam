@@ -472,6 +472,9 @@ import Sentry
             return createTab(withURLRequest: URLRequest(url: url))
         }
         browserTabsManager.reopenGroup(group, withTabs: tabs)
+        if mode != .web && hasBrowserTabs {
+            mode = .web
+        }
         stopFocusOmnibox()
     }
 
