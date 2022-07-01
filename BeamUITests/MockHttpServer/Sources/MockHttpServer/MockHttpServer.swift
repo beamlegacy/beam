@@ -8,11 +8,12 @@ import LoggingOSLog
 public class MockHttpServer {
     private static var loggerInitialized = false
     private static var instances: [Int: MockHttpServer] = [:]
+    private var serverPort: Int
 
     private static let loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n"
 
     @discardableResult
-    public static func start(port: Int = 8080) -> MockHttpServer {
+    public static func start(port: Int) -> MockHttpServer {
         if !loggerInitialized {
             LoggingSystem.bootstrap(LoggingOSLog.init)
             loggerInitialized = true
@@ -32,6 +33,7 @@ public class MockHttpServer {
     }
 
     private init(port: Int) {
+        self.serverPort = port
         guard let basePath = Bundle.module.resourcePath else {
             fatalError("Resources not available.")
         }
@@ -94,7 +96,7 @@ public class MockHttpServer {
         if let formTemplateName = request.hostname.removingSuffix(".form.lvh.me") {
             renderStencil(request, response, "form/\(formTemplateName)")
         } else if let browserTemplateName = request.hostname.removingSuffix(".browser.lvh.me") {
-            renderStencil(request, response, "browser/\(browserTemplateName)")
+            renderStencil(request, response, "browser/\(browserTemplateName)", additionalParams: ["port": "\(serverPort)"])
         } else if let redirectionTemplateName = request.hostname.removingSuffix(".redirection.lvh.me") {
             renderStencil(request, response, "redirection/\(redirectionTemplateName)")
         } else if let redirectionTemplateName = request.hostname.removingSuffix(".adblock.lvh.me") {

@@ -7,11 +7,12 @@
 
 import Foundation
 import XCTest
+import BeamCore
 
 class SignInAutocompleteTests: BaseTest {
     
-    let signInPageURL = "http://signin.form.lvh.me:8080/"
-    let signUpPageURL = "http://signup.form.lvh.me:8080/"
+    let signInPageURL = "http://signin.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
+    let signUpPageURL = "http://signup.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
     
     private func credentialsAutocompleteAssertion(login: String) {
         step("THEN after clicking on pop-up login text the credentials are successfully populated"){

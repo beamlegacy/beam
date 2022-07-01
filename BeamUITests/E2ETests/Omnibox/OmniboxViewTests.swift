@@ -7,6 +7,7 @@
 
 import Foundation
 import XCTest
+import BeamCore
 
 class OmniboxViewTests: BaseTest {
     
@@ -195,16 +196,16 @@ class OmniboxViewTests: BaseTest {
     
     func testOmniboxTextSelectionAndEditing() throws {
         let initialSearch = mockPage.getMockPageUrl(.mainView)
-        let expectedInitialSearchURLinTab = "http://localhost:8080/"
+        let expectedInitialSearchURLinTab = "http://localhost:\(EnvironmentVariables.MockHttpServer.port)/"
         let expectedTabTitle = "Mock HTTP Server"
         
         let editedSourceToSearch = "menu.form.lvh.me"
-        let expectedEditedSourceToSearchURL = "http://menu.form.lvh.me:8080/"
-        let editedSourceToSearchInTab = "menu.form.lvh.me:8080/"
+        let expectedEditedSourceToSearchURL = "http://menu.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
+        let editedSourceToSearchInTab = "menu.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
         
-        let replacedSourceToSearch = "http://nestediframe.form.lvh.me:8080/"
-        let replacedSourceToSearchInTab = "nestediframe.form.lvh.me:8080/"
-        let expectedReplacedSourceToSearchURL = "http://nestediframe.form.lvh.me:8080/"
+        let replacedSourceToSearch = "http://nestediframe.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
+        let replacedSourceToSearchInTab = "nestediframe.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
+        let expectedReplacedSourceToSearchURL = "http://nestediframe.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
         
         launchApp()
         uiMenu.startMockHTTPServer()
