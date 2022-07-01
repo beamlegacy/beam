@@ -7,6 +7,7 @@
 
 import Foundation
 import XCTest
+import BeamCore
 
 //Designed to be inherited by Test classes.
 //It contains common setup and tear down methods as well as the common methods used in Test classes
@@ -28,7 +29,7 @@ class BaseTest: XCTestCase {
     let incorrectPassword = "Incorrect1"
     let username = "AutomationTestSignin"
     let host = "form.lvh.me"
-    let mockBaseUrl = "http://form.lvh.me:8080/"
+    let mockBaseUrl = "http://form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
     
     let uiMenu = UITestsMenuBar()
     let shortcutHelper = ShortcutsHelper()

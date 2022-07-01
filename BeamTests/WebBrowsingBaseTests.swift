@@ -17,7 +17,7 @@ class WebBrowsingBaseTests: XCTestCase {
     var tab: BrowserTab!
     var mockIndexingDelegate: MockWebIndexingDelegate?
     var destinationURL: URL!
-    static let port: Int = 8080
+    static let port: Int = Configuration.MockHttpServer.port
 
     let destinationPageTitle = "Redirection Destination"
     let jsDestinationPageTitle = "Redirected to destination"

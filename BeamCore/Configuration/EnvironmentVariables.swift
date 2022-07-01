@@ -74,6 +74,10 @@ public struct EnvironmentVariables {
         static public private(set) var testEmail = "$(TEST_ACCOUNT_EMAIL)"
     }
 
+    public struct MockHttpServer {
+        static public private(set) var port = NSString("$(MOCK_HTTP_PORT)").integerValue
+    }
+
     static public private(set) var env = "$(ENV)"
     static public private(set) var autoUpdate = NSString("$(AUTOMATIC_UPDATE)").boolValue
     static public private(set) var networkStubs = NSString("$(NETWORK_STUBS)").boolValue
