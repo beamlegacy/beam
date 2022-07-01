@@ -16,7 +16,7 @@
 
         document.querySelector("#openAsTab").addEventListener("click", () => {
           window.open(
-            "http://windowopenresult.browser.lvh.me:8080",
+            "http://windowopenresult.browser.lvh.me:{{ params.port }}",
             "BeamNewTabName"
           )
         })
@@ -30,7 +30,7 @@
 
             popup.focus()
 
-            popup.window.location.href = "http://windowopen.browser.lvh.me:8080"
+            popup.window.location.href = "http://windowopen.browser.lvh.me:{{ params.port }}"
           })
       })
     </script>

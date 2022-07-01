@@ -16,7 +16,7 @@
 
         document.querySelector("#openAsTab").addEventListener("click", () => {
           window.open(
-            "http://windowopenresult.browser.lvh.me:8080",
+            "http://windowopenresult.browser.lvh.me:{{ params.port }}",
             "BeamNewTabName"
           )
         })
@@ -27,7 +27,7 @@
             const options =
               "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=300, height=200, top=0, left=0"
             window.open(
-              "http://windowopen.browser.lvh.me:8080",
+              "http://windowopen.browser.lvh.me:{{ params.port }}",
               "BeamNewWindowName",
               options
             )
