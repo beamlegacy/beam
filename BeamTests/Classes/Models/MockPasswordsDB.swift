@@ -13,29 +13,29 @@ final class MockPasswordsDB: PasswordStore {
         case notFound
     }
 
-    var passwords: [PasswordRecord]
+    var passwords: [LocalPasswordRecord]
 
     init() {
         passwords = []
     }
 
-    func entries(for hostname: String, options: PasswordManagerHostLookupOptions) throws -> [PasswordRecord] {
+    func entries(for hostname: String, options: PasswordManagerHostLookupOptions) throws -> [LocalPasswordRecord] {
         passwords.filter { record in
             record.hostname == hostname
         }
     }
 
-    func find(_ searchString: String) throws -> [PasswordRecord] {
+    func find(_ searchString: String) throws -> [LocalPasswordRecord] {
         passwords.filter { record in
             record.hostname.contains(searchString) || record.username.contains(searchString)
         }
     }
 
-    func fetchAll() throws -> [PasswordRecord] {
+    func fetchAll() throws -> [LocalPasswordRecord] {
         passwords
     }
 
-    func allRecords(_ updatedSince: Date?) throws -> [PasswordRecord] {
+    func allRecords(_ updatedSince: Date?) throws -> [LocalPasswordRecord] {
         guard let updatedSince = updatedSince else {
             return passwords
         }
@@ -44,23 +44,23 @@ final class MockPasswordsDB: PasswordStore {
         }
     }
 
-    func passwordRecord(hostname: String, username: String) throws -> PasswordRecord? {
+    func passwordRecord(hostname: String, username: String) throws -> LocalPasswordRecord? {
         passwords.first { record in
             record.hostname == hostname && record.username == username
         }
     }
 
-    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> PasswordRecord {
-        let record = PasswordRecord(entryId: UUID().uuidString, hostname: hostname, username: username, password: encryptedPassword, createdAt: Date(), updatedAt: Date())
+    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord {
+        let record = LocalPasswordRecord(entryId: UUID().uuidString, hostname: hostname, username: username, password: encryptedPassword, createdAt: Date(), updatedAt: Date())
         passwords.append(record)
         return record
     }
 
-    func save(passwords: [PasswordRecord]) throws {
+    func save(passwords: [LocalPasswordRecord]) throws {
         self.passwords = passwords
     }
 
-    func update(record: PasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> PasswordRecord {
+    func update(record: LocalPasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord {
         var newRecord = record
         newRecord.hostname = hostname
         newRecord.username = username
@@ -76,7 +76,7 @@ final class MockPasswordsDB: PasswordStore {
         return newRecord
     }
 
-    func markDeleted(hostname: String, username: String) throws -> PasswordRecord {
+    func markDeleted(hostname: String, username: String) throws -> LocalPasswordRecord {
         guard let index = passwords.firstIndex(where: { record in
             record.hostname == hostname && record.username == username
         }) else {
@@ -87,12 +87,12 @@ final class MockPasswordsDB: PasswordStore {
         return record
     }
 
-    func markAllDeleted() throws -> [PasswordRecord] {
+    func markAllDeleted() throws -> [LocalPasswordRecord] {
         passwords = []
         return []
     }
 
-    func deleteAll() throws -> [PasswordRecord] {
+    func deleteAll() throws -> [LocalPasswordRecord] {
         passwords = []
         return []
     }

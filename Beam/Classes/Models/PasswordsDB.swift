@@ -18,7 +18,7 @@ enum PasswordDBError: Error {
     case errorSearchingPassword(errorMsg: String)
 }
 
-struct PasswordRecord {
+struct RemotePasswordRecord {
     internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
 
     var uuid: UUID = .null
@@ -34,7 +34,7 @@ struct PasswordRecord {
     var privateKeySignature: String?
 }
 
-extension PasswordRecord: BeamObjectProtocol {
+extension RemotePasswordRecord: BeamObjectProtocol {
     static let beamObjectType = BeamObjectObjectType.password
 
     var beamObjectId: UUID {
@@ -56,15 +56,8 @@ extension PasswordRecord: BeamObjectProtocol {
         case privateKeySignature
     }
 
-    func copy() -> PasswordRecord {
-        PasswordRecord(uuid: uuid,
-                       entryId: entryId,
-                       hostname: hostname, username: username,
-                       password: password,
-                       createdAt: createdAt,
-                       updatedAt: updatedAt,
-                       deletedAt: deletedAt,
-                       privateKeySignature: privateKeySignature)
+    func copy() -> Self {
+        self
     }
 
     // TODO: Remove the support of old keys
@@ -84,16 +77,38 @@ extension PasswordRecord: BeamObjectProtocol {
     }
 }
 
-extension PasswordRecord: Equatable { }
+struct LocalPasswordRecord {
+    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
 
-extension PasswordRecord: TableRecord {
+    var uuid: UUID = .null
+    var entryId: String
+    var hostname: String
+    var username: String
+    var password: String
+    var createdAt: Date
+    var updatedAt: Date
+    var deletedAt: Date?
+    var privateKeySignature: String?
+}
+
+extension LocalPasswordRecord {
+    func copy() -> Self {
+        self
+    }
+}
+
+extension LocalPasswordRecord: Equatable { }
+
+extension LocalPasswordRecord: TableRecord {
+    static let databaseTableName = "passwordRecord"
+
     enum Columns: String, ColumnExpression {
         case uuid, entryId, hostname, username, password, createdAt, updatedAt, deletedAt, privateKeySignature
     }
 }
 
 // Fetching
-extension PasswordRecord: FetchableRecord {
+extension LocalPasswordRecord: FetchableRecord {
     init(row: Row) {
         uuid = row[Columns.uuid]
         entryId = row[Columns.entryId]
@@ -108,7 +123,7 @@ extension PasswordRecord: FetchableRecord {
 }
 
 // Persisting
-extension PasswordRecord: MutablePersistableRecord {
+extension LocalPasswordRecord: MutablePersistableRecord {
     static let persistenceConflictPolicy = PersistenceConflictPolicy(
         insert: .replace,
         update: .replace)
@@ -157,7 +172,7 @@ class PasswordsDB: PasswordStore {
         migrator.registerMigration("migrateOldData") { db in
             if let storedPasswords = rows {
                 for password in storedPasswords {
-                    var passwordRecord = PasswordRecord(
+                    var passwordRecord = LocalPasswordRecord(
                         uuid: UUID(),
                         entryId: self.id(for: password["host"], and: password["name"]),
                         hostname: password["host"],
@@ -184,7 +199,7 @@ class PasswordsDB: PasswordStore {
                         encryptedPassword = newlyEncryptedPassword
                     }
 
-                    var passwordRecord = PasswordRecord(
+                    var passwordRecord = LocalPasswordRecord(
                         uuid: password["uuid"],
                         entryId: password["entryId"],
                         hostname: password["host"],
@@ -208,13 +223,15 @@ class PasswordsDB: PasswordStore {
 
         migrator.registerMigration("saveAllPasswords") { db in
             if let rows = try? Row.fetchAll(db, sql: "SELECT * FROM \(PasswordsDB.tableName)") {
-                var passwordRecords = [PasswordRecord]()
+                var passwordRecords = [LocalPasswordRecord]()
                 for row in rows {
-                    passwordRecords.append(PasswordRecord(row: row))
+                    passwordRecords.append(LocalPasswordRecord(row: row))
                 }
-                if !passwordRecords.isEmpty {
+                let networkPasswords = passwordRecords.compactMap(PasswordEncryptionManager.tryReEncryptBeforeSend)
+                if !networkPasswords.isEmpty {
+                    Logger.shared.logInfo("Uploading \(networkPasswords.count) as part of database migration", category: .passwordNetwork)
                     let beamObjectManager = BeamObjectManager()
-                    _ = try? beamObjectManager.saveToAPI(passwordRecords) { _ in }
+                    _ = try? beamObjectManager.saveToAPI(networkPasswords) { _ in }
                 }
             }
         }
@@ -226,12 +243,12 @@ class PasswordsDB: PasswordStore {
         return PasswordManagerEntry(minimizedHost: hostname, username: username).id
     }
 
-    private func credentials(for passwordsRecord: [PasswordRecord]) -> [Credential] {
-        passwordsRecord.map { Credential(username: $0.username, password: $0.password) }
+    private func credentials(for passwordRecords: [LocalPasswordRecord]) -> [Credential] {
+        passwordRecords.map { Credential(username: $0.username, password: $0.password) }
     }
 
-    func entries(for host: String, options: PasswordManagerHostLookupOptions) throws -> [PasswordRecord] {
-        var allEntries: [PasswordRecord]
+    func entries(for host: String, options: PasswordManagerHostLookupOptions) throws -> [LocalPasswordRecord] {
+        var allEntries: [LocalPasswordRecord]
         if options.contains(.subdomains) {
             allEntries = try entriesWithSubdomains(for: host)
         } else {
@@ -252,11 +269,11 @@ class PasswordsDB: PasswordStore {
         return allEntries
     }
 
-    internal func entries(for hostname: String) throws -> [PasswordRecord] {
+    internal func entries(for hostname: String) throws -> [LocalPasswordRecord] {
         do {
             return try dbPool.read { db in
-                let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.hostname == hostname && PasswordRecord.Columns.deletedAt == nil)
+                let passwords = try LocalPasswordRecord
+                    .filter(LocalPasswordRecord.Columns.hostname == hostname && LocalPasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 return passwords
             }
@@ -265,12 +282,12 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func entriesWithSubdomains(for hostname: String) throws -> [PasswordRecord] {
+    func entriesWithSubdomains(for hostname: String) throws -> [LocalPasswordRecord] {
         do {
             return try dbPool.read { db in
-                let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.hostname == hostname || PasswordRecord.Columns.hostname.like("%.\(hostname)"))
-                    .filter(PasswordRecord.Columns.deletedAt == nil)
+                let passwords = try LocalPasswordRecord
+                    .filter(LocalPasswordRecord.Columns.hostname == hostname || LocalPasswordRecord.Columns.hostname.like("%.\(hostname)"))
+                    .filter(LocalPasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 return passwords
             }
@@ -279,11 +296,11 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func find(_ searchString: String) throws -> [PasswordRecord] {
+    func find(_ searchString: String) throws -> [LocalPasswordRecord] {
         do {
             return try dbPool.read { db in
-                let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.hostname.like("%\(searchString)%") && PasswordRecord.Columns.deletedAt == nil)
+                let passwords = try LocalPasswordRecord
+                    .filter(LocalPasswordRecord.Columns.hostname.like("%\(searchString)%") && LocalPasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 return passwords
             }
@@ -293,11 +310,11 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func fetchAll() throws -> [PasswordRecord] {
+    func fetchAll() throws -> [LocalPasswordRecord] {
         do {
             return try dbPool.read { db in
-                let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.deletedAt == nil)
+                let passwords = try LocalPasswordRecord
+                    .filter(LocalPasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 return passwords
             }
@@ -306,11 +323,11 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func passwordRecord(hostname: String, username: String) throws -> PasswordRecord? {
+    func passwordRecord(hostname: String, username: String) throws -> LocalPasswordRecord? {
         do {
             return try dbPool.read { db in
-                try PasswordRecord
-                    .filter(PasswordRecord.Columns.entryId == id(for: hostname, and: username) && PasswordRecord.Columns.deletedAt == nil)
+                try LocalPasswordRecord
+                    .filter(LocalPasswordRecord.Columns.entryId == id(for: hostname, and: username) && LocalPasswordRecord.Columns.deletedAt == nil)
                     .fetchOne(db)
             }
         } catch let error {
@@ -318,14 +335,14 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String) throws -> PasswordRecord {
+    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String) throws -> LocalPasswordRecord {
         try save(hostname: hostname, username: username, encryptedPassword: encryptedPassword, privateKeySignature: privateKeySignature, uuid: nil)
     }
 
-    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID? = nil) throws -> PasswordRecord {
+    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID? = nil) throws -> LocalPasswordRecord {
         do {
             return try dbPool.write { db in
-                var passwordRecord = PasswordRecord(
+                var passwordRecord = LocalPasswordRecord(
                     uuid: uuid ?? UUID(),
                     entryId: id(for: hostname, and: username),
                     hostname: hostname,
@@ -343,7 +360,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func save(passwords: [PasswordRecord]) throws {
+    func save(passwords: [LocalPasswordRecord]) throws {
         try dbPool.write { db in
             for password in passwords {
                 var pass = password.copy()
@@ -352,7 +369,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func update(record: PasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID? = nil) throws -> PasswordRecord {
+    func update(record: LocalPasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID? = nil) throws -> LocalPasswordRecord {
         do {
             return try dbPool.write { db in
                 var updatedRecord = record
@@ -373,35 +390,35 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func allRecords(_ updatedSince: Date? = nil) throws -> [PasswordRecord] {
+    func allRecords(_ updatedSince: Date? = nil) throws -> [LocalPasswordRecord] {
         try dbPool.read { db in
             if let updatedSince = updatedSince {
-                return try PasswordRecord.filter(PasswordRecord.Columns.updatedAt >= updatedSince).fetchAll(db)
+                return try LocalPasswordRecord.filter(LocalPasswordRecord.Columns.updatedAt >= updatedSince).fetchAll(db)
             }
-            return try PasswordRecord.fetchAll(db)
+            return try LocalPasswordRecord.fetchAll(db)
         }
     }
 
-    func fetchWithId(_ id: UUID) throws -> PasswordRecord? {
+    func fetchWithId(_ id: UUID) throws -> LocalPasswordRecord? {
         try dbPool.read { db in
-            try PasswordRecord.filter(PasswordRecord.Columns.uuid == id).fetchOne(db)
+            try LocalPasswordRecord.filter(LocalPasswordRecord.Columns.uuid == id).fetchOne(db)
         }
     }
 
-    func fetchWithIds(_ ids: [UUID]) throws -> [PasswordRecord] {
+    func fetchWithIds(_ ids: [UUID]) throws -> [LocalPasswordRecord] {
         try dbPool.read { db in
-            try PasswordRecord
-                .filter(ids.contains(PasswordRecord.Columns.uuid))
+            try LocalPasswordRecord
+                .filter(ids.contains(LocalPasswordRecord.Columns.uuid))
                 .fetchAll(db)
         }
     }
 
     @discardableResult
-    func markDeleted(hostname: String, username: String) throws -> PasswordRecord {
+    func markDeleted(hostname: String, username: String) throws -> LocalPasswordRecord {
         do {
             return try dbPool.write { db in
-                if var password = try PasswordRecord
-                    .filter(PasswordRecord.Columns.entryId == id(for: hostname, and: username) && PasswordRecord.Columns.deletedAt == nil)
+                if var password = try LocalPasswordRecord
+                    .filter(LocalPasswordRecord.Columns.entryId == id(for: hostname, and: username) && LocalPasswordRecord.Columns.deletedAt == nil)
                     .fetchOne(db) {
                     password.deletedAt = BeamDate.now
                     try password.update(db)
@@ -415,16 +432,16 @@ class PasswordsDB: PasswordStore {
     }
 
     @discardableResult
-    func markAllDeleted() throws -> [PasswordRecord] {
+    func markAllDeleted() throws -> [LocalPasswordRecord] {
         do {
             return try dbPool.write { db in
                 let now = BeamDate.now
-                try PasswordRecord
+                try LocalPasswordRecord
                     .filter(Column("deletedAt") == nil)
                     .updateAll(db, Column("deletedAt").set(to: now))
 
-                let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.deletedAt == now)
+                let passwords = try LocalPasswordRecord
+                    .filter(LocalPasswordRecord.Columns.deletedAt == now)
                     .fetchAll(db)
                 return passwords
             }
@@ -434,11 +451,11 @@ class PasswordsDB: PasswordStore {
     }
 
     @discardableResult
-    func deleteAll() throws -> [PasswordRecord] {
+    func deleteAll() throws -> [LocalPasswordRecord] {
         do {
             return try dbPool.write { db in
-                let passwords = try PasswordRecord.fetchAll(db)
-                try PasswordRecord.deleteAll(db)
+                let passwords = try LocalPasswordRecord.fetchAll(db)
+                try LocalPasswordRecord.deleteAll(db)
                 return passwords
             }
         } catch {
@@ -450,8 +467,8 @@ class PasswordsDB: PasswordStore {
     func credentials(for hostname: String, completion: @escaping ([Credential]) -> Void) {
         do {
             try dbPool.read { db in
-                let passwords = try PasswordRecord
-                    .filter(PasswordRecord.Columns.hostname == hostname && PasswordRecord.Columns.deletedAt == nil)
+                let passwords = try LocalPasswordRecord
+                    .filter(LocalPasswordRecord.Columns.hostname == hostname && LocalPasswordRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
                 completion(credentials(for: passwords))
             }
