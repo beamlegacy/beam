@@ -22,7 +22,7 @@ class WebViewControllerJSNavigationHandlingTests: XCTestCase {
     var sut: WebViewController!
     private var mockPage: TestWebPageWithNavigation!
     private let navigationTimeout: TimeInterval = 4
-    private static let port: Int = 8080
+    private static let port: Int = Configuration.MockHttpServer.port
     private var destinationURL: URL!
 
     override class func setUp() {

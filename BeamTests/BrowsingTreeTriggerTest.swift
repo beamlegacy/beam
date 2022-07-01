@@ -26,7 +26,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
     }
 
     func testNavigation() throws {
-        let url0 = "http://localhost:8080/"
+        let url0 = "http://localhost:\(Configuration.MockHttpServer.port)/"
 
         let indexExpectations = (0...3).map { i in expectation(description: "index \(i)") }
         var indexExpectation = indexExpectations[0]
@@ -106,7 +106,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
             indexExpectation.fulfill()
         }
 
-        let url0 = "http://localhost:8080/"
+        let url0 = "http://localhost:\(Configuration.MockHttpServer.port)/"
         let request0 = URLRequest(url: URL(string: url0)!)
         //start reading when tab is current
         let tab0 = state.createTab(withURLRequest: request0, originalQuery: nil, setCurrent: true, note: nil, rootElement: nil, webView: nil)
@@ -141,7 +141,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
             indexExpectation.fulfill()
         }
 
-        let url = "http://localhost:8080/"
+        let url = "http://localhost:\(Configuration.MockHttpServer.port)/"
         let request = URLRequest(url: URL(string: url)!)
         //start reading when tab is current
         let tab = state.createTab(withURLRequest: request, originalQuery: nil, setCurrent: true, note: nil, rootElement: nil, webView: nil)
@@ -156,7 +156,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
             indexExpectation.fulfill()
         }
 
-        let url = "http://localhost:8080/"
+        let url = "http://localhost:\(Configuration.MockHttpServer.port)/"
         let request = URLRequest(url: URL(string: url)!)
         //start reading when tab is current
         let tab = state.createTab(withURLRequest: request, originalQuery: nil, setCurrent: true, note: nil, rootElement: nil, webView: nil)
@@ -184,7 +184,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         let scrollAmountX = 50
         let scrollAmountY = 100
 
-        let url = "http://localhost:8080/"
+        let url = "http://localhost:\(Configuration.MockHttpServer.port)/"
         let request = URLRequest(url: URL(string: url)!)
         //start reading when tab is current
         let tab = state.createTab(withURLRequest: request, originalQuery: nil, setCurrent: true, note: nil, rootElement: nil, webView: nil)
@@ -207,8 +207,8 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
     }
 
     func testCmdClick() throws {
-        let url0 = "http://localhost:8080/"
-        let url1 = "http://ambiguous.form.lvh.me:8080/"
+        let url0 = "http://localhost:\(Configuration.MockHttpServer.port)/"
+        let url1 = "http://ambiguous.form.lvh.me:\(Configuration.MockHttpServer.port)/"
 
         let indexExpectations = (0...1).map { i in expectation(description: "index \(i)") }
         var indexExpectation = indexExpectations[0]
@@ -246,7 +246,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
     func testOrigins() {
 
         //trigger a searchBar origin
-        let url = "http://localhost:8080/"
+        let url = "http://localhost:\(Configuration.MockHttpServer.port)/"
 
         let indexExpectations = (0...3).map { i in expectation(description: "index \(i)") }
         var indexExpectation = indexExpectations[0]

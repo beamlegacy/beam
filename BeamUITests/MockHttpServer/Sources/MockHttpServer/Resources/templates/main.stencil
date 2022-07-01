@@ -52,8 +52,8 @@
 </ul>
 
 <h2>Downloads:</h2>
-<div>To download a text file: <strong>http://download.lvh.me:8080/<em>filename</em>?length=<em>bytes</em></strong><div>
-<div>Example: <a href="http://download.lvh.me:8080/loremipsum.txt?length=500000">http://download.lvh.me:8080/loremipsum.txt?length=500000</a></div>
+<div>To download a text file: <strong>http://download.lvh.me:{{ params.port }}/<em>filename</em>?length=<em>bytes</em></strong><div>
+<div>Example: <a href="http://download.lvh.me:{{ params.port }}/loremipsum.txt?length=500000">http://download.lvh.me:{{ params.port }}/loremipsum.txt?length=500000</a></div>
 <div>Default length: 100000 bytes.</div>
 
 </body>
