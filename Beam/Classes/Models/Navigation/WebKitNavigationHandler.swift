@@ -258,12 +258,16 @@ extension WebKitNavigationHandler {
            navigationAction.navigationType == .linkActivated,
            isNavigationWithCommandKey(navigationAction) || page.shouldNavigateInANewTab(url: targetURL) || isNavigationWithMiddleMouseDown(navigationAction) {
             let setCurent = (isNavigationWithCommandKey(navigationAction) || isNavigationWithMiddleMouseDown(navigationAction)) ? false : true
-            _ = page.createNewTab(
-                request,
-                nil,
-                setCurrent: setCurent,
-                rect: page.frame
-            )
+            if PreferencesManager.cmdClickOpenTab {
+                _ = page.createNewTab(
+                    request,
+                    nil,
+                    setCurrent: setCurent,
+                    rect: page.frame
+                )
+            } else {
+               _ = page.createNewWindow(request, nil, windowFeatures: BeamWindowFeatures(), setCurrent: true)
+            }
             return true
         } else {
             return false
