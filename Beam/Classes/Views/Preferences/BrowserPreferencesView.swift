@@ -217,7 +217,7 @@ struct DownloadSection: View {
                 loaded = true
             })
             .onReceive([self.selectedDownloadFolder].publisher, perform: handleOnReceive)
-            if self.selectedDownloadFolder == DownloadFolder.custom.rawValue {
+            if self.selectedDownloadFolder == DownloadFolder.custom.rawValue && PreferencesManager.customDownloadFolder != nil {
                 pathToCustomDownloadFolderButton
             }
         }
@@ -232,7 +232,11 @@ struct DownloadSection: View {
             panel.canChooseFiles = false
             panel.directoryURL = DownloadFolder(rawValue: value)?.rawUrl
             panel.prompt = "Select"
-            panel.runModal()
+
+            if panel.runModal() == .cancel {
+                self.selectedDownloadFolder = PreferencesManager.selectedDownloadFolder
+                return
+            }
 
             let choosedFolder = panel.url
 
