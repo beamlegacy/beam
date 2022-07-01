@@ -350,7 +350,7 @@ class BeamFileDBManager: BeamFileStorage {
     func allRecords(_ updatedSince: Date? = nil) throws -> [BeamFileRecord] {
         try dbPool.read { db in
             if let updatedSince = updatedSince {
-                return try BeamFileRecord.filter(PasswordRecord.Columns.updatedAt >= updatedSince).fetchAll(db)
+                return try BeamFileRecord.filter(BeamFileRecord.Columns.updatedAt >= updatedSince).fetchAll(db)
             }
             return try BeamFileRecord.fetchAll(db)
         }

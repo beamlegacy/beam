@@ -43,17 +43,17 @@ struct PasswordManagerHostLookupOptions: OptionSet {
 }
 
 protocol PasswordStore {
-    func entries(for hostname: String, options: PasswordManagerHostLookupOptions) throws -> [PasswordRecord]
-    func find(_ searchString: String) throws -> [PasswordRecord]
-    func fetchAll() throws -> [PasswordRecord]
-    func allRecords(_ updatedSince: Date?) throws -> [PasswordRecord]
-    func passwordRecord(hostname: String, username: String) throws -> PasswordRecord?
-    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> PasswordRecord
-    func save(passwords: [PasswordRecord]) throws
-    func update(record: PasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> PasswordRecord
-    @discardableResult func markDeleted(hostname: String, username: String) throws -> PasswordRecord
-    @discardableResult func markAllDeleted() throws -> [PasswordRecord]
-    @discardableResult func deleteAll() throws -> [PasswordRecord]
+    func entries(for hostname: String, options: PasswordManagerHostLookupOptions) throws -> [LocalPasswordRecord]
+    func find(_ searchString: String) throws -> [LocalPasswordRecord]
+    func fetchAll() throws -> [LocalPasswordRecord]
+    func allRecords(_ updatedSince: Date?) throws -> [LocalPasswordRecord]
+    func passwordRecord(hostname: String, username: String) throws -> LocalPasswordRecord?
+    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord
+    func save(passwords: [LocalPasswordRecord]) throws
+    func update(record: LocalPasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord
+    @discardableResult func markDeleted(hostname: String, username: String) throws -> LocalPasswordRecord
+    @discardableResult func markAllDeleted() throws -> [LocalPasswordRecord]
+    @discardableResult func deleteAll() throws -> [LocalPasswordRecord]
     func credentials(for hostname: String, completion: @escaping ([Credential]) -> Void)
 }
 

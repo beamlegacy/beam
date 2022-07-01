@@ -311,7 +311,7 @@ class CreditCardsDB: CreditCardStore {
                     .updateAll(db, Column("deletedAt").set(to: now))
 
                 let records = try CreditCardRecord
-                    .filter(PasswordRecord.Columns.deletedAt == now)
+                    .filter(CreditCardRecord.Columns.deletedAt == now)
                     .fetchAll(db)
                 return records
             }
