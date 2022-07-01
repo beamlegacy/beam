@@ -76,7 +76,6 @@ extension BrowserTab: WebPage {
     }
 
     func createNewWindow(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
-        // TODO: Open a new window compliant with windowFeatures instead, including slight offset similar to the default new window behaviour
         let defaultValue = true
         let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
         let statusBar = windowFeatures.statusBarVisibility?.boolValue ?? defaultValue
@@ -98,6 +97,9 @@ extension BrowserTab: WebPage {
 
             newWindow = newBeamWindow
             newWebView = tab.webView
+            if let windowFeatures = windowFeatures as? BeamWindowFeatures {
+                windowFeatures.origin = newBeamWindow.frame.origin
+            }
         } else {
             // this is more likely a login window or something that should disappear at some point so let's create something transient:
             // IMPORTANT!!: WebKit will perform the `URLRequest` automatically!! Attempting to do
@@ -110,7 +112,9 @@ extension BrowserTab: WebPage {
             state?.setup(webView: newWebView)
         }
         if windowFeatures.x == nil || windowFeatures.y == nil {
-            newWindow.center()
+            if let beamWindowFeatures = windowFeatures as? BeamWindowFeatures, beamWindowFeatures.origin == nil {
+                newWindow.center()
+            }
         }
         return newWebView
     }
