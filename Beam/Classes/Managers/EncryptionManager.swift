@@ -5,7 +5,9 @@ import BeamCore
 enum EncryptionManagerError: Error {
     case authenticationFailure
     case stringEncodingError
+    case stringDecodingError
     case keyError
+    case internalEncryptionError
 }
 extension EncryptionManagerError: LocalizedError {
     public var errorDescription: String? {
@@ -14,8 +16,12 @@ extension EncryptionManagerError: LocalizedError {
             return loc("Couldn't decrypt data, encrypted with a different private key?")
         case .stringEncodingError:
             return loc("Couldn't change String to Data.")
+        case .stringDecodingError:
+            return loc("Couldn't decode UTF-8")
         case .keyError:
             return loc("Key couldn't be read")
+        case .internalEncryptionError:
+            return loc("Internal encryption error")
         }
     }
 }

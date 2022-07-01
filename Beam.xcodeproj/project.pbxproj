@@ -603,6 +603,7 @@
 		879CA71D281AE05C00D1C395 /* CreditCardListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CA71C281AE05C00D1C395 /* CreditCardListViewModel.swift */; };
 		87A551C527ADA1F100D6A22D /* WebAutofillPopoverContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */; };
 		87A87CE426C2F620009D9EE2 /* PasswordExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */; };
+		87AD4BF4286A530C0058F8BE /* PasswordEncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AD4BF3286A530C0058F8BE /* PasswordEncryptionManager.swift */; };
 		87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */; };
 		87C539BD26162C3400D51877 /* WebFieldAutofillMenuCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539BC26162C3400D51877 /* WebFieldAutofillMenuCell.swift */; };
 		87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */; };
@@ -2232,6 +2233,7 @@
 		879CA71C281AE05C00D1C395 /* CreditCardListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardListViewModel.swift; sourceTree = "<group>"; };
 		87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutofillPopoverContainer.swift; sourceTree = "<group>"; };
 		87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordExporterTests.swift; sourceTree = "<group>"; };
+		87AD4BF3286A530C0058F8BE /* PasswordEncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordEncryptionManager.swift; sourceTree = "<group>"; };
 		87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModel.swift; sourceTree = "<group>"; };
 		87C539BC26162C3400D51877 /* WebFieldAutofillMenuCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillMenuCell.swift; sourceTree = "<group>"; };
 		87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSuggestionCell.swift; sourceTree = "<group>"; };
@@ -4408,6 +4410,7 @@
 				5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */,
 				52C5A40826DFAB2D00CD559F /* DocumentStruct+Debug.swift */,
 				524CF6C925F2735D007312F0 /* EncryptionManager.swift */,
+				87AD4BF3286A530C0058F8BE /* PasswordEncryptionManager.swift */,
 				9606616727AC1F5E007D3DD0 /* PrivateKeySignature.swift */,
 				A545055427B11F83006AE756 /* EncryptionManager+ImportExport.swift */,
 				A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */,
@@ -9216,6 +9219,7 @@
 				A5919F7F268EF964009015C5 /* TextEditCmdReturnAnimator.swift in Sources */,
 				52842D522715B3F40099602C /* FilesList.swift in Sources */,
 				375D83C8278D6ACE0064C246 /* WebViewStatusBar.swift in Sources */,
+				87AD4BF4286A530C0058F8BE /* PasswordEncryptionManager.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
 				52842D572715D2620099602C /* FileRow.swift in Sources */,
 				A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */,
