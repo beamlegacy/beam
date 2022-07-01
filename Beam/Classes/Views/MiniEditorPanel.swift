@@ -26,7 +26,9 @@ class MiniEditorPanel: NSPanel {
         CGPoint(x: mainWindowFrame.origin.x + mainWindowFrame.width + 5, y: mainWindowFrame.origin.y)
     }
 
-    static func presentMiniEditor(from window: BeamWindow, with note: BeamNote) {
+    static func presentMiniEditor(from window: BeamWindow, with note: BeamNote, at frame: CGRect? = nil) {
+        guard Configuration.branchType == .develop else { return }
+
         let state = window.state
         guard state.associatedPanel(for: note) == nil else {
             state.associatedPanel(for: note)?.makeKeyAndOrderFront(nil)
@@ -37,9 +39,11 @@ class MiniEditorPanel: NSPanel {
         let panelSize = CGSize(width: idealWidth, height: window.frame.height)
         let position = dockedPanelOrigin(from: window.frame)
 
-        let miniEditor = MiniEditorPanel(note: note, state: state, rect: NSRect(origin: position, size: panelSize))
-        window.addChildWindow(miniEditor, ordered: .above)
-        miniEditor.makeKey()
+        let miniEditor = MiniEditorPanel(note: note, state: state, rect: frame ?? NSRect(origin: position, size: panelSize))
+        if frame == nil {
+            window.addChildWindow(miniEditor, ordered: .above)
+        }
+        miniEditor.makeKeyAndOrderFront(nil)
     }
 
     static func panelWidth(for originWindow: BeamWindow) -> CGFloat {
@@ -53,7 +57,7 @@ class MiniEditorPanel: NSPanel {
         super.init(contentRect: rect, styleMask: [.fullSizeContentView, .borderless], backing: .buffered, defer: false)
 
         self.title = note.title
-        
+
         let mainView = MiniEditor(note: note, window: self)
             .environmentObject(state)
             .environmentObject(data)
@@ -191,26 +195,42 @@ struct MiniEditor: View {
         ZStack(alignment: .top) {
             GeometryReader { proxy in
                 NoteView(note: note, containerGeometry: proxy, topInset: 0, leadingPercentage: 0, centerText: false)
-            }
-            HStack {
-                ButtonLabel(icon: "tabs-side_close", customStyle: buttonStyle) {
-                    window?.close()
-                }
-                .padding(.leading, 10)
-                .padding(.vertical, 10)
-                if window?.parent == nil {
-                    Button("Re-Dock") {
-                        window?.reDock()
+                HStack {
+                    ButtonLabel(icon: "tabs-side_close", customStyle: buttonStyle) {
+                        if let window = window {
+                            window.close()
+                        } else {
+                            state.sideNote = nil
+                        }
+                    }
+                    Spacer()
+                    if let window = window, window.parent == nil {
+                        Button("Re-Dock") {
+                            window.reDock()
+                        }
+                    }
+                    if let window = windowInfo.window as? BeamWindow {
+                        ButtonLabel(icon: "tabs-side_detach", customStyle: buttonStyle) {
+                            let frame = proxy.frame(in: .global)
+                            MiniEditorPanel.presentMiniEditor(from: window, with: note, at: window.convertToScreen(frame).offsetBy(dx: 20, dy: -20))
+                            state.sideNote = nil
+                        }
+                    } else if let window = windowInfo.window as? MiniEditorPanel {
+                        ButtonLabel(icon: "tabs-side_openmain", customStyle: buttonStyle) {
+                            state.sideNote = note
+                            window.close()
+                        }
                     }
                 }
-                Spacer()
-            }.background(VisualEffectView(material: .headerView))
+                .padding(10)
+                .background(VisualEffectView(material: .headerView))
+            }
         }
         .background(BeamColor.Generic.background.swiftUI)
         .cornerRadius(10)
     }
 
     private var buttonStyle: ButtonLabelStyle {
-        ButtonLabelStyle(iconSize: 12)
+        ButtonLabelStyle(iconSize: 12, activeBackgroundColor: .clear)
     }
 }
