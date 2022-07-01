@@ -68,21 +68,22 @@ class PasswordsDBTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 10.0)
 
-        guard var newPasswordUnwrapped = newPassword else {
+        guard let newPasswordUnwrapped = newPassword else {
             XCTFail("Password wasn't saved")
             return
         }
 
         do {
-            let remotePassword: PasswordRecord? = try beamObjectHelper.fetchOnAPI(newPasswordUnwrapped)
+            var newPasswordReEncrypted = try PasswordEncryptionManager.reEncryptBeforeSend(newPasswordUnwrapped)
+            let remotePassword: RemotePasswordRecord? = try beamObjectHelper.fetchOnAPI(newPasswordReEncrypted)
             XCTAssertNotNil(remotePassword, "Object doesn't exist on the API side?")
 
             if var remotePassword = remotePassword {
                 // We need to decrypt passwords as both, even equal, will give different encrypted strings
                 let decryptedPassword = try EncryptionManager.shared.decryptString(remotePassword.password) ?? "1"
                 remotePassword.password = decryptedPassword
-                newPasswordUnwrapped.password = try EncryptionManager.shared.decryptString(newPasswordUnwrapped.password) ?? "2"
-                XCTAssertEqual(newPasswordUnwrapped, remotePassword)
+                newPasswordReEncrypted.password = try EncryptionManager.shared.decryptString(newPasswordReEncrypted.password) ?? "2"
+                XCTAssertEqual(newPasswordReEncrypted, remotePassword)
             }
         } catch {
             XCTFail(error.localizedDescription)
@@ -124,7 +125,7 @@ class PasswordsDBTests: XCTestCase {
         let beamObject = BeamObject(id: UUID(uuidString: "000008B1-9BF7-4D11-8CFC-381A81A30EA0")!, beamObjectType: "password")
         beamObject.data = data
 
-        let passwordRecord: PasswordRecord = try beamObject.decodeBeamObject()
+        let passwordRecord: RemotePasswordRecord = try beamObject.decodeBeamObject()
         XCTAssertEqual(passwordRecord.username, "foo@gmail.com")
         XCTAssertEqual(passwordRecord.hostname, "facebook.com")
     }
@@ -144,7 +145,7 @@ class PasswordsDBTests: XCTestCase {
         let beamObject = BeamObject(id: UUID(uuidString: "000008B1-9BF7-4D11-8CFC-381A81A30EA0")!, beamObjectType: "password")
         beamObject.data = data
 
-        let passwordRecord: PasswordRecord = try beamObject.decodeBeamObject()
+        let passwordRecord: RemotePasswordRecord = try beamObject.decodeBeamObject()
         XCTAssertEqual(passwordRecord.username, "foo@gmail.com")
         XCTAssertEqual(passwordRecord.hostname, "facebook.com")
     }
