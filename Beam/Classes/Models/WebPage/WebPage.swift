@@ -228,7 +228,7 @@ extension WebPage {
         guard let query = textSelection, let tuple = state?.urlFor(query: query), let url = tuple.0 else {
             return
         }
-        state?.createTab(withURLRequest: URLRequest(url: url))
+        state?.performQuickSearch(with: URLRequest(url: url))
     }
 
 }
