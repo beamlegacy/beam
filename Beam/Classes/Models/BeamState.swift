@@ -151,6 +151,8 @@ import Sentry
 
     var downloadButtonPosition: CGPoint?
 
+    private var lastQuickSearchDate: Date = .init()
+
     private var scope = Set<AnyCancellable>()
     let cmdManager = CommandManager<BeamState>()
 
@@ -399,6 +401,13 @@ import Sentry
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         keepDestinationNote = true
         startNewSearch()
+    }
+
+    func performQuickSearch(with request: URLRequest) {
+        let now: Date = .init()
+        guard now.timeIntervalSince(lastQuickSearchDate) > 1 else { return } // very basic debouncing...
+        createTab(withURLRequest: request)
+        lastQuickSearchDate = now
     }
 
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
