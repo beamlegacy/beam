@@ -23,12 +23,26 @@ indirect enum ContextMenuMessageHandlerPayload {
     /// Menu invoked from an image, inline or raw.
     case image(src: String)
 
+    /// Menu invoked from an element that we want to ignore.
+    case ignored
+
     /// Menu invoked from a combination of invocations.
     case multiple(items: [ContextMenuMessageHandlerPayload])
 
 }
 
 extension ContextMenuMessageHandlerPayload {
+
+    /// For some invocations, we want to keep a custom menu with items in a specific order.
+    /// In other cases, we might want to keep the original menu, but with some items hidden or replaced on the fly.
+    var shouldBuildCustomMenu: Bool {
+        switch self {
+        case .ignored:
+            return false
+        default:
+            return true
+        }
+    }
 
     var contents: String? {
         switch self {
@@ -125,6 +139,7 @@ extension ContextMenuMessageHandlerPayload: ScriptMessageBodyDecodable {
         static let textSelection    = Invocations(rawValue: 1 << 1)
         static let link             = Invocations(rawValue: 1 << 2)
         static let image            = Invocations(rawValue: 1 << 3)
+        static let ignored          = Invocations(rawValue: 1 << 4)
 
     }
 
@@ -146,7 +161,14 @@ extension ContextMenuMessageHandlerPayload: ScriptMessageBodyDecodable {
 
         var invocations = Invocations(rawValue: rawInvocations)
 
-        if invocations.contains(.page) {
+        if invocations.contains(.ignored) {
+            // pop-count check to be sure that the native media invocation is not associated with other invocations
+            guard invocations.rawValue.nonzeroBitCount == 1 else {
+                throw ScriptMessageBodyDecodingError.unexpectedFormat
+            }
+
+            self = .ignored
+        } else if invocations.contains(.page) {
             // pop-count check to be sure that the page invocation is not associated with other invocations
             guard invocations.rawValue.nonzeroBitCount == 1 else {
                 throw ScriptMessageBodyDecodingError.unexpectedFormat
