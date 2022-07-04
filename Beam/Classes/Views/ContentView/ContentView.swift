@@ -58,6 +58,19 @@ struct ContentView: View {
         }
     }
 
+    @ViewBuilder var sideNoteSeparator: some View {
+        if state.sideNote != nil {
+            Rectangle()
+                .frame(width: 4)
+                .foregroundColor(.clear)
+                .cursorOverride(.resizeLeftRight)
+                .gesture(DragGesture().onChanged { value in
+                    let newWidth = sideNoteWidth - value.translation.width
+                    sideNoteWidth = newWidth.clamp(400, 800)
+                })
+        }
+    }
+
     var body: some View {
         ZStack {
             HStack(spacing: 0) {
@@ -65,19 +78,9 @@ struct ContentView: View {
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
                     .frame(minWidth: 800)
                     .background(BeamColor.Generic.background.swiftUI)
-                    .roundedCorners(radius: 10, corners: [.topRight, .bottomRight])
                     .edgesIgnoringSafeArea(.top)
                     .zIndex(0)
-                if state.sideNote != nil {
-                    Rectangle()
-                        .frame(width: 4)
-                        .foregroundColor(.clear)
-                        .cursorOverride(.resizeLeftRight)
-                        .gesture(DragGesture().onChanged { value in
-                            let newWidth = sideNoteWidth - value.translation.width
-                            sideNoteWidth = newWidth.clamp(400, 800)
-                        })
-                }
+                sideNoteSeparator
                 sideNote
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
                     .frame(width: sideNoteWidth)
