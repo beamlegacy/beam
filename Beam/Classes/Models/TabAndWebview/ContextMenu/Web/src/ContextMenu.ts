@@ -8,10 +8,11 @@ import type { ContextMenuUI as ContextMenuUI } from "./ContextMenuUI"
 import { BeamLogger } from "@beam/native-utils"
 
 enum Invocation {
-  Page = 1,
-  TextSelection = 2,
-  Link = 4,
-  Image = 8
+  Page = 1 << 0,
+  TextSelection = 1 << 1,
+  Link = 1 << 2,
+  Image = 1 << 3,
+  Ignored = 1 << 4
 }
 
 export class ContextMenu<UI extends ContextMenuUI> {
@@ -82,6 +83,9 @@ export class ContextMenu<UI extends ContextMenuUI> {
   elementsAndInvocationType(element: BeamElement, invocation?: Invocation): [BeamElement[], Invocation] {
     if (element == null || element == this.win.document.body) {
       return [[element], Invocation.Page]
+    }
+    if (element.tagName == "VIDEO" || element.tagName == "AUDIO" || element.tagName == "INPUT" || element.tagName == "TEXTAREA") {
+      return [[element], Invocation.Ignored]
     }
     if (element.tagName == "A") {
       return [[element], Invocation.Link]

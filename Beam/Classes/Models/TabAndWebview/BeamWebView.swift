@@ -214,7 +214,7 @@ class BeamWebView: WKWebView {
     }
 
     override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
-        if let payload = page?.pendingContextMenuPayload {
+        if let payload = page?.pendingContextMenuPayload, payload.shouldBuildCustomMenu {
             menu.items = BeamWebContextMenuItem.items(with: payload, from: self, menu: menu)
             page?.pendingContextMenuPayload = nil
         } else {
@@ -225,7 +225,11 @@ class BeamWebView: WKWebView {
     private func configureItemsForDefaultMenu(_ menu: NSMenu) {
         let menuItemIdentifiersToDisable: [NSUserInterfaceItemIdentifier] = [
             .webKitCopyImage,
-            .webKitDownloadImage
+            .webKitDownloadImage,
+            .webKitSearchWeb,
+            .webKitDownloadMedia,
+            .webKitOpenMediaInNewWindow,
+            .webKitToggleEnhancedFullscreen
         ]
 
         let filteredItems = menu.items.filter { menuItem in
