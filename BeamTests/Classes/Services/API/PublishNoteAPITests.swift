@@ -21,6 +21,8 @@ class PublishNoteAPITests: XCTestCase {
     var testNoteDocumentStruct: DocumentStruct!
 
     override func setUpWithError() throws {
+        AccountManager.logout() // will force clean up data
+
         BeamTestsHelper.logout()
         BeamDate.freeze("2022-04-18T06:00:03Z")
         APIRequest.networkCallFiles = []
