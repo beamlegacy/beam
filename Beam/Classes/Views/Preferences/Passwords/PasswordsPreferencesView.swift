@@ -8,6 +8,7 @@
 import SwiftUI
 import Preferences
 import BeamCore
+import LocalAuthentication
 
 let PasswordsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .passwords, title: "Passwords", imageName: "preferences-passwords") {
     PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(), creditCardsViewModel: CreditCardListViewModel())
@@ -18,19 +19,41 @@ struct PasswordsPreferencesView: View {
     var passwordsViewModel: PasswordListViewModel
     var creditCardsViewModel: CreditCardListViewModel
 
+    // view stays unlocked for 5 minutes.
+    @State private var lastUnlockDate: Date?
+    private var isUnlocked: Bool {
+        lastUnlockDate != nil && (lastUnlockDate?.timeIntervalSinceNow ?? -300 > -300)
+    }
+
+    private func checkAuthentication() {
+        Task { @MainActor in
+            await passwordsViewModel.checkAuthentication()
+            lastUnlockDate = passwordsViewModel.isUnlocked ? BeamDate.now : nil
+        }
+    }
+
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(bottomDivider: true) {
+            Preferences.Section(bottomDivider: isUnlocked) {
                 Text("").labelsHidden()
             } content: {
+                let isUnlocked = isUnlocked
                 VStack {
                     Passwords(passwordsViewModel: passwordsViewModel)
+                        .opacity(isUnlocked ? 1 : 0)
+                        .overlay(isUnlocked ? nil : LockedPasswordsView(onUnlockPressed: { checkAuthentication() }),
+                                 alignment: .center)
+                }
+                .onAppear {
+                    guard !self.isUnlocked && AppDelegate.main.openedPrefPanelOnce else { return }
+                    checkAuthentication()
                 }
             }
             Preferences.Section {
                 Text("").labelsHidden()
             } content: {
                 Webforms(creditCardsViewModel: creditCardsViewModel)
+                    .opacity(isUnlocked ? 1 : 0)
             }
         }
     }
@@ -39,6 +62,57 @@ struct PasswordsPreferencesView: View {
 struct PasswordsPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
         PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(), creditCardsViewModel: CreditCardListViewModel())
+    }
+}
+
+private struct LockedPasswordsView: View {
+
+    @State private var hasTouchID: Bool = false
+    var onUnlockPressed: () -> Void
+    private func updateHasTouchID() {
+        let context = LAContext()
+        hasTouchID = context.biometryType == .touchID
+    }
+
+    private var unlockSubtitle: String {
+        let username = NSFullUserName()
+        var text = loc("Click the Unlock button to ")
+        if hasTouchID {
+            text += loc("Touch ID or ")
+        }
+        text += loc("enter the password for the user “\(username)”")
+        return text
+    }
+
+    var body: some View {
+        VStack(alignment: .center, spacing: BeamSpacing._200) {
+            Image("preferences-passswords_lock")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 96, height: 96)
+            VStack(alignment: .center, spacing: BeamSpacing._100) {
+                Text(loc("Passwords Are Locked"))
+                    .font(BeamFont.semibold(size: 18).swiftUI)
+                Text(unlockSubtitle)
+                    .multilineTextAlignment(.center)
+                    .font(BeamFont.regular(size: 13).swiftUI)
+            }
+            .frame(maxWidth: 340)
+            Button(action: {
+                onUnlockPressed()
+            }, label: {
+                Text(loc("Unlock"))
+                    .frame(minWidth: 100)
+            })
+        }
+        .foregroundColor(BeamColor.Generic.text.swiftUI)
+        .onAppear {
+            updateHasTouchID()
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+                // sometimes touch ID isn't available right away
+                updateHasTouchID()
+            }
+        }
     }
 }
 
@@ -61,111 +135,125 @@ struct Passwords: View {
     @State private var availableImportSources: [OnboardingImportsView.ImportSource] = [.passwordsCSV]
     @State private var importPasswordsChoice = -1
 
+    @State private var isViewUnlocked = false
+
+    var topRow: some View {
+        HStack {
+            Toggle(isOn: $autofillUsernamePasswords) {
+                Text("Autofill usernames and passwords")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([autofillUsernamePasswords].publisher.first()) {
+                    PreferencesManager.autofillUsernamePasswords = $0
+                }
+            Spacer()
+            BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor)
+                .frame(width: 220, height: 21, alignment: .center)
+                .foregroundColor(BeamColor.Generic.background.swiftUI)
+                .onChange(of: searchString) { searchString in
+                    passwordsViewModel.searchString = searchString
+                }
+        }
+    }
+
+    private var passwordTableView: some View {
+        HStack {
+            Spacer()
+            PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems) { idx in
+                passwordsViewModel.updateSelection(idx)
+            } onDoubleTap: { row in
+                let entry = passwordsViewModel.filteredPasswordEntries[row]
+                do {
+                    let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
+                    editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
+                } catch {
+                    alertMessage = .init(error: error)
+                }
+            }
+            .frame(width: 682, height: 240, alignment: .center)
+            .border(BeamColor.Mercury.swiftUI, width: 1)
+            .background(BeamColor.Generic.background.swiftUI)
+            Spacer()
+        }
+    }
+
+    private var bottomRow: some View {
+        HStack {
+            Group {
+                Group {
+                    Button {
+                        showingAddPasswordSheet = true
+                    } label: {
+                        Image("basicAdd")
+                            .renderingMode(.template)
+                    }.buttonStyle(.bordered)
+                        .sheet(isPresented: $showingAddPasswordSheet) {
+                            PasswordEditView(entry: nil, password: "", editType: .create)
+                                .frame(width: 400, height: 179, alignment: .center)
+                        }
+                    Button {
+                        promptDeletePasswordsAlert()
+                    } label: {
+                        Image("basicRemove")
+                            .renderingMode(.template)
+                    }.buttonStyle(.bordered)
+                        .disabled(passwordsViewModel.selectedEntries.count == 0)
+                }
+            }
+            .fixedSize()
+
+            Button {
+                if let entry = passwordsViewModel.selectedEntries.first {
+                    do {
+                        let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
+                        editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
+                    } catch {
+                        alertMessage = .init(error: error)
+                    }
+                }
+            } label: {
+                Text("Details…")
+            }.buttonStyle(.bordered)
+                .sheet(item: $editedPassword) {
+                    PasswordEditView(entry: $0.entry, password: $0.password, editType: .update)
+                }
+                .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1)
+            Spacer()
+            HStack {
+                Picker("", selection: $importPasswordsChoice) {
+                    Text("Import…").tag(-1)
+                    ForEach(Array(availableImportSources.enumerated()), id: \.self.0) { (idx, src) in
+                        Text(src.rawValue).tag(idx)
+                    }
+                }
+                .pickerStyle(.menu)
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .frame(width: 96)
+                .onChange(of: importPasswordsChoice) { index in
+                    if index >= 0 {
+                        let importSource = availableImportSources[index]
+                        importPasswordsChoice = -1
+                        importPasswordsAction(source: importSource)
+                    }
+                }
+                Button {
+                    exportPasswordAction()
+                } label: {
+                    Text("Export…")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                }.buttonStyle(.bordered)
+            }
+        }
+    }
+
     var body: some View {
         HStack {
             Spacer()
             VStack(alignment: .center) {
-                HStack {
-                    Toggle(isOn: $autofillUsernamePasswords) {
-                        Text("Autofill usernames and passwords")
-                    }.toggleStyle(CheckboxToggleStyle())
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                        .onReceive([autofillUsernamePasswords].publisher.first()) {
-                            PreferencesManager.autofillUsernamePasswords = $0
-                        }
-                    Spacer()
-                    BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor)
-                        .frame(width: 220, height: 21, alignment: .center)
-                        .foregroundColor(BeamColor.Generic.background.swiftUI)
-                        .onChange(of: searchString) { searchString in
-                            passwordsViewModel.searchString = searchString
-                        }
-                }
-                HStack {
-                    Spacer()
-                    PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems) { idx in
-                        passwordsViewModel.updateSelection(idx)
-                    } onDoubleTap: { row in
-                        let entry = passwordsViewModel.filteredPasswordEntries[row]
-                        do {
-                            let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
-                            editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
-                        } catch {
-                            alertMessage = .init(error: error)
-                        }
-                    }
-                    .frame(width: 682, height: 240, alignment: .center)
-                    .border(BeamColor.Mercury.swiftUI, width: 1)
-                    .background(BeamColor.Generic.background.swiftUI)
-                    Spacer()
-                }
-                HStack {
-                    Group {
-                        Group {
-                            Button {
-                                showingAddPasswordSheet = true
-                            } label: {
-                                Image("basicAdd")
-                                    .renderingMode(.template)
-                            }.buttonStyle(.bordered)
-                                .sheet(isPresented: $showingAddPasswordSheet) {
-                                    PasswordEditView(entry: nil, password: "", editType: .create)
-                                        .frame(width: 400, height: 179, alignment: .center)
-                                }
-                            Button {
-                                promptDeletePasswordsAlert()
-                            } label: {
-                                Image("basicRemove")
-                                    .renderingMode(.template)
-                            }.buttonStyle(.bordered)
-                                .disabled(passwordsViewModel.selectedEntries.count == 0)
-                        }
-                    }
-                    .fixedSize()
-
-                    Button {
-                        if let entry = passwordsViewModel.selectedEntries.first {
-                            do {
-                                let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
-                                editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
-                            } catch {
-                                alertMessage = .init(error: error)
-                            }
-                        }
-                    } label: {
-                        Text("Details…")
-                    }.buttonStyle(.bordered)
-                        .sheet(item: $editedPassword) {
-                            PasswordEditView(entry: $0.entry, password: $0.password, editType: .update)
-                        }
-                        .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1)
-                    Spacer()
-                    HStack {
-                        Picker("", selection: $importPasswordsChoice) {
-                            Text("Import…").tag(-1)
-                            ForEach(Array(availableImportSources.enumerated()), id: \.self.0) { (idx, src) in
-                                Text(src.rawValue).tag(idx)
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .frame(width: 96)
-                        .onChange(of: importPasswordsChoice) { index in
-                            if index >= 0 {
-                                let importSource = availableImportSources[index]
-                                importPasswordsChoice = -1
-                                importPasswordsAction(source: importSource)
-                            }
-                        }
-                        Button {
-                            exportPasswordAction()
-                        } label: {
-                            Text("Export…")
-                                .font(BeamFont.regular(size: 13).swiftUI)
-                        }.buttonStyle(.bordered)
-                    }
-                }
+                topRow
+                passwordTableView
+                bottomRow
             }.frame(width: 682, alignment: .center)
             Spacer()
         }
