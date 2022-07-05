@@ -40,9 +40,11 @@ struct PasswordsPreferencesView: View {
                 let isUnlocked = isUnlocked
                 VStack {
                     Passwords(passwordsViewModel: passwordsViewModel)
-                        .opacity(isUnlocked ? 1 : 0)
-                        .overlay(isUnlocked ? nil : LockedPasswordsView(onUnlockPressed: { checkAuthentication() }),
-                                 alignment: .center)
+                        .if(!isUnlocked) {
+                            $0.opacity(0)
+                            .overlay(LockedPasswordsView(onUnlockPressed: { checkAuthentication() }),
+                                     alignment: .center)
+                        }
                 }
                 .onAppear {
                     guard !self.isUnlocked && AppDelegate.main.openedPrefPanelOnce else { return }
