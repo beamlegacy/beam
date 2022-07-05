@@ -64,7 +64,9 @@ struct OtherCreditCardsModal: View {
         }
         .foregroundColor(BeamColor.Generic.background.swiftUI)
         .padding(20)
-        .opacity(viewModel.isUnlocked ? 1 : 0)
+        .if(!viewModel.isUnlocked) {
+            $0.opacity(0)
+        }
         .onAppear {
             Task {
                 await viewModel.checkAuthentication()
