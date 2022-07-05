@@ -88,6 +88,15 @@ struct OtherPasswordModal: View {
         }
         .foregroundColor(BeamColor.Generic.background.swiftUI)
         .padding(20)
+        .opacity(viewModel.isUnlocked ? 1 : 0)
+        .onAppear {
+            Task {
+                await viewModel.checkAuthentication()
+                if !viewModel.isUnlocked {
+                    dismiss()
+                }
+            }
+        }
     }
 
     private func removeAlertMessage(for entries: [PasswordManagerEntry]) -> String {

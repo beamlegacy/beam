@@ -20,6 +20,7 @@ final class CreditCardListViewModel: ObservableObject {
     var editedCreditCard: CreditCardEntry?
     @Published var disableFillButton = true
     @Published var disableRemoveButton = true
+    @Published var isUnlocked = false
 
     var selectedEntries: [CreditCardEntry] {
         currentSelection.map { allCreditCardEntries[$0] }
@@ -92,5 +93,10 @@ final class CreditCardListViewModel: ObservableObject {
                 .map { (index, _) in index }
         )
         objectWillChange.send()
+    }
+
+    @MainActor
+    func checkAuthentication() async {
+        isUnlocked = await PasswordManager.shared.checkDeviceAuthentication()
     }
 }
