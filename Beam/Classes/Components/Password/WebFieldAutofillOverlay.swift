@@ -132,7 +132,7 @@ final class WebFieldAutofillOverlay {
         guard let page = self.page else { return }
         guard menuPopover == nil else { return }
         showIcon(frameInfo: frameInfo) // make sure icon is always created before menu
-        guard let popoverWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, storedInPresenter: true) else { return }
+        guard let popoverWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, movable: false, storedInPresenter: true) else { return }
         let menuPopover = WebAutofillPopoverContainer(window: popoverWindow, page: page, topEdgeHeight: 24, fieldLocator: fieldLocator) { rect in
             CGPoint(x: rect.minX, y: rect.minY)
         }
