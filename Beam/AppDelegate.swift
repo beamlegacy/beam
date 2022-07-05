@@ -164,8 +164,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // It means that a full rewrite of the Preferences without the Preferences SPM is needed
     // As soon as the target is 11.0
     // https://developer.apple.com/documentation/swiftui/settings
-    private var openedPrefPanelOnce: Bool = false
-    func fixFirstTimeLanuchOddAnimationByImplicitlyShowIt() {
+    var openedPrefPanelOnce: Bool = false
+    private func fixFirstTimeLaunchOddAnimationByImplicitlyShowIt() {
         Preferences.PaneIdentifier.allBeamPreferences.forEach {
             preferencesWindowController.show(preferencePane: $0)
         }
@@ -783,7 +783,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBAction private func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
         guard !data.onboardingManager.needsToDisplayOnboard else { return }
         if !openedPrefPanelOnce {
-            fixFirstTimeLanuchOddAnimationByImplicitlyShowIt()
+            fixFirstTimeLaunchOddAnimationByImplicitlyShowIt()
         }
         preferencesWindowController.show()
     }
