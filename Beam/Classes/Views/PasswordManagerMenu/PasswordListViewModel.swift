@@ -47,6 +47,7 @@ final class PasswordListViewModel: ObservableObject {
 
     @Published var disableFillButton = true
     @Published var disableRemoveButton = true
+    @Published var isUnlocked = false
 
     var searchString = "" {
         didSet {
@@ -88,6 +89,11 @@ final class PasswordListViewModel: ObservableObject {
         currentSelection = IndexSet(idx.map { filteredIndices[$0] })
         disableFillButton = idx.count != 1
         disableRemoveButton = idx.count == 0
+    }
+
+    @MainActor
+    func checkAuthentication() async {
+        isUnlocked = await passwordManager.checkDeviceAuthentication()
     }
 
     private func refresh() {

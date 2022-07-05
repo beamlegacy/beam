@@ -175,7 +175,11 @@ class PasswordManagerMenuViewModel: ObservableObject {
 extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
     func fillCredentials(_ entry: PasswordManagerEntry) {
         Logger.shared.logDebug("Clicked on entry: \(entry.username) @ \(entry.minimizedHost)")
-        delegate?.fillCredentials(entry)
+        Task { @MainActor in
+            if await PasswordManager.shared.checkDeviceAuthentication() {
+                delegate?.fillCredentials(entry)
+            }
+        }
     }
 
     func dismissMenu() {
