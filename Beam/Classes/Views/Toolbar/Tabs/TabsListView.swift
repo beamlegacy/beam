@@ -28,6 +28,21 @@ struct TabsListItem: Identifiable, CustomStringConvertible {
     var group: TabGroup?
     var count: Int?
 
+    var displayedText: String {
+        if isAGroupCapsule, let group = group {
+            var title = group.title ?? ""
+            if group.collapsed, let count = count, count > 0 {
+                if title.isEmpty {
+                    title = "\(count)"
+                } else {
+                    title += " (\(count))"
+                }
+            }
+            return title
+        }
+        return tab?.title ?? ""
+    }
+
     var description: String {
         if let tab = tab {
             return "TabsListItem(tab: \(tab.title))"

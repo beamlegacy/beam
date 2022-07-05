@@ -153,7 +153,6 @@ class BrowserTabsManager: ObservableObject {
 
             if tab.isPinned {
                 let tabItem = TabsListItem(tab: tab, group: nil)
-                sections.allItems.append(tabItem)
                 sections.pinnedItems.append(tabItem)
                 visibleTabs.append(tab)
             } else {
@@ -161,7 +160,6 @@ class BrowserTabsManager: ObservableObject {
                 if let currentGroup = currentGroup {
                     if currentGroup != previousGroup && alreadyAddedGroups[currentGroup.id] == nil {
                         let groupItem = TabsListItem(group: currentGroup)
-                        sections.allItems.append(groupItem)
                         sections.unpinnedItems.append(groupItem)
                     }
                     alreadyAddedGroups[currentGroup.id, default: 0] += 1
@@ -170,7 +168,6 @@ class BrowserTabsManager: ObservableObject {
                 if currentGroup?.collapsed != true || collapsedTabsInGroup[currentGroup?.id ?? UUID()]?.contains(tab.id) != true {
                     sections.unpinnedItems.append(tabItem)
                     visibleTabs.append(tab)
-                    sections.allItems.append(tabItem)
                 }
             }
         }
@@ -180,6 +177,7 @@ class BrowserTabsManager: ObservableObject {
             item.count = alreadyAddedGroups[group.id] ?? group.pageIds.count
             return item
         }
+        sections.allItems = sections.pinnedItems + sections.unpinnedItems
         self.visibleTabs = visibleTabs
         self.listItems = sections
     }
