@@ -64,7 +64,11 @@ final class CreditCardsMenuViewModel: ObservableObject {
     }
 
     func fillCreditCard(_ entry: CreditCardEntry) {
-        delegate?.fillCreditCard(entry)
+        Task { @MainActor in
+            if await PasswordManager.shared.checkDeviceAuthentication() {
+                delegate?.fillCreditCard(entry)
+            }
+        }
     }
 
     func close() {
