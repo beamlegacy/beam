@@ -259,6 +259,7 @@ extension DestinationNoteAutocompleteList {
 
         private func getEmptySearchRecentsNotes(documentManager: DocumentManager, itemLimit: Int) -> ([DocumentStruct], [UUID: FrecencyNoteRecord]) {
             let scores = GRDBDatabase.shared.getTopNoteFrecencies(limit: itemLimit, paramKey: AutocompleteManager.noteFrecencyParamKey)
+
             var items = documentManager.loadDocumentsById(ids: Array(scores.keys))
             if recentsAlwaysShowTodayNote, let todayNote = data?.todaysNote.documentStruct {
                 if let index = items.firstIndex(where: { $0.id == todayNote.id }) {
@@ -277,6 +278,7 @@ extension DestinationNoteAutocompleteList {
             var items = [DocumentStruct]()
             var scores = [UUID: FrecencyNoteRecord]()
             let documentManager = DocumentManager()
+            var shouldSortResult = true
             if !text.isEmpty {
                 allowCreateCard = true
                 items = documentManager.documentsWithTitleMatch(title: text)
@@ -286,6 +288,7 @@ extension DestinationNoteAutocompleteList {
                 //When query is empty, we get top N frecencies' noteIds
                 //and fetch corresponding notes (avoids fetching all the notes)
                 (items, scores) = getEmptySearchRecentsNotes(documentManager: documentManager, itemLimit: itemLimit)
+                shouldSortResult = false
             }
             let cleanedItems: [DocumentStruct] = items.compactMap { doc in
                 if text.containsSymbol || text.containsWhitespace {
@@ -298,12 +301,14 @@ extension DestinationNoteAutocompleteList {
                 return containsTextPrefixedSlice ? doc : nil
             }
 
-            let itemsSlice = cleanedItems.map {
+            autocompleteItems = cleanedItems.map {
                 AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
             }
-                .sorted(by: >)
-                .prefix(itemLimit)
-            autocompleteItems = Array(itemsSlice)
+            if shouldSortResult {
+                autocompleteItems = autocompleteItems.sorted(by: >)
+            }
+            autocompleteItems = Array(autocompleteItems.prefix(itemLimit))
+
             let cardReplacementResults = getAutoCompleteResutsForCardReplacement(text)
             if !cardReplacementResults.isEmpty {
                 autocompleteItems.append(contentsOf: cardReplacementResults)
