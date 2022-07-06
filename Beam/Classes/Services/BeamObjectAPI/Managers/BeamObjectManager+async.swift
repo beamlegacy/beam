@@ -1,6 +1,9 @@
 import Foundation
 import BeamCore
 import Atomics
+import AsyncHTTPClient
+import NIOCore
+import NIO
 
 // swiftlint:disable file_length
 
@@ -408,6 +411,50 @@ extension BeamObjectManager {
         }
     }
 
+    fileprivate func uploadS3(beamObjectsUpload: [BeamObjectRequest.BeamObjectUpload], decoder: BeamJSONDecoder, objectsToSave: [BeamObject], chunkSize: Int, s3Upload: S3Upload) async throws -> (Int, [Error]) {
+        Logger.shared.logDebug("Upload using \(s3Upload.kind)", category: .beamObjectNetwork)
+        var errors: [Error] = []
+        var totalSize = 0
+        try await withThrowingTaskGroup(of: Error?.self, body: { group in
+
+            for i in 0..<beamObjectsUpload.count {
+                // After currentChunckSize async items, wait one to complete before adding the next on in order to keep max concurrent requests to ~chunkSize
+                if i >= chunkSize {
+                    do {
+                        // For precise control (eg: tests) needs to happen before enqueing the next object
+                        _ = try await group.next()
+                    } catch {
+                        errors.append(error)
+                    }
+                }
+
+                let beamObjectUpload = beamObjectsUpload[i]
+                let headers: [String: String] = try decoder.decode([String: String].self,
+                                                                   from: beamObjectUpload.uploadHeaders.asData)
+
+                guard let data = objectsToSave.first(where: { $0.id == beamObjectUpload.id })?.data else {
+                    Logger.shared.logError("Couldn't find data", category: .beamObjectNetwork)
+                    assert(false)
+                    continue
+                }
+
+                totalSize += data.count
+                group.addTask(operation: s3Upload.makeOperation(uploadUrl: beamObjectUpload.uploadUrl, headers: headers, data: data))
+            }
+
+            if !group.isEmpty {
+                // Finish waiting for the remaining async requests
+                for try await error in group {
+                    if let error = error {
+                        errors.append(error)
+                    }
+                }
+            }
+        })
+
+        return (totalSize, errors)
+    }
+
     // swiftlint:disable:next cyclomatic_complexity
     func saveToAPIWithDirectUpload<T: BeamObjectProtocol>(_ objects: [T],
                                                           force: Bool = false) async throws -> [T] {
@@ -446,6 +493,7 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
+        let chunkSize = Configuration.env == .test ? 1 : 100
         // swiftlint:disable:next date_init
         localTimer = Date()
 
@@ -495,52 +543,18 @@ extension BeamObjectManager {
         }
 
         let decoder = BeamJSONDecoder()
-        var errors: [Error] = []
-
         Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: starting",
                                category: .beamObjectNetwork)
 
+        // Test recoding and playback used in tests does not work with NIO ¯\_(ツ)_/¯
+        let  s3Upload: S3Upload = (Configuration.directUploadNIO && Configuration.env != .test)  ?
+        S3UploadURLNIO.init(concurrentHTTP1ConnectionsPerHostSoftLimit: chunkSize):
+            S3UploadURLSession.init()
+
         // swiftlint:disable:next date_init
         localTimer = Date()
-        var totalSize = 0
-
-        try await withThrowingTaskGroup(of: Error?.self, body: { group in
-            var chunkSize = 10
-            if Configuration.env == .test {
-                // Order is not guaranteed, so we disable parallel upload when recording it with Vinyl
-                chunkSize = 1
-            }
-            for beamObjectsUploadChunk in beamObjectsUpload.chunked(into: chunkSize) {
-                for beamObjectUpload in beamObjectsUploadChunk {
-                    let headers: [String: String] = try decoder.decode([String: String].self,
-                                                                       from: beamObjectUpload.uploadHeaders.asData)
-
-                    guard let data = objectsToSave.first(where: { $0.id == beamObjectUpload.id })?.data else {
-                        assert(false)
-                        Logger.shared.logError("Couldn't find data", category: .beamObjectNetwork)
-                        continue
-                    }
-
-                    totalSize += data.count
-
-                    group.addTask {
-                        do {
-                            try await request.sendDataToUrl(urlString: beamObjectUpload.uploadUrl,
-                                                            putHeaders: headers,
-                                                            data: data)
-                            return nil
-                        } catch {
-                            return error
-                        }
-                    }
-                }
-                for try await error in group {
-                    if let error = error {
-                        errors.append(error)
-                    }
-                }
-            }
-        })
+        let totalSize: Int, errors: [Error]
+        (totalSize, errors) = try await uploadS3(beamObjectsUpload: beamObjectsUpload, decoder: decoder, objectsToSave: objectsToSave, chunkSize: chunkSize, s3Upload: s3Upload)
 
         Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: finished uploading \(totalSize.byteSize)",
                                category: .beamObjectNetwork,
@@ -1275,5 +1289,116 @@ extension BeamObjectManager {
             try BeamObjectChecksum.deleteAll()
         }
         return true
+    }
+}
+
+// Enqueues a upload task on the given task group
+protocol S3Upload {
+    func makeOperation(uploadUrl: String, headers: [String: String], data: Data) -> (@Sendable () async throws -> Error?)
+    var kind: String {get}
+}
+
+// implements S3UploadTask by using NSURLSession via BeamObjectRequest
+class S3UploadURLSession: S3Upload {
+    let request: BeamObjectRequest
+    let kind = "NSURLSession"
+
+    init(request: BeamObjectRequest) {
+        self.request = request
+    }
+
+    convenience init() {
+        self.init(request: BeamObjectRequest.init())
+    }
+
+    func makeOperation(uploadUrl: String, headers: [String: String], data: Data) -> (@Sendable () async throws -> Error?) {
+        let req = self.request
+        return {
+            do {
+                try await req.sendDataToUrl(urlString: uploadUrl,
+                                            putHeaders: headers,
+                                            data: data)
+                return nil
+            } catch {
+                return error
+            }
+        }
+    }
+}
+
+// implements S3UploadTask by using NIO HTTPClient managed my NIOContextManager
+class S3UploadURLNIO: S3Upload {
+    let nioContextManager: NIOContextManager
+    let kind = "NIOHTTPClient"
+
+    init(context: NIOContextManager) {
+        self.nioContextManager = context
+    }
+
+    convenience init(concurrentHTTP1ConnectionsPerHostSoftLimit: Int) {
+        self.init(context: NIOContextManager.init(concurrentHTTP1ConnectionsPerHostSoftLimit: concurrentHTTP1ConnectionsPerHostSoftLimit))
+    }
+
+    func makeOperation(uploadUrl: String, headers: [String: String], data: Data) -> (@Sendable () async throws -> Error?) {
+        let httpClient = self.nioContextManager.httpClient
+
+        return {
+            var request = HTTPClientRequest(url: uploadUrl)
+            request.method = .PUT
+            request.body = .bytes(data)
+            for (header, value) in headers {
+                request.headers.add(name: header, value: value)
+            }
+
+            do {
+                let response = try await httpClient.execute(request, timeout: .seconds(30))
+                if response.status != .ok {
+                    return BeamObjectManagerError.saveError
+                }
+                return nil
+            } catch {
+                return error
+            }
+        }
+
+    }
+}
+
+// NIOContextManager wraps a http client that runs on an internal managed MultiThreadedEventLoopGroup
+class NIOContextManager {
+    private var _httpClient: HTTPClient?
+    private var eventLoopGroup: MultiThreadedEventLoopGroup?
+    let concurrentHTTP1ConnectionsPerHostSoftLimit: Int
+
+    var httpClient: HTTPClient {
+        if _httpClient == nil {
+            initClient()
+        }
+        return _httpClient!
+    }
+
+    func initClient() {
+        let newEventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount*2)
+        eventLoopGroup = newEventLoopGroup
+        var configuration = HTTPClient.Configuration()
+        configuration.connectionPool = HTTPClient.Configuration.ConnectionPool.init(idleTimeout: .seconds(60), concurrentHTTP1ConnectionsPerHostSoftLimit: concurrentHTTP1ConnectionsPerHostSoftLimit)
+        _httpClient = HTTPClient(eventLoopGroupProvider: .shared(newEventLoopGroup), configuration: configuration)
+    }
+
+    init(concurrentHTTP1ConnectionsPerHostSoftLimit: Int) {
+        self.concurrentHTTP1ConnectionsPerHostSoftLimit = concurrentHTTP1ConnectionsPerHostSoftLimit
+    }
+
+    deinit {
+        let eventLoopGroup = eventLoopGroup
+        if let httpClient = _httpClient {
+            Task.detached {
+                // swiftlint:disable force_try
+                try! await httpClient.shutdown()
+                // swiftlint:disable force_try
+                try! eventLoopGroup?.syncShutdownGracefully()
+            }
+        }
+
     }
 }

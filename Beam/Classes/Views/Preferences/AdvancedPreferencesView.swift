@@ -38,6 +38,7 @@ struct AdvancedPreferencesView: View {
     @State var showClusteringSettingsMenu = PreferencesManager.showClusteringSettingsMenu
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
     @State var isDirectUploadOn = Configuration.beamObjectDataUploadOnSeparateCall
+    @State var isDirectUploadNIOOn = Configuration.directUploadNIO
     @State var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
     @State var isWebsocketEnabled = Configuration.websocketEnabled
     @State var restBeamObject = Configuration.beamObjectOnRest
@@ -154,6 +155,9 @@ struct AdvancedPreferencesView: View {
                 }
                 Preferences.Section(title: "Direct Upload") {
                     DirectUpload
+                }
+                Preferences.Section(title: "Direct Upload use NIO") {
+                    DirectUploadNIO
                 }
                 Preferences.Section(title: "Direct Download") {
                     DirectDownload
@@ -682,6 +686,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([isDirectUploadOn].publisher.first()) {
                 Configuration.beamObjectDataUploadOnSeparateCall = $0
+            }
+    }
+
+    private var DirectUploadNIO: some View {
+        return Toggle(isOn: $isDirectUploadNIOOn) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([isDirectUploadNIOOn].publisher.first()) {
+                Configuration.directUploadNIO = $0
             }
     }
 
