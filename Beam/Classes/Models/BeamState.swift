@@ -85,7 +85,6 @@ import Sentry
     @Published var isFullScreen: Bool = false
     @Published var omniboxInfo = OmniboxLayoutInformation()
 
-    @Published var showHelpAndFeedback = false
     @Published var showSidebar = false
     @Published var useSidebar: Bool = false
 
@@ -150,6 +149,8 @@ import Sentry
     }
 
     var downloadButtonPosition: CGPoint?
+
+    private var navigateBackFromShortcutsToWeb = false
 
     private var lastQuickSearchDate: Date = .init()
 
@@ -332,6 +333,11 @@ import Sentry
 
     func navigateToPage(_ page: WindowPage) {
         EventsTracker.logBreadcrumb(message: "\(#function) \(page)", category: "BeamState")
+
+        if page.id == WindowPage.shortcutsWindowPage.id {
+            navigateBackFromShortcutsToWeb = (mode == .web)
+        }
+
         mode = .page
 
         currentNote = nil
@@ -349,6 +355,14 @@ import Sentry
         guard let currentTabId = currentTab?.id else { return }
         browserTabsManager.removeFromTabNeighborhood(tabId: currentTabId)
         browserTabsManager.createNewNeighborhood(for: currentTabId)
+    }
+
+    func navigateBackFromShortcuts() {
+        if navigateBackFromShortcutsToWeb {
+            mode = .web
+        } else {
+            navigateToJournal(note: nil)
+        }
     }
 
     func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, request: URLRequest? = nil, webView: BeamWebView? = nil) -> BrowserTab {
