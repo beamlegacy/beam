@@ -37,8 +37,13 @@ struct TabClusteringGroupCapsuleView: View {
     }
 
     private var displayedText: String {
-        if title.isEmpty && collapsed && itemsCount > 0 {
-            return "\(itemsCount)"
+        var title = title
+        if collapsed && itemsCount > 0 {
+            if title.isEmpty {
+                title = "\(itemsCount)"
+            } else {
+                title += " (\(itemsCount))"
+            }
         }
         return title
     }

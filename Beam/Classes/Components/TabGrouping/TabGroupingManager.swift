@@ -200,6 +200,7 @@ extension TabGroupingManager {
         }
     }
 
+    @MainActor
     func updateAutomaticClustering(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageID?]? = nil) async {
         let openTabs = allOpenTabs()
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
