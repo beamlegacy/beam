@@ -72,6 +72,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             .environmentObject(data)
             .environmentObject(windowInfo)
             .environmentObject(state.browserTabsManager)
+            .environment(\.showHelpAction, showHelpAndFeedbackMenuView)
             .frame(minWidth: minimumSize.width, maxWidth: .infinity, minHeight: minimumSize.height, maxHeight: .infinity)
 
         let hostingView = BeamHostingView(rootView: mainView)
@@ -96,6 +97,23 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
         // Adding the window item to the app's windowsMenu with prefilled title if any
         NSApp.addWindowsItem(self, title: title ?? "Beam", filename: false)
+    }
+
+    func showHelpAndFeedbackMenuView() {
+        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
+
+        let view = HelpAndFeedbackMenuView(window: window)
+            .environmentObject(state)
+
+        var origin = NSPoint(x: 10, y: frame.size.height-10)
+
+        if let parentWindow = window?.parent {
+            origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
+        }
+
+        window?.setView(with: view, at: origin)
+        window?.isMovable = false
+        window?.makeKey()
     }
 
     // This is an imperfect way to try making the sidebar more simple to display and dismiss using a two finger swipe

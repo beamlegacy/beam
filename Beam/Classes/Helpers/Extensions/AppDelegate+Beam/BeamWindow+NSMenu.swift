@@ -137,10 +137,7 @@ extension BeamWindow {
     }
 
     @IBAction func showHelp(_ sender: Any?) {
-        if state.mode == .web {
-            state.mode = .today
-        }
-        self.state.showHelpAndFeedback = true
+        showHelpAndFeedbackMenuView()
     }
 
     @IBAction func toggleStatusBar(_ sender: Any?) {
