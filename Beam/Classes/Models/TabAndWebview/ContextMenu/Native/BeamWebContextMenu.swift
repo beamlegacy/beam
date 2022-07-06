@@ -58,6 +58,7 @@ extension BeamWebContextMenuItem {
         return items.compactMap { $0.nsMenuItem(from: webView, payload: payload, menu: menu) }
     }
 
+    // swiftlint:disable:next function_body_length
     private static func content(for payload: ContextMenuMessageHandlerPayload) -> [Self] {
         switch payload {
         case .page:
@@ -104,7 +105,9 @@ extension BeamWebContextMenuItem {
             }
             items.removeAll { $0 == .systemShare }
             return items + [.systemShare]
+        case .ignored:
+            assertionFailure("We shouldn't ask for any custom item for an ignored item")
+            return []
         }
     }
-
 }
