@@ -56,7 +56,18 @@ private struct TabViewForSnapshot: View {
                 disableHovering: true,
                 applyDraggingStyle: false)
             .frame(width: size.width, height: size.height)
-        .drawingGroup() // fixes rendering issue with images when snapshoting.
+            .drawingGroupExceptBigSur()
+    }
+}
+private extension View {
+    /// Somehow drawingGroup doesn't work properly with the snapshot on BigSur - BE-4650
+    @ViewBuilder
+    func drawingGroupExceptBigSur() -> some View {
+        if #available(macOS 12.0, *) {
+            self.drawingGroup()
+        } else {
+            self
+        }
     }
 }
 
