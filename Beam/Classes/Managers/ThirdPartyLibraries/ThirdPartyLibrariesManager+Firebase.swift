@@ -72,6 +72,7 @@ extension ThirdPartyLibrariesManager {
                   }
             DispatchQueue.main.async {
                 FirebaseApp.configure(options: fileopts)
+                self?.firebaseReady = true
                 Logger.shared.logDebug("Firebase Analytics enabled", category: .tracking)
             }
         }

@@ -7,6 +7,8 @@ import Sentry
 class ThirdPartyLibrariesManager: NSObject {
     static let shared = ThirdPartyLibrariesManager()
 
+    @Published var firebaseReady: Bool = false
+
     var sentryUser: Sentry.User?
 
     func configure() {
