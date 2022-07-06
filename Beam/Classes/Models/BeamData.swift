@@ -152,9 +152,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         setupSubscribers()
         resetPinnedTabs()
         configureAutoUpdate()
-        if Configuration.branchType == .develop {
-            analyticsCollector.add(backend: FirebaseAnalyticsBackend())
-        }
+        analyticsCollector.add(backend: FirebaseAnalyticsBackend())
     }
 
     // swiftlint:disable:next function_body_length cyclomatic_complexity
