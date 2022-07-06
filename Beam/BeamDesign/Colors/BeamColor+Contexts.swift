@@ -248,8 +248,8 @@ extension BeamColor {
         static let fieldButtonBackgroundHovered = BeamColor.Nero.alpha(0.5) // light version is used, regardless of actual mode
         static let fieldButtonIcon = BeamColor.LightStoneGray // light version is used, regardless of actual mode
         static let fieldButtonIconHovered = BeamColor.Niobium // light version is used, regardless of actual mode
-        static let popupBackground = BeamColor.combining(lightColor: .From(color: NSColor(white: 1.0, alpha: 0.92) + BeamColor.Mercury.alpha(0.20).nsColor),
-                                                         darkColor: .From(color: NSColor(red: 28.0/255.0, green: 28.0/255.0, blue: 31.0/255.0, alpha: 0.92) + BeamColor.Mercury.alpha(0.80).nsColor))
+        static let popupBackground = BeamColor.combining(lightColor: .From(color: NSColor(white: 1.0, alpha: 0.92) + BeamColor.Mercury.alpha(0.20).nsColor(for: .aqua)),
+                                                         darkColor: .From(color: NSColor(red: 28.0/255.0, green: 28.0/255.0, blue: 31.0/255.0, alpha: 0.92) + BeamColor.Mercury.alpha(0.80).nsColor(for: .darkAqua)))
         static let autofillCellBackgroundHovered = BeamColor.combining(lightColor: .Bluetiful.alpha(0.10), darkColor: .Bluetiful.alpha(0.14))
         static let autofillCellBackgroundClicked = BeamColor.combining(lightColor: .Bluetiful.alpha(0.16), darkColor: .Bluetiful.alpha(0.20))
         static let actionCellBackgroundHovered = BeamColor.combining(lightColor: .Nero, darkColor: .Nero.alpha(0.30))
