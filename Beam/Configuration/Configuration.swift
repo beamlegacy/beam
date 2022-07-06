@@ -100,6 +100,24 @@ struct Configuration {
         }
     }
 
+    static private(set) var directUploadNIODefault = false
+
+    static private var directUploadNIOKey = "directUploadNIO"
+    static var directUploadNIO: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: directUploadNIOKey) != nil {
+                return UserDefaults.standard.bool(forKey: directUploadNIOKey)
+            }
+
+            return directUploadNIODefault
+        }
+        set {
+            if newValue != directUploadNIO {
+                UserDefaults.standard.set(newValue, forKey: directUploadNIOKey)
+            }
+        }
+    }
+
     static private(set) var beamObjectOnRestDefault = true
 
     static private var beamObjectOnRestKey = "beamObjectOnRestKey"

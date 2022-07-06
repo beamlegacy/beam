@@ -1354,6 +1354,7 @@
 		BAA67DDD4452566DFF99171E /* WebAutofillController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670958C9BAC6322CDA80A /* WebAutofillController.swift */; };
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
+		BFEA487D286A1519007A73BD /* AsyncHTTPClient in Frameworks */ = {isa = PBXBuildFile; productRef = BFEA487C286A1519007A73BD /* AsyncHTTPClient */; };
 		CE304C2D27DB544B005AE274 /* GCPAuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C2C27DB544B005AE274 /* GCPAuthenticationManager.swift */; };
 		CE304C2F27DB5469005AE274 /* Digest+convert.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C2E27DB5469005AE274 /* Digest+convert.swift */; };
 		CE304C3127DB547C005AE274 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C3027DB547C005AE274 /* Errors.swift */; };
@@ -3412,6 +3413,7 @@
 				8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */,
 				33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */,
 				3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */,
+				BFEA487D286A1519007A73BD /* AsyncHTTPClient in Frameworks */,
 				878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */,
 				33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
@@ -8086,6 +8088,7 @@
 				A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */,
 				0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */,
 				96D71CE827F735D10094F54D /* MessagePack */,
+				BFEA487C286A1519007A73BD /* AsyncHTTPClient */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -8230,6 +8233,7 @@
 				A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				0564F51127E8BC6600F969CA /* XCRemoteSwiftPackageReference "JJLISO8601DateFormatter" */,
 				96D71CE727F735D00094F54D /* XCRemoteSwiftPackageReference "MessagePack" */,
+				BFEA487B286A1519007A73BD /* XCRemoteSwiftPackageReference "async-http-client" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -12254,6 +12258,14 @@
 				minimumVersion = 8.9.0;
 			};
 		};
+		BFEA487B286A1519007A73BD /* XCRemoteSwiftPackageReference "async-http-client" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swift-server/async-http-client";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -12445,6 +12457,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
+		};
+		BFEA487C286A1519007A73BD /* AsyncHTTPClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BFEA487B286A1519007A73BD /* XCRemoteSwiftPackageReference "async-http-client" */;
+			productName = AsyncHTTPClient;
 		};
 /* End XCSwiftPackageProductDependency section */
 
