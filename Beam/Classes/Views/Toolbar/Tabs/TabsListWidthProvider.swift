@@ -73,17 +73,13 @@ final class TabsListWidthProvider {
     private func computeWidths() {
         var customWidths = [String: CGFloat]()
         items.allItems.forEach { item in
-            if let group = item.group, item.tab == nil {
+            if item.isAGroupCapsule, let group = item.group {
                 var width: CGFloat = minimumGroupItemWidth
                 let hPadding: CGFloat = 8
-                let title = group.title
-                if title?.isEmpty != false && group.collapsed {
-                    if group.pageIds.count >= 1000 {
-                        width = 12 + (hPadding*2)
-                    } else {
-                        width = max(width, widthForText("\(group.pageIds.count)") + (hPadding*2))
-                    }
-                } else if let title = title, !title.isEmpty {
+                let title = item.displayedText
+                if group.title?.isEmpty != false && group.collapsed && item.count ?? 0 >= 1000 {
+                    width = 12 + (hPadding*2) // showing infinite icon
+                } else if !title.isEmpty {
                     width = max(width, widthForText(title) + (hPadding*2))
                 }
                 customWidths[item.id] = width
