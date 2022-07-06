@@ -112,7 +112,7 @@ struct ActionableButton: View {
                 Icon(name: icon.name, width: icon.size, color: iconColor)
                     .padding(.leading, hPadding)
             }
-            Text(text)
+            Text(LocalizedStringKey(text))
                 .font(variant.style.font)
                 .foregroundColor(foregroundColor)
                 .padding(.leading, textLeadingPadding)
