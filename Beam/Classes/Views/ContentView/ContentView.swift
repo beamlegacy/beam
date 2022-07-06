@@ -139,3 +139,14 @@ extension EnvironmentValues {
         set { self[WindowFrameEnvironmentKey.self] = newValue }
     }
 }
+
+// MARK: - Window Help
+private struct ShowHelpActionEnvironmentKey: EnvironmentKey {
+    static let defaultValue = { }
+}
+extension EnvironmentValues {
+    var showHelpAction: () -> Void {
+        get { self[ShowHelpActionEnvironmentKey.self] }
+        set { self[ShowHelpActionEnvironmentKey.self] = newValue }
+    }
+}

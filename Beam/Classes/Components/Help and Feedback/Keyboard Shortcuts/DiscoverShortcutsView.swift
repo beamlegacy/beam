@@ -28,14 +28,14 @@ struct DiscoverShortcutsView: View {
             }
             .frame(maxHeight: 550) // enough to fit all the shorcuts, might change over time
             ActionableButton(text: "Done", defaultState: .normal, variant: .primaryBlue) {
-                navigateToJournal()
+                navigateBack()
             }
             Spacer()
         }
         .animation(.default, value: compactHeight)
         .animation(.default, value: compactWidth)
         .background(KeyEventHandlingView(handledKeyCodes: [.enter, .escape], firstResponder: true, onKeyDown: { _ in
-            navigateToJournal()
+            navigateBack()
         }))
     }
 
@@ -53,8 +53,8 @@ struct DiscoverShortcutsView: View {
         return false
     }
 
-    private func navigateToJournal() {
-        state.navigateToJournal(note: nil)
+    private func navigateBack() {
+        state.navigateBackFromShortcuts()
     }
 }
 
