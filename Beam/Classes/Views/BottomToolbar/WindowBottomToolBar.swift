@@ -96,11 +96,12 @@ struct WindowBottomToolBar: View {
 private struct HelpButtonView: View {
 
     @EnvironmentObject var state: BeamState
+    @Environment(\.showHelpAction) var showHelpAction: () -> Void
     @State private var buttonFrameInGlobalCoordinates: CGRect?
 
     var body: some View {
         ButtonLabel("Help", customStyle: WindowBottomToolBar.buttonStyle(withIcon: false)) {
-            showHelpAndFeedbackMenuView()
+            showHelpAction()
         }
         .accessibility(identifier: "HelpButton")
         .background(geometryReaderView)
@@ -114,27 +115,6 @@ private struct HelpButtonView: View {
             let frame = proxy.frame(in: .global)
             Color.clear.preference(key: FramePreferenceKey.self, value: frame)
         }
-    }
-
-    private func showHelpAndFeedbackMenuView() {
-        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
-
-        guard let buttonFrame = buttonFrameInGlobalCoordinates?.swiftUISafeTopLeftGlobalFrame(in: window?.parent) else { return }
-
-        let view = HelpAndFeedbackMenuView(window: window)
-            .environmentObject(state)
-
-        var origin = CGPoint(
-            x: buttonFrame.origin.x,
-            y: buttonFrame.minY - 7
-        )
-        if let parentWindow = window?.parent {
-            origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
-        }
-
-        window?.setView(with: view, at: origin)
-        window?.isMovable = false
-        window?.makeKey()
     }
 
     private struct FramePreferenceKey: PreferenceKey {
