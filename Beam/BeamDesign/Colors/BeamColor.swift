@@ -83,6 +83,16 @@ extension BeamColor {
         return NSColor.loadColor(named: colorName)
     }
 
+    func nsColor(for appearanceName: NSAppearance.Name) -> NSColor {
+        var colorForAppearance = nsColor
+        NSAppearance(named: appearanceName)?.performAsCurrentDrawingAppearance {
+            if let flattenedColor = NSColor(cgColor: colorForAppearance.cgColor) {
+                colorForAppearance = flattenedColor
+            }
+        }
+        return colorForAppearance
+    }
+
     /// Property originally returning the color value in the P3 Display color space. Preserved in case of needed
     /// rollback. [Read original discussion.](https://linear.app/beamapp/issue/BE-448/system-wide-switch-light-dark-mode-breaks-the-ui)
     ///
