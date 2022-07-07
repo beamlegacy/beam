@@ -99,12 +99,9 @@ struct LegacyDataImporter: BeamDocumentSource {
                             if !database.isLoaded {
                                 _ = try account.loadDatabase(database.id)
                             }
-                            let document = BeamDocument(id: id, source: self, database: database, title: name, createdAt: createdAt, updatedAt: updatedAt, data: data ?? Data(), documentType: DocumentType(rawValue: type)!, version: 0, isPublic: isPublic != 0, journalDate: journalDay)
-                            _ = try database.collection?.save(self, document, indexDocument: false)
-                            if let deletedAt = deletedAt {
-                                try database.collection?.update(self, filters: [.id(id)], { doc in
-                                    doc.deletedAt = deletedAt
-                                })
+                            if deletedAt == nil, let data = data {
+                                let document = BeamDocument(id: id, source: self, database: database, title: name, createdAt: createdAt, updatedAt: updatedAt, data: data, documentType: DocumentType(rawValue: type)!, version: 0, isPublic: isPublic != 0, journalDate: journalDay)
+                                _ = try database.collection?.save(self, document, indexDocument: false)
                             }
                         }
                     } catch {
@@ -163,7 +160,11 @@ struct LegacyDataImporter: BeamDocumentSource {
         try copyTable("contactRecord", from: dbQueue, to: currentDatabase.grdbStore.writer)
     }
 
-    let columnSuppressor = ["BrowsingTreeRecord": ["previousChecksum"]]
+    let columnSuppressor = [
+        "BrowsingTreeRecord": ["previousChecksum"],
+        "Link": ["previousChecksum"],
+        "passwordRecord": ["previousChecksum"]
+    ]
 
     func copyTable(_ tableName: String, from: DatabaseReader, to: DatabaseWriter) throws {
         // read the table description and the data
@@ -192,7 +193,7 @@ struct LegacyDataImporter: BeamDocumentSource {
         Logger.shared.logInfo("\t\t\t\(rows.count) rows. Columns: \(columnNames.joined(separator: ", "))", category: .database)
         let statement = "INSERT INTO \(tableName) VALUES (\(columnsString))"
         var done = 0
-        try to.write({ db in
+        try to.writeWithoutTransaction({ db in
             try db.inTransaction {
                 for row in rows {
                     let columnValues = columnNames.map { row[$0] }
