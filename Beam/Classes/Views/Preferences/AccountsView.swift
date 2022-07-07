@@ -44,15 +44,12 @@ class AccountsViewModel: ObservableObject {
 
 /// The main view of “Accounts” preference pane.
 struct AccountsView: View {
-    // swiftlint:disable:next type_body_length
-
     @State private var enableLogging = true
     @State private var errorMessage: Error!
     @State private var loading = false
 
     @State private var showingChangeEmailSheet = false
     @State private var showingChangePasswordSheet = false
-    @State private var connectCalendarChoice = -1
 
     @State private var encryptionKeyIsHover = false
     @State private var encryptionKeyIsCopied = false
@@ -125,29 +122,17 @@ struct AccountsView: View {
                         }.padding(.bottom, 20)
                     }
                 }
-                Picker("", selection: $connectCalendarChoice) {
-                    Text("Connect Calendars & Contacts…").tag(-1)
-                    if !viewModel.calendarManager.isConnected(calendarService: .appleCalendar) {
-                        Text("macOS Calendar…").tag(0)
+                Menu("Connect Calendars & Contacts") {
+                    Button("macOS Calendar…") {
+                        connectCalendar(service: .appleCalendar)
                     }
-                    Text("Google Calendar…").tag(1)
+                    .disabled(viewModel.calendarManager.isConnected(calendarService: .appleCalendar))
+                    Button("Google Calendar…") {
+                        connectCalendar(service: .googleCalendar)
+                    }
                 }
-                .pickerStyle(.menu)
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .fixedSize()
-                .padding(.leading, -8)
-                .onChange(of: connectCalendarChoice) { index in
-                    switch index {
-                    case 0:
-                        connectCalendar(service: .appleCalendar)
-                        connectCalendarChoice = -1
-                    case 1:
-                        connectCalendar(service: .googleCalendar)
-                        connectCalendarChoice = -1
-                    default:
-                        break
-                    }
-                }
                 Text("Connect your Calendars & Contacts and easily take meeting notes.")
                     .font(BeamFont.regular(size: 11).swiftUI)
                     .foregroundColor(BeamColor.Corduroy.swiftUI)
