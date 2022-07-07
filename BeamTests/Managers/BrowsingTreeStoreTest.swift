@@ -14,18 +14,18 @@ class BrowsingTreeStoreTest: XCTestCase {
 
     override func setUpWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try GRDBDatabase.shared.clearUrlFrecencies()
-        try GRDBDatabase.shared.clearBrowsingTrees()
+        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
+        try BeamData.shared.browsingTreeDBManager?.clearBrowsingTrees()
     }
 
     override func tearDownWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in}
-        try GRDBDatabase.shared.clearUrlFrecencies()
-        try GRDBDatabase.shared.clearBrowsingTrees()
+        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
+        try BeamData.shared.browsingTreeDBManager?.clearBrowsingTrees()
     }
 
     func testTreeProcessTrigger() throws {
-        let store = BrowsingTreeStoreManager()
+        let store = try XCTUnwrap(BrowsingTreeStoreManager())
 
         let tree = BrowsingTree(nil)
         tree.navigateTo(url: "http://hello", title: nil, startReading: false, isLinkActivation: false)
@@ -34,32 +34,38 @@ class BrowsingTreeStoreTest: XCTestCase {
         let savedTree = BrowsingTree(nil)
         savedTree.navigateTo(url: "http://world", title: nil, startReading: false, isLinkActivation: false)
         let savedRecord = try XCTUnwrap(savedTree.toRecord())
-        try GRDBDatabase.shared.save(browsingTreeRecord: savedRecord)
+        try BeamData.shared.browsingTreeDBManager?.save(browsingTreeRecord: savedRecord)
 
         let alreadyProcessingTree = BrowsingTree(nil)
         alreadyProcessingTree.navigateTo(url: "http://beam", title: nil, startReading: false, isLinkActivation: false)
         var alreadyProcessingRecord = try XCTUnwrap(alreadyProcessingTree.toRecord())
         alreadyProcessingRecord.processingStatus = .started
-        try GRDBDatabase.shared.save(browsingTreeRecord: alreadyProcessingRecord)
+        try BeamData.shared.browsingTreeDBManager?.save(browsingTreeRecord: alreadyProcessingRecord)
 
         try store.receivedObjects([record, savedRecord, alreadyProcessingRecord])
         expect(store.treeProcessingCompleted).toEventually(beTrue())
 
         //received tree not already stored in db should trigger tree processsing
-        let treeFrecencies = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: tree.current.link)
+        guard let treeFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: tree.current.link) else {
+            throw BeamDataError.databaseNotFound
+        }
         XCTAssert(treeFrecencies.count > 0)
 
         //tree record already in db with done should not trigger processing when received
-        let savedTreeFrecencies = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: savedTree.current.link)
+        guard let savedTreeFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: savedTree.current.link) else {
+            throw BeamDataError.databaseNotFound
+        }
         XCTAssertEqual(savedTreeFrecencies.count, 0)
 
         //tree record already in db with started status should not trigger processing when received
-        let processingTreeFrecencies = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: alreadyProcessingTree.current.link)
+        guard let processingTreeFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: alreadyProcessingTree.current.link) else {
+            throw BeamDataError.databaseNotFound
+        }
         XCTAssertEqual(processingTreeFrecencies.count, 0)
     }
 
     func testSaveFetchLocal() throws {
-        let store = BrowsingTreeStoreManager()
+        let store = try XCTUnwrap(BrowsingTreeStoreManager())
         let tree = BrowsingTree(nil)
         let rootId = try XCTUnwrap(tree.rootId)
         try store.save(browsingTree: tree)
@@ -71,7 +77,7 @@ class BrowsingTreeStoreTest: XCTestCase {
 
     func testRemoteFlattening() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
-        let store = BrowsingTreeStoreManager()
+        let store = try XCTUnwrap(BrowsingTreeStoreManager())
         let tree0 = BrowsingTree(nil)
         let rootId = try XCTUnwrap(tree0.rootId)
         let rootCreatedAt = try XCTUnwrap(tree0.root.events.first?.date)
@@ -98,7 +104,7 @@ class BrowsingTreeStoreTest: XCTestCase {
 
     func testSoftDelete() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
-        let store = BrowsingTreeStoreManager()
+        let store = try XCTUnwrap(BrowsingTreeStoreManager())
 
         //absolute date based soft deletion
         let tree0 = BrowsingTree(nil)

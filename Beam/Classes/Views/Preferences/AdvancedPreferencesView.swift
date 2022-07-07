@@ -11,7 +11,9 @@ var AdvancedPreferencesViewController: PreferencePane = PreferencesPaneBuilder.b
 }
 
 //swiftlint:disable:next function_body_length type_body_length
-struct AdvancedPreferencesView: View {
+struct AdvancedPreferencesView: View, BeamDocumentSource {
+    public static var sourceId: String { "\(Self.self)"}
+    
     @State private var apiHostname: String = Configuration.apiHostname
     @State private var restApiHostname: String = Configuration.restApiHostname
     @State private var publicAPIpublishServer: String = Configuration.publicAPIpublishServer
@@ -46,16 +48,15 @@ struct AdvancedPreferencesView: View {
     @State var createJournalOncePerWindow = PreferencesManager.createJournalOncePerWindow
     @State var useSidebar = PreferencesManager.useSidebar
     @State var includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBox
+    @State var enableOmnibeams = PreferencesManager.enableOmnibeams
     @State var enableDailySummary = PreferencesManager.enableDailySummary
 
     // Database
     @State private var newDatabaseTitle = ""
-    @State private var selectedDatabase = Database.defaultDatabase()
-    private let databaseManager = DatabaseManager()
-    @FetchRequest(entity: Database.entity(),
-                  sortDescriptors: [NSSortDescriptor(keyPath: \Database.title, ascending: true)],
-                  predicate: NSPredicate(format: "deleted_at == nil"))
-    var databases: FetchedResults<Database>
+    @State private var selectedDatabase = BeamData.shared.currentDatabase
+    var databases: [BeamDatabase] {
+        BeamData.shared.currentAccount?.allDatabases ?? []
+    }
 
     private let contentWidth: Double = PreferencesManager.contentWidth
 
@@ -177,6 +178,17 @@ struct AdvancedPreferencesView: View {
                         Text("Force full sync").frame(minWidth: 100)
                     })
                     .disabled(loading)
+
+                    Button(action: {
+                        do {
+                            try BeamData.shared.currentAccount?.documentSynchroniser?.forceReceiveAll()
+                        } catch {
+                            Logger.shared.logError("Error while force recieve all document: \(error)", category: .document)
+                        }
+                    }, label: {
+                        Text("Force Receive All Document").frame(minWidth: 100)
+                    })
+                    .disabled(loading)
                 }
 
                 Preferences.Section(bottomDivider: true) {
@@ -243,26 +255,27 @@ struct AdvancedPreferencesView: View {
                                 .padding()
 
                             Button(action: {
-                                let beforeDb = DatabaseManager.defaultDatabase
-                                if !newDatabaseTitle.isEmpty {
-                                    let database = DatabaseStruct(title: newDatabaseTitle)
-                                    databaseManager.save(database, completion: { result in
-                                        if case .success(let done) = result, done {
-
-                                            if let database = try? Database.fetchWithId(CoreDataManager.shared.mainContext, database.id) {
-                                                DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
-                                                selectedDatabase = database
-                                                try? CoreDataManager.shared.save()
-                                                DatabaseManager.dispatchDatabaseChangedNotification(beforeDb,
-                                                                                                    DatabaseManager.defaultDatabase, andRestart: true)
-                                            }
-                                        }
-                                        showNewDatabase = false
-                                    })
-                                } else {
-                                    showNewDatabase = false
-                                }
-                                newDatabaseTitle = ""
+                                // TODO: Fix Database operation with the new BeamDatabase objects
+//                                let beforeDb = DatabaseManager.defaultDatabase
+//                                if !newDatabaseTitle.isEmpty {
+//                                    let database = DatabaseStruct(title: newDatabaseTitle)
+//                                    databaseManager.save(database, completion: { result in
+//                                        if case .success(let done) = result, done {
+//
+//                                            if let database = try? Database.fetchWithId(CoreDataManager.shared.mainContext, database.id) {
+//                                                DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
+//                                                selectedDatabase = database
+//                                                try? CoreDataManager.shared.save()
+//                                                DatabaseManager.dispatchDatabaseChangedNotification(beforeDb,
+//                                                                                                    DatabaseManager.defaultDatabase, andRestart: true)
+//                                            }
+//                                        }
+//                                        showNewDatabase = false
+//                                    })
+//                                } else {
+//                                    showNewDatabase = false
+//                                }
+//                                newDatabaseTitle = ""
                             }, label: {
                                 Text("Create")
                             }).padding()
@@ -270,11 +283,14 @@ struct AdvancedPreferencesView: View {
                     }
                     Button(action: {
                         DispatchQueue.global(qos: .userInteractive).async {
-                            let databaseManager = DatabaseManager()
-                            databaseManager.deleteEmptyDatabases(onlyAutomaticCreated: false) { result in
-                                switch result {
-                                case .success: AppDelegate.showMessage("Empty databases deleted")
-                                case .failure(let error): AppDelegate.showError(error)
+                            do {
+                                try BeamData.shared.currentAccount?.deleteEmptyDatabases()
+                                DispatchQueue.main.async {
+                                    AppDelegate.showMessage("Empty databases deleted")
+                                }
+                            } catch {
+                                DispatchQueue.main.async {
+                                    AppDelegate.showError(error)
                                 }
                             }
                         }
@@ -318,9 +334,9 @@ struct AdvancedPreferencesView: View {
                                 return
                             }
                             export_all_note_sources(to: url)
-                            AppDelegate.main.data.clusteringManager.addOrphanedUrlsFromCurrentSession(orphanedUrlManager: AppDelegate.main.data.clusteringOrphanedUrlManager)
-                            AppDelegate.main.data.clusteringOrphanedUrlManager.export(to: url)
-                            AppDelegate.main.data.clusteringManager.exportSession(sessionExporter: AppDelegate.main.data.sessionExporter, to: url, correctedPages: nil)
+                            BeamData.shared.clusteringManager.addOrphanedUrlsFromCurrentSession(orphanedUrlManager: BeamData.shared.clusteringOrphanedUrlManager)
+                            BeamData.shared.clusteringOrphanedUrlManager.export(to: url)
+                            BeamData.shared.clusteringManager.exportSession(sessionExporter: BeamData.shared.sessionExporter, to: url, correctedPages: nil)
                         }
                     }, label: {
                         Text("Note Sources").frame(minWidth: 100)
@@ -346,12 +362,12 @@ struct AdvancedPreferencesView: View {
 
                 Preferences.Section(title: "Cleanup ", bottomDivider: true) {
                     Button(action: {
-                        let manager = DocumentManager()
-                        manager
-                            .allDocumentsIds(includeDeletedNotes: true)
+                        guard let collection = BeamData.shared.currentDocumentCollection else { return }
+                        try? collection
+                            .fetchIds(filters: [])
                             .forEach {
-                                let note = BeamNote.fetch(id: $0, includeDeleted: false, keepInMemory: false)
-                                note?.save(completion: { _ in })
+                                let note = BeamNote.fetch(id: $0, keepInMemory: false)
+                                note?.save(self)
                             }
                     }, label: {
                         Text("Notes browsing sessions").frame(minWidth: 100)
@@ -478,6 +494,14 @@ struct AdvancedPreferencesView: View {
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
                     HistoryInOmniboxCheckbox
+                }
+
+                Preferences.Section(bottomDivider: true) {
+                    Text("Omnibeams")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    OmnibeamsCheckbox
                 }
 
                 Preferences.Section(verticalAlignment: .top) {
@@ -653,6 +677,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([includeHistoryContentsInOmniBox].publisher.first()) {
                 PreferencesManager.includeHistoryContentsInOmniBox = $0
+            }
+    }
+
+    private var OmnibeamsCheckbox: some View {
+        return Toggle(isOn: $enableOmnibeams) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([enableOmnibeams].publisher.first()) {
+                PreferencesManager.enableOmnibeams = $0
             }
     }
 
@@ -833,24 +868,22 @@ struct AdvancedPreferencesView: View {
         .frame(idealWidth: 100, maxWidth: 400)
     }
 
-    private func dbChange(_ database: Database?) {
+    private func dbChange(_ database: BeamDatabase?) {
         guard let database = database else { return }
-        DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
+        try? BeamData.shared.setCurrentDatabase(database)
     }
 
     @State private var cancellables = [AnyCancellable]()
 
     private func startObservers() {
-        NotificationCenter.default
-            .publisher(for: .defaultDatabaseUpdate, object: nil)
+        BeamData.shared.$currentDatabase
             .sink { _ in
-                selectedDatabase = Database.defaultDatabase()
+                selectedDatabase = BeamData.shared.currentDatabase
             }
             .store(in: &cancellables)
-        NotificationCenter.default
-            .publisher(for: .databaseListUpdate, object: nil)
+        BeamData.shared.currentAccount?.$allDatabases
             .sink { _ in
-                selectedDatabase = Database.defaultDatabase()
+                selectedDatabase = BeamData.shared.currentDatabase
             }
             .store(in: &cancellables)
         AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { isAuthenticated in
@@ -889,7 +922,7 @@ struct AdvancedPreferencesView: View {
     private var PasswordBraveImporter: some View {
         Button(action: {
             let importer = ChromiumPasswordImporter(browser: .brave)
-            AppDelegate.main.data.importsManager.startBrowserPasswordImport(from: importer)
+            BeamData.shared.importsManager.startBrowserPasswordImport(from: importer)
         }, label: {
             Text("Import Passwords from Brave Browser")
         })
@@ -910,13 +943,13 @@ struct AdvancedPreferencesView: View {
     }
 
     private var RebuildNotesContents: some View {
-        Button(action: { BeamNote.rebuildAllNotes() }, label: {
+        Button(action: { try? BeamNote.rebuildAllNotes(self) }, label: {
             Text("Rebuild all notes' contents")
         })
     }
 
     private var ValidateNotesContents: some View {
-        Button(action: { BeamNote.validateAllNotes() }, label: {
+        Button(action: { try? BeamNote.validateAllNotes() }, label: {
             Text("Validate all notes' contents")
         })
     }

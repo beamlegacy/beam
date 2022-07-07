@@ -15,7 +15,7 @@ class BrowserTabTests: XCTestCase {
     var tab: BrowserTab!
 
     override func setUpWithError() throws {
-        note = BeamNote(title: "Sample note")
+        note = try BeamNote(title: "Sample note")
         tab = BrowserTab(state: BeamState(), browsingTreeOrigin: nil, originMode: .note, note: note)
     }
 

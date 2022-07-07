@@ -39,6 +39,8 @@ extension HistoryUrlRecord: FetchableRecord {
 
 // FTS search
 extension HistoryUrlRecord {
+    static let databaseTableName = "historyUrlRecord"
+
     struct FTS: TableRecord {
         static let databaseTableName = "historyUrlContent"
     }

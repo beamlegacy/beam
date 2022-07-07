@@ -52,23 +52,6 @@ class WebIndexingController {
         }
     }
 
-    /// Unused. We let the LinkStore do its job.
-    /// This was commented out in January 2022 with commit f405554
-    /// It used to be in BeamData.tabToIndex
-    private func updateHistoryRecordDirectly(urlId: UUID, _ tabInfo: TabIndexingInfo) {
-        do {
-            if tabInfo.shouldBeIndexed {
-                try GRDBDatabase.shared._insertHistoryUrl(urlId: urlId,
-                                                          url: tabInfo.url.string,
-                                                          aliasDomain: tabInfo.requestedURL?.absoluteString,
-                                                          title: tabInfo.document.title,
-                                                          content: nil)
-            }
-        } catch {
-            Logger.shared.logError("unable to save history url \(tabInfo.url.string)", category: .webIndexing)
-        }
-    }
-
     private func indexNavigation(to url: URL, tabIndexingInfo: TabIndexingInfo, read: Readability? = nil,
                                  browsingTree: BrowsingTree, isLinkActivation: Bool, startReading: Bool) {
 

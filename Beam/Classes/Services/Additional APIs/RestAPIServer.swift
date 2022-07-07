@@ -122,11 +122,11 @@ class RestAPIServer {
         }
 
         private func multipart(encodedPublicNote: Data, richContent: [BeamElement], publicationGroups: [String]?) -> Data? {
+            guard let fileDB = BeamFileDBManager.shared else { return nil }
             let boundary = RestAPIServer.multipartBoundary
             let lineBreak = "\r\n"
 
             let body = NSMutableData()
-            let fileDB = BeamFileDBManager.shared
 
             let note = createMultipartBody(data: encodedPublicNote, documentName: "note", fileNameAndExtension: nil, mimetype: "application/json")
             body.append(note)

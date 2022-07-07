@@ -111,9 +111,10 @@ struct SidebarListNoteButton: View {
 
 struct SidebarListNoteButton_Previews: PreviewProvider {
 
-    static var note = BeamNote(title: "Baudrillard")
+    // swiftlint:disable:next force_try
+    static var note = try! BeamNote(title: "Baudrillard")
 
     static var previews: some View {
-        SidebarListNoteButton(note: note, pinnedManager: PinnedNotesManager(with: DocumentManager()))
+        SidebarListNoteButton(note: note, pinnedManager: PinnedNotesManager())
     }
 }

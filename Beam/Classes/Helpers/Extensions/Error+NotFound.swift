@@ -16,8 +16,6 @@ class BeamError {
         switch error {
         case BeamObjectManagerError.multipleErrors(let errors):
             return isNotFound(errors)
-        case DatabaseManagerError.multipleErrors(let errors):
-            return isNotFound(errors)
         case APIRequestError.notFound:
             return true
         default:

@@ -297,7 +297,7 @@ struct Passwords: View {
     }
 
     private func importPasswordsAction(source: OnboardingImportsView.ImportSource) {
-        let importsManager = AppDelegate.main.data.importsManager
+        let importsManager = BeamData.shared.importsManager
         if source.supportsAutomaticPasswordImport, let passwordImporter = source.passwordImporter {
             importsManager.startBrowserPasswordImport(from: passwordImporter)
         } else {

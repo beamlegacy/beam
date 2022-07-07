@@ -10,9 +10,15 @@ import XCTest
 @testable import BeamCore
 
 class DomainPath0Test: XCTestCase {
+    var db: TabPinSuggestionDBManager!
+    
+    override func setUpWithError() throws {
+        let store = GRDBStore.empty()
+        db = try TabPinSuggestionDBManager(store: store)
+        try store.migrate()
+    }
 
     func testReadingDay() throws {
-        let db = GRDBDatabase.empty()
         BeamDate.freeze("2001-01-01T13:40:12+000")
         let firstDate = BeamDate.now
         let domainPath0s = ["abc.com/cat", "def.com/dog"]
@@ -38,7 +44,6 @@ class DomainPath0Test: XCTestCase {
     }
 
     func testStats() throws {
-        let db = GRDBDatabase.empty()
         BeamDate.freeze("2001-01-01T13:40:12+000")
         let domainPath0s = ["abc.com/cat", "def.com/dog"]
         let treeId = UUID()
@@ -69,7 +74,6 @@ class DomainPath0Test: XCTestCase {
     }
     
     func testStorage() throws {
-        let db = GRDBDatabase.empty()
         let storage = DomainPath0TreeStatsStorage(db: db)
         let treeId = UUID()
         BeamDate.freeze("2001-01-01T13:40:12+000")

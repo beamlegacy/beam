@@ -79,20 +79,30 @@ final class WebFieldLocator {
 
     private func requestWebFieldFrame(elementId: String, frameInfo: WKFrameInfo?, completion: @escaping (CGRect?) -> Void) {
         let script = "passwordHelper.getElementRects('[\"\(elementId)\"]')"
-        self.page?.executeJS(script, objectName: JSObjectName, frameInfo: frameInfo).then { [weak self] jsResult in
-            guard let self = self, let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let rects = try? self.decoder.decode([DOMRect?].self, from: jsonData), let rect = rects.first??.rect else {
-                return completion(nil)
+        page?.executeJS(script, objectName: JSObjectName, frameInfo: frameInfo) { [weak self] result in
+            switch result {
+            case .success(let jsResult):
+                guard let jsonString = jsResult as? String,
+                      let jsonData = jsonString.data(using: .utf8),
+                      let rects = try? self?.decoder.decode([DOMRect?].self, from: jsonData),
+                      let rect = rects.first??.rect
+                else {
+                    return completion(nil)
+                }
+                let offset: CGPoint
+                if let href = frameInfo?.request.url?.absoluteString, let webPositions = self?.page?.webPositions {
+                    offset = webPositions.viewportOffset(href: href)
+                } else {
+                    offset = .zero
+                }
+                let scale = self?.page?.webView.zoomLevel() ?? 1
+                Logger.shared.logDebug("Frame for \(elementId): \(rect), with offset \(offset), scale: \(scale)", category: .webAutofillInternal)
+                let frame = CGRect(x: (rect.minX + offset.x) * scale, y: (rect.minY + offset.y) * scale, width: rect.width * scale, height: rect.height * scale)
+                completion(frame)
+
+            case .failure(let error):
+                Logger.shared.logError("WebFieldLocator error requesting web field frame: \(error)", category: .webAutofillInternal)
             }
-            let offset: CGPoint
-            if let href = frameInfo?.request.url?.absoluteString, let webPositions = self.page?.webPositions {
-                offset = webPositions.viewportOffset(href: href)
-            } else {
-                offset = .zero
-            }
-            let scale = self.page?.webView.zoomLevel() ?? 1
-            Logger.shared.logDebug("Frame for \(elementId): \(rect), with offset \(offset), scale: \(scale)", category: .webAutofillInternal)
-            let frame = CGRect(x: (rect.minX + offset.x) * scale, y: (rect.minY + offset.y) * scale, width: rect.width * scale, height: rect.height * scale)
-            completion(frame)
         }
     }
 

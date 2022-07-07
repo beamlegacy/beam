@@ -118,10 +118,10 @@ class DebugSection: Widget {
     }
 
     private func setupDebugInfoLayer() {
-        let nodeDatabaseId = self.note.documentStruct?.databaseId.uuidString ?? "-"
-        let previousChecksum = self.note.documentStruct?.previousChecksum ?? "-"
+        let nodeDatabaseId = self.note.document?.databaseId?.uuidString ?? "-"
+        let previousChecksum = self.note.document?.previousChecksum ?? "-"
 
-        let defaultDatabaseId = DatabaseManager.defaultDatabase.id.uuidString
+        let defaultDatabaseId = BeamData.shared.currentDatabase?.id.uuidString
         let databaseTextColor = nodeDatabaseId == defaultDatabaseId ? BeamColor.Generic.text.nsColor : BeamColor.Shiraz.nsColor
 
         let noteIdLayer = Layer.text("ID: \(self.note.id.uuidString)", color: BeamColor.Generic.text.nsColor, size: 12)
@@ -146,7 +146,7 @@ class DebugSection: Widget {
         addLayer(ButtonLayer("defaultDatabaseIdBtn", defaultDatabaseIdLayer, activated: {
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
-            pasteboard.setString(defaultDatabaseId, forType: .string)
+            pasteboard.setString(defaultDatabaseId ?? "no default database id", forType: .string)
         }, hovered: { [unowned self] hovered in
             self.layers["defaultDatabaseIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
         }), origin: CGPoint(x: 0, y: 70))

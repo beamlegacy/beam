@@ -13,7 +13,8 @@ import Combine
 
 
 fileprivate var pnsNoteTitle = "Grocery list"
-fileprivate var pnsNote = BeamNote(title: pnsNoteTitle)
+// swiftlint:disable:next force_try
+fileprivate var pnsNote = try! BeamNote(title: pnsNoteTitle)
 
 class NoteScoreTriggerTests: XCTestCase {
 
@@ -101,7 +102,7 @@ class NoteScoreTriggerTests: XCTestCase {
 
         func addContent(content: [BeamElement], with source: URL? = nil, reason: NoteElementAddReason) {
             Logger.shared.logWarning("Incomplete implementation of addContent logic", category: .web)
-            let element = BeamElement("url: \(url) text: \(title)")
+            let element = BeamElement("url: \(String(describing: url)) text: \(title)")
             pnsNote.addChild(element)
         }
 
@@ -117,7 +118,8 @@ class NoteScoreTriggerTests: XCTestCase {
     func testNavigateToNote() throws {
         let state = BeamState()
         state.data = data
-        let note = BeamNote(title: "Amazing Thoughts")
+        let note = try BeamNote(title: "Amazing Thoughts")
+        note.owner = BeamData.shared.currentDatabase
         note.addChild(BeamElement("Nothing"))
         KeychainDailyNoteScoreStore.shared.clear()
 

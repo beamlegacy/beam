@@ -104,34 +104,48 @@ extension AutocompleteManager {
     private func autocompleteNotesResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
             let start = DispatchTime.now()
-            let documentManager = DocumentManager()
-            documentManager.documentsWithTitleMatch(title: query) { result in
-                switch result {
-                case .failure(let error): promise(.failure(error))
-                case .success(let documentStructs):
-                    let ids = documentStructs.map { $0.id }
-                    let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
-                    let autocompleteResults = documentStructs.map {
-                        AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
-                    }.sorted(by: >).prefix(6)
-                    let autocompleteResultsArray = Array(autocompleteResults)
-                    self?.logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray, startedAt: start)
-                    promise(.success(autocompleteResultsArray))
-                }
-            }
+            guard let collection = BeamData.shared.currentDocumentCollection else { return promise(.success([])) }
+            guard let documents = try? collection.fetch(filters: [.titleMatch(query)]) else { return promise(.success([])) }
+            let ids = documents.map { $0.id }
+            guard let scores = BeamData.shared.noteLinksAndRefsManager?.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey) else { return promise(.success([])) }
+            let autocompleteResults = documents.map {
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
+            }.sorted(by: >).prefix(6)
+            let autocompleteResultsArray = Array(autocompleteResults)
+            self?.logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray, startedAt: start)
+            promise(.success(autocompleteResultsArray))
         }
+    }
+
+    private func _autocompleteNotesResults(for query: String) -> [AutocompleteResult] {
+        let start = DispatchTime.now()
+        guard let collection = BeamData.shared.currentDocumentCollection else { return [] }
+        guard let documents = try? collection.fetch(filters: [.titleMatch(query)]) else { return [] }
+        let ids = documents.map { $0.id }
+        guard let scores = BeamData.shared.noteLinksAndRefsManager?.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey) else { return [] }
+        let autocompleteResults = documents.map {
+            AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
+        }.sorted(by: >).prefix(6)
+        let autocompleteResultsArray = Array(autocompleteResults)
+        logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray, startedAt: start)
+        return autocompleteResultsArray
     }
 
     private func autocompleteNotesContentsResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
-            GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10, frecencyParam: AutocompleteManager.noteFrecencyParamKey) { result in
+            BeamData.shared.noteLinksAndRefsManager?.search(matchingAllTokensIn: query, maxResults: 10, frecencyParam: AutocompleteManager.noteFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let notesContentResults):
-                    let documentManager = DocumentManager()
                     let ids = notesContentResults.map { $0.noteId }
-                    let docs = documentManager.loadDocumentsById(ids: ids)
+                    guard let collection = BeamData.shared.currentDocumentCollection,
+                          let docs = try? collection.fetch(filters: [.ids(ids)])
+                    else {
+                        promise(.failure(BeamDataError.databaseNotFound))
+                        return
+                    }
+
                     let autocompleteResults = notesContentResults.compactMap { result -> AutocompleteResult? in
                         // Check if the note still exists before proceeding.
                         guard docs.first(where: { $0.id == result.noteId }) != nil else { return nil }
@@ -140,21 +154,6 @@ extension AutocompleteManager {
                     }
                     self.logIntermediate(step: "NoteContent", stepShortName: "NC", results: autocompleteResults, startedAt: start)
                     promise(.success(autocompleteResults))
-                }
-            }
-        }
-    }
-
-    private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
-        Future { promise in
-            let documentManager = DocumentManager()
-            documentManager.loadDocumentByTitle(title: query) { result in
-                switch result {
-                case .failure(let error):
-                    promise(.failure(error))
-                case .success(let documentStruct):
-                    let canCreateNote = documentStruct == nil && URL(string: query)?.scheme == nil && query.containsCharacters
-                    promise(.success(canCreateNote))
                 }
             }
         }
@@ -169,7 +168,7 @@ extension AutocompleteManager {
     private func autocompleteHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
-            GRDBDatabase.shared.searchLink(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
+            BeamData.shared.urlHistoryManager?.searchLink(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let historyResults):
@@ -204,7 +203,10 @@ extension AutocompleteManager {
     private func autocompleteLinkStoreResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
-            let scoredLinks = GRDBDatabase.shared.getTopScoredLinks(matchingUrl: query, frecencyParam: AutocompleteManager.urlFrecencyParamKey, limit: 6)
+            guard let scoredLinks = BeamData.shared.urlHistoryManager?.getTopScoredLinks(matchingUrl: query, frecencyParam: AutocompleteManager.urlFrecencyParamKey, limit: 6) else {
+                promise(.failure(BeamDataError.databaseNotFound))
+                return
+            }
             let results = scoredLinks.map { (scoredLink) -> AutocompleteResult in
                 let url = URL(string: scoredLink.url)
                 var text = ""
@@ -227,6 +229,17 @@ extension AutocompleteManager {
             }.sorted(by: >)
             self.logIntermediate(step: "HistoryTitle", stepShortName: "HT", results: results, startedAt: start)
             promise(.success(results))
+        }
+    }
+
+    private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
+        Future { promise in
+            guard let collection = BeamData.shared.currentDocumentCollection else { promise(.failure(BeamDataError.databaseNotFound))
+                return
+            }
+            let document = try? collection.fetchFirst(filters: [.title(query)])
+            let canCreateNote = document == nil && URL(string: query)?.scheme == nil && query.containsCharacters
+            promise(.success(canCreateNote))
         }
     }
 
@@ -262,7 +275,7 @@ extension AutocompleteManager {
         Future { promise in
             guard Self.enableMmnemonics else { return promise(.success([])) }
             let start = DispatchTime.now()
-            guard let url = GRDBDatabase.shared.getMnemonic(text: query) else {
+            guard let url = BeamData.shared.mnemonicManager?.getMnemonic(text: query) else {
                 promise(.failure(TopDomainDatabaseError.notFound))
                 return
             }
@@ -357,7 +370,7 @@ extension AutocompleteManager {
         Future { promise in
             let start = DispatchTime.now()
             var results = [AutocompleteResult]()
-            if let group = TabGroupingStoreManager.shared.searchGroups(forText: query).first {
+            if let group = BeamData.shared.tabGroupingDBManager?.searchGroups(forText: query).first {
                 let scores = LinkStore.shared.getLinks(for: group.pageIds).compactMap { $1.frecencyVisitSortScore }
                 let bestScore = scores.max()
                 results.append(AutocompleteResult(text: group.title ?? "Tab Group (\(group.pageIds.count) tabs)",
@@ -383,7 +396,10 @@ extension AutocompleteManager {
             let currentNoteID = beamState.mode == .note ? beamState.currentNote?.id : nil
             let recentsNotes = beamState.recentsManager.recentNotes.filter { $0.id != currentNoteID }
             let ids = recentsNotes.map { $0.id }
-            let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
+            guard let scores = BeamData.shared.noteLinksAndRefsManager?.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey) else {
+                promise(.failure(BeamDataError.databaseNotFound))
+                return
+            }
             let autocompleteResults = recentsNotes.map {
                 AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
             }.sorted(by: >).prefix(limit)

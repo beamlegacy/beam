@@ -8,7 +8,7 @@
 import XCTest
 import Quick
 import Nimble
-import Promises
+
 @testable import Beam
 @testable import BeamCore
 

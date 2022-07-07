@@ -9,7 +9,7 @@
 import Foundation
 import BeamCore
 import SwiftUI
-import Promises
+
 import Combine
 
 struct WebFieldAutofill: Codable {
@@ -170,11 +170,16 @@ class WebAutofillController: NSObject, WebPageRelated {
             installSubmitHandlerIfNeeded(frameInfo: frameInfo) {
                 self.installFocusHandlers(addedIds: newFieldsWithFocusHandler, frameInfo: frameInfo)
             }
-            self.page?.executeJS("passwordHelper.getFocusedField()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal).then { result in
-                if let focusedId = result as? String {
-                    DispatchQueue.main.async {
-                        self.inputFieldDidGainFocus(focusedId, frameInfo: frameInfo, contents: nil)
+            self.page?.executeJS("passwordHelper.getFocusedField()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal) { result in
+                switch result {
+                case .success(let res):
+                    if let focusedId = res as? String {
+                        DispatchQueue.main.async {
+                            self.inputFieldDidGainFocus(focusedId, frameInfo: frameInfo, contents: nil)
+                        }
                     }
+                case .failure(let error):
+                    Logger.shared.logError("WebAutofillController error updating input fields: \(error)", category: .webAutofillInternal)
                 }
             }
         }
@@ -188,7 +193,9 @@ class WebAutofillController: NSObject, WebPageRelated {
         else {
             return completion()
         }
-        page.executeJS("installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal).then { _ in
+
+        Task.init {
+            page.executeJS("installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal)
             self.framesWithInstalledSubmitHandler.insert(frameHref)
             completion()
         }
@@ -215,7 +222,8 @@ class WebAutofillController: NSObject, WebPageRelated {
         guard let autofillGroup = fieldClassifiers?.autofillGroup(for: elementId, frameInfo: frameInfo) else {
             DispatchQueue.main.async {
                 self.clearInputFocus()
-                self.page?.executeJS("sendTextFields(null)", objectName: self.JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal).then { _ in
+                Task.init {
+                    self.page?.executeJS("sendTextFields(null)", objectName: self.JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal)
                     if let autofillGroup = self.fieldClassifiers?.autofillGroup(for: elementId, frameInfo: frameInfo) {
                         self.handleInputFieldFocus(elementId: elementId, inGroup: autofillGroup, frameInfo: frameInfo, contents: contents)
                     }
@@ -403,14 +411,19 @@ class WebAutofillController: NSObject, WebPageRelated {
     private func requestValuesFromTextFields(ids: [String], frameInfo: WKFrameInfo?, completion: @escaping (([String]?) -> Void)) {
         let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
         let script = "passwordHelper.getTextFieldValues('[\(formattedList)]')"
-        self.page?.executeJS(script, objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal).then { jsResult in
-            if let jsonString = jsResult as? String,
-               let jsonData = jsonString.data(using: .utf8),
-               let values = try? self.decoder.decode([String].self, from: jsonData) {
-                completion(values)
-            } else {
-                Logger.shared.logWarning("Unable to decode text field values from \(String(describing: jsResult))", category: .webAutofillInternal)
-                completion(nil)
+        self.page?.executeJS(script, objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal)  { result in
+            switch result {
+            case .success(let jsResult):
+                if let jsonString = jsResult as? String,
+                   let jsonData = jsonString.data(using: .utf8),
+                   let values = try? self.decoder.decode([String].self, from: jsonData) {
+                    completion(values)
+                } else {
+                    Logger.shared.logWarning("Unable to decode text field values from \(String(describing: jsResult))", category: .webAutofillInternal)
+                    completion(nil)
+                }
+            case .failure(let error):
+                Logger.shared.logError("WebAutofillController error requesting value from text fields: \(error)", category: .webAutofillInternal)
             }
         }
     }
@@ -669,9 +682,8 @@ extension WebAutofillController: PasswordManagerMenuDelegate {
             let data = try encoder.encode(params)
             guard let jsonString = String(data: data, encoding: .utf8)?.javascriptEscaped() else { return }
             let script = "passwordHelper.setTextFieldValues('\(jsonString)')"
-            self.page?.executeJS(script, objectName: JSObjectName, frameInfo: currentOverlay?.frameInfo, successLogCategory: .webAutofillInternal).then { _ in
-                Logger.shared.logDebug("passwordOverlay text fields set.", category: .webAutofillInternal)
-            }
+            self.page?.executeJS(script, objectName: JSObjectName, frameInfo: currentOverlay?.frameInfo, successLogCategory: .webAutofillInternal)
+            Logger.shared.logDebug("passwordOverlay text fields set.", category: .webAutofillInternal)
         } catch {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
         }

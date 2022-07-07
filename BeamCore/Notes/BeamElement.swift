@@ -236,7 +236,7 @@ public enum ElementKind: Codable, Equatable {
             }
             // V1
             if let idString = try container.decodeIfPresent(String.self, forKey: .title),
-               let id = BeamNote.idForNoteNamed(idString, false) {
+               let id = BeamNote.idForNoteNamed(idString) {
                 noteID = id
             }
 

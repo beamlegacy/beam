@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import Promises
+
 import Nimble
 
 @testable import Beam

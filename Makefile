@@ -77,12 +77,6 @@ install_swiftlint:
 	brew install swiftlint
 	sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
-build_libgit2:
-	cd Extern/libgit2
-	mkdir -p build && cd build
-	cmake -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DBUILD_SHARED_LIBS="OFF" -DCMAKE_OSX_DEPLOYMENT_TARGET="10.15" -S Extern/libgit2/ -B Extern/libgit2/build
-	cmake --build Extern/libgit2/build
-
 gym:
 	fastlane gym
 
@@ -185,4 +179,4 @@ update_curl_jq_image:
 	@echo "Pushing image"
 	docker push registry.gitlab.com/beamgroup/beam/curl-jq
 
-setup: git_checkout install_dependencies install_swiftlint install_cmake install_direnv install_variable_injector build_libgit2 install_js
+setup: git_checkout install_dependencies install_swiftlint install_cmake install_direnv install_variable_injector install_js

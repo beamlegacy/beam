@@ -257,17 +257,19 @@ struct NoteHeaderView: View {
 
 struct NoteHeaderView_Previews: PreviewProvider {
     static var classicModel: NoteHeaderView.ViewModel {
-        NoteHeaderView.ViewModel(note: BeamNote(title: "My note title"))
+        // swiftlint:disable:next force_try
+        NoteHeaderView.ViewModel(note: try! BeamNote(title: "My note title"))
     }
     static var titleTakenModel: NoteHeaderView.ViewModel {
-        let model = NoteHeaderView.ViewModel(note: BeamNote(title: "Taken Title"))
+        // swiftlint:disable:next force_try
+        let model = NoteHeaderView.ViewModel(note: try! BeamNote(title: "Taken Title"))
         model.isTitleTaken = (true, true)
         return model
     }
     static var previews: some View {
         VStack {
-            NoteHeaderView(model: classicModel, pinnedManager: PinnedNotesManager(with: DocumentManager()), topPadding: 20)
-            NoteHeaderView(model: titleTakenModel, pinnedManager: PinnedNotesManager(with: DocumentManager()), topPadding: 60)
+            NoteHeaderView(model: classicModel, pinnedManager: PinnedNotesManager(), topPadding: 20)
+            NoteHeaderView(model: titleTakenModel, pinnedManager: PinnedNotesManager(), topPadding: 60)
         }
         .border(Color.green)
         .padding(.vertical)

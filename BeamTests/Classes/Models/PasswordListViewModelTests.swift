@@ -21,7 +21,7 @@ class PasswordListViewModelTests: XCTestCase {
         _ = try? passwordsDB.save(hostname: "test4.com", username: "user4", encryptedPassword: "password4", privateKeySignature: "", uuid: UUID())
         _ = try? passwordsDB.save(hostname: "test5.com", username: "user5", encryptedPassword: "password5", privateKeySignature: "", uuid: UUID())
         _ = try? passwordsDB.save(hostname: "test6.com", username: "user6", encryptedPassword: "password6", privateKeySignature: "", uuid: UUID())
-        passwordManager = PasswordManager(passwordsDB: passwordsDB)
+        passwordManager = PasswordManager(overridePasswordDB: passwordsDB)
     }
 
     func testFilteringEntries() throws {

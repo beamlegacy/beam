@@ -139,7 +139,7 @@ class BeamObjectManager {
 
                     return result
                 } catch {
-                    Logger.shared.logError("Error decoding \($0.beamObjectType) beamobject: \(error.localizedDescription)",
+                    Logger.shared.logError("Error decoding \($0.beamObjectType) beamobject: \(error)",
                                            category: .beamObject)
                     dump($0)
                     throw error
@@ -187,6 +187,10 @@ class BeamObjectManager {
         }
     }
 
+    static func unregister(objectType: BeamObjectObjectType) {
+        managerInstances.removeValue(forKey: objectType)
+    }
+
     static func unregisterAll() {
         managerInstances = [:]
         translators = [:]
@@ -195,11 +199,9 @@ class BeamObjectManager {
     static func setup() {
         let treeSyncEnabled = Configuration.browsingTreeApiSyncEnabled
         // Add any manager using BeamObjects here
-        DocumentManager().registerOnBeamObjectManager()
-        DatabaseManager().registerOnBeamObjectManager()
+        BeamData.shared.registerWithBeamObjectManager()
         PasswordManager.shared.registerOnBeamObjectManager()
-        BeamFileDBManager.shared.registerOnBeamObjectManager()
-        TabGroupingStoreManager.shared.registerOnBeamObjectManager()
+        TabGroupingStoreManager.shared?.registerOnBeamObjectManager()
         if treeSyncEnabled {
             BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
         }
@@ -218,7 +220,10 @@ class BeamObjectManager {
         if treeSyncEnabled {
             managerOrder.append(.browsingTree)
         }
-        assert(managerOrder.count == managerInstances.count)
+
+        if managerOrder.count != managerInstances.count {
+            Logger.shared.logError("Wrong number of BeamObjectManagers. Should be \(managerOrder.count): \(managerOrder)\nbut had \(managerInstances.count): \(managerInstances.values)", category: .beamObjectDebug)
+        }
     }
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
@@ -269,7 +274,14 @@ class BeamObjectManager {
          fix I will parse per type, in the order listed at `managerOrder`.
          */
 
-        for (key, objects) in filteredObjects {
+        let sortedObjects = filteredObjects.sorted(by: {
+            if let firstIndex = Self.managerOrder.firstIndex(of: $0.0), let secondIndex = Self.managerOrder.firstIndex(of: $1.0) {
+                return firstIndex < secondIndex
+            }
+            return true
+        })
+
+        for (key, objects) in sortedObjects {
             guard let managerInstance = Self.managerInstances[key] else {
                 Logger.shared.logDebug("**managerInstance for \(key) not found** keys: \(Self.managerInstances.keys)",
                                        category: .beamObject)
@@ -282,47 +294,40 @@ class BeamObjectManager {
                 continue
             }
 
-            group.enter()
-            DispatchQueue.global(qos: .userInteractive).async {
-                do {
-                    try translator(managerInstance, objects.filter({ $0.deletedAt == nil }))
-                } catch {
-                    Logger.shared.logError("Error parsing remote \(key) beamobjects: \(error.localizedDescription). Retrying one by one.",
-                                           category: .beamObjectNetwork)
+            do {
+                try translator(managerInstance, objects.filter({ $0.deletedAt == nil }))
+            } catch {
+                Logger.shared.logError("Error parsing remote \(key) beamobjects: \(error.localizedDescription). Retrying one by one.",
+                                       category: .beamObjectNetwork)
 
-                    var objectsInError: [BeamObject] = []
+                var objectsInError: [BeamObject] = []
 
-                    // When error occurs, we need to know what object is actually failing
-                    for beamObject in objects {
-                        do {
-                            try translator(managerInstance, [beamObject])
-                        } catch {
-                            objectsInError.append(beamObject)
-                            objectsInErrors.insert(beamObject.beamObjectType)
-                        }
-                    }
-
-                    var message: String
-                    if objectsInError.count == objects.count {
-                        Logger.shared.logError("All \(key) objects in error", category: .beamObjectNetwork)
-                        message = "All \(objectsInError.count) BeamObjects types: \(key) are in error"
-                        dump(objectsInError)
-                    } else {
-                        Logger.shared.logError("Error parsing following \(key) beamobjects: \(objectsInError.map { $0.id.uuidString }.joined(separator: ", "))",
-                                               category: .beamObjectNetwork)
-                        dump(objectsInError)
-                        message = "Some BeamObjects types: \(key) are in error"
-                    }
-                    DispatchQueue.mainSync {
-                        errors.append(BeamObjectManagerError.parsingError(message))
+                // When error occurs, we need to know what object is actually failing
+                for beamObject in objects {
+                    do {
+                        try translator(managerInstance, [beamObject])
+                    } catch {
+                        objectsInError.append(beamObject)
+                        objectsInErrors.insert(beamObject.beamObjectType)
                     }
                 }
 
-                group.leave()
+                var message: String
+                if objectsInError.count == objects.count {
+                    Logger.shared.logError("All \(key) objects in error", category: .beamObjectNetwork)
+                    message = "All \(objectsInError.count) BeamObjects types: \(key) are in error"
+                    dump(objectsInError)
+                } else {
+                    Logger.shared.logError("Error parsing following \(key) beamobjects: \(objectsInError.map { $0.id.uuidString }.joined(separator: ", "))",
+                                           category: .beamObjectNetwork)
+                    dump(objectsInError)
+                    message = "Some BeamObjects types: \(key) are in error"
+                }
+                DispatchQueue.mainSync {
+                    errors.append(BeamObjectManagerError.parsingError(message))
+                }
             }
         }
-
-        group.wait()
 
         Logger.shared.logDebug("Call object managers: done",
                                category: .beamObject,

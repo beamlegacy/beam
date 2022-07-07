@@ -14,7 +14,9 @@ import XCTest
 import NaturalLanguage
 import Fakery
 
-class TextNodeTests: XCTestCase {
+class TextNodeTests: XCTestCase, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
+
     override func setUp() {
         super.setUp()
     }
@@ -51,8 +53,8 @@ class TextNodeTests: XCTestCase {
         }
     }
 
-    func createMiniArborescence(title: String) -> BeamNote {
-        let note = BeamNote.fetchOrCreate(title: title)
+    func createMiniArborescence(title: String) throws -> BeamNote {
+        let note = try BeamNote.fetchOrCreate(self, title: title)
         let bullet1 = BeamElement("bullet1")
         note.addChild(bullet1)
         let bullet11 = BeamElement("bullet11")
@@ -67,26 +69,10 @@ class TextNodeTests: XCTestCase {
         return note
     }
 
-    func createLoremArborescence(title: String) -> BeamNote {
-        let note = BeamNote(title: title)
-        let bullet1 = BeamElement(String.loremIpsumSmallMD)
-        note.addChild(bullet1)
-        let bullet11 = BeamElement(String.loremIpsumSmallMD)
-        bullet1.addChild(bullet11)
-        bullet1.addChild(BeamElement(String.loremIpsumSmallMD))
-        let bullet2 = BeamElement(String.loremIpsumSmallMD)
-        note.addChild(bullet2)
-        bullet2.addChild(BeamElement(String.loremIpsumSmallMD))
-        bullet2.addChild(BeamElement(String.loremIpsumSmallMD))
-        bullet2.addChild(BeamElement(String.loremIpsumSmallMD))
-
-        return note
-    }
-
     var editor: BeamTextEdit!
 
-    func createNodeWithInternalLink() -> TextNode {
-        let note = createMiniArborescence(title: "title")
+    func createNodeWithInternalLink() throws -> TextNode {
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -103,9 +89,9 @@ class TextNodeTests: XCTestCase {
         return node!
     }
 
-    func testLoadExistingNote() {
+    func testLoadExistingNote() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -128,9 +114,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testFoldNode() {
+    func testFoldNode() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -153,9 +139,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testRemoveNode() {
+    func testRemoveNode() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -178,9 +164,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testAddNodeToRoot() {
+    func testAddNodeToRoot() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -208,9 +194,9 @@ class TextNodeTests: XCTestCase {
     }
 
     // MARK: - Insert
-    func testInsertNodeIntoRoot() {
+    func testInsertNodeIntoRoot() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -236,9 +222,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testAddNodeToBullet() {
+    func testAddNodeToBullet() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -264,9 +250,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testInsertNodeIntoBullet() {
+    func testInsertNodeIntoBullet() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -293,9 +279,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testAddTreeToBullet() {
+    func testAddTreeToBullet() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -325,9 +311,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testInsertTreeIntoBullet() {
+    func testInsertTreeIntoBullet() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -357,9 +343,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testRemoveBulletFromNote() {
+    func testRemoveBulletFromNote() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -382,9 +368,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testRemoveBulletFromBullet() {
+    func testRemoveBulletFromBullet() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -410,9 +396,9 @@ class TextNodeTests: XCTestCase {
     }
 
     // swiftlint:disable:next function_body_length
-    func testInsertText1() {
+    func testInsertText1() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -468,9 +454,9 @@ class TextNodeTests: XCTestCase {
     }
 
     // swiftlint:disable:next function_body_length
-    func testInsertText2() {
+    func testInsertText2() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -525,9 +511,9 @@ class TextNodeTests: XCTestCase {
     }
 
     // swiftlint:disable:next function_body_length
-    func testInsertText3() {
+    func testInsertText3() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -584,9 +570,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testInsertTextAroundInternalLink() {
+    func testInsertTextAroundInternalLink() throws {
         defer { reset() }
-        let node = createNodeWithInternalLink()
+        let node = try createNodeWithInternalLink()
         guard let root = node.editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         XCTAssertEqual(node.text.text, "before link My Internal Note after link")
         root.cursorPosition = 28
@@ -601,9 +587,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testInsertTextInsideInternalLink() {
+    func testInsertTextInsideInternalLink() throws {
         defer { reset() }
-        let node = createNodeWithInternalLink()
+        let node = try createNodeWithInternalLink()
         guard let root = node.editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         XCTAssertEqual(node.text.text, "before link My Internal Note after link")
         root.cursorPosition = 20
@@ -616,10 +602,10 @@ class TextNodeTests: XCTestCase {
 
     // MARK: - Delete
     // swiftlint:disable:next function_body_length
-    func testDeleteBackward() {
+    func testDeleteBackward() throws {
         defer { reset() }
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         guard let root = editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
@@ -643,9 +629,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testDeleteBackwardAfterLink() {
+    func testDeleteBackwardAfterLink() throws {
         defer { reset() }
-        let node = createNodeWithInternalLink()
+        let node = try createNodeWithInternalLink()
         guard let root = node.editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         root.cursorPosition = 29
         XCTAssertEqual(node.text.text, "before link My Internal Note after link")
@@ -657,10 +643,10 @@ class TextNodeTests: XCTestCase {
     }
 
     // swiftlint:disable:next function_body_length
-    func testDeleteForward() {
+    func testDeleteForward() throws {
         defer { reset() }
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -688,9 +674,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testDeleteForwardBeforeLink() {
+    func testDeleteForwardBeforeLink() throws {
         defer { reset() }
-        let node = createNodeWithInternalLink()
+        let node = try createNodeWithInternalLink()
         guard let root = node.editor?.rootNode else { XCTFail("RootNode isn't attached to an editor."); return }
         XCTAssertEqual(node.text.text, "before link My Internal Note after link")
         root.cursorPosition = 11
@@ -702,9 +688,9 @@ class TextNodeTests: XCTestCase {
     }
 
     // MARK: - Stripped Text
-    func testStrippedText() {
+    func testStrippedText() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -713,9 +699,9 @@ class TextNodeTests: XCTestCase {
     }
 
     // MARK: - Links finder
-    func testExternalLinkFinder() {
+    func testExternalLinkFinder() throws {
         defer { reset() }
-        let note = createMiniArborescence(title: "title")
+        let note = try createMiniArborescence(title: "title")
         editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -743,9 +729,9 @@ class TextNodeTests: XCTestCase {
         BeamNote.clearCancellables()
     }
 
-    func testInternalLinkFinder() {
+    func testInternalLinkFinder() throws {
         defer { reset() }
-        let node = createNodeWithInternalLink()
+        let node = try createNodeWithInternalLink()
 
         XCTAssertEqual(node.internalLinkAt(index: 15), UUID.null)
         XCTAssertNil(node.internalLinkAt(index: 12))

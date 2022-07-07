@@ -149,7 +149,7 @@ public class SuggestedNoteSourceUpdater {
         let allLongTermScores = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: allPages)
         for noteId in allNotes {
             DispatchQueue.main.async {
-                if let note = BeamNote.fetch(id: noteId, includeDeleted: false) {
+                if let note = BeamNote.fetch(id: noteId) {
                     if let addPagesToNote = sourcesToAdd[noteId] {
                         note.sources.refreshScores {
                             for pageId in addPagesToNote {

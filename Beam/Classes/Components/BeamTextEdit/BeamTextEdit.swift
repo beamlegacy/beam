@@ -1459,11 +1459,9 @@ public extension CALayer {
         relayoutRoot()
     }
 
-    let documentManager = DocumentManager()
-
     @IBAction func save(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .noteEditor)
-        rootNode?.note?.save()
+        _ = rootNode?.note?.save(self)
     }
 
     @IBAction func selectAllHierarchically(_ sender: Any?) {
@@ -2008,7 +2006,9 @@ public extension CALayer {
     static let maximumImageSize = 40*1024*1024
 
     public override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        guard let rootNode = rootNode else { return false }
+        guard let rootNode = rootNode,
+              let fileManager = BeamFileDBManager.shared
+        else { return false }
         defer {
             updateDragIndicator(at: nil)
         }
@@ -2044,7 +2044,6 @@ public extension CALayer {
                 }
             }
 
-            let fileManager = BeamFileDBManager.shared
             do {
                 let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
                 let newElement = BeamElement()

@@ -12,12 +12,21 @@ import GRDB
 extension ScoredDomainPath0: FetchableRecord {}
 
 class DomainPath0TreeStatsStorage: DomainPath0TreeStatsStorageProtocol {
-    let db: GRDBDatabase
-    init(db: GRDBDatabase = GRDBDatabase.shared) {
-        self.db = db
+    let providedDb: TabPinSuggestionDBManager?
+    var db: TabPinSuggestionDBManager? {
+        let currentDb = providedDb ?? BeamData.shared.tabPinSuggestionDBManager
+        if currentDb == nil {
+            Logger.shared.logError("DomainPath0TreeStatsStorage has no TabPinSuggestionDBManager available", category: .database)
+        }
+        return currentDb
+    }
+
+    init(db providedDb: TabPinSuggestionDBManager? = nil) {
+        self.providedDb = providedDb
     }
     func update(treeId: UUID, url: String, readTime: Double, date: Date) {
-        guard let url = URL(string: url),
+        guard let db = db,
+              let url = URL(string: url),
               !url.isSearchEngineResultPage,
               let domainPath0 = url.domainPath0?.absoluteString else { return }
         do {
@@ -29,6 +38,7 @@ class DomainPath0TreeStatsStorage: DomainPath0TreeStatsStorageProtocol {
         }
     }
     func update(treeId: UUID, lifeTime: Double) {
+        guard let db = db else { return }
         do {
             try db.updateBrowsingTreeStats(treeId: treeId) { record in record.lifeTime = lifeTime }
         } catch {
@@ -36,6 +46,7 @@ class DomainPath0TreeStatsStorage: DomainPath0TreeStatsStorageProtocol {
         }
     }
     func cleanUp(olderThan days: Int, maxRows: Int) {
+        guard let db = db else { return }
         do {
             try db.cleanBrowsingTreeStats(olderThan: days, maxRows: maxRows)
             try db.cleanDomainPath0TreeStat(olderThan: days, maxRows: maxRows)
@@ -46,11 +57,12 @@ class DomainPath0TreeStatsStorage: DomainPath0TreeStatsStorageProtocol {
     }
 
     var domainPath0MinReadDay: Date? {
-        db.domainPath0MinReadDay
+        db?.domainPath0MinReadDay
     }
 
     func getPinTabSuggestionCandidates(minDayCount: Int, minTabReadingTimeShare: Float, minAverageTabLifetime: Float,
                                        dayRange: Int, maxRows: Int) -> [ScoredDomainPath0] {
+        guard let db = db else { return [ScoredDomainPath0]() }
         do {
             return try db.getPinTabSuggestionCandidates(minDayCount: minDayCount, minTabReadingTimeShare: minTabReadingTimeShare, minAverageTabLifetime: minAverageTabLifetime, dayRange: dayRange, maxRows: maxRows)
         } catch {
