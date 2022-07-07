@@ -13,8 +13,10 @@ import SwiftSoup
 import BeamCore
 import Sentry
 
-@objc public class BeamState: NSObject, ObservableObject, Codable {
+@objc public class BeamState: NSObject, ObservableObject, Codable, BeamDocumentSource {
     var data: BeamData
+
+    public static var sourceId: String { "\(Self.self)" }
 
     let isIncognito: Bool
     var incognitoCookiesManager: CookiesManager?
@@ -57,7 +59,7 @@ import Sentry
     }
 
     private(set) lazy var recentsManager: RecentsManager = {
-        RecentsManager(with: DocumentManager())
+        RecentsManager()
     }()
     private(set) lazy var autocompleteManager: AutocompleteManager = {
         AutocompleteManager(searchEngine: searchEngine, beamState: self)
@@ -238,7 +240,7 @@ import Sentry
 
     @discardableResult func openNoteInMiniEditor(id: UUID) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
-        guard let note = BeamNote.fetch(id: id, includeDeleted: false), let window = associatedWindow as? BeamWindow else {
+        guard let note = BeamNote.fetch(id: id), let window = associatedWindow as? BeamWindow else {
             return false
         }
 
@@ -249,7 +251,7 @@ import Sentry
 
     @discardableResult func openNoteInSplitView(id: UUID) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
-        guard let note = BeamNote.fetch(id: id, includeDeleted: false) else {
+        guard let note = BeamNote.fetch(id: id) else {
             return false
         }
 
@@ -273,14 +275,14 @@ import Sentry
     @discardableResult func navigateToNote(named: String, elementId: UUID? = nil) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) named \(named) - elementId \(String(describing: elementId))", category: "BeamState")
         //Logger.shared.logDebug("load note named \(named)")
-        let note = BeamNote.fetchOrCreate(title: named)
+        guard let note = try? BeamNote.fetchOrCreate(self, title: named) else { return false }
         return navigateToNote(note, elementId: elementId)
     }
 
     @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) id \(id) - elementId \(String(describing: elementId))", category: "BeamState")
         //Logger.shared.logDebug("load note named \(named)")
-        guard let note = BeamNote.fetch(id: id, includeDeleted: false) else {
+        guard let note = BeamNote.fetch(id: id) else {
             return false
         }
         return navigateToNote(note, elementId: elementId, unfold: unfold)
@@ -514,19 +516,9 @@ import Sentry
         stopFocusOmnibox()
     }
 
-    func createNewUntitledNote() -> BeamNote {
-        let title = BeamNote.availableTitle(withPrefix: loc("New Note"))
-        return BeamNote.create(title: title)
-    }
-
-    func fetchOrCreateNoteForQuery(_ query: String) -> BeamNote {
+    func fetchOrCreateNoteForQuery(_ query: String) throws -> BeamNote {
         EventsTracker.logBreadcrumb(message: "fetchOrCreateNoteForQuery \(query)", category: "BeamState")
-        if let n = BeamNote.fetch(title: query) {
-            return n
-        }
-
-        let n = BeamNote.create(title: query)
-        return n
+        return try BeamNote.fetchOrCreate(self, title: query)
     }
 
     func handleOpenUrl(_ url: URL, note: BeamNote?, element: BeamElement?, inBackground: Bool) {
@@ -615,7 +607,7 @@ import Sentry
                let mnemonic = result.completingText,
                url.hostname?.starts(with: mnemonic) ?? false {
                 // Create a mnemonic shortcut
-                _ = try? GRDBDatabase.shared.insertMnemonic(text: mnemonic, url: LinkStore.shared.getOrCreateId(for: url.absoluteString, title: nil))
+                try? BeamData.shared.mnemonicManager?.insertMnemonic(text: mnemonic, url: LinkStore.shared.getOrCreateId(for: url.absoluteString, title: nil))
             }
 
             if  mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
@@ -639,7 +631,7 @@ import Sentry
             result.handler?(self)
         case .createNote:
             if let noteTitle = result.information {
-                navigateToNote(fetchOrCreateNoteForQuery(noteTitle))
+                _ = try? navigateToNote(fetchOrCreateNoteForQuery(noteTitle))
             } else {
                 autocompleteManager.animateToMode(.noteCreation)
             }
@@ -679,7 +671,7 @@ import Sentry
     }
 
     public init(incognito: Bool = false) {
-        data = AppDelegate.main.data
+        data = BeamData.shared
         isIncognito = incognito
         if isIncognito {
             incognitoCookiesManager = CookiesManager()
@@ -704,7 +696,7 @@ import Sentry
     }
 
     required public init(from decoder: Decoder) throws {
-        data = AppDelegate.main.data
+        data = BeamData.shared
         isIncognito = false
         super.init()
 
@@ -743,10 +735,10 @@ import Sentry
         destinationCardName = data.todaysName
         backForwardList.push(.journal)
 
-        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
-            .sink { [weak self] id in
+        BeamDocumentCollection.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { [weak self] deletedDocument in
                 guard let self = self else { return }
-                self.backForwardList.purgeDeletedNote(withId: id)
+                self.backForwardList.purgeDeletedNote(withId: deletedDocument.id)
                 self.updateCanGoBackForward()
             }.store(in: &scope)
     }
@@ -897,10 +889,10 @@ import Sentry
 
     var cancellables = Set<AnyCancellable>()
     private func setupObservers() {
-        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
-            .sink { [weak self] id in
+        BeamDocumentCollection.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { [weak self] deletedDocument in
                 guard let self = self else { return }
-                if self.currentNote?.id == id {
+                if self.currentNote?.id == deletedDocument.id {
                     self.currentNote = nil
                     if self.mode == .note {
                         self.navigateToJournal(note: nil)

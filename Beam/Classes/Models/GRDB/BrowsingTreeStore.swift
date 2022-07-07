@@ -149,22 +149,29 @@ protocol BrowsingTreeStoreProtocol {
 }
 
 class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
-    let db: GRDBDatabase
+    let providedDb: BrowsingTreeDBManager?
+    var db: BrowsingTreeDBManager? {
+        let currentDb = providedDb ?? BeamData.shared.browsingTreeDBManager
+        if currentDb == nil {
+            Logger.shared.logError("BrowswingTreeStore has no BrowsingTreeDBManager available", category: .browsingTreeNetwork)
+        }
+        return currentDb
+    }
     public var treeProcessingCompleted = false
     public let group = DispatchGroup()
     static let shared = BrowsingTreeStoreManager()
     let groupTimeOut: Double = 2
     let treeProcessor = BrowsingTreeProcessor()
 
-    init(db: GRDBDatabase = GRDBDatabase.shared) {
-        self.db = db
+    init(db providedDb: BrowsingTreeDBManager? = nil) {
+        self.providedDb = providedDb
     }
 
     func process(tree: BrowsingTree) {
         treeProcessor.process(tree: tree)
     }
     func save(browsingTree: BrowsingTree, appSessionId: UUID? = nil) throws {
-        guard let record = browsingTree.toRecord(appSessionId: appSessionId) else { return }
+        guard let db = db, let record = browsingTree.toRecord(appSessionId: appSessionId) else { return }
         try db.save(browsingTreeRecord: record)
         if AuthenticationManager.shared.isAuthenticated,
             Configuration.networkEnabled,
@@ -198,42 +205,52 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     }
 
     func save(browsingTreeRecords: [BrowsingTreeRecord]) throws {
+        guard let db = db else { return }
         try db.save(browsingTreeRecords: browsingTreeRecords)
     }
 
     func getBrowsingTree(rootId: UUID) throws -> BrowsingTreeRecord? {
-        try db.getBrowsingTree(rootId: rootId)
+        guard let db = db else { return nil }
+        return try db.getBrowsingTree(rootId: rootId)
     }
 
     func getBrowsingTrees(rootIds: [UUID]) throws -> [BrowsingTreeRecord] {
-        try db.getBrowsingTrees(rootIds: rootIds)
+        guard let db = db else { return [] }
+        return try db.getBrowsingTrees(rootIds: rootIds)
     }
 
     func getAllBrowsingTrees(updatedSince: Date? = nil) throws -> [BrowsingTreeRecord] {
-        try db.getAllBrowsingTrees(updatedSince: updatedSince)
+        guard let db = db else { return [] }
+        return try db.getAllBrowsingTrees(updatedSince: updatedSince)
     }
 
     func exists(browsingTreeRecord: BrowsingTreeRecord) throws -> Bool {
-        try db.exists(browsingTreeRecord: browsingTreeRecord)
+        guard let db = db else { return false }
+        return try db.exists(browsingTreeRecord: browsingTreeRecord)
     }
     func browsingTreeExists(rootId: UUID) throws -> Bool {
-        try db.browsingTreeExists(rootId: rootId)
+        guard let db = db else { return false }
+        return try db.browsingTreeExists(rootId: rootId)
     }
 
     var countBrowsingTrees: Int? {
-        db.countBrowsingTrees
+        db?.countBrowsingTrees
     }
 
     func clearBrowsingTrees() throws {
+        guard let db = db else { return }
         try db.clearBrowsingTrees()
     }
     func delete(id: UUID) throws {
+        guard let db = db else { return }
         try db.deleteBrowsingTree(id: id)
     }
     func delete(ids: [UUID]) throws {
+        guard let db = db else { return }
         try db.deleteBrowsingTrees(ids: ids)
     }
     func softDelete(olderThan days: Int = 60, maxRows: Int = 20 * 1000) {
+        guard let db = db else { return }
         do {
             try db.softDeleteBrowsingTrees(olderThan: days, maxRows: maxRows)
 
@@ -272,6 +289,7 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func receivedObjects(_ records: [BrowsingTreeRecord]) throws {
+        guard let db = db else { return }
         treeProcessingCompleted = false
         let statuses = db.browsingTreeProcessingStatuses(ids: records.map { $0.rootId })
         let flattenedRecordsWithDbStatus = records.map { (record) -> BrowsingTreeRecord in
@@ -283,11 +301,12 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
         let recordsToProcess = flattenedRecordsWithDbStatus.filter { $0.processingStatus == .toDo }
         Self.backgroundQueue.async {
             for record in recordsToProcess {
+                guard let db = self.db else { return }
                 if let flattenedTree = record.flattenedData,
                    let tree = BrowsingTree(flattenedTree: flattenedTree) {
-                    self.db.update(record: record, status: .started)
+                    db.update(record: record, status: .started)
                     self.process(tree: tree)
-                    self.db.update(record: record, status: .done)
+                    db.update(record: record, status: .done)
                 }
             }
             self.treeProcessingCompleted = true

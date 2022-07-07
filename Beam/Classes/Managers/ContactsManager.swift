@@ -21,22 +21,15 @@ struct Email: Codable, Hashable {
 
 class ContactsManager {
     static let shared = ContactsManager()
-    static var contactsDBPath: String { BeamData.dataFolder(fileName: "contacts.db") }
-
-    private var contactsDB: ContactsDB
+    private var contactsDB: ContactsDB? { BeamData.shared.contactsDB }
 
     init() {
-        do {
-            contactsDB = try ContactsDB(path: Self.contactsDBPath)
-        } catch {
-            fatalError("Error while creating the Contacts Database \(error)")
-        }
     }
 
     // MARK: Fetch
     func fetch(for id: UUID) -> ContactRecord? {
         do {
-            let contactRecord = try contactsDB.fetchWithId(id)
+            let contactRecord = try contactsDB?.fetchWithId(id)
             return contactRecord
         } catch ContactsDBError.errorFetchingContacts(let errorMsg) {
             Logger.shared.logError("Error while fetching contact: \(errorMsg)", category: .contactsDB)
@@ -48,7 +41,7 @@ class ContactsManager {
 
     func fetchAll() -> [ContactRecord] {
         do {
-            let allContactsRecords = try contactsDB.fetchAll()
+            let allContactsRecords = (try contactsDB?.fetchAll()) ?? []
             return allContactsRecords
         } catch ContactsDBError.errorFetchingContacts(let errorMsg) {
             Logger.shared.logError("Error while fetching all contacts: \(errorMsg)", category: .contactsDB)
@@ -60,7 +53,7 @@ class ContactsManager {
 
     func emails(for noteId: UUID) -> [Email]? {
         do {
-            guard let contactRecord = try contactsDB.contact(for: noteId) else { return nil }
+            guard let contactRecord = try contactsDB?.contact(for: noteId) else { return nil }
             return contactRecord.emails
         } catch ContactsDBError.errorFetchingContacts(let errorMsg) {
             Logger.shared.logError("Error while fetching contacts for \(noteId): \(errorMsg)", category: .contactsDB)
@@ -73,7 +66,7 @@ class ContactsManager {
     func note(for email: String) -> UUID? {
         do {
             guard !email.isEmpty else { return nil }
-            let contactRecords = try contactsDB.fetchAll()
+            let contactRecords = (try contactsDB?.fetchAll()) ?? []
             return contactRecords.first { $0.emails.contains { $0.value == email } }?.noteId
         } catch ContactsDBError.errorFetchingContacts(let errorMsg) {
             Logger.shared.logError("Error while fetching contacts for \(email): \(errorMsg)", category: .contactsDB)
@@ -91,7 +84,7 @@ class ContactsManager {
     }
 
     func search(for noteTitle: String) -> String {
-        let searchResult = DocumentManager().documentsWithTitleMatch(title: noteTitle)
+        let searchResult = (try? BeamData.shared.currentDocumentCollection?.fetch(filters: [.titleMatch(noteTitle)])) ?? []
         for result in searchResult {
             if hasContactInformations(for: result.id) {
                 return result.title
@@ -108,14 +101,14 @@ class ContactsManager {
         }
         do {
             var contactRecord: ContactRecord?
-            if let previousContactRecord = try? contactsDB.contact(for: noteId) {
+            if let previousContactRecord = try? contactsDB?.contact(for: noteId) {
                 if !previousContactRecord.emails.compactMap({ $0.value }).contains(email) {
                     var emails = previousContactRecord.emails
                     emails.append(Email(value: email, type: .none))
-                    contactRecord = try contactsDB.update(record: previousContactRecord, with: emails)
+                    contactRecord = try contactsDB?.update(record: previousContactRecord, with: emails)
                 }
             } else {
-                contactRecord = try contactsDB.save([Email(value: email, type: .none)], to: noteId)
+                contactRecord = try contactsDB?.save([Email(value: email, type: .none)], to: noteId)
             }
             if let contactRecord = contactRecord, AuthenticationManager.shared.isAuthenticated {
                 try self.saveOnNetwork(contactRecord, networkCompletion)
@@ -133,8 +126,9 @@ class ContactsManager {
     // MARK: Delete
     func markDeleted(noteId: UUID, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
-            let contactRecord = try contactsDB.markDeleted(noteId: noteId)
-            if AuthenticationManager.shared.isAuthenticated {
+
+            if let contactRecord = try contactsDB?.markDeleted(noteId: noteId),
+               AuthenticationManager.shared.isAuthenticated {
                 try self.saveOnNetwork(contactRecord, networkCompletion)
             } else {
                 networkCompletion?(.success(false))
@@ -150,7 +144,7 @@ class ContactsManager {
 
     func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
-            try contactsDB.deleteAll()
+            try contactsDB?.deleteAll()
             if AuthenticationManager.shared.isAuthenticated && includedRemote {
                 try self.deleteAllFromBeamObjectAPI { result in
                     networkCompletion?(result)
@@ -174,7 +168,7 @@ extension ContactsManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func saveObjectsAfterConflict(_ contacts: [ContactRecord]) throws {
-        try self.contactsDB.save(contacts: contacts)
+        try self.contactsDB?.save(contacts: contacts)
     }
 
     func manageConflict(_ dbStruct: ContactRecord,
@@ -183,11 +177,11 @@ extension ContactsManager: BeamObjectManagerDelegate {
     }
 
     func receivedObjects(_ contacts: [ContactRecord]) throws {
-        try self.contactsDB.save(contacts: contacts)
+        try self.contactsDB?.save(contacts: contacts)
     }
 
     func allObjects(updatedSince: Date?) throws -> [ContactRecord] {
-        try self.contactsDB.allRecords(updatedSince)
+        (try self.contactsDB?.allRecords(updatedSince)) ?? []
     }
 
     func saveAllOnNetwork(_ contacts: [ContactRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {

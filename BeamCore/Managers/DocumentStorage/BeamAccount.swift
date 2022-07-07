@@ -1,0 +1,322 @@
+//
+//  Account.swift
+//  Beam
+//
+//  Created by Sebastien Metrot on 11/05/2022.
+//
+
+import Foundation
+import BeamCore
+import GRDB
+import Combine
+
+public enum BeamAccountError: Error {
+    case databaseDoesntExist
+    case databaseAlreadyExists
+}
+
+public struct BeamDeletedAccount: Equatable, Hashable {
+    var source: String
+    var account: BeamAccount
+    var id: UUID
+
+    init(_ source: BeamDocumentSource, _ account: BeamAccount, _ id: UUID) {
+        self.source = source.sourceId
+        self.account = account
+        self.id = id
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(source)
+        hasher.combine(id)
+    }
+
+    static public func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.source == rhs.source &&
+        lhs.account === rhs.account
+    }
+}
+
+/// An account contains the user's meta data (name, id, etc) as well as a set of document collections.
+public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner, BeamDocumentSource {
+
+    @Published public private(set) var id: UUID
+    @Published public private(set) var email: String
+    @Published public private(set) var name: String
+
+    @Published public private(set) var path: String = ""
+
+    @Published public private(set) var databases: [UUID: BeamDatabase] = [:]
+    @Published public private(set) var allDatabases: [BeamDatabase] = []
+    public var defaultDatabase: BeamDatabase {
+        return getOrCreateDefaultDatabase()
+    }
+
+    public var grdbStore: GRDBStore!
+
+    /// This publisher is triggered anytime we are completely removing a database
+    static let accountDeleted = PassthroughSubject<BeamDeletedAccount, Never>()
+
+    public static var sourceId: String { "\(Self.self)" }
+    public var defaultDatabaseId: UUID = UUID.null
+
+    public var managers = [UUID: BeamManager]()
+    public static var registeredManagers = [BeamManager.Type]()
+
+    let userSessionRequest = UserSessionRequest()
+    let userInfoRequest = UserInfoRequest()
+
+    public internal(set) var state = ConnectionState.signedOff
+    public enum ConnectionState {
+        case signedOff
+        case authenticated
+        case privateKeyCheck
+        case signedIn
+    }
+
+    public init(id: UUID, email: String, name: String, path: String, overrideDatabasePath: String? = nil, migrate: Bool = true) throws {
+        self.id = id
+        self.name = name
+        self.email = email
+        self.path = path
+
+        try createPath()
+        try setup(overrideDatabasePath: overrideDatabasePath, migrate: migrate)
+    }
+
+    private func setup(overrideDatabasePath: String?, migrate: Bool) throws {
+        let databasePath = URL(fileURLWithPath: path).appendingPathComponent("account.sqlite").path
+        let db = try DatabaseQueue(path: overrideDatabasePath ?? databasePath)
+        grdbStore = GRDBStore(writer: db)
+
+        try loadManagers(grdbStore)
+        if migrate {
+            try grdbStore.migrate()
+        }
+
+        try postMigrationSetup()
+
+        try refreshDatabases()
+        setupSync()
+    }
+
+    public func loadDatabase(_ id: UUID) throws -> BeamDatabase {
+        guard let database = databases[id] else { throw BeamAccountError.databaseDoesntExist }
+        if !database.isLoaded {
+            try database.load()
+        }
+        return database
+    }
+
+    public func addDatabase(_ db: BeamDatabase) throws {
+        guard databases[db.id] == nil else { throw BeamAccountError.databaseAlreadyExists }
+        databases[db.id] = db
+        db.account = self
+        allDatabases = Array(databases.values)
+    }
+
+    /// Remove the database from the account, only in memory, don't remove the files from disk
+    public func removeDatabase(_ id: UUID) throws {
+        guard databases[id] != nil else { throw BeamAccountError.databaseDoesntExist }
+        try unloadDatabase(id)
+        databases.removeValue(forKey: id)
+        allDatabases = Array(databases.values)
+    }
+
+    /// Remove the database from the account, in memory and from disk
+    public func deleteDatabase(_ id: UUID) throws {
+        guard let database = databases[id] else { return }
+        try removeDatabase(id)
+        try database.delete(self)
+    }
+
+    public func unloadDatabase(_ id: UUID) throws {
+        guard let database = databases[id] else { throw BeamAccountError.databaseDoesntExist }
+        try database.unload()
+    }
+
+    @discardableResult
+    public func getOrCreateDefaultDatabase() -> BeamDatabase {
+        if let database = databases[defaultDatabaseId] {
+            return database
+        }
+
+        // There is no database, let's create one
+        defaultDatabaseId = UUID()
+        let database = BeamDatabase(account: self, id: defaultDatabaseId, name: "Default")
+        databases[database.id] = database
+        allDatabases = Array(databases.values)
+
+        try? database.save(self)
+        return database
+    }
+
+    // MARK: Equatable
+    public static func == (lhs: BeamAccount, rhs: BeamAccount) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    // MARK: Codable
+    enum CodingKeys: String, CodingKey {
+        case id, email, name, defaultDatabaseId
+    }
+
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        email = try container.decode(String.self, forKey: .email)
+        defaultDatabaseId = try container.decode(UUID.self, forKey: .defaultDatabaseId)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(email, forKey: .email)
+        try container.encode(defaultDatabaseId, forKey: .defaultDatabaseId)
+    }
+
+    static func jsonUrlFrom(path: String) -> URL {
+        let mainUrl = URL(fileURLWithPath: path)
+        return mainUrl.appendingPathComponent("account.json")
+    }
+
+    var jsonUrl: URL {
+        Self.jsonUrlFrom(path: path)
+    }
+
+    private func createPath() throws {
+        try FileManager.default.createDirectory(at: URL(fileURLWithPath: path), withIntermediateDirectories: true)
+    }
+
+    public func save() throws {
+        try createPath()
+
+        let encoder = JSONEncoder()
+        let data = try encoder.encode(self)
+        let url = jsonUrl
+        try data.write(to: url)
+
+        for db in databases.values {
+            do {
+                try db.save(self)
+            } catch {
+                Logger.shared.logError("Unable to save BeamDatabase \(db.title) - \(db.id): Error", category: .database)
+            }
+        }
+    }
+
+    public func pathForDatabase(_ id: UUID) -> String {
+        return URL(fileURLWithPath: path).appendingPathComponent("database-\(id)").path
+    }
+
+    public func refreshDatabases() throws {
+        let urls = try FileManager.default.contentsOfDirectory(at: URL(fileURLWithPath: path), includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+        for url in urls where url.hasDirectoryPath {
+            do {
+                let db = try BeamDatabase.load(fromFolder: url.path, inAccount: self)
+                databases[db.id] = db
+            } catch {
+                Logger.shared.logError("Couldn't load BeamDatabase from \(url): \(error)", category: .database)
+            }
+        }
+        allDatabases = Array(databases.values)
+    }
+
+    public static func load(fromFolder path: String, overrideDatabasePath: String? = nil, migrate: Bool = true) throws -> Self {
+        let jsonUrl = jsonUrlFrom(path: path)
+        let data = try Data(contentsOf: jsonUrl)
+        let decoder = JSONDecoder()
+        let account = try decoder.decode(Self.self, from: data)
+        account.path = path
+
+        try account.setup(overrideDatabasePath: overrideDatabasePath, migrate: migrate)
+        try account.refreshDatabases()
+        return account
+    }
+
+    func delete(_ source: BeamDocumentSource) throws {
+        guard let grdbStore = grdbStore else { return }
+
+        try allDatabases.forEach {
+            try deleteDatabase($0.id)
+        }
+
+        unloadManagers()
+
+        try grdbStore.writer.close()
+        self.grdbStore = nil
+
+        try FileManager.default.removeItem(atPath: path)
+        Self.accountDeleted.send(BeamDeletedAccount(source, self, id))
+    }
+
+    // MARK: Sync
+    var databaseSynchroniser: BeamDatabaseSynchronizer?
+    var documentSynchroniser: BeamDocumentSynchronizer?
+
+    public static func disableSync() {
+        syncDisabled = true
+    }
+
+    public static func enableSync() {
+        syncDisabled = false
+    }
+
+    var syncSetup = false
+    private static var syncDisabled = false
+    public func setupSync() {
+        guard !syncSetup, !Self.syncDisabled else { return }
+        databaseSynchroniser = BeamDatabaseSynchronizer(account: self)
+        documentSynchroniser = BeamDocumentSynchronizer(account: self)
+        syncSetup = true
+    }
+
+    func clear() {
+        databases.values.forEach { $0.clear() }
+        clearManagersDB()
+    }
+}
+
+extension BeamAccount {
+    func registerOnBeamObjectManager() {
+        databaseSynchroniser?.registerOnBeamObjectManager()
+        documentSynchroniser?.registerOnBeamObjectManager()
+        BeamFileDBManager.shared?.registerOnBeamObjectManager()
+    }
+
+    public func checkAndRepairIntegrity() {
+        grdbStore.checkAndRepairIntegrity()
+        for database in allDatabases where database.isLoaded {
+            database.checkAndRepairIntegrity()
+        }
+    }
+}
+
+extension BeamAccount {
+    static func loadAccounts(from url: URL, stopAtFirst: Bool = false) -> [BeamAccount] {
+        guard let urls = try? FileManager().contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]) else {
+            Logger.shared.logError("Unable to finds potential accounts from \(url)", category: .accountManager)
+            return []
+        }
+        var first = true
+        return urls.compactMap { url -> BeamAccount? in
+            do {
+                if !first && stopAtFirst {
+                    return nil
+                }
+                let account = try Self.load(fromFolder: url.path)
+                first = false
+                return account
+            } catch {
+                Logger.shared.logError("Unable to load account from \(url): \(error)", category: .accountManager)
+                return nil
+            }
+        }
+    }
+
+    static func hasValidAccount(in url: URL) -> Bool {
+        !loadAccounts(from: url, stopAtFirst: true).isEmpty
+    }
+}

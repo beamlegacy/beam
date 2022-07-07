@@ -1,6 +1,6 @@
 import Foundation
 import CoreData
-import Promises
+
 import BeamCore
 
 /*
@@ -209,13 +209,18 @@ class CoreDataManager {
         persistentContainerQueue.addOperation(blockOperation)
     }
 
-    static func storeURLFromEnv() -> URL? {
+    static func filenameFromEnv() -> String? {
         var name = "Beam-\(Configuration.env)"
         if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
             name = "Beam-\(Configuration.env)-\(jobId)"
         }
 
-        let coreDataFileName = BeamData.dataFolder(fileName: "Beam/\(name).sqlite")
+        return "Beam/\(name).sqlite"
+    }
+
+    static func storeURLFromEnv() -> URL? {
+        guard let name = filenameFromEnv() else { return nil }
+        let coreDataFileName = BeamData.dataFolder(fileName: name)
         return URL(fileURLWithPath: coreDataFileName)
     }
 
@@ -248,17 +253,6 @@ class CoreDataManager {
         storeType = description.type
         return container
     }()
-}
-
-// MARK: Promises
-extension CoreDataManager {
-    func background() -> Promises.Promise<NSManagedObjectContext> {
-        Promises.Promise(backgroundContext)
-    }
-
-    func newBackgroundContext() -> Promises.Promise<NSManagedObjectContext> {
-        Promises.Promise(persistentContainer.newBackgroundContext())
-    }
 }
 
 // MARK: tests

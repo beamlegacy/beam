@@ -4,8 +4,14 @@ import AutoUpdate
 import MockHttpServer
 import Fakery
 
+struct BeamUITestsMenuGeneratorSource: BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
+}
+
 // swiftlint:disable file_length type_body_length
-class BeamUITestsMenuGenerator {
+class BeamUITestsMenuGenerator: BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
+
     static var beeper: CrossTargetBeeper?
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func executeCommand(_ command: UITestMenuAvailableCommands) {
@@ -70,14 +76,13 @@ class BeamUITestsMenuGenerator {
         }
     }
 
-    var documentManager = DocumentManager()
     var googleCalendarService = GoogleCalendarService(accessToken: nil, refreshToken: nil)
 
     private func logout() {
         for window in AppDelegate.main.windows {
             window.state.closeAllTabs(closePinnedTabs: true)
         }
-        AccountManager.logout()
+        BeamData.shared.currentAccount?.logout()
         AppDelegate.main.deleteAllLocalData()
     }
 
@@ -120,29 +125,20 @@ class BeamUITestsMenuGenerator {
 
         Logger.shared.logDebug("current Note: \(currentNote.id) copy: \(newNote.id)", category: .documentDebug)
 
-        newNote.save(completion: { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError(error.localizedDescription, category: .general)
-            case .success(let success):
-                Logger.shared.logInfo("Saved! \(success)", category: .documentDebug)
-            }
-        })
+        _ = newNote.save(self)
     }
 
     private func destroyDatabase() {
         clearPasswordsDatabase()
         clearCreditCardsDatabase()
-        DocumentManager().deleteAll { _ in }
-        DatabaseManager().deleteAll { _ in }
-        let data = AppDelegate.main.window?.state.data
+
+        try? BeamData.shared.currentDocumentCollection?.delete(self, filters: [])
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         RestoreTabsManager.shared.clearSavedClosedTabs()
         PinnedBrowserTabsManager().savePinnedTabs(tabs: [])
-        ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }
-        TabGroupingStoreManager.shared.clearData()
-        try? GRDBDatabase.shared.clear()
-        data?.saveData()
+        ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }        
+        KeychainDailyNoteScoreStore.shared.clear()
+        try? BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
     private func loadUITestsPage(identifier: String) {
@@ -155,7 +151,7 @@ class BeamUITestsMenuGenerator {
         let generator = FakeNoteGenerator(count: count, journalRatio: 1, futureRatio: 0)
         generator.generateNotes()
         for note in generator.notes {
-            note.save()
+            _ = note.save(BeamUITestsMenuGeneratorSource())
         }
     }
 
@@ -203,7 +199,7 @@ class BeamUITestsMenuGenerator {
         let generator = FakeNoteGenerator(count: count, journalRatio: journalRatio, futureRatio: futureRatio)
         generator.generateNotes()
         for note in generator.notes {
-            note.save()
+            _ = note.save(BeamUITestsMenuGeneratorSource())
         }
     }
 
@@ -255,18 +251,17 @@ class BeamUITestsMenuGenerator {
             return BeamLinkDB.shared.visitId(url, title: title, content: title)
         }()
         let frecency = FrecencyUrlRecord(urlId: id, lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
-        try? GRDBDatabase.shared.saveFrecencyUrl(frecency)
+        try? BeamData.shared.urlHistoryManager?.saveFrecencyUrl(frecency)
     }
 
     private func signInWithTestAccount() {
         guard !AuthenticationManager.shared.isAuthenticated else { return }
 
-        let accountManager = AccountManager()
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
-        accountManager.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
+        BeamData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
             if case .failure(let error) = result {
                 fatalError(error.localizedDescription)
             }
@@ -280,27 +275,26 @@ class BeamUITestsMenuGenerator {
             return
         }
 
-        let accountManager = AccountManager()
         let randomString = UUID()
         let emailComponents = Configuration.testAccountEmail.split(separator: "@")
         let email = "\(emailComponents[0])_\(randomString)@\(emailComponents[1])"
         let username = "\(emailComponents[0])_\(randomString)".replacingOccurrences(of: "+", with: "_").substring(from: 0, to: 30)
         let password = Configuration.testAccountPassword
 
-        accountManager.signUp(email, password) { result in
+        BeamData.shared.currentAccount?.signUp(email, password) { result in
             if case .failure(let error) = result {
                 DispatchQueue.main.async {
                     self.showAlert("Cannot sign up", "Cannot sign up with \(email): \(error.localizedDescription)")
                 }
                 return
             }
-            accountManager.signIn(email: email, password: password, runFirstSync: false, completionHandler: { result in
+            BeamData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: false, completionHandler: { result in
                 if case .failure(let error) = result {
                     DispatchQueue.main.async {
                         self.showAlert("Cannot sign in", "Cannot sign in with \(email): \(error.localizedDescription)")
                     }
                 } else {
-                    accountManager.setUsername(username: username) { result in
+                    BeamData.shared.currentAccount?.setUsername(username: username) { result in
                         DispatchQueue.main.async {
                             switch result {
                             case .failure(let error):
@@ -314,15 +308,15 @@ class BeamUITestsMenuGenerator {
                                     self.showAlert("Cannot set username \(username)", errorMessage)
                                 }
                             case .success:
-                                if AppDelegate.main.data.onboardingManager.needsToDisplayOnboard {
-                                    AppDelegate.main.data.onboardingManager.userDidSignUp = true
-                                    AppDelegate.main.data.onboardingManager.advanceToNextStep(OnboardingStep(type: .imports))
-                                    AppDelegate.main.data.onboardingManager.advanceToNextStep()
+                                if BeamData.shared.onboardingManager.needsToDisplayOnboard {
+                                    BeamData.shared.onboardingManager.userDidSignUp = true
+                                    BeamData.shared.onboardingManager.advanceToNextStep(OnboardingStep(type: .imports))
+                                    BeamData.shared.onboardingManager.advanceToNextStep()
                                 }
                                 NSPasteboard.general.clearContents()
                                 NSPasteboard.general.setString(email, forType: .string)
 
-                                accountManager.runFirstSync(useBuiltinPrivateKeyUI: false)
+                                BeamData.shared.currentAccount?.runFirstSync(useBuiltinPrivateKeyUI: false)
                             }
                         }
                     }
@@ -427,7 +421,7 @@ class BeamUITestsMenuGenerator {
     }
 
     private func deleteRemoteAccount() {
-        AccountManager().deleteAccount { result in
+        BeamData.shared.currentAccount?.deleteAccount { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Error while deleting account: \(error)", category: .accountManager)
@@ -462,8 +456,7 @@ class BeamUITestsMenuGenerator {
         for pastdayNote in pastdayNotes {
             pastdayNote.recordScoreWordCount()
             pastdayNote.addChild(BeamElement("Some text"))
-            pastdayNote.save(completion: { _ in sem.signal() })
-            sem.wait()
+            _ = pastdayNote.save(self)
         }
 
         let urlsAndTitlesToday = [
@@ -480,10 +473,12 @@ class BeamUITestsMenuGenerator {
         var notes: [BeamNote] = []
 
         for title in titles {
-            let note = BeamNote(title: title)
+            // swiftlint:disable:next force_try
+            let note = try! BeamNote(title: title)
             note.type = .note
+            note.owner = BeamData.shared.currentDatabase
             note.children.append(BeamElement(text))
-            note.save()
+            _ = note.save(self)
             notes.append(note)
         }
         return notes
@@ -507,9 +502,11 @@ class BeamUITestsMenuGenerator {
     var noteCount = 1
     @discardableResult
     private func createNote(open: Bool = false) -> BeamNote {
-        let note = BeamNote(title: "Test\(noteCount)")
+        // swiftlint:disable:next force_try
+        let note = try! BeamNote(title: "Test\(noteCount)")
         note.type = .note
-        note.save()
+        note.owner = BeamData.shared.currentDatabase
+        _ = note.save(self)
         noteCount += 1
         if open {
             self.open(note: note)

@@ -187,12 +187,6 @@ public class TextNode: ElementNode {
         setAccessibilityLabel("TextNode")
         setAccessibilityRole(.textArea)
 
-        displayedElement.$children
-            .sink { [unowned self] elements in
-                guard self.editor != nil else { return }
-                updateTextChildren(elements: elements)
-            }.store(in: &scope)
-
         initTextPadding()
         observeNoteTitles()
     }
@@ -211,7 +205,7 @@ public class TextNode: ElementNode {
     }
 
     private func observeNoteTitles() {
-        AppDelegate.main.data.$renamedNote.dropFirst().sink { [unowned self] (noteId, previousName, newName) in
+        BeamData.shared.$renamedNote.dropFirst().sink { [unowned self] (noteId, previousName, newName) in
             Logger.shared.logInfo("Note '\(previousName)' renamed to '\(newName)' [\(noteId)]")
             if self.elementText.internalLinks.contains(noteId) {
                self.unproxyElement.updateNoteNamesInInternalLinks(recursive: true)

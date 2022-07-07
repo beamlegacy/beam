@@ -118,30 +118,34 @@ struct LinkWithFrecency: FetchableRecord {
     }
 }
 
-public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
-    let db: GRDBDatabase
-    static let tableName = "Link"
+public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
+    static let tableName = "link"
     static var shared = BeamLinkDB()
     internal static var backgroundQueue = DispatchQueue(label: "Links BeamObjectManager backgroundQueue", qos: .userInitiated)
 
+    private var overridenManager: UrlHistoryManager?
+    private var manager: UrlHistoryManager? {
+        overridenManager ?? BeamData.shared.urlHistoryManager
+    }
+
     //swiftlint:disable:next function_body_length
-    init(db: GRDBDatabase = GRDBDatabase.shared) {
-        self.db = db
+    init(overridenManager: UrlHistoryManager? = nil) {
+        self.overridenManager = overridenManager
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
-        return db.getLinks(matchingUrl: url)
+        return manager?.getLinks(matchingUrl: url) ?? [:]
     }
     public func getLinks(for ids: [UUID]) -> [UUID: Link] {
         do {
-            return try db.getLinks(ids: ids)
+            return try manager?.getLinks(ids: ids) ?? [:]
         } catch {
             Logger.shared.logError("Couldn't get links: \(error)", category: .linkDB)
             return [UUID: Link]()
         }
     }
     public func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID {
-        return db.getOrCreateId(for: url, title: title, content: content, destination: destination)
+        return manager?.getOrCreateId(for: url, title: title, content: content, destination: destination) ?? UUID.null
     }
 
     private func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -149,14 +153,14 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     private func store(links: [Link], shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        try db.insert(links: links)
+        try manager?.insert(links: links)
 
         guard shouldSaveOnNetwork else { return }
         saveOnNetwork(links, networkCompletion)
     }
 
     public func linkFor(id: UUID) -> Link? {
-        db.linkFor(id: id)
+        manager?.linkFor(id: id)
     }
 
     public func isDomain(id: UUID) -> Bool {
@@ -171,11 +175,11 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     public func linkFor(url: String) -> Link? {
-        db.linkFor(url: url)
+        manager?.linkFor(url: url)
     }
     public func insertOrIgnore(links: [Link]) {
         do {
-            try db.insertOrIgnore(links: links)
+            try manager?.insertOrIgnore(links: links)
         } catch {
             Logger.shared.logError("Couldn't insert links: \(error)", category: .linkDB)
         }
@@ -188,14 +192,14 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
 
     @discardableResult
     public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link {
-        let link: Link = db.visit(url: url, title: title, content: content, destination: destination)
+        guard let link: Link = manager?.visit(url: url, title: title, content: content, destination: destination) else { return Link(url: url, title: title, content: content) }
         saveOnNetwork(link)
         return link
     }
 
     public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
-            try db.deleteAll()
+            try manager?.deleteAll()
             if AuthenticationManager.shared.isAuthenticated && includedRemote {
                 try self.deleteAllFromBeamObjectAPI { result in
                     networkCompletion?(result)
@@ -211,15 +215,15 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     public func updateFrecency(id: UUID, lastAccessAt: Date, score: Float, sortScore: Float) {
-        db.updateLinkFrecency(id: id, lastAccessAt: lastAccessAt, score: score, sortScore: sortScore)
+        manager?.updateLinkFrecency(id: id, lastAccessAt: lastAccessAt, score: score, sortScore: sortScore)
     }
 
     public func updateFrecencies(scores: [FrecencyScore]) {
-        db.updateLinkFrecencies(scores: scores)
+        manager?.updateLinkFrecencies(scores: scores)
     }
 
     public var allLinks: [Link] {
-        return (try? db.allLinks(updatedSince: nil)) ?? []
+        return (try? manager?.allLinks(updatedSince: nil)) ?? []
     }
 
     public func showAllLinks() {
@@ -236,7 +240,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
 
     func receivedObjects(_ links: [Link]) throws {
         let ids = links.map { $0.id }
-        let existingLinks: [UUID: Link] = (try? db.getLinks(ids: ids)) ?? [UUID: Link]()
+        let existingLinks: [UUID: Link] = (try? manager?.getLinks(ids: ids)) ?? [UUID: Link]()
         let linksToStore = links.map { (link) -> Link in
             var newLink = link
             //if received frecency fields are nil and local links exist, dont overwrite existing fields.
@@ -249,11 +253,11 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     func allObjects(updatedSince: Date?) throws -> [Link] {
-        return try db.allLinks(updatedSince: updatedSince)
+        return try manager?.allLinks(updatedSince: updatedSince) ?? []
     }
 
     func fetchWithIds(_ ids: [UUID]) throws -> [Link] {
-        return try db.getLinks(ids: ids)
+        return try manager?.getLinks(ids: ids) ?? []
     }
 
     func saveAllOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {

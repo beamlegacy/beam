@@ -1,7 +1,7 @@
 import Foundation
 import BeamCore
 import SwiftSoup
-import Promises
+
 
 struct PointAndShootError: LocalizedError {
     var errorDescription: String?
@@ -35,7 +35,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         SoundEffectPlayer.shared.playSound(.pointAndShootConfirm)
     }
 
-    var data: BeamData = AppDelegate.main.data
+    var data: BeamData = BeamData.shared
     private var scorer: BrowsingScorer? {
         page?.browsingScorer
     }

@@ -10,6 +10,8 @@ public struct FrecencyUrlRecord {
     /// Frecency score to sort URLs in a search query.
     var frecencySortScore: Float
     var frecencyKey: FrecencyParamKey
+
+    public static let databaseTableName = "frecencyUrlRecord"
 }
 
 // SQL generation
@@ -50,14 +52,19 @@ extension FrecencyUrlRecord: PersistableRecord {
 }
 
 public class GRDBUrlFrecencyStorage: FrecencyStorage {
-    let db: GRDBDatabase
-    init(db: GRDBDatabase = GRDBDatabase.shared) {
-        self.db = db
+    private var overridenManager: UrlHistoryManager?
+    private var manager: UrlHistoryManager {
+        overridenManager ?? BeamData.shared.urlHistoryManager!
+    }
+
+    //swiftlint:disable:next function_body_length
+    init(overridenManager: UrlHistoryManager? = nil) {
+        self.overridenManager = overridenManager
     }
 
     public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         do {
-            if let record = try db.fetchOneFrecency(fromUrl: id)[paramKey] {
+            if let record = try manager.fetchOneFrecency(fromUrl: id)[paramKey] {
                 return FrecencyScore(id: record.urlId,
                                      lastTimestamp: record.lastAccessAt,
                                      lastScore: record.frecencyScore,
@@ -70,7 +77,7 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
         return nil
     }
     public func fetchMany(ids: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyScore] {
-        let keyValues = db.getFrecencies(urlIds: ids, paramKey: paramKey)
+        let keyValues = manager.getFrecencies(urlIds: ids, paramKey: paramKey)
             .map { (id, record) in
                 (id, FrecencyScore(id: record.urlId,
                                    lastTimestamp: record.lastAccessAt,
@@ -86,7 +93,7 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
                                        frecencyScore: score.lastScore,
                                        frecencySortScore: score.sortValue,
                                        frecencyKey: paramKey)
-        try db.saveFrecencyUrl(record)
+        try manager.saveFrecencyUrl(record)
     }
     public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
         let records = scores.map { score in
@@ -98,15 +105,15 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
                 frecencyKey: paramKey
             )
         }
-        try db.save(urlFrecencies: records)
+        try manager.save(urlFrecencies: records)
     }
 }
 
 class LinkStoreFrecencyUrlStorage: FrecencyStorage {
     let linkDB: BeamLinkDB
 
-    init(db: GRDBDatabase = GRDBDatabase.shared) {
-        linkDB = BeamLinkDB(db: db)
+    init(overridenManager: UrlHistoryManager? = nil) {
+        linkDB = BeamLinkDB(overridenManager: overridenManager)
     }
     func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         guard paramKey == .webVisit30d0,

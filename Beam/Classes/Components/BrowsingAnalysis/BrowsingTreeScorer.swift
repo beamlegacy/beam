@@ -24,7 +24,7 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
 
     var currentScore: Score { browsingTree.current.score }
 
-    func scoreApply(changes: (UrlScoreProtocol) -> Void) {
+    func scoreApply(changes: @escaping (UrlScoreProtocol) -> Void) {
         browsingTree.current.scoreApply(changes: changes)
     }
     func updateScore() {

@@ -13,10 +13,6 @@ default:
     - scripts/delete-pipeline.sh
     - scripts/install_xcode.sh
     - bundle install
-    # This is actually to be done once per CI or ~/.gitconfig gets messed up
-    # - git config --global url."https://${GITLAB_USERNAME}:${GITLAB_ACCESS_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
-    - scripts/move_libgit2_step1.sh
-    - scripts/move_libgit2_step2.sh
     # So that we can push tags
     - git config user.email "${GITLAB_USER_EMAIL}"
     - git config user.name "${GITLAB_USER_NAME}"

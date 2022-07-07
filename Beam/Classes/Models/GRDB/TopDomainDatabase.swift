@@ -4,7 +4,7 @@ struct TopDomainDatabase {
     static let shared = makeShared()
     private(set) var dbWriter: DatabaseWriter
 
-    /// Creates a `GRDBDatabase`, and make sure the database schema is ready.
+    /// Creates a `GRDB Database`, and make sure the database schema is ready.
     init(_ dbWriter: DatabaseWriter) throws {
         self.dbWriter = dbWriter
 

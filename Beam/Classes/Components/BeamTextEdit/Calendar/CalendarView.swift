@@ -34,7 +34,9 @@ class CalendarGutterViewModel: ObservableObject {
     }
 }
 
-struct CalendarView: View {
+struct CalendarView: View, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
+
     @State var isHoveringConnect = false
     @State var isHoveringNotConnect = false
 
@@ -158,7 +160,7 @@ struct CalendarView: View {
         var text = BeamText(text: "")
         var meetingAttributes: [BeamText.Attribute] = []
         if meeting.linkCards {
-            let meetingNote = BeamNote.fetchOrCreate(title: meeting.name)
+            guard let meetingNote = try? BeamNote.fetchOrCreate(self, title: meeting.name) else { return }
             meetingAttributes = [.internalLink(meetingNote.id)]
         }
         if !meeting.name.isEmpty {
@@ -172,7 +174,7 @@ struct CalendarView: View {
             meeting.attendees.enumerated().forEach { index, attendee in
                 guard !attendee.name.isEmpty else { return }
                 let name = attendee.name
-                let attendeeNote = BeamNote.fetchOrCreate(title: name)
+                guard let attendeeNote = try? BeamNote.fetchOrCreate(self, title: name) else { return }
                 text.insert(name, at: position, withAttributes: [.internalLink(attendeeNote.id)])
                 position += name.count
                 if index < meeting.attendees.count - 1 {

@@ -900,7 +900,8 @@ struct TabsListView_Previews: PreviewProvider {
     static var state = BeamState()
 
     static func tab(_ title: String) -> BrowserTab {
-        let t = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .today, note: BeamNote(title: "note"))
+        // swiftlint:disable:next force_try
+        let t = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .today, note: try! BeamNote(title: "note"))
         t.title = title
         return t
     }

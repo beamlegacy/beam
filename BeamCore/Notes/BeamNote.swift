@@ -9,6 +9,10 @@ import Foundation
 import Combine
 import Atomics
 
+public protocol BeamOwner: AnyObject {
+    var id: UUID { get }
+}
+
 public protocol BeamNoteDocument {
     func autoSave()
     var lastChangedElement: BeamElement? { get set }
@@ -18,6 +22,8 @@ public enum BeamNoteError: Error, Equatable {
     case saveAlreadyRunning
     case unableToCreateDocumentStruct
     case dataIsEmpty
+    case noDefaultCollection
+    case invalidTitle
 }
 
 public struct VisitedPage: Codable, Identifiable {
@@ -132,8 +138,8 @@ public class BeamNote: BeamElement {
     public var sources = NoteSources()
     @Published public var version = ManagedAtomic<Int64>(0)
     @Published public var savedVersion = ManagedAtomic<Int64>(0)
-    public var databaseId: UUID?
-    @Published public var deleted: Bool = false
+    public var databaseId: UUID? { owner?.id }
+    public weak var owner: BeamOwner?
     @Published public var saving = ManagedAtomic<Bool>(false)
     @Published public var updateAttempts: Int = 0
     @Published public var updates: Int = 0
@@ -158,8 +164,12 @@ public class BeamNote: BeamElement {
         }
     }
 
-    public init(title: String) {
+    public init(title: String) throws {
         self.title = Self.validTitle(fromTitle: title)
+        guard !title.isEmpty else {
+            throw BeamNoteError.invalidTitle
+        }
+
         super.init()
         changePropagationEnabled = false
         warmingUp = true
@@ -276,7 +286,7 @@ public class BeamNote: BeamElement {
             return nil
         }
 
-        newNote.databaseId = databaseId
+        newNote.owner = owner
         newNote.title = title
         newNote.creationDate = creationDate
         newNote.updateDate = updateDate
@@ -367,6 +377,14 @@ public class BeamNote: BeamElement {
 
         fetchedNotes[note.id] = WeakReference(note)
         fetchedNotesTitles[cacheKeyFromTitle(note.title)] = note.id
+    }
+
+    public static func clearFetchedNotes() {
+        fetchedLock.writeLock()
+        defer { fetchedLock.writeUnlock() }
+        fetchedNotes.removeAll()
+        fetchedNotesTitles.removeAll()
+        fetchedNotesCancellables.removeAll()
     }
 
     public static func clearCancellables() {
@@ -478,12 +496,12 @@ public class BeamNote: BeamElement {
     }
 
     // (Note name, include deleted notes)
-    static public var idForNoteNamed: (String, Bool) -> UUID? = { _, _ in
+    static public var idForNoteNamed: (String) -> UUID? = { _ in
         fatalError()
     }
 
     // (Note id, include deleted notes)
-    static public var titleForNoteId: (UUID, Bool) -> String? = { _, _ in
+    static public var titleForNoteId: (UUID) -> String? = { _ in
         fatalError()
     }
 
@@ -521,6 +539,7 @@ public class BeamNote: BeamElement {
         super.change(type)
         if !isInitializingFromDecoder { recordScoreWordCount() }
     }
+
 }
 
 public func beamCheckMainThread() {

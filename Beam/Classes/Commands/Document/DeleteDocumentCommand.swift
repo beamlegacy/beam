@@ -7,9 +7,9 @@
 
 import Foundation
 import BeamCore
-import Promises
 
-class DeleteDocument: DocumentCommand {
+class DeleteDocument: DocumentCommand, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
     static let name: String = "DeleteDocument"
 
     private let shouldClearData = true
@@ -19,7 +19,7 @@ class DeleteDocument: DocumentCommand {
     init(documentIds: [UUID] = [], allDocuments: Bool = false) {
         super.init(name: Self.name)
         self.allDocuments = allDocuments
-        let todayId = AppDelegate.main.data.todaysNote.id
+        let todayId = BeamData.shared.todaysNote.id
         self.documentIds = documentIds.filter { $0 != todayId }
     }
 
@@ -28,7 +28,7 @@ class DeleteDocument: DocumentCommand {
     }
 
     // swiftlint:disable function_body_length
-    override func run(context: DocumentManager?, completion: ((Bool) -> Void)?) {
+    override func run(context: BeamDocumentCollection?, completion: ((Bool) -> Void)?) {
         let signpost = SignPost("DeleteDocumentCommand")
         signpost.begin("run")
         defer {
@@ -36,21 +36,21 @@ class DeleteDocument: DocumentCommand {
         }
         var notesToUpdate = Set<UUID>()
 
-        documents = allDocuments ? (context?.loadAll() ?? []) : documentIds.compactMap { context?.loadById(id: $0, includeDeleted: false) }
+        documents = allDocuments ? ((try? context?.fetch(filters: [])) ?? []) : documentIds.compactMap { try? context?.fetchFirst(filters: [.id($0)]) }
         BeamNote.purgingNotes = BeamNote.purgingNotes.union(Set(documents.map { $0.id }))
 
         let removeNotesFromIndex: ([UUID]) -> Void = { ids in
             do {
-                try GRDBDatabase.shared.removeNotes(ids)
+                try BeamData.shared.noteLinksAndRefsManager?.removeNotes(ids)
             } catch {
                 Logger.shared.logError("Impossible to remove all notes from indexing: \(error)", category: .search)
             }
         }
 
-        DocumentManager.disableNotifications()
-        defer { DocumentManager.enableNotifications() }
+        BeamDocumentCollection.disableNotifications()
+        defer { BeamDocumentCollection.enableNotifications() }
 
-        let todayId = AppDelegate.main.data.todaysNote.id
+        let todayId = BeamData.shared.todaysNote.id
 
         if allDocuments {
             let ids: [UUID] = documents.compactMap { note in
@@ -59,8 +59,12 @@ class DeleteDocument: DocumentCommand {
             }
             removeNotesFromIndex(ids)
 
-            context?.softDelete(ids: ids, clearData: shouldClearData) { _ in
+            do {
+                try context?.delete(self, filters: [.ids(ids)])
                 completion?(true)
+            } catch {
+                Logger.shared.logError("Error while softDeleting \(ids): \(error)", category: .document)
+                completion?(false)
             }
         } else {
             saveDocumentsLinks().forEach { notesToUpdate.insert($0.noteID) }
@@ -70,69 +74,49 @@ class DeleteDocument: DocumentCommand {
             for id in documentIds {
                 guard let note = BeamNote.getFetchedNote(id) else { continue }
                 note.recursiveChangePropagationEnabled = false
-                note.deleted = true
                 notes.insert(note)
             }
 
-            context?.softDelete(ids: documentIds, clearData: shouldClearData) { result in
-                switch result {
-                case .failure(let error):
-                    Logger.shared.logError("Error while softDeleting \(self.documentIds): \(error)", category: .document)
-                    completion?(false)
-                case .success:
-                    removeNotesFromIndex(self.documentIds)
-                    for note in notes {
-                        note.recursiveChangePropagationEnabled = true
-                    }
-                    completion?(true)
-                }
+            do {
+                try context?.delete(self, filters: [.ids(documentIds)])
+                completion?(true)
+            } catch {
+                Logger.shared.logError("Error while softDeleting \(self.documentIds): \(error)", category: .document)
+                completion?(false)
             }
         }
 
         DispatchQueue.main.async {
             signpost.begin("update note names")
             notesToUpdate.forEach { id in
-                guard let note = BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false) else { return }
+                guard let note = BeamNote.fetch(id: id, keepInMemory: false) else { return }
                 note.recursiveChangePropagationEnabled = false
                 note.updateNoteNamesInInternalLinks(recursive: true)
-                _ = note.syncedSave()
+                _ = note.save(self)
                 note.recursiveChangePropagationEnabled = true
             }
             signpost.end("update note names")
         }
     }
 
-    override func undo(context: DocumentManager?, completion: ((Bool) -> Void)?) {
+    override func undo(context: BeamDocumentCollection?, completion: ((Bool) -> Void)?) {
+        guard let context = context else {
+            completion?(false)
+            return
+        }
+
         guard !documents.isEmpty else {
             completion?(false)
             return
         }
-        var ids: [UUID] = []
-        var restoreData: [UUID: Data] = [:]
-        documents.forEach {
-            ids.append($0.id)
-            if shouldClearData {
-                restoreData[$0.id] = $0.data
-            }
+
+        for document in documents {
+            _ = try? context.save(self, document, indexDocument: true)
         }
-        context?.softUndelete(ids: ids, restoreData: restoreData) { [weak self] result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Error while softUndeleting \(ids): \(error)", category: .document)
-                completion?(false)
-            case .success:
-                for id in ids {
-                    guard let note = BeamNote.getFetchedNote(id) else { continue }
-                    note.recursiveChangePropagationEnabled = true
-                    note.deleted = false
-                }
-                self?.restoreNoteReferences()
-                completion?(true)
-            }
-        }
+        completion?(true)
     }
 
-    private func unpublishNotes(in docs: [DocumentStruct]) {
+    private func unpublishNotes(in docs: [BeamDocument]) {
         let toUnpublish = docs.filter({ $0.isPublic })
         toUnpublish.forEach { doc in
             if let note = BeamNote.getFetchedNote(doc.id) {
@@ -156,7 +140,7 @@ class DeleteDocument: DocumentCommand {
         var noteLinks = [BeamNoteReference]()
         var refsMapping = [UUID: Set<UUID>]()
         documents.forEach { doc in
-            let links = (try? GRDBDatabase.shared.fetchLinks(toNote: doc.id).map({ bidiLink in
+            let links = (try? BeamData.shared.noteLinksAndRefsManager?.fetchLinks(toNote: doc.id).map({ bidiLink in
                 BeamNoteReference(noteID: bidiLink.sourceNoteId, elementID: bidiLink.sourceElementId)
             })) ?? []
 
@@ -171,22 +155,22 @@ class DeleteDocument: DocumentCommand {
 
     private func restoreNoteReferences() {
         documents.forEach { doc in
-            guard let storedRefs = savedReferences?[doc.id], !storedRefs.isEmpty, let note = BeamNote.fetch(id: doc.id, includeDeleted: true)
+            guard let storedRefs = savedReferences?[doc.id], !storedRefs.isEmpty, let note = BeamNote.fetch(id: doc.id)
             else { return }
             note.references.forEach { ref in
-                ref.element?.text.makeLinksToNoteExplicit(forNote: note.title)
+                ref.element?.text.makeLinksToNoteExplicit(self, forNote: note.title)
             }
         }
     }
 }
 
-extension CommandManagerAsync where Context == DocumentManager {
-    func deleteDocuments(ids: [UUID], in context: DocumentManager, completion: ((Bool) -> Void)? = nil) {
+extension CommandManagerAsync where Context == BeamDocumentCollection {
+    func deleteDocuments(ids: [UUID], in context: BeamDocumentCollection, completion: ((Bool) -> Void)? = nil) {
         let cmd = DeleteDocument(documentIds: ids)
         run(command: cmd, on: context, completion: completion)
     }
 
-    func deleteAllDocuments(in context: DocumentManager, completion: ((Bool) -> Void)? = nil) {
+    func deleteAllDocuments(in context: BeamDocumentCollection, completion: ((Bool) -> Void)? = nil) {
         let cmd = DeleteDocument(allDocuments: true)
         run(command: cmd, on: context, completion: completion)
     }

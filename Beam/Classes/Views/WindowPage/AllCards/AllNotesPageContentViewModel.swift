@@ -19,7 +19,7 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
     static private var persistedState = PersistedState()
 
     var data: BeamData?
-    @Published private var allNotes = [DocumentStruct]() {
+    @Published private var allNotes = [BeamDocument]() {
         didSet {
             updateNoteItemsFromAllNotes()
         }
@@ -53,7 +53,7 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
         }
     }
 
-    private var coreDataObservers = Set<AnyCancellable>()
+    private var databaseObservers = Set<AnyCancellable>()
     private var metadataFetchers = Set<AnyCancellable>()
     private var notesCancellables = Set<AnyCancellable>()
     private var notesMetadataCache: NoteListMetadataCache {
@@ -71,15 +71,21 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
         listType = Self.persistedState.listType ?? .allNotes
         showDailyNotes = Self.persistedState.showDailyNotes ?? true
 
-        CoreDataContextObserver.shared
-            .publisher(for: .anyDocumentChange)
+        BeamDocumentCollection.documentSaved
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.refreshAllNotes()
             }
-            .store(in: &coreDataObservers)
-        NotificationCenter.default
-            .publisher(for: .defaultDatabaseUpdate, object: nil)
+            .store(in: &databaseObservers)
+
+        BeamDocumentCollection.documentDeleted
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.refreshAllNotes()
+            }
+            .store(in: &databaseObservers)
+
+        BeamData.shared.$currentDatabase
             .sink { [weak self] _ in
                 self?.refreshAllNotes()
             }
@@ -94,7 +100,8 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
     }
 
     func refreshAllNotes() {
-        allNotes = DocumentManager().loadAll()
+        guard let collection = BeamData.shared.currentDocumentCollection else { return }
+        allNotes = (try? collection.fetch(filters: [])) ?? []
     }
 
     func getCurrentNotesList(for type: ListType) -> [NoteTableViewItem] {
@@ -111,11 +118,11 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
     }
 
     /// We're hiding empty journal notes; except for today's
-    private func noteShouldBeDisplayed(_ doc: DocumentStruct) -> Bool {
+    private func noteShouldBeDisplayed(_ doc: BeamDocument) -> Bool {
         if doc.title == publishingNoteTitle {
             return false
         }
-        return doc.documentType != .journal || !doc.isEmpty || doc.journalDate == BeamNoteType.todaysJournal.journalDateString
+        return doc.documentType != .journal || !doc.isEmpty || doc.journalDate == BeamNoteType.intFrom(journalDate: BeamDate.now)
     }
 
     private func updateNoteItemsFromAllNotes() {
@@ -230,7 +237,7 @@ class NoteTableViewItem: IconButtonTableViewItem {
             words = note?.textStats.wordsCount ?? words
         }
     }
-    private var document: DocumentStruct
+    private var document: BeamDocument
 
     var title: String
     var createdAt: Date = BeamDate.now
@@ -241,7 +248,7 @@ class NoteTableViewItem: IconButtonTableViewItem {
     var copyLinkIconName: String?
     var copyAction: (() -> Void)?
 
-    init(document: DocumentStruct, note: BeamNote?) {
+    init(document: BeamDocument, note: BeamNote?) {
         self.note = note
         self.document = document
         title = note?.title ?? document.title
@@ -282,7 +289,7 @@ class NoteTableViewItem: IconButtonTableViewItem {
     }
 
     func getNote() -> BeamNote? {
-        note ?? BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false, decodeChildren: false)
+        note ?? BeamNote.fetch(id: id, keepInMemory: false, decodeChildren: false)
     }
 
     override func isEqual(_ object: Any?) -> Bool {

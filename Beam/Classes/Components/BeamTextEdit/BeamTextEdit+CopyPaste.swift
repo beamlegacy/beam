@@ -22,7 +22,7 @@ extension BeamTextEdit {
     }
 
     func buildStringFrom(image source: UUID) -> NSAttributedString {
-        guard let imageRecord = try? BeamFileDBManager.shared.fetch(uid: source)
+        guard let imageRecord = try? BeamFileDBManager.shared?.fetch(uid: source)
         else {
             Logger.shared.logError("ImageNode unable to fetch image '\(source)' from FileDB", category: .noteEditor)
             return NSAttributedString()
@@ -264,7 +264,9 @@ extension BeamTextEdit {
 
     private func paste(image: NSImage, with name: String? = nil) {
         guard let node = focusedWidget as? ElementNode,
-              let parent = node.parent as? ElementNode else {
+              let parent = node.parent as? ElementNode,
+              let fileManager = BeamFileDBManager.shared
+        else {
             Logger.shared.logError("Can't paste on a node that is not an element node", category: .noteEditor)
             return
         }
@@ -276,7 +278,6 @@ extension BeamTextEdit {
             return
         }
 
-        let fileManager = BeamFileDBManager.shared
         do {
             let cmdManager = node.cmdManager
             cmdManager.beginGroup(with: "PasteImageContent")

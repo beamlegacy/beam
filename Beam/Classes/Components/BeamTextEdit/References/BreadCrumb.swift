@@ -10,7 +10,8 @@ import Foundation
 import AppKit
 import BeamCore
 
-class BreadCrumb: Widget {
+class BreadCrumb: Widget, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
 
     // MARK: - Properties
     var crumbChain = [BeamElement]()
@@ -312,8 +313,8 @@ class BreadCrumb: Widget {
 
     func convertReferenceToLink() {
         guard let note = root?.note else { return }
-        proxy.proxy.text.makeLinksToNoteExplicit(forNote: note.title)
-        _ = proxy.note?.syncedSave()
+        proxy.proxy.text.makeLinksToNoteExplicit(self, forNote: note.title)
+        _ = proxy.note?.save(self)
     }
 
     var showCrumbs: Bool {

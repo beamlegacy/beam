@@ -41,7 +41,6 @@ struct OnboardingEmailConnectView: View {
     }
     @State private var passwordMissingRequirements: [PasswordRequirements] = [.length, .number, .symbol, .matches]
 
-    private let accountManager = AccountManager()
     private var buttonVariant: ActionableButtonVariant {
         var style = ActionableButtonVariant.gradient(icon: nil).style
         style.textAlignment = .center
@@ -242,7 +241,7 @@ struct OnboardingEmailConnectView: View {
         loadingState = .signinin
         var loadingStartTime = BeamDate.now
         updateButtonState()
-        accountManager.signIn(email: emailField, password: passwordField, runFirstSync: false) { result in
+        BeamData.shared.currentAccount?.signIn(email: emailField, password: passwordField, runFirstSync: false) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .failure(let error):
@@ -295,7 +294,7 @@ struct OnboardingEmailConnectView: View {
     private func createAccount() {
         guard areCredentialsValid, loadingState == nil else { return }
         loadingState = .signinup
-        accountManager.signUp(emailField, passwordField) { result in
+        BeamData.shared.currentAccount?.signUp(emailField, passwordField) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .failure(let error):
@@ -327,7 +326,7 @@ struct OnboardingEmailConnectView: View {
             errorState = .invalidEmail
             return
         }
-        accountManager.forgotPassword(email: email) { result in
+        BeamData.shared.currentAccount?.forgotPassword(email: email) { result in
             switch result {
             case .failure(let error):
                 forgotPasswordTooltip = error.localizedDescription

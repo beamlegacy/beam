@@ -152,7 +152,7 @@ struct TabGroupingFeedbackContentView: View {
             HStack {
                 Spacer()
                 Button {
-                    AppDelegate.main.data.clusteringManager.exportSession(sessionExporter: AppDelegate.main.data.sessionExporter, to: nil, correctedPages: viewModel.correctedPages)
+                    BeamData.shared.clusteringManager.exportSession(sessionExporter: BeamData.shared.sessionExporter, to: nil, correctedPages: viewModel.correctedPages)
                     AppDelegate.main.tabGroupingFeedbackWindow?.close()
                 } label: {
                     Text("Send Feedback")
@@ -166,7 +166,7 @@ struct TabGroupingFeedbackContentView: View {
                             savePanel.close()
                             return
                         }
-                        AppDelegate.main.data.clusteringManager.exportSession(sessionExporter: AppDelegate.main.data.sessionExporter, to: url, correctedPages: viewModel.correctedPages)
+                        BeamData.shared.clusteringManager.exportSession(sessionExporter: BeamData.shared.sessionExporter, to: url, correctedPages: viewModel.correctedPages)
                         AppDelegate.main.tabGroupingFeedbackWindow?.close()
                     }
                 } label: {

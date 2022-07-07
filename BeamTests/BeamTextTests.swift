@@ -20,15 +20,17 @@ extension String {
     }
 }
 
-class BeamTextTests: XCTestCase {
+class BeamTextTests: XCTestCase, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
+
     override class func setUp() {
         // To prevent saving on the API side
-        AccountManager.logout()
+        BeamData.shared.currentAccount?.logout()
         Configuration.networkEnabled = false
-        BeamNote.idForNoteNamed = { _, _ in
+        BeamNote.idForNoteNamed = { _ in
             return UUID.null
         }
-        BeamNote.titleForNoteId = { _, _ in
+        BeamNote.titleForNoteId = { _ in
             return "link"
         }
 
@@ -164,7 +166,7 @@ class BeamTextTests: XCTestCase {
 
     func testMakeLink1() {
         var text = BeamText(text: "some link test")
-        guard let linkId = text.makeInternalLink(5..<9) else {
+        guard let linkId = text.makeInternalLink(self, 5..<9) else {
             XCTFail("makeInternalLink returned nil instead of a valid UUID")
             return
         }
@@ -185,7 +187,7 @@ class BeamTextTests: XCTestCase {
 
     func testMakeLink2() {
         var text = BeamText(text: "some link test")
-        guard let linkId = text.makeInternalLink(4..<9) else {
+        guard let linkId = text.makeInternalLink(self, 4..<9) else {
             XCTFail("makeInternalLink returned nil instead of a valid UUID")
             return
         }
@@ -206,7 +208,7 @@ class BeamTextTests: XCTestCase {
 
     func testMakeLink3() {
         var text = BeamText(text: "some link test")
-        guard let linkId = text.makeInternalLink(5..<9) else {
+        guard let linkId = text.makeInternalLink(self, 5..<9) else {
             XCTFail("makeInternalLink returned nil instead of a valid UUID")
             return
         }
@@ -227,7 +229,7 @@ class BeamTextTests: XCTestCase {
 
     func testPrefix() {
         var text = BeamText(text: "testText")
-        XCTAssertNotNil(text.makeInternalLink(2..<4))
+        XCTAssertNotNil(text.makeInternalLink(self, 2..<4))
         XCTAssert(text.hasPrefix("test"))
         XCTAssertEqual(text.internalLinkRanges[0].string, "st")
         let prefix = text.prefix(3)
@@ -239,7 +241,7 @@ class BeamTextTests: XCTestCase {
 
     func testSuffix() {
         var text = BeamText(text: "testText")
-        XCTAssertNotNil(text.makeInternalLink(4..<6))
+        XCTAssertNotNil(text.makeInternalLink(self, 4..<6))
         XCTAssert(text.hasSuffix("Text"))
         XCTAssertEqual(text.internalLinkRanges[0].string, "Te")
         let suffix = text.suffix(3)

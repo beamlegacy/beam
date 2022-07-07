@@ -10,7 +10,8 @@ import SwiftUI
 import Foundation
 import BeamCore
 
-struct DestinationNotePicker: View {
+struct DestinationNotePicker: View, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
     @Environment(\.isMainWindow) private var isMainWindow
     @EnvironmentObject var windowInfo: BeamWindowInfo
 
@@ -111,7 +112,7 @@ struct DestinationNotePicker: View {
                             state.destinationCardNameSelectedRange = nil
                             updateSearchResults()
                         } onCommit: { modifierFlags in
-                            selectedCurrentAutocompleteResult(withCommand: modifierFlags?.contains(.command) ?? false)
+                            try? selectedCurrentAutocompleteResult(withCommand: modifierFlags?.contains(.command) ?? false)
                         } onEscape: {
                             cancelSearch()
                         } onCursorMovement: { move -> Bool in
@@ -149,7 +150,7 @@ struct DestinationNotePicker: View {
                         DestinationNotePickerBackground(isEditing: true, enableAnimations: enableAnimations) {
                             DestinationNoteAutocompleteList(model: autocompleteModel)
                                 .onSelectAutocompleteResult {
-                                    selectedCurrentAutocompleteResult()
+                                    try? selectedCurrentAutocompleteResult()
                                 }
                         }
                         .frame(width: maxBoxWidth, alignment: .top)
@@ -188,36 +189,25 @@ struct DestinationNotePicker: View {
         }
     }
 
-    @discardableResult
-    func createNote(named name: String) -> BeamNote {
-        let note = BeamNote.fetchOrCreate(title: name)
-        note.save()
-        return note
-    }
-
-    @discardableResult
-    func createJournalNote(date: Date) -> BeamNote {
-        let note = BeamNote.fetchOrCreateJournalNote(date: date)
-        note.save()
-        return note
-    }
-
-    func selectedCurrentAutocompleteResult(withCommand: Bool = false) {
+    func selectedCurrentAutocompleteResult(withCommand: Bool = false) throws {
         let noteName: String
         var note: BeamNote?
         if withCommand {
             noteName = state.destinationCardName
-            note = createNote(named: noteName)
+            note = try BeamNote.fetchOrCreate(self, title: title)
+            guard note != nil else { return }
         } else {
             guard let result = autocompleteModel.selectedResult else {
                 return
             }
             let finalCardName = autocompleteModel.realNameForCardName(result.text)
             if result.source == .createNote, let title = result.information {
-                note = createNote(named: title)
+                note = try? BeamNote.fetchOrCreate(self, title: title)
+                guard note != nil else { return }
             } else if result.source == .note && result.text != finalCardName,
                       let date = autocompleteModel.getDateForCardReplacementJournalNote(result.text) {
-                note = createJournalNote(date: date)
+                note = try? BeamNote.fetchOrCreateJournalNote(self, date: date)
+                guard note != nil else { return }
             }
             noteName = finalCardName
         }
@@ -236,7 +226,8 @@ struct DestinationNotePicker_Previews: PreviewProvider {
     static var previews: some View {
         let state = BeamState()
         let origin = BrowsingTreeOrigin.searchBar(query: "original query", referringRootId: nil)
-        let tab = BrowserTab(state: state, browsingTreeOrigin: origin, originMode: .today, note: BeamNote(title: "Query text"))
+        // swiftlint:disable:next force_try
+        let tab = BrowserTab(state: state, browsingTreeOrigin: origin, originMode: .today, note: try? BeamNote(title: "Query text"))
         let focusedState = BeamState()
         focusedState.destinationCardIsFocused = true
         let itemHeight: CGFloat = 32.0

@@ -9,7 +9,8 @@ import SwiftUI
 import BeamCore
 import Combine
 
-struct AllNotesPageContentView: View {
+struct AllNotesPageContentView: View, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var data: BeamData
     @EnvironmentObject var windowInfo: BeamWindowInfo
@@ -198,7 +199,7 @@ struct AllNotesPageContentView: View {
                       isCreationRowLoading: model.publishingNoteTitle != nil,
                       shouldReloadData: $model.shouldReloadData,
                       sortDescriptor: model.sortDescriptor) { (newText, row) in
-                onEditingText(newText, row: row, in: currentNotesList)
+                onEditingText(self, newText, row: row, in: currentNotesList)
             } onSelectionChanged: { (selectedIndexes) in
                 Logger.shared.logDebug("selected: \(selectedIndexes.map { $0 })")
                 DispatchQueue.main.async {
@@ -304,12 +305,12 @@ struct AllNotesPageContentView: View {
         menu.presentMenu(at: CGPoint(x: buttonFrame.origin.x, y: buttonFrame.maxY + 6))
     }
 
-    private func onEditingText(_ text: String?, row: Int, in notesList: [NoteTableViewItem]) {
+    private func onEditingText(_ source: BeamDocumentSource, _ text: String?, row: Int, in notesList: [NoteTableViewItem]) {
         guard let title = text, !title.isEmpty else {
             return
         }
         if row >= notesList.count {
-            let newNote = state.fetchOrCreateNoteForQuery(title)
+            guard let newNote = try? state.fetchOrCreateNoteForQuery(title) else { return }
             let isPublic = model.listType == .publicNotes
             let publishOnProfile = model.listType == .onProfileNotes
 
@@ -324,7 +325,7 @@ struct AllNotesPageContentView: View {
                             UserAlert.showError(message: loc("Could not publish note. Try again from the note view."), error: e)
                             // Saving the private note at least and showing it to user.
                             newNote.publicationStatus = .unpublished
-                            newNote.save()
+                            _ = newNote.save(source)
                             model.listType = .privateNotes
                         case .success:
                             model.refreshAllNotes()
@@ -332,13 +333,13 @@ struct AllNotesPageContentView: View {
                     }
                 }
             } else {
-                newNote.save()
+                _ = newNote.save(source)
             }
         } else {
             let item = notesList[row]
-            let note = BeamNote.fetchOrCreate(title: item.title)
+            guard let note = try? BeamNote.fetchOrCreate(source, title: item.title) else { return }
             if note.title != title {
-                note.updateTitle(title)
+                note.updateTitle(source, title)
                 model.refreshAllNotes()
             }
         }

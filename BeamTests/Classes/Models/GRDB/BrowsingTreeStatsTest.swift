@@ -11,9 +11,15 @@ import XCTest
 import GRDB
 
 class BrowsingTreeStatsTest: XCTestCase {
+    var db: TabPinSuggestionDBManager!
 
+    override func setUpWithError() throws {
+        let store = GRDBStore.empty()
+        db = try TabPinSuggestionDBManager(store: store)
+        try store.migrate()
+    }
+    
     func testStats() throws {
-        let db = GRDBDatabase.empty()
         BeamDate.freeze("2001-01-01T13:40:12+000")
         let treeIds = [UUID(), UUID()]
         try db.updateBrowsingTreeStats(treeId: treeIds[0]) { record in

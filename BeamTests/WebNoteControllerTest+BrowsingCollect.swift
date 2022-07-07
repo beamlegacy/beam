@@ -19,7 +19,7 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        note = BeamNote(title: "Sample note")
+        note = try BeamNote(title: "Sample note")
         // Add text "lama" to start search
         searchElement = BeamElement("lama")
         note.addChild(searchElement)

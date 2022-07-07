@@ -119,6 +119,9 @@ class NoteFrecencyApiSaveLimiter {
         }
         saveCount += 1
     }
+    func remove(record: FrecencyNoteRecord) {
+        records.removeValue(forKey: record.id)
+    }
     func reset() {
         saveCount = 0
         records = [UUID: FrecencyNoteRecord]()
@@ -131,20 +134,28 @@ class NoteFrecencyApiSaveLimiter {
 }
 
 public class GRDBNoteFrecencyStorage: FrecencyStorage {
-    let db: GRDBDatabase
+    let providedDb: BeamNoteLinksAndRefsManager?
+    var db: BeamNoteLinksAndRefsManager? {
+        let currentDb = providedDb ?? BeamData.shared.noteLinksAndRefsManager
+        if currentDb == nil {
+            Logger.shared.logError("GRDBNoteFrecencyStorage has no BeamNoteLinksAndRefsManager available", category: .browsingTreeNetwork)
+        }
+        return currentDb
+    }
     private static let apiSaveLimiter = NoteFrecencyApiSaveLimiter()
 
     private(set) var batchSaveOnApiCompleted = false
     private(set) var softDeleteCompleted = false
 
-    init(db: GRDBDatabase = GRDBDatabase.shared) {
-        self.db = db
+    init(db providedDb: BeamNoteLinksAndRefsManager? = nil) {
+        self.providedDb = providedDb
     }
 
     func resetApiSaveLimiter() {
         Self.apiSaveLimiter.reset()
     }
     public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
+        guard let db = db else { return nil }
         do {
             if let record = try db.fetchOneFrecencyNote(noteId: id, paramKey: paramKey) {
                 return FrecencyScore(id: record.noteId,
@@ -158,6 +169,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         return nil
     }
     public func fetchMany(ids: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyScore] {
+        guard let db = db else { return [UUID: FrecencyScore]() }
         let keyValues = db.getFrecencyScoreValues(noteIds: ids, paramKey: paramKey)
             .map { (id, record) in
                 (id, FrecencyScore(id: record.noteId,
@@ -187,24 +199,31 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
     }
 
     public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
+        guard let db = db else { return }
         let existingRecord = try? db.fetchOneFrecencyNote(noteId: score.id, paramKey: paramKey)
         let recordToSave = createOrUpdate(record: existingRecord, score: score, paramKey: paramKey)
         try db.saveFrecencyNote(recordToSave)
-        Self.apiSaveLimiter.add(record: recordToSave)
 
-        if AuthenticationManager.shared.isAuthenticated,
-           Configuration.networkEnabled,
-           let recordsToSaveOnNetwork = Self.apiSaveLimiter.recordsToSave {
-            batchSaveOnApiCompleted = false
-            try saveAllOnNetwork(recordsToSaveOnNetwork) { _ in
-                self.batchSaveOnApiCompleted = true
+        if AuthenticationManager.shared.isAuthenticated &&
+            Configuration.networkEnabled {
+
+            Self.apiSaveLimiter.add(record: recordToSave)
+
+            if let recordsToSaveOnNetwork = Self.apiSaveLimiter.recordsToSave {
+                batchSaveOnApiCompleted = false
+                try saveAllOnNetwork(recordsToSaveOnNetwork) { _ in
+                    self.batchSaveOnApiCompleted = true
+                }
             }
         }
     }
 
     public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
+        guard let db = db else { return }
         let noteIds = scores.map { $0.id }
-        let recordsToUpdate = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: noteIds, paramKey: paramKey)
+        guard let recordsToUpdate = BeamData.shared.noteLinksAndRefsManager?.getFrecencyScoreValues(noteIds: noteIds, paramKey: paramKey) else {
+            throw BeamDataError.databaseNotFound
+        }
         let recordsToSave = scores.map { createOrUpdate(record: recordsToUpdate[$0.id], score: $0, paramKey: paramKey) }
         try db.save(noteFrecencies: recordsToSave)
 
@@ -213,8 +232,9 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
     }
 
     public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        guard let db = db else { return }
         do {
-            try self.db.clearNoteFrecencies()
+            try db.clearNoteFrecencies()
             if AuthenticationManager.shared.isAuthenticated && includedRemote {
                 try self.deleteAllFromBeamObjectAPI { result in
                     networkCompletion?(result)
@@ -245,17 +265,24 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
         return Array(deduplicatedDict.values)
     }
     func remoteSoftDelete(noteId: UUID) {
+        guard let db = db else { return }
         softDeleteCompleted = false
         let frecencies = db.fetchNoteFrecencies(noteId: noteId)
         let now = BeamDate.now
         let softDeleted = frecencies.map { (frecency) -> FrecencyNoteRecord in
             var softDeleted = frecency
             softDeleted.deletedAt = now
+            Self.apiSaveLimiter.remove(record: frecency)
             return softDeleted
         }
+
+        let syncedOnceNoteFrecencies = softDeleted.filter {
+            $0.hasBeenSyncedOnce == true
+        }
+
         do {
             try db.save(noteFrecencies: softDeleted)
-            try saveAllOnNetwork(softDeleted) { _ in
+            try saveAllOnNetwork(syncedOnceNoteFrecencies) { _ in
                 self.softDeleteCompleted = true
             }
         } catch {
@@ -264,11 +291,13 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
     }
 
     func receivedObjects(_ objects: [FrecencyNoteRecord]) throws {
-        try self.db.save(noteFrecencies: deduplicated(records: objects))
+        guard let db = db else { return }
+        try db.save(noteFrecencies: deduplicated(records: objects))
     }
 
     func allObjects(updatedSince: Date?) throws -> [FrecencyNoteRecord] {
-        try db.allNoteFrecencies(updatedSince: updatedSince)
+        guard let db = db else { return [FrecencyNoteRecord]() }
+        return try db.allNoteFrecencies(updatedSince: updatedSince)
     }
 
     func willSaveAllOnBeamObjectApi() {}
@@ -279,7 +308,8 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
     }
 
     func saveObjectsAfterConflict(_ objects: [FrecencyNoteRecord]) throws {
-        try self.db.save(noteFrecencies: objects)
+        guard let db = db else { return }
+        try db.save(noteFrecencies: objects)
     }
 
     func saveAllOnNetwork(_ frecencies: [FrecencyNoteRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {

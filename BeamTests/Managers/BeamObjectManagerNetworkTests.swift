@@ -57,6 +57,10 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             MyRemoteObjectManager.receivedMyRemoteObjects = []
         }
 
+        afterSuite {
+            BeamObjectManager.unregister(objectType: .myRemoteObject)
+        }
+
         describe("fetchAllFromAPI()") {
             let uuid = "995d94e1-e0df-4eca-93e6-8778984bcd58".uuid ?? UUID()
             let title = "my title"
