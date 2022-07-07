@@ -95,8 +95,13 @@ struct CalendarView: View, BeamDocumentSource {
         } else if viewModel.todaysCalendar && viewModel.calendarManager.showedNotConnectedView < 3 && !viewModel.isConnected {
             isNotConnectedView
                 .padding(.leading, 14)
-                .onHover { isHoveringNotConnect = $0 }
+                .foregroundColor(isHoveringNotConnect ? BeamColor.Niobium.swiftUI : BeamColor.Generic.placeholder.swiftUI)
                 .animation(.easeInOut(duration: 0.3))
+                .onHover { isHoveringNotConnect = $0 }
+                .onTapGesture {
+                    openAccountPreferences()
+                }
+                .cursorOverride(.pointingHand)
         }
     }
 
@@ -107,27 +112,17 @@ struct CalendarView: View, BeamDocumentSource {
                     .renderingMode(.template)
                     .resizable()
                     .frame(width: 16, height: 16)
-                    .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
                 Spacer()
             }.frame(width: 21)
             if isHoveringNotConnect {
                 VStack(alignment: .leading, spacing: 4.5) {
-                    ButtonLabel(customView: { hovered, _ in
-                        AnyView(
-                            Text("Connect your Calendar")
-                                .font(BeamFont.medium(size: 12).swiftUI)
-                                .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.Generic.placeholder.swiftUI)
-                        )
-                    }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
-                        openAccountPreferences()
-                    })
-
+                    Text("Connect your Calendar")
+                        .font(BeamFont.medium(size: 12).swiftUI)
                     Text("Write a meeting note or join a video call")
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                         .multilineTextAlignment(.leading)
                         .font(BeamFont.regular(size: 11).swiftUI)
-                        .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
                     Spacer()
                 }
             }
