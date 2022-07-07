@@ -9,6 +9,7 @@ import Foundation
 import AppKit
 import Combine
 import BeamCore
+import GRDB
 
 protocol MenuOutlineViewDelegate: NSOutlineViewDelegate {
     func outlineView(outlineView: NSOutlineView, menuForItem item: Any?) -> NSMenu?
@@ -235,6 +236,9 @@ class DataView: NSView, NSOutlineViewDataSource, MenuOutlineViewDelegate, BeamDo
                 menu.addItem(withTitle: "Undelete", action: #selector(undeleteDatabase), keyEquivalent: "")
             }
             menu.addItem(withTitle: "Hard delete", action: #selector(hardDeleteDatabase), keyEquivalent: "")
+
+            menu.addItem(withTitle: "Sanitize Database Contents", action: #selector(sanitizeDatabaseContents), keyEquivalent: "")
+
         } else if let accountNode = item as? AccountTreeNode {
             menu.addItem(withTitle: "Hard delete", action: #selector(hardDeleteAccount), keyEquivalent: "")
         }
@@ -271,6 +275,26 @@ class DataView: NSView, NSOutlineViewDataSource, MenuOutlineViewDelegate, BeamDo
     @objc func hardDeleteDatabase(_ sender: Any) {
         guard let databaseNode = itemUnderMenu as? DatabaseTreeNode else { return }
         try? databaseNode.database?.delete(self)
+    }
+
+    @objc func sanitizeDatabaseContents(_ sender: Any) {
+        guard let databaseNode = itemUnderMenu as? DatabaseTreeNode,
+              let database = databaseNode.database
+        else { return }
+
+        if
+            let count = try? database.grdbStore.write({ db in
+            try BeamDocument.filter(BeamDocument.Columns.data == nil || length(BeamDocument.Columns.data) == 0).fetchCount(db)
+        }) {
+            UserAlert.showAlert(message: "Found \(count) malformed documents. Would you like to delete them?", informativeText: "Operation cannot be undone", buttonTitle: "Delete", secondaryButtonTitle: "Cancel", buttonAction: { self.deleteMalformedDocuments(database: database) }, primaryIsDestructive: true, style: .critical)
+        }
+    }
+
+    private func deleteMalformedDocuments(database: BeamDatabase) {
+        try? database.grdbStore.write({ db in
+            try BeamDocument.filter(BeamDocument.Columns.data == nil).deleteAll(db)
+            try BeamDocument.filter(length(BeamDocument.Columns.data) == 0).deleteAll(db)
+        })
     }
 
     @objc func hardDeleteAccount(_ sender: Any) {
