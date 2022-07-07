@@ -1369,6 +1369,7 @@
 		D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */; };
 		D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */; };
 		D775219A2852262B007408DA /* NotePinUnpinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77521992852262B007408DA /* NotePinUnpinTests.swift */; };
+		D77A5A7A28770F0D00652727 /* RightClickMenuTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A7928770F0D00652727 /* RightClickMenuTestView.swift */; };
 		D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D77D4792282273940006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D780BA54285083E600F5CBC8 /* BrowserPinnedTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */; };
@@ -1385,6 +1386,8 @@
 		D7E38CED282A93580059F60D /* AdBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEC282A93580059F60D /* AdBlockerTests.swift */; };
 		D7E38CEF282A95250059F60D /* AdBlockerViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */; };
 		D7E38CF1282A96BA0059F60D /* AdBlockerTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */; };
+		D7F5BF0528756231008FE546 /* RightClickImageMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5BF0428756231008FE546 /* RightClickImageMenuTests.swift */; };
+		D7F5BF0C2875630C008FE546 /* RightClickMenuViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5BF0B2875630C008FE546 /* RightClickMenuViewLocators.swift */; };
 		DA0BBE6A282D006600437AA1 /* BrowsingTreeTriggerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0BBE69282D006600437AA1 /* BrowsingTreeTriggerTest.swift */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
 		DA113A852760FA26006B20AF /* chromeHistory.db in Resources */ = {isa = PBXBuildFile; fileRef = DA113A842760FA26006B20AF /* chromeHistory.db */; };
@@ -3278,6 +3281,7 @@
 		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
 		D77521992852262B007408DA /* NotePinUnpinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotePinUnpinTests.swift; sourceTree = "<group>"; };
 		D77A5153280FC3110045F603 /* BeamUITests-Thread6.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread6.xctestplan"; sourceTree = "<group>"; };
+		D77A5A7928770F0D00652727 /* RightClickMenuTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickMenuTestView.swift; sourceTree = "<group>"; };
 		D77D4788282269640006847A /* CrossTargetBeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetBeeper.swift; sourceTree = "<group>"; };
 		D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPinnedTabTests.swift; sourceTree = "<group>"; };
 		D7858BC5283BB5A000D0336A /* CreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
@@ -3293,6 +3297,8 @@
 		D7E38CEC282A93580059F60D /* AdBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerTests.swift; sourceTree = "<group>"; };
 		D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerViewLocators.swift; sourceTree = "<group>"; };
 		D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerTestView.swift; sourceTree = "<group>"; };
+		D7F5BF0428756231008FE546 /* RightClickImageMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickImageMenuTests.swift; sourceTree = "<group>"; };
+		D7F5BF0B2875630C008FE546 /* RightClickMenuViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickMenuViewLocators.swift; sourceTree = "<group>"; };
 		DA0BBE69282D006600437AA1 /* BrowsingTreeTriggerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowsingTreeTriggerTest.swift; path = BeamTests/BrowsingTreeTriggerTest.swift; sourceTree = SOURCE_ROOT; };
 		DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongTermUrlScoreStoreTest.swift; sourceTree = "<group>"; };
 		DA113A842760FA26006B20AF /* chromeHistory.db */ = {isa = PBXFileReference; lastKnownFileType = text; path = chromeHistory.db; sourceTree = "<group>"; };
@@ -7423,6 +7429,7 @@
 				A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */,
 				A310949A281D9F7C003B96D1 /* BrowserHistoryTests.swift */,
 				D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */,
+				D7F5BF0428756231008FE546 /* RightClickImageMenuTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -7575,6 +7582,7 @@
 				B55E4D2627FEDD1C00F73218 /* PublishedNoteViewLocators.swift */,
 				D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */,
 				D7D6F029284E2BA100C3EE7F /* AddLinkViewLocators.swift */,
+				D7F5BF0B2875630C008FE546 /* RightClickMenuViewLocators.swift */,
 			);
 			path = Locators;
 			sourceTree = "<group>";
@@ -7600,6 +7608,7 @@
 				B557155626FA257700F6C9D4 /* UpdateTestView.swift */,
 				A5EB6EAE26FDFC55001442E7 /* ContextMenuTestView.swift */,
 				D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */,
+				D77A5A7928770F0D00652727 /* RightClickMenuTestView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -9832,6 +9841,7 @@
 				D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
+				D7F5BF0528756231008FE546 /* RightClickImageMenuTests.swift in Sources */,
 				A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */,
 				A3E7B4BD27AC23D50074C9BB /* SignInAutocompleteTests.swift in Sources */,
 				B5D2A1802805E91E00C833B9 /* OnboardingPrivateKeyViewLocators.swift in Sources */,
@@ -9841,6 +9851,7 @@
 				8AA6D91D27FAF9AB00F42FAB /* BrowserOpenModalTests.swift in Sources */,
 				B579258F275E473E0093B32B /* DeleteNotesTests.swift in Sources */,
 				A3E7B4BB27AC1A0C0074C9BB /* MockHTTPWebPages.swift in Sources */,
+				D7F5BF0C2875630C008FE546 /* RightClickMenuViewLocators.swift in Sources */,
 				B5C71D532716F4280028D495 /* UITestPagePasswordManager.swift in Sources */,
 				8714A3E428100767007DDF4F /* OneFieldAutofillTests.swift in Sources */,
 				B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */,
@@ -9929,6 +9940,7 @@
 				B5BA078626AF3B4400D31FED /* NoteViewLocators.swift in Sources */,
 				A39F7259284F92970085DDCA /* AllNotesPublishProfileTests.swift in Sources */,
 				B5D2A1872805EAA600C833B9 /* OnboardingPrivateKeyTestView.swift in Sources */,
+				D77A5A7A28770F0D00652727 /* RightClickMenuTestView.swift in Sources */,
 				B57A9B3126AB06AD002C954D /* BaseTest.swift in Sources */,
 				A310949B281D9F7C003B96D1 /* BrowserHistoryTests.swift in Sources */,
 				B5E8010C26AEA1F100C8BD61 /* JournalViewLocators.swift in Sources */,

@@ -135,6 +135,7 @@
         "PnSAddToNoteTests",
         "ReferencesTests",
         "ReportBugFeatureTests",
+        "RightClickImageMenuTests",
         "SearchOnCardTests",
         "SearchOnNoteTests",
         "SearchOnWebTests",
