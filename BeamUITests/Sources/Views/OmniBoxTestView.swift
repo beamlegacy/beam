@@ -34,7 +34,7 @@ class OmniBoxTestView: BaseView {
     }
     
     func getAutocompleteResults() -> XCUIElementQuery {
-        return app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'"))
+        return app.links.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Link.autocompleteResult.accessibilityIdentifier)'"))
     }
     
     func getSearchFieldValue() -> String {
@@ -103,11 +103,11 @@ class OmniBoxTestView: BaseView {
     }
     
     func doesOmniboxCreateNoteExist() -> Bool {
-        return otherElement(OmniboxLocators.Labels.createNote.accessibilityIdentifier).exists
+        return link(OmniboxLocators.Labels.createNote.accessibilityIdentifier).exists
     }
     
     func doesOmniboxAllNotesExist() -> Bool {
-        return otherElement(OmniboxLocators.Labels.allNotes.accessibilityIdentifier).exists
+        return getAutocompleteResults().matching(NSPredicate(format: "label == '\(OmniboxLocators.Labels.action.accessibilityIdentifier)' && value == '\(OmniboxLocators.Labels.allNotes.accessibilityIdentifier)'")).firstMatch.exists
     }
     
     func getAutocompleteIdentifierFor(domainURL: String) -> String {

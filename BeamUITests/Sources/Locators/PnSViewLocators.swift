@@ -11,6 +11,7 @@ enum PnSViewLocators {
     
     enum TextFields: String, CaseIterable, UIElement  {
         case destinationNoteToday = "Today"
+        case shootCardPickerTextField = "ShootCardPickerTextField"
     }
     
     enum StaticTexts: String, CaseIterable, UIElement  {
@@ -19,7 +20,7 @@ enum PnSViewLocators {
         case failedCollectPopup = "Failed to collect"
         case copy = "Copy"
         case copied = "Copied"
-        case share = "social-share"
+        case share = "share"
     }
     
     enum Other: String, CaseIterable, UIElement  {

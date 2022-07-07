@@ -23,7 +23,7 @@ class TextEditorContextTestView: BaseView {
     @discardableResult
     func confirmBidiLinkCreation(noteName: String) -> NoteTestView {
         let helper = OmniBoxUITestsHelper(app)
-        app.otherElements.matching(helper.autocompleteCreateNotePredicate).firstMatch.clickOnExistence()
+        app.links.matching(helper.autocompleteCreateNotePredicate).firstMatch.clickOnExistence()
         return NoteTestView()
     }
 

@@ -12,6 +12,7 @@ enum OmniboxLocators {
     enum Labels: String, CaseIterable, UIElement {
         case journal = "Journal"
         case allNotes = "All Notes"
+        case action = "action"
         case switchToNotes = "Switch to Notes"
         case switchToWeb = "Switch to Web"
         case copyTab = "Copy Address"

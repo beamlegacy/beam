@@ -117,6 +117,7 @@ struct PointAndShootCardPicker: View {
         }
         .frame(minHeight: 16)
         .padding(BeamSpacing._40)
+        .accessibility(identifier: "ShootCardPickerTextField")
         .background(
             Token(text: cardSearchField, currentCardName: currentCardName, tokenize: cursorIsOnCardName,
                   selectedResult: lastInputWasBackspace ? nil : autocompleteModel.selectedResult, completed: completed)
@@ -198,6 +199,7 @@ struct PointAndShootCardPicker: View {
         .onReceive(autocompleteModel.$results.dropFirst()) { _ in
             enableResizeAnimation()
         }
+        .accessibilityElement(children: .contain)
         .accessibility(identifier: "ShootCardPicker")
     }
 }
@@ -462,12 +464,14 @@ extension PointAndShootCardPicker {
                     Spacer()
                     ButtonLabel(loc("Share"), icon: "social-share")
                         .opacity(0)
+                        .accessibility(hidden: true)
                         .overlay(GeometryReader { proxy in
                             ButtonLabel(loc("Share"), icon: "social-share") {
                                 let frame = proxy.frame(in: .global)
                                 let point = CGPoint(x: frame.minX, y: frame.maxY + 8)
                                 showShareMenu(at: point)
                             }
+                            .accessibilityIdentifier("share")
                         })
                 }
             }
