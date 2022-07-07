@@ -11,19 +11,17 @@ import SwiftUI
 
 class DailySummaryTests: BaseTest {
     
-    var noteView: NoteTestView!
-    var journalView: JournalTestView!
-    var helper: BeamUITestsHelper!
+    var noteView = NoteTestView()
+    var journalView = JournalTestView()
     let allNotes = AllNotesTestView()
     let linkToOpen = "Pitchfork"
-    let pitchForkUrl = "pitchfork.com/contact/"
     let noteToOpen = "Triplego"
     let dummyText = "Dummy Text"
     let startedDailySummaryExpected = "Started Triplego, Laylow. Worked on Alpha Wann, Prince Waly and RA Electronic music online, Pitchfork"
     let continueOnDailySummaryExpected = "Continue on Key Glock, Maxo Kream and LeMonde, Twitter"
     
     override func setUp() {
-        journalView = launchApp()
+        launchApp()
 
         step("Given I populate daily summary"){
             uiMenu.createFakeDailySummary()
@@ -31,38 +29,38 @@ class DailySummaryTests: BaseTest {
         }
     }
     
-    private func verifyDailySummaryInView(view: TextEditorContextTestView){
+    private func verifyDailySummaryInView(){
         step("Then daily summary is displayed"){
-            XCTAssertTrue(view.doesStartedDailySummaryExist())
-            XCTAssertTrue(view.doesContinueOnDailySummaryExist())
+            XCTAssertTrue(noteView.doesStartedDailySummaryExist())
+            XCTAssertTrue(noteView.doesContinueOnDailySummaryExist())
         }
 
         step("And note contains Started daily summary sentence at second node"){
-            XCTAssertEqual(view.getNoteNodeValueByIndex(1), startedDailySummaryExpected)
+            XCTAssertEqual(noteView.getNoteNodeValueByIndex(1), startedDailySummaryExpected)
         }
 
         step("And note contains Continue To daily summary sentence at third node"){
-            XCTAssertEqual(view.getNoteNodeValueByIndex(2), continueOnDailySummaryExpected)
+            XCTAssertEqual(noteView.getNoteNodeValueByIndex(2), continueOnDailySummaryExpected)
         }
         
+    }
+    
+    private func verifyDailySummaryOpenLink(){
         step("When I open BiDi link Pitchfork"){
-            view.openBiDiLink(linkToOpen)
-            _ = webView.waitForWebViewToLoad()
+            noteView.openBiDiLink(linkToOpen)
+            webView.waitForWebViewToLoad()
         }
         
-        step("Then the webview is opened and Pitchfork is searched"){
-            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
-            XCTAssertEqual(webView.getTabUrlAtIndex(index: 0), pitchForkUrl)
+        step("Then webview is opened"){
+            XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
+
         }
         
-        step("When I switch back to my note"){
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            XCTAssertTrue(view.doesStartedDailySummaryExist())
-            XCTAssertTrue(view.doesContinueOnDailySummaryExist())
-        }
-        
-        step("And I open BiDi link Triplego"){
-            noteView = view.openBiDiLink(noteToOpen)
+    }
+    
+    private func verifyDailySummaryOpenNote(){
+        step("When I open BiDi link Triplego"){
+            noteView.openBiDiLink(noteToOpen)
             noteView.waitForNoteViewToLoad()
         }
         
@@ -70,11 +68,8 @@ class DailySummaryTests: BaseTest {
             XCTAssertEqual(noteView.getNoteTitle(), noteToOpen)
         }
         
-        step("And daily summary is not displayed"){
-            XCTAssertFalse(noteView.doesStartedDailySummaryExist())
-            XCTAssertFalse(noteView.doesContinueOnDailySummaryExist())
-        }
     }
+    
     func testDailySummaryInTodayNote() {
         let todaysDateInNoteTitleFormat = DateHelper().getTodaysDateString(.noteViewTitle)
         
@@ -83,15 +78,29 @@ class DailySummaryTests: BaseTest {
             noteView = allNotes.openNoteByName(noteTitle: todaysDateInNoteTitleFormat)
         }
         
-        verifyDailySummaryInView(view: noteView)
+        verifyDailySummaryInView()
+        
+        verifyDailySummaryOpenNote()
+
+        step("When I go to Today Note"){
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            noteView = allNotes.openNoteByName(noteTitle: todaysDateInNoteTitleFormat)
+        }
+        
+        verifyDailySummaryOpenLink()
     }
     
     func testDailySummaryInJournal() {
-        step("When I open Journal"){
+        
+        verifyDailySummaryInView()
+        
+        verifyDailySummaryOpenNote()
+
+        step("When I go back to Journal"){
             shortcutHelper.shortcutActionInvoke(action: .showJournal)
         }
         
-        verifyDailySummaryInView(view: journalView)
+        verifyDailySummaryOpenLink()
     }
     
     func testNoBulletDragDropAllowedOnDailySummary() {
