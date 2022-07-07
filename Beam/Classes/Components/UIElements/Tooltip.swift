@@ -109,10 +109,27 @@ struct TooltipHoverModifier: ViewModifier {
                 tooltipOffset = offset
             }
             .transition(
-                .opacity.combined(with: .animatableOffset(offset: CGSize(width: 0, height: alignment.vertical == .top ? 5 : -5)))
+                .opacity.combined(with: .animatableOffset(offset: animationOffset))
                     .animation(BeamAnimation.easeInOut(duration: 0.15)))
             .offset(tooltipOffset)
     }
+
+    private var animationOffset: CGSize {
+        if alignment.vertical == .top {
+            return CGSize(width: 0, height: 5)
+        }
+        if alignment.vertical == .bottom {
+            return CGSize(width: 0, height: -5)
+        }
+        if alignment.horizontal == .leading {
+            return CGSize(width: 5, height: 0)
+        }
+        if alignment.horizontal == .trailing {
+            return CGSize(width: -5, height: 0)
+        }
+        return CGSize.zero
+    }
+
     private var overlayProxy: some View {
         GeometryReader { proxy in
             ZStack { }
