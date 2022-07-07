@@ -51,6 +51,10 @@ final class TabsListWidthProvider {
         TabView.minimumWidth
     }
 
+    private var maximumWidth: CGFloat {
+        TabView.maximumWidth
+    }
+
     private var minimumGroupItemWidth: CGFloat {
         22
     }
@@ -130,6 +134,11 @@ final class TabsListWidthProvider {
             // not enough space for all tabs
             tabWidth = (availableWidthWithoutSeparators - minimumActiveWidth) / CGFloat(dynamicItemsCount - 1)
         }
-        return max(selected ? minimumActiveWidth : minimumWidth, tabWidth)
+        tabWidth = max(selected ? minimumActiveWidth : minimumWidth, tabWidth)
+        let hasSingleTab = itemsCount - pinnedItemsCount == 1
+        if !hasSingleTab {
+            tabWidth = min(tabWidth, maximumWidth)
+        }
+        return tabWidth
     }
 }
