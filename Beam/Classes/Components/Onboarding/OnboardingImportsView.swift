@@ -54,7 +54,7 @@ struct OnboardingImportsView: View {
                     }
                 }
             }
-            .pickerStyle(MenuPickerStyle())
+            .pickerStyle(.menu)
             .opacity(showNativePickerAfterAnimation ? 1.0 : 0.0)
             .overlay(
                 ZStack(alignment: .leading) {
