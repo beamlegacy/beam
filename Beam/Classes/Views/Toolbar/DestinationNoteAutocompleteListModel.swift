@@ -241,9 +241,9 @@ extension DestinationNoteAutocompleteList {
         }
 
         private func getSearchResultForNoteContent(text: String, itemLimit: Int) -> [AutocompleteResult] {
-            var dbResults = [GRDBDatabase.SearchResult]()
+            var dbResults = [BeamNoteLinksAndRefsManager.SearchResult]()
             if !text.isEmpty {
-                dbResults = GRDBDatabase.shared.search(matchingAnyTokenIn: text, maxResults: itemLimit, includeText: true, excludeElements: excludeElements)
+                dbResults = BeamData.shared.noteLinksAndRefsManager?.search(matchingAnyTokenIn: text, maxResults: itemLimit, includeText: true, excludeElements: excludeElements) ?? []
             }
             var results: [AutocompleteResult] = dbResults.compactMap { r in
                 let elementId = r.uid
@@ -257,11 +257,10 @@ extension DestinationNoteAutocompleteList {
             return results
         }
 
-        private func getEmptySearchRecentsNotes(documentManager: DocumentManager, itemLimit: Int) -> ([DocumentStruct], [UUID: FrecencyNoteRecord]) {
-            let scores = GRDBDatabase.shared.getTopNoteFrecencies(limit: itemLimit, paramKey: AutocompleteManager.noteFrecencyParamKey)
-
-            var items = documentManager.loadDocumentsById(ids: Array(scores.keys))
-            if recentsAlwaysShowTodayNote, let todayNote = data?.todaysNote.documentStruct {
+        private func getEmptySearchRecentsNotes(collection: BeamDocumentCollection, itemLimit: Int) -> ([BeamDocument], [UUID: FrecencyNoteRecord]) {
+            let scores = BeamData.shared.noteLinksAndRefsManager?.getTopNoteFrecencies(limit: itemLimit, paramKey: AutocompleteManager.noteFrecencyParamKey) ?? [:]
+            var items = (try? collection.fetch(filters: [.ids(Array(scores.keys))])) ?? []
+            if recentsAlwaysShowTodayNote, let todayNote = data?.todaysNote.document {
                 if let index = items.firstIndex(where: { $0.id == todayNote.id }) {
                     items.remove(at: index)
                 } else if !items.isEmpty {
@@ -273,24 +272,24 @@ extension DestinationNoteAutocompleteList {
         }
 
         private func getSearchResultForNoteTitle(text: String, itemLimit: Int) -> [AutocompleteResult] {
+            guard let collection = BeamData.shared.currentDocumentCollection else { return [] }
             var autocompleteItems: [AutocompleteResult]
             var allowCreateCard = false
-            var items = [DocumentStruct]()
+            var items = [BeamDocument]()
             var scores = [UUID: FrecencyNoteRecord]()
-            let documentManager = DocumentManager()
             var shouldSortResult = true
             if !text.isEmpty {
                 allowCreateCard = true
-                items = documentManager.documentsWithTitleMatch(title: text)
+                items = (try? collection.fetch(filters: [.titleMatch(text)])) ?? []
                 let noteIds = items.map { $0.id }
-                scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: noteIds, paramKey: AutocompleteManager.noteFrecencyParamKey)
+                scores = BeamData.shared.noteLinksAndRefsManager?.getFrecencyScoreValues(noteIds: noteIds, paramKey: AutocompleteManager.noteFrecencyParamKey) ?? [:]
             } else if useRecents {
                 //When query is empty, we get top N frecencies' noteIds
                 //and fetch corresponding notes (avoids fetching all the notes)
-                (items, scores) = getEmptySearchRecentsNotes(documentManager: documentManager, itemLimit: itemLimit)
+                (items, scores) = getEmptySearchRecentsNotes(collection: collection, itemLimit: itemLimit)
                 shouldSortResult = false
             }
-            let cleanedItems: [DocumentStruct] = items.compactMap { doc in
+            let cleanedItems: [BeamDocument] = items.compactMap { doc in
                 if text.containsSymbol || text.containsWhitespace {
                     return doc
                 }

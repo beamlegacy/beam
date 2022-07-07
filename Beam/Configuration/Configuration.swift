@@ -144,7 +144,7 @@ struct Configuration {
         set {
             if newValue != apiHostname {
                 UserDefaults.standard.set(newValue, forKey: apiHostnameKey)
-                AccountManager.logout()
+                BeamData.shared.currentAccount?.logout()
             }
         }
     }
@@ -270,7 +270,7 @@ struct Configuration {
         UserDefaults.standard.removeObject(forKey: apiHostnameKey)
         UserDefaults.standard.removeObject(forKey: restApiHostnameKey)
         UserDefaults.standard.removeObject(forKey: beamObjectsPageSizeKey)
-        AccountManager.logout()
+        BeamData.shared.currentAccount?.logout()
     }
 
     static func setAPIEndPointsToStaging() {

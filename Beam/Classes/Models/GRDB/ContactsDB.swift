@@ -134,15 +134,20 @@ extension ContactRecord: MutablePersistableRecord {
     }
 }
 
-class ContactsDB {
+class ContactsDB: GRDBHandler, BeamManager, LegacyAutoImportDisabler {
+    static var id = UUID()
+    static var name = "ContactsDB"
+    var holder: BeamManagerOwner?
+    override var tableNames: [String] { [ContactsDB.tableName] }
+
+    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
+        self.holder = holder
+        try super.init(store: store)
+    }
+
     static let tableName = "contactRecord"
-    var dbPool: DatabasePool
 
-    init(path: String) throws {
-        dbPool = try DatabasePool(path: path, configuration: GRDB.Configuration())
-
-        var migrator = DatabaseMigrator()
-
+    override func prepareMigration(migrator: inout DatabaseMigrator) throws {
         migrator.registerMigration("contactTableCreation") { db in
             try db.create(table: ContactsDB.tableName, ifNotExists: true) { table in
                 table.column("uuid", .text).notNull().primaryKey().unique()
@@ -153,18 +158,16 @@ class ContactsDB {
                 table.column("deletedAt", .datetime)
             }
         }
-
-        try migrator.migrate(dbPool)
     }
 
     func fetchWithId(_ id: UUID) throws -> ContactRecord? {
-        try dbPool.read { db in
+        try read { db in
             try ContactRecord.filter(ContactRecord.Columns.uuid == id).fetchOne(db)
         }
     }
 
     func fetchWithIds(_ ids: [UUID]) throws -> [ContactRecord] {
-        try dbPool.read { db in
+        try read { db in
             try ContactRecord
                 .filter(ids.contains(ContactRecord.Columns.uuid))
                 .fetchAll(db)
@@ -172,7 +175,7 @@ class ContactsDB {
     }
 
     func allRecords(_ updatedSince: Date? = nil) throws -> [ContactRecord] {
-        try dbPool.read { db in
+        try read { db in
             if let updatedSince = updatedSince {
                 return try ContactRecord.filter(ContactRecord.Columns.updatedAt >= updatedSince).fetchAll(db)
             }
@@ -182,7 +185,7 @@ class ContactsDB {
 
     func fetchAll() throws -> [ContactRecord] {
         do {
-            return try dbPool.read { db in
+            return try read { db in
                 let contacts = try ContactRecord
                     .filter(ContactRecord.Columns.deletedAt == nil)
                     .fetchAll(db)
@@ -195,7 +198,7 @@ class ContactsDB {
 
     func contact(for noteId: UUID) throws -> ContactRecord? {
         do {
-            return try dbPool.read { db in
+            return try read { db in
                 return try ContactRecord
                     .filter(ContactRecord.Columns.noteId == noteId && ContactRecord.Columns.deletedAt == nil)
                     .fetchOne(db)
@@ -207,7 +210,7 @@ class ContactsDB {
 
     func save(_ emails: [Email], to noteId: UUID) throws -> ContactRecord {
         do {
-            return try dbPool.write { db in
+            return try write { db in
                 var contactRecord = ContactRecord(uuid: UUID(),
                                                   noteId: noteId,
                                                   emails: emails,
@@ -223,7 +226,7 @@ class ContactsDB {
     }
 
     func save(contacts: [ContactRecord]) throws {
-        try dbPool.write { db in
+        try write { db in
             for contact in contacts {
                 var contact = contact.copy()
                 try contact.insert(db)
@@ -233,7 +236,7 @@ class ContactsDB {
 
     func update(record: ContactRecord, with emails: [Email]) throws -> ContactRecord {
         do {
-            return try dbPool.write { db in
+            return try write { db in
                 var updatedRecord = record
                 updatedRecord.emails = emails
                 updatedRecord.updatedAt = BeamDate.now
@@ -247,7 +250,7 @@ class ContactsDB {
 
     func markDeleted(noteId: UUID) throws -> ContactRecord {
         do {
-            return try dbPool.write { db in
+            return try write { db in
                 try ContactRecord
                     .filter(ContactRecord.Columns.deletedAt == nil && ContactRecord.Columns.noteId == noteId)
                     .updateAll(db, ContactRecord.Columns.deletedAt.set(to: BeamDate.now))
@@ -266,7 +269,7 @@ class ContactsDB {
 
     func markAllDeleted() throws -> [ContactRecord] {
             do {
-                return try dbPool.write { db in
+                return try write { db in
                     try ContactRecord
                         .filter(Column("deletedAt") == nil)
                         .updateAll(db, ContactRecord.Columns.deletedAt.set(to: BeamDate.now))
@@ -284,7 +287,7 @@ class ContactsDB {
     @discardableResult
     func delete(noteId: Int) throws -> ContactRecord? {
         do {
-            return try dbPool.write { db in
+            return try write { db in
                 let contact = try ContactRecord
                     .filter(ContactRecord.Columns.noteId == noteId)
                     .fetchOne(db)
@@ -299,7 +302,7 @@ class ContactsDB {
     @discardableResult
     func deleteAll() throws -> [ContactRecord] {
         do {
-            return try dbPool.write { db in
+            return try write { db in
                 let contacts = try ContactRecord.fetchAll(db)
                 try ContactRecord.deleteAll(db)
                 return contacts
@@ -307,5 +310,17 @@ class ContactsDB {
         } catch {
             throw ContactsDBError.cantDeleteContact(errorMsg: error.localizedDescription)
         }
+    }
+}
+
+extension BeamManagerOwner {
+    var contactsDB: ContactsDB? {
+        try? manager(ContactsDB.self)
+    }
+}
+
+extension BeamData {
+    var contactsDB: ContactsDB? {
+        currentAccount?.contactsDB
     }
 }

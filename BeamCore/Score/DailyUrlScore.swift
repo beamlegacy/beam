@@ -51,7 +51,7 @@ public class DailyURLScore: Codable, UrlScoreProtocol {
 }
 
 public protocol DailyUrlScoreStoreProtocol {
-    func apply(to urlId: UUID, changes: (DailyURLScore) -> Void)
+    func apply(to urlId: UUID, changes: @escaping (DailyURLScore) -> Void)
     func getScores(daysAgo: Int) -> [UUID: DailyURLScore]
 }
 

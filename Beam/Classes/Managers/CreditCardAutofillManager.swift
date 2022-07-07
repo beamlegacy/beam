@@ -17,20 +17,10 @@ class CreditCardAutofillManager {
         changeSubject.eraseToAnyPublisher()
     }
 
-    private var creditCardsDB: CreditCardStore
+    private var creditCardsDB: CreditCardStore? { BeamData.shared.creditCardsDB }
     private var changeSubject: PassthroughSubject<Void, Never>
 
-    convenience init() {
-        do {
-            let creditCardsDB = try CreditCardsDB(path: Self.creditCardsDBPath)
-            self.init(creditCardsDB: creditCardsDB)
-        } catch {
-            fatalError("Error while creating the Credit Cards Database \(error)")
-        }
-    }
-
-    init(creditCardsDB: CreditCardStore) {
-        self.creditCardsDB = creditCardsDB
+    init() {
         self.changeSubject = PassthroughSubject<Void, Never>()
     }
 
@@ -43,7 +33,7 @@ class CreditCardAutofillManager {
 
     func fetchAll() -> [CreditCardEntry] {
         do {
-            let allEntries = try creditCardsDB.fetchAll()
+            guard let allEntries = try creditCardsDB?.fetchAll() else { return [] }
             return try creditCardEntries(for: allEntries)
         } catch CreditCardsDBError.errorFetchingCreditCards(let errorMsg) {
             Logger.shared.logError("Error while fetching all credit cards: \(errorMsg)", category: .creditCardsDB)
@@ -60,6 +50,10 @@ class CreditCardAutofillManager {
 
     @discardableResult
     func save(entry: CreditCardEntry) -> CreditCardRecord? {
+        guard let creditCardsDB = creditCardsDB else {
+            return nil
+        }
+
         do {
             let savedRecord: CreditCardRecord
             if let uuid = entry.databaseID, let updatedRecord = try creditCardsDB.fetchRecord(uuid: uuid) {
@@ -80,6 +74,10 @@ class CreditCardAutofillManager {
     }
 
     func markDeleted(entry: CreditCardEntry) {
+        guard let creditCardsDB = creditCardsDB else {
+            return
+        }
+
         do {
             guard let uuid = entry.databaseID, let deletedRecord = try creditCardsDB.fetchRecord(uuid: uuid) else {
                 Logger.shared.logError("Credit card to be deleted cannot be found: \(entry.cardDescription)", category: .creditCardsDB)
@@ -93,6 +91,10 @@ class CreditCardAutofillManager {
     }
 
     func markAllDeleted() {
+        guard let creditCardsDB = creditCardsDB else {
+            return
+        }
+
         do {
             _ = try creditCardsDB.markAllDeleted()
             changeSubject.send()
@@ -104,6 +106,10 @@ class CreditCardAutofillManager {
     }
 
     func deleteAll(includedRemote: Bool) {
+        guard let creditCardsDB = creditCardsDB else {
+            return
+        }
+
         do {
             try creditCardsDB.deleteAll()
             changeSubject.send()

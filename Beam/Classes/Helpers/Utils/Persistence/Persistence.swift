@@ -90,6 +90,11 @@ struct Persistence {
         @StandardStorable("NoteScores.daily") static var daily: Data?
     }
 
+    enum Account {
+        @StandardStorable("currentAccount.id") static var currentAccountId: UUID?
+        @StandardStorable("currentDatabase.id") static var currentDatabaseId: UUID?
+    }
+
     // swiftlint:disable nesting
     enum Sync {
         enum BeamObjects {

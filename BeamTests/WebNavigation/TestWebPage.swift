@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import Promises
+
 
 @testable import Beam
 @testable import BeamCore
@@ -40,10 +40,12 @@ class TestWebPage: WebPage {
         if let note = testNotes.values.first {
             return note
         } else {
-            return BeamNote(title: "activeNote backup")
+            // swiftlint:disable:next force_try
+            return try! BeamNote(title: "activeNote backup")
         }
     }
-    var testNotes: [String: BeamCore.BeamNote] = ["Note A": BeamNote(title: "Note A")]
+    // swiftlint:disable:next force_try
+    var testNotes: [String: BeamCore.BeamNote] = ["Note A": try! BeamNote(title: "Note A")]
     var fileStorage: BeamFileStorage? {
         storage
     }
@@ -101,12 +103,12 @@ class TestWebPage: WebPage {
 
     func shouldNavigateInANewTab(url: URL) -> Bool { false }
 
-    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
+    func executeJS(_ jsCode: String, objectName: String?) async -> Any? {
         if objectName == "PointAndShoot" {
             Logger.shared.logDebug("no matching jsCode case, no js call mocked", category: .pointAndShoot)
         }
         events.append("executeJS \(objectName ?? "").\(jsCode)")
-        return Promise(true)
+        return true
     }
 
     func logInNote(url: URL, reason: NoteElementAddReason) {

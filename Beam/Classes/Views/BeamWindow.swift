@@ -45,7 +45,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.data = data
         state = BeamState(incognito: isIncognito)
 
-        data.setupJournal(firstSetup: true)
+        try? data.setupJournal(firstSetup: true)
 
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
@@ -250,6 +250,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     public func draggingEnded(_ sender: NSDraggingInfo) { }
 
     public func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let collection = BeamData.shared.currentDocumentCollection else { return false }
         guard let files = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: nil)
         else {
             Logger.shared.logError("unable to get files from drag operation", category: .document)
@@ -268,8 +269,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
                 note.resetIds() // use a new UUID to be sure not to overwrite an existing note
                 let titleBase = note.title
                 var i = 0
-                let documentManager = DocumentManager()
-                while documentManager.allDocumentsTitles(includeDeletedNotes: false).contains(note.title.lowercased()) {
+                while (try? collection.fetchTitles(filters: []))?.contains(note.title.lowercased()) == true {
                     note.title = titleBase + " #\(i)"
                     i += 1
                 }

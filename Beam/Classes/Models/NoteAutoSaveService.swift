@@ -9,7 +9,8 @@ import Foundation
 import Combine
 import BeamCore
 
-class NoteAutoSaveService: ObservableObject {
+class NoteAutoSaveService: ObservableObject, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
     private var scope = Set<AnyCancellable>()
 
     func addNoteToSave(_ note: BeamNote) {
@@ -34,7 +35,7 @@ class NoteAutoSaveService: ObservableObject {
 
     func saveNotes() {
         for note in notesToSave {
-            note.key.save()
+            note.key.save(self)
 //            if note.value {
 //                BeamNote.requestLinkDetection()
 //            }

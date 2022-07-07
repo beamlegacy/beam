@@ -11,8 +11,8 @@ import Nimble
 
 class DeepCopyTests: XCTestCase {
 
-    private func setupTree() -> BeamNote {
-        let note = BeamNote(title: "DeepCopytest")
+    private func setupTree() throws -> BeamNote {
+        let note = try BeamNote(title: "DeepCopytest")
 
         let bullet1 = BeamElement("First bullet")
         note.addChild(bullet1)
@@ -35,8 +35,8 @@ class DeepCopyTests: XCTestCase {
         }
     }
 
-    func testDeepCopy() {
-        let note = setupTree()
+    func testDeepCopy() throws {
+        let note = try setupTree()
         guard let noteDuplicated = note.deepCopy(withNewId: false, selectedElements: nil, includeFoldedChildren: false) else { return }
         expect(note).to(equal(noteDuplicated))
         expect(note.id).to(equal(noteDuplicated.id))
@@ -44,8 +44,8 @@ class DeepCopyTests: XCTestCase {
         checkChildrenId(originalChildren: note.children, duplicatedChidren: noteDuplicated.children, withNewId: false)
     }
 
-    func testDeepCopyWithNewId() {
-        let note = setupTree()
+    func testDeepCopyWithNewId() throws {
+        let note = try setupTree()
         guard let noteDuplicated = note.deepCopy(withNewId: true, selectedElements: nil, includeFoldedChildren: false) else { return }
         expect(note).toNot(equal(noteDuplicated))
         expect(note.id).toNot(equal(noteDuplicated.id))
@@ -53,8 +53,8 @@ class DeepCopyTests: XCTestCase {
         checkChildrenId(originalChildren: note.children, duplicatedChidren: noteDuplicated.children, withNewId: true)
     }
 
-    func testDeepCopyWithNewIdAndSelection() {
-        let note = setupTree()
+    func testDeepCopyWithNewIdAndSelection() throws {
+        let note = try setupTree()
         guard let firstChild = note.children.first,
               let lastChild = note.children.last else { return }
         let selectedElements = [firstChild, lastChild]

@@ -1,14 +1,6 @@
 import Foundation
 import CoreData
-
-/*
- When changing this, you *must* let backend know. We have to add new values to
- `app/models/document.rb` in our API codebase.
- */
-public enum DocumentType: Int16, Codable {
-    case journal
-    case note
-}
+import BeamCore
 
 extension Document {
     //swiftlint:disable identifier_name

@@ -471,6 +471,10 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             BeamDate.reset()
         }
 
+        afterSuite {
+            BeamObjectManager.unregister(objectType: .myRemoteObject)
+        }
+
         describe("refreshFromBeamObjectAPI()") {
             var object1: MyRemoteObject!
 

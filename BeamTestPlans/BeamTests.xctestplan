@@ -63,8 +63,13 @@
     },
     {
       "skippedTests" : [
+        "BeamAccountDeleteAccountTests",
+        "BeamAccountSynchronisationTest",
+        "BeamLinkDBTests\/testMoveFrecencyToLinkDB()",
         "BrowserImportManagerTest\/testSpeed()",
         "BrowsingTreeTriggerTests",
+        "DocumentManagerReceiveObjectTests",
+        "OLD_BeamNote_DocumentManagerTests",
         "OmniboxAnalyticsTests"
       ],
       "target" : {

@@ -8,13 +8,14 @@
 import Foundation
 import BeamCore
 
-extension Meeting {
+extension Meeting: BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
 
     func buildBeamText() -> BeamText {
         var text = BeamText(text: "")
         var meetingAttributes: [BeamText.Attribute] = []
         if self.linkCards {
-            let meetingNote = BeamNote.fetchOrCreate(title: self.name)
+            guard let meetingNote = try? BeamNote.fetchOrCreate(self, title: self.name) else { return text }
             meetingAttributes = [.internalLink(meetingNote.id)]
         }
         text.insert(self.name, at: 0, withAttributes: meetingAttributes)
@@ -25,7 +26,7 @@ extension Meeting {
             text.insert(prefix, at: 0, withAttributes: [])
             self.attendees.enumerated().forEach { index, attendee in
                 let name = attendee.name
-                let attendeeNote = BeamNote.fetchOrCreate(title: name)
+                guard let attendeeNote = try? BeamNote.fetchOrCreate(self, title: name) else { return }
                 text.insert(name, at: position, withAttributes: [.internalLink(attendeeNote.id)])
                 position += name.count
                 if index < self.attendees.count - 1 {

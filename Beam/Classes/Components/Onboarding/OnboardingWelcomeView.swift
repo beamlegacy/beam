@@ -133,7 +133,7 @@ struct OnboardingWelcomeView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
             error = nil
         }
-        AccountManager.logoutIfNeeded()
+        BeamData.shared.currentAccount?.logoutIfNeeded()
     }
 
     private func onSigninDone() {

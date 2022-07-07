@@ -11,7 +11,6 @@ import BeamCore
 
 class PinnedNotesManager: ObservableObject {
 
-    private let documentManager: DocumentManager
     private var scope = Set<AnyCancellable>()
     private var documentManagerCancellables = Set<AnyCancellable>()
 
@@ -35,10 +34,9 @@ class PinnedNotesManager: ObservableObject {
         return maxNumberOfPinnedNotes - pinnedNotes.count
     }
 
-    init(with documentManager: DocumentManager) {
-        self.documentManager = documentManager
+    init() {
         self.fetchPinned()
-        self.observeDocumentManager()
+        self.observeDocuments()
 
         NotificationCenter.default
             .publisher(for: .defaultDatabaseUpdate, object: nil)
@@ -51,7 +49,7 @@ class PinnedNotesManager: ObservableObject {
     private func fetchPinned() {
         guard let pinnedIds = Persistence.PinnedNotes.pinnedNotesId else { return }
         let pinnedNotes = pinnedIds.compactMap { id -> BeamNote? in
-            if let uuid = UUID(uuidString: id), let note = BeamNote.fetch(id: uuid, includeDeleted: false) {
+            if let uuid = UUID(uuidString: id), let note = BeamNote.fetch(id: uuid) {
                 return note
             }
             return nil
@@ -59,11 +57,11 @@ class PinnedNotesManager: ObservableObject {
         self.pinnedNotes = pinnedNotes
     }
 
-    private func observeDocumentManager() {
+    private func observeDocuments() {
         documentManagerCancellables.removeAll()
-        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
-            .sink { [weak self] docId in
-                if let index = self?.pinnedNotes.firstIndex(where: { $0.id == docId }) {
+        BeamDocumentCollection.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { [weak self] deletedDoc in
+                if let index = self?.pinnedNotes.firstIndex(where: { $0.id == deletedDoc.id }) {
                     self?.pinnedNotes.remove(at: index)
                 }
             }.store(in: &scope)

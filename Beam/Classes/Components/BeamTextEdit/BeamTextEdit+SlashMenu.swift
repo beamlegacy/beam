@@ -8,6 +8,10 @@
 import Foundation
 import BeamCore
 
+extension BeamTextEdit: BeamDocumentSource {
+    public static var sourceId: String { "\(Self.self)" }
+}
+
 extension BeamTextEdit {
 
     private enum SlashMenuAction {
@@ -201,7 +205,7 @@ extension BeamTextEdit {
         }
         calendarPicker.onDismiss = { [weak node, weak self] _ in
             guard let node = node else { return }
-            self?.onFinishPickingDate(selectedDate, in: node, for: editableRange, placeholderText: placeholderText)
+            try? self?.onFinishPickingDate(selectedDate, in: node, for: editableRange, placeholderText: placeholderText)
         }
         inlineFormatter = calendarPicker
         prepareInlineFormatterWindowBeforeShowing(calendarPicker, atPoint: .zero)
@@ -212,13 +216,13 @@ extension BeamTextEdit {
         }
     }
 
-    private func onFinishPickingDate(_ date: Date?, in node: TextNode, for range: Range<Int>, placeholderText: BeamText) {
+    private func onFinishPickingDate(_ date: Date?, in node: TextNode, for range: Range<Int>, placeholderText: BeamText) throws {
         guard let date = date else {
             cleanupPickerPlaceholder(in: node, for: range, placeholderText: placeholderText)
             return
         }
         let title = BeamDate.journalNoteTitle(for: date)
-        let note = BeamNote.fetchOrCreateJournalNote(date: date)
+        let note = try BeamNote.fetchOrCreateJournalNote(self, date: date)
         let dateText = BeamText(text: title, attributes: [.internalLink(note.id)])
         node.cmdManager.replaceText(in: node, for: range, with: dateText)
     }

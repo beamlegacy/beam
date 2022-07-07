@@ -7,6 +7,65 @@
 
 import SwiftUI
 
+struct OmniboxBeams: View {
+    let boxCornerRadius: CGFloat
+    let shadowRadius: CGFloat
+
+    @State var angles: [Double] = [0, 0, 0, 0]
+
+    static let colors = [colorsForGradient(), colorsForGradient(), colorsForGradient(), colorsForGradient()]
+
+    static var randomColor: Color {
+        Color(hue: Double.random(in: 0...1),
+              saturation: Double.random(in: 0.7...1),
+              brightness: Double.random(in: 0.7...1.0))
+        .opacity(Double.random(in: 0.0...0.9))
+    }
+
+    static func colorsForGradient() -> [Color] {
+        var _colors = [Color]()
+        for _ in 0...40 {
+            _colors.append(randomColor)
+        }
+        _colors.append(_colors[0])
+        return _colors
+    }
+
+    func part(index: Int, lineWidth: Double) -> some View {
+        RoundedRectangle(cornerRadius: boxCornerRadius)
+            .stroke(AngularGradient(colors: Self.colors[index], center: UnitPoint(x: 0.5, y: 0.5), angle: .degrees(angles[index])), lineWidth: lineWidth)
+            .blendMode(.plusLighter)
+            .onAppear {
+                let baseAnimation = Animation.linear(duration: 100)
+                let repeated = baseAnimation.repeatForever(autoreverses: false)
+
+                withAnimation(repeated) {
+                    angles[index] = angles[index] + Double(index + 1) * (index.isMultiple(of: 2) ? 360 : -360)
+                }
+            }
+    }
+
+    func contour(lineWidth: Double) -> some View {
+        ZStack {
+            part(index: 0, lineWidth: lineWidth)
+            part(index: 1, lineWidth: lineWidth)
+            part(index: 2, lineWidth: lineWidth)
+            part(index: 3, lineWidth: lineWidth)
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            contour(lineWidth: 10)
+                .blur(radius: 64)
+                .opacity(1.0 - 1.0 / shadowRadius)
+
+            contour(lineWidth: 2)
+                .opacity(0.3)
+        }
+    }
+}
+
 extension Omnibox {
 
     struct Background<Content: View>: View {
@@ -42,13 +101,24 @@ extension Omnibox {
 
         private let animationDuration: Double = 0.3
 
+        @State private var useBeams = PreferencesManager.enableOmnibeams
+
         var body: some View {
             ZStack(alignment: alignment) {
+                if useBeams {
+                    OmniboxBeams(boxCornerRadius: boxCornerRadius, shadowRadius: shadowRadius)
+                }
+
                 RoundedRectangle(cornerRadius: boxCornerRadius)
                     .stroke(strokeColor, lineWidth: isLow ? 2 : 1) // 1pt centered stroke, makes it a 0.5pt outer stroke.
-                VisualEffectView(material: .headerView)
-                    .cornerRadius(boxCornerRadius)
-                    .shadow(color: shadowColor, radius: shadowRadius, x: 0.0, y: shadowOffsetY)
+                if !useBeams {
+                    VisualEffectView(material: .headerView)
+                        .cornerRadius(boxCornerRadius)
+                        .shadow(color: shadowColor, radius: shadowRadius, x: 0.0, y: shadowOffsetY)
+                } else {
+                    VisualEffectView(material: .headerView)
+                        .cornerRadius(boxCornerRadius)
+                }
                 RoundedRectangle(cornerRadius: boxCornerRadius)
                     .fill(backgroundColor.opacity(0.4))
                 content()

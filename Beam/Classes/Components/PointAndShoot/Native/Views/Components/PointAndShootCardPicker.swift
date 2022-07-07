@@ -380,19 +380,16 @@ extension PointAndShootCardPicker {
     }
 }
 
-extension PointAndShootCardPicker {
+extension PointAndShootCardPicker: BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
     @discardableResult
-    private func fetchOrCreateNote(named name: String) -> BeamNote {
-        let note = BeamNote.fetchOrCreate(title: name)
-        note.save()
-        return note
+    private func fetchOrCreateNote(named name: String) -> BeamNote? {
+        return try? BeamNote.fetchOrCreate(self, title: name)
     }
 
     @discardableResult
-    private func fetchOrCreateJournalNote(date: Date) -> BeamNote {
-        let note = BeamNote.fetchOrCreateJournalNote(date: date)
-        note.save()
-        return note
+    private func fetchOrCreateJournalNote(date: Date) -> BeamNote? {
+        return try? BeamNote.fetchOrCreateJournalNote(self, date: date)
     }
 }
 

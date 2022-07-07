@@ -125,7 +125,7 @@ class BeamTestsHelper {
     static func login() {
         guard !AuthenticationManager.shared.isAuthenticated else { return }
 
-        let accountManager = AccountManager()
+        let accountManager = BeamData.shared.currentAccount!
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
 
@@ -157,6 +157,6 @@ class BeamTestsHelper {
     static func logout() {
         BeamObjectManager.clearNetworkCalls()
         guard AuthenticationManager.shared.isAuthenticated else { return }
-        AccountManager.logout()
+        BeamData.shared.currentAccount!.logout()
     }
 }

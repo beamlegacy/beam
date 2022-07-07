@@ -13,7 +13,9 @@ import Nimble
 @testable import Beam
 @testable import BeamCore
 
-class CommandNodeTests: QuickSpec {
+class CommandNodeTests: QuickSpec, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
+
     // swiftlint:disable:next function_body_length
     override func spec() {
         var editor: BeamTextEdit!
@@ -21,7 +23,10 @@ class CommandNodeTests: QuickSpec {
         var rootNode: TextRoot!
 
         beforeEach {
-            let note = self.setupTree()
+            guard let note = try? self.setupTree() else {
+                fail("Unable to create note for test")
+                return
+            }
             let bullet2 = BeamElement("Second bullet")
             note.addChild(bullet2)
             let editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
@@ -42,7 +47,10 @@ class CommandNodeTests: QuickSpec {
         describe("Indented tree") {
             beforeEach {
                 BeamNote.clearCancellables()
-                let note = self.setupTree()
+                guard let note = try? self.setupTree() else {
+                    fail("Unable to create note for test")
+                    return
+                }
                 let bullet2 = BeamElement("Second bullet")
 
                 editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
@@ -86,7 +94,10 @@ class CommandNodeTests: QuickSpec {
         describe("Not Intended") {
             beforeEach {
                 BeamNote.clearCancellables()
-                let note = self.setupTree()
+                guard let note = try? self.setupTree() else {
+                    fail("Unable to create note for test")
+                    return
+                }
                 let bullet2 = BeamElement("Second bullet")
                 note.addChild(bullet2)
                 editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
@@ -182,7 +193,10 @@ class CommandNodeTests: QuickSpec {
         describe("Delete Commands") {
             beforeEach {
                 BeamNote.clearCancellables()
-                let note = self.setupTree()
+                guard let note = try? self.setupTree() else {
+                    fail("Unable to create note for test")
+                    return
+                }
                 let bullet2 = BeamElement("Second bullet")
                 note.addChild(bullet2)
                 editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
@@ -255,24 +269,12 @@ class CommandNodeTests: QuickSpec {
         }
     }
 
-    private func setupTree() -> BeamNote {
+    private func setupTree() throws -> BeamNote {
         BeamTestsHelper.logout()
 
-        DocumentManager().deleteAll() { result in
-            DispatchQueue.main.async {
-
-                switch result {
-                case .failure(let error):
-                    // TODO: i18n
-                    XCTFail("Could not delete documents \(error)")
-                case .success:
-                    break
-                }
-            }
-        }
-
+        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
         BeamNote.clearCancellables()
-        let note = BeamNote.fetchOrCreate(title: "TestCommands")
+        let note = try BeamNote.fetchOrCreate(self, title: "TestCommands")
 
         let bullet1 = BeamElement("First bullet")
         note.addChild(bullet1)

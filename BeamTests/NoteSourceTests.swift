@@ -15,19 +15,25 @@ class NoteSourceTests: XCTestCase {
     private var sources: NoteSources!
     private var note: BeamNote!
     let previousNetworkEnabled = Configuration.networkEnabled
-    
-    override func setUp() {
+
+    override func setUpWithError() throws {
         super.setUp()
-        note = BeamNote(title: "Some research")
+        note = try BeamNote(title: "Some research")
+        note.owner = BeamData.shared.currentDatabase
         sources = note.sources
-        scoreStore = LongTermUrlScoreStore(db: GRDBDatabase.empty())
+
+        let grdbStore = GRDBStore.empty()
+        let db = try UrlStatsDBManager(store: grdbStore)
+        try grdbStore.migrate()
+
+        scoreStore = LongTermUrlScoreStore(db: db)
         Configuration.networkEnabled = false
     }
     override func tearDown() {
         super.tearDown()
         Configuration.networkEnabled = previousNetworkEnabled
     }
-    
+
     func testAdd() throws {
         let firstUrlId = UUID()
         let secondUrlId = UUID()

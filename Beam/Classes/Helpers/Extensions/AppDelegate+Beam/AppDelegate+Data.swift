@@ -14,12 +14,6 @@ extension AppDelegate {
         } catch {
             Logger.shared.logError("Could not delete Clustering Orphaned file", category: .general)
         }
-        // GRDB
-        do {
-            try GRDBDatabase.shared.clear()
-        } catch {
-            Logger.shared.logError("Could not delete GRDB Databases", category: .general)
-        }
         // TopDomain
         do {
             try TopDomainDatabase.shared.clear()
@@ -41,7 +35,7 @@ extension AppDelegate {
         data.clearCookiesAndCache()
 
         // BeamFile
-        BeamFileDBManager.shared.deleteAll(includedRemote: false) { _ in }
+        BeamFileDBManager.shared?.deleteAll(includedRemote: false) { _ in }
         // Link Store
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         //Contacts
@@ -59,6 +53,13 @@ extension AppDelegate {
 
         // Notes and Databases
         self.deleteDocumentsAndDatabases(includedRemote: false)
+
+        // GRDB
+        do {
+            try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+        } catch {
+            Logger.shared.logError("Could not delete GRDB Databases", category: .general)
+        }
     }
 
     @IBAction func resetDatabase(_ sender: Any) {
@@ -67,32 +68,23 @@ extension AppDelegate {
 
     func deleteDocumentsAndDatabases(includedRemote: Bool) {
         // Documents and Databases
-        documentManager.deleteAll(includedRemote: includedRemote) { result in
-            switch result {
-            case .failure(let error):
-                UserAlert.showError(message: "Could not delete documents",
-                                    error: error)
-            case .success:
-                self.databaseManager.deleteAll(includedRemote: includedRemote) { result in
-                    switch result {
-                    case .failure(let error):
-                        // TODO: i18n
-                        UserAlert.showError(message: "Could not delete databases",
-                                            error: error)
-                    case .success:
-                        DispatchQueue.main.async {
-                            for window in self.windows {
-                                window.close()
-                            }
-                            AppDelegate.main.closePreferencesWindow()
-                            self.data.onboardingManager.forceDisplayOnboarding()
-                            self.data.onboardingManager.delegate = self
-                            self.data.onboardingManager.presentOnboardingWindow()
-                        }
-                    }
-                }
-            }
+        BeamNote.clearFetchedNotes()
+        guard let databases = BeamData.shared.currentAccount?.allDatabases else {
+            return
         }
+
+        for db in databases {
+            db.clear()
+        }
+
+        AppDelegate.main.closePreferencesWindow()
+        AppDelegate.main.windows.forEach { window in
+            window.close()
+        }
+        AppDelegate.main.windows = []
+        self.data.onboardingManager.forceDisplayOnboarding()
+        self.data.onboardingManager.delegate = self
+        self.data.onboardingManager.presentOnboardingWindow()
     }
 
     @IBAction func exportNotes(_ sender: Any) {
@@ -172,20 +164,20 @@ extension AppDelegate {
         // TODO: i18n
         openPanel.title = "Choose your ROAM JSON Export"
         openPanel.begin { [weak openPanel] result in
-            guard result == .OK, let selectedPath = openPanel?.url?.path else { openPanel?.close(); return }
+            guard result == .OK, let selectedPath = openPanel?.url?.path,
+                  let database = BeamData.shared.currentDatabase
+            else { openPanel?.close(); return }
 
-            let documentManager = DocumentManager()
-            let beforeNotesCount = documentManager.count()
+            let beforeNotesCount = database.documentsCount()
 
             let roamImporter = RoamImporter()
             do {
                 try roamImporter.parseAndCreate(CoreDataManager.shared.mainContext, selectedPath)
-                try CoreDataManager.shared.save()
             } catch {
                 // TODO: raise error?
                 Logger.shared.logError("error: \(error.localizedDescription)", category: .general)
             }
-            let afterNotesCount = documentManager.count()
+            let afterNotesCount = database.documentsCount()
 
             UserAlert.showMessage(message: "Roam file has been imported",
                                   informativeText: "\(afterNotesCount - beforeNotesCount) notes have been imported")
@@ -208,6 +200,6 @@ extension AppDelegate {
     public func checkAndRepairLinkDBIfNeeded() {
         guard Self.lastLinkDBIntegrityCheck == nil || Self.lastLinkDBIntegrityCheck?.timeIntervalSinceNow ?? 0 < -86400 else { return }
         Self.lastLinkDBIntegrityCheck = BeamDate.now
-        GRDBDatabase.shared.checkAndRepairLinksIntegrity()
+        BeamData.shared.checkAndRepairDB()
     }
 }

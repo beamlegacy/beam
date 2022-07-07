@@ -7,6 +7,6 @@ protocol BrowsingScorer: WebPageRelated {
     var currentScore: Score { get }
     func updateScore()
     func addTextSelection()
-    func scoreApply(changes: (UrlScoreProtocol) -> Void)
+    func scoreApply(changes: @escaping (UrlScoreProtocol) -> Void)
     func updateScrollingScore(_ frame: WebFrames.FrameInfo)
 }

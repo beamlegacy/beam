@@ -64,14 +64,16 @@ private struct NoteAndSourcesRow: CsvRow {
 }
 
 func export_all_note_sources(to url: URL?) {
-    guard let url = url else { return }
-
-    let documentManager = DocumentManager()
-    let notesAndSources = documentManager.allDocumentsIds(includeDeletedNotes: true)
-        .compactMap { id -> [NoteAndSourcesRow]? in
-            guard let note = BeamNote.fetch(id: id, includeDeleted: true) else { return nil }
-            note.sources.refreshScores()
-            if note.sources.count > 0 {
+    guard let url = url,
+          let currentDocumentCollection = BeamData.shared.currentDocumentCollection
+    else { return }
+    let destination = url.appendingPathComponent("beam_all_note_sources-\(BeamDate.now).csv")
+    do {
+        let notesAndSources = try currentDocumentCollection.fetchIds(filters: [])
+            .compactMap { id -> [NoteAndSourcesRow]? in
+                guard let note = BeamNote.fetch(id: id) else { return nil }
+                note.sources.refreshScores()
+                guard note.sources.count > 0 else { return nil }
                 return note.sources.getAll().map { s in
                     return NoteAndSourcesRow(
                         noteTitle: note.title,
@@ -84,18 +86,13 @@ func export_all_note_sources(to url: URL?) {
                         sourceSessionId: s.sessionId,
                         similarity: s.similarity
                     )
-            }
-            } else {
-                return nil
-            }
-    }.joined()
+                }
+            }.joined()
 
-    let writer = CsvRowsWriter(header: NoteAndSourcesRow.header, rows: Array(notesAndSources))
-    let destination = url.appendingPathComponent("beam_all_note_sources-\(BeamDate.now).csv")
-    do {
+        let writer = CsvRowsWriter(header: NoteAndSourcesRow.header, rows: Array(notesAndSources))
         try writer.overWrite(to: destination)
     } catch {
-        Logger.shared.logError("Unable to save note sources to \(destination)", category: .web)
+        Logger.shared.logError("Unable to save note sources to \(destination): \(error)", category: .web)
     }
     //swiftlint:disable:next print
     print("All note sources saved to file \(destination)")
