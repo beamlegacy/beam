@@ -79,7 +79,7 @@ class BeamUITestsHelper {
     
     func addNote(noteTitle: String? = nil) {
         let notePickerField = self.app.textFields[todayDate()].firstMatch
-        notePickerField.tap()
+        notePickerField.clickInTheMiddle()
         XCTAssert(notePickerField.waitForExistence(timeout: 4))
         if let title = noteTitle {
             notePickerField.typeText("\(title)\r\r")
