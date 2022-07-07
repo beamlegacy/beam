@@ -20,13 +20,13 @@ class NoteTestView: TextEditorContextTestView {
     @discardableResult
     func waitForNoteViewToLoad() -> Bool {
         return scrollView(NoteViewLocators.ScrollViews.noteView.accessibilityIdentifier)
-            .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+            .waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
 
     @discardableResult
     func waitForNoteTitleToBeVisible() -> Bool {
         return scrollView(NoteViewLocators.TextFields.noteTitle.accessibilityIdentifier)
-            .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+            .waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func getIndentationTriangleAtNode(nodeIndex: Int) -> XCUIElement {
