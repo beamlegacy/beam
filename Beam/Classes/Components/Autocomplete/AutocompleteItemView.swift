@@ -129,6 +129,23 @@ struct AutocompleteItemView: View {
         return "autocompleteResult\(selected ? "-selected":"")-\(importantText)-\(item.source)"
     }
 
+    private var axLabel: String {
+        switch item.source {
+        case .createNote:
+            return item.displayText
+        case .searchEngine, .note, .tabGroup:
+            return item.displayInformation ?? item.source.shortDescription
+        default: return item.source.shortDescription
+        }
+    }
+
+    private var axValue: String {
+        switch item.source {
+        case .createNote: return item.displayInformation ?? ""
+        default: return item.displayText
+        }
+    }
+
     @ViewBuilder
     var iconView: some View {
         if let icon = favicon {
@@ -232,7 +249,9 @@ struct AutocompleteItemView: View {
             }
         }
         .accessibilityElement()
-        .accessibilityLabel(item.displayText)
+        .accessibilityLabel(axLabel)
+        .accessibilityValue(Text(axValue))
+        .accessibilityAddTraits(.isLink)
         .accessibility(identifier: axIdentifier)
     }
 
