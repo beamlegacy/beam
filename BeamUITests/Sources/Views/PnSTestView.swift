@@ -12,7 +12,7 @@ class PnSTestView: BaseView {
     
     @discardableResult
     func waitForCollectPopUpAppear() -> Bool {
-        return self.textField(PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        return self.textField(PnSViewLocators.TextFields.shootCardPickerTextField.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     @discardableResult
@@ -29,25 +29,24 @@ class PnSTestView: BaseView {
         return self
     }
     
-    func addToNoteByName(_ elementToAdd: XCUIElement, _ noteName: String, _ isNewNote: Bool = false) {
+    func addToNoteByName(_ elementToAdd: XCUIElement, _ noteName: String, _ createNote: Bool = false) {
         pointAndShootElement(elementToAdd)
-        let destinationNote = app.windows.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
-        destinationNote.clickOnExistence()
+        let destinationNote = app.windows.textFields.matching(identifier: PnSViewLocators.TextFields.shootCardPickerTextField.accessibilityIdentifier).firstMatch
+        _ = destinationNote.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        destinationNote.clickInTheMiddle()
         typeKeyboardKey(.delete)
         destinationNote.typeText(noteName)
-        
-        //WIP, TBD in next PnS tests
-        /*if isNewCard {
-        }*/
-        let notesDropDown = otherElement(PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier)
-        XCTAssertTrue(notesDropDown.waitForExistence(timeout: BaseTest.implicitWaitTimeout), "PnS Note picker drop down didn't appear")
-        app.windows.children(matching: .other).matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
+
+        let helper = OmniBoxUITestsHelper(app)
+        let notesResults = helper.allAutocompleteResults.matching(createNote ? helper.autocompleteCreateNotePredicate : helper.autocompleteNotePredicate)
+        XCTAssertTrue(notesResults.firstMatch.waitForExistence(timeout: BaseTest.implicitWaitTimeout), "PnS Note picker drop down didn't appear")
+        notesResults.element(boundBy: 0).clickOnExistence()
     }
     
     @discardableResult
     func addToTodayNote(_ elementToAdd: XCUIElement) -> PnSTestView {
         pointAndShootElement(elementToAdd)
-        let destinationCard = app.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
+        let destinationCard = app.textFields.matching(identifier: PnSViewLocators.TextFields.shootCardPickerTextField.accessibilityIdentifier).firstMatch
         _ = destinationCard.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         destinationCard.clickOnExistence()
         typeKeyboardKey(.delete)
@@ -159,7 +158,7 @@ class PnSTestView: BaseView {
     
     func getShareButton() -> XCUIElement {
         waitForCollectPopUpAppear()
-        return app.windows.children(matching: .image).matching(identifier: PnSViewLocators.StaticTexts.share.accessibilityIdentifier).element(boundBy: 0)
+        return image(PnSViewLocators.StaticTexts.share.accessibilityIdentifier)
     }
     
     func isWindowOpenedWithContaining(title: String, isLowercased: Bool = false) -> Bool {
