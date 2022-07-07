@@ -28,7 +28,7 @@ enum WebViewLocators {
         case tabTitle = "browserTabTitle"
     }
     
-    enum Other: String, CaseIterable, UIElement {
+    enum Link: String, CaseIterable, UIElement {
         case autocompleteResult = "autocompleteResult"
     }
     

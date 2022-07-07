@@ -130,8 +130,8 @@ class OmniboxViewTests: BaseTest {
 
         step("Then suggestions contains the correct actions"){
             XCTAssertEqual(results.count, 5)
-            XCTAssertEqual(results.element(boundBy: 2).label, noteATitle) // Note A is last
-            XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
+            XCTAssertEqual(results.element(boundBy: 2).getStringValue(), noteATitle) // Note A is last
+            XCTAssertEqual(results.element(boundBy: 3).getStringValue(), OmniboxLocators.Labels.journal.accessibilityIdentifier)
             XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
             XCTAssertEqual(noteResults.count, 3)
         }
@@ -146,10 +146,10 @@ class OmniboxViewTests: BaseTest {
 
         step("Then suggestions contains the correct actions"){
             XCTAssertEqual(results.count, 5)
-            XCTAssertEqual(results.element(boundBy: 0).label, noteATitle) // Note A moved up in the list of recents
-            XCTAssertNotEqual(results.element(boundBy: 1).label, noteBTitle) // Note B is not suggested because we're already on it.
-            XCTAssertEqual(results.element(boundBy: 2).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
-            XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
+            XCTAssertEqual(results.element(boundBy: 0).getStringValue(), noteATitle) // Note A moved up in the list of recents
+            XCTAssertNotEqual(results.element(boundBy: 1).getStringValue(), noteBTitle) // Note B is not suggested because we're already on it.
+            XCTAssertEqual(results.element(boundBy: 2).getStringValue(), OmniboxLocators.Labels.journal.accessibilityIdentifier)
+            XCTAssertEqual(results.element(boundBy: 3).getStringValue(), OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
             XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
             XCTAssertEqual(noteResults.count, 2)
             journalView.openNoteFromAllNotesList(noteTitleToOpen: noteATitle)
@@ -163,10 +163,10 @@ class OmniboxViewTests: BaseTest {
 
         step("Then suggestions contains the correct actions"){
             XCTAssertEqual(results.count, 7)
-            XCTAssertEqual(results.element(boundBy: 0).label, noteATitle)
-            XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
-            XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
-            XCTAssertEqual(results.element(boundBy: 5).label, OmniboxLocators.Labels.switchToNotes.accessibilityIdentifier)
+            XCTAssertEqual(results.element(boundBy: 0).getStringValue(), noteATitle)
+            XCTAssertEqual(results.element(boundBy: 3).getStringValue(), OmniboxLocators.Labels.journal.accessibilityIdentifier)
+            XCTAssertEqual(results.element(boundBy: 4).getStringValue(), OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
+            XCTAssertEqual(results.element(boundBy: 5).getStringValue(), OmniboxLocators.Labels.switchToNotes.accessibilityIdentifier)
             XCTAssertEqual(results.element(boundBy: 6).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
             XCTAssertEqual(noteResults.count, 3)
         }
@@ -311,7 +311,7 @@ class OmniboxViewTests: BaseTest {
         step("Then create action is selected and notes are suggested"){
             XCTAssertEqual(results.count, 2)
             XCTAssertEqual(results.element(boundBy: 0).label, OmniboxLocators.Labels.createNotePrefix.accessibilityIdentifier)
-            XCTAssertEqual(results.element(boundBy: 1).label, noteATitle)
+            XCTAssertEqual(results.element(boundBy: 1).getStringValue(), noteATitle)
             XCTAssertEqual(results.matching(omniboxHelper.autocompleteCreateNotePredicate).count, 1)
         }
         

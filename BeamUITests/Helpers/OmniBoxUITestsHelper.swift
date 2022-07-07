@@ -19,7 +19,7 @@ class OmniBoxUITestsHelper : BeamUITestsHelper {
 
     override init(_ app: XCUIApplication) {
         searchField = app.searchFields["OmniboxSearchField"]
-        allAutocompleteResults = app.otherElements.matching(self.autocompleteResultPredicate)
+        allAutocompleteResults = app.links.matching(self.autocompleteResultPredicate)
         super.init(app)
     }
 

@@ -97,7 +97,7 @@ class NoteCreationTests: BaseTest {
         
         step("When I create \(noteNameToBeCreated) a note from Omnibox search results via Option+Enter"){
             journalView.searchInOmniBox(noteNameToBeCreated, false)
-            _ = journalView.app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+            _ = OmniBoxTestView().getAutocompleteResults().firstMatch.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             journalView.app.typeKey("\r", modifierFlags: .option)
         }
 
