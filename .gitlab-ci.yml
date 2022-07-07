@@ -14,13 +14,6 @@ variables:
   # That generates IO errors
   # GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/$CI_PROJECT_NAME
 
-cache:
-  key:
-    files:
-      - Extern/libgit2
-  paths:
-    - Extern/libgit2/build/libgit2.a
-
 include:
   - local: '.gitlab/ci/before-script-template.yml'
   - local: '.gitlab/ci/gitlab-ci-test.yml'

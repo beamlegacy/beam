@@ -98,7 +98,7 @@ class CardReferenceFormatterView: FormatterView {
     override func setupUI() {
         super.setupUI()
         listModel.excludeElements = excludeElements
-        listModel.data = AppDelegate.main.data
+        listModel.data = BeamData.shared
         listModel.searchCardContent = searchCardContent
         listModel.allowNewCardShortcut = false
 

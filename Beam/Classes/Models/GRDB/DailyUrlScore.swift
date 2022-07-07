@@ -19,19 +19,28 @@ extension DailyURLScore: TableRecord {
 extension DailyURLScore: Identifiable {}
 
 class GRDBDailyUrlScoreStore: DailyUrlScoreStoreProtocol {
-    let db: GRDBDatabase
+    let providedDb: UrlStatsDBManager?
+    var db: UrlStatsDBManager? {
+        let currentDb = providedDb ?? BeamData.shared.urlStatsDBManager
+        if currentDb == nil {
+            Logger.shared.logError("LongTermUrlScoreStore has no UrlStatsDBManager available", category: .database)
+        }
+        return currentDb
+    }
+
     let daysToKeep: Int
-    init(db: GRDBDatabase = GRDBDatabase.shared, daysToKeep: Int = 2) {
-        self.db = db
+    init(db providedDb: UrlStatsDBManager? = nil, daysToKeep: Int = 2) {
+        self.providedDb = providedDb
         self.daysToKeep = daysToKeep
     }
 
-    func apply(to urlId: UUID, changes: (DailyURLScore) -> Void) {
-        guard let localDay = BeamDate.now.localDayString() else { return }
+    func apply(to urlId: UUID, changes: @escaping (DailyURLScore) -> Void) {
+        guard let db = db, let localDay = BeamDate.now.localDayString() else { return }
         db.updateDailyUrlScore(urlId: urlId, day: localDay, changes: changes)
     }
 
     func cleanup() {
+        guard let db = db else { return }
         do {
             let now = BeamDate.now
             let bound = Calendar(identifier: .iso8601).date(byAdding: DateComponents(day: -daysToKeep), to: now)?.localDayString()
@@ -50,6 +59,7 @@ class GRDBDailyUrlScoreStore: DailyUrlScoreStoreProtocol {
         return Array(sorted.prefix(topN))
     }
     func getScores(daysAgo: Int = 1) -> [UUID: DailyURLScore] {
+        guard let db = db else { return [UUID: DailyURLScore]() }
         let now = BeamDate.now
         let cal = Calendar(identifier: .iso8601)
         guard let day = cal.date(byAdding: DateComponents(day: -daysAgo), to: now)?.localDayString() else { return [:] }

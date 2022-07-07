@@ -97,7 +97,7 @@ struct JournalScrollView: NSViewRepresentable {
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         guard let journalStackView = nsView.documentView as? StackView else { return }
         if state.data.newDay {
-            state.data.reloadJournal()
+            try? state.data.reloadJournal()
         }
         journalStackView.topOffset = Self.firstNoteTopOffset(forProxy: proxy, isIncognito: state.isIncognito) + Self.incognitoOffset(isIncognito: state.isIncognito)
         resetJournalFocus()

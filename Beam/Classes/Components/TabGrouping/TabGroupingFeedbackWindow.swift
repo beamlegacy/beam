@@ -98,7 +98,7 @@ class TabGroupingFeedbackWindow: NSWindow, NSWindowDelegate {
     }
 
     override func close() {
-        guard let tabGroupingManager = AppDelegate.main.data.clusteringManager.tabGroupingManager else { return }
+        guard let tabGroupingManager = BeamData.shared.clusteringManager.tabGroupingManager else { return }
         let usedColors = Array(Set(tabGroupingManager.builtPagesGroups.compactMap { $0.value.color }))
         tabGroupingManager.colorGenerator.updateUsedColor(usedColors)
         AppDelegate.main.tabGroupingFeedbackWindow = nil

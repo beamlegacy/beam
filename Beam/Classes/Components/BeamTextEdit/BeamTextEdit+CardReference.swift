@@ -26,7 +26,8 @@ extension BeamTextEdit {
             showCardReferenceFormatter(atPosition: node.cursorPosition, prefix: 1, suffix: 0)
             return nil
         }
-        guard let doc = documentManager.loadDocumentByTitle(title: title) else {
+        guard let collection = BeamData.shared.currentDocumentCollection,
+              let doc = try? collection.fetchFirst(filters: [.title(title)]) else {
             let text = selectedText.trimmingCharacters(in: .whitespacesAndNewlines)
             let pos = selectedTextRange.lowerBound
             let previousSelectedRange = selectedTextRange
@@ -65,7 +66,7 @@ extension BeamTextEdit {
             guard let self = self, let node = node else { return }
             if searchCardContent, let elementId = elementId {
                 self.onFinishSelectingBlockRef(in: node, noteId: noteId, elementId: elementId, range: targetRange, prefix: prefix, suffix: suffix)
-            } else if let title = BeamNote.fetch(id: noteId, includeDeleted: false)?.title {
+            } else if let title = BeamNote.fetch(id: noteId)?.title {
                 self.onFinishSelectingLinkRef(in: node, title: title, range: targetRange, prefix: prefix, suffix: suffix)
             }
         }, onCreateNoteHandler: { [weak self] title in
@@ -93,7 +94,7 @@ extension BeamTextEdit {
         defer { cmdManager.endGroup() }
         cmdManager.replaceText(in: node, for: replacementStart..<replacementEnd, with: BeamText(text: title, attributes: []))
 
-        let (_, linkedNoteId) = node.unproxyElement.makeInternalLink(replacementStart..<linkEnd)
+        let (_, linkedNoteId) = node.unproxyElement.makeInternalLink(self, replacementStart..<linkEnd)
         if let linkedNoteId = linkedNoteId {
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d0)
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d1)

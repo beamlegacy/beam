@@ -209,7 +209,7 @@ public class BrowsingNode: ObservableObject, Codable {
     @Published public var events: [ReadingEvent] = []
     @Published public var children = [BrowsingNode]()
     public var score: Score { tree.scoreFor(link: link) }
-    public func scoreApply(changes: (UrlScoreProtocol) -> Void) {
+    public func scoreApply(changes: @escaping (UrlScoreProtocol) -> Void) {
         tree.scoreApply(to: link, changes: changes)
     }
 
@@ -459,7 +459,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
     public var isPinned = false {
         didSet {
-            dailyScoreStore?.apply(to: current.link) { $0.isPinned = $0.isPinned || isPinned }
+            dailyScoreStore?.apply(to: current.link) { $0.isPinned = $0.isPinned || self.isPinned }
         }
     }
 
@@ -545,7 +545,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         root.tree = self
     }
 
-    public func scoreApply(to link: UUID, changes: (UrlScoreProtocol) -> Void) {
+    public func scoreApply(to link: UUID, changes: @escaping (UrlScoreProtocol) -> Void) {
         longTermScoreStore?.apply(to: link, changes: changes)
         dailyScoreStore?.apply(to: link, changes: changes)
     }
@@ -621,7 +621,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         if startReading {
             current.addEvent(.startReading)
         }
-        scoreApply(to: current.link) { $0.navigationCountSinceLastSearch = nilMin($0.navigationCountSinceLastSearch, navigationCountSinceLastSearch) }
+        scoreApply(to: current.link) { $0.navigationCountSinceLastSearch = nilMin($0.navigationCountSinceLastSearch, self.navigationCountSinceLastSearch) }
         current.score.navigationCountSinceLastSearch = nilMin(current.score.navigationCountSinceLastSearch, navigationCountSinceLastSearch)
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
     }

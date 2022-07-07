@@ -13,23 +13,23 @@ import Foundation
 class BeamElementLinks: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-        do {
-            try GRDBDatabase.shared.clearBidirectionalLinks()
-        } catch {
-            Logger.shared.logError("Error clearing bidi links: \(error)", category: .database)
-        }
+        BeamTestsHelper.logout()
+        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
-    func testLink1() {
-        let linkedNote1 = BeamNote(title: "note1")
-        let linkedNote2 = BeamNote(title: "note2")
-        let linkedNote3 = BeamNote(title: "note3")
-        let linkedNote4 = BeamNote(title: "note4")
+    func testLink1() throws {
+        let linkedNote1 = try BeamNote(title: "note1")
+        let linkedNote2 = try BeamNote(title: "note2")
+        let linkedNote3 = try BeamNote(title: "note3")
+        let linkedNote4 = try BeamNote(title: "note4")
+        linkedNote1.owner = BeamData.shared.currentDatabase
+        linkedNote2.owner = BeamData.shared.currentDatabase
+        linkedNote3.owner = BeamData.shared.currentDatabase
+        linkedNote4.owner = BeamData.shared.currentDatabase
         let id1 = linkedNote1.id
         let id2 = linkedNote2.id
         let id3 = linkedNote3.id
@@ -41,7 +41,7 @@ class BeamElementLinks: XCTestCase {
         text2.addAttributes([.internalLink(id3)], to: 0..<3)
         text2.addAttributes([.internalLink(id4)], to: 4..<8)
 
-        let note = BeamNote(title: "testNote")
+        let note = try BeamNote(title: "testNote")
         let element1 = BeamElement(text1)
         let element2 = BeamElement(text2)
         note.addChild(element1)
@@ -59,10 +59,10 @@ class BeamElementLinks: XCTestCase {
         XCTAssert(links.contains(link3))
         XCTAssert(links.contains(link4))
 
-        GRDBDatabase.shared.appendLink(link1)
-        GRDBDatabase.shared.appendLink(link2)
-        GRDBDatabase.shared.appendLink(link3)
-        GRDBDatabase.shared.appendLink(link4)
+        BeamData.shared.noteLinksAndRefsManager?.appendLink(link1)
+        BeamData.shared.noteLinksAndRefsManager?.appendLink(link2)
+        BeamData.shared.noteLinksAndRefsManager?.appendLink(link3)
+        BeamData.shared.noteLinksAndRefsManager?.appendLink(link4)
 
         let dbLinks1 = linkedNote1.links
         XCTAssertEqual(dbLinks1.count, 1)

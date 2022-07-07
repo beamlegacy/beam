@@ -11,7 +11,7 @@ import BeamCore
 extension BeamNote {
 
     @ViewBuilder static func contextMenu(for noteId: UUID, state: BeamState) -> some View {
-        if let note = fetch(id: noteId, includeDeleted: false) {
+        if let note = fetch(id: noteId) {
             contextualMenu(for: note, state: state)
         }
     }

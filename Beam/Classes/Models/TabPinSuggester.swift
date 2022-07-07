@@ -8,7 +8,6 @@
 import Foundation
 import BeamCore
 import GRDB
-import Promises
 
 struct TabPinSuggestion: Codable {
     var id = UUID()
@@ -26,11 +25,21 @@ extension TabPinSuggestion: TableRecord {
 extension TabPinSuggestion: Identifiable {}
 
 class TabPinSuggestionMemory {
-    let db: GRDBDatabase
-    init(db: GRDBDatabase = GRDBDatabase.shared) {
-        self.db = db
+    let providedDb: TabPinSuggestionDBManager?
+    var db: TabPinSuggestionDBManager? {
+        let currentDb = providedDb ?? BeamData.shared.tabPinSuggestionDBManager
+        if currentDb == nil {
+            Logger.shared.logError("TabPinSuggestionMemory has no TabPinSuggestionDBManager available", category: .database)
+        }
+        return currentDb
     }
+
+    init(db providedDb: TabPinSuggestionDBManager? = nil) {
+        self.providedDb = providedDb
+    }
+
     func addTabPinSuggestion(domainPath0: String) {
+        guard let db = db else { return }
         do {
             try db.addTabPinSuggestion(domainPath0: domainPath0)
         } catch {
@@ -38,9 +47,11 @@ class TabPinSuggestionMemory {
         }
     }
     var tabPinSuggestionCount: Int {
-        db.tabPinSuggestionCount
+        guard let db = db else { return 0 }
+        return db.tabPinSuggestionCount
     }
     func alreadyPinTabSuggested(domainPath0: String) -> Bool {
+        guard let db = db else { return false }
         do {
             return try db.alreadyPinTabSuggested(domainPath0: domainPath0)
         } catch {
@@ -49,6 +60,7 @@ class TabPinSuggestionMemory {
         }
     }
     func reset() {
+        guard let db = db else { return }
         do {
             try db.cleanTabPinSuggestions()
         } catch {

@@ -59,7 +59,10 @@ class RestAPIserverTests: QuickSpec {
             }
 
             describe("with publishNote") {
-                let note = BeamNote(title: "foo")
+                guard let note = try? BeamNote(title: "foo") else {
+                    fail("Error while creating note")
+                    return
+                }
                 let request = RestAPIServer.Request.publishNote(note: note, publicationGroups: [])
 
                 describe("with default configuration") {
@@ -96,7 +99,10 @@ class RestAPIserverTests: QuickSpec {
             }
 
             describe("with updatePublicationGroup") {
-                let note = BeamNote(title: "foo")
+                guard let note = try? BeamNote(title: "foo") else {
+                    fail("Error while creating note")
+                    return
+                }
                 let request = RestAPIServer.Request.updatePublicationGroup(note: note, publicationGroups: [])
 
                 describe("with default configuration") {

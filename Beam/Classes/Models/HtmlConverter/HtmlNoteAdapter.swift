@@ -8,7 +8,7 @@
 import Foundation
 import SwiftSoup
 import BeamCore
-import Promises
+
 
 // The HtmlNoteAdapter should be instantiated for each time html is parsed. Instantiating
 // a global HtmlNoteAdapter could create unexpected behaviour with downloading images

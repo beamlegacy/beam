@@ -18,8 +18,7 @@ extension AppDelegate {
                   completionHandler?(.success(false))
                   return
               }
-        let accountManager = AccountManager()
-        accountManager.getUserInfos { _ in
+        BeamData.shared.currentAccount?.getUserInfos { _ in
             completionHandler?(.success(true))
         }
     }

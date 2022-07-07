@@ -7,7 +7,7 @@
 
 import Foundation
 import BeamCore
-import Promises
+
 
 protocol AllNotesPageContextualMenuDelegate: AnyObject {
     func contextualMenuShouldPublishNote() -> Bool
@@ -20,7 +20,7 @@ class AllNotesPageContextualMenu {
     private let selectedNotes: [BeamNote]
     private let onLoadBlock: ((_ isLoading: Bool) -> Void)?
     private let onFinishBlock: ((_ needReload: Bool) -> Void)?
-    private let cmdManager = CommandManagerAsync<DocumentManager>()
+    private let cmdManager = CommandManagerAsync<BeamDocumentCollection>()
 
     var undoManager: UndoManager?
     weak var delegate: AllNotesPageContextualMenuDelegate?
@@ -38,7 +38,7 @@ class AllNotesPageContextualMenu {
         menu.font = BeamFont.regular(size: 13).nsFont
 
         let allIds = selectedNotes.map { $0.id }
-        let containsToday =  allIds.contains(AppDelegate.main.data.todaysNote.id)
+        let containsToday =  allIds.contains(BeamData.shared.todaysNote.id)
 
         var countSuffix = " All"
         if selectedNotes.count > 0 {
@@ -213,11 +213,11 @@ class AllNotesPageContextualMenu {
     }
 
     @objc private func exportNotesToBeamNote() {
-        let documentManager = DocumentManager()
+        guard let collection = BeamData.shared.currentDocumentCollection else { return }
         if selectedNotes.count == 1 {
             guard let note = selectedNotes.first else { return }
             AppDelegate.main.exportOneNoteToBeamNote(note: note)
-        } else if selectedNotes.count != documentManager.allDocumentsIds(includeDeletedNotes: false).count {
+        } else if selectedNotes.count != (try? collection.count(filters: [])) ?? 0 {
             AppDelegate.main.exportNotesToBeamNote(selectedNotes)
         } else {
             AppDelegate.main.exportAllNotesToBeamNote(self)
@@ -316,10 +316,11 @@ class AllNotesPageContextualMenu {
     }
 
     private func confirmedDeleteSelectedNotes() {
+        guard let collection = BeamData.shared.currentDocumentCollection else { return }
         guard selectedNotes.count > 0 else {
             onLoadBlock?(true)
             self.delegate?.contextualMenuWillDeleteDocuments(ids: [], all: true)
-            cmdManager.deleteAllDocuments(in: DocumentManager()) { _ in
+            cmdManager.deleteAllDocuments(in: collection) { _ in
                 DispatchQueue.main.async {
                     self.registerUndo(actionName: "Delete All Notes")
                     self.onFinishBlock?(true)
@@ -330,7 +331,7 @@ class AllNotesPageContextualMenu {
         onLoadBlock?(true)
         let ids = selectedNotes.map { $0.id }
         self.delegate?.contextualMenuWillDeleteDocuments(ids: ids, all: false)
-        cmdManager.deleteDocuments(ids: ids, in: DocumentManager()) { _ in
+        cmdManager.deleteDocuments(ids: ids, in: collection) { _ in
             DispatchQueue.main.async {
                 let count = ids.count
                 self.registerUndo(actionName: "Delete \(count) Note\(count > 1 ? "s" : "")")
@@ -361,11 +362,11 @@ class AllNotesPageContextualMenu {
 /// Using a separate struct that can be kept in memory by the UndoManager instead of the whole ContextualMenu class
 private class AllNotesMenuUndoRegisterer {
     let undoManager: UndoManager?
-    let cmdManager: CommandManagerAsync<DocumentManager>
+    let cmdManager: CommandManagerAsync<BeamDocumentCollection>
     weak var menuDelegate: AllNotesPageContextualMenuDelegate?
 
     init(undoManager: UndoManager,
-         cmdManager: CommandManagerAsync<DocumentManager>,
+         cmdManager: CommandManagerAsync<BeamDocumentCollection>,
          menuDelegate: AllNotesPageContextualMenuDelegate?) {
         self.undoManager = undoManager
         self.cmdManager = cmdManager
@@ -373,15 +374,17 @@ private class AllNotesMenuUndoRegisterer {
     }
 
     func registerUndo(redo: Bool = false, actionName: String) {
+        guard let collection = BeamData.shared.currentDocumentCollection else { return }
+
         undoManager?.registerUndo(withTarget: self, handler: { _ in
             self.registerUndo(redo: !redo, actionName: actionName)
             let completion: (Bool) -> Void = { _ in
                 self.menuDelegate?.contextualMenuWillUndoRedoDeleteDocuments()
             }
             if redo {
-                self.cmdManager.redoAsync(context: DocumentManager(), completion: completion)
+                self.cmdManager.redoAsync(context: collection, completion: completion)
             } else {
-                self.cmdManager.undoAsync(context: DocumentManager(), completion: completion)
+                self.cmdManager.undoAsync(context: collection, completion: completion)
             }
         })
         undoManager?.setActionName(actionName)

@@ -15,7 +15,13 @@ class NoteBackForwardListTests: XCTestCase {
     var noteA: BeamNote!
 
     override func setUp() {
-        noteA = BeamNote(title: "Note A")
+        do {
+            noteA = try BeamNote(title: "Note A")
+        } catch {
+            XCTFail("Error while creating note: \(error)")
+            return
+        }
+
         list = NoteBackForwardList()
     }
 

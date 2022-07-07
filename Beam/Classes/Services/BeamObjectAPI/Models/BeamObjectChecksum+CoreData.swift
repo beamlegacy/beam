@@ -97,6 +97,26 @@ extension BeamObjectChecksum {
         }
     }
 
+    static func previousSavedObjects<T: BeamObjectProtocol>(type: T.Type) throws -> [T] {
+        let request: NSFetchRequest<BeamObjectChecksum> = BeamObjectChecksum.fetchRequest()
+        request.predicate = predicates(id: nil, type: type.beamObjectType)
+
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+
+        return context.performAndWait {
+            guard let objects = try? context.fetch(request) else { return []}
+
+            return objects.compactMap { object in
+                context.refresh(object, mergeChanges: false)
+                guard let previousData = object.data_sent else { return nil }
+
+                let beamObject = try? Self.decoder.decode(BeamObject.self, from: previousData)
+                return try? beamObject?.decodeBeamObject()
+            }
+
+        }
+    }
+
     static var encoder: JSONEncoder {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
@@ -692,10 +712,12 @@ extension BeamObjectChecksum {
         }
     }
 
-    private static func predicates(id: UUID, type: BeamObjectObjectType) -> NSPredicate {
+    private static func predicates(id: UUID?, type: BeamObjectObjectType) -> NSPredicate {
         var predicates: [NSPredicate] = []
-        predicates.append(NSPredicate(format: "id = %@",
-                                      id as CVarArg))
+        if let id = id {
+            predicates.append(NSPredicate(format: "id = %@",
+                                          id as CVarArg))
+        }
         predicates.append(NSPredicate(format: "object_type = %@",
                                       type.rawValue as CVarArg))
 

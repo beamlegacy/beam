@@ -22,10 +22,11 @@ class WebNoteControllerTest: XCTestCase {
     }
 
     var words = WordsFile()
-    var note = BeamNote(title: "Sample note")
+    // swiftlint:disable:next force_try
+    var note = try! BeamNote(title: "Sample note")
 
     override func setUpWithError() throws {
-        note = BeamNote(title: "Sample note")
+        note = try BeamNote(title: "Sample note")
         SocialTitleFetcher.shared = MockSocialTitleFetcher()
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }

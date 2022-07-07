@@ -237,7 +237,7 @@ extension OnboardingImportsView {
             return
         }
 
-        let importsManager = AppDelegate.main.data.importsManager
+        let importsManager = BeamData.shared.importsManager
         if checkPassword {
             if selectedSource.supportsAutomaticPasswordImport, let passwordImporter = selectedSource.passwordImporter {
                 importsManager.startBrowserPasswordImport(from: passwordImporter)

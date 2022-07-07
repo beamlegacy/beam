@@ -13,7 +13,8 @@ import Nimble
 @testable import BeamCore
 @testable import Beam
 
-class CommandsTextTests: QuickSpec {
+class CommandsTextTests: QuickSpec, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
 
     // swiftlint:disable:next function_body_length
     override func spec() {
@@ -23,7 +24,10 @@ class CommandsTextTests: QuickSpec {
 
         beforeEach {
             // Setup a simple node tree
-            let note = self.setupAndResetTree()
+            guard let note = try? self.setupAndResetTree() else {
+                fail("Unable to setup and reset tree")
+                return
+            }
             let editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
             editor.prepareRoot()
             rootNode = editor.rootNode!
@@ -42,7 +46,10 @@ class CommandsTextTests: QuickSpec {
             beforeEach {
                 BeamNote.clearCancellables()
 
-                let note = self.setupAndResetTree()
+                guard let note = try? self.setupAndResetTree() else {
+                    fail("Unable to setup and reset tree")
+                    return
+                }
                 editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
                 editor.prepareRoot()
                 rootNode = editor.rootNode!
@@ -212,10 +219,10 @@ class CommandsTextTests: QuickSpec {
         }
     }
 
-    private func setupAndResetTree() -> BeamNote {
+    private func setupAndResetTree() throws -> BeamNote {
         // Setup a simple node tree
         BeamNote.clearCancellables()
-        let note = BeamNote.fetchOrCreate(title: "TestEditCommands")
+        let note = try BeamNote.fetchOrCreate(self, title: "TestEditCommands")
 
         let bullet1 = BeamElement("First bullet")
         note.addChild(bullet1)

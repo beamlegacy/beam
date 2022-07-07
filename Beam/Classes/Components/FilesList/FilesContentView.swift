@@ -9,6 +9,6 @@ struct FilesContentView: View {
 
     var body: some View {
         FilesList(selectedFile: $selectedFile,
-                  files: (try? fileManager.allObjects(updatedSince: nil)) ?? [])
+                  files: (try? fileManager?.allObjects(updatedSince: nil)) ?? [])
     }
 }

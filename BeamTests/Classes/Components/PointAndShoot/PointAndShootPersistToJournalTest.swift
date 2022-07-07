@@ -5,7 +5,7 @@
 //  Created by Stef Kors on 08/06/2021.
 //
 import XCTest
-import Promises
+
 import Nimble
 
 @testable import Beam
@@ -170,7 +170,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         // Try to add to note existent note
         let group = PointAndShoot.ShootGroup(id: "id", targets: [paragraphTarget], text: "placeholder string", href: page.url!.absoluteString, shapeCache: .init())
         let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-        self.pns.addShootToNote(targetNote: BeamNote(title: "fake non existent note title"), group: group, completion: {
+        self.pns.addShootToNote(targetNote: try BeamNote(title: "fake non existent note title"), group: group, completion: {
             // Expect it to still work.
             XCTAssertEqual(self.pns.collectedGroups.count, 1)
             XCTAssertEqual(self.pns.collectedGroups.first?.targets.count, 1)

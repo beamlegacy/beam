@@ -101,7 +101,7 @@ class LinksSection: Widget {
 
     /// This method is doing the actual work of setting up the links section. It is used both by LinksSection and ReferencesSection
     final func doSetupSectionMode() {
-        AppDelegate.main.data.$lastIndexedElement
+        BeamData.shared.$lastIndexedElement
             .dropFirst()
             .filter({ [weak self] element in
                 guard let self = self,
@@ -170,8 +170,8 @@ class LinksSection: Widget {
             }
 
             // Prepare title children:
-            guard   BeamNote.fetch(id: noteID, includeDeleted: false) != nil,
-                    let refTitleWidget = try? titles[noteID]
+            guard BeamNote.fetch(id: noteID) != nil,
+                  let refTitleWidget = try? titles[noteID]
                     ?? newrefs[noteID]
                     ?? RefNoteTitle(parent: self, noteId: noteID, availableWidth: childAvailableWidth)
             else {

@@ -13,36 +13,34 @@ import Nimble
 @testable import Beam
 @testable import BeamCore
 
-class RecentsManagerTests: QuickSpec {
+class RecentsManagerTests: QuickSpec, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
 
-    var documentHelper: DocumentManagerTestsHelper!
-    let documentManager = DocumentManager()
-
-    func fillWithRandomDocuments(_ documentManager: DocumentManager) {
-        guard documentHelper == nil else {
+    func fillWithRandomDocuments() {
+        guard let database = BeamData.shared.currentDatabase else {
+            fail("Not currentDatabase found")
             return
         }
-        documentHelper = DocumentManagerTestsHelper(documentManager: documentManager,
-                                                    coreDataManager: CoreDataManager.shared)
-
         for _ in 0..<7 {
-            let note = BeamNote(title: String.randomTitle())
-            note.databaseId = DatabaseManager.defaultDatabase.id
-            let doc = note.documentStruct!
-            _ = documentHelper.saveLocally(doc)
+            // swiftlint:disable:next force_try
+            let note = try! BeamNote(title: String.randomTitle())
+            note.owner = database
+            let doc = note.document!
+            _ = try? BeamData.shared.currentDocumentCollection?.save(self, doc, indexDocument: true)
         }
     }
 
     override func spec() {
 
         var recentsManager: RecentsManager!
-        let newNote = BeamNote(title: "Note")
+        // swiftlint:disable:next force_try
+        let newNote = try! BeamNote(title: "Note")
 
         beforeEach {
             BeamTestsHelper.logout()
 
-            self.fillWithRandomDocuments(self.documentManager)
-            recentsManager = RecentsManager(with: self.documentManager)
+            self.fillWithRandomDocuments()
+            recentsManager = RecentsManager()
         }
 
         describe("init") {
@@ -61,18 +59,23 @@ class RecentsManagerTests: QuickSpec {
             context("when too many recent") {
                 it("respects max count") {
                     expect(recentsManager.recentNotes.count) == 5
-                    recentsManager.currentNoteChanged(BeamNote(title: "1"))
-                    recentsManager.currentNoteChanged(BeamNote(title: "2"))
+                    // swiftlint:disable force_try
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "1"))
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "2"))
+                    // swiftlint:enable force_try
                     expect(recentsManager.recentNotes.count) == 5
                 }
 
                 it("removes oldest note") {
-                    let firstAddedNote = BeamNote(title:"1")
+                    // swiftlint:disable:next force_try
+                    let firstAddedNote = try! BeamNote(title:"1")
                     recentsManager.currentNoteChanged(firstAddedNote)
-                    recentsManager.currentNoteChanged(BeamNote(title: "2"))
-                    recentsManager.currentNoteChanged(BeamNote(title: "3"))
-                    recentsManager.currentNoteChanged(BeamNote(title: "4"))
-                    recentsManager.currentNoteChanged(BeamNote(title: "5"))
+                    // swiftlint:disable force_try
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "2"))
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "3"))
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "4"))
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "5"))
+                    // swiftlint:enable force_try
 
                     expect(recentsManager.recentNotes.last?.id) == firstAddedNote.id
                     recentsManager.currentNoteChanged(newNote)
@@ -82,14 +85,17 @@ class RecentsManagerTests: QuickSpec {
                 }
 
                 it("removes the less used note") {
-                    let firstAddedNote = BeamNote(title: "1")
+                    // swiftlint:disable:next force_try
+                    let firstAddedNote = try! BeamNote(title: "1")
                     recentsManager.currentNoteChanged(firstAddedNote)
-                    recentsManager.currentNoteChanged(BeamNote(title: "2"))
-                    recentsManager.currentNoteChanged(BeamNote(title: "3"))
+                    // swiftlint:disable force_try
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "2"))
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "3"))
                     recentsManager.currentNoteChanged(firstAddedNote)
-                    recentsManager.currentNoteChanged(BeamNote(title: "4"))
-                    recentsManager.currentNoteChanged(BeamNote(title: "5"))
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "4"))
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "5"))
                     recentsManager.currentNoteChanged(firstAddedNote)
+                    // swiftlint:enable force_try
 
                     expect(recentsManager.recentNotes.last?.id) == firstAddedNote.id
                     recentsManager.currentNoteChanged(newNote)
@@ -104,7 +110,8 @@ class RecentsManagerTests: QuickSpec {
                     recentsManager.currentNoteChanged(newNote)
                     expect(recentsManager.recentNotes.first?.id) == newNote.id
 
-                    recentsManager.currentNoteChanged(BeamNote(title: "Some"))
+                    // swiftlint:disable:next force_try
+                    recentsManager.currentNoteChanged(try! BeamNote(title: "Some"))
                     expect(recentsManager.recentNotes[1].id) == newNote.id
 
                     recentsManager.currentNoteChanged(newNote)
@@ -131,19 +138,20 @@ class RecentsManagerTests: QuickSpec {
                 it("handles deleted notes") {
                     expect(recentsManager.recentNotes.count) == 5
 
-                    guard let note = recentsManager.recentNotes.last, let documentStruct = note.documentStruct else {
+                    guard let note = recentsManager.recentNotes.last,
+                          let document = note.document
+                    else {
                         fail("Last recent notes is nil")
                         return
                     }
 
                     var cancellable = [AnyCancellable]()
                     waitUntil(timeout: .seconds(10)) { done in
-                        DocumentManager.documentDeleted.receive(on: DispatchQueue(label: "tester")).sink { id in
-                            guard id == documentStruct.id else { return }
+                        BeamDocumentCollection.documentDeleted.receive(on: DispatchQueue(label: "tester")).sink { deleted in
+                            guard deleted.id == document.id else { return }
                             done()
                         }.store(in: &cancellable)
-                        self.documentManager.delete(document: documentStruct) { _ in
-                        }
+                        try? BeamData.shared.currentDocumentCollection?.delete(self, filters: [.id(document.id)])
                     }
 
                     expect(recentsManager.recentNotes.count) == 4

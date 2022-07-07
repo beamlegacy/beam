@@ -53,7 +53,7 @@ class NoteScoreTest: XCTestCase {
     func testWordCountScoreUpdate() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
 
-        let note = BeamNote(title: "Animals")
+        let note = try BeamNote(title: "Animals")
         let elements = [
             BeamElement("Grey dog"),
             BeamElement("Tall green cow"),
@@ -79,7 +79,7 @@ class NoteScoreTest: XCTestCase {
     func testWordCountAfterDeserialization() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
 
-        let note = BeamNote(title: "Fruits")
+        let note = try BeamNote(title: "Fruits")
         note.addChild(BeamElement("Apple banana strawberry"))
         let data = try JSONEncoder().encode(note)
 

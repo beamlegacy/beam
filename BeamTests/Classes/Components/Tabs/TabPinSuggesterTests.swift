@@ -12,9 +12,13 @@ import BeamCore
 import XCTest
 
 class TabPinSuggesterTests: XCTestCase {
+    var db: TabPinSuggestionDBManager!
     var existingHasPinned: Bool!
-    override func setUp() {
-        super.setUp()
+
+    override func setUpWithError() throws {
+        let store = GRDBStore.empty()
+        db = try TabPinSuggestionDBManager(store: store)
+        try store.migrate()
         existingHasPinned = Persistence.TabPinSuggestion.hasPinned
         Persistence.TabPinSuggestion.hasPinned = nil
     }
@@ -26,7 +30,6 @@ class TabPinSuggesterTests: XCTestCase {
 
     func testCandidateQuery() throws {
         BeamDate.freeze("2001-01-01T15:00:00+000")
-        let db = GRDBDatabase.empty()
         let treeIds = [UUID(), UUID()]
         let urls = [
             "https://site.a/path",
@@ -88,7 +91,6 @@ class TabPinSuggesterTests: XCTestCase {
             candidateRefreshMinInterval: Double(1 * 60 * 60),
             maxSuggestionCount: 2
         )
-        let db = GRDBDatabase.empty()
         let suggestionMemory = TabPinSuggestionMemory(db: db)
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let suggester = TabPinSuggester(
@@ -119,7 +121,7 @@ class TabPinSuggesterTests: XCTestCase {
     }
 
     func testTabPinSuggestionMemory() {
-        let memory = TabPinSuggestionMemory(db: GRDBDatabase.empty())
+        let memory = TabPinSuggestionMemory(db: db)
         XCTAssertEqual(memory.tabPinSuggestionCount, 0)
         memory.addTabPinSuggestion(domainPath0: "http://abc.com")
         memory.addTabPinSuggestion(domainPath0: "http://abc.com")

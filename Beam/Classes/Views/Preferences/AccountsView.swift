@@ -5,12 +5,12 @@ import OAuthSwift
 import Combine
 
 let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .accounts, title: "Account", imageName: "preferences-account") {
-    AccountsView(viewModel: AccountsViewModel(calendarManager: AppDelegate.main.data.calendarManager))
+    AccountsView(viewModel: AccountsViewModel(calendarManager: BeamData.shared.calendarManager))
 }
 
 class AccountsViewModel: ObservableObject {
     @ObservedObject var calendarManager: CalendarManager
-    @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
+    @Published var isloggedIn: Bool = AuthenticationManager.shared.isLoggedIn
     @Published var accountsCalendar: [AccountCalendar] = []
 
     private var scope = Set<AnyCancellable>()
@@ -23,7 +23,7 @@ class AccountsViewModel: ObservableObject {
                 return
             }
             for source in sources {
-                AppDelegate.main.data.calendarManager.getInformation(for: source) { accountCalendar in
+                BeamData.shared.calendarManager.getInformation(for: source) { accountCalendar in
                     if !self.accountsCalendar.contains(where: { $0.sourceId == source.id }) {
                         self.accountsCalendar.append(accountCalendar)
                     }
@@ -32,12 +32,12 @@ class AccountsViewModel: ObservableObject {
         }.store(in: &scope)
 
         AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
-            self?.isloggedIn = isAuthenticated && AccountManager.state == .signedIn
+            self?.isloggedIn = AuthenticationManager.shared.isLoggedIn
         }.store(in: &scope)
     }
 
     fileprivate func showOnboarding() {
-        let onboardingManager = AppDelegate.main.data.onboardingManager
+        let onboardingManager = BeamData.shared.onboardingManager
         onboardingManager.showOnboardingForConnectOnly(withConfirmationAlert: false)
     }
 }
@@ -59,7 +59,6 @@ struct AccountsView: View {
 
     @ObservedObject var viewModel: AccountsViewModel
 
-    private let accountManager = AccountManager()
     private let contentWidth: Double = PreferencesManager.contentWidth
     private let checkboxHelper = NSButtonCheckboxHelper()
 
@@ -233,7 +232,7 @@ struct AccountsView: View {
     private var RefreshTokenButton: some View {
         Button(action: {
             self.loading = true
-            accountManager.refreshToken { result in
+            AuthenticationManager.shared.account?.refreshToken { result in
                 self.loading = false
                 switch result {
                 case .failure(let error):
@@ -441,11 +440,11 @@ struct AccountsView: View {
                     window.state.closeAllTabs(closePinnedTabs: true)
                 }
             }
-            AccountManager.logout()
+            AuthenticationManager.shared.account?.logout()
             if self.checkboxHelper.isOn {
                 AppDelegate.main.deleteAllLocalData()
             }
-            viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
+            viewModel.isloggedIn = AuthenticationManager.shared.isLoggedIn
         }
     }
 
@@ -574,7 +573,7 @@ struct AppleAccountView: View {
 
 struct AccountsView_Previews: PreviewProvider {
     static var previews: some View {
-        AccountsView(viewModel: AccountsViewModel(calendarManager: AppDelegate.main.data.calendarManager))
+        AccountsView(viewModel: AccountsViewModel(calendarManager: BeamData.shared.calendarManager))
     }
     // swiftlint:disable:next file_length
 }

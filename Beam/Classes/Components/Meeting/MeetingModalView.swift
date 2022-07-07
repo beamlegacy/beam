@@ -111,7 +111,7 @@ struct MeetingModalView: View {
                                             get: { attendee.email },
                                             set: {
                                                 if let noteId = ContactsManager.shared.note(for: $0),
-                                                   let name = BeamNote.fetch(id: noteId, includeDeleted: false)?.title {
+                                                   let name = BeamNote.fetch(id: noteId)?.title {
                                                         viewModel.attendees[index].name = name
                                                 }
                                                 viewModel.attendees[index].email = $0
@@ -132,7 +132,7 @@ struct MeetingModalView: View {
                                             get: {
                                                 // Return note title (name) if email already in ContactDB
                                                 guard let noteId = ContactsManager.shared.note(for: attendee.email),
-                                                      let name = BeamNote.fetch(id: noteId, includeDeleted: false)?.title, viewModel.attendees.count > index else { return attendee.name }
+                                                      let name = BeamNote.fetch(id: noteId)?.title, viewModel.attendees.count > index else { return attendee.name }
                                                 viewModel.attendees[index].name = name
                                                 return name
                                             },
@@ -253,7 +253,8 @@ private struct MeetingModalAddAttendeeRow: View {
 
 extension MeetingModalView {
 
-    class ViewModel: ObservableObject {
+    class ViewModel: ObservableObject, BeamDocumentSource {
+        static var sourceId: String { "\(Self.self)" }
         @Published fileprivate var meetingName: String
         @Published fileprivate var startTime: Date
         @Published fileprivate var attendees: [Meeting.Attendee]
@@ -286,7 +287,10 @@ extension MeetingModalView {
             meeting.attendees.forEach { attendee in
                 guard !attendee.name.isEmpty else { return }
                 let name = attendee.name
-                let attendeeNote = BeamNote.fetchOrCreate(title: name)
+                guard let attendeeNote = try? BeamNote.fetchOrCreate(self, title: name) else {
+                    onFinish?(meeting)
+                    return
+                }
                 saveContacts(for: attendee, and: attendeeNote)
             }
             onFinish?(meeting)
@@ -299,7 +303,7 @@ extension MeetingModalView {
         private func saveContacts(for attendee: Meeting.Attendee, and attendeeNote: BeamNote) {
             guard let contactRecord = ContactsManager.shared.save(email: attendee.email, to: attendeeNote.id, networkCompletion: { _ in }) else { return }
             attendeeNote.contactId = contactRecord.uuid
-            attendeeNote.save()
+            _ = attendeeNote.save(self)
         }
     }
 }

@@ -18,14 +18,14 @@ let BetaPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build
 
 class BetaPreferencesViewModel: ObservableObject {
     @Published var isSynchronizationRunning = AppDelegate.main.isSynchronizationRunning
-    @Published var isloggedIn = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
+    @Published var isloggedIn = AuthenticationManager.shared.isLoggedIn
     @Published var synchronizationStatus: BeamObjectObjectSynchronizationStatus = .notStarted
 
     private var scope = Set<AnyCancellable>()
 
     init() {
         AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
-            self?.isloggedIn = isAuthenticated && AccountManager.state == .signedIn
+            self?.isloggedIn = AuthenticationManager.shared.isLoggedIn
         }.store(in: &scope)
 
         AppDelegate.main.isSynchronizationRunningPublisher.receive(on: DispatchQueue.main).sink { [weak self] isSynchronizationRunning in
@@ -38,17 +38,17 @@ class BetaPreferencesViewModel: ObservableObject {
     }
 }
 
-struct BetaPreferencesView: View {
+struct BetaPreferencesView: View, BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
+
     private let contentWidth: Double = PreferencesManager.contentWidth
 
     @State private var loading: Bool = false
 
-    @State private var selectedDatabase = Database.defaultDatabase()
-    private let databaseManager = DatabaseManager()
-    @FetchRequest(entity: Database.entity(),
-                  sortDescriptors: [NSSortDescriptor(keyPath: \Database.title, ascending: true)],
-                  predicate: NSPredicate(format: "deleted_at == nil"))
-    var databases: FetchedResults<Database>
+    @State private var selectedDatabase = BeamData.shared.currentDatabase
+    var databases: [BeamDatabase] {
+        BeamData.shared.currentAccount?.allDatabases ?? []
+    }
 
     @State var showDebugSection = PreferencesManager.showDebugSection
     @State var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
@@ -88,11 +88,14 @@ struct BetaPreferencesView: View {
                     DatabasePicker
                     Button(action: {
                         DispatchQueue.global(qos: .userInteractive).async {
-                            let databaseManager = DatabaseManager()
-                            databaseManager.deleteEmptyDatabases(onlyAutomaticCreated: false) { result in
-                                switch result {
-                                case .success: AppDelegate.showMessage("Empty databases deleted")
-                                case .failure(let error): AppDelegate.showError(error)
+                            do {
+                                try BeamData.shared.currentAccount?.deleteEmptyDatabases()
+                                DispatchQueue.main.async {
+                                    AppDelegate.showMessage("Empty databases deleted")
+                                }
+                            } catch {
+                                DispatchQueue.main.async {
+                                    AppDelegate.showError(error)
                                 }
                             }
                         }
@@ -130,9 +133,9 @@ struct BetaPreferencesView: View {
         .frame(maxWidth: 200)
     }
 
-    private func dbChange(_ database: Database?) {
+    private func dbChange(_ database: BeamDatabase?) {
         guard let database = database else { return }
-        DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
+        try? BeamData.shared.setCurrentDatabase(database)
     }
 
     private var DebugSectionCheckbox: some View {
@@ -166,14 +169,14 @@ struct BetaPreferencesView: View {
     }
 
     private var RebuildNotesContents: some View {
-        Button(action: { BeamNote.rebuildAllNotes() }, label: {
+        Button(action: { try? BeamNote.rebuildAllNotes(self) }, label: {
             Text("Rebuild all notes content")
                 .frame(width: 180)
         })
     }
 
     private var ValidateNotesContents: some View {
-        Button(action: { BeamNote.validateAllNotes() }, label: {
+        Button(action: { try? BeamNote.validateAllNotes() }, label: {
             Text("Validate all notes content")
                 .frame(width: 180)
         })

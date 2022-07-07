@@ -11,17 +11,17 @@ import XCTest
 @testable import BeamCore
 import Atomics
 
-class PublishNoteAPITests: XCTestCase {
+class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
+    static var sourceId: String { "PublishNoteAPITests" }
 
-    var helper: DocumentManagerTestsHelper!
     var beamTestHelper = BeamTestsHelper()
     var coreDataManager: CoreDataManager!
 
     var testNote: BeamNote?
-    var testNoteDocumentStruct: DocumentStruct!
+    var testNoteDocument: BeamDocument!
 
     override func setUpWithError() throws {
-        AccountManager.logout() // will force clean up data
+        BeamData.shared.currentAccount?.logout() // will force clean up data
 
         BeamTestsHelper.logout()
         BeamDate.freeze("2022-04-18T06:00:03Z")
@@ -37,32 +37,25 @@ class PublishNoteAPITests: XCTestCase {
         // Setup CoreData
         coreDataManager.setupWithoutMigration()
 
-        helper = DocumentManagerTestsHelper(documentManager: DocumentManager(),
-                                            coreDataManager: CoreDataManager.shared)
-
-        helper.deleteAllDocuments()
-        helper.deleteAllDatabases()
-
-        helper.createDefaultDatabase()
+        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
 
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
         BeamTestsHelper.login()
-        testNote = BeamNote(title: "Test")
-        testNote!.databaseId = DatabaseManager.defaultDatabase.id
+        testNote = try BeamNote(title: "Test")
+        testNote?.owner = BeamData.shared.currentDatabase
 
-        let testNoteDocumentStruct = testNote!.documentStruct
+        let testNoteDocument = testNote!.document
 
-        self.testNoteDocumentStruct = helper.saveLocally(testNoteDocumentStruct!)
+        self.testNoteDocument = try BeamData.shared.currentDocumentCollection?.save(self, testNoteDocument!, indexDocument: false, autoIncrementVersion: true)
 
         // Consecutive saves expect both those variable to be up to date
-        testNote!.version.store(self.testNoteDocumentStruct.version, ordering: .relaxed)
+        testNote!.version.store(self.testNoteDocument.version, ordering: .relaxed)
         testNote!.savedVersion = testNote!.version
     }
 
     override func tearDownWithError() throws {
-
-        helper.deleteDocumentStruct(testNoteDocumentStruct)
+        try BeamData.shared.currentDocumentCollection?.delete(self, filters: [.id(testNoteDocument.id)])
         BeamTestsHelper.logout()
         beamTestHelper.endNetworkRecording()
         BeamDate.reset()

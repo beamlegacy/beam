@@ -11,7 +11,7 @@ struct FileDetail: View {
     @State private var deleted = false
     @State private var saving = false
 
-    private let fileManager = BeamFileDBManager.shared
+    private let fileManager = BeamFileDBManager.shared!
     private let formatter = ByteCountFormatter()
 
     var body: some View {
@@ -99,11 +99,11 @@ struct FileDetail: View {
                         Divider()
                         HStack {
                             Text("Reference count:").bold()
-                            let count = (try? BeamFileDBManager.shared.referenceCount(fileId: file.id)) ?? 0
+                            let count = (try? BeamFileDBManager.shared?.referenceCount(fileId: file.id)) ?? 0
                             Text("\(count)")
                             Spacer()
                         }
-                        Text( ((try? BeamFileDBManager.shared.referencesFor(fileId: file.id)) ?? []).map({ "\($0.note?.titleAndId ?? "???") - \($0.elementID)" }).joined(separator: "\n"))
+                        Text( ((try? BeamFileDBManager.shared?.referencesFor(fileId: file.id)) ?? []).map({ "\($0.note?.titleAndId ?? "???") - \($0.elementID)" }).joined(separator: "\n"))
 
                         Divider()
 
@@ -126,7 +126,7 @@ struct FileDetail: View {
             }.onAppear {
                 self.cancellable = ValueObservation.tracking { db in
                     try BeamFileRecord.fetchOne(db, key: file.uid)
-                }.start(in: BeamFileDBManager.shared.dbPool,
+                }.start(in: fileManager.grdbStore.writer,
                         onError: { error in Logger.shared.logError(error.localizedDescription, category: .fileDB) },
                         onChange: { changedFile in
                     if let changedFile = changedFile {
@@ -157,7 +157,7 @@ struct FileDetail: View {
         deleted = true
 
         do {
-            try BeamFileDBManager.shared.remove(uid: file.uid)
+            try BeamFileDBManager.shared?.remove(uid: file.uid)
 
             if remoteDelete {
                 try fileManager.deleteFromBeamObjectAPI(object: file) { result in
@@ -177,7 +177,7 @@ struct FileDetail: View {
         self.file.deletedAt = BeamDate.now
 
         do {
-            try BeamFileDBManager.shared.insert(files: [file])
+            try BeamFileDBManager.shared?.insert(files: [file])
             try fileManager.saveOnBeamObjectAPI(file) { result in
                 switch result {
                 case .success: break
@@ -234,7 +234,7 @@ struct FileDetail: View {
 
     private var PurgeUnlinked: some View {
         Button {
-            try? BeamFileDBManager.shared.purgeUnlinkedFiles()
+            try? BeamFileDBManager.shared?.purgeUnlinkedFiles()
         } label: {
             Text("Purge unlinked files")
         }
@@ -242,7 +242,7 @@ struct FileDetail: View {
 
     private var PurgeUndo: some View {
         Button {
-            try? BeamFileDBManager.shared.purgeUndo()
+            try? BeamFileDBManager.shared?.purgeUndo()
         } label: {
             Text("Purge undo files")
         }
@@ -275,7 +275,7 @@ struct FileDetail: View {
 struct FileDetail_Previews: PreviewProvider {
     static var previews: some View {
         // swiftlint:disable:next force_try
-        let file = try! BeamFileDBManager.shared.fetchRandom()
+        let file = try! BeamFileDBManager.shared?.fetchRandom()
 
         return FileDetail(file: file!).background(Color.white)
     }

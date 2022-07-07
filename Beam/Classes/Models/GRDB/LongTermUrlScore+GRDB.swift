@@ -31,21 +31,32 @@ extension LongTermUrlScore: TableRecord {
 }
 
 class LongTermUrlScoreStore: LongTermUrlScoreStoreProtocol {
-    let db: GRDBDatabase
-    static let shared = LongTermUrlScoreStore()
-    init(db: GRDBDatabase = GRDBDatabase.shared) {
-        self.db = db
+    let providedDb: UrlStatsDBManager?
+    var db: UrlStatsDBManager? {
+        let currentDb = providedDb ?? BeamData.shared.urlStatsDBManager
+        if currentDb == nil {
+            Logger.shared.logError("LongTermUrlScoreStore has no UrlStatsDBManager available", category: .database)
+        }
+        return currentDb
     }
 
-    func apply(to urlId: UUID, changes: (LongTermUrlScore) -> Void) {
+    static let shared = LongTermUrlScoreStore()
+    init(db providedDb: UrlStatsDBManager? = nil) {
+        self.providedDb = providedDb
+    }
+
+    func apply(to urlId: UUID, changes: @escaping (LongTermUrlScore) -> Void) {
+        guard let db = db else { return }
         db.updateLongTermUrlScore(urlId: urlId, changes: changes)
     }
 
     func getMany(urlIds: [UUID]) -> [UUID: LongTermUrlScore] {
+        guard let db = db else { return [UUID: LongTermUrlScore]() }
         let scores = db.getManyLongTermUrlScore(urlIds: urlIds)
         return Dictionary(uniqueKeysWithValues: scores.map { ($0.urlId, $0) })
     }
     func save(scores: [LongTermUrlScore]) {
+        guard let db = db else { return }
         do {
             try db.save(scores: scores)
         } catch {

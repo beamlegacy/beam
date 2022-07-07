@@ -11,16 +11,23 @@ import AutoUpdate
 import ZIPFoundation
 
 // swiftlint:disable file_length type_body_length
-public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
+public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, BeamDocumentSource {
+    public private(set) static var shared: BeamData!
+    public static var sourceId: String { "\(Self.self)" }
     var _todaysNote: BeamNote?
     var todaysNote: BeamNote {
         if let note = _todaysNote, note.isTodaysNote {
             return note
         }
-        setupJournal()
+        do {
+            try setupJournal()
+        } catch {
+            Logger.shared.logError("BeamData.setupJournal failed, todaysNote will not work: \(error)", category: .general)
+        }
         return _todaysNote!
     }
     @Published var journal: [BeamNote] = []
+    @Published var journalSet = Set<BeamNote>()
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var lastIndexedElement: BeamElement?
@@ -35,6 +42,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var noteAutoSaveService: NoteAutoSaveService
 
     let cookieManager: CookiesManager
+
+    @Published public private(set) var accounts = [BeamAccount]()
+    @Published public private(set) var currentAccount: BeamAccount?
+    @Published public private(set) var currentDatabase: BeamDatabase?
+    @Published public var currentDocumentCollection: BeamDocumentCollection?
 
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
     var importsManager: ImportsManager = ImportsManager()
@@ -58,10 +70,29 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var onboardingManager = OnboardingManager()
     private var pinnedTabsManager = PinnedBrowserTabsManager()
     private(set) lazy var pinnedManager: PinnedNotesManager = {
-        PinnedNotesManager(with: DocumentManager())
+        PinnedNotesManager()
     }()
     let signpost = SignPost("BeamData")
     var analyticsCollector = AnalyticsCollector()
+
+    static var dataFolder: String {
+        let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
+
+        var name = "BeamData-\(Configuration.env)"
+        if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+            Logger.shared.logDebug("Using Gitlab CI Job ID for dataFolder: \(jobId)", category: .general)
+            name += "-\(jobId)"
+        }
+
+        guard let directory = paths.first else {
+            // Never supposed to happen
+            return "~/Application Data/BeamApp/"
+        }
+
+        let localDirectory = directory + "/Beam" + "/\(name)/"
+
+        return localDirectory
+    }
 
     static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
@@ -114,6 +145,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     override init() {
         LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
         NoteScorer.shared = NoteScorer(dailyStorage: KeychainDailyNoteScoreStore.shared)
+
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         sessionExporter = ClusteringSessionExporter()
         tabGroupingManager = TabGroupingManager()
@@ -131,18 +163,18 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
         super.init()
+        Self.shared = self
 
-        let documentManager = DocumentManager()
-
-        BeamNote.idForNoteNamed = { title, includeDeletedNotes in
-            guard let doc = documentManager.loadDocumentByTitle(title: title),
-                  includeDeletedNotes || doc.deletedAt == nil
+        BeamNote.idForNoteNamed = { [weak self] title in
+            guard let collection = self?.currentDocumentCollection,
+                  let doc = try? collection.fetchFirst(filters: [.title(title)])
             else { return nil }
             let id = doc.id
             return id
         }
-        BeamNote.titleForNoteId = { id, includeDeletedNotes in
-            guard let doc = documentManager.loadDocumentById(id: id, includeDeleted: includeDeletedNotes)
+        BeamNote.titleForNoteId = { [weak self] id in
+            guard let collection = self?.currentDocumentCollection,
+                  let doc = try? collection.fetchFirst(filters: [.id(id)])
             else { return nil }
             let title = doc.title
             return title
@@ -150,9 +182,23 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         tabGroupingManager.delegate = self
         setupSubscribers()
-        resetPinnedTabs()
         configureAutoUpdate()
-        analyticsCollector.add(backend: FirebaseAnalyticsBackend())
+
+        if Configuration.branchType == .develop {
+            analyticsCollector.add(backend: FirebaseAnalyticsBackend())
+        }
+
+        // Importing legacy data may fail so make sure the pinned tabs are ok anyway:
+        defer {
+            resetPinnedTabs()
+        }
+
+        do {
+            try loadAccounts()
+            try setupCurrentAccount()
+        } catch {
+            Logger.shared.logError("Unable to setup accounts: \(error)", category: .accountManager)
+        }
     }
 
     // swiftlint:disable:next function_body_length cyclomatic_complexity
@@ -161,7 +207,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             guard let self = self, let element = element else { return }
             self.signpost.begin("lastElementChanged")
             defer { self.signpost.end("lastElementChanged") }
-            GRDBDatabase.shared.appendAsync(element: element) {
+            BeamData.shared.noteLinksAndRefsManager?.appendAsync(element: element) {
                 DispatchQueue.main.async {
                     self.lastIndexedElement = element
                     if let note = element.note,
@@ -177,7 +223,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         $newDay.sink { [weak self] newDay in
             guard let self = self else { return }
             if newDay {
-                self.reloadJournal()
+                try? self.reloadJournal()
             }
         }.store(in: &scope)
 
@@ -188,78 +234,65 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         NotificationCenter.default.addObserver(self, selector: #selector(calendarDayDidChange(notification:)),
                                                name: NSNotification.Name.NSCalendarDayChanged, object: nil)
 
-        DocumentManager.documentSaved.receive(on: DispatchQueue.main)
-            .sink { [weak self] documentStruct in
-                guard let self = self else { return }
-                self.signpost.begin("documentSaved", documentStruct.titleAndId)
+        BeamDocumentCollection.documentSaved.receive(on: DispatchQueue.main)
+            .sink { [weak self] document in
+                guard let self = self,
+                      document.database == self.currentDatabase
+                else { return }
+
+                self.signpost.begin("documentSaved", document.titleAndId)
                 defer { self.signpost.end("documentSaved") }
 
                 // All notes go through this publisher
-                BeamNote.updateNote(documentStruct)
-                Self.noteUpdated.send(documentStruct)
-                switch documentStruct.documentType {
+                BeamNote.updateNote(self, document)
+                switch document.documentType {
                 case .note:
-                    if documentStruct.deletedAt != nil {
-                        self.clusteringManager.removeNote(noteId: documentStruct.id)
-                        self.activeSources.removeNote(noteId: documentStruct.id)
-                    }
+                    break
                 case .journal:
                     // Only send journal updates to this one
-                    Self.journalNoteUpdated.send(documentStruct)
+                    self.maybeInsertInJournal(document)
+                }
+            }.store(in: &scope)
 
-                    // Also update the journal if a note was added or removed and it's not in the future
-                    if let journalDateString = documentStruct.journalDate, let journalDate = BeamNoteType.dateFormater.date(from: journalDateString), journalDate <= BeamDate.now {
-                        let contained = self.journal.contains(where: { $0.id == documentStruct.id })
-                        if documentStruct.deletedAt == nil && !contained {
-                            if !self.journal.contains(where: { $0.id == documentStruct.id }),
-                               let index = self.journal.firstIndex(where: { journalDate > ($0.type.journalDate ?? BeamDate.now) }),
-                               let note = BeamNote.fetch(id: documentStruct.id, includeDeleted: false) {
-                                self.journal.insert(note, at: index)
-                            }
+        BeamDocumentCollection.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { [weak self] deletedDocument in
+                guard let self = self else { return }
+                let scorer = self.noteFrecencyScorer as? ExponentialFrecencyScorer
+                let storage = scorer?.storage as? GRDBNoteFrecencyStorage
+                storage?.remoteSoftDelete(noteId: deletedDocument.id)
+
+                guard deletedDocument.database == self.currentDatabase else { return }
+
+                self.signpost.begin("documentDeleted")
+                defer { self.signpost.end("documentDeleted") }
+
+                self.clusteringManager.removeNote(noteId: deletedDocument.id)
+                self.activeSources.removeNote(noteId: deletedDocument.id)
+
+                self.maybeRemoveFromJournal(deletedDocument)
+                BeamNote.purgeDeletedNode(self, deletedDocument.id)
+            }.store(in: &scope)
+
+        BeamData.shared.$currentDatabase
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] db in
+                guard let self = self else { return }
+                BeamNote.unloadAllNotes()
+                try? self.reloadJournal()
+
+                let dbID = db?.id
+                for window in AppDelegate.main.windows {
+                    switch window.state.mode {
+                    case .note:
+                        if window.state.currentNote?.databaseId != dbID {
+                            window.state.navigateToJournal(note: nil, clearNavigation: true)
                         }
+                    default:
+                        break
                     }
                 }
             }.store(in: &scope)
-
-        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
-            .sink { id in
-                self.signpost.begin("documentDeleted")
-                defer { self.signpost.end("documentDeleted") }
-                if let index = self.journal.firstIndex(where: { $0.id == id }) {
-                    self.journal.remove(at: index)
-                }
-                BeamNote.purgeDeletedNode(id)
-                let scorer = self.noteFrecencyScorer as? ExponentialFrecencyScorer
-                let storage = scorer?.storage as? GRDBNoteFrecencyStorage
-                storage?.remoteSoftDelete(noteId: id)
-            }.store(in: &scope)
-
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(defaultDatabaseDidChange(notification:)),
-                                               name: .defaultDatabaseUpdate,
-                                               object: nil)
-
     }
-
-    @objc private func defaultDatabaseDidChange(notification: Notification) {
-        BeamNote.unloadAllNotes()
-        reloadJournal()
-
-        let dbID = DatabaseManager.defaultDatabase.id
-        for window in AppDelegate.main.windows {
-            switch window.state.mode {
-            case .note:
-                if window.state.currentNote?.databaseId != dbID {
-                    window.state.navigateToJournal(note: nil, clearNavigation: true)
-                }
-            default:
-                break
-            }
-        }
-    }
-
-    static let noteUpdated = PassthroughSubject<DocumentStruct, Never>()
-    static let journalNoteUpdated = PassthroughSubject<DocumentStruct, Never>()
 
     func allWindowsDidClose() {
         resetPinnedTabs()
@@ -267,6 +300,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     func saveData() {
         noteAutoSaveService.saveNotes()
+        try? saveAccounts()
     }
 
     @objc func calendarDayDidChange(notification: Notification) {
@@ -280,23 +314,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         return BeamDate.journalNoteTitle(for: today)
     }
 
-    private var journalCancellables = [AnyCancellable]()
-    private func observeJournal(note: BeamNote) {
-        note.$deleted
-            .drop(while: { $0 == true }) // skip notes that started already deleted
-            .sink { [unowned self] deleted in
-                if deleted {
-                    self.reloadJournal()
-                }
-            }.store(in: &journalCancellables)
-    }
-
-    func setupJournal(firstSetup: Bool = false) {
-        journalCancellables = []
+    func setupJournal(firstSetup: Bool = false) throws {
         journal.removeAll()
-        let note  = BeamNote.fetchOrCreateJournalNote(date: BeamDate.now)
-        observeJournal(note: note)
-        journal.append(note)
+        journalSet.removeAll()
+
+        let note = try BeamNote.fetchOrCreateJournalNote(self, date: BeamDate.now)
+        appendToJournal([note], fetchEvents: !firstSetup)
         _todaysNote = note
         loadMorePastJournalNotes(count: 4, fetchEvents: !firstSetup)
     }
@@ -334,7 +357,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     func appendToJournal(_ _journal: [BeamNote], fetchEvents: Bool) {
         for note in _journal {
-            observeJournal(note: note)
             if fetchEvents, let journalDate = note.type.journalDate {
                 loadEvents(for: note.id, for: journalDate)
             }
@@ -342,17 +364,40 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         let newJournal = journal + _journal
         let sorted = Set(newJournal).sorted { ($0.type.journalDate ?? Date.distantPast) > ($1.type.journalDate ?? Date.distantPast) }
         journal = sorted
+        journalSet = Set(sorted)
+    }
+
+    func maybeInsertInJournal(_ document: BeamDocument) {
+        // update the journal if a note was added or removed and it's not in the future
+        if let journalDate = BeamNoteType.dateFrom(journalDateInt: document.journalDate), journalDate <= BeamDate.now {
+            let contained = journal.contains(where: { $0.id == document.id })
+            if !contained {
+                if !journal.contains(where: { $0.id == document.id }),
+                   let index = journal.firstIndex(where: { journalDate > ($0.type.journalDate ?? BeamDate.now) }),
+                   let note = BeamNote.fetch(id: document.id) {
+                    journal.insert(note, at: index)
+                    journalSet.insert(note)
+                }
+            }
+        }
+    }
+
+    func maybeRemoveFromJournal(_ document: BeamDocument) {
+        if let index = journal.firstIndex(where: { $0.id == document.id }) {
+            journalSet.remove(journal[index])
+            journal.remove(at: index)
+        }
     }
 
     func updateNoteCount() {
-        noteCount = DocumentManager().count()
+        noteCount = (try? currentDocumentCollection?.count()) ?? 0
     }
 
-    func reloadJournal() {
+    func reloadJournal() throws {
         _todaysNote = nil
         journal.removeAll()
         calendarManager.meetingsForNote.removeAll()
-        setupJournal()
+        try setupJournal()
         if newDay { newDay.toggle() }
     }
 
@@ -365,15 +410,15 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     ///Create a .zip backup of all the content of the BeamData folder in Beam sandbox
-    private func backup() {
+    static func backup(overrideArchiveName: String? = nil) {
         let fileManager = FileManager.default
 
         guard PreferencesManager.isDataBackupOnUpdateOn else { return }
 
         let downloadFolder = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        var archiveName = "Beam data archive"
+        var archiveName = overrideArchiveName ?? "Beam data archive"
 
-        if let name = Information.appName, let version = Information.appVersion, let build = Information.appBuild {
+        if let name = overrideArchiveName ?? Information.appName, let version = Information.appVersion, let build = Information.appBuild {
             archiveName = "\(name) v.\(version)_\(build) data backup"
         }
 
@@ -429,7 +474,7 @@ extension BeamData {
 
         self.versionChecker.allowAutoDownload = PreferencesManager.isAutoUpdateOn
         self.versionChecker.customPreinstall = {
-            self.backup()
+            Self.backup()
         }
         self.versionChecker.logMessage = { logMessage in
             Logger.shared.logInfo(logMessage, category: .autoUpdate)
@@ -575,15 +620,16 @@ extension BeamData {
 
 extension BeamData {
     func reindexFileReferences() throws {
+        guard let collection = currentDocumentCollection else { throw BeamDataError.currentDatabaseNotSet }
         do {
-            try BeamFileDBManager.shared.clearFileReferences()
-            for noteId in DocumentManager().allDocumentsIds(includeDeletedNotes: false) {
-                guard let note = BeamNote.fetch(id: noteId, includeDeleted: false) else { continue }
+            try BeamFileDBManager.shared?.clearFileReferences()
+            for noteId in try collection.fetchIds(filters: []) {
+                guard let note = BeamNote.fetch(id: noteId) else { continue }
 
                 note.visitAllElements { element in
                     guard case let .image(fileId, origin: _, displayInfos: _) = element.kind else { return }
                     do {
-                        try BeamFileDBManager.shared.addReference(fromNote: noteId, element: element.id, to: fileId)
+                        try BeamFileDBManager.shared?.addReference(fromNote: noteId, element: element.id, to: fileId)
                     } catch {
                         Logger.shared.logError("Unable to add reindexed reference to file \(fileId) from element \(element.id) of note \(element.note?.id ?? UUID.null)", category: .fileDB)
                     }
@@ -593,7 +639,174 @@ extension BeamData {
             Logger.shared.logError("Couldn't reindex all files from notes: \(error)", category: .fileDB)
         }
     }
+}
 
+// MARK: BeamAccount + BeamDatabase support
+extension BeamData {
+    func addAccount(_ account: BeamAccount, setCurrent: Bool) throws {
+        guard !accounts.contains(where: { $0.id != account.id }) else { return }
+        accounts.append(account)
+        if setCurrent {
+            try setCurrentAccount(account)
+        }
+    }
+
+    func setCurrentAccount(_ account: BeamAccount, database: BeamDatabase? = nil) throws {
+        let database = database ?? account.defaultDatabase
+        guard database.account == account else { throw BeamDataError.databaseAccountMismatch }
+        if currentAccount != account {
+            currentAccount = account
+        }
+        try setCurrentDatabase(database)
+        AuthenticationManager.shared.account = currentAccount
+        Persistence.Account.currentAccountId = account.id
+    }
+
+    func setCurrentDatabase(_ database: BeamDatabase) throws {
+        guard currentDatabase != database else { return }
+        guard let db = try database.account?.loadDatabase(database.id) else { throw BeamDataError.databaseNotFound }
+        currentDatabase = db
+        currentDocumentCollection = db.collection
+        Persistence.Account.currentDatabaseId = db.id
+        registerWithBeamObjectManager()
+    }
+
+    func saveAccounts() throws {
+        for account in accounts {
+            try account.save()
+        }
+    }
+
+    private func setupDefaultAccount() throws {
+        assert(accounts.isEmpty)
+        try addAccount(try Self.createDefaultAccount(), setCurrent: true)
+    }
+
+    public static func createDefaultAccount() throws -> BeamAccount {
+        let path = URL(fileURLWithPath: Self.dataFolder(fileName: Self.accountsFilename))
+        let accountName = "Local"
+        let id = UUID()
+        let accountPath = path.appendingPathComponent("account-" + id.uuidString)
+        let p = accountPath.path
+        let account = try BeamAccount(id: id, email: "", name: accountName, path: p)
+        account.getOrCreateDefaultDatabase()
+
+        try account.save()
+
+        return account
+    }
+
+    public func setupCurrentAccount() throws {
+        guard !accounts.isEmpty else {
+            try setupDefaultAccount()
+            return
+        }
+
+        guard let accountId = Persistence.Account.currentAccountId ?? accounts.first?.id else { throw BeamDataError.currentAccountNotSet }
+        guard let dbId = Persistence.Account.currentDatabaseId ?? accounts.first?.defaultDatabaseId else { throw BeamDataError.currentDatabaseNotSet }
+
+        guard let account = accounts.first(where: { $0.id == accountId }) ?? accounts.first else {
+            throw BeamDataError.accountNotFound
+        }
+
+        let database = (try? account.loadDatabase(dbId)) ?? account.defaultDatabase
+        try setCurrentAccount(account, database: database)
+    }
+
+    static var accountsPath: URL {
+        URL(fileURLWithPath: Self.dataFolder(fileName: Self.accountsFilename))
+    }
+
+    private func loadAccounts() throws {
+        let path = Self.accountsPath
+        Logger.shared.logInfo("Init accounts from \(path)")
+
+        BeamAccount.loadAccounts(from: path).forEach { account in
+            do {
+                try addAccount(account, setCurrent: false)
+            } catch {
+                Logger.shared.logError("Unable to add account \(account): \(error)", category: .accountManager)
+            }
+        }
+    }
+
+    private func loadAccount(url: URL) throws {
+        try addAccount(BeamAccount.load(fromFolder: url.path), setCurrent: false)
+    }
+
+    private static var accountsFilename: String {
+        var suffix = "-\(Configuration.env)"
+        if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+            Logger.shared.logDebug("Using Gitlab CI Job ID for GRDB sqlite file: \(jobId)", category: .search)
+
+            suffix += "-\(jobId)"
+        }
+
+        return "Accounts\(suffix)"
+    }
+
+    public func registerWithBeamObjectManager() {
+        // TODO: This will have to be changed a lot when we go multi account!
+        currentAccount?.registerOnBeamObjectManager()
+    }
+
+    public func clearAllAccounts() throws {
+        try accounts.forEach {
+            try $0.delete(self)
+        }
+
+        let url = URL(fileURLWithPath: BeamData.dataFolder(fileName: Self.accountsFilename))
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        accounts = []
+        currentAccount = nil
+        currentDatabase = nil
+        currentDocumentCollection = nil
+
+        try FileManager.default.removeItem(at: url)
+        saveData()
+    }
+
+    public func clearAllAccountsAndSetupDefaultAccount() throws {
+        try clearAllAccounts()
+        try setupCurrentAccount()
+        BeamObjectManager.setup()
+
+        if let account = BeamData.shared.currentAccount {
+            guard let db = BeamData.shared.currentAccount?.getOrCreateDefaultDatabase() else { return }
+            try? BeamData.shared.setCurrentAccount(account, database: db)
+        }
+        saveData()
+    }
+
+    public func checkAndRepairDB() {
+        for account in accounts {
+            account.checkAndRepairIntegrity()
+        }
+    }
+
+    public static func registerDefaultManagers() {
+        BeamDatabase.registerManager(BeamDocumentCollection.self)
+        BeamDatabase.registerManager(BeamNoteLinksAndRefsManager.self)
+        BeamDatabase.registerManager(BeamFileDBManager.self)
+        BeamAccount.registerManager(BrowsingTreeDBManager.self)
+        BeamAccount.registerManager(TabPinSuggestionDBManager.self)
+        BeamAccount.registerManager(UrlStatsDBManager.self)
+        BeamAccount.registerManager(UrlHistoryManager.self)
+        BeamAccount.registerManager(PasswordsDB.self)
+        BeamAccount.registerManager(CreditCardsDB.self)
+        BeamAccount.registerManager(MnemonicManager.self)
+        BeamAccount.registerManager(ContactsDB.self)
+        BeamAccount.registerManager(TabGroupingStoreManager.self)
+    }
+}
+
+enum BeamDataError: Error {
+    case databaseAccountMismatch
+    case currentAccountNotSet
+    case currentDatabaseNotSet
+    case accountNotFound
+    case databaseNotFound
+    case invalidAccountFile
 }
 
 // MARK: - Tab Grouping

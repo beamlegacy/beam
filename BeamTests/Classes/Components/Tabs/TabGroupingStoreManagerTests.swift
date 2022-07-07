@@ -10,10 +10,14 @@ import XCTest
 
 class TabGroupingStoreManagerTests: XCTestCase {
 
-    let sut = TabGroupingStoreManager()
+    var sut:TabGroupingStoreManager!
 
+    override func setUp() {
+        sut = BeamData.shared.tabGroupingDBManager
+    }
+    
     override class func tearDown() {
-        TabGroupingStoreManager().clearData()
+        try? BeamData.shared.tabGroupingDBManager?.clear()
     }
 
     func tab(withPageId pageId: UUID) -> BrowserTab {

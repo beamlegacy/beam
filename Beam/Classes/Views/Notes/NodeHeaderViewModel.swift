@@ -15,7 +15,9 @@ extension NoteHeaderView {
         case fromPublishButton
     }
 
-    final class ViewModel: ObservableObject {
+    final class ViewModel: ObservableObject, BeamDocumentSource {
+        static var sourceId: String { "NoteHeaderView_\(Self.self)" }
+
         @Published var note: BeamNote? {
             didSet {
                 guard note != oldValue else { return }
@@ -68,9 +70,10 @@ extension NoteHeaderView {
         }
 
         func textFieldDidChange(_ text: String) {
+            guard let collection = BeamData.shared.currentDocumentCollection else { return }
             titleSelectedRange = nil
             let newTitle = formatToValidTitle(titleText)
-            let existingNote = DocumentManager().loadDocumentByTitle(title: newTitle)
+            let existingNote = try? collection.fetchFirst(filters: [.title(newTitle)])
             self.isTitleTaken = (existingNote != nil && existingNote?.id != note?.id, true)
         }
 
@@ -95,7 +98,7 @@ extension NoteHeaderView {
                 }
                 return
             }
-            note?.updateTitle(newTitle)
+            note?.updateTitle(self, newTitle)
             isEditingTitle = false
         }
 

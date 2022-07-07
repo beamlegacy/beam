@@ -87,7 +87,9 @@ class TabGroupingManager {
     var hasPagesGroup: Bool {
         !builtPagesGroups.isEmpty
     }
-    private let storeManager = TabGroupingStoreManager.shared
+    private var storeManager: TabGroupingStoreManager? {
+        BeamData.shared.tabGroupingDBManager
+    }
 
     /// Page associated to a manual group because Clustering found some grouping with pages inside a manual group.
     private var temporaryInManualPageGroups = PageGroupDictionary()
@@ -163,16 +165,16 @@ extension TabGroupingManager {
     }
 
     private func groupDidChangeMetadata(_ group: TabGroup) {
-        storeManager.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: allOpenTabs())
+        storeManager?.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: allOpenTabs())
     }
 
     private func groupDidChangeContent(_ group: TabGroup, fromUser: Bool) {
-        storeManager.groupDidUpdate(group, origin: fromUser ? .userGroupReordering : .clustering, openTabs: allOpenTabs())
+        storeManager?.groupDidUpdate(group, origin: fromUser ? .userGroupReordering : .clustering, openTabs: allOpenTabs())
     }
 
     private func groupsWereUpdatedByClustering(_ groups: Set<TabGroup>) {
         groups.forEach { group in
-            storeManager.groupDidUpdate(group, origin: .clustering, openTabs: allOpenTabs())
+            storeManager?.groupDidUpdate(group, origin: .clustering, openTabs: allOpenTabs())
         }
     }
 }

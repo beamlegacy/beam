@@ -93,8 +93,7 @@ struct OnboardingProfileCreationView: View {
     private func saveUsernameAndFinish() {
         let username = textField.trimmingCharacters(in: .whitespacesAndNewlines)
         guard isUsernameValid(username) else { return }
-        let accountManager = AccountManager()
-        accountManager.setUsername(username: username) { result in
+        BeamData.shared.currentAccount?.setUsername(username: username) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .failure(let error):

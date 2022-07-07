@@ -14,19 +14,23 @@ class FrecencyNoteStorageTest: XCTestCase {
 
     let beamHelper = BeamTestsHelper()
     let beamObjectHelper = BeamObjectTestsHelper()
+    var db: BeamNoteLinksAndRefsManager!
 
-    override func setUp() {
+    override func setUpWithError() throws {
         super.setUp()
 
         BeamTestsHelper.logout()
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
+
+        let store = GRDBStore.empty()
+        db = try BeamNoteLinksAndRefsManager(store: store)
+        try store.migrate()
     }
 
     func testSaveFetch() throws {
         //Checks that createdAt is written once at creation and then updated at each create/Update
         BeamDate.freeze("2001-01-01T00:00:00+000")
 
-        let db = GRDBDatabase.empty()
         let storage = GRDBNoteFrecencyStorage(db: db)
 
         let score = FrecencyScore(id: UUID(), lastTimestamp: BeamDate.now, lastScore: 1, sortValue: 2)
@@ -34,7 +38,7 @@ class FrecencyNoteStorageTest: XCTestCase {
         var fetchedRecord = try db.fetchOneFrecencyNote(noteId: score.id, paramKey: .note30d0)
         let createdAt0 = try XCTUnwrap(fetchedRecord?.createdAt)
         let updatedAt0 = try XCTUnwrap(fetchedRecord?.updatedAt)
-        
+
         BeamDate.travel(1)
 
         try storage.save(score: score, paramKey: .note30d0)
@@ -77,12 +81,11 @@ class FrecencyNoteStorageTest: XCTestCase {
         XCTAssertEqual(records.count, 2)
         XCTAssertNil(limiter.recordsToSave)
     }
-    
+
     func testApiSaveLimiterIntegration() throws {
         //We at least check that rate limiter doesnt prevent sending on api til save limit.
         beforeNetworkTests()
 
-        let db = GRDBDatabase.empty()
         let storage = GRDBNoteFrecencyStorage(db: db)
         storage.resetApiSaveLimiter()
         let noteIds = (0..<10).map { _ in UUID() }
@@ -105,7 +108,6 @@ class FrecencyNoteStorageTest: XCTestCase {
     func testReceivedDeduplication() throws {
         let noteId = UUID()
         let now = BeamDate.now
-        let db = GRDBDatabase.empty()
         let storage = GRDBNoteFrecencyStorage(db: db)
 
         let records = [
@@ -123,7 +125,6 @@ class FrecencyNoteStorageTest: XCTestCase {
     func testSoftDelete() throws {
         beforeNetworkTests()
         let noteIds = [UUID(), UUID()]
-        let db = GRDBDatabase.empty()
         let storage = GRDBNoteFrecencyStorage(db: db)
         let now = BeamDate.now
         let records = [
@@ -138,12 +139,12 @@ class FrecencyNoteStorageTest: XCTestCase {
         var localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[0], paramKey: .note30d0))
         XCTAssertEqual(localRecord.deletedAt, now)
         var fetchedRecord = try self.beamObjectHelper.fetchOnAPI(localRecord)
-        XCTAssertEqual(fetchedRecord?.deletedAt, localRecord.deletedAt)
+        XCTAssertNil(fetchedRecord)
 
         localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[0], paramKey: .note30d1))
         XCTAssertEqual(localRecord.deletedAt, now)
         fetchedRecord = try self.beamObjectHelper.fetchOnAPI(localRecord)
-        XCTAssertEqual(fetchedRecord?.deletedAt, localRecord.deletedAt)
+        XCTAssertNil(fetchedRecord)
 
         localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[1], paramKey: .note30d0))
         XCTAssertNil(localRecord.deletedAt)

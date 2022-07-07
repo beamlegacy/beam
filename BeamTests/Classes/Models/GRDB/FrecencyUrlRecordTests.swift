@@ -7,7 +7,9 @@ import XCTest
 
 class FrecencyUrlRecordTests: XCTestCase {
     func testSave() throws {
-        let db = GRDBDatabase.empty()
+        let store = GRDBStore(writer: DatabaseQueue())
+        let db = try UrlHistoryManager(holder: nil, store: store)
+        try store.migrate()
 
         // Check subsequent record save: primary keys are `urlId` and `frecencyKey`.
         // When a primary key already exists, the record is updated.
@@ -29,12 +31,15 @@ class FrecencyUrlRecordTests: XCTestCase {
             expect(frecency.frecencyScore) == rec.frecencyScore
         }
 
-        try db.dbReader.read { db in
+        try db.read { db in
             try expect(FrecencyUrlRecord.fetchCount(db)) == 3
         }
     }
     func testFetchNanSortScore() throws {
-        let db = GRDBDatabase.empty()
+        let store = GRDBStore(writer: DatabaseQueue())
+        let db = try UrlHistoryManager(holder: nil, store: store)
+        try store.migrate()
+
         let id = UUID()
         let record = FrecencyUrlRecord(urlId: id, lastAccessAt: Date(timeIntervalSince1970: 1), frecencyScore: -1, frecencySortScore: Float.nan, frecencyKey: .webVisit30d0)
         try db.saveFrecencyUrl(record)
@@ -44,7 +49,10 @@ class FrecencyUrlRecordTests: XCTestCase {
     }
 
     func testGetMany() throws {
-        let db = GRDBDatabase.empty()
+        let store = GRDBStore(writer: DatabaseQueue())
+        let db = try UrlHistoryManager(holder: nil, store: store)
+        try store.migrate()
+
         let urlIds = (0...2).map { _ in UUID() }
         let records = [
             FrecencyUrlRecord(urlId: urlIds[0], lastAccessAt: Date(timeIntervalSince1970: 0), frecencyScore: 0.34,           frecencySortScore: 10, frecencyKey: .webVisit30d0),

@@ -31,22 +31,6 @@ class Document: NSManagedObject {
         try? Database.fetchWithId(context, database_id)
     }
 
-    func update(_ documentStruct: DocumentStruct) {
-        database_id = documentStruct.databaseId
-        // use mergeWithLocalChanges for `data`
-        // data = documentStruct.data
-        title = documentStruct.title
-        document_type = documentStruct.documentType.rawValue
-        created_at = documentStruct.createdAt
-        updated_at = documentStruct.updatedAt
-        deleted_at = documentStruct.deletedAt
-        is_public = documentStruct.isPublic
-
-        if let journalDate = documentStruct.journalDate, !journalDate.isEmpty {
-            journal_day = JournalDateConverter.toInt(from: journalDate)
-        }
-    }
-
     // MARK: -
     // MARK: Validations
     override func validateForInsert() throws {

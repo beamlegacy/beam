@@ -42,14 +42,6 @@ class Database: NSManagedObject, BeamCoreDataObject {
         }
     }
 
-    func documentsCount() -> Int {
-        DocumentManager().count(filters: [.databaseId(id)])
-    }
-
-    class func defaultDatabase(_ context: NSManagedObjectContext = CoreDataManager.shared.mainContext) -> Database {
-        (try? Database.fetchWithId(context, DatabaseManager.defaultDatabase.id)) ?? Database.fetchOrCreateWithTitle(context, "Default")
-    }
-
     class func deleteWithPredicate(_ context: NSManagedObjectContext,
                                    _ predicate: NSPredicate? = nil) throws {
         try context.performAndWait {

@@ -30,7 +30,6 @@ struct OnboardingEmailConfirmationView: View {
     }
     @State private var errorState: ConnectError?
 
-    private let accountManager = AccountManager()
     private var buttonVariant: ActionableButtonVariant {
         var style = ActionableButtonVariant.gradient(icon: nil).style
         style.textAlignment = .center
@@ -123,7 +122,7 @@ struct OnboardingEmailConfirmationView: View {
         loadingState = .signinin
         updateActions()
         var loadingStartTime = BeamDate.now
-        accountManager.signIn(email: email, password: password, runFirstSync: false) { result in
+        BeamData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: false) { result in
             DispatchQueue.main.async {
                 updateActions()
                 switch result {
@@ -168,7 +167,7 @@ struct OnboardingEmailConfirmationView: View {
             return
         }
         errorState = nil
-        accountManager.resendVerificationEmail(email: email) { result in
+        BeamData.shared.currentAccount?.resendVerificationEmail(email: email) { result in
             switch result {
             case .failure(let error):
                 emailConfirmationTooltip = error.localizedDescription
