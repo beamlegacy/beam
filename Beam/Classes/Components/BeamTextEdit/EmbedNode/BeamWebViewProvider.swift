@@ -41,7 +41,7 @@ extension BeamWebViewProvider: BeamWebViewProviding {
 
         let webView = BeamWebView(frame: .zero, configuration: configuration)
         webView.setupForEmbed()
-        AppDelegate.main.data.setup(webView: webView)
+        BeamData.shared.setup(webView: webView)
 
         completionHandler(webView, false)
     }

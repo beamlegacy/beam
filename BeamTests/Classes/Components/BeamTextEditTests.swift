@@ -18,11 +18,12 @@ class BeamTextEditTests: XCTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        AccountManager.logout()
+        BeamData.shared.currentAccount?.logout()
         Configuration.networkEnabled = false
 
-        note = BeamNote(title: "BeamTextEditTests")
         data = BeamData()
+        note = try BeamNote(title: "BeamTextEditTests")
+        note.owner = BeamData.shared.currentDatabase
         editor = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: false)
         editor.data = data
         editor.prepareRoot()
@@ -72,7 +73,8 @@ class BeamTextEditTests: XCTestCase {
 
         //Pasting BeamElements
         url = urls[3]
-        let fromNote = BeamNote(title: "note to copy")
+        let fromNote = try BeamNote(title: "note to copy")
+        fromNote.owner = BeamData.shared.currentDatabase
         fromNote.addChild(BeamElement(BeamText(attributedString: NSAttributedString(string: "abc \n\(url) efg"))))
         let noteData = try JSONEncoder().encode(fromNote)
         let elementHolder = BeamNoteDataHolder(noteData: noteData)

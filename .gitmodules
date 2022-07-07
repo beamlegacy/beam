@@ -1,6 +1,3 @@
-[submodule "Extern/libgit2"]
-	path = Extern/libgit2
-	url = https://github.com/libgit2/libgit2.git
 [submodule "Extern/AutoUpdate"]
 	path = Extern/AutoUpdate
 	url = ../autoupdate.git

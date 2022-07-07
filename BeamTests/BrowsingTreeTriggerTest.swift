@@ -16,13 +16,13 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         try super.setUpWithError()
 
         BeamObjectManager.disableSendingObjects = true
-        try GRDBDatabase.shared.clear()
+        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
     override func tearDownWithError() throws {
         try super.tearDownWithError()
         
-        try GRDBDatabase.shared.clear()
+        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
     func testNavigation() throws {
@@ -243,7 +243,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         }
     }
 
-    func testOrigins() {
+    func testOrigins() throws {
 
         //trigger a searchBar origin
         let url = "http://localhost:\(Configuration.MockHttpServer.port)/"
@@ -272,7 +272,8 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         //search from node
         indexExpectation = indexExpectations[2]
         let expectedText = "hi there"
-        let note = BeamNote(title: "abc")
+        let note = try BeamNote(title: "abc")
+        note.owner = BeamData.shared.currentDatabase
         let editor = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: false)
         editor.prepareRoot()
         let root = editor.rootNode!
@@ -291,7 +292,8 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         //click on link in note
         indexExpectation = indexExpectations[3]
         let expectedNoteTitle = "my note"
-        let note2 = BeamNote(title: expectedNoteTitle)
+        let note2 = try BeamNote(title: expectedNoteTitle)
+        note2.owner = BeamData.shared.currentDatabase
         let element = BeamElement("some text")
         state.handleOpenUrl(URL(string: url)!, note: note2, element: element, inBackground: false)
         wait(for: [indexExpectation], timeout: 1)

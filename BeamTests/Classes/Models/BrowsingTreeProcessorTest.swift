@@ -13,15 +13,15 @@ class BrowsingTreeProcessorTest: XCTestCase {
 
     override func setUpWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try GRDBDatabase.shared.clearUrlFrecencies()
+        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
         Persistence.cleanUp()
     }
 
     override func tearDownWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try GRDBDatabase.shared.clearUrlFrecencies()
+        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
         Persistence.cleanUp()
-        try GRDBDatabase.shared.clearLongTermScores()
+        try BeamData.shared.urlStatsDBManager?.clearLongTermScores()
      }
 
     func testTreeProcess() throws {
@@ -44,7 +44,9 @@ class BrowsingTreeProcessorTest: XCTestCase {
         XCTAssertEqual(longTermScores.count, 1)
         BeamDate.reset()
 
-        var frecencies = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: tree.current.link)
+        guard var frecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: tree.current.link) else {
+            throw BeamDataError.databaseNotFound
+        }
         var visitFrecencyRecord = try XCTUnwrap(frecencies[.webVisit30d0])
         XCTAssertEqual(visitFrecencyRecord.frecencyScore, 1.5)
         var readingTimeFrecencyRecord = try XCTUnwrap(frecencies[.webReadingTime30d0])
@@ -52,7 +54,9 @@ class BrowsingTreeProcessorTest: XCTestCase {
 
         //domain url id frecencies should also be updated
         var domainId = try XCTUnwrap(LinkStore.shared.getDomainId(id: tree.current.link))
-        var domainFrecencies = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: domainId)
+        guard var domainFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: domainId) else {
+            throw BeamDataError.databaseNotFound
+        }
         visitFrecencyRecord = try XCTUnwrap(domainFrecencies[.webVisit30d0])
         XCTAssertEqual(visitFrecencyRecord.frecencyScore, 0.5)
         readingTimeFrecencyRecord = try XCTUnwrap(domainFrecencies[.webReadingTime30d0])
@@ -68,14 +72,21 @@ class BrowsingTreeProcessorTest: XCTestCase {
         longTermScores = store.getMany(urlIds: [importedTree.current.link])
         XCTAssertEqual(longTermScores.count, 0) //history imported from other browsers doesn't contain scores
 
-        frecencies = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: importedTree.current.link)
+        guard let _frecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: importedTree.current.link) else {
+            throw BeamDataError.databaseNotFound
+        }
+        frecencies = _frecencies
         visitFrecencyRecord = try XCTUnwrap(frecencies[.webVisit30d0])
         XCTAssertEqual(visitFrecencyRecord.frecencyScore, 1.5)
         XCTAssertNil(frecencies[.webReadingTime30d0])
 
         //domain url id frecencies should also be updated
         domainId = try XCTUnwrap(LinkStore.shared.getDomainId(id: importedTree.current.link))
-        domainFrecencies = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: domainId)
+        guard let _domainFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: domainId) else {
+            throw BeamDataError.databaseNotFound
+        }
+        domainFrecencies = _domainFrecencies
+
         visitFrecencyRecord = try XCTUnwrap(domainFrecencies[.webVisit30d0])
         XCTAssertEqual(visitFrecencyRecord.frecencyScore, 0.5)
         XCTAssertNil(domainFrecencies[.webReadingTime30d0])
@@ -110,15 +121,19 @@ class BrowsingTreeProcessorTest: XCTestCase {
         processor.process(tree: tree0)
         XCTAssertEqual(Persistence.ImportedBrowserHistory.getMaxDate(for: .chrome), t2)
         //node whose date is > t1
-        XCTAssert(try GRDBDatabase.shared.fetchOneFrecency(fromUrl: link2).count > 0)
+        XCTAssert(try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: link2).count ?? 0 > 0)
         //node whose date is < t1
-        XCTAssertEqual(try GRDBDatabase.shared.fetchOneFrecency(fromUrl: link0).count, 0)
+        XCTAssertEqual(try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: link0).count, 0)
 
         BeamDate.reset()
     }
 
     func testLongTermScoreUpdate() throws {
-        let store = LongTermUrlScoreStore(db: GRDBDatabase.empty())
+        let grdbStore = GRDBStore.empty()
+        let db = try UrlStatsDBManager(store: grdbStore)
+        try grdbStore.migrate()
+
+        let store = LongTermUrlScoreStore(db: db)
         let updater = LongTermScoreUpdater(scoreStore: store)
 
         let tree = BrowsingTree(nil)

@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 import Quick
 import Nimble
-import Promises
+
 
 @testable import Beam
 @testable import BeamCore
@@ -37,6 +37,10 @@ class BeamObjectsRequests: QuickSpec {
             beamHelper.endNetworkRecording()
             Beam.Configuration.reset()
             BeamDate.reset()
+        }
+
+        afterSuite {
+            BeamObjectManager.unregister(objectType: .myRemoteObject)
         }
 
         context("with Foundation") {

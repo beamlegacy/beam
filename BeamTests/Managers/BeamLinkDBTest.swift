@@ -49,7 +49,10 @@ class BeamLinkDBTests: XCTestCase {
             Link(url: "http://blabla.fr/", title: nil, content: nil, destination: nil, frecencyVisitSortScore: 5),
             destinationLink,
         ]
-        let db = GRDBDatabase.empty()
+        let store = GRDBStore(writer: DatabaseQueue())
+        let db = try UrlHistoryManager(holder: nil, store: store)
+        try store.migrate()
+
         try db.insert(links: links)
 
         let results = db.getTopScoredLinks(matchingUrl: "animal", frecencyParam: .webVisit30d0, limit: 2)
@@ -66,12 +69,13 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let creationDate = BeamDate.now
         let dbQueue = DatabaseQueue()
-        let inMemoryGrdb = try GRDBDatabase(dbQueue, migrate: false)
-        try inMemoryGrdb.migrate(upTo: "flattenBrowsingTrees")
+        let store = GRDBStore(writer: dbQueue)
+        let inMemoryGrdb = try UrlHistoryManager(holder: nil, store: store)
+        try store.migrate(upTo: "flattenBrowsingTrees")
 
         //insertion of separated link and frecency records
         let urls = ["http://abc.com", "http://def.fr"]
-        let linkStore = BeamLinkDB(db: inMemoryGrdb)
+        let linkStore = BeamLinkDB(overridenManager: inMemoryGrdb)
         let ids = urls.map { _ in UUID() }
         try zip(urls, ids).forEach { (url, id) in
             try dbQueue.write { db in
@@ -82,7 +86,7 @@ class BeamLinkDBTests: XCTestCase {
             }
         }
         let lastAccessAt = creationDate - Double(2)
-        let scoreStore = GRDBUrlFrecencyStorage(db: inMemoryGrdb)
+        let scoreStore = GRDBUrlFrecencyStorage(overridenManager: inMemoryGrdb)
         let visitScore = FrecencyScore(id: ids[0], lastTimestamp: lastAccessAt, lastScore: 2.0, sortValue: 2.5)
         let readTimeScore = FrecencyScore(id: ids[0], lastTimestamp: lastAccessAt, lastScore: 1.0, sortValue: 1.0)
         try scoreStore.save(score: visitScore, paramKey: .webVisit30d0)
@@ -91,7 +95,7 @@ class BeamLinkDBTests: XCTestCase {
         //tested migration
         BeamDate.travel(1)
         let migrationDate = BeamDate.now
-        try inMemoryGrdb.migrate(upTo: "moveUrlVisitFrecenciesToLinkDB")
+        try store.migrate(upTo: "moveUrlVisitFrecenciesToLinkDB")
 
         //link 0 frecency fields have been filled with visitScore values
         let link0 = try XCTUnwrap(linkStore.linkFor(id: ids[0]))
@@ -112,16 +116,19 @@ class BeamLinkDBTests: XCTestCase {
     }
 
     func testReceivedLinkFrecencyOverwrite() throws {
-        let db = GRDBDatabase.empty()
-        let store = BeamLinkDB(db: db)
+        let dbQueue = DatabaseQueue()
+        let store = GRDBStore(writer: dbQueue)
+        let inMemoryGrdb = try UrlHistoryManager(holder: nil, store: store)
+        let db = BeamLinkDB(overridenManager: inMemoryGrdb)
+        try store.migrate()
         let now = BeamDate.now
         let urls = ["http://coucou.fr", "http://hello.fr"]
         let localRecord0 = Link(url: urls[0], title: nil, content: nil, frecencyVisitLastAccessAt: now, frecencyVisitScore: 1.0, frecencyVisitSortScore: 1.0)
         let localRecord1 = Link(url: urls[1], title: nil, content: nil, frecencyVisitLastAccessAt: now, frecencyVisitScore: 1.0, frecencyVisitSortScore: 1.0)
-        try db.insert(links: [localRecord0, localRecord1])
+        try inMemoryGrdb.insert(links: [localRecord0, localRecord1])
         let remoteRecord0 = Link(url: urls[0], title: "coucou", content: nil, frecencyVisitLastAccessAt: nil, frecencyVisitScore: nil, frecencyVisitSortScore: nil)
         let remoteRecord1 = Link(url: urls[1], title: "hello", content: nil, frecencyVisitLastAccessAt: now + Double(1), frecencyVisitScore: 2.0, frecencyVisitSortScore: 2.0)
-        try store.receivedObjects([remoteRecord0, remoteRecord1])
+        try db.receivedObjects([remoteRecord0, remoteRecord1])
 
         //link frecency fields are not reset to nil when receiving a frecencyless record
         let savedRecord0 = try XCTUnwrap(db.linkFor(url: urls[0]))
@@ -140,21 +147,24 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertEqual(savedRecord1.frecencyVisitSortScore, 2.0)
     }
     
-    func testFrencencyStore() throws {
-        let db = GRDBDatabase.empty()
-        let linkstore = BeamLinkDB(db: db)
-        let frencencyStorage = LinkStoreFrecencyUrlStorage(db: db)
+    func testFrecencyStore() throws {
+        let dbQueue = DatabaseQueue()
+        let store = GRDBStore(writer: dbQueue)
+        let inMemoryGrdb = try UrlHistoryManager(holder: nil, store: store)
+        let linkstore = BeamLinkDB(overridenManager: inMemoryGrdb)
+        let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb)
+        try store.migrate()
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let t0 = BeamDate.now
         
         let linkId0 = linkstore.getOrCreateId(for: "http://moon.fr", title: nil, content: nil, destination: nil)
         let score = FrecencyScore(id: linkId0, lastTimestamp: t0, lastScore: 1, sortValue: 2)
         //storing frecency using readingTime param key doesn't fill link frecency fields
-        try frencencyStorage.save(score: score, paramKey: .webReadingTime30d0)
-        XCTAssertNil(try frencencyStorage.fetchOne(id: linkId0, paramKey: .webVisit30d0))
+        try frecencyStorage.save(score: score, paramKey: .webReadingTime30d0)
+        XCTAssertNil(try frecencyStorage.fetchOne(id: linkId0, paramKey: .webVisit30d0))
         //storing frecency using visit paramKey allows to retreive it
-        try frencencyStorage.save(score: score, paramKey: .webVisit30d0)
-        var fetched = try XCTUnwrap(frencencyStorage.fetchOne(id: linkId0, paramKey: .webVisit30d0))
+        try frecencyStorage.save(score: score, paramKey: .webVisit30d0)
+        var fetched = try XCTUnwrap(frecencyStorage.fetchOne(id: linkId0, paramKey: .webVisit30d0))
         XCTAssertEqual(fetched.lastTimestamp, BeamDate.now)
         XCTAssertEqual(fetched.lastScore, 1)
         XCTAssertEqual(fetched.sortValue, 2)
@@ -162,8 +172,8 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.travel(1.0)
         let t1 = BeamDate.now
         var updatedScore = FrecencyScore(id: linkId0, lastTimestamp: t1, lastScore: 1.5, sortValue: 3)
-        try frencencyStorage.save(score: updatedScore, paramKey: .webVisit30d0)
-        fetched = try XCTUnwrap(frencencyStorage.fetchOne(id: linkId0, paramKey: .webVisit30d0))
+        try frecencyStorage.save(score: updatedScore, paramKey: .webVisit30d0)
+        fetched = try XCTUnwrap(frecencyStorage.fetchOne(id: linkId0, paramKey: .webVisit30d0))
         XCTAssertEqual(fetched.lastTimestamp, t1)
         XCTAssertEqual(fetched.lastScore, 1.5)
         XCTAssertEqual(fetched.sortValue, 3)
@@ -177,12 +187,12 @@ class BeamLinkDBTests: XCTestCase {
         let linkId1 = linkstore.getOrCreateId(for: "http://sun.com", title: nil, content: nil, destination: nil)
         let otherScore = FrecencyScore(id: linkId1, lastTimestamp: t2, lastScore: 2, sortValue: 7)
         updatedScore = FrecencyScore(id: linkId0, lastTimestamp: t2, lastScore: 1, sortValue: 2)
-        try frencencyStorage.save(scores: [otherScore, updatedScore], paramKey: .webReadingTime30d0)
-        XCTAssertNil(try frencencyStorage.fetchOne(id: linkId1, paramKey: .webVisit30d0))
-        try frencencyStorage.save(scores: [otherScore, updatedScore], paramKey: .webVisit30d0)
+        try frecencyStorage.save(scores: [otherScore, updatedScore], paramKey: .webReadingTime30d0)
+        XCTAssertNil(try frecencyStorage.fetchOne(id: linkId1, paramKey: .webVisit30d0))
+        try frecencyStorage.save(scores: [otherScore, updatedScore], paramKey: .webVisit30d0)
 
         //updated score
-        fetched = try XCTUnwrap(frencencyStorage.fetchOne(id: linkId0, paramKey: .webVisit30d0))
+        fetched = try XCTUnwrap(frecencyStorage.fetchOne(id: linkId0, paramKey: .webVisit30d0))
         XCTAssertEqual(fetched.lastTimestamp, t2)
         XCTAssertEqual(fetched.lastScore, 1)
         XCTAssertEqual(fetched.sortValue, 2)
@@ -191,7 +201,7 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertEqual(link0.updatedAt, t2)
         
         //created score
-        fetched = try XCTUnwrap(frencencyStorage.fetchOne(id: linkId1, paramKey: .webVisit30d0))
+        fetched = try XCTUnwrap(frecencyStorage.fetchOne(id: linkId1, paramKey: .webVisit30d0))
         XCTAssertEqual(fetched.lastTimestamp, t2)
         XCTAssertEqual(fetched.lastScore, 2)
         XCTAssertEqual(fetched.sortValue, 7)
@@ -205,8 +215,10 @@ class BeamLinkDBTests: XCTestCase {
     func testConflictManagement() throws {
         beforeNetworkTests()
         let beamObjectHelper = BeamObjectTestsHelper()
-        let db = GRDBDatabase.empty()
-        let linkstore = BeamLinkDB(db: db)
+        let store = GRDBStore(writer: DatabaseQueue())
+        let db = try UrlHistoryManager(holder: nil, store: store)
+        let linkstore = BeamLinkDB(overridenManager: db)
+        try store.migrate()
         let now = BeamDate.now
         var link = Link(
             url: "httpl://abc.fr/",
@@ -244,9 +256,8 @@ class BeamLinkDBTests: XCTestCase {
 
         stopNetworkTests()
     }
-    func testTitleNotReplacedByEmpty() {
-        let db = GRDBDatabase.empty()
-        let linkstore = BeamLinkDB(db: db)
+    func testTitleNotReplacedByEmpty() throws {
+        let linkstore = BeamLinkDB()
 
         var link = linkstore.visit("http://site.cool/page", title: "A page", content: nil, destination: nil)
         link = linkstore.visit("http://site.cool/page", title: nil, content: nil, destination: nil)

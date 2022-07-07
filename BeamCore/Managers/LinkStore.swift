@@ -56,7 +56,7 @@ public struct Link: Codable {
     }
 }
 
-public protocol LinkManager {
+public protocol LinkManagerProtocol {
     func getLinks(matchingUrl url: String) -> [UUID: Link]
     func getLinks(for ids: [UUID]) -> [UUID: Link]
     func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID
@@ -68,7 +68,7 @@ public protocol LinkManager {
     func insertOrIgnore(links: [Link])
     var allLinks: [Link] { get }
 }
-extension LinkManager {
+extension LinkManagerProtocol {
     public func normalized(url: String) -> String {
         URL(string: url)?.normalized.absoluteString ?? url
     }
@@ -87,7 +87,7 @@ extension LinkManager {
     }
 }
 
-public class FakeLinkManager: LinkManager {
+public class FakeLinkManager: LinkManagerProtocol {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { [:] }
     public func getLinks(for ids: [UUID]) -> [UUID: Link] { [:] }
     public func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID { UUID.null }
@@ -100,11 +100,11 @@ public class FakeLinkManager: LinkManager {
     public var allLinks: [Link] { [] }
 }
 
-public class LinkStore: LinkManager {
+public class LinkStore: LinkManagerProtocol {
     public static var shared = LinkStore(linkManager: FakeLinkManager())
-    public var linkManager: LinkManager
+    public var linkManager: LinkManagerProtocol
 
-    public init(linkManager: LinkManager) {
+    public init(linkManager: LinkManagerProtocol) {
         self.linkManager = linkManager
     }
 
@@ -153,7 +153,7 @@ public class LinkStore: LinkManager {
     public var allLinks: [Link] { linkManager.allLinks }
 }
 
-public class InMemoryLinkManager: LinkManager {
+public class InMemoryLinkManager: LinkManagerProtocol {
     public func insertOrIgnore(links: [Link]) {
         for link in links where self.linksById[link.id] == nil {
             self.linksById[link.id] = link

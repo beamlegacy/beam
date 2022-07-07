@@ -7,19 +7,22 @@
 
 import XCTest
 @testable import Beam
+import GRDB
 
 class FrecencyNoteRecordTest: XCTestCase {
+    var db: BeamNoteLinksAndRefsManager!
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        let store = GRDBStore.empty()
+        try db = BeamNoteLinksAndRefsManager(store: store)
+        try store.migrate()
     }
 
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testRecord() throws {
-        let db = GRDBDatabase.empty()
+    func testRecordNewManager() throws {
         let noteIds = Array((0..<2).map { _ in UUID() })
         let ids = Array((0..<3).map { _ in UUID() })
         let records = [
@@ -32,13 +35,13 @@ class FrecencyNoteRecordTest: XCTestCase {
         try db.saveFrecencyNote(records[0])
         var fetchedRecord = try XCTUnwrap(try? db.fetchOneFrecencyNote(noteId: noteIds[0], paramKey: .note30d0))
         XCTAssertEqual(fetchedRecord.frecencyScore, 1.0)
-        try db.dbReader.read { db in
+        try db.read { db in
             try XCTAssertEqual(FrecencyNoteRecord.fetchCount(db), 1)
         }
         for record in records[1..<4] {
             try db.saveFrecencyNote(record)
         }
-        try db.dbReader.read { db in
+        try db.read { db in
             try XCTAssertEqual(FrecencyNoteRecord.fetchCount(db), 3)
         }
         //First record get overwritten thanks to primary key
@@ -64,8 +67,8 @@ class FrecencyNoteRecordTest: XCTestCase {
         fetchedScores = db.getFrecencyScoreValues(noteIds: noteIds, paramKey: .note30d1)
         XCTAssertEqual(fetchedScores[noteIds[0]]?.frecencySortScore, 4.5)
     }
-    func testFetchTopRecords() throws {
-        let db = GRDBDatabase.empty()
+
+    func testFetchTopRecordsNewManager() throws {
         let noteIds = Array((0..<3).map { _ in UUID() })
         let records = [
             FrecencyNoteRecord(id: UUID(), noteId: noteIds[0], lastAccessAt: Date(), frecencyScore: 1.0, frecencySortScore: 1.5, frecencyKey: .note30d0),
@@ -80,6 +83,5 @@ class FrecencyNoteRecordTest: XCTestCase {
         XCTAssertEqual(topScores.count, 2)
         XCTAssertEqual(topScores[noteIds[1]]?.frecencySortScore, 3.5)
         XCTAssertEqual(topScores[noteIds[2]]?.frecencySortScore, 2.5)
-
     }
 }

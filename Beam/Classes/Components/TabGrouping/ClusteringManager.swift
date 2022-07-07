@@ -319,11 +319,20 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
                     self.logForClustering(result: result.pageGroups, changeCandidate: false)
                     // After adding the second page, add notes from previous sessions
                     if self.initialiseNotes {
-                        let notes = DocumentManager().loadAllWithLimit(10, sortingKey: .updatedAt(false), type: .note).compactMap {
-                            BeamNote.fetch(id: $0.id, includeDeleted: false)
+                        guard let collection = BeamData.shared.currentDocumentCollection else {
+                            Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): no current document collection", category: .clustering)
+                            return
                         }
-                        for note in notes {
-                            self.addNote(note: note, addToNextSummary: false)
+                        do {
+                            let notes = try collection.fetch(filters: [.limit(10, offset: 0), .type(.note)], sortingKey: .updatedAt(false))
+                                .compactMap({
+                                    BeamNote.fetch(id: $0.id)
+                                })
+                            for note in notes {
+                                self.addNote(note: note, addToNextSummary: false)
+                            }
+                        } catch {
+                            Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): unable to fetch 10 documents", category: .clustering)
                         }
                     }
                 }
@@ -483,7 +492,7 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     private func transformToClusteredNotes() {
         self.clusteredNotes = self.clusteredNotesId.compactMap({ cluster in
             return cluster.map { noteUuid in
-                return BeamNote.titleForNoteId(noteUuid, false)
+                return BeamNote.titleForNoteId(noteUuid)
             }
         })
     }
@@ -554,7 +563,7 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
             let notesInGroup = self.clusteredNotesId[group.offset]
             for noteId in notesInGroup {
                 let informationForId = self.cluster.getExportInformationForId(id: noteId)
-                sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId, includeDeleted: false)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, tabColouringGroupId: nil, userCorrectionGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, id: noteId, parentId: nil))
+                sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, tabColouringGroupId: nil, userCorrectionGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, id: noteId, parentId: nil))
             }
             for urlId in group.element {
                 let url = LinkStore.linkFor(urlId)?.url

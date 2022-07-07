@@ -26,21 +26,13 @@ class PasswordManager {
     }
 
     private var hostnameCanonicalizer: HostnameCanonicalizer
-    private var passwordsDB: PasswordStore
+    private var overridePasswordDB: PasswordStore?
+    private var passwordsDB: PasswordStore? { overridePasswordDB ?? BeamData.shared.passwordDB }
     private var changeSubject: PassthroughSubject<Void, Never>
 
-    convenience init() {
-        do {
-            let passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
-            self.init(passwordsDB: passwordsDB, hostLookup: .shared)
-        } catch {
-            fatalError("Error while creating the Passwords Database \(error)")
-        }
-    }
-
-    init(passwordsDB: PasswordStore, hostLookup: HostnameCanonicalizer = .shared) {
+    init(overridePasswordDB: PasswordStore? = nil, hostLookup: HostnameCanonicalizer = .shared) {
+        self.overridePasswordDB = overridePasswordDB
         self.hostnameCanonicalizer = hostLookup
-        self.passwordsDB = passwordsDB
         self.changeSubject = PassthroughSubject<Void, Never>()
     }
 
@@ -70,7 +62,9 @@ class PasswordManager {
 
     func fetchAll() -> [PasswordManagerEntry] {
         do {
-            let allEntries = try passwordsDB.fetchAll()
+            guard let allEntries = try passwordsDB?.fetchAll() else {
+                return []
+            }
             return passwordManagerEntries(for: allEntries)
         } catch PasswordDBError.errorFetchingPassword(let errorMsg) {
             Logger.shared.logError("Error while fetching all passwords: \(errorMsg)", category: .passwordsDB)
@@ -81,6 +75,8 @@ class PasswordManager {
     }
 
     func entries(for host: String, options: PasswordManagerHostLookupOptions) -> [PasswordManagerEntry] {
+        guard let passwordsDB = passwordsDB else { return [] }
+
         do {
             let canonicalHost = options.contains(.genericHost) ? hostnameCanonicalizer.canonicalHostname(for: host) : nil
             let hostGroup = options.contains(.sharedCredentials) ? hostnameCanonicalizer.hostsSharingCredentials(with: canonicalHost ?? host) : nil
@@ -110,14 +106,19 @@ class PasswordManager {
     }
 
     func credentials(for host: String, completion: @escaping ([Credential]) -> Void) {
-        passwordsDB.credentials(for: host) { credentials in
+        guard let passwordsDB = passwordsDB else {
+            completion([])
+            return
+        }
+
+        return passwordsDB.credentials(for: host) { credentials in
             completion(credentials)
         }
     }
 
     func password(hostname: String, username: String) throws -> String {
         do {
-            guard let passwordRecord = try passwordsDB.passwordRecord(hostname: hostname, username: username) else {
+            guard let passwordRecord = try passwordsDB?.passwordRecord(hostname: hostname, username: username) else {
                 throw PasswordDBError.cantReadDB(errorMsg: "Database returned no entry")
             }
             guard let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password, EncryptionManager.shared.localPrivateKey()) else {
@@ -143,6 +144,11 @@ class PasswordManager {
               password: String,
               uuid: UUID? = nil,
               _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) -> LocalPasswordRecord? {
+        guard let passwordsDB = passwordsDB else {
+            networkCompletion?(.failure(BeamDataError.databaseNotFound))
+            return nil
+        }
+
         do {
             let previousHostname: String
             let previousUsername: String
@@ -182,6 +188,7 @@ class PasswordManager {
     }
 
     func find(_ searchString: String) -> [PasswordManagerEntry] {
+        guard let passwordsDB = passwordsDB else { return [] }
         do {
             let entries = try passwordsDB.find(searchString)
             return passwordManagerEntries(for: entries)
@@ -194,6 +201,10 @@ class PasswordManager {
     }
 
     func markDeleted(hostname: String, for username: String, _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) {
+        guard let passwordsDB = passwordsDB else {
+            networkCompletion?(.failure(BeamDataError.databaseNotFound))
+            return
+        }
         do {
             let passwordRecord = try passwordsDB.markDeleted(hostname: hostname, username: username)
             changeSubject.send()
@@ -212,6 +223,10 @@ class PasswordManager {
     }
 
     func markAllDeleted(_ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) {
+        guard let passwordsDB = passwordsDB else {
+            networkCompletion?(.failure(BeamDataError.databaseNotFound))
+            return
+        }
         do {
             let passwordsRecord = try passwordsDB.markAllDeleted()
             changeSubject.send()
@@ -231,6 +246,11 @@ class PasswordManager {
 
     func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) {
         do {
+            guard let passwordsDB = passwordsDB else {
+                networkCompletion?(.failure(BeamDataError.databaseNotFound))
+                return
+            }
+
             try passwordsDB.deleteAll()
             changeSubject.send()
             if AuthenticationManager.shared.isAuthenticated && includedRemote {
@@ -260,11 +280,14 @@ extension PasswordManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func saveObjectsAfterConflict(_ passwords: [RemotePasswordRecord]) throws {
+        guard let passwordsDB = passwordsDB else {
+            throw BeamDataError.databaseNotFound
+        }
         let localPasswords = passwords.map(PasswordEncryptionManager.laxReEncryptAfterReceive)
         if localPasswords.count != passwords.count {
             EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - localPasswords.count)/\(passwords.count)"))
         }
-        try self.passwordsDB.save(passwords: localPasswords)
+        try passwordsDB.save(passwords: localPasswords)
         changeSubject.send()
     }
 
@@ -274,16 +297,24 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     func receivedObjects(_ passwords: [RemotePasswordRecord]) throws {
+        guard let passwordsDB = passwordsDB else {
+            throw BeamDataError.databaseNotFound
+        }
+
         let localPasswords = passwords.map(PasswordEncryptionManager.laxReEncryptAfterReceive)
         if localPasswords.count != passwords.count {
             EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - localPasswords.count)/\(passwords.count)"))
         }
-        try self.passwordsDB.save(passwords: localPasswords)
+        try passwordsDB.save(passwords: localPasswords)
         changeSubject.send()
     }
 
     func allObjects(updatedSince: Date?) throws -> [RemotePasswordRecord] {
-        let localPasswords = try self.passwordsDB.allRecords(updatedSince)
+        guard let passwordsDB = passwordsDB else {
+            throw BeamDataError.databaseNotFound
+        }
+
+        let localPasswords = try passwordsDB.allRecords(updatedSince)
         return try localPasswords.map(PasswordEncryptionManager.reEncryptBeforeSend)
     }
 

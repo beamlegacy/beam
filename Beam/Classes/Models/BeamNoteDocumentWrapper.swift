@@ -28,7 +28,7 @@ final class BeamNoteDocumentWrapper: NSDocument {
         self.note = note
 
         for (fileId, _) in note.allFileElements {
-            guard let file = try? BeamFileDBManager.shared.fetch(uid: fileId) else { continue }
+            guard let file = try? BeamFileDBManager.shared?.fetch(uid: fileId) else { continue }
             let filename = "\(fileId)-\(file.name)"
             let data = file.data
             files[filename] = File(id: fileId, name: file.name, data: data)
@@ -40,7 +40,7 @@ final class BeamNoteDocumentWrapper: NSDocument {
     override func fileWrapper(ofType typeName: String) throws -> FileWrapper {
         let rootWrapper = FileWrapper(directoryWithFileWrappers: [:])
         guard let note = note,
-              let doc = note.documentStruct
+              let doc = note.document
         else { return rootWrapper }
 
         let noteData = doc.data
@@ -97,18 +97,18 @@ final class BeamNoteDocumentWrapper: NSDocument {
     }
 
     func importNote() throws {
-        guard let note = note else { return }
-        note.databaseId = DatabaseManager.defaultDatabase.id
-        guard let docStruct = note.documentStruct else { return }
+        guard let note = note,
+              let database = BeamData.shared.currentDatabase else { return }
+        note.owner = database
+        guard let doc = note.document else { return }
 
         // We use the same mecanism than when recieving notes from the sync, so that we can go thru a tested and well known code path:
-        let documentManager = DocumentManager()
-        try documentManager.receivedObjects([docStruct])
+        try BeamData.shared.currentAccount?.documentSynchroniser?.receivedObjects([doc])
 
         let fileElements = note.allFileElements
         if !fileElements.isEmpty {
             for file in self.files.values {
-                _ = try? BeamFileDBManager.shared.insert(name: file.name, data: file.data)
+                _ = try? BeamFileDBManager.shared?.insert(name: file.name, data: file.data)
             }
         }
     }

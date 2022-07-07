@@ -41,9 +41,9 @@ class DeleteElement: TextEditorCommand {
             do {
                 // Add a fake reference so that we don't destroy the associated file too early
                 // We'll remove all fake instances when exiting (and relaunching the app)
-                try BeamFileDBManager.shared.addReference(fromNote: UUID.null, element: UUID.null, to: uid)
+                try BeamFileDBManager.shared?.addReference(fromNote: UUID.null, element: UUID.null, to: uid)
                 // Remove the actual reference:
-                try BeamFileDBManager.shared.removeReference(fromNote: noteId, element: elementId)
+                try BeamFileDBManager.shared?.removeReference(fromNote: noteId, element: elementId)
             } catch {
                 Logger.shared.logError("Unable to handle removal of fileId \(uid)", category: .fileDB)
             }
@@ -65,7 +65,7 @@ class DeleteElement: TextEditorCommand {
         if case let .image(uid, origin: _, displayInfos: _) = deletedElement.kind {
             // Add back the actual file reference:
             do {
-                try BeamFileDBManager.shared.addReference(fromNote: noteId, element: elementId, to: uid)
+                try BeamFileDBManager.shared?.addReference(fromNote: noteId, element: elementId, to: uid)
             } catch {
                 Logger.shared.logError("Unable to undo delete reference of fileId \(uid)", category: .fileDB)
             }

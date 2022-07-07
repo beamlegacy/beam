@@ -150,6 +150,7 @@ class BeamObject: Codable {
         encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         encoder.keyEncodingStrategy = .convertToSnakeCase
+        encoder.userInfo[Self.beamObjectCoding] = true
         return encoder
     }
 
@@ -157,6 +158,7 @@ class BeamObject: Codable {
         let decoder = BeamJSONDecoder()
         decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.userInfo[Self.beamObjectCoding] = true
         return decoder
     }
 
@@ -188,7 +190,7 @@ class BeamObject: Codable {
         do {
             decodedObject = try Self.decoder.decode(T.self, from: data)
         } catch {
-            Logger.shared.logError("Error decoding \(self.beamObjectType) error: \(error.localizedDescription)",
+            Logger.shared.logError("Error decoding \(self.beamObjectType) error: \(error)",
                                    category: .beamObject)
             Logger.shared.logError(data.asString ?? "Can't output data", category: .beamObject)
             dump(data.asString)
@@ -207,12 +209,17 @@ class BeamObject: Codable {
         return decodedObject
     }
 
+    public static let beamObjectCoding = CodingUserInfoKey(rawValue: "beamObjectCoding")!
+    public static let beamObjectId = CodingUserInfoKey(rawValue: "beamObjectId")!
+
     func encodeObject<T: BeamObjectProtocol>(_ object: T) throws {
         assert(!encoded)
         // swiftlint:disable:next date_init
         let localTimer = Date()
 
-        let jsonData = try Self.encoder.encode(object)
+        let encoder = Self.encoder
+        encoder.userInfo[Self.beamObjectId] = object.beamObjectId
+        let jsonData = try encoder.encode(object)
 
         encoded = true
         data = jsonData
@@ -237,7 +244,10 @@ class BeamObject: Codable {
         }
 
         do {
-            return try Self.decoder.decode(T.self, from: data)
+
+            let decoder = Self.decoder
+            decoder.userInfo[Self.beamObjectId] = id
+            return try decoder.decode(T.self, from: data)
         } catch {
             Logger.shared.logError("Couldn't decode object \(T.self): \(self)",
                                    category: .beamObject)

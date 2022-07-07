@@ -5,6 +5,7 @@ import Combine
 
 class AuthenticationManager {
     static var shared = AuthenticationManager()
+    var account: BeamAccount?
 
     // Queue is used to make sure only one refresh at a time is being called on the API
     lazy private var queue: OperationQueue = {
@@ -31,10 +32,10 @@ class AuthenticationManager {
         set {
             Persistence.Authentication.accessToken = newValue
             persistenceDidUpdate()
-            if isAuthenticated && AccountManager.state == .signedOff {
-                AccountManager.moveToAuthenticated()
-            } else if !isAuthenticated && AccountManager.state != .signedOff {
-                AccountManager.moveToSignedOff()
+            if isAuthenticated && account?.state == .signedOff {
+                account?.moveToAuthenticated()
+            } else if !isAuthenticated && account?.state != .signedOff {
+                account?.moveToSignedOff()
             }
 
         }
@@ -63,6 +64,13 @@ class AuthenticationManager {
         }
 
         return true
+    }
+
+    var isLoggedIn: Bool {
+        if let account = account {
+            return account.state == .signedIn && AuthenticationManager.shared.isAuthenticated
+        }
+        return false
     }
 
     private var authenticationSubject = PassthroughSubject<Bool, Never>()
@@ -98,6 +106,12 @@ class AuthenticationManager {
         group.enter()
         queue.addOperation {
             // Token might have been updated by another API call by then, we should test it again
+            guard self.account != nil else {
+                self.log(message: "missing BeamAccount")
+                self.group.leave()
+                return
+            }
+
             guard !self.accessTokenIsValid() else {
                 self.log(message: "accessToken already been refreshed")
                 self.group.leave()
@@ -115,9 +129,7 @@ class AuthenticationManager {
                                                category: "app.lifecycle",
                                                type: "system")
 
-            let accountManager = AccountManager()
-
-            accountManager.refreshToken { result in
+            self.account?.refreshToken { result in
                 switch result {
                 case .failure(let error):
                     Logger.shared.logInfo("Could not refresh token: \(error.localizedDescription)", category: .network)

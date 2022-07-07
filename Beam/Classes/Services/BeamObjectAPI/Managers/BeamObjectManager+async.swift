@@ -27,6 +27,7 @@ extension BeamObjectManager {
             }
 
             Self.fullSyncRunning.store(true, ordering: .relaxed)
+            Self.disableSendingObjects = true
 
             Self.synchronizationStatusUpdated(.downloading(0))
             try await fetchAllByChecksumsFromAPI(force: force)
@@ -35,20 +36,21 @@ extension BeamObjectManager {
             try Task.checkCancellation()
 
             if let prepareBeforeSaveAll = prepareBeforeSaveAll {
+
                 Logger.shared.logDebug("syncAllFromAPI: calling prepareBeforeSaveAll",
-                                       category: .beamObjectNetwork)
+                                       category: .sync)
                 prepareBeforeSaveAll()
             }
 
             // swiftlint:disable:next date_init
             let localTimer = Date()
             Logger.shared.logDebug("syncAllFromAPI: calling asyncSaveAllToAPI",
-                                   category: .beamObjectNetwork)
+                                   category: .sync)
             Self.synchronizationStatusUpdated(.uploading(0))
             let objectsCount = try await self.asyncSaveAllToAPI(force: force)
             Self.synchronizationStatusUpdated(.uploading(100))
             Logger.shared.logDebug("syncAllFromAPI: Called asyncSaveAllToAPI, saved \(objectsCount) objects",
-                                   category: .beamObjectNetwork,
+                                   category: .sync,
                                    localTimer: localTimer)
 
             Self.synchronizationStatusUpdated(.finished)

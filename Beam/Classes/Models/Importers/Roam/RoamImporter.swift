@@ -37,15 +37,15 @@ struct RoamNote: Decodable {
     }
 }
 
-class RoamImporter {
+class RoamImporter: BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
+
     lazy var decoder: BeamJSONDecoder = {
         let decoder = BeamJSONDecoder()
         decoder.dateDecodingStrategy = .millisecondsSince1970
 
         return decoder
     }()
-
-    var documentManager = DocumentManager()
 
     func parseAndCreate(_ context: NSManagedObjectContext, _ filename: String) throws {
         guard let jsonData = NSData(contentsOfFile: filename) as Data? else { return }
@@ -58,7 +58,7 @@ class RoamImporter {
         let roamNotes = try parseData(data)
 
         for roamNote in roamNotes {
-            let newNote = BeamNote.fetchOrCreate(title: roamNote.title)
+            let newNote = try BeamNote.fetchOrCreate(self, title: roamNote.title)
             newNote.importedByUser()
             newNote.clearChildren()
 
@@ -68,7 +68,7 @@ class RoamImporter {
 
             newNote.creationDate = roamNote.createTime ?? newNote.creationDate
             newNote.updateDate = roamNote.editTime ?? newNote.updateDate
-            newNote.save()
+            newNote.save(self)
         }
 
         return roamNotes

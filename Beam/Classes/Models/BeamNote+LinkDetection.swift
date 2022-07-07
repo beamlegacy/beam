@@ -10,7 +10,7 @@ import BeamCore
 
 public extension BeamNote {
     var shouldAppearInJournal: Bool {
-        return !deleted && (isTodaysNote || !isEntireNoteEmpty() || !fastLinksAndReferences.isEmpty)
+        return isTodaysNote || !isEntireNoteEmpty() || !fastLinksAndReferences.isEmpty
     }
 
     var mentionsCount: Int {
@@ -25,7 +25,7 @@ public extension BeamNote {
     }
 
     var links: [BeamNoteReference] {
-        (try? GRDBDatabase.shared.fetchLinks(toNote: self.id).map({ bidiLink in
+        (try? BeamData.shared.noteLinksAndRefsManager?.fetchLinks(toNote: self.id).map({ bidiLink in
             BeamNoteReference(noteID: bidiLink.sourceNoteId, elementID: bidiLink.sourceElementId)
         })) ?? []
     }
@@ -47,11 +47,11 @@ public extension BeamNote {
     }
 
     private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID, verifyMatch: Bool) -> [BeamNoteReference] {
-        GRDBDatabase.shared.search(matchingPhrase: titleToMatch, column: BeamElementRecord.Columns.text).compactMap { result -> BeamNoteReference? in
+        (BeamData.shared.noteLinksAndRefsManager?.search(matchingPhrase: titleToMatch, column: BeamElementRecord.Columns.text) ?? []).compactMap { result -> BeamNoteReference? in
             let noteRef = BeamNoteReference(noteID: result.noteId, elementID: result.uid)
             guard result.noteId != self.id else { return nil }
             guard verifyMatch else { return noteRef }
-            guard  let note = BeamNote.fetch(id: result.noteId, includeDeleted: false),
+            guard  let note = BeamNote.fetch(id: result.noteId),
                   let element = note.findElement(result.uid),
                   element.hasReferenceToNote(named: titleToMatch)
             else { return nil }
@@ -72,6 +72,10 @@ public extension BeamElement {
     }
 }
 
+struct BeamNoteLinkDetection: BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
+}
+
 public extension BeamElement {
     /// - Returns: true is something was actually updated
     @discardableResult
@@ -80,7 +84,7 @@ public extension BeamElement {
         if res, let note = note, !note.cmdManager.isEmpty {
             // If the note renaming has changed anything in the currently edited note we need to reset the commandManager
             note.resetCommandManager()
-            _ = note.syncedSave()
+            _ = note.save(BeamNoteLinkDetection())
         }
         return res
     }
@@ -106,7 +110,7 @@ public extension BeamElement {
 
 public extension BeamNoteReference {
     var note: BeamNote? {
-        BeamNote.fetch(id: noteID, includeDeleted: false)
+        BeamNote.fetch(id: noteID)
     }
 
     var element: BeamElement? {

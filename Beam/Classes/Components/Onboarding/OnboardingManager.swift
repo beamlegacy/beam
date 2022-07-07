@@ -127,7 +127,7 @@ class OnboardingManager: ObservableObject {
     func backToPreviousStep() {
         guard let previous = stepsHistory.popLast() else { return }
         if [.emailConnect, .welcome].contains(previous.type) {
-            AccountManager.logoutIfNeeded()
+            BeamData.shared.currentAccount?.logoutIfNeeded()
         }
         actions = []
         currentStepIsFromHistory = true
@@ -141,7 +141,7 @@ class OnboardingManager: ObservableObject {
         if let nextStep = nextStep ?? stepAfter(step: previous) {
             currentStep = nextStep
             viewIsLoading = false
-            if AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn {
+            if AuthenticationManager.shared.isAuthenticated && BeamData.shared.currentAccount?.state == .signedIn {
                 stepsHistory.removeAll()
             } else {
                 stepsHistory.append(previous)
@@ -191,7 +191,7 @@ class OnboardingManager: ObservableObject {
 
     private func onboardingDidStart() {
         AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
-            if isAuthenticated && AccountManager.state == .signedIn {
+            if isAuthenticated && BeamData.shared.currentAccount?.state == .signedIn {
                 self?.stepsHistory.removeAll()
             }
         }.store(in: &cancellables)
@@ -216,15 +216,19 @@ class OnboardingManager: ObservableObject {
     }
 
     func checkForPrivateKey(completionHandler: @escaping (OnboardingStep?) -> Void, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
-        switch AccountManager.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
-        case .signedIn:
-            completionHandler(nil)
-            AccountManager().runFirstSync(useBuiltinPrivateKeyUI: false) { result in
-                syncCompletion?(result)
+        if let currentAccount = BeamData.shared.currentAccount {
+            switch currentAccount.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
+            case .signedIn:
+                completionHandler(nil)
+                currentAccount.runFirstSync(useBuiltinPrivateKeyUI: false) { result in
+                    syncCompletion?(result)
+                }
+            case .privateKeyCheck:
+                completionHandler(OnboardingStep(type: .setupPrivateKey))
+            default:
+                assert(false)
             }
-        case .privateKeyCheck:
-            completionHandler(OnboardingStep(type: .setupPrivateKey))
-        default:
+        } else {
             assert(false)
         }
     }

@@ -45,19 +45,24 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
 
     func observeNotesChanges() {
         // automatically rescan the journal when the notes change:
-        AppDelegate.main.data.$lastIndexedElement
+        BeamData.shared.$lastIndexedElement
             .throttle(for: 2, scheduler: RunLoop.current, latest: true)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
                 self.setNotes(self.notes, focussingOn: nil, force: true)
             }.store(in: &scope)
 
-        state.data.$journal.sink { [weak self] journalNotes in
+        state.data.$journal
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] journalNotes in
             guard let self = self else { return }
             self.setNotes(journalNotes, focussingOn: self.state.journalNoteToFocus, force: false)
         }.store(in: &scope)
 
-        state.$journalNoteToFocus.sink { [weak self] focusedNote in
+        state.$journalNoteToFocus
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] focusedNote in
             guard let self = self else { return }
             self.setNotes(self.notes, focussingOn: focusedNote, force: true)
         }.store(in: &scope)
@@ -150,18 +155,30 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
 
     private var databaseId = UUID.null
     private func inspectDatabaseChange() {
-        guard databaseId != DatabaseManager.defaultDatabase.id else { return }
+        guard let currentDatabaseId = BeamData.shared.currentDatabase?.id,
+              databaseId != currentDatabaseId
+        else { return }
         self.notes.removeAll()
         for view in views.values {
             view.removeFromSuperview()
         }
         views.removeAll()
-        databaseId = DatabaseManager.defaultDatabase.id
+        databaseId = currentDatabaseId
     }
 
     //swiftlint:disable:next cyclomatic_complexity function_body_length
     private func setNotes(_ notes: [BeamNote], focussingOn: BeamNote?, force: Bool) {
         inspectDatabaseChange()
+
+        #if DEBUG
+        // swiftlint:disable print
+        //print("JournalStackView.setNotes \(notes)")
+        defer {
+            let mismatching = self.notes.compactMap({ (views[$0]?.note) === $0 ? nil : $0 })
+            print("Mismatching note with note views: \(mismatching)")
+        }
+        // swiftlint:enable print
+        #endif
 
         let sortedNotes = notes.sorted(by: { lhs, rhs in
             guard let j1 = lhs.type.journalDate,
@@ -210,7 +227,9 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
             // Remove the notes that are not there any more:
             if !noteSet.contains(note) {
                 let view = tuple.value
-                view.removeFromSuperview()
+                DispatchQueue.main.async {
+                    view.removeFromSuperview()
+                }
                 views.removeValue(forKey: note)
             }
         }
@@ -222,7 +241,11 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
 
     private let typicalEditorHeightWhenWeDontKnow = CGFloat(800)
     public func addNote(_ note: BeamNote, forceInit: Bool) {
-        guard views[note] == nil else { return }
+        // Remove views for notes that have changed without changing ids:
+        guard views[note] == nil else {
+            views[note]?.note = note
+            return
+        }
         let maxHeight: CGFloat
         if frame.height > 0 {
             maxHeight = frame.height

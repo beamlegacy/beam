@@ -11,9 +11,9 @@ import BeamCore
 
 class PinNoteTests: XCTestCase {
 
-    func testPinNote() {
-        let note = BeamNote(title: "Note 1")
-        let pinnedManager = PinnedNotesManager(with: DocumentManager())
+    func testPinNote() throws {
+        let note = try BeamNote(title: "Note 1")
+        let pinnedManager = PinnedNotesManager()
 
         pinnedManager.pin(notes: [note])
 
@@ -21,10 +21,10 @@ class PinNoteTests: XCTestCase {
         XCTAssertTrue(pinnedManager.pinnedNotes.first == note)
     }
 
-    func testUnpinNote() {
-        let note1 = BeamNote(title: "Note 1")
-        let note2 = BeamNote(title: "Note 2")
-        let pinnedManager = PinnedNotesManager(with: DocumentManager())
+    func testUnpinNote() throws {
+        let note1 = try BeamNote(title: "Note 1")
+        let note2 = try BeamNote(title: "Note 2")
+        let pinnedManager = PinnedNotesManager()
 
         pinnedManager.pin(notes: [note1, note2])
 
@@ -35,12 +35,12 @@ class PinNoteTests: XCTestCase {
         XCTAssertTrue(pinnedManager.pinnedNotes.first == note2)
     }
 
-    func testPinMultipleNotes() {
-        let note1 = BeamNote(title: "Note 1")
-        let note2 = BeamNote(title: "Note 2")
-        let note3 = BeamNote(title: "Note 3")
-        let note4 = BeamNote(title: "Note 4")
-        let pinnedManager = PinnedNotesManager(with: DocumentManager())
+    func testPinMultipleNotes() throws {
+        let note1 = try BeamNote(title: "Note 1")
+        let note2 = try BeamNote(title: "Note 2")
+        let note3 = try BeamNote(title: "Note 3")
+        let note4 = try BeamNote(title: "Note 4")
+        let pinnedManager = PinnedNotesManager()
 
         pinnedManager.pin(notes: [note1, note2, note3, note4])
 
@@ -49,12 +49,12 @@ class PinNoteTests: XCTestCase {
         XCTAssertTrue(pinnedManager.pinnedNotes.last == note4)
     }
 
-    func testPersistence() {
-        let note1 = BeamNote(title: "Note 1")
-        let note2 = BeamNote(title: "Note 2")
-        let note3 = BeamNote(title: "Note 3")
-        let note4 = BeamNote(title: "Note 4")
-        let pinnedManager = PinnedNotesManager(with: DocumentManager())
+    func testPersistence() throws {
+        let note1 = try BeamNote(title: "Note 1")
+        let note2 = try BeamNote(title: "Note 2")
+        let note3 = try BeamNote(title: "Note 3")
+        let note4 = try BeamNote(title: "Note 4")
+        let pinnedManager = PinnedNotesManager()
 
         let toPin = [note1, note2, note3, note4]
         pinnedManager.pin(notes: toPin)
@@ -71,12 +71,12 @@ class PinNoteTests: XCTestCase {
         XCTAssertTrue(Persistence.PinnedNotes.pinnedNotesId?.count == 0)
     }
 
-    func testUnpinMultipleNotes() {
-        let note1 = BeamNote(title: "Note 1")
-        let note2 = BeamNote(title: "Note 2")
-        let note3 = BeamNote(title: "Note 3")
-        let note4 = BeamNote(title: "Note 4")
-        let pinnedManager = PinnedNotesManager(with: DocumentManager())
+    func testUnpinMultipleNotes() throws {
+        let note1 = try BeamNote(title: "Note 1")
+        let note2 = try BeamNote(title: "Note 2")
+        let note3 = try BeamNote(title: "Note 3")
+        let note4 = try BeamNote(title: "Note 4")
+        let pinnedManager = PinnedNotesManager()
 
         pinnedManager.pin(notes: [note1, note2, note3, note4])
 
@@ -87,12 +87,12 @@ class PinNoteTests: XCTestCase {
         XCTAssertTrue(pinnedManager.pinnedNotes.last == note3)
     }
 
-    func testAvoidIdenticalNotes() {
-        let note1 = BeamNote(title: "Note 1")
-        let note2 = BeamNote(title: "Note 2")
-        let note3 = BeamNote(title: "Note 3")
-        let note4 = BeamNote(title: "Note 4")
-        let pinnedManager = PinnedNotesManager(with: DocumentManager())
+    func testAvoidIdenticalNotes() throws {
+        let note1 = try BeamNote(title: "Note 1")
+        let note2 = try BeamNote(title: "Note 2")
+        let note3 = try BeamNote(title: "Note 3")
+        let note4 = try BeamNote(title: "Note 4")
+        let pinnedManager = PinnedNotesManager()
 
         pinnedManager.pin(notes: [note1, note2, note3, note4, note3])
 
@@ -101,14 +101,14 @@ class PinNoteTests: XCTestCase {
         XCTAssertTrue(pinnedManager.pinnedNotes.last == note4)
     }
 
-    func testMax5NotesIfNoSidebar() {
-        let note1 = BeamNote(title: "Note 1")
-        let note2 = BeamNote(title: "Note 2")
-        let note3 = BeamNote(title: "Note 3")
-        let note4 = BeamNote(title: "Note 4")
-        let note5 = BeamNote(title: "Note 5")
-        let note6 = BeamNote(title: "Note 6")
-        let pinnedManager = PinnedNotesManager(with: DocumentManager())
+    func testMax5NotesIfNoSidebar() throws {
+        let note1 = try BeamNote(title: "Note 1")
+        let note2 = try BeamNote(title: "Note 2")
+        let note3 = try BeamNote(title: "Note 3")
+        let note4 = try BeamNote(title: "Note 4")
+        let note5 = try BeamNote(title: "Note 5")
+        let note6 = try BeamNote(title: "Note 6")
+        let pinnedManager = PinnedNotesManager()
 
         pinnedManager.pin(notes: [note1, note2, note3, note4, note5])
 
@@ -119,12 +119,12 @@ class PinNoteTests: XCTestCase {
         XCTAssertTrue(pinnedManager.pinnedNotes.count == 5)
     }
 
-    func testCleanAll() {
-        let note1 = BeamNote(title: "Note 1")
-        let note2 = BeamNote(title: "Note 2")
-        let note3 = BeamNote(title: "Note 3")
-        let note4 = BeamNote(title: "Note 4")
-        let pinnedManager = PinnedNotesManager(with: DocumentManager())
+    func testCleanAll() throws {
+        let note1 = try BeamNote(title: "Note 1")
+        let note2 = try BeamNote(title: "Note 2")
+        let note3 = try BeamNote(title: "Note 3")
+        let note4 = try BeamNote(title: "Note 4")
+        let pinnedManager = PinnedNotesManager()
 
         pinnedManager.pin(notes: [note1, note2, note3, note3, note4])
         pinnedManager.unpinAll()

@@ -3,7 +3,7 @@ import SwiftUI
 import Combine
 import WebKit
 import BeamCore
-import Promises
+
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
@@ -269,7 +269,7 @@ import Promises
                 linkStore: LinkStore.shared,
                 frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
                 longTermScoreStore: LongTermUrlScoreStore(),
-                domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(db: GRDBDatabase.shared),
+                domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
                 dailyScoreStore: GRDBDailyUrlScoreStore()
             )
         }
