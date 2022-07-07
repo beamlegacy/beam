@@ -10,6 +10,7 @@ import BeamCore
 
 struct TabView: View {
     static let minimumWidth: CGFloat = 29
+    static let maximumWidth: Double = 800 // for very wide screens BE-4571
     static let pinnedWidth: CGFloat = 32
     static let minimumActiveWidth: CGFloat = 120
     static let minSingleTabWidth: Double = 370
