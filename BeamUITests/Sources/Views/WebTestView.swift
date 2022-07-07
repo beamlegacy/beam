@@ -43,7 +43,7 @@ class WebTestView: BaseView {
         self.getDestinationNoteElement().clickOnHittable()
         searchField(WebViewLocators.SearchFields.destinationNoteSearchField.accessibilityIdentifier).typeText(title)
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-'")
-        app.otherElements.matching(predicate).firstMatch.clickOnExistence()
+        app.links.matching(predicate).firstMatch.clickOnExistence()
         }
     }
     
@@ -64,7 +64,7 @@ class WebTestView: BaseView {
                 NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-" + searchText + "-createNote'")
             ]
         )
-        let noteCreationElement = app.otherElements.matching(predicate).firstMatch
+        let noteCreationElement = app.links.matching(predicate).firstMatch
         //Try out to replace additional waiting
         //XCTAssertTrue(noteCreationElement.waitForExistence(timeout: BaseTest.minimumWaitTimeout), "\(searchText) is NOT in the create note autocomplete result")
         noteCreationElement.clickOnExistence()
