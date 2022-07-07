@@ -141,6 +141,7 @@
         "PnSAddToCardTests\/testNavigateLinksInCollectedText()",
         "PnSAddToCardTests\/testOpensShootCardPickerWithoutNavigatingPage()",
         "PnSAddToNoteTests",
+        "RightClickImageMenuTests",
         "SearchOnCardTests",
         "SearchOnNoteTests",
         "SearchOnPDFTests",
