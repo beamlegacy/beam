@@ -121,8 +121,8 @@ private struct LockedPasswordsView: View {
 struct Passwords: View {
     @ObservedObject var passwordsViewModel: PasswordListViewModel
 
-    @State var searchString = ""
-    @State var isEditing = false
+    @State private var searchString = ""
+    @State private var isEditing = false
 
     @State private var selectedEntries = IndexSet()
     @State private var passwordSelected = false
@@ -135,7 +135,6 @@ struct Passwords: View {
     @State private var autofillUsernamePasswords = PreferencesManager.autofillUsernamePasswords
 
     @State private var availableImportSources: [OnboardingImportsView.ImportSource] = [.passwordsCSV]
-    @State private var importPasswordsChoice = -1
 
     @State private var isViewUnlocked = false
 
@@ -223,22 +222,15 @@ struct Passwords: View {
                 .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1)
             Spacer()
             HStack {
-                Picker("", selection: $importPasswordsChoice) {
-                    Text("Import…").tag(-1)
-                    ForEach(Array(availableImportSources.enumerated()), id: \.self.0) { (idx, src) in
-                        Text(src.rawValue).tag(idx)
+                Menu("Import…") {
+                    ForEach(availableImportSources, id: \.self) { importSource in
+                        Button(importSource.rawValue) {
+                            importPasswordsAction(source: importSource)
+                        }
                     }
                 }
-                .pickerStyle(.menu)
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .frame(width: 96)
-                .onChange(of: importPasswordsChoice) { index in
-                    if index >= 0 {
-                        let importSource = availableImportSources[index]
-                        importPasswordsChoice = -1
-                        importPasswordsAction(source: importSource)
-                    }
-                }
                 Button {
                     exportPasswordAction()
                 } label: {
