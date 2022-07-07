@@ -43,6 +43,7 @@ struct TextEditCmdReturnAnimator {
             let text = node.attributedString.attributedSubstring(from: NSRange(location: startOfText, length: endOfText-startOfText))
             let (maskTextLayer, fakeTextLayer) = setupTextFakingLayers(originalTextLayer: textLayer, rect: rect, text: text)
 
+            layersToRemoveAfterAnimation.append(boxLayer)
             layersToRemoveAfterAnimation.append(maskTextLayer)
             layersToRemoveAfterAnimation.append(fakeTextLayer)
             lastExpandedBoxRect = expandedBoxRect
