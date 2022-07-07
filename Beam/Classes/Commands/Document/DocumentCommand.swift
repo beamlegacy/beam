@@ -8,11 +8,11 @@
 import Foundation
 import BeamCore
 
-class DocumentCommand: CommandAsync<DocumentManager> {
+class DocumentCommand: CommandAsync<BeamDocumentCollection> {
     var documentIds = [UUID]()
-    var documents = [DocumentStruct]()
+    var documents = [BeamDocument]()
 
-    override func coalesce(command: Command<DocumentManager>) -> Bool {
+    override func coalesce(command: Command<BeamDocumentCollection>) -> Bool {
         guard let command = command as? DocumentCommand,
               type(of: command) === type(of: self) else { return false }
         documentIds = Array(Set(documentIds + command.documentIds))

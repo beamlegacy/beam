@@ -8,7 +8,8 @@
 import Foundation
 import BeamCore
 
-class OnboardingNoteCreator {
+class OnboardingNoteCreator: BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
     static let shared = OnboardingNoteCreator()
 
     enum Note: String {
@@ -67,9 +68,9 @@ class OnboardingNoteCreator {
                 addImages(in: newNote)
                 guard let forceDate = forceDate else {
                     for c in newNote.children {
-                        c.parent = AppDelegate.main.data.todaysNote
+                        c.parent = BeamData.shared.todaysNote
                     }
-                    AppDelegate.main.data.todaysNote.children = newNote.children
+                    BeamData.shared.todaysNote.children = newNote.children
                     return
                 }
 
@@ -77,17 +78,20 @@ class OnboardingNoteCreator {
                 newNote.creationDate = forceDate
                 newNote.updateDate = forceDate
                 newNote.type = .journalForDate(forceDate)
-                newNote.save()
+                newNote.owner = BeamData.shared.currentDatabase
+                _ = newNote.save(self)
             }
         case .note:
             addImages(in: note)
             note.creationDate = BeamDate.now
             note.updateDate = BeamDate.now
-            note.save()
+            note.owner = BeamData.shared.currentDatabase
+            _ = note.save(self)
         }
     }
 
     private func addImages(in note: BeamNote) {
+        guard let fileManager = BeamFileDBManager.shared else { return }
         var imageCount: Int = 0
         for element in note.children {
             for imageElement in element.imageElements() {
@@ -100,7 +104,6 @@ class OnboardingNoteCreator {
 
                     if let data = try? Data(contentsOf: url),
                        let image = NSImage(contentsOf: url) {
-                        let fileManager = BeamFileDBManager.shared
                         do {
                             let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
                             imageElement.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))

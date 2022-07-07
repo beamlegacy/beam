@@ -7,7 +7,7 @@
 
 import Foundation
 import BeamCore
-import Promises
+
 
 extension PointAndShoot {
 

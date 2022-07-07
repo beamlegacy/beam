@@ -1,7 +1,7 @@
 import GRDB
 
 // Declare a record struct, data, how it is stored within the DB.
-// Refer to GRDBDatabase for read/write operations.
+// Refer to GRDB Database for read/write operations.
 
 // Previous version:
 //struct BeamElementRecord {

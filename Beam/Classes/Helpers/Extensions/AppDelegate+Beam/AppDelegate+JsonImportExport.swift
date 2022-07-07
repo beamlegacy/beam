@@ -9,12 +9,13 @@ extension AppDelegate {
 
         savePanel.title = loc("Choose the directory to export beamNote files")
         savePanel.begin { [weak savePanel] result in
-            guard result == .OK, let selectedPath = savePanel?.url?.path
+            guard result == .OK, let selectedPath = savePanel?.url?.path,
+                  let ids = try? self.data.currentDocumentCollection?.fetchIds(filters: [])
             else { savePanel?.close(); return }
 
             let baseURL = URL(fileURLWithPath: selectedPath)
 
-            for id in self.documentManager.allDocumentsIds(includeDeletedNotes: false) {
+            for id in ids {
                 self.exportNoteToBeamNote(id: id, baseURL: baseURL)
             }
             savePanel?.close()
@@ -58,7 +59,7 @@ extension AppDelegate {
     }
 
     func exportNoteToBeamNote(id: UUID, baseURL: URL, toFile fileUrl: URL? = nil) {
-        if let note = BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false, decodeChildren: true) {
+        if let note = BeamNote.fetch(id: id, keepInMemory: false, decodeChildren: true) {
             let url = fileUrl ?? URL(fileURLWithPath: "\(note.type.journalDateString ?? note.title) \(id).beamNote", relativeTo: baseURL)
             do {
                 let document = BeamNoteDocumentWrapper(note: note)

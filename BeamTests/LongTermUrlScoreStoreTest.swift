@@ -11,6 +11,13 @@ import XCTest
 @testable import BeamCore
 
 class LongTermUrlScoreStoreTests: XCTestCase {
+    var db: UrlStatsDBManager!
+
+    override func setUpWithError() throws {
+        let store = GRDBStore.empty()
+        db = try UrlStatsDBManager(store: store)
+        try store.migrate()
+    }
 
     func testDbRecord() throws {
         func assertZeroValues(score: LongTermUrlScore) {
@@ -21,16 +28,14 @@ class LongTermUrlScoreStoreTests: XCTestCase {
             XCTAssertEqual(score.textAmount, 0)
             XCTAssertEqual(score.area, 0)
         }
-        
+
         func assertCount(urlId: UUID, count: Int) throws {
-            try db.dbReader.read { db in
+            try db.read { db in
                 let query = LongTermUrlScore.filter(id: urlId)
                 try XCTAssertEqual(query.fetchCount(db), count)
             }
         }
 
-        let db = GRDBDatabase.empty()
-        
         //when a given urlId's record does not exist yet, a 0 valued record (+ changes) is inserted
         let urlId = UUID()
         try assertCount(urlId: urlId, count: 0)
@@ -38,24 +43,19 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         var score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
         XCTAssertEqual(score.textSelections, 1)
         XCTAssertNil(score.lastCreationDate)
-        XCTAssertNil(score.navigationCountSinceLastSearch)
         assertZeroValues(score: score)
         try assertCount(urlId: urlId, count: 1)
 
         //when the urlId's record already exists, it's updated
         let date = BeamDate.now
-        db.updateLongTermUrlScore(urlId: urlId) {
-            $0.lastCreationDate = date
-            $0.navigationCountSinceLastSearch = 2
-        }
+        db.updateLongTermUrlScore(urlId: urlId) { $0.lastCreationDate = date }
         score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
         XCTAssertEqual(score.textSelections, 1)
         let fetchedDate = try XCTUnwrap(score.lastCreationDate)
         XCTAssertEqual(fetchedDate.timeIntervalSince1970, date.timeIntervalSince1970, accuracy: 1.0/1000.0)
-        XCTAssertEqual(score.navigationCountSinceLastSearch, 2)
         assertZeroValues(score: score)
         try assertCount(urlId: urlId, count: 1)
-        
+
         //an other url id update doesnt interfere with previous one
         let otherUrlId = UUID()
         let otherDate = BeamDate.now
@@ -63,9 +63,8 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         score = try XCTUnwrap(db.getLongTermUrlScore(urlId: urlId))
         XCTAssertEqual(fetchedDate.timeIntervalSince1970, date.timeIntervalSince1970, accuracy: 1.0/1000.0)
     }
-    
+
     func testGetMany() {
-        let db = GRDBDatabase.empty()
         //fetching works for an empty list
         XCTAssertEqual(db.getManyLongTermUrlScore(urlIds: []).count, 0)
         
@@ -83,7 +82,6 @@ class LongTermUrlScoreStoreTests: XCTestCase {
     }
 
     func testSaveMany() {
-        let db = GRDBDatabase.empty()
         let store = LongTermUrlScoreStore(db: db)
         let ids = (0...2).map { _ in UUID() }
         let records = ids.map { LongTermUrlScore(urlId: $0) }

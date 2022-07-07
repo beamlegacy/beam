@@ -15,6 +15,7 @@ let CardsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.buil
 struct CardsPreferencesView: View {
     private let contentWidth: Double = PreferencesManager.contentWidth
     @State private var alwaysShowBullets = PreferencesManager.alwaysShowBullets
+    @State private var firstTrigger = true
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
@@ -38,6 +39,10 @@ struct CardsPreferencesView: View {
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .onReceive([alwaysShowBullets].publisher.first()) {
+                        guard !firstTrigger else {
+                            firstTrigger = false
+                            return
+                        }
                         PreferencesManager.alwaysShowBullets = $0
                     }
             }

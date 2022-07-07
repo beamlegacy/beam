@@ -60,7 +60,7 @@ class WebNoteController: Encodable, Decodable {
     }
 
     static private var defaultNote: BeamNote {
-        AppDelegate.main.data.todaysNote
+        BeamData.shared.todaysNote
     }
 
     private var cancellables = Set<AnyCancellable>()
@@ -77,7 +77,7 @@ class WebNoteController: Encodable, Decodable {
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         if let id = try? container.decode(UUID.self, forKey: .note),
-           let fetchedNote = BeamNote.fetch(id: id, includeDeleted: false) {
+           let fetchedNote = BeamNote.fetch(id: id) {
             note = fetchedNote
             let rootId = try? container.decode(UUID.self, forKey: .rootElement)
             _rootElement = fetchedNote.findElement(rootId ?? fetchedNote.id) ?? fetchedNote.children.first!
@@ -93,14 +93,14 @@ class WebNoteController: Encodable, Decodable {
     }
 
     private func setupObservers() {
-        DocumentManager.documentDeleted.receive(on: DispatchQueue.main).sink { id in
-            if self.note?.id == id {
+        BeamDocumentCollection.documentDeleted.receive(on: DispatchQueue.main).sink { deletedDocument in
+            if self.note?.id == deletedDocument.id {
                 self.note = nil
             }
-            if self._rootElement?.id == id {
+            if self._rootElement?.id == deletedDocument.id {
                 self._rootElement = nil
             }
-            if self._element?.id == id {
+            if self._element?.id == deletedDocument.id {
                 self._element = nil
             }
         }.store(in: &cancellables)

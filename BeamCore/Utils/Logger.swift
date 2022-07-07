@@ -70,6 +70,7 @@ public enum LogCategory: String, CaseIterable {
     case tabPinSuggestion
     case tabGrouping
     case analyticsCollection
+    case sync
 }
 
 public final class Logger {

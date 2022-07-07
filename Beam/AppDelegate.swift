@@ -51,8 +51,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     static let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
     static let defaultWindowSize = CGSize(width: 1024, height: 768)
-    public private(set) lazy var documentManager = DocumentManager()
-    public private(set) lazy var databaseManager = DatabaseManager()
     public private(set) lazy var beamObjectManager = BeamObjectManager()
 
     private let networkMonitor = NetworkMonitor()
@@ -83,7 +81,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSClassFromString("XCTest") != nil
     }
 
+    // swiftlint:disable:next function_body_length
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        splashScreen?.close()
+        splashScreen = nil
+
+        data = BeamData()
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
         if Configuration.env.rawValue == "$(ENV)" || Configuration.Sentry.key == "$(SENTRY_KEY)", !isSwiftUIPreview {
             fatalError("The ENV wasn't detected properly, please run `direnv allow` and restart your build. (Should only happen in SwiftUI Previews)")
@@ -111,7 +114,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         //TODO: - Remove when everyone has its local links data moved from old db to grdb
         BeamObjectManager.setup()
 
-        data = BeamData()
         if deleteAllLocalDataAtStartup {
             self.deleteAllLocalData()
         }
@@ -144,14 +146,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // In test mode, we want to start fresh without auth tokens as they may have expired
         if Configuration.env == .test {
-            AccountManager.logout()
+            data.currentAccount?.logout()
         }
         #endif
 
         setupNetworkMonitor()
 
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-        AccountManager.updateInitialState()
+        data.currentAccount?.updateInitialState()
 
         fetchTopDomains()
         getUserInfos()
@@ -192,13 +194,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Private Key Check
     func checkPrivateKey() {
-        if AccountManager.checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
-            beamObjectManager.liveSync { _ in
-                self.syncDataWithBeamObject()
-                self.data.updateNoteCount()
+        if let account = data.currentAccount {
+            if account.checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
+                beamObjectManager.liveSync { _ in
+                    self.syncDataWithBeamObject()
+                    self.data.updateNoteCount()
+                }
+            } else {
+                account.logoutIfNeeded()
             }
-        } else {
-            AccountManager.logoutIfNeeded()
         }
     }
 
@@ -234,50 +238,36 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool, _ completionHandler: ((Result<Bool, Error>) -> Void)?) -> Task<Void, Error> {
         Task {
+            defer {
+                self.synchronizationTaskDidStop()
+                self.synchronizationSemaphore.signal()
+                self.indexAllNotes()
+            }
+
             // swiftlint:disable:next date_init
             let localTimer = Date()
-
-            let initialDBs = Set(databaseManager.all())
-            var syncError: Error?
-            Logger.shared.logInfo("syncAllFromAPI calling", category: .beamObjectNetwork)
+            guard let currentAccount = data.currentAccount else {
+                return
+            }
+            let initialDBs = Set(currentAccount.allDatabases)
+            Logger.shared.logInfo("syncAllFromAPI calling", category: .sync)
             do {
                 try await beamObjectManager.syncAllFromAPI(force: force,
                                                            prepareBeforeSaveAll: {
-                    self.prepareBeforeSaveAll(initialDBs: initialDBs)
+                    currentAccount.mergeAllDatabases(initialDBs: initialDBs)
                 })
             } catch {
-                syncError = error
+                Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
+                                      category: .sync,
+                                      localTimer: localTimer)
+                completionHandler?(.failure(error))
+                return
             }
+
             Logger.shared.logInfo("syncAllFromAPI called",
-                                  category: .beamObjectNetwork,
+                                  category: .sync,
                                   localTimer: localTimer)
-            if !Task.isCancelled {
-                self.deleteEmptyDatabases(showAlert: showAlert) { _ in
-                    self.synchronizationTaskDidStop()
-                    self.synchronizationSemaphore.signal()
-                    if let error = syncError {
-                        Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
-                                              category: .beamObjectNetwork,
-                                              localTimer: localTimer)
-                        completionHandler?(.failure(error))
-                    } else {
-                        DatabaseManager.changeDefaultDatabaseIfNeeded()
-                        completionHandler?(.success(true))
-                    }
-                }
-            } else {
-                synchronizationTaskDidStop()
-                synchronizationSemaphore.signal()
-                if let error = syncError {
-                    Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
-                                          category: .beamObjectNetwork,
-                                          localTimer: localTimer)
-                    completionHandler?(.failure(error))
-                } else {
-                    DatabaseManager.changeDefaultDatabaseIfNeeded()
-                    completionHandler?(.success(true))
-                }
-            }
+            completionHandler?(.success(true))
         }
     }
 
@@ -302,158 +292,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         synchronizationSubject.send(isSynchronizationRunning)
     }
 
-    //swiftlint:disable:next cyclomatic_complexity function_body_length
-    private func prepareBeforeSaveAll(initialDBs: Set<DatabaseStruct>) {
-        // We have just synced all the databases
-        // We now need to check if a new database was added from the sync and move all the notes to it
-        let initialIds = Set(initialDBs.map({ $0.id }))
-        let allDBs = databaseManager.all()
-        let dbMap = [UUID: DatabaseStruct](uniqueKeysWithValues: allDBs.map({ ($0.id, $0) }))
-        let allIds = Set(dbMap.keys)
-        let syncedIds = allIds.subtracting(initialIds)
-        let strictlyLocalIds = initialIds.subtracting(syncedIds)
-
-        // Basically strictlyLocalDBs are the DBs that are not from the sync and syncedDBs are the one that comes from the sync
-        // In the end we must have ONLY ONE DB. We will take the one that has the most notes from the sync and make it current. If syncedDBs is empty them we take the local DB that has the most notes and make it current.
-        // We then move all the notes to the current DB and DESTROY all the other DBs.
-        // If the other DB comes from the Sync they are soft deleted, if the other DB is strictly local, it is hard deleted
-
-        var newDefaultDB: UUID?
-        if !syncedIds.isEmpty && !syncedIds.contains(DatabaseManager.defaultDatabase.id) {
-            // The default database is not synced. So we need to change it to the one that has the most notes:
-            Logger.shared.logInfo("The default database is not synced. So we need to change it to the one that has the most notes", category: .database)
-            var noteCount = 0
-            for db in syncedIds {
-                let count = self.databaseManager.documentsCountForDatabase(db)
-                Logger.shared.logInfo("Database \(db) contains \(count) documents", category: .database)
-                if count > noteCount {
-                    noteCount = count
-                    newDefaultDB = db
-                }
-            }
-        }
-
-        if newDefaultDB == nil {
-            // We haven't found a suitable default DB, let's use a local one:
-            Logger.shared.logInfo("We haven't found a suitable default synced DB, let's use a local one", category: .database)
-            var noteCount = 0
-            for db in strictlyLocalIds {
-                let count = self.databaseManager.documentsCountForDatabase(db)
-                Logger.shared.logInfo("Database \(db) contains \(count) documents", category: .database)
-                if count > noteCount {
-                    noteCount = count
-                    newDefaultDB = db
-                }
-            }
-        }
-
-        if let newDefaultDB = newDefaultDB {
-            // We have a new current DB so let's move all the notes to the current DB:
-            let moveSemaphore = DispatchSemaphore(value: 0)
-            DispatchQueue.mainSync {
-                self.documentManager.moveAllOrphanNotes(databaseId: newDefaultDB, onlyOrphans: false) { result in
-                    switch result {
-                    case let .failure(error):
-                        Logger.shared.logError("Error while moving all notes to database \(newDefaultDB): \(error)", category: .database)
-                    case let .success(res):
-                        if !res {
-                            Logger.shared.logError("Unable to move all notes to database \(newDefaultDB)", category: .database)
-                        }
-                    }
-                    moveSemaphore.signal()
-                }
-            }
-            moveSemaphore.wait()
-
-            // We are done moving, let's change the current dB:
-            if DatabaseManager.defaultDatabase.id != newDefaultDB, let defaultDBStruct = dbMap[newDefaultDB] {
-                DatabaseManager.defaultDatabase = defaultDBStruct
-            }
-        }
-
-        Logger.shared.logInfo("The default database now is \(DatabaseManager.defaultDatabase)", category: .database)
-        let deleteSemaphore = DispatchSemaphore(value: 0)
-        deleteEmptyDatabases(showAlert: false) { result in
-            switch result {
-            case .success:
-                Logger.shared.logInfo("Deleted all empty databases", category: .database)
-            case .failure(let error):
-                Logger.shared.logInfo("Error while Deleting all empty databases: \(error)", category: .database)
-            }
-            deleteSemaphore.signal()
-        }
-        deleteSemaphore.wait()
-
-        // rename the default DB if possible:
-        if let title = DatabaseManager.defaultDatabase.titleBeforeAutoRenaming, !databaseManager.allTitles().contains(title) {
-            DatabaseManager.defaultDatabase.title = title
-            let renameSemaphore = DispatchSemaphore(value: 0)
-            // Let's save this DB only locally, we'll let the full sync do the job to syncing everything later
-            databaseManager.save(DatabaseManager.defaultDatabase, false, nil) { result in
-                switch result {
-                case let .failure(error):
-                    Logger.shared.logError("Error while saving renamed default database: \(error)", category: .database)
-                case let .success(res):
-                    if !res {
-                        Logger.shared.logError("Error while saving renamed default database", category: .database)
-                    } else {
-                        Logger.shared.logInfo("Renamed default database to \(title)", category: .database)
-
-                    }
-                }
-                renameSemaphore.signal()
-            }
-            renameSemaphore.wait()
+    private func indexAllNotes() {
+        DispatchQueue.main.async {
+            BeamNote.indexAllNotes()
         }
     }
 
     private func deleteEmptyDatabases(showAlert: Bool = true,
                                       _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        // swiftlint:disable:next date_init
-        let localTimer = Date()
-        let previousDefaultDatabase = DatabaseManager.defaultDatabase
 
-        Logger.shared.logInfo("Deleting Empty databases", category: .database)
-        self.databaseManager.deleteEmptyDatabases { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Error deleting empty databases: \(error.localizedDescription)",
-                                       category: .database,
-                                       localTimer: localTimer)
-                completionHandler?(.failure(error))
-            case .success(let success):
-                Logger.shared.logDebug("Deleted Empty databases, success: \(success)",
-                                       category: .database,
-                                       localTimer: localTimer)
-                do {
-                    if Configuration.shouldDeleteEmptyDatabase {
-                        try self.databaseManager.deleteCurrentDatabaseIfEmpty()
-                    }
-                } catch {
-                    Logger.shared.logError(error.localizedDescription, category: .database)
-                }
-
-                guard showAlert else {
-                    completionHandler?(.success(success))
-                    return
-                }
-
-                // `DispatchQueue.main.async` doesn't call its block once we called terminate...
-                DispatchQueue.main.async { [unowned self] in
-                    if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id {
-                        if self.data.onboardingManager.needsToDisplayOnboard == true {
-                            Logger.shared.logWarning("Default database changed after onboarding",
-                                                    category: .database, localTimer: localTimer)
-                        } else {
-                            Logger.shared.logWarning("Default database changed, showing alert",
-                                                    category: .database, localTimer: localTimer)
-
-                            DatabaseManager.dispatchDatabaseChangedNotification(previousDefaultDatabase, DatabaseManager.defaultDatabase, andRestart: true)
-                        }
-                    }
-                    completionHandler?(.success(success))
-                }
-            }
+        guard let currentAccount = data.currentAccount else { return }
+        do {
+            try currentAccount.deleteEmptyDatabases()
+            completionHandler?(.success(true))
+        } catch {
+            Logger.shared.logInfo("deleteEmptyDatabases failed: \(error)",
+                                  category: .database)
+            completionHandler?(.failure(error))
+            return
         }
     }
 
@@ -564,8 +420,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard !skipTerminateMethods else { return }
         // Insert code here to tear down your application
         do {
-            try BeamFileDBManager.shared.purgeUndo()
-            try BeamFileDBManager.shared.purgeUnlinkedFiles()
+            try BeamFileDBManager.shared?.purgeUndo()
+            try BeamFileDBManager.shared?.purgeUnlinkedFiles()
         } catch {
             Logger.shared.logError("Unable to purge unused files: \(error)", category: .fileDB)
         }
@@ -585,7 +441,107 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     var deleteAllLocalDataAtStartup = false
+    class SplashScreen: NSWindow {
+        var nextReport = BeamDate.now
+        var text: String = "Migrating orignal data" {
+            didSet {
+                splashText.stringValue = text
+
+                tick()
+            }
+        }
+
+        func tick() {
+            let now = BeamDate.now
+            if nextReport < now {
+                RunLoop.main.run(mode: .modalPanel, before: BeamDate.now.addingTimeInterval(0.01))
+                nextReport = BeamDate.now.addingTimeInterval(0.2)
+            }
+        }
+
+        var splashText = NSTextField(labelWithString: "Migrating local database:")
+
+        init() {
+            let rect = NSRect(x: 0, y: 0, width: 500, height: 70)
+            splashText.stringValue = text
+            splashText.isEditable = false
+            splashText.isBordered = false
+            splashText.alignment = .center
+            splashText.isSelectable = false
+            splashText.isBezeled = false
+            super.init(contentRect: rect, styleMask: [], backing: .buffered, defer: false)
+            let title = NSTextField(labelWithAttributedString: NSAttributedString(string: "Migrating local databases:", attributes: [.font: NSFont.systemFont(ofSize: 14, weight: .bold)]))
+            title.alignment = .center
+            var iconView: NSImageView?
+            if let icon = NSImage(named: Bundle.main.iconFileName ?? "FileDatabase") {
+                iconView = NSImageView(image: icon)
+            }
+            let views = [iconView, title, splashText]
+            let stackView = NSStackView(views: views.compactMap({ $0 }))
+            stackView.orientation = .vertical
+            self.contentView = stackView
+            self.isReleasedWhenClosed = false
+            self.level = .floating
+            self.isOpaque = false
+            self.hasShadow = true
+        }
+
+    }
+    private var splashScreen: SplashScreen?
+    var progressText: String = "Migrating orignal data" {
+        didSet {
+            splashScreen?.text = progressText
+        }
+    }
+
+    private func migrateLegacyData() {
+        BeamAccount.disableSync()
+        if !BeamAccount.hasValidAccount(in: BeamData.accountsPath) {
+            splashScreen = SplashScreen()
+            splashScreen?.center()
+            splashScreen?.makeKeyAndOrderFront(nil)
+            splashScreen?.orderFrontRegardless()
+            splashScreen?.display()
+            splashScreen?.update()
+
+            splashScreen?.tick()
+
+            self.progressText = "Backup existing data"
+            BeamData.backup(overrideArchiveName: "Beam Backup before GRDB migration")
+
+            // try to migrate the old databases
+            let account: BeamAccount
+            let database: BeamDatabase
+            do {
+                account = try BeamData.createDefaultAccount()
+                database = try account.loadDatabase(account.defaultDatabaseId)
+            } catch {
+                Logger.shared.logError("Cannot migrate legacy data creating a default account failed: \(error)", category: .accountManager)
+                return
+            }
+
+            let importer = LegacyDataImporter(account: account, database: database) { text in
+                DispatchQueue.mainSync {
+                    self.progressText = text
+                }
+            }
+            do {
+                try importer.importAllFrom(path: BeamData.dataFolder)
+            } catch {
+                Logger.shared.logError("Error during legacy data migration: \(error)", category: .accountManager)
+                return
+            }
+        }
+
+        BeamAccount.enableSync()
+    }
+
     func applicationWillFinishLaunching(_ notification: Notification) {
+        // We need to migrate the legacy database BEFORE initializing CoreData so that we can access the sqlite store without making a super slow backup
+        BeamData.registerDefaultManagers()
+
+        migrateLegacyData()
+
         CoreDataManager.shared.setup()
 
         Logger.shared.logDebug("-------------------------( applicationLaunching )-------------------------",
@@ -605,7 +561,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if flags.contains(.shift), flags.contains(.command), flags.contains(.option), flags.contains(.control) {
             if Persistence.Authentication.email != nil {
                 UserAlert.showAlert(message: "Logout from account \(Persistence.emailOrRaiseError())", informativeText: "Do you want to logout?", buttonTitle: "Cancel", secondaryButtonTitle: "Logout", secondaryButtonAction: {
-                    AccountManager.logout()
+                    self.data.currentAccount?.logout()
 
                     UserAlert.showAlert(message: "Reset all private keys", informativeText: "Do you want to reset all accounts? (make sure your private keys are backuped first!). The following accounts will be removed:\n\(EncryptionManager.shared.accounts.joined(separator: "\n"))", buttonTitle: "Cancel", secondaryButtonTitle: "Reset all accounts", secondaryButtonAction: {
                         EncryptionManager.shared.resetPrivateKeys(andMigrateOldSharedKey: false)
@@ -633,10 +589,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return handleURL(incomingURL)
     }
 
-    var documentsWindow: DocumentsWindow?
     var omniboxContentDebuggerWindow: OmniboxContentDebuggerWindow?
+
+    var dataTreeWindow: DataTreeWindow?
+
     var filesWindow: FilesWindow?
-    var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingSettingsWindow?
     weak var tabGroupingFeedbackWindow: TabGroupingFeedbackWindow?
     ///Should only be used to say that the full sync on quit is done
@@ -650,7 +607,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logDebug("Tried to quit while full syncing")
             return .terminateCancel }
 
-        AccountManager.logoutIfNeeded()
+        data.currentAccount?.logoutIfNeeded()
         data.saveData()
         RestoreTabsManager.shared.saveOpenedTabsBeforeTerminatingApp()
         _ = self.data.browsingTreeSender?.groupWait()

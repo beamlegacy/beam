@@ -17,7 +17,6 @@ sentry:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: '$CI_COMMIT_BRANCH == "develop-grdb"'
     - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -52,7 +51,6 @@ build:upload:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: '$CI_COMMIT_BRANCH == "develop-grdb"'
     - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -116,23 +114,3 @@ cherry_pick_to_develop:
     - scripts/handle_cherry_pick.sh
   interruptible: true
   allow_failure: true
-
-# cherry_pick_to_develop_grdb:
-#  timeout: 2 minutes
-#  image: registry.gitlab.com/beamgroup/beam/curl-jq
-#  before_script:
-#    - date
-#  dependencies: []
-#  stage: deploy
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-#      when: never
-#    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
-#      when: never
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#      when: never
-#    - if: '$CI_COMMIT_BRANCH == "develop"'
-#  script:
-#    - scripts/handle_cherry_pick_grdb.sh
-#  interruptible: true
-#  allow_failure: true

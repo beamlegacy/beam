@@ -67,7 +67,7 @@ struct OauthButton<Content: View>: View {
                         }
                     }
                 case .signin:
-                    AccountManager().signInWithProvider(provider: type, accessToken: credential.oauthToken, runFirstSync: false) { _ in
+                    BeamData.shared.currentAccount?.signInWithProvider(provider: type, accessToken: credential.oauthToken, runFirstSync: false) { _ in
                         onConnect?()
                     } syncCompletion: { _ in
                         onDataSync?()

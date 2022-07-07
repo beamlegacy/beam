@@ -1,5 +1,5 @@
 import BeamCore
-import Promises
+
 
 /**
  The expected API for a WebPage to work (received messages, point and shoot) with.
@@ -44,8 +44,7 @@ protocol WebPage: AnyObject, Scorable {
     var textSelection: String? { get set }
     var pendingContextMenuPayload: ContextMenuMessageHandlerPayload? { get set }
 
-    @discardableResult
-    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo?, successLogCategory: LogCategory) -> Promise<Any?>
+    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo?, successLogCategory: LogCategory, _ completion: ((Result<Any?, Error>) -> Void)?)
 
     // MARK: Note handling
     func addContent(content: [BeamElement], with source: URL?, reason: NoteElementAddReason)
@@ -82,34 +81,26 @@ enum JavascriptExecutionError: Error {
 
 // MARK: - Default WebPage methods implementations
 extension WebPage {
+    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo? = nil, successLogCategory: LogCategory = .javascript, _ completion: ((Result<Any?, Error>) -> Void)? = nil) {
+        var command = jsCode
 
-    @discardableResult
-    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo? = nil, successLogCategory: LogCategory = .javascript) -> Promise<Any?> {
-        Promise<Any?> { [weak self] fulfill, reject in
-            var command = jsCode
-
-            guard let self = self else {
-                let error = JavascriptExecutionError.webPageDeallocated
-                Logger.shared.logError("(\(command) failed: \(String(describing: error))", category: .javascript)
-                reject(error)
-                return
+        if let configuration = webView.configurationWithoutMakingCopy as? BeamWebViewConfiguration {
+            if let name = objectName {
+                command = configuration.obfuscate(str: "beam.__ID__\(name)." + jsCode)
+            } else {
+                command = configuration.obfuscate(str: jsCode)
             }
+        }
 
-            if let configuration = self.webView.configurationWithoutMakingCopy as? BeamWebViewConfiguration {
-                if let name = objectName {
-                    command = configuration.obfuscate(str: "beam.__ID__\(name)." + jsCode)
-                } else {
-                    command = configuration.obfuscate(str: jsCode)
-                }
-            }
-            self.webView.evaluateJavaScript(command, in: frameInfo, in: WKContentWorld.page) { result in
+        DispatchQueue.mainSync { [weak self] in
+            self?.webView.evaluateJavaScript(command, in: frameInfo, in: WKContentWorld.page) { result in
                 switch result {
                 case .failure(let error):
                     Logger.shared.logError("(\(command) failed: \(String(describing: error))", category: .javascript)
-                    reject(error)
+                    completion?(.failure(error))
                 case .success(let response):
                     Logger.shared.logInfo("(\(command) succeeded: \(String(describing: response))", category: successLogCategory)
-                    fulfill(response)
+                    completion?(.success(response))
                 }
             }
         }

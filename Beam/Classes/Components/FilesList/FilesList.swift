@@ -33,7 +33,7 @@ struct FilesList: View {
                 .tracking { db in
                     try BeamFileRecord.fetchAll(db)
                 }
-                .start(in: BeamFileDBManager.shared.dbPool,
+                .start(in: fileManager!.grdbStore.writer,
                        onError: { Logger.shared.logError($0.localizedDescription, category: .fileDB) },
                        onChange: { self.files = $0 })
         }

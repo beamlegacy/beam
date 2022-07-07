@@ -23,6 +23,7 @@ extension PreferencesManager {
     private static let createJournalOncePerWindowKey = "createJournalOncePerWindow"
     private static let useSidebarKey = "useSidebar"
     private static let includeHistoryContentsInOmniBoxKey = "includeHistoryContentsInOmniBox"
+    private static let enableOmnibeamsKey = "enableOmnibeams"
     private static let enableDailySummaryKey = "enableDailySummary"
 }
 
@@ -44,6 +45,7 @@ extension PreferencesManager {
     private static let createJournalOncePerWindowDefault = true
     private static let useSidebarDefault = false
     static let includeHistoryContentsInOmniBoxDefault = false
+    static let enableOmnibeamsDefault = false
     private static let enableDailySummaryDefault: Bool = Configuration.branchType == .develop
 }
 
@@ -89,6 +91,9 @@ extension PreferencesManager {
 
     @UserDefault(key: includeHistoryContentsInOmniBoxKey, defaultValue: includeHistoryContentsInOmniBoxDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var includeHistoryContentsInOmniBox: Bool
+
+    @UserDefault(key: enableOmnibeamsKey, defaultValue: enableOmnibeamsDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
+    static var enableOmnibeams: Bool
 
     @UserDefault(key: enableDailySummaryKey, defaultValue: enableDailySummaryDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var enableDailySummary: Bool

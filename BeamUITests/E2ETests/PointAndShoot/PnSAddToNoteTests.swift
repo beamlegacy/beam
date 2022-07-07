@@ -132,7 +132,7 @@ class PnSAddToNoteTests: BaseTest {
             OmniBoxTestView().navigateToNoteViaPivotButton()
             _ = noteView.waitForNoteViewToLoad()
             noteNodes = noteView.getNoteNodesForVisiblePart()
-            XCTAssertTrue(noteNodes.count == 2 || noteNodes.count == 3) //CI specific issue handling
+            XCTAssert(noteNodes.count == 2 || noteNodes.count == 3) //CI specific issue handling
         }
 
     }
@@ -240,7 +240,6 @@ class PnSAddToNoteTests: BaseTest {
             XCTAssertEqual(noteNodes.count, 1)
             XCTAssertTrue(noteNodes[0].getStringValue() == emptyString || noteNodes[0].getStringValue() == "Media Player Test Page") //CI specific issue handling
         }
-
     }
     
     func testCollectFullPage() {

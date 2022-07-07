@@ -61,7 +61,7 @@ public class LongTermUrlScore: Codable, UrlScoreProtocol {
 }
 
 public protocol LongTermUrlScoreStoreProtocol {
-    func apply(to urlId: UUID, changes: (LongTermUrlScore) -> Void)
+    func apply(to urlId: UUID, changes: @escaping (LongTermUrlScore) -> Void)
     func getMany(urlIds: [UUID]) -> [UUID: LongTermUrlScore]
     func save(scores: [LongTermUrlScore])
 }

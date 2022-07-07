@@ -195,11 +195,13 @@ struct WindowBottomToolBar_Previews: PreviewProvider {
     static var previews: some View {
         let state = BeamState()
         state.mode = .today
-        state.currentNote = BeamNote(title: "Note A")
-        state.currentNote = BeamNote(title: "Long Note B")
-        state.currentNote = BeamNote(title: "Note C ")
-        state.currentNote = BeamNote(title: "Last Note D")
-        state.currentNote = BeamNote(title: "Current Note")
+        // swiftlint:disable force_try
+        state.currentNote = try? BeamNote(title: "Note A")
+        state.currentNote = try? BeamNote(title: "Long Note B")
+        state.currentNote = try? BeamNote(title: "Note C ")
+        state.currentNote = try? BeamNote(title: "Last Note D")
+        state.currentNote = try? BeamNote(title: "Current Note")
+        // swiftlint:enable force_try
 
         return WindowBottomToolBar()
             .environmentObject(state)

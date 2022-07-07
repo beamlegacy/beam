@@ -11,7 +11,7 @@ import BeamCore
 // High level manipulation:
 extension BeamText {
     //swiftlint:disable:next function_body_length
-    @discardableResult mutating func makeInternalLink(_ range: Swift.Range<Int>) -> UUID? {
+    @discardableResult mutating func makeInternalLink(_ source: BeamDocumentSource, _ range: Swift.Range<Int>) -> UUID? {
         let text = self.extract(range: range)
         let t = text.text
 
@@ -45,7 +45,7 @@ extension BeamText {
             return nil
         }
 
-        let linkedNote = BeamNote.fetchOrCreate(title: link)
+        guard let linkedNote = try? BeamNote.fetchOrCreate(source, title: link) else { return nil }
         if linkedNote.children.isEmpty {
             linkedNote.addChild(BeamElement())
         }
@@ -61,16 +61,16 @@ extension BeamText {
         }
 
         linkedNote.referencedByUser()
-        linkedNote.save()
+        _ = linkedNote.save(source)
 
         return linkedNote.id
     }
 
-    mutating func makeLinksToNoteExplicit(forNote title: String) {
+    mutating func makeLinksToNoteExplicit(_ source: BeamDocumentSource, forNote title: String) {
         text.ranges(of: title, options: .caseInsensitive).forEach { range in
             let start = text.position(at: range.lowerBound)
             let end = text.position(at: range.upperBound)
-            makeInternalLink(start..<end)
+            makeInternalLink(source, start..<end)
         }
     }
 
@@ -101,7 +101,7 @@ extension BeamText {
 }
 
 public extension BeamElement {
-    @discardableResult func makeInternalLink(_ range: Swift.Range<Int>) -> (UUID?, UUID?) {
-        return (note?.id, text.makeInternalLink(range))
+    @discardableResult func makeInternalLink(_ source: BeamDocumentSource, _ range: Swift.Range<Int>) -> (UUID?, UUID?) {
+        return (note?.id, text.makeInternalLink(source, range))
     }
 }

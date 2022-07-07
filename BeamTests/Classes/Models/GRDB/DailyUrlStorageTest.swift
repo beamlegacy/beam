@@ -10,13 +10,18 @@ import XCTest
 @testable import Beam
 
 class DailyUrlStorageTest: XCTestCase {
+    var db: UrlStatsDBManager!
 
+    override func setUpWithError() throws {
+        let store = GRDBStore.empty()
+        db = try UrlStatsDBManager(store: store)
+        try store.migrate()
+    }
 
     func testRecord() throws {
         BeamDate.freeze("2001-01-01T00:01:00+000")
         let t0 = BeamDate.now
 
-        let db = GRDBDatabase.empty()
         let id = UUID()
         let day0 = "2020-01-01"
         let day1 = "2020-01-02"
@@ -64,7 +69,6 @@ class DailyUrlStorageTest: XCTestCase {
     
     func testStorage() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
-        let db = GRDBDatabase.empty()
         let storage = GRDBDailyUrlScoreStore(db: db, daysToKeep: 1)
         let ids = [UUID(), UUID()]
         storage.apply(to: ids[0]) { $0.scrollRatioY = 0.5 }

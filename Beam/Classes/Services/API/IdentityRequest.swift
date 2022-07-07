@@ -1,5 +1,5 @@
 import Foundation
-import Promises
+
 
 enum IdentityRequestError: Error, Equatable {
     case parserError

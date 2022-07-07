@@ -26,9 +26,9 @@ final class BeamNoteCollectionWrapper: NSDocument {
     }
 
     override init() {
-        let dm = DocumentManager()
-        for id in dm.allDocumentsIds(includeDeletedNotes: false) {
-            guard let note = BeamNote.fetch(id: id, includeDeleted: false) else { continue }
+        guard let collection = BeamData.shared.currentDocumentCollection else { super.init(); return }
+        for id in (try? collection.fetchIds(filters: [])) ?? [] {
+            guard let note = BeamNote.fetch(id: id) else { continue }
             noteDocuments.insert(BeamNoteDocumentWrapper(note: note))
         }
         super.init()

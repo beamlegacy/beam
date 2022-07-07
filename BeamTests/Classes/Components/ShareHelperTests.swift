@@ -102,7 +102,7 @@ class ShareHelperTests: XCTestCase {
         let imageData = image.jpegRepresentation
         downloadManager.mockData = imageData
         downloadManager.mockFileName = "image.jpg"
-        let _ = try BeamFileDBManager.shared.insert(name: "image.jpg", data: imageData, type: "image/jpeg")
+        let _ = try BeamFileDBManager.shared?.insert(name: "image.jpg", data: imageData, type: "image/jpeg")
 
         htmlNoteAdatper = HtmlNoteAdapter(baseURL, downloadManager, BeamFileDBManager.shared)
 

@@ -59,14 +59,14 @@ class BrowserImportManagerTest: XCTestCase {
     override func setUpWithError() throws {
         try BrowsingTreeStoreManager.shared.clearBrowsingTrees()
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try GRDBDatabase.shared.clearUrlFrecencies()
+        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
         Persistence.cleanUp()
     }
 
     override func tearDownWithError() throws {
         try BrowsingTreeStoreManager.shared.clearBrowsingTrees()
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try GRDBDatabase.shared.clearUrlFrecencies()
+        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
         Persistence.cleanUp()
     }
 
@@ -91,9 +91,13 @@ class BrowserImportManagerTest: XCTestCase {
         XCTAssertEqual(node1.events.first?.date, Date(timeIntervalSinceReferenceDate: Double(1)))
         let urlIds = [node0.link, node1.link]
         //expects 2 frecencies to be saved in linkstore and not in frecencyRecord table anymore
-        let frecencies = GRDBDatabase.shared.getFrecencyScoreValues(urlIds: urlIds, paramKey: .webVisit30d0)
+        guard let frecencies = BeamData.shared.urlHistoryManager?.getFrecencyScoreValues(urlIds: urlIds, paramKey: .webVisit30d0) else {
+            throw BeamDataError.databaseNotFound
+        }
         XCTAssertEqual(frecencies.count, 0)
-        let links: [UUID: Link] = try GRDBDatabase.shared.getLinks(ids: urlIds)
+        guard let links: [UUID: Link] = try BeamData.shared.urlHistoryManager?.getLinks(ids: urlIds) else {
+            throw BeamDataError.databaseNotFound
+        }
         XCTAssertNotNil(links[node0.link]?.frecencyVisitScore)
         XCTAssertNotNil(links[node0.link]?.frecencyVisitSortScore)
         XCTAssertNotNil(links[node0.link]?.frecencyVisitLastAccessAt)
@@ -136,9 +140,13 @@ class BrowserImportManagerTest: XCTestCase {
         }
         let urlIds = nodes.map { $0.link }
         //expects 3 frecencies to be saved in linkstore and not in frecencyRecord table anymore
-        let frecencies = GRDBDatabase.shared.getFrecencyScoreValues(urlIds: urlIds, paramKey: .webVisit30d0)
+        guard let frecencies = BeamData.shared.urlHistoryManager?.getFrecencyScoreValues(urlIds: urlIds, paramKey: .webVisit30d0) else {
+            throw BeamDataError.databaseNotFound
+        }
         XCTAssertEqual(frecencies.count, 0)
-        let links: [UUID: Link] = try GRDBDatabase.shared.getLinks(ids: urlIds)
+        guard let links: [UUID: Link] = try BeamData.shared.urlHistoryManager?.getLinks(ids: urlIds) else {
+            throw BeamDataError.databaseNotFound
+        }
         for node in nodes {
             XCTAssertNotNil(links[node.link]?.frecencyVisitScore)
             XCTAssertNotNil(links[node.link]?.frecencyVisitSortScore)
