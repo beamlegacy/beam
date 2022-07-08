@@ -17,6 +17,6 @@ enum PrivacyAllowListPreferencesViewLocators {
     }
     
     enum TextFields: String, CaseIterable, UIElement {
-        case searchField = "Search ..."
+        case searchField = "Search"
     }
 }
