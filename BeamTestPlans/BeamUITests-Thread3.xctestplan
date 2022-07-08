@@ -134,6 +134,7 @@
         "PasswordPreferencesTests\/testAutofillUsernameAndPasswords()",
         "ReferencesTests",
         "ReportBugFeatureTests",
+        "RightClickLinkMenuTests",
         "SearchOnCardTests",
         "SearchOnNoteTests",
         "SearchOnPDFTests",
