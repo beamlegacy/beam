@@ -153,6 +153,7 @@
         "ReferencesTests",
         "ReportBugFeatureTests",
         "RightClickImageMenuTests",
+        "RightClickLinkMenuTests",
         "SearchOnPDFTests",
         "SearchOnPdfTests",
         "SearchOnWebTests",
