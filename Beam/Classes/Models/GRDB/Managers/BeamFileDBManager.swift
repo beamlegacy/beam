@@ -173,7 +173,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
 
     var holder: BeamManagerOwner?
 
-    override var tableNames: [String] { [BeamFileRefRecord.tableName] }
+    override var tableNames: [String] { [BeamFileRecord.tableName, BeamFileRefRecord.tableName] }
 
     static public var shared: BeamFileDBManager? {
         BeamData.shared.fileDBManager
