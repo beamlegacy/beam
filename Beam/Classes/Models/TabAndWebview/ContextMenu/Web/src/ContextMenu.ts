@@ -62,7 +62,7 @@ export class ContextMenu<UI extends ContextMenuUI> {
       parameters = { ...parameters, href: elements[0].href ?? elements[1].href }
     }
     if ((invocations & Invocation.Image) != 0) {
-      parameters = { ...parameters, src: elements[0].src ?? elements[1].src }
+      parameters = { ...parameters, src: this.getSrcFromImageElement(elements[0]) }
     }
 
     message.parameters = parameters
@@ -110,6 +110,13 @@ export class ContextMenu<UI extends ContextMenuUI> {
       }
     }
     return this.elementsAndInvocationType(element.parentElement, Invocation.Page)
+  }
+
+  getSrcFromImageElement(element: BeamElement) {
+    if (element.src != null && element.src != "") {
+      return element.src
+    }
+    return element.currentSrc
   }
 
   toString(): string {
