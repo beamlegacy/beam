@@ -10,9 +10,11 @@ import BeamCore
 
 struct AllowListTableView: View {
     @ObservedObject var viewModel: AllowListViewModel
-    var searchStr: String
-    @Binding var selectedItems: [RBAllowlistEntry]
+    let searchStr: String
+    @Binding var selectedItems: [AllowListViewItem]
     @Binding var creationRowTitle: String?
+
+    @State private var invalidItem: IdentifiableString?
 
     var allowListColumns = [
         TableViewColumn(key: "host", title: "Sites", editable: true, sortableCaseInsensitive: true, resizable: false, width: 334, fontSize: 12),
@@ -21,26 +23,35 @@ struct AllowListTableView: View {
 
     var body: some View {
         TableView(hasSeparator: false,
-                  items: searchStr.isEmpty ? viewModel.allAllowListItems : filterAllowListItemsBy(searchStr: searchStr),
+                  items: searchStr.isEmpty ? viewModel.allowListItems : filterAllowListItemsBy(searchStr: searchStr),
                   columns: allowListColumns,
-                  creationRowTitle: creationRowTitle) { title, _ in
+                  creationRowTitle: creationRowTitle) { title, index in
             guard let titleStr = title else { return }
-            viewModel.add(domain: titleStr)
+            if index < viewModel.allowListItems.count {
+                viewModel.update(domain: titleStr, at: index)
+            } else {
+                viewModel.add(domain: titleStr)
+            }
             creationRowTitle = nil
+
+            if !titleStr.validUrl().isValid {
+                invalidItem = IdentifiableString(titleStr)
+            }
         } onSelectionChanged: { indexes in
-            var newSelectedItems: [RBAllowlistEntry] = []
-            for idx in indexes {
-                guard let entry = viewModel.allAllowListItems[idx].entry else { continue }
-                newSelectedItems.append(entry)
-            }
+            let items = indexes.map { viewModel.allowListItems[$0] }
+
             DispatchQueue.main.async {
-                selectedItems = newSelectedItems
+                selectedItems = items
             }
+        }
+        .alert(item: $invalidItem) { item in
+            Alert(title: Text("Invalid URL"),
+                  message: Text("'\(item.string)' is not a valid URL and will be discarded."))
         }
     }
 
     private func filterAllowListItemsBy(searchStr: String) -> [TableViewItem] {
-        return viewModel.allAllowListItems.filter { item in
+        return viewModel.allowListItems.filter { item in
             item.host.contains(searchStr)
         }
     }
@@ -69,5 +80,14 @@ class AllowListViewItem: TableViewItem {
         dateFormatter.dateStyle = .long
         self.addedDate = dateFormatter.string(from: BeamDate.now)
         super.init()
+    }
+}
+
+private struct IdentifiableString: Identifiable {
+    let string: String
+    var id: String { string }
+
+    init(_ string: String) {
+        self.string = string
     }
 }
