@@ -22,8 +22,8 @@ class NotesNavigationHistoryTests: BaseTest {
         XCTAssertTrue(AllNotesTestView().waitForAllNotesViewToLoad())
     }
     
-    private func assertNoteIsOpened() {
-        XCTAssertTrue(noteView.waitForNoteViewToLoad())
+    private func assertTodayNoteIsOpened() {
+        XCTAssertTrue(noteView.waitForTodayNoteViewToLoad())
     }
     
     func testNotesNavigationHistory() {
@@ -52,7 +52,7 @@ class NotesNavigationHistoryTests: BaseTest {
         
         step("THEN Today's note is opened on CMD+] shortcuts call"){
             noteView.shortcutHelper.shortcutActionInvoke(action: .browserHistoryForward)
-            self.assertNoteIsOpened()
+            self.assertTodayNoteIsOpened()
         }
         
         step("THEN All Notes is opened on Go menu -> Back option"){
@@ -62,7 +62,7 @@ class NotesNavigationHistoryTests: BaseTest {
         
         step("THEN Today's note is opened on Go menu -> Forward option"){
             GoMenu().goForward()
-            self.assertNoteIsOpened()
+            self.assertTodayNoteIsOpened()
         }
         
         //CMD+left/right arrow assertions to be implemented once BE-4244 is fixed
