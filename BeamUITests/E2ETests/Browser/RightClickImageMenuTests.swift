@@ -99,6 +99,7 @@ class RightClickImageMenuTests: BaseTest {
         }
         
         step("Then image download locator window is displayed") {
+            _ = app.textFields[imageName].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
             XCTAssertTrue(app.textFields[imageName].exists)
             XCTAssertTrue(app.buttons["Save"].exists)
             XCTAssertTrue(app.buttons["Cancel"].exists)

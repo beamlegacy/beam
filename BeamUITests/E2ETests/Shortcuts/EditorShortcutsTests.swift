@@ -17,8 +17,7 @@ class EditorShortcutsTests: BaseTest {
         let searchWord = "Everest"
         
         step ("Given I search for \(searchWord)"){
-            launchApp()
-            noteView = openFirstNoteInAllNotesList()
+            noteView = launchAppAndOpenFirstNote() //first note opened is the Today's note
             noteView.typeInNoteNodeByIndex(noteIndex: 0, text: searchWord)
             shortcutHelper.shortcutActionInvoke(action: .instantSearch)
         }
@@ -26,7 +25,7 @@ class EditorShortcutsTests: BaseTest {
         step ("Then I see 1 tab opened"){
             XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 1, elementQuery: webView.getTabs()))
             webView.openDestinationNote()
-            XCTAssertTrue(noteView.waitForNoteViewToLoad())
+            XCTAssertTrue(noteView.waitForTodayNoteViewToLoad())
         }
         
         step ("Then I see \(searchWord) link as a first note"){
@@ -43,7 +42,7 @@ class EditorShortcutsTests: BaseTest {
         step ("Then I'm redirected to a new tab and the note has not been changed"){
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             webView.openDestinationNote()
-            XCTAssertTrue(noteView!.waitForNoteViewToLoad())
+            XCTAssertTrue(noteView!.waitForTodayNoteViewToLoad())
             XCTAssertEqual(noteView!.getNumberOfVisibleNotes(), 1)
             let actualNoteValue = noteView.getNoteNodeValueByIndex(0)
             XCTAssertTrue(actualNoteValue == searchWord + " - Google Search" ||
