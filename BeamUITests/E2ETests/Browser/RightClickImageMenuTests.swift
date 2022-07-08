@@ -36,7 +36,11 @@ class RightClickImageMenuTests: BaseTest {
     private func verifyShareMenuForImage () {
         rightClickMenuTestView.waitForShareMenuToBeDisplayed()
         
-        for item in RightClickMenuViewLocators.ShareMenuItems.allCases {
+        for item in RightClickMenuViewLocators.ShareImageMenuItems.allCases {
+            XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
+        }
+        
+        for item in RightClickMenuViewLocators.ShareCommonMenuItems.allCases {
             XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
         }
     }
@@ -45,7 +49,10 @@ class RightClickImageMenuTests: BaseTest {
         //wait for menu to be displayed - inspect element should always be displayed
         rightClickMenuTestView.waitForMenuToBeDisplayed()
 
-        for item in RightClickMenuViewLocators.MenuItems.allCases {
+        for item in RightClickMenuViewLocators.ImageMenuItems.allCases {
+            XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
+        }
+        for item in RightClickMenuViewLocators.CommonMenuItems.allCases {
             XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
         }
     }
@@ -53,7 +60,7 @@ class RightClickImageMenuTests: BaseTest {
     func testRightClickOpenNewTabImage() throws {
         
         step("When I open image in a new tab") {
-            rightClickMenuTestView.clickMenu(.openImageInNewTab)
+            rightClickMenuTestView.clickImageMenu(.openImageInNewTab)
         }
         
         step("Then image is correctly opened in a new tab") {
@@ -73,7 +80,7 @@ class RightClickImageMenuTests: BaseTest {
     func testRightClickOpenNewWindowImage() throws {
 
         step("When I open image in a new window") {
-            rightClickMenuTestView.clickMenu(.openImageInNewWindow)
+            rightClickMenuTestView.clickImageMenu(.openImageInNewWindow)
         }
         
         step("Then image is correctly opened in a new window") {
@@ -84,7 +91,7 @@ class RightClickImageMenuTests: BaseTest {
     func testRightClickImageSaveToDownloads() throws {
 
         step("When I save image to downloads") {
-            rightClickMenuTestView.clickMenu(.saveToDownloads)
+            rightClickMenuTestView.clickImageMenu(.saveToDownloads)
         }
         
         step("Then image is correctly downloaded but download menu does not open") {
@@ -94,8 +101,8 @@ class RightClickImageMenuTests: BaseTest {
     
     func testRightClickImageSaveAs() throws {
 
-        step("When I save image to downloads") {
-            rightClickMenuTestView.clickMenu(.saveAs)
+        step("When I save image to another location") {
+            rightClickMenuTestView.clickImageMenu(.saveAs)
         }
         
         step("Then image download locator window is displayed") {
@@ -109,7 +116,7 @@ class RightClickImageMenuTests: BaseTest {
     func testRightClickCopyImageAddress() throws {
 
         step("When I copy image address") {
-            rightClickMenuTestView.clickMenu(.copyImageAddress)
+            rightClickMenuTestView.clickImageMenu(.copyImageAddress)
         }
         
         step("Then image address has been copied") {
@@ -123,7 +130,7 @@ class RightClickImageMenuTests: BaseTest {
     func testRightClickCopyImage() throws {
 
         step("When I copy image address") {
-            rightClickMenuTestView.clickMenu(.copyImage)
+            rightClickMenuTestView.clickImageMenu(.copyImage)
         }
         
         step("Then image address has been copied") {
@@ -139,7 +146,7 @@ class RightClickImageMenuTests: BaseTest {
     func testShareImage() throws {
 
         step("When I want to share image") {
-            rightClickMenuTestView.clickMenu(.share)
+            rightClickMenuTestView.clickCommonMenu(.share)
         }
         
         step("Then Share options are displayed") {
@@ -150,7 +157,7 @@ class RightClickImageMenuTests: BaseTest {
     func testInspectElementImage() throws {
 
         step("When I want to inspect element") {
-            rightClickMenuTestView.clickMenu(.inspectElement)
+            rightClickMenuTestView.clickCommonMenu(.inspectElement)
         }
         
         step("Then Developer Menu is opened") {
