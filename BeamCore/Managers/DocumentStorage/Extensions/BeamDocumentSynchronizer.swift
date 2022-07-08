@@ -112,7 +112,6 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
         // Then look for the database and update it, or create it if not found
         let currentDB = BeamData.shared.currentDatabase
         for var document in objects {
-            let originalDocument = document
             guard let dbId = destination?.id ?? document.databaseId,
                   let database = destination ?? (try? account.loadDatabase(dbId)),
                   let collection = database.collection
@@ -176,10 +175,30 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
     }
 
     func manageConflict(_ object: BeamDocument, _ remoteObject: BeamDocument) throws -> BeamDocument {
-        object
+        guard let account = account,
+              let dbId = remoteObject.databaseId,
+              let database = (try? account.loadDatabase(dbId)),
+              let collection = database.collection
+        else {
+            Logger.shared.logError("Trying to sync a document in a database that doesn't exist \(remoteObject)", category: .sync)
+            return remoteObject
+        }
+
+        try receivedObjects([remoteObject])
+
+        if let updatedObject = try collection.fetchWithId(remoteObject.id) {
+            Logger.shared.logError("Document \(remoteObject) was changed to \(updatedObject) during conflict resolution", category: .sync)
+            return updatedObject
+        }
+
+        Logger.shared.logError("Document \(remoteObject) was deleted during conflict resolution", category: .sync)
+        var deletedObject = remoteObject
+        deletedObject.deletedAt = BeamDate.now
+        return deletedObject
     }
 
     func saveObjectsAfterConflict(_ objects: [BeamDocument]) throws {
+        // We have already saved everything that needs to be saved during manageConflict
     }
 }
 
