@@ -14,7 +14,7 @@ struct AllowListModalView: View {
     @ObservedObject var viewModel: AllowListViewModel
 
     @State private var searchString: String = ""
-    @State private var selectedItems = [RBAllowlistEntry]()
+    @State private var selectedItems = [AllowListViewItem]()
     @State private var stepperTest: Double = 0.0
     @State private var creationRowTitle: String?
 
@@ -23,33 +23,28 @@ struct AllowListModalView: View {
             HStack {
                 Text("Allowed sites are excluded from blockers.")
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    Spacer()
-                    .font(BeamFont.medium(size: 13).swiftUI)
-                SearchBar(text: $searchString).frame(width: 217)
+                Spacer()
+                SearchBar(text: $searchString)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 217)
             }
-            Spacer()
             AllowListTableView(viewModel: viewModel, searchStr: searchString, selectedItems: $selectedItems, creationRowTitle: $creationRowTitle)
-                .frame(width: 526, height: 278, alignment: .center)
                 .border(BeamColor.Mercury.swiftUI, width: 1)
                 .background(BeamColor.Generic.background.swiftUI)
                 .onAppear {
                     viewModel.refreshAllAllowListItems()
                 }
-            Spacer()
             HStack {
                 Button {
-                    self.creationRowTitle = "Enter URL"
+                    self.creationRowTitle = loc("Enter URL", comment: "Table creation row title")
                 } label: {
                     Image("basicAdd")
                         .renderingMode(.template)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
                 Button {
-                    if selectedItems.count > 0 {
-                        ContentBlockingManager.shared.radBlockPreferences.remove(entries: selectedItems) {
-                            selectedItems.removeAll()
-                            viewModel.refreshAllAllowListItems()
-                        }
+                    if !selectedItems.isEmpty {
+                        viewModel.remove(items: selectedItems)
                     }
                 } label: {
                     Image("basicRemove")
@@ -66,8 +61,7 @@ struct AllowListModalView: View {
                         .frame(maxWidth: .infinity)
                         .frame(width: 62, height: 20, alignment: .center)
                 })
-                .buttonStyle(BorderedButtonStyle())
-                .foregroundColor(BeamColor.Generic.background.swiftUI)
+                .keyboardShortcut(.cancelAction)
                 Button(action: {
                     save()
                 }, label: {
@@ -77,9 +71,6 @@ struct AllowListModalView: View {
                         .frame(maxWidth: .infinity)
                         .frame(width: 62, height: 20, alignment: .center)
                 })
-                .buttonStyle(BorderedButtonStyle())
-                .foregroundColor(BeamColor.Generic.background.swiftUI)
-
             }
         }.foregroundColor(BeamColor.Generic.background.swiftUI)
         .padding()
