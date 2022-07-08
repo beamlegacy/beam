@@ -36,7 +36,7 @@ struct LegacyDataImporter: BeamDocumentSource {
         try importGRDBDatabaseFrom(path: path + grdbFileName())
         try? importFilesFrom(path: path + "files.db")
         try? importPasswordsFrom(path: path + "passwords.db")
-        try? importCreditCardsFrom(path: path + "creditCards.db")
+        try? importCreditCardsFrom(path: path + "credit_cards.db")
         try? importContactsFrom(path: path + "contacts.db")
     }
 
