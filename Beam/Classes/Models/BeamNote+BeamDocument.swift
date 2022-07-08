@@ -468,7 +468,7 @@ public extension BeamNote {
 
     var isTodaysNote: Bool { type.isJournal && type.journalDateString == BeamNoteType.iso8601ForDate(BeamDate.now) }
 
-    static func indexAllNotes() {
+    static func indexAllNotes(interactive: Bool) {
         let sign = Self.signPost.createId()
         sign.begin(Signs.indexAllNotes)
         defer {
@@ -489,12 +489,14 @@ public extension BeamNote {
 
         log.append("After reindexing \(allIds.count) notes, DB contains \((try? BeamData.shared.noteLinksAndRefsManager?.countBidirectionalLinks()) ?? -1) bidirectional links from \((try? BeamData.shared.noteLinksAndRefsManager?.countIndexedElements()) ?? -1) indexed elements")
 
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(log.joined(separator: "\n"), forType: .string)
+        if interactive {
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(log.joined(separator: "\n"), forType: .string)
+        }
     }
 
-    static func rebuildAllNotes(_ source: BeamDocumentSource) throws {
+    static func rebuildAllNotes(_ source: BeamDocumentSource, interactive: Bool) throws {
         beamCheckMainThread()
         guard let collection = defaultCollection else { return  }
         let sign = Self.signPost.createId()
@@ -511,12 +513,14 @@ public extension BeamNote {
             }
         }
 
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(rebuilt.joined(separator: "\n"), forType: .string)
+        if interactive {
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(rebuilt.joined(separator: "\n"), forType: .string)
+        }
     }
 
-    static func validateAllNotes() throws {
+    static func validateAllNotes(interactive: Bool) throws {
         guard let collection = defaultCollection else { return  }
         beamCheckMainThread()
         var all = [String]()
@@ -537,10 +541,12 @@ public extension BeamNote {
             }
         }
 
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        let str = all.joined(separator: "\n")
-        pasteboard.setString(str, forType: .string)
+        if interactive {
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            let str = all.joined(separator: "\n")
+            pasteboard.setString(str, forType: .string)
+        }
     }
 
     func validate() throws -> (Bool, [String]) {
