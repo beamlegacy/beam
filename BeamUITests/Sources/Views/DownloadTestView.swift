@@ -10,4 +10,8 @@ import XCTest
 
 class DownloadTestView: BaseView {
     
+    @discardableResult
+    func isDownloadedFileDisplayed(fileToSearch: String) -> Bool{
+        return app.staticTexts[fileToSearch].waitForExistence(timeout: minimumWaitTimeout)
+    }
 }
