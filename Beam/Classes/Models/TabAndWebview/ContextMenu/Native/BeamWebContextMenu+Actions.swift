@@ -54,7 +54,7 @@ extension BeamWebContextMenuItem {
                 result(printPage(webView: webView))
             case .pageCopyAddress:
                 guard let url = payload.linkHrefURL else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
-                result(copy(url.absoluteString, toPasteboard: .general, forType: .URL))
+                result(copy(url.absoluteString, toPasteboard: .general, forTypes: [.URL, .string]))
             case .linkOpenInNewTab:
                 guard let url = payload.linkHrefURL else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
                 result(openURLInNewTab(url))
@@ -70,7 +70,7 @@ extension BeamWebContextMenuItem {
                 showSaveAsPanel(imageResource: false, payload: payload, webView: webView, completion: result)
             case .linkCopy:
                 guard let url = payload.linkHrefURL else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
-                result(copy(url.absoluteString, toPasteboard: .general, forType: .URL))
+                result(copy(url.absoluteString, toPasteboard: .general, forTypes: [.URL, .string]))
             case .imageOpenInNewTab:
                 guard let src = payload.imageSrcURL else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
                 result(openURLInNewTab(src))
@@ -86,12 +86,12 @@ extension BeamWebContextMenuItem {
                 showSaveAsPanel(imageResource: true, payload: payload, webView: webView, completion: result)
             case .imageCopyAddress:
                 guard let src = payload.imageSrcURL else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
-                result(copy(src.absoluteString, toPasteboard: .general, forType: .URL))
+                result(copy(src.absoluteString, toPasteboard: .general, forTypes: [.URL, .string]))
             case .textSearch:
                 result(search(with: payload))
             case .textCopy:
                 guard let contents = payload.contents else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
-                result(copy(contents, toPasteboard: .general, forType: .string))
+                result(copy(contents, toPasteboard: .general, forTypes: [.string]))
             case .textCapture, .imageCapture, .linkCapture, .pageCapture:
                 result(.failure(BeamWebContextMenuItemError.unimplemented))
             case .separator:
@@ -176,9 +176,13 @@ extension BeamWebContextMenuItem {
         return .success(())
     }
 
-    private func copy(_ string: String, toPasteboard pasteboard: NSPasteboard, forType type: NSPasteboard.PasteboardType) -> Result<Void, Error> {
+    private func copy(
+        _ string: String,
+        toPasteboard pasteboard: NSPasteboard,
+        forTypes types: [NSPasteboard.PasteboardType]
+    ) -> Result<Void, Error> {
         pasteboard.clearContents()
-        pasteboard.setString(string, forType: type)
+        types.forEach { pasteboard.setString(string, forType: $0) }
         return .success(())
     }
 
