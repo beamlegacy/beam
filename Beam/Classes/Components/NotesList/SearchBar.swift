@@ -6,12 +6,12 @@ struct SearchBar: View {
 
     var body: some View {
         HStack {
-            Spacer()
+            Spacer(minLength: 0)
 
-            TextField("Search ...", text: $text)
+            TextField("Search", text: $text)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
 
-            Spacer()
+            Spacer(minLength: 0)
 
             if isEditing {
                 Button(action: {
