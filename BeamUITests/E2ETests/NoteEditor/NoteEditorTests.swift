@@ -146,6 +146,7 @@ class NoteEditorTests: BaseTest {
         launchAppAndOpenFirstNote()
         
         step("Given I create indentation levels") {
+            noteTestView.waitForNoteViewToLoad()
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
             noteTestView.typeKeyboardKey(.return)
             noteTestView.typeKeyboardKey(.tab)
