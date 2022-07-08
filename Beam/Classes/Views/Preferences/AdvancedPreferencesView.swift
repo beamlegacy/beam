@@ -937,19 +937,19 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
     }
 
     private var ReindexNotesContents: some View {
-        Button(action: { BeamNote.indexAllNotes() }, label: {
+        Button(action: { BeamNote.indexAllNotes(interactive: true) }, label: {
             Text("Reindex all notes' contents")
         })
     }
 
     private var RebuildNotesContents: some View {
-        Button(action: { try? BeamNote.rebuildAllNotes(self) }, label: {
+        Button(action: { try? BeamNote.rebuildAllNotes(self, interactive: true) }, label: {
             Text("Rebuild all notes' contents")
         })
     }
 
     private var ValidateNotesContents: some View {
-        Button(action: { try? BeamNote.validateAllNotes() }, label: {
+        Button(action: { try? BeamNote.validateAllNotes(interactive: true) }, label: {
             Text("Validate all notes' contents")
         })
     }

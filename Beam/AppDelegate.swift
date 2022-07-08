@@ -294,7 +294,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func indexAllNotes() {
         DispatchQueue.main.async {
-            BeamNote.indexAllNotes()
+            BeamNote.indexAllNotes(interactive: false)
         }
     }
 
