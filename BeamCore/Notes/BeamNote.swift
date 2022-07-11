@@ -275,6 +275,7 @@ public class BeamNote: BeamElement {
         try container.encode(browsingSessionIds, forKey: .browsingSessionIds)
         try container.encode(contactId, forKey: .contactId)
         try container.encode(noteSettings, forKey: .noteSettings)
+        try container.encode(tombstones, forKey: .tombstones)
         try super.encode(to: encoder)
     }
 
