@@ -59,6 +59,18 @@ extension DOMInputElement {
     var debugDescription: String {
         "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), visible: \(visible), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), inputmode: \(inputmode?.rawValue ?? "(undefined)"), id: \(elementId ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)"), value: \(value ?? "nil"))"
     }
+
+    static var debugHeader: [String] {
+        ["beamId", "type", "visible", "autocomplete", "autofocus", "inputmode", "id", "name", "class", "required", "value"]
+    }
+
+    var debugValues: [String] {
+        [beamId, unwrap(type?.rawValue), "\(visible)", unwrap(autocomplete), unwrap(autofocus), unwrap(inputmode?.rawValue), unwrap(elementId), unwrap(name), unwrap(elementClass), unwrap(required), unwrap(value)]
+    }
+
+    private func unwrap(_ value: String?) -> String {
+        value ?? "(nil)"
+    }
 }
 
 enum DOMInputAutocomplete: String, Codable {
