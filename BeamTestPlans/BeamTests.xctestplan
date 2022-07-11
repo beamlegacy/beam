@@ -70,6 +70,7 @@
         "BrowsingTreeTriggerTests",
         "DocumentManagerReceiveObjectTests",
         "OLD_BeamNote_DocumentManagerTests",
+        "DailyUrlStorageTest\/testGetRepeatingUrlsSpeed()",
         "OmniboxAnalyticsTests"
       ],
       "target" : {
