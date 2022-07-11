@@ -210,8 +210,12 @@ extension CreditCardEntry {
         String(format: "%04d", expirationYear)
     }
 
+    var formattedYearTwoDigits: String {
+        String(format: "%02d", expirationYear % 100)
+    }
+
     var formattedDate: String {
-        expirationMonth > 0 && expirationYear > 0 ? "\(formattedMonth)/\(formattedYear)" : ""
+        expirationMonth > 0 && expirationYear > 0 ? "\(formattedMonth)/\(formattedYearTwoDigits)" : ""
     }
 
     private func formatted(number: String, separator: String = " ") -> String {

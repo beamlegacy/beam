@@ -16,7 +16,7 @@ class CreditCardEntryTests: XCTestCase {
         let card = CreditCardEntry(cardDescription: "card", cardNumber: cardNumber, cardHolder: "me", expirationMonth: 10, expirationYear: 2030)
         XCTAssertEqual(card.cardType, .amex)
         XCTAssertTrue(card.isValidNumber)
-        XCTAssertEqual(card.formattedDate, "10/2030")
+        XCTAssertEqual(card.formattedDate, "10/30")
         XCTAssertEqual(card.formattedNumber, "3700 000000 00002")
     }
 
