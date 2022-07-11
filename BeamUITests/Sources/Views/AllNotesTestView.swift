@@ -170,6 +170,12 @@ class AllNotesTestView: BaseView {
     }
     
     @discardableResult
+    func showDailyNotesClick() -> AllNotesTestView {
+        openTableView(.dailyNotes)
+        return self
+    }
+    
+    @discardableResult
     func clickSortingDropDownExpandTriangle() -> AllNotesTestView {
         image(AllNotesViewLocators.Images.allNotesEditor.accessibilityIdentifier).tapInTheMiddle()
         return self
