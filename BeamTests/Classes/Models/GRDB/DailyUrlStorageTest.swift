@@ -10,11 +10,13 @@ import XCTest
 @testable import Beam
 
 class DailyUrlStorageTest: XCTestCase {
-    var db: UrlStatsDBManager!
+    var urlStatsDb: UrlStatsDBManager!
+    var urlHistoryDb: UrlHistoryManager!
 
     override func setUpWithError() throws {
         let store = GRDBStore.empty()
-        db = try UrlStatsDBManager(store: store)
+        urlStatsDb = try UrlStatsDBManager(store: store)
+        urlHistoryDb = try UrlHistoryManager(store: store)
         try store.migrate()
     }
 
@@ -26,20 +28,20 @@ class DailyUrlStorageTest: XCTestCase {
         let day0 = "2020-01-01"
         let day1 = "2020-01-02"
         //upserting and fetching
-        db.updateDailyUrlScore(urlId: id, day: day0) {
+        urlStatsDb.updateDailyUrlScore(urlId: id, day: day0) {
             $0.readingTimeToLastEvent += 5
             $0.navigationCountSinceLastSearch = 2
         }
         BeamDate.travel(1)
         let t1 = BeamDate.now
-        db.updateDailyUrlScore(urlId: id, day: day0) {
+        urlStatsDb.updateDailyUrlScore(urlId: id, day: day0) {
             $0.readingTimeToLastEvent += 5
         }
-        db.updateDailyUrlScore(urlId: id, day: day1) {
+        urlStatsDb.updateDailyUrlScore(urlId: id, day: day1) {
             $0.scrollRatioY += 0.5
             $0.isPinned = true
         }
-        var records0 = db.getDailyUrlScores(day: day0)
+        var records0 = urlStatsDb.getDailyUrlScores(day: day0)
         XCTAssertEqual(records0.count, 1)
         var record = try XCTUnwrap(records0[id])
         XCTAssertEqual(record.readingTimeToLastEvent, 10)
@@ -48,20 +50,20 @@ class DailyUrlStorageTest: XCTestCase {
         XCTAssertEqual(record.updatedAt, t1)
         XCTAssertEqual(record.navigationCountSinceLastSearch, 2)
 
-        var records1 = db.getDailyUrlScores(day: day1)
+        var records1 = urlStatsDb.getDailyUrlScores(day: day1)
         XCTAssertEqual(records1.count, 1)
         record = try XCTUnwrap(records1[id])
         XCTAssertEqual(record.scrollRatioY, 0.5)
         XCTAssert(record.isPinned)
-        try db.clearDailyUrlScores(toDay: "2020-01-01")
+        try urlStatsDb.clearDailyUrlScores(toDay: "2020-01-01")
         XCTAssertEqual(record.createdAt, t1)
         XCTAssertEqual(record.updatedAt, t1)
         XCTAssertNil(record.navigationCountSinceLastSearch)
 
         //clearing records older than 1 day
-        records0 = db.getDailyUrlScores(day: day0)
+        records0 = urlStatsDb.getDailyUrlScores(day: day0)
         XCTAssertEqual(records0.count, 0)
-        records1 = db.getDailyUrlScores(day: day1)
+        records1 = urlStatsDb.getDailyUrlScores(day: day1)
         XCTAssertEqual(records1.count, 1)
 
         BeamDate.reset()
@@ -69,7 +71,7 @@ class DailyUrlStorageTest: XCTestCase {
     
     func testStorage() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
-        let storage = GRDBDailyUrlScoreStore(db: db, daysToKeep: 1)
+        let storage = GRDBDailyUrlScoreStore(db: urlStatsDb, daysToKeep: 1)
         let ids = [UUID(), UUID()]
         storage.apply(to: ids[0]) { $0.scrollRatioY = 0.5 }
         BeamDate.travel(1)
@@ -99,6 +101,80 @@ class DailyUrlStorageTest: XCTestCase {
         storage.cleanup()
         XCTAssertEqual(storage.getHighScoredUrlIds(daysAgo: 1).count, 0)
         XCTAssertEqual(storage.getHighScoredUrlIds(daysAgo: 0).count, 1)
+        BeamDate.reset()
+    }
+    
+    func testGetRepeatingUrls() throws {
+        BeamDate.freeze("2001-01-01T00:00:00+000")
+        let urls = [
+            "http://colors.com/#red",
+            "http://colors.com/#blue",
+            "http://here.com/"
+        ]
+        let linkStore = LinkStore(linkManager: BeamLinkDB(overridenManager: urlHistoryDb))
+        let storage = GRDBDailyUrlScoreStore(db: urlStatsDb, daysToKeep: 1)
+        let urlIds = urls.map { linkStore.getOrCreateId(for: $0) }
+        
+        storage.apply(to: urlIds[2]) { $0.visitCount = 1 }  //out of time bounds, not taken into account
+
+        BeamDate.travel(10 * 24 * 60 * 60)
+        storage.apply(to: urlIds[0]) { $0.visitCount = 1 }
+        storage.apply(to: urlIds[2]) { $0.visitCount = 1 }
+
+        BeamDate.travel(24 * 60 * 60)
+        storage.apply(to: urlIds[1]) { $0.visitCount = 1 }
+
+        let repeating = storage.getDailyRepeatingUrlsWithoutFragment(between: 5, and: 0, minRepeat: 2)
+        XCTAssertEqual(repeating, Set(["http://colors.com/"]))
+        BeamDate.reset()
+    }
+    func testGetRepeatingUrlsSpeed() throws {
+        let linkStore = LinkStore(linkManager: BeamLinkDB(overridenManager: urlHistoryDb))
+
+        for siteIndex in 0...99 {
+            for fragmentIndex in 0...99 {
+                let urlId = linkStore.getOrCreateId(for: "http://site\(siteIndex).com/#fragment\(fragmentIndex)")
+                for day in 1...7 {
+                    urlStatsDb.updateDailyUrlScore(urlId: urlId, day: "2022-01-0\(day)") { $0.visitCount = 1}
+                }
+            }
+        }
+
+        measure {
+            let repeated = try? urlStatsDb.getDailyRepeatingUrlsWithoutFragment(between: "2022-01-01", and: "2022-01-07", minRepeat: 1)
+            XCTAssertEqual(repeated?.count, 100)
+        }
+    }
+
+    func testGetRepeatingUrlsInScorer() throws {
+        let urls = [
+            "http://colors.fr/red", //url will be visited 2 distinct days
+            "http://fruits.org/orange"
+        ]
+
+        let params = DailySummaryUrlParams(minReadingTime: 0, minTextAmount: 0, maxRepeatTimeFrame: 5, maxRepeat: 2)
+        let linkStore = LinkStore(linkManager: BeamLinkDB(overridenManager: urlHistoryDb))
+        let urlIds = urls.map { linkStore.getOrCreateId(for: $0) }
+        let store = GRDBDailyUrlScoreStore(db: urlStatsDb, daysToKeep: 10)
+        let scorer = DailyUrlScorer(store: store, params: params, linkStore: linkStore)
+
+        BeamDate.freeze("2001-01-01T00:00:00+000")
+        store.apply(to: urlIds[0]) { $0.visitCount = 1 }
+
+        BeamDate.travel(2 * 24 * 60 * 60)
+        store.apply(to: urlIds[0]) {
+            $0.visitCount = 1
+            $0.readingTimeToLastEvent = 100
+        }
+        store.apply(to: urlIds[1]) {
+            $0.visitCount = 1
+            $0.readingTimeToLastEvent = 5
+        }
+
+        BeamDate.travel(2 * 24 * 60 * 60)
+        let scores = scorer.getHighScoredUrls(daysAgo: 2, topN: 1, filtered: true)
+        XCTAssertEqual(scores.count, 1)
+        XCTAssertEqual(scores[0].url.absoluteString, urls[1])
         BeamDate.reset()
     }
 }

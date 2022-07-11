@@ -65,4 +65,30 @@ class GRDBDailyUrlScoreStore: DailyUrlScoreStoreProtocol {
         guard let day = cal.date(byAdding: DateComponents(day: -daysAgo), to: now)?.localDayString() else { return [:] }
         return db.getDailyUrlScores(day: day)
     }
+    func getDailyRepeatingUrlsWithoutFragment(between offset0: Int, and offset1: Int, minRepeat: Int) -> Set<String> {
+        guard let db = db else { return Set<String>() }
+        let now = BeamDate.now
+        let cal = Calendar(identifier: .iso8601)
+        guard let leftBound = cal.date(byAdding: DateComponents(day: -offset0), to: now)?.localDayString(),
+              let rightBound = cal.date(byAdding: DateComponents(day: -offset1), to: now)?.localDayString() else { return Set<String>() }
+        do {
+            return try db.getDailyRepeatingUrlsWithoutFragment(between: leftBound, and: rightBound, minRepeat: minRepeat)
+        } catch {
+            Logger.shared.logError("Couldn't get daily repeating urls: \(error)", category: .database)
+            return Set<String>()
+        }
+    }
+    func getUrlWithoutFragmentDistinctVisitDayCount(between offset0: Int, and offset1: Int) -> [String: Int] {
+        guard let db = db else { return [String: Int]() }
+        let now = BeamDate.now
+        let cal = Calendar(identifier: .iso8601)
+        guard let leftBound = cal.date(byAdding: DateComponents(day: -offset0), to: now)?.localDayString(),
+              let rightBound = cal.date(byAdding: DateComponents(day: -offset1), to: now)?.localDayString() else { return [String: Int]() }
+        do {
+            return try db.getUrlWithoutFragmentDistinctVisitDayCount(between: leftBound, and: rightBound)
+        } catch {
+            Logger.shared.logError("Couldn't get distinct visit day count: \(error)", category: .database)
+            return [String: Int]()
+        }
+    }
 }
