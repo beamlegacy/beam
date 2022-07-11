@@ -66,7 +66,7 @@ class PrivacyPreferencesTestView: PreferencesBaseView {
     
     @discardableResult
     func saveAllowList() -> PrivacyPreferencesTestView {
-        button(PrivacyAllowListPreferencesViewLocators.Buttons.saveButton.accessibilityIdentifier).clickOnExistence()
+        button(PrivacyAllowListPreferencesViewLocators.Buttons.applyButton.accessibilityIdentifier).clickOnExistence()
         return self
     }
     

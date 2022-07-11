@@ -62,7 +62,7 @@ struct PrivacyPreferencesView: View {
             }
 
             Preferences.Section(verticalAlignment: .top) {
-            Text("Allowlist:")
+            Text("Allow list:")
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
                 .frame(width: 250, alignment: .trailing)
