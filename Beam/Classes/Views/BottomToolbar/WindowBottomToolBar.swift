@@ -96,7 +96,7 @@ struct WindowBottomToolBar: View {
 private struct HelpButtonView: View {
 
     @EnvironmentObject var state: BeamState
-    @Environment(\.showHelpAction) var showHelpAction: () -> Void
+    @Environment(\.showHelpAction) var showHelpAction
     @State private var buttonFrameInGlobalCoordinates: CGRect?
 
     var body: some View {
