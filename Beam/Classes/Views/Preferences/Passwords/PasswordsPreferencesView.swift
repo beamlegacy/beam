@@ -4,6 +4,7 @@
 //
 //  Created by Jean-Louis Darmon on 29/06/2021.
 //
+// swiftlint:disable file_length
 
 import SwiftUI
 import Preferences
@@ -145,9 +146,9 @@ struct Passwords: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onReceive([autofillUsernamePasswords].publisher.first()) {
+                .onChange(of: autofillUsernamePasswords, perform: {
                     PreferencesManager.autofillUsernamePasswords = $0
-                }
+                })
             Spacer()
             BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor)
                 .frame(width: 220, height: 21, alignment: .center)
@@ -395,9 +396,9 @@ struct Webforms: View {
                     .toggleStyle(CheckboxToggleStyle())
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .onReceive([autofillCreditCards].publisher.first()) {
+                    .onChange(of: autofillCreditCards, perform: {
                         PreferencesManager.autofillCreditCards = $0
-                    }
+                    })
                     Spacer()
                     Button {
                         self.showingCreditCardsSheet.toggle()

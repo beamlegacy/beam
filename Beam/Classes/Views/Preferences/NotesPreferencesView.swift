@@ -1,5 +1,5 @@
 //
-//  CardsPreferencesView.swift
+//  NotesPreferencesView.swift
 //  Beam
 //
 //  Created by Jean-Louis Darmon on 29/06/2021.
@@ -8,14 +8,13 @@
 import SwiftUI
 import Preferences
 
-let CardsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .notes, title: "Notes", imageName: "preferences-cards") {
-    CardsPreferencesView()
+let NotesPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .notes, title: "Notes", imageName: "preferences-cards") {
+    NotesPreferencesView()
 }
 
-struct CardsPreferencesView: View {
+struct NotesPreferencesView: View {
     private let contentWidth: Double = PreferencesManager.contentWidth
     @State private var alwaysShowBullets = PreferencesManager.alwaysShowBullets
-    @State private var firstTrigger = true
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
@@ -38,13 +37,9 @@ struct CardsPreferencesView: View {
                 }.toggleStyle(CheckboxToggleStyle())
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .onReceive([alwaysShowBullets].publisher.first()) {
-                        guard !firstTrigger else {
-                            firstTrigger = false
-                            return
-                        }
+                    .onChange(of: alwaysShowBullets, perform: {
                         PreferencesManager.alwaysShowBullets = $0
-                    }
+                    })
             }
 //            Preferences.Section {
 //                Text("Embed Content:")
@@ -57,9 +52,9 @@ struct CardsPreferencesView: View {
     }
 }
 
-struct CardsPreferencesView_Previews: PreviewProvider {
+struct NotesPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        CardsPreferencesView()
+        NotesPreferencesView()
     }
 }
 
@@ -74,27 +69,27 @@ struct SpellingGrammarSection: View {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([checkSpellingIsOn].publisher.first()) {
+            .onChange(of: checkSpellingIsOn, perform: {
                 PreferencesManager.checkSpellingIsOn = $0
-            }
+            })
 
         Toggle(isOn: $checkGrammarIsOn) {
             Text("Check grammar with spelling")
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([checkGrammarIsOn].publisher.first()) {
+            .onChange(of: checkGrammarIsOn, perform: {
                 PreferencesManager.checkGrammarIsOn = $0
-            }
+            })
 
         Toggle(isOn: $correctSpellingIsOn) {
             Text("Correct spelling")
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([correctSpellingIsOn].publisher.first()) {
+            .onChange(of: correctSpellingIsOn, perform: {
                 PreferencesManager.correctSpellingIsOn = $0
-            }
+            })
     }
 }
 
@@ -108,8 +103,8 @@ struct PreferencesEmbedContentSection: View {
             }
         }.labelsHidden()
         .frame(width: 212, height: 20)
-        .onReceive([self.embedContent].publisher.first()) {
+        .onChange(of: embedContent, perform: {
             PreferencesManager.embedContentPreference = $0
-        }
+        })
     }
 }
