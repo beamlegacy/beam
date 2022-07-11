@@ -141,11 +141,25 @@ extension EnvironmentValues {
 }
 
 // MARK: - Window Help
+
+// The reason we use a struct to wrap the action (like Apple does with its own types)
+// is because of performance issues when passing functions directly into the environment.
+// https://twitter.com/lukeredpath/status/1491127803328495618
+struct HelpAction {
+    let action: () -> Void
+    init(_ action: @escaping () -> Void) {
+        self.action = action
+    }
+    func callAsFunction() {
+        action()
+    }
+}
+
 private struct ShowHelpActionEnvironmentKey: EnvironmentKey {
-    static let defaultValue = { }
+    static let defaultValue = HelpAction({ })
 }
 extension EnvironmentValues {
-    var showHelpAction: () -> Void {
+    var showHelpAction: HelpAction {
         get { self[ShowHelpActionEnvironmentKey.self] }
         set { self[ShowHelpActionEnvironmentKey.self] = newValue }
     }
