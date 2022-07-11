@@ -37,12 +37,15 @@ class NoteDailySummary {
     func get(daysAgo: Int = 1, filtered: Bool = true) throws -> [ScoredDocument] {
         guard let collection = BeamData.shared.currentDocumentCollection else { return [] }
         let (start, end) = dayBounds(daysAgo: daysAgo)
-        guard let updatedDocuments = try? collection.fetch(filters: [.type(DocumentType.note), .updatedBetween(start, end)]) else { return [] }
+        guard let updatedDocuments = try? collection.fetch(filters: [.type(DocumentType.note), .updatedSince(start)]) else { return [] }
         let scores = noteScorer.getLocalDailyScores(daysAgo: daysAgo)
+        let (noteIdsLastChangedDaysAgo, noteIdsLastChangedAfterDaysAgo) = noteScorer.getNoteIdsLastChangedAtAndAfter(daysAgo: daysAgo)
         let scoredDocuments = updatedDocuments.compactMap { (doc) -> ScoredDocument? in
-            let created = doc.createdAt > start
+            let created = doc.createdAt >= start && doc.createdAt < end
+            let changed = noteIdsLastChangedDaysAgo.contains(doc.id)
+            let willChange = noteIdsLastChangedAfterDaysAgo.contains(doc.id)
             guard let score = scores[doc.id],
-                  (score.minToMaxDeltaWordCount != 0) || created || !filtered else { return nil }
+                   changed || (created && !willChange) || !filtered else { return nil }
             return ScoredDocument(noteId: doc.id, title: doc.title, createdAt: doc.createdAt, updatedAt: doc.updatedAt,
                            created: created, score: score,
                            captureToCount: score.captureToCount)
