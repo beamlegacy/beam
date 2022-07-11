@@ -103,11 +103,7 @@ extension AppDelegate {
         savePanel.canCreateDirectories = true
         savePanel.allowsOtherFileTypes = false
         savePanel.isExtensionHidden = true
-
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withYear, .withMonth, .withDay, .withTime]
-        let dateString = dateFormatter.string(from: BeamDate.now)
-        savePanel.nameFieldStringValue = "BeamExport-\(dateString).beamCollection"
+        savePanel.nameFieldStringValue = BeamNoteCollectionWrapper.preferredFilename
 
         if savePanel.runModal() == .OK, let url = savePanel.url {
             if !url.startAccessingSecurityScopedResource() {

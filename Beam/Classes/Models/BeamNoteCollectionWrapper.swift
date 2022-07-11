@@ -73,6 +73,13 @@ final class BeamNoteCollectionWrapper: NSDocument {
     static let fileExtension = "beamCollection"
     static let documentTypeName = "co.beamapp.noteCollection"
 
+    static var preferredFilename: String {
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [.withYear, .withMonth, .withDay, .withTime]
+        let dateString = dateFormatter.string(from: BeamDate.now)
+        return "BeamExport-\(dateString).\(fileExtension)"
+    }
+
     enum Error: Swift.Error {
         case incompleteNoteDocument
     }

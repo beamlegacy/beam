@@ -214,10 +214,10 @@ class AllNotesPageContextualMenu {
 
     @objc private func exportNotesToBeamNote() {
         guard let collection = BeamData.shared.currentDocumentCollection else { return }
+        let selectedNotesCount = selectedNotes.count
         if selectedNotes.count == 1 {
-            guard let note = selectedNotes.first else { return }
-            AppDelegate.main.exportOneNoteToBeamNote(note: note)
-        } else if selectedNotes.count != (try? collection.count(filters: [])) ?? 0 {
+            AppDelegate.main.exportOneNoteToBeamNote(note: selectedNotes[0])
+        } else if selectedNotesCount != .zero, selectedNotes.count != (try? collection.count(filters: [])) ?? 0 {
             AppDelegate.main.exportNotesToBeamNote(selectedNotes)
         } else {
             AppDelegate.main.exportAllNotesToBeamNote(self)
