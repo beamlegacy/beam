@@ -158,7 +158,7 @@ struct EditorAppearance: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onReceive([editorIsCentered].publisher.first()) {
+                .onChange(of: editorIsCentered) {
                     PreferencesManager.editorIsCentered = $0
                 }
             HStack {

@@ -158,18 +158,18 @@ struct SearchEngineSection: View {
             }.accessibilityIdentifier("search-engine-selector")
             .labelsHidden()
             .frame(width: 180, height: 20)
-            .onReceive([self.selectedSearchEngine].publisher.first()) { value in
-                PreferencesManager.selectedSearchEngine = value
-            }
+            .onChange(of: selectedSearchEngine, perform: {
+                PreferencesManager.selectedSearchEngine = $0
+            })
             Toggle(isOn: $includeSearchEngineSuggestion) {
                 Text("Include search engine suggestions")
             }.accessibilityIdentifier("search-engine-suggestion")
             .toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onReceive([includeSearchEngineSuggestion].publisher.first()) {
+                .onChange(of: includeSearchEngineSuggestion, perform: {
                     PreferencesManager.includeSearchEngineSuggestion = $0
-                }
+                })
         }
     }
 }
@@ -216,7 +216,9 @@ struct DownloadSection: View {
             .onAppear(perform: {
                 loaded = true
             })
-            .onReceive([self.selectedDownloadFolder].publisher, perform: handleOnReceive)
+            .onChange(of: selectedDownloadFolder, perform: {
+                handleOnReceive(value: $0)
+            })
             if self.selectedDownloadFolder == DownloadFolder.custom.rawValue && PreferencesManager.customDownloadFolder != nil {
                 pathToCustomDownloadFolderButton
             }
@@ -294,17 +296,18 @@ struct TabsSection: View {
                 Text("Group tabs automatically")
             }.accessibilityIdentifier("group-tabs-checkbox")
                 .toggleStyle(CheckboxToggleStyle())
-                .onReceive([enableTabGrouping].publisher.first()) {
+                .onChange(of: enableTabGrouping, perform: {
                     PreferencesManager.enableTabGrouping = $0
-                }
+                })
 
             Toggle(isOn: $cmdClickOpenTab) {
                 Text("⌘-click opens a link in a new tab")
             }.accessibilityIdentifier("cmd-click-checkbox")
                 .toggleStyle(CheckboxToggleStyle())
-                .onReceive([cmdClickOpenTab].publisher.first()) {
+                .onChange(of: cmdClickOpenTab, perform: {
                     PreferencesManager.cmdClickOpenTab = $0
-                }
+                })
+
     //        Toggle(isOn: $newTabWindowMakeActive) {
     //            Text("When a new tab or window opens, make it active")
     //        }.toggleStyle(CheckboxToggleStyle())
@@ -313,9 +316,10 @@ struct TabsSection: View {
                 Text("Use ⌘1 to ⌘9 to switch tabs")
             }.accessibilityIdentifier("switch-tabs-checkbox")
                 .toggleStyle(CheckboxToggleStyle())
-                .onReceive([cmdNumberSwitchTabs].publisher.first()) {
+                .onChange(of: cmdNumberSwitchTabs, perform: {
                     PreferencesManager.cmdNumberSwitchTabs = $0
-                }
+                })
+
     //        Toggle(isOn: $showWebsiteIconTab) {
     //            Text("Show website icons in tabs")
     //        }.toggleStyle(CheckboxToggleStyle())
@@ -324,9 +328,9 @@ struct TabsSection: View {
                 Text("Restore all tabs from last session")
             }.accessibilityIdentifier("restore-tabs-checkbox")
                 .toggleStyle(CheckboxToggleStyle())
-                .onReceive([restoreLastBeamSession].publisher.first()) {
+                .onChange(of: restoreLastBeamSession, perform: {
                     PreferencesManager.restoreLastBeamSession = $0
-                }
+                })
         }
         .font(BeamFont.regular(size: 13).swiftUI)
         .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -343,8 +347,8 @@ struct SoundsSection: View {
             .toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([isCollectSoundsEnabled].publisher.first()) {
+            .onChange(of: isCollectSoundsEnabled, perform: {
                 PreferencesManager.isCollectSoundsEnabled = $0
-            }
+            })
     }
 }
