@@ -21,7 +21,10 @@ class RightClickTextMenuTests: BaseTest {
         rightClickMenuTestView.waitForMenuToBeDisplayed()
 
         for item in RightClickMenuViewLocators.TextMenuItems.allCases {
-            XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
+            // Translate menu not available on Big Sur
+            if !(BaseTest().isBigSurOS() && item.accessibilityIdentifier == "WKMenuItemIdentifierTranslate") {
+                XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
+            }
         }
         for item in RightClickMenuViewLocators.CommonMenuItems.allCases {
             XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
@@ -58,6 +61,7 @@ class RightClickTextMenuTests: BaseTest {
     
     func testRightClickTextTranslate() throws {
         
+        try XCTSkipIf(isBigSurOS(), "Not available on BigSur")
         // Look Up option is a system option.
         // I will verify option is filled with the word and we can click on it
         step("Then look up option is filled with keyword") {
