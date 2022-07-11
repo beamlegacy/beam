@@ -254,7 +254,7 @@ class NoteTableViewItem: IconButtonTableViewItem {
         title = note?.title ?? document.title
         createdAt = document.createdAt
         updatedAt = document.updatedAt
-        isJournal = document.journalDate != nil
+        isJournal = (document.journalDate != 0 && document.documentType == .journal)
         words = note?.textStats.wordsCount ?? -1
 
         super.init()
