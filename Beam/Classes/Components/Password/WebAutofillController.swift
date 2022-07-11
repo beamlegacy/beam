@@ -27,14 +27,14 @@ enum PasswordSaveAction {
 // swiftlint:disable type_body_length
 class WebAutofillController: NSObject, WebPageRelated {
     private var scope = Set<AnyCancellable>()
+    private var lock = RWLock()
     private let passwordManager: PasswordManager
     private let creditCardManager: CreditCardAutofillManager
     private let userInfoStore: UserInformationsStore
     private let credentialsBuilder: PasswordManagerCredentialsBuilder
     private let creditCardBuilder: CreditCardAutofillBuilder
     private let scrollUpdater = PassthroughSubject<WebFrames.FrameInfo, Never>()
-    private var currentOverlayInternal: WebFieldAutofillOverlay?
-    private var currentOverlayMutex = DispatchSemaphore(value: 1)
+    private var currentOverlay: WebFieldAutofillOverlay?
     private let encoder: JSONEncoder
     private let decoder: BeamJSONDecoder
     private var previouslyFocusedElementId: String?
@@ -51,19 +51,6 @@ class WebAutofillController: NSObject, WebPageRelated {
         guard let webFrames = self.page?.webFrames else { return nil }
         return WebFieldClassifiers(webFrames: webFrames)
     }()
-
-    private var currentOverlay: WebFieldAutofillOverlay? {
-        get {
-            currentOverlayMutex.wait()
-            defer { currentOverlayMutex.signal() }
-            return currentOverlayInternal
-        }
-        set {
-            currentOverlayMutex.wait()
-            defer { currentOverlayMutex.signal() }
-            currentOverlayInternal = newValue
-        }
-    }
 
     init(passwordManager: PasswordManager = .shared, creditCardManager: CreditCardAutofillManager = .shared, userInfoStore: UserInformationsStore) {
         self.passwordManager = passwordManager
@@ -87,13 +74,16 @@ class WebAutofillController: NSObject, WebPageRelated {
     }
 
     func prepareForLoading() {
-        credentialsBuilder.enterPage(url: self.page?.url)
-        creditCardBuilder.enterPage(url: self.page?.url)
-        fieldClassifiers?.clear()
-        fieldsWithInstalledFocusHandler.removeAll()
-        framesWithInstalledSubmitHandler.removeAll()
-        clearInputFocus()
-        currentFrameIdentifier = 0
+        lock.write { [weak self] in
+            guard let self = self else { return }
+            self.credentialsBuilder.enterPage(url: self.page?.url)
+            self.creditCardBuilder.enterPage(url: self.page?.url)
+            self.fieldClassifiers?.clear()
+            self.fieldsWithInstalledFocusHandler.removeAll()
+            self.framesWithInstalledSubmitHandler.removeAll()
+            self.clearInputFocus()
+            self.currentFrameIdentifier = 0
+        }
     }
 
     func webViewFinishedLoading() {
@@ -101,8 +91,10 @@ class WebAutofillController: NSObject, WebPageRelated {
     }
 
     private func nextFrameIdentifier() -> Int {
-        currentFrameIdentifier += 1
-        return currentFrameIdentifier
+        return lock.write { [weak self] in
+            self?.currentFrameIdentifier += 1
+            return self?.currentFrameIdentifier ?? 0
+        }
     }
 
     private func isAutofillEnabled(for action: WebAutofillAction) -> Bool {
@@ -163,9 +155,11 @@ class WebAutofillController: NSObject, WebPageRelated {
         if !values.isEmpty {
             self.updateStoredValues(with: values, userInput: false, frameInfo: frameInfo)
         }
-        let newFieldsWithFocusHandler = elements
-            .map(\.beamId)
-            .filter { !fieldsWithInstalledFocusHandler.contains($0) }
+        let newFieldsWithFocusHandler = lock.read { [fieldsWithInstalledFocusHandler] in
+            elements
+                .map(\.beamId)
+                .filter { !fieldsWithInstalledFocusHandler.contains($0) }
+        }
         if !newFieldsWithFocusHandler.isEmpty {
             installSubmitHandlerIfNeeded(frameInfo: frameInfo) {
                 self.installFocusHandlers(addedIds: newFieldsWithFocusHandler, frameInfo: frameInfo)
@@ -188,15 +182,22 @@ class WebAutofillController: NSObject, WebPageRelated {
 
     private func installSubmitHandlerIfNeeded(frameInfo: WKFrameInfo?, completion: @escaping () -> Void) {
         guard let page = page,
-              let frameHref = frameInfo?.request.url?.absoluteString,
-              !framesWithInstalledSubmitHandler.contains(frameHref)
+              let frameHref = frameInfo?.request.url?.absoluteString
         else {
             return completion()
         }
+        let alreadyInstalled = lock.read { [framesWithInstalledSubmitHandler] in
+            framesWithInstalledSubmitHandler.contains(frameHref)
+        }
+        guard !alreadyInstalled else {
+            return completion()
+        }
 
-        Task.init {
+        Task {
             page.executeJS("installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal)
-            self.framesWithInstalledSubmitHandler.insert(frameHref)
+            _ = lock.write { [weak self] in
+                self?.framesWithInstalledSubmitHandler.insert(frameHref)
+            }
             completion()
         }
     }
@@ -205,10 +206,13 @@ class WebAutofillController: NSObject, WebPageRelated {
         let formattedList = addedIds.map { "\"\($0)\"" }.joined(separator: ",")
         let focusScript = "installFocusHandlers('[\(formattedList)]')"
         self.page?.executeJS(focusScript, objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal)
-        for fieldId in addedIds {
-            fieldsWithInstalledFocusHandler.insert(fieldId)
+        lock.write { [weak self] in
+            guard let self = self else { return }
+            for fieldId in addedIds {
+                self.fieldsWithInstalledFocusHandler.insert(fieldId)
+            }
+            Logger.shared.logDebug("Fields with focus handlers: \(self.fieldsWithInstalledFocusHandler)", category: .webAutofillInternal)
         }
-        Logger.shared.logDebug("Fields with focus handlers: \(fieldsWithInstalledFocusHandler)", category: .webAutofillInternal)
     }
 
     func inputFieldDidGainFocus(_ elementId: String, frameInfo: WKFrameInfo?, contents: String?) {
@@ -261,8 +265,10 @@ class WebAutofillController: NSObject, WebPageRelated {
             self.showWebFieldAutofillMenu(for: elementId, inGroup: autofillGroup, frameInfo: frameInfo)
         }
         overlay.showIcon(frameInfo: frameInfo)
-        currentOverlay?.dismiss()
-        currentOverlay = overlay
+        lock.write { [weak self] in
+            self?.currentOverlay?.dismiss()
+            self?.currentOverlay = overlay
+        }
         if autofillMenuHasSignificantContents(autofillGroup: autofillGroup, menuOptions: menuOptions) {
             showWebFieldAutofillMenu(for: elementId, inGroup: autofillGroup, frameInfo: frameInfo)
         }
