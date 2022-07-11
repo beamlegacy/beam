@@ -25,31 +25,31 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
     @State private var sentryEnabled = Configuration.sentryEnabled
     @State private var loggedIn: Bool = AuthenticationManager.shared.isAuthenticated
     @State private var networkEnabled: Bool = Configuration.networkEnabled
-    @State private var localPrivateKey = ""
     @State private var privateKeys = [String: String]()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
     @State private var loading: Bool = false
     @State private var showPrivateKeysSection = false
     @State private var dailyStatsExportDaysAgo: String = "0"
+    @State private var passwordSanityReport = ""
 
-    @State var showPNSView = PreferencesManager.showPNSView
-    @State var pnsJSIsOn = PreferencesManager.PnsJSIsOn
-    @State var browsingSessionCollectionIsOn = PreferencesManager.browsingSessionCollectionIsOn
-    @State var showDebugSection = PreferencesManager.showDebugSection
-    @State var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
-    @State var showClusteringSettingsMenu = PreferencesManager.showClusteringSettingsMenu
-    @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
-    @State var isDirectUploadOn = Configuration.beamObjectDataUploadOnSeparateCall
-    @State var isDirectUploadNIOOn = Configuration.directUploadNIO
-    @State var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
-    @State var isWebsocketEnabled = Configuration.websocketEnabled
-    @State var restBeamObject = Configuration.beamObjectOnRest
-    @State var showWebOnLaunchIfTabs = PreferencesManager.showWebOnLaunchIfTabs
-    @State var createJournalOncePerWindow = PreferencesManager.createJournalOncePerWindow
-    @State var useSidebar = PreferencesManager.useSidebar
-    @State var includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBox
-    @State var enableOmnibeams = PreferencesManager.enableOmnibeams
-    @State var enableDailySummary = PreferencesManager.enableDailySummary
+    @State private var showPNSView = PreferencesManager.showPNSView
+    @State private var pnsJSIsOn = PreferencesManager.PnsJSIsOn
+    @State private var browsingSessionCollectionIsOn = PreferencesManager.browsingSessionCollectionIsOn
+    @State private var showDebugSection = PreferencesManager.showDebugSection
+    @State private var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
+    @State private var showClusteringSettingsMenu = PreferencesManager.showClusteringSettingsMenu
+    @State private var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
+    @State private var isDirectUploadOn = Configuration.beamObjectDataUploadOnSeparateCall
+    @State private var isDirectUploadNIOOn = Configuration.directUploadNIO
+    @State private var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
+    @State private var isWebsocketEnabled = Configuration.websocketEnabled
+    @State private var restBeamObject = Configuration.beamObjectOnRest
+    @State private var showWebOnLaunchIfTabs = PreferencesManager.showWebOnLaunchIfTabs
+    @State private var createJournalOncePerWindow = PreferencesManager.createJournalOncePerWindow
+    @State private var useSidebar = PreferencesManager.useSidebar
+    @State private var includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBox
+    @State private var enableOmnibeams = PreferencesManager.enableOmnibeams
+    @State private var enableDailySummary = PreferencesManager.enableDailySummary
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -437,16 +437,15 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                         HStack(alignment: .firstTextBaseline) {
                             Text("Local private key (only used to store local contents)")
                             Spacer()
-
-                                Button("Verify") {
-                                    verifyLocalPrivateKey()
-                                }
-                                Button("Reset") {
-                                    resetLocalPrivateKey()
-                                }.foregroundColor(Color.red)
+                            Button("Verify") {
+                                verifyLocalPrivateKey()
+                            }
+                            Button("Reset") {
+                                resetLocalPrivateKey()
+                            }.foregroundColor(Color.red)
                         }.frame(width: 450)
                         TextField("local private key:", text: Binding<String>(get: {
-                            localPrivateKey
+                            Persistence.Encryption.localPrivateKey ?? ""
                         }, set: { value, _ in
                             Persistence.Encryption.localPrivateKey = value
                             updateKeys()
@@ -461,6 +460,13 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                                 Persistence.Encryption.privateKey = value
                             }))
                         }.frame(width: 450)
+                        Spacer()
+
+                        Button("Verify Passwords") {
+                            verifyPasswords()
+                        }
+                        Text(passwordSanityReport)
+                            .frame(width: 450)
                     }
                 }
 
@@ -609,7 +615,6 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
             pkeys[email] = EncryptionManager.shared.readPrivateKey(for: email)?.asString() ?? ""
         }
         privateKeys = pkeys
-        localPrivateKey = EncryptionManager.shared.localPrivateKey().asString()
     }
 
     @State private var showNewDatabase = false
@@ -1137,6 +1142,15 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                                 informativeText: "This encryption didn't work, key is corrupted!")
         } catch {
             UserAlert.showError(message: "Encryption", error: error)
+        }
+    }
+
+    private func verifyPasswords() {
+        do {
+            let sanityDigest = try PasswordManager.shared.sanityDigest()
+            passwordSanityReport = sanityDigest.description
+        } catch {
+            passwordSanityReport = error.localizedDescription
         }
     }
 
