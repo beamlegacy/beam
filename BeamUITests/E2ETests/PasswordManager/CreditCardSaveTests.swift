@@ -16,7 +16,7 @@ class CreditCardSaveTests: BaseCreditCardTest {
     let fakeCardNumber = "5425233430109903"
     let fakeSecurityCode = "123"
     let expectedCardOwnerName = "Quentin Tester"
-    let expectedCardExpDate = "04/2023"
+    let expectedCardExpDate = "04/23"
     let expectedCardHiddenNumber = "xxxx-xxxx-xxxx-9903"
         
     override func setUpWithError() throws {

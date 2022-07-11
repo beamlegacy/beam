@@ -13,7 +13,7 @@ class CreditCardsTests: BaseTest {
     let expectedCardDescription = "TestDescription"
     let expectedCardHolder = "TestHolder"
     let expectedCardNumber = "1234 5678 1234 5670"
-    let expectedCardDueDate = "01/2027"
+    let expectedCardDueDate = "01/27"
 
     var creditCardsTable: CreditCardsTestTable!
     var passwordPreferencesView: PasswordPreferencesTestView!
@@ -51,11 +51,11 @@ class CreditCardsTests: BaseTest {
         
         creditCardView.getCardTextFieldElement(.expirationDate).tapInTheMiddle()
         creditCardView.shortcutHelper.shortcutActionInvoke(action: .endOfLine)
-        creditCardView.typeKeyboardKey(.leftArrow, 5)
+        creditCardView.typeKeyboardKey(.leftArrow, 3)
         creditCardView.typeKeyboardKey(.delete)
         creditCardView.app.typeText("9")
         
-        return RowCreditCardsTestTable("test", "John Appleseededited", "xxxx-xxxx-xxxx-0008", "09/2025")
+        return RowCreditCardsTestTable("test", "John Appleseededited", "xxxx-xxxx-xxxx-0008", "09/25")
 
     }
     
