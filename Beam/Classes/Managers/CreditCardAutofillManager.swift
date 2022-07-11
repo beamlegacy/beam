@@ -9,9 +9,8 @@ import Foundation
 import Combine
 import BeamCore
 
-class CreditCardAutofillManager {
+final class CreditCardAutofillManager {
     static let shared = CreditCardAutofillManager()
-    static private var creditCardsDBPath: String { BeamData.dataFolder(fileName: "credit_cards.db") }
 
     var changePublisher: AnyPublisher<Void, Never> {
         changeSubject.eraseToAnyPublisher()
