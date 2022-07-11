@@ -82,6 +82,7 @@ class BrowserTabsManager: ObservableObject {
         }
     }
     @Published var currentTabUIFrame: CGRect?
+    @Published var isCurrentTabPlaying = false
 
     init(with data: BeamData, state: BeamState) {
         self.data = data
@@ -129,6 +130,10 @@ class BrowserTabsManager: ObservableObject {
         currentTab?.$url.receive(on: DispatchQueue.main).removeDuplicates()
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main).sink { [unowned self] _ in
             self.delegate?.tabsManagerCurrentTabDidChangeDisplayInformation(currentTab)
+        }.store(in: &currentTabScope)
+        currentTab?.$mediaPlayerController.removeDuplicates(by: { $0?.isPlaying == $1?.isPlaying }).dropFirst()
+            .sink {  [unowned self] mediaController in
+                self.isCurrentTabPlaying = mediaController?.isPlaying ?? false
         }.store(in: &currentTabScope)
     }
 
