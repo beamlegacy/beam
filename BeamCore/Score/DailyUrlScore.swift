@@ -7,6 +7,13 @@
 
 import Foundation
 
+public struct DailySummaryUrlParams {
+    public let minReadingTime: Double
+    public let minTextAmount: Int
+    public let maxRepeatTimeFrame: Int //number of observation days
+    public let maxRepeat: Int
+}
+
 public class DailyURLScore: Codable, UrlScoreProtocol {
     public var id = UUID()
     public var createdAt = BeamDate.now
@@ -53,6 +60,8 @@ public class DailyURLScore: Codable, UrlScoreProtocol {
 public protocol DailyUrlScoreStoreProtocol {
     func apply(to urlId: UUID, changes: @escaping (DailyURLScore) -> Void)
     func getScores(daysAgo: Int) -> [UUID: DailyURLScore]
+    func getDailyRepeatingUrlsWithoutFragment(between offset0: Int, and offset1: Int, minRepeat: Int) -> Set<String>
+    func getUrlWithoutFragmentDistinctVisitDayCount(between offset0: Int, and offset1: Int) -> [String: Int]
 }
 
 public struct AggregatedURLScore {
@@ -192,27 +201,33 @@ fileprivate extension URL {
 }
 
 public class DailyUrlScorer {
-    let minReadingTime: Double
-    let minTextAmount: Int
     let store: DailyUrlScoreStoreProtocol
+    let linkStore: LinkStore
+    public private(set) var params = DailySummaryUrlParams(
+        minReadingTime: 30,
+        minTextAmount: 500,
+        maxRepeatTimeFrame: 7,
+        maxRepeat: 3
+    )
 
-    public init(store: DailyUrlScoreStoreProtocol, minReadingTime: Double = 30, minTextAmount: Int = 500) {
+    public init(store: DailyUrlScoreStoreProtocol, params: DailySummaryUrlParams? = nil, linkStore: LinkStore = LinkStore.shared) {
         self.store = store
-        self.minReadingTime = minReadingTime
-        self.minTextAmount = minTextAmount
+        self.params = params ?? self.params
+        self.linkStore = linkStore
     }
     public func getHighScoredUrls(daysAgo: Int = 1, topN: Int = 5, filtered: Bool = true) -> [ScoredURL] {
         let scores = store.getScores(daysAgo: daysAgo)
-        let links = LinkStore.shared.getLinks(for: Array(scores.keys))
+        let links = linkStore.getLinks(for: Array(scores.keys))
             .filter { (id, link) in id != Link.missing.id || link.url != Link.missing.url }
         let urlGroups = UrlGroups(links: links).regroup { $0.fragmentRemoved }
         let schemeGroups = urlGroups.groupHTTPSchemes
         let mostRecentTitle = schemeGroups.getMostRecentTitles(links: links)
         let aggregatedScores = schemeGroups.aggregate(scores: scores)
+        let repeatingUrls = store.getDailyRepeatingUrlsWithoutFragment(between: daysAgo + params.maxRepeatTimeFrame, and: daysAgo, minRepeat: params.maxRepeat)
         return Array(
             aggregatedScores
-                .filter { (url, score) in (score.isSummaryEligible(minReadingTime: minReadingTime, minTextAmount: minTextAmount)
-                                           && url.isSummaryEligible)
+                .filter { (url, score) in (score.isSummaryEligible(minReadingTime: params.minReadingTime, minTextAmount: params.minTextAmount)
+                                           && url.isSummaryEligible && !repeatingUrls.contains(url.absoluteString))
                                            || !filtered
                 }
                 .sorted { (lhs, rhs) in lhs.value.score > rhs.value.score }
