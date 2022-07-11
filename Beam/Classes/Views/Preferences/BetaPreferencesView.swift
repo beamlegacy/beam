@@ -144,9 +144,9 @@ struct BetaPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showDebugSection].publisher.first()) {
+            .onChange(of: showDebugSection, perform: {
                 PreferencesManager.showDebugSection = $0
-            }
+            })
     }
 
     private var OmniboxScoreSectionCheckbox: some View {
@@ -155,9 +155,9 @@ struct BetaPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showOmniboxScoreSection].publisher.first()) {
+            .onChange(of: showOmniboxScoreSection, perform: {
                 PreferencesManager.showOmniboxScoreSection = $0
-            }
+            })
     }
 
     private var ReindexNotesContents: some View {

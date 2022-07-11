@@ -709,7 +709,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     lazy var preferences: [PreferencePane] = [
         GeneralPreferencesViewController,
         BrowserPreferencesViewController,
-        CardsPreferencesViewController,
+        NotesPreferencesViewController,
         PrivacyPreferencesViewController,
         PasswordsPreferencesViewController,
         AccountsPreferenceViewController,
@@ -720,7 +720,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     lazy var debugPreferences: [PreferencePane] = [
         GeneralPreferencesViewController,
         BrowserPreferencesViewController,
-        CardsPreferencesViewController,
+        NotesPreferencesViewController,
         PrivacyPreferencesViewController,
         PasswordsPreferencesViewController,
         AccountsPreferenceViewController,

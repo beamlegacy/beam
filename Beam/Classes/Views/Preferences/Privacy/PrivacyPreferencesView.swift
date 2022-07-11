@@ -97,8 +97,8 @@ struct AdsSection: View {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onChange(of: isAdsFilterEnabled) { newValue in
-                PreferencesManager.isAdsFilterEnabled = newValue
+            .onChange(of: isAdsFilterEnabled) {
+                PreferencesManager.isAdsFilterEnabled = $0
             }
     }
 }
@@ -112,8 +112,8 @@ struct CrossSiteTrackingSection: View {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onChange(of: isCrossSiteTrackingEnabled) { newValue in
-                PreferencesManager.isCrossSiteTrackingEnabled = newValue
+            .onChange(of: isCrossSiteTrackingEnabled) {
+                PreferencesManager.isCrossSiteTrackingEnabled = $0
             }
     }
 }
@@ -129,8 +129,8 @@ struct TrackersSection: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onChange(of: isPrivacyFilterEnabled) { newValue in
-                    PreferencesManager.isPrivacyFilterEnabled = newValue
+                .onChange(of: isPrivacyFilterEnabled) {
+                    PreferencesManager.isPrivacyFilterEnabled = $0
                 }
 
             Toggle(isOn: $isSocialMediaFilterEnabled) {
@@ -138,8 +138,8 @@ struct TrackersSection: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onChange(of: isSocialMediaFilterEnabled) { newValue in
-                    PreferencesManager.isSocialMediaFilterEnabled = newValue
+                .onChange(of: isSocialMediaFilterEnabled) {
+                    PreferencesManager.isSocialMediaFilterEnabled = $0
                 }
 
             VStack {
@@ -165,8 +165,8 @@ struct AnnoyancesSection: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onChange(of: isAnnoyancesFilterEnabled) { newValue in
-                    PreferencesManager.isAnnoyancesFilterEnabled = newValue
+                .onChange(of: isAnnoyancesFilterEnabled) {
+                    PreferencesManager.isAnnoyancesFilterEnabled = $0
                 }
 
             Toggle(isOn: $isCookiesFilterEnabled) {
@@ -174,8 +174,8 @@ struct AnnoyancesSection: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onChange(of: isCookiesFilterEnabled) { newValue in
-                    PreferencesManager.isCookiesFilterEnabled = newValue
+                .onChange(of: isCookiesFilterEnabled) {
+                    PreferencesManager.isCookiesFilterEnabled = $0
                 }
 
             VStack {
@@ -202,8 +202,8 @@ struct UpdateRulesSection: View {
                     }
                 }.labelsHidden()
                 .frame(width: 140)
-                .onChange(of: selectedUpdate) { newValue in
-                    ContentBlockingManager.shared.radBlockPreferences.synchronizeInterval = newValue
+                .onChange(of: selectedUpdate) {
+                    ContentBlockingManager.shared.radBlockPreferences.synchronizeInterval = $0
                 }
 
                 Button("Update Now") {

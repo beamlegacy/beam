@@ -954,7 +954,7 @@
 		A0C83F13276E40B400DD29FB /* BeamHelper in Embed BeamHelper Tool */ = {isa = PBXBuildFile; fileRef = A07E94A7276A01D70094117C /* BeamHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		A0CB5ADE268B1FF500D1EF02 /* GeneralPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB5ADD268B1FF500D1EF02 /* GeneralPreferencesView.swift */; };
 		A0CB5AE8268B20C200D1EF02 /* BrowserPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB5AE7268B20C200D1EF02 /* BrowserPreferencesView.swift */; };
-		A0CB5AEA268B231400D1EF02 /* CardsPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB5AE9268B231400D1EF02 /* CardsPreferencesView.swift */; };
+		A0CB5AEA268B231400D1EF02 /* NotesPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB5AE9268B231400D1EF02 /* NotesPreferencesView.swift */; };
 		A0CB5AEC268B241400D1EF02 /* PasswordsPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB5AEB268B241400D1EF02 /* PasswordsPreferencesView.swift */; };
 		A0CB5AEE268B244800D1EF02 /* AboutPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB5AED268B244800D1EF02 /* AboutPreferencesView.swift */; };
 		A0CB7E54268E66CD00D15AFD /* View+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB7E53268E66CD00D15AFD /* View+Beam.swift */; };
@@ -2861,7 +2861,7 @@
 		A0C83F11276E3ED900DD29FB /* BeamHelper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BeamHelper.entitlements; sourceTree = "<group>"; };
 		A0CB5ADD268B1FF500D1EF02 /* GeneralPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPreferencesView.swift; sourceTree = "<group>"; };
 		A0CB5AE7268B20C200D1EF02 /* BrowserPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPreferencesView.swift; sourceTree = "<group>"; };
-		A0CB5AE9268B231400D1EF02 /* CardsPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardsPreferencesView.swift; sourceTree = "<group>"; };
+		A0CB5AE9268B231400D1EF02 /* NotesPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesPreferencesView.swift; sourceTree = "<group>"; };
 		A0CB5AEB268B241400D1EF02 /* PasswordsPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsPreferencesView.swift; sourceTree = "<group>"; };
 		A0CB5AED268B244800D1EF02 /* AboutPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPreferencesView.swift; sourceTree = "<group>"; };
 		A0CB7E53268E66CD00D15AFD /* View+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Beam.swift"; sourceTree = "<group>"; };
@@ -4758,7 +4758,7 @@
 				A07F2435269C8529008918B0 /* PreferencePaneBuilder.swift */,
 				A0CB5ADD268B1FF500D1EF02 /* GeneralPreferencesView.swift */,
 				A0CB5AE7268B20C200D1EF02 /* BrowserPreferencesView.swift */,
-				A0CB5AE9268B231400D1EF02 /* CardsPreferencesView.swift */,
+				A0CB5AE9268B231400D1EF02 /* NotesPreferencesView.swift */,
 				A0CB5AE6268B206600D1EF02 /* Privacy */,
 				A0AEC24927022A9C00BEE4F3 /* Passwords */,
 				524299E225A480A300F4DBF5 /* AccountsView.swift */,
@@ -8987,7 +8987,7 @@
 				37DB5A0B27BB514400534760 /* EmbedAnimator.swift in Sources */,
 				3312203428097382006A5EA1 /* UpdatePanel.swift in Sources */,
 				5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */,
-				A0CB5AEA268B231400D1EF02 /* CardsPreferencesView.swift in Sources */,
+				A0CB5AEA268B231400D1EF02 /* NotesPreferencesView.swift in Sources */,
 				873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */,
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
 				A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */,

@@ -100,8 +100,8 @@ struct AppearanceView: View {
 }
 
 struct AccessibilitySection: View {
-    @State private var isPickerEnabled: Bool = PreferencesManager.isFontMinOnPreference
-    @State private var fontSizeIndex = PreferencesManager.fontSizeIndexPreference
+//    @State private var isPickerEnabled: Bool = PreferencesManager.isFontMinOnPreference
+//    @State private var fontSizeIndex = PreferencesManager.fontSizeIndexPreference
     @State private var isTabToHighlightOn = PreferencesManager.isTabToHighlightOn
 
     var body: some View {
@@ -128,9 +128,10 @@ struct AccessibilitySection: View {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([isTabToHighlightOn].publisher.first()) {
+            .onChange(of: isTabToHighlightOn, perform: {
                 PreferencesManager.isTabToHighlightOn = $0
-            }
+            })
+
         VStack {
             Text("Option-Tab to highlights each item.")
                 .font(BeamFont.regular(size: 11).swiftUI)
@@ -151,8 +152,8 @@ struct UpdatesSection: View {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([isAutoUpdateOn].publisher.first()) {
+            .onChange(of: isAutoUpdateOn, perform: {
                 PreferencesManager.isAutoUpdateOn = $0
-            }
+            })
     }
 }
