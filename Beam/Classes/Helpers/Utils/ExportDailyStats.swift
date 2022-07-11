@@ -20,6 +20,7 @@ private struct DailyUrlStatsRow: CsvRow {
     let score: Float
     let isPinned: Bool
     let isSearchEngine: Bool
+    let distinctVisitDayCount: Int?
 
     var columns: [String] { [
             url.urlStringWithoutScheme,
@@ -31,7 +32,9 @@ private struct DailyUrlStatsRow: CsvRow {
             "\(navigationCountSinceLastSearch)",
             "\(score)",
             "\(isPinned)",
-            "\(isSearchEngine)"
+            "\(isSearchEngine)",
+            "\(url.isDomain)",
+            "\(distinctVisitDayCount ?? 0)"
         ] }
 
     static var columnNames = [
@@ -44,10 +47,12 @@ private struct DailyUrlStatsRow: CsvRow {
         "navigationCountSinceLastSearch",
         "score",
         "isPinned",
-        "isSearchEngine"
+        "isSearchEngine",
+        "isDomain",
+        "rollingDistinctVisitDayCount"
     ]
 
-    init(scoredUrl: ScoredURL) {
+    init(scoredUrl: ScoredURL, distinctVisitDayCount: Int?) {
         url = scoredUrl.url
         title = scoredUrl.title
         readingTime = scoredUrl.score.readingTimeToLastEvent
@@ -58,6 +63,7 @@ private struct DailyUrlStatsRow: CsvRow {
         score = scoredUrl.score.score
         isPinned = scoredUrl.score.isPinned
         isSearchEngine = scoredUrl.url.isSearchEngineResultPage
+        self.distinctVisitDayCount = distinctVisitDayCount
     }
 }
 
@@ -114,9 +120,14 @@ class DailyStatsExporter {
 
     static func exportUrlStats(daysAgo: Int, to url: URL?) {
         guard let url = url else { return }
-        let scorer = DailyUrlScorer(store: GRDBDailyUrlScoreStore())
+        let scoreStore = GRDBDailyUrlScoreStore()
+        let scorer = DailyUrlScorer(store: scoreStore)
+        let params = scorer.params
+        let distinctVisitDayCounts = scoreStore.getUrlWithoutFragmentDistinctVisitDayCount(between: daysAgo + params.maxRepeatTimeFrame, and: daysAgo)
         let urlStats = scorer.getHighScoredUrls(daysAgo: daysAgo, topN: 5000, filtered: false)
-        let urlStatsRows: [DailyUrlStatsRow] = urlStats.map { DailyUrlStatsRow(scoredUrl: $0) }
+        let urlStatsRows: [DailyUrlStatsRow] = urlStats.map {
+            DailyUrlStatsRow(scoredUrl: $0, distinctVisitDayCount: distinctVisitDayCounts[$0.url.absoluteString])
+        }
         let writer = CsvRowsWriter(header: DailyUrlStatsRow.header, rows: urlStatsRows)
         do {
             try writer.overWrite(to: url)

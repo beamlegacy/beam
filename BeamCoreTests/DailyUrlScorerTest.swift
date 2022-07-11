@@ -8,6 +8,18 @@
 import XCTest
 @testable import BeamCore
 
+
+private class FakeDailyScoreStore: DailyUrlScoreStoreProtocol {
+    let scores: [UUID: DailyURLScore]
+    init(scores: [UUID: DailyURLScore], repeatedUrls: Set<String> = Set<String>()) {
+        self.scores = scores
+    }
+    func apply(to urlId: UUID, changes: (DailyURLScore) -> Void) {}
+    func getScores(daysAgo: Int) -> [UUID: DailyURLScore] { scores }
+    func getDailyRepeatingUrlsWithoutFragment(between offset0: Int, and offset1: Int, minRepeat: Int) -> Set<String> { Set<String>() }
+    func getUrlWithoutFragmentDistinctVisitDayCount(between offset0: Int, and offset1: Int) -> [String : Int] { [String: Int]() }
+}
+
 class DailyUrlScorerTest: XCTestCase {
 
     override func setUpWithError() throws {
@@ -162,14 +174,6 @@ class DailyUrlScorerTest: XCTestCase {
 
     // swiftlint:disable:next function_body_length
     func testGetHighScores() {
-        class FakeDailyScoreStore: DailyUrlScoreStoreProtocol {
-            let scores: [UUID: DailyURLScore]
-            init(scores: [UUID: DailyURLScore]) {
-                self.scores = scores
-            }
-            func apply(to urlId: UUID, changes: (DailyURLScore) -> Void) {}
-            func getScores(daysAgo: Int) -> [UUID: DailyURLScore] { scores }
-        }
         let urlsAndTitles = [
             ("https://abc.com/page1#anchor", "title 1"),
             ("http://abc.com/page1", "title 2"),
@@ -236,7 +240,8 @@ class DailyUrlScorerTest: XCTestCase {
             urlIds[7]: score7,
             urlIds[8]: score8
         ]
-        let scorer = DailyUrlScorer(store: FakeDailyScoreStore(scores: scores), minReadingTime: 1, minTextAmount: 500)
+        let params = DailySummaryUrlParams(minReadingTime: 1, minTextAmount: 500, maxRepeatTimeFrame: 0, maxRepeat: 0)
+        let scorer = DailyUrlScorer(store: FakeDailyScoreStore(scores: scores), params: params)
         let scoredUrls = scorer.getHighScoredUrls(daysAgo: 0, topN: 1)
         XCTAssertEqual(scoredUrls.count, 1)
         //the 2 first url scores got aggregated and title was chosen as most recent.

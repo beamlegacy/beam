@@ -9,6 +9,11 @@ import Foundation
 import GRDB
 import BeamCore
 
+private struct UrlDistinctVisitDayCount: Decodable, FetchableRecord {
+    let urlWithoutFragment: String
+    let distinctDayCount: Int
+}
+
 class UrlStatsDBManager: GRDBHandler, BeamManager {
     weak public private(set) var holder: BeamManagerOwner?
     static var id = UUID()
@@ -140,6 +145,50 @@ class UrlStatsDBManager: GRDBHandler, BeamManager {
                 try DailyURLScore.deleteAll(db)
             }
         }
+    }
+
+    func getDailyRepeatingUrlsWithoutFragment(between leftBound: String, and rightBound: String, minRepeat: Int) throws -> Set<String> {
+            let query: SQLRequest<String> = SQLRequest("""
+                SELECT
+                CASE
+                    WHEN INSTR(l.url, '#') > 0 THEN SUBSTR(l.url, 0, INSTR(l.url, '#'))
+                    ELSE l.url
+                END AS url_without_fragment
+                FROM Link AS l
+                JOIN DailyUrlScore AS s ON l.id = s.urlId
+                WHERE
+                    true
+                    AND s.localDay BETWEEN \(leftBound) AND \(rightBound)
+                    AND s.visitCount >= 1
+                GROUP BY 1
+                HAVING COUNT(1) >= \(minRepeat)
+                """
+                )
+            return try self.read { db in
+                try String.fetchSet(db, query)
+        }
+    }
+    func getUrlWithoutFragmentDistinctVisitDayCount(between leftBound: String, and rightBound: String) throws -> [String: Int] {
+        let query: SQLRequest<Row> = SQLRequest("""
+            SELECT
+            CASE
+                WHEN INSTR(l.url, '#') > 0 THEN SUBSTR(l.url, 0, INSTR(l.url, '#'))
+                ELSE l.url
+            END AS urlWithoutFragment,
+            COUNT(1) AS distinctDayCount
+            FROM Link AS l
+            JOIN DailyUrlScore AS s ON l.id = s.urlId
+            WHERE
+                true
+                AND s.localDay BETWEEN \(leftBound) AND \(rightBound)
+                AND s.visitCount >= 1
+            GROUP BY 1
+        """)
+        let rows = try self.read { db in
+            try UrlDistinctVisitDayCount.fetchAll(db, query)
+                .map { ($0.urlWithoutFragment, $0.distinctDayCount)}
+        }
+        return Dictionary(uniqueKeysWithValues: rows)
     }
 }
 
