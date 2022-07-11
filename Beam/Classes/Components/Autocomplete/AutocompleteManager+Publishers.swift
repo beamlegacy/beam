@@ -58,7 +58,7 @@ extension AutocompleteManager {
             futureToPublisher(autocompleteTabGroupingResults(for: searchText), source: .tabGroup(group: nil))
         ]
 
-        if let state = beamState, !state.isIncognito {
+        if let state = beamState, !state.isIncognito && PreferencesManager.includeSearchEngineSuggestion {
             webPublishers.append(getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter))
         }
 
