@@ -4,7 +4,7 @@ import BeamCore
 import CryptoKit
 import LocalAuthentication
 
-class PasswordManager {
+final class PasswordManager {
     enum Error: Swift.Error {
         case databaseError(errorMsg: String)
         case decryptionError(errorMsg: String)
@@ -18,8 +18,24 @@ class PasswordManager {
         }
     }
 
+    struct SanityDigest: Equatable {
+        var total: Int
+        var deleted: Int
+        var readableValidSignature: Int
+        var readableInvalidSignature: Int
+        var unreadableValidSignature: Int
+        var unreadableInvalidSignature: Int
+
+        var isValid: Bool {
+            total == deleted + readableValidSignature
+        }
+
+        var description: String {
+            "Total records: \(total), deleted: \(deleted) - \(readableValidSignature + readableInvalidSignature) readable (\(readableInvalidSignature) invalid signatures) - \(unreadableValidSignature + unreadableInvalidSignature) unreadable (\(unreadableInvalidSignature) invalid signatures)"
+        }
+    }
+
     static let shared = PasswordManager()
-    static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
 
     var changePublisher: AnyPublisher<Void, Never> {
         changeSubject.eraseToAnyPublisher()
@@ -272,8 +288,38 @@ class PasswordManager {
     func count() -> Int {
         fetchAll().count
     }
+
+    func sanityDigest() throws -> SanityDigest {
+        let localPrivateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
+        let allRecords = try passwordsDB?.fetchAll() ?? []
+        var digest = SanityDigest(total: allRecords.count, deleted: 0, readableValidSignature: 0, readableInvalidSignature: 0, unreadableValidSignature: 0, unreadableInvalidSignature: 0)
+        for record in allRecords {
+            if record.deletedAt == nil {
+                let validSignature = record.privateKeySignature == localPrivateKeySignature
+                let password = try? EncryptionManager.shared.decryptString(record.password, EncryptionManager.shared.localPrivateKey())
+                let readablePassword = password?.isEmpty == false
+                if readablePassword {
+                    if validSignature {
+                        digest.readableValidSignature += 1
+                    } else {
+                        digest.readableInvalidSignature += 1
+                    }
+                } else {
+                    if validSignature {
+                        digest.unreadableValidSignature += 1
+                    } else {
+                        digest.unreadableInvalidSignature += 1
+                    }
+                }
+            } else {
+                digest.deleted += 1
+            }
+        }
+        return digest
+    }
 }
 
+// MARK: - BeamObjectManagerDelegate
 extension PasswordManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
     internal static var backgroundQueue = DispatchQueue(label: "PasswordManager BeamObjectManager backgroundQueue", qos: .userInitiated)
