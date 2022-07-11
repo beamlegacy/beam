@@ -88,6 +88,7 @@ struct Persistence {
     }
     enum NoteScores {
         @StandardStorable("NoteScores.daily") static var daily: Data?
+        @StandardStorable("NoteScores.lastWordCountChange") static var lastWordCountChange: Data?
     }
 
     enum Account {
