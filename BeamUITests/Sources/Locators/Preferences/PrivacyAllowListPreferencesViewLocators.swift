@@ -13,7 +13,7 @@ enum PrivacyAllowListPreferencesViewLocators {
         case addUrl = "basicAdd"
         case removeUrl = "basicRemove"
         case cancelButton = "Cancel"
-        case saveButton = "Save"
+        case applyButton = "Apply"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
