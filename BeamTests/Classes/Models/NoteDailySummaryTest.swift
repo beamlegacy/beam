@@ -39,9 +39,9 @@ class NoteDailySummaryTest: XCTestCase, BeamDocumentSource {
         docs[5].createdAt = dates[2]
         //created one day ago
         docs[2].createdAt = dates[1]
-        docs[2].updatedAt = dates[1]
+        docs[2].updatedAt = dates[0]
         docs[3].createdAt = dates[1]
-        docs[3].updatedAt = dates[1]
+        docs[3].updatedAt = dates[0]
         //created today
         docs[4].updatedAt = dates[0]
 
