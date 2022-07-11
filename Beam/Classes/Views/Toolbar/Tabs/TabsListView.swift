@@ -77,7 +77,7 @@ struct TabsListView: View {
     var currentTab: BrowserTab?
     var globalContainerGeometry: GeometryProxy?
 
-    @ObservedObject private var dragModel = TabsDragModel()
+    @StateObject private var dragModel = TabsDragModel()
     @State private var disableAnimation: Bool = false
     @State private var isAnimatingDrop: Bool = false
 

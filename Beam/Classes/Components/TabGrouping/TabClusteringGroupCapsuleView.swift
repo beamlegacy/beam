@@ -106,6 +106,9 @@ struct TabClusteringGroupCapsuleView: View {
 
                     .blendMode(forLightScheme: .normal, forDarkScheme: .screen)
             })
+            .overlay(ClickCatchingView(onRightTap: { event in
+                onTap?(true, event)
+            }))
             .onHover { isHovering = $0 }
             .onTouchDown { isTouchDown = $0 }
             .simultaneousGesture(TapGesture().onEnded({ _ in
@@ -113,9 +116,6 @@ struct TabClusteringGroupCapsuleView: View {
                 // But we still need it for right click and control-click, which could end up here.
                 guard NSApp.currentEvent?.isRightClick != true else { return }
                 onTap?(false, nil)
-            }))
-            .background(ClickCatchingView(onRightTap: { event in
-                onTap?(true, event)
             }))
     }
 }
