@@ -58,7 +58,8 @@ struct WebAutofillRules {
     enum Condition {
         case never
         case always
-        case whenPasswordField
+        case whenPasswordFieldPresent
+        case forAutocompleteValues([String])
     }
 
     let ignoreTextAutocompleteOff: Condition
@@ -66,29 +67,34 @@ struct WebAutofillRules {
     let ignoreTelAutocompleteOff: Condition
     let ignorePasswordAutocompleteOff: Condition
     let discardAutocompleteAttribute: Condition
+    let discardTypeAttribute: Condition
     let ignoreUntaggedPasswordFieldAlone: Bool
     let mergeIncompleteCardExpirationDate: Bool
 
-    init(ignoreTextAutocompleteOff: Condition = .whenPasswordField, ignoreEmailAutocompleteOff: Condition = .whenPasswordField, ignoreTelAutocompleteOff: Condition = .whenPasswordField, ignorePasswordAutocompleteOff: Condition = .always, discardAutocompleteAttribute: Condition = .never, ignoreUntaggedPasswordFieldAlone: Bool = false, mergeIncompleteCardExpirationDate: Bool = false) {
+    init(ignoreTextAutocompleteOff: Condition = .whenPasswordFieldPresent, ignoreEmailAutocompleteOff: Condition = .whenPasswordFieldPresent, ignoreTelAutocompleteOff: Condition = .whenPasswordFieldPresent, ignorePasswordAutocompleteOff: Condition = .always, discardAutocompleteAttribute: Condition = .never, discardTypeAttribute: Condition = .never, ignoreUntaggedPasswordFieldAlone: Bool = false, mergeIncompleteCardExpirationDate: Bool = false) {
         self.ignoreTextAutocompleteOff = ignoreTextAutocompleteOff
         self.ignoreEmailAutocompleteOff = ignoreEmailAutocompleteOff
         self.ignoreTelAutocompleteOff = ignoreTelAutocompleteOff
         self.ignorePasswordAutocompleteOff = ignorePasswordAutocompleteOff
         self.discardAutocompleteAttribute = discardAutocompleteAttribute
+        self.discardTypeAttribute = discardTypeAttribute
         self.ignoreUntaggedPasswordFieldAlone = ignoreUntaggedPasswordFieldAlone
         self.mergeIncompleteCardExpirationDate = mergeIncompleteCardExpirationDate
     }
 
     static let `default` = Self()
 
-    private func apply(condition: Condition, inPageContainingPasswordField pageContainsPasswordField: Bool) -> Bool {
+    private func apply(condition: Condition, to field: DOMInputElement, inPageContainingPasswordField pageContainsPasswordField: Bool) -> Bool {
         switch condition {
         case .never:
             return false
         case .always:
             return true
-        case .whenPasswordField:
+        case .whenPasswordFieldPresent:
             return pageContainsPasswordField
+        case .forAutocompleteValues(let values):
+            guard let autocomplete = field.autocomplete else { return false }
+            return values.contains(autocomplete)
         }
     }
 
@@ -97,13 +103,13 @@ struct WebAutofillRules {
         case .off:
             switch field.type {
             case .text:
-                return apply(condition: ignoreTextAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
+                return apply(condition: ignoreTextAutocompleteOff, to: field, inPageContainingPasswordField: pageContainsPasswordField)
             case .email:
-                return apply(condition: ignoreEmailAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
+                return apply(condition: ignoreEmailAutocompleteOff, to: field, inPageContainingPasswordField: pageContainsPasswordField)
             case .tel:
-                return apply(condition: ignoreTelAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
+                return apply(condition: ignoreTelAutocompleteOff, to: field, inPageContainingPasswordField: pageContainsPasswordField)
             case .password:
-                return apply(condition: ignorePasswordAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
+                return apply(condition: ignorePasswordAutocompleteOff, to: field, inPageContainingPasswordField: pageContainsPasswordField)
             default:
                 return false
             }
@@ -117,9 +123,13 @@ struct WebAutofillRules {
             return nil
         }
         var transformedField = field
-        let ignoreAutocomplete = apply(condition: discardAutocompleteAttribute, inPageContainingPasswordField: pageContainsPasswordField)
+        let ignoreAutocomplete = apply(condition: discardAutocompleteAttribute, to: field, inPageContainingPasswordField: pageContainsPasswordField)
         if ignoreAutocomplete {
             transformedField.autocomplete = nil
+        }
+        let ignoreType = apply(condition: discardTypeAttribute, to: field, inPageContainingPasswordField: pageContainsPasswordField)
+        if ignoreType {
+            transformedField.type = nil
         }
         return transformedField
     }
@@ -493,10 +503,14 @@ final class WebFieldClassifier {
         switch host {
         case "app.beamapp.co":
             return WebAutofillRules(ignorePasswordAutocompleteOff: .never, ignoreUntaggedPasswordFieldAlone: true)
-        case "pinterest.com", "maderasbarber.com":
-            return WebAutofillRules(discardAutocompleteAttribute: .whenPasswordField)
+        case "pinterest.com", "maderasbarber.com", "testrail.io":
+            return WebAutofillRules(discardAutocompleteAttribute: .whenPasswordFieldPresent)
+        case "agoda.com", "figma.com":
+            return WebAutofillRules(discardAutocompleteAttribute: .forAutocompleteValues(["new-password"]))
         case "netflix.com", "payment-netflix.form.lvh.me":
-            return WebAutofillRules(ignoreTelAutocompleteOff: .always, discardAutocompleteAttribute: .whenPasswordField, mergeIncompleteCardExpirationDate: true)
+            return WebAutofillRules(ignoreTelAutocompleteOff: .always, discardAutocompleteAttribute: .whenPasswordFieldPresent, mergeIncompleteCardExpirationDate: true)
+        case "calendar.amie.so":
+            return WebAutofillRules(discardAutocompleteAttribute: .forAutocompleteValues(["new-password"]), discardTypeAttribute: .forAutocompleteValues(["new-password"]))
         default:
             return .default
         }
