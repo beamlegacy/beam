@@ -1371,6 +1371,7 @@
 		D775219A2852262B007408DA /* NotePinUnpinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77521992852262B007408DA /* NotePinUnpinTests.swift */; };
 		D77A5A7A28770F0D00652727 /* RightClickMenuTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A7928770F0D00652727 /* RightClickMenuTestView.swift */; };
 		D77A5A8428780F2100652727 /* RightClickLinkMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */; };
+		D77A5A912878688500652727 /* RightClickTextMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A902878688500652727 /* RightClickTextMenuTests.swift */; };
 		D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D77D4792282273940006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D780BA54285083E600F5CBC8 /* BrowserPinnedTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */; };
@@ -3284,6 +3285,7 @@
 		D77A5153280FC3110045F603 /* BeamUITests-Thread6.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread6.xctestplan"; sourceTree = "<group>"; };
 		D77A5A7928770F0D00652727 /* RightClickMenuTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickMenuTestView.swift; sourceTree = "<group>"; };
 		D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickLinkMenuTests.swift; sourceTree = "<group>"; };
+		D77A5A902878688500652727 /* RightClickTextMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickTextMenuTests.swift; sourceTree = "<group>"; };
 		D77D4788282269640006847A /* CrossTargetBeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetBeeper.swift; sourceTree = "<group>"; };
 		D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPinnedTabTests.swift; sourceTree = "<group>"; };
 		D7858BC5283BB5A000D0336A /* CreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
@@ -7433,6 +7435,7 @@
 				D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */,
 				D7F5BF0428756231008FE546 /* RightClickImageMenuTests.swift */,
 				D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */,
+				D77A5A902878688500652727 /* RightClickTextMenuTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -9873,6 +9876,7 @@
 				A53F1C5627B8A8A8009AE2D0 /* OmniboxLocators.swift in Sources */,
 				B5792591275E4FE30093B32B /* FileMenu.swift in Sources */,
 				B57A9B3B26AB08A5002C954D /* AllNotesViewLocators.swift in Sources */,
+				D77A5A912878688500652727 /* RightClickTextMenuTests.swift in Sources */,
 				B5EB9A7626C28192004C798A /* GoMenu.swift in Sources */,
 				B5FAE2FC270ECFA600EAC8A3 /* ShortcutsHelper.swift in Sources */,
 				B57A9B3626AB07B8002C954D /* UIElement.swift in Sources */,

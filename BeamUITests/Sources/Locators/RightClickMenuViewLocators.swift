@@ -27,6 +27,15 @@ enum RightClickMenuViewLocators {
         case services = "Services"
     }
     
+    enum TextMenuItems: String, CaseIterable, UIElement {
+        case lookUpText = "WKMenuItemIdentifierLookUp"
+        case translateText = "WKMenuItemIdentifierTranslate"
+        case searchWithGoogle = "Search with Google"
+        case copyText = "Copy"
+        case speech = "Speech"
+        case services = "Services"
+    }
+    
     enum CommonMenuItems: String, CaseIterable, UIElement {
         case share = "WKMenuItemIdentifierShareMenu"
         case inspectElement = "Inspect Element"
@@ -51,8 +60,10 @@ enum RightClickMenuViewLocators {
         case serviceSearchGoogle = "Search With Google"
         case serviceShowInFinder = "Show in Finder"
         case serviceShowInfoInFinder = "Show Info in Finder"
-
-
     }
     
+    enum SpeechCommonMenuItems: String, CaseIterable, UIElement {
+        case startSpeaking = "Start Speaking"
+        case stopSpeaking = "Stop Speaking"
+    }
 }
