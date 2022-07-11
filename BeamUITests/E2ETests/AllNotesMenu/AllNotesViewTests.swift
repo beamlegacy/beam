@@ -160,7 +160,6 @@ class AllNotesViewTests: BaseTest {
     }
     
     func testShowDailyNotesFilter() throws {
-        try XCTSkipIf(true, "blocked by https://linear.app/beamapp/issue/BE-4721/show-daily-notes-disabling-in-all-notes-hides-all-existing-notes")
         let tableBeforeFilterApplied = AllNotesTestTable()
         
         step ("WHEN I disable displaying of the Daily notes") {
