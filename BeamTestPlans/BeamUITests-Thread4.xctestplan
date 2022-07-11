@@ -154,6 +154,7 @@
         "ReportBugFeatureTests",
         "RightClickImageMenuTests",
         "RightClickLinkMenuTests",
+        "RightClickPageMenuTests",
         "RightClickTextMenuTests",
         "SearchOnPDFTests",
         "SearchOnPdfTests",

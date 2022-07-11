@@ -135,6 +135,7 @@
         "ReferencesTests",
         "ReportBugFeatureTests",
         "RightClickLinkMenuTests",
+        "RightClickPageMenuTests",
         "SearchOnCardTests",
         "SearchOnNoteTests",
         "SearchOnPDFTests",
