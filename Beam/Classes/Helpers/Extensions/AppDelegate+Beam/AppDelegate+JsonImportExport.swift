@@ -4,93 +4,87 @@ import BeamCore
 
 extension AppDelegate {
     @IBAction func exportAllNotesToBeamNote(_ sender: Any) {
-        let savePanel = NSSavePanel()
-        savePanel.canCreateDirectories = true
+        let openPanel = NSOpenPanel()
+        openPanel.canChooseDirectories = true
+        openPanel.canCreateDirectories = true
+        openPanel.title = loc("Choose the directory to export beamNote files")
+        openPanel.begin { [weak openPanel] result in
+            defer { openPanel?.close() }
 
-        savePanel.title = loc("Choose the directory to export beamNote files")
-        savePanel.begin { [weak savePanel] result in
-            guard result == .OK, let selectedPath = savePanel?.url?.path,
+            guard result == .OK, let selectedPath = openPanel?.url?.path,
                   let ids = try? self.data.currentDocumentCollection?.fetchIds(filters: [])
-            else { savePanel?.close(); return }
+            else { return }
 
             let baseURL = URL(fileURLWithPath: selectedPath)
 
             for id in ids {
                 self.exportNoteToBeamNote(id: id, baseURL: baseURL)
             }
-            savePanel?.close()
         }
     }
 
     func exportOneNoteToBeamNote(note: BeamNote) {
         let savePanel = NSSavePanel()
         // TODO: i18n
-        savePanel.allowedFileTypes = ["beamNote"]
+        savePanel.allowedFileTypes = [BeamNoteDocumentWrapper.fileExtension]
         savePanel.allowsOtherFileTypes = true
         savePanel.title = loc("Choose the file to export \(note.title)")
-        savePanel.nameFieldStringValue = "\(note.type.journalDateString ?? note.title) \(note.id).beamNote"
+        savePanel.nameFieldStringValue = BeamNoteDocumentWrapper.preferredFilename(for: note, withExtension: true)
         savePanel.begin { [weak savePanel] result in
-            guard result == .OK, let selectedPath = savePanel?.url?.path
-            else { savePanel?.close(); return }
+            defer { savePanel?.close() }
+
+            guard result == .OK, let selectedPath = savePanel?.url?.path else { return }
 
             let url = URL(fileURLWithPath: selectedPath)
             self.exportNoteToBeamNote(id: note.id, baseURL: url.deletingLastPathComponent(), toFile: url)
-
-            savePanel?.close()
         }
     }
 
     func exportNotesToBeamNote(_ notes: [BeamNote]) {
-        let savePanel = NSSavePanel()
-        savePanel.canCreateDirectories = true
+        let openPanel = NSOpenPanel()
+
+        openPanel.canCreateDirectories = true
+        openPanel.canChooseDirectories = true
         // TODO: i18n
-        savePanel.title = loc("Choose the directory to export json files to")
-        savePanel.begin { [weak savePanel] result in
-            guard result == .OK, let selectedPath = savePanel?.url?.path
-            else { savePanel?.close(); return }
+        openPanel.title = loc("Choose the directory to export json files to")
+        openPanel.begin { [weak openPanel] result in
+            defer { openPanel?.close() }
+            guard result == .OK, let selectedPath = openPanel?.url?.path else { return }
 
             let baseURL = URL(fileURLWithPath: selectedPath)
 
             for note in notes {
                 self.exportNoteToBeamNote(id: note.id, baseURL: baseURL)
             }
-            savePanel?.close()
         }
     }
 
     func exportNoteToBeamNote(id: UUID, baseURL: URL, toFile fileUrl: URL? = nil) {
-        if let note = BeamNote.fetch(id: id, keepInMemory: false, decodeChildren: true) {
-            let url = fileUrl ?? URL(fileURLWithPath: "\(note.type.journalDateString ?? note.title) \(id).beamNote", relativeTo: baseURL)
-            do {
-                let document = BeamNoteDocumentWrapper(note: note)
-                try document.write(to: url, ofType: "beamNote")
-            } catch {
-                UserAlert.showError(message: error.localizedDescription)
-
-                return
-            }
+        guard let note = BeamNote.fetch(id: id, keepInMemory: false, decodeChildren: true) else {
+            UserAlert.showError(message: "Unable to retrieve note with id: \(id)"); return
+        }
+        do {
+            let filename = BeamNoteDocumentWrapper.preferredFilename(for: note, withExtension: true)
+            let url = fileUrl ?? URL(fileURLWithPath: filename, relativeTo: baseURL)
+            let document = BeamNoteDocumentWrapper(note: note)
+            try document.write(to: url, ofType: BeamNoteDocumentWrapper.fileExtension)
+        } catch {
+            UserAlert.showError(message: error.localizedDescription)
         }
     }
 
-    fileprivate func importFile(_ url: URL) {
-        if url.hasDirectoryPath {
+    fileprivate func importFile(_ url: URL, fm: FileManager = .default) {
+        if url.hasDirectoryPath, url.pathExtension != BeamNoteDocumentWrapper.fileExtension {
             // looks for all files and try to decode / add them
-            let fm = FileManager()
             do {
                 for child in try fm.contentsOfDirectory(atPath: url.path) {
-                    importFile(URL(fileURLWithPath: child, relativeTo: url))
+                    importFile(URL(fileURLWithPath: child, relativeTo: url), fm: fm)
                 }
             } catch {
                 Logger.shared.logError("Unable to list files in \(url)", category: .general)
             }
         } else {
             // try to decode and import this file
-            let data = try? Data(contentsOf: url)
-            guard data != nil else {
-                Logger.shared.logError("Unable to import data from \(url)", category: .general)
-                return
-            }
-
             do {
                 let noteDocument = try BeamNoteDocumentWrapper(fileWrapper: FileWrapper(url: url, options: .immediate))
                 try noteDocument.importNote()
