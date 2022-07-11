@@ -19,7 +19,7 @@ class RightClickImageMenuTests: BaseTest {
     private var helper: BeamUITestsHelper!
 
     override func setUp() {
-        step("Given I start mock server") {
+        step("Given I open test page") {
             helper = BeamUITestsHelper(launchApp().app)
             uiMenu.loadUITestPage2()
         }
@@ -37,12 +37,9 @@ class RightClickImageMenuTests: BaseTest {
         rightClickMenuTestView.waitForShareMenuToBeDisplayed()
         
         for item in RightClickMenuViewLocators.ShareImageMenuItems.allCases {
-            XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
+            XCTAssertTrue(app.windows.menuItems[item.accessibilityIdentifier].exists)
         }
-        
-        for item in RightClickMenuViewLocators.ShareCommonMenuItems.allCases {
-            XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
-        }
+        XCTAssertTrue(rightClickMenuTestView.isShareCommonMenuDisplayed())
     }
     
     private func verifyMenuForImage () {
@@ -50,11 +47,13 @@ class RightClickImageMenuTests: BaseTest {
         rightClickMenuTestView.waitForMenuToBeDisplayed()
 
         for item in RightClickMenuViewLocators.ImageMenuItems.allCases {
-            XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
+            XCTAssertTrue(app.windows.menuItems[item.accessibilityIdentifier].exists)
         }
         for item in RightClickMenuViewLocators.CommonMenuItems.allCases {
-            XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
+            XCTAssertTrue(app.windows.menuItems[item.accessibilityIdentifier].exists)
         }
+        XCTAssertFalse(app.windows.menuItems["Services"].exists)
+
     }
     
     func testRightClickOpenNewTabImage() throws {

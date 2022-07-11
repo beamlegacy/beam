@@ -137,6 +137,7 @@
         "ReportBugFeatureTests",
         "RightClickImageMenuTests",
         "RightClickLinkMenuTests",
+        "RightClickTextMenuTests",
         "SearchOnCardTests",
         "SearchOnNoteTests",
         "SearchOnWebTests",

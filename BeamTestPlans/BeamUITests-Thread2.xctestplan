@@ -140,6 +140,7 @@
         "ReportBugFeatureTests",
         "RightClickImageMenuTests",
         "RightClickLinkMenuTests",
+        "RightClickTextMenuTests",
         "SearchOnCardTests",
         "SearchOnNoteTests",
         "SearchOnPDFTests",
