@@ -59,7 +59,7 @@ class AllowListViewModel: ObservableObject {
 
         // Process removals first, this ensures we do not lose anything in case we have equivalent items.
         if !removals.isEmpty {
-            let entries = removals.compactMap { $0.entry }
+            let entries = removals.compactMap(\.entry)
             ContentBlockingManager.shared.radBlockPreferences.remove(entries: entries, completion: { })
         }
         if !additions.isEmpty {
