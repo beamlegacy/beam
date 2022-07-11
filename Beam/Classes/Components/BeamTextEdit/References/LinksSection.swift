@@ -95,6 +95,7 @@ class LinksSection: Widget {
     var links: [BeamNoteReference] { note.links }
 
     func updateInitialHeading() {
+        guard initialUpdate else { return } // making sure we didn't already update the heading
         let refs = note.links
         updateHeading(refs.count)
     }
