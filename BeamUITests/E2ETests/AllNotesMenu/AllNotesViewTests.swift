@@ -159,4 +159,32 @@ class AllNotesViewTests: BaseTest {
         }
     }
     
+    func testShowDailyNotesFilter() throws {
+        try XCTSkipIf(true, "blocked by https://linear.app/beamapp/issue/BE-4721/show-daily-notes-disabling-in-all-notes-hides-all-existing-notes")
+        let tableBeforeFilterApplied = AllNotesTestTable()
+        
+        step ("WHEN I disable displaying of the Daily notes") {
+            allNotesView.showDailyNotesClick()
+                        .waitForAllNotesViewToLoad()
+        }
+        
+        step ("THEN I don't see daily notes anymore in All Notes table") {
+            let tableAfterFilterApplied = AllNotesTestTable()
+            XCTAssertEqual(tableAfterFilterApplied.numberOfVisibleItems, 2)
+            XCTAssertTrue(allNotesView.isNoteNameAvailable("How to beam"))
+            XCTAssertTrue(allNotesView.isNoteNameAvailable("Capture"))
+        }
+        
+        step ("WHEN I enable displaying of the Daily notes") {
+            allNotesView.showDailyNotesClick()
+                        .waitForAllNotesViewToLoad()
+        }
+        
+        step ("THEN I see daily notes in All Notes table") {
+            let tableAfterFilterEnabledAgain = AllNotesTestTable()
+            let comparisonResult = tableAfterFilterEnabledAgain.isEqualTo(tableBeforeFilterApplied)
+            XCTAssertTrue(comparisonResult.0, comparisonResult.1)
+        }
+    }
+    
 }
