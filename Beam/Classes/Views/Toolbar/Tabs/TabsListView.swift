@@ -442,8 +442,7 @@ extension TabsListView {
         var pinnedFrame: CGRect = .zero
         if tabsSections.pinnedItems.count > 0 {
             pinnedFrame = globalFrame
-            let pinWidth = widthProvider.width(forItem: nil, selected: false, pinned: true)
-            pinnedFrame.size.width = CGFloat(tabsSections.pinnedItems.count) * (pinWidth + widthProvider.separatorWidth)
+            pinnedFrame.size.width = widthProvider.widthForAllPinnedItems(pinnedItemsCount: tabsSections.pinnedItems.count)
             areas.append(pinnedFrame)
         }
         if tabsSections.unpinnedItems.count == 1, let singleTabFrame = singleTabFrame {
