@@ -72,7 +72,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             .environmentObject(data)
             .environmentObject(windowInfo)
             .environmentObject(state.browserTabsManager)
-            .environment(\.showHelpAction, showHelpAndFeedbackMenuView)
+            .environment(\.showHelpAction, HelpAction(showHelpAndFeedbackMenuView))
             .frame(minWidth: minimumSize.width, maxWidth: .infinity, minHeight: minimumSize.height, maxHeight: .infinity)
 
         let hostingView = BeamHostingView(rootView: mainView)
