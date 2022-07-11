@@ -109,7 +109,7 @@ final class TabsListWidthProvider {
     }
 
     func width(forItemAtIndex index: Int, selected: Bool, pinned: Bool) -> CGFloat {
-        guard index < items.allItems.count else { return 0 }
+        guard index >= 0 && index < items.allItems.count else { return 0 }
         let item = items.allItems[index]
         return width(forItem: item, selected: selected, pinned: pinned)
     }
