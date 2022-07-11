@@ -236,12 +236,9 @@ public class BeamNote: BeamElement {
         }
 
         self.sign = Self.signPost.createId(object: self)
-        if container.contains(.sources) {
-            do {
-                sources = try container.decode(NoteSources.self, forKey: .sources)
-            } catch {
-                Logger.shared.logWarning("⚠️ Couldn't decode sources for note id: \(id) - title: \(title)", category: .document)
-            }
+        if container.contains(.sources),
+           let decodedSources = try? container.decode(NoteSources.self, forKey: .sources) {
+            sources = decodedSources
         }
         setupSourceObserver()
 
