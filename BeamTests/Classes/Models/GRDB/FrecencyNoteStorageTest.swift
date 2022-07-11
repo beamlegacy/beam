@@ -97,7 +97,7 @@ class FrecencyNoteStorageTest: XCTestCase {
             let correspondingRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteId, paramKey: .note30d0))
             correspondingRecords.append(correspondingRecord)
         }
-        expect(storage.batchSaveOnApiCompleted).toEventually(beTrue())
+        expect(storage.batchSaveOnApiCompleted).toEventually(beTrue(), timeout: .seconds(2))
         for record in correspondingRecords {
             let fetchedRecord = try self.beamObjectHelper.fetchOnAPI(record)
             XCTAssertNotNil(fetchedRecord)
