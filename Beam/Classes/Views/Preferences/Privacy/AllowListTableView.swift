@@ -46,7 +46,7 @@ struct AllowListTableView: View {
         }
         .alert(item: $invalidItem) { item in
             Alert(title: Text("Invalid URL"),
-                  message: Text("'\(item.string)' is not a valid URL and will be discarded."))
+                  message: Text("'\(item.string)' is not a valid URL and will be discarded if the changes are applied."))
         }
     }
 
