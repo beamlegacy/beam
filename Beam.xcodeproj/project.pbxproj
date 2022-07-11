@@ -1373,6 +1373,7 @@
 		D77A5A7A28770F0D00652727 /* RightClickMenuTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A7928770F0D00652727 /* RightClickMenuTestView.swift */; };
 		D77A5A8428780F2100652727 /* RightClickLinkMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */; };
 		D77A5A912878688500652727 /* RightClickTextMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A902878688500652727 /* RightClickTextMenuTests.swift */; };
+		D77A5A9C287C55C800652727 /* RightClickPageMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A9B287C55C800652727 /* RightClickPageMenuTests.swift */; };
 		D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D77D4792282273940006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D780BA54285083E600F5CBC8 /* BrowserPinnedTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */; };
@@ -3288,6 +3289,7 @@
 		D77A5A7928770F0D00652727 /* RightClickMenuTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickMenuTestView.swift; sourceTree = "<group>"; };
 		D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickLinkMenuTests.swift; sourceTree = "<group>"; };
 		D77A5A902878688500652727 /* RightClickTextMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickTextMenuTests.swift; sourceTree = "<group>"; };
+		D77A5A9B287C55C800652727 /* RightClickPageMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickPageMenuTests.swift; sourceTree = "<group>"; };
 		D77D4788282269640006847A /* CrossTargetBeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetBeeper.swift; sourceTree = "<group>"; };
 		D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPinnedTabTests.swift; sourceTree = "<group>"; };
 		D7858BC5283BB5A000D0336A /* CreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
@@ -7439,6 +7441,7 @@
 				D7F5BF0428756231008FE546 /* RightClickImageMenuTests.swift */,
 				D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */,
 				D77A5A902878688500652727 /* RightClickTextMenuTests.swift */,
+				D77A5A9B287C55C800652727 /* RightClickPageMenuTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -9852,6 +9855,7 @@
 				D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
+				D77A5A9C287C55C800652727 /* RightClickPageMenuTests.swift in Sources */,
 				D7F5BF0528756231008FE546 /* RightClickImageMenuTests.swift in Sources */,
 				A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */,
 				A3E7B4BD27AC23D50074C9BB /* SignInAutocompleteTests.swift in Sources */,
