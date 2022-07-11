@@ -45,6 +45,11 @@ indirect enum BeamColor {
     case Custom(named: String)
     case From(color: NSColor, alpha: CGFloat? = nil)
 
+    #if DEBUG
+    /// A random color, allowing easy debugging. **Only available in DEBUG builds**.
+    case Random
+    #endif
+
     /**
      Creates a dynamic color with provided appearance color.
 
@@ -68,7 +73,7 @@ extension BeamColor {
     }
 
     var nsColor: NSColor {
-        var colorName: String
+        let colorName: String
         switch self {
         case .Custom(let named):
             colorName = named
@@ -77,6 +82,10 @@ extension BeamColor {
                 return NSColor(name: nil) { _ in color.withAlphaComponent(alpha) }
             }
             return color
+        #if DEBUG
+        case .Random:
+            return .random
+        #endif
         default:
             colorName = String(describing: self)
         }
@@ -123,3 +132,21 @@ extension BeamColor {
         return String(format: "#%02x%02x%02x%02x", Int(red * 255), Int(green * 255), Int(blue * 255), Int(alpha * 255))
     }
 }
+
+#if DEBUG
+// MARK: - Debug helpers
+
+extension NSColor {
+    /// A random color, allowing easy debugging. **Only available in DEBUG builds**.
+    static var random: NSColor {
+        NSColor(red: .random(in: 0...1), green: .random(in: 0...1), blue: .random(in: 0...1), alpha: 1.0)
+    }
+}
+
+extension Color {
+    /// A random color, allowing easy debugging. **Only available in DEBUG builds**.
+    static var random: Color {
+        Color(red: .random(in: 0...1), green: .random(in: 0...1), blue: .random(in: 0...1), opacity: 1.0)
+    }
+}
+#endif

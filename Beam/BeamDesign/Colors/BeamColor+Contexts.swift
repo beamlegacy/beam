@@ -22,6 +22,8 @@ extension BeamColor {
         static let transparent = BeamColor.Custom(named: "Transparent")
         /// -> Mercury
         static let separator = BeamColor.Mercury
+
+        static let macOSContextSeparator = BeamColor.Custom(named: "macOSContextSeparator")
     }
 
     enum ContextMenu {

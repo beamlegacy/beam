@@ -488,6 +488,7 @@
 		6635D9852853E73A00F4B775 /* ContextMenu_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 6635D9612853E73A00F4B775 /* ContextMenu_prod.js */; };
 		6635D99F2853E8AD00F4B775 /* NSWorkspace+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */; };
 		6635D9A02853E8AD00F4B775 /* Result+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99E2853E8AD00F4B775 /* Result+Beam.swift */; };
+		66A815C22876D1A3005A8499 /* ContentViewMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */; };
 		66D77CA128351612004D03E9 /* NSMenu+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D77CA028351612004D03E9 /* NSMenu+Beam.swift */; };
 		66E618E928635B5100D06A15 /* WebKitManualDownloadProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */; };
 		66F9AEBE283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */; };
@@ -2135,6 +2136,7 @@
 		6635D97D2853E73A00F4B775 /* ContextMenu.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = ContextMenu.css; sourceTree = "<group>"; };
 		6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSWorkspace+Beam.swift"; sourceTree = "<group>"; };
 		6635D99E2853E8AD00F4B775 /* Result+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Result+Beam.swift"; sourceTree = "<group>"; };
+		66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewMenuItem.swift; sourceTree = "<group>"; };
 		66D77CA028351612004D03E9 /* NSMenu+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMenu+Beam.swift"; sourceTree = "<group>"; };
 		66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebKitManualDownloadProxy.swift; sourceTree = "<group>"; };
 		66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseOverAndSelectionMessageHandler.swift; sourceTree = "<group>"; };
@@ -4551,6 +4553,7 @@
 				A570D32D27591C27003B239D /* ReadSizeViewModifier.swift */,
 				370794B727D7A17F00D2768B /* CursorOverrideModifier.swift */,
 				A03E64A5282CFF8D0003A7B2 /* RoundedCornersModifier.swift */,
+				66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -8880,6 +8883,7 @@
 				DAF063EF27D10CAD000406DE /* DomainPath0ReadingDay.swift in Sources */,
 				A07FFBCD282D66BF00AFCB02 /* NSWindow+Beam.swift in Sources */,
 				874111A22825894A0024C348 /* WebAutofillPositionModifier.swift in Sources */,
+				66A815C22876D1A3005A8499 /* ContentViewMenuItem.swift in Sources */,
 				A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */,
 				A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */,
 				03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */,
