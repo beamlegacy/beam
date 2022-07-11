@@ -11,6 +11,7 @@ import BeamCore
 struct TabView: View {
     static let minimumWidth: CGFloat = 29
     static let pinnedWidth: CGFloat = 32
+    static let pinnedWidthWithMedia: CGFloat = 52
     static let minimumActiveWidth: CGFloat = 120
     static let minSingleTabWidth: Double = 370
     static let height: CGFloat = 29
@@ -305,6 +306,7 @@ struct TabView: View {
         let showForegroundHoverStyle = isHovering && isSelected
         let hPadding = shouldShowCompactSize ? 0 : BeamSpacing._80
         let spacerMinWidth = BeamSpacing._40
+        let isCompactWithAudio = audioIsPlaying && shouldShowCompactSize
 
         let leadingViews = leadingViews(shouldShowClose: shouldShowClose)
         let trailingViews = trailingViews(shouldShowCopy: shouldShowCopy, shouldShowMedia: shouldShowMedia)
@@ -341,10 +343,15 @@ struct TabView: View {
             if shouldShowTitle {
                 centerView(shouldShowSecurity: shouldShowSecurity, leadingViewsWidth: estimatedLeadingViewsWidth, trailingViewsWidth: estimatedTrailingViewsWidth, containerWidth: containerGeometry.size.width)
                     .layoutPriority(2)
-            } else if shouldShowCompactSize && audioIsPlaying {
-                audioView
             } else {
-                faviconView
+                HStack(spacing: BeamSpacing._40) {
+                    if !isCompactWithAudio || isPinned {
+                        faviconView
+                    }
+                    if isCompactWithAudio {
+                        audioView
+                    }
+                }
             }
 
             // Trailing Content

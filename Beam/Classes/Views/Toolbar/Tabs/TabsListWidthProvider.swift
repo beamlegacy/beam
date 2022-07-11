@@ -43,6 +43,10 @@ final class TabsListWidthProvider {
         TabView.pinnedWidth
     }
 
+    private var pinnedWidthWithMedia: CGFloat {
+        TabView.pinnedWidthWithMedia
+    }
+
     private var minimumActiveWidth: CGFloat {
         TabView.minimumActiveWidth
     }
@@ -96,12 +100,16 @@ final class TabsListWidthProvider {
     private func availableWidthForUnpinneds(pinnedItemsCount: Int) -> CGFloat {
         var fixedWidthUsed: CGFloat = 0
         computedFixedWidths.values.forEach { fixedWidthUsed += ($0 + separatorWidth) }
-        if pinnedItemsCount > 0 {
-            fixedWidthUsed += separatorBetweenPinnedAndOther
-            + (CGFloat(pinnedItemsCount) * defaultPinnedWidth)
-            + (CGFloat(pinnedItemsCount - 1) * separatorWidth)
-        }
+        fixedWidthUsed += widthForAllPinnedItems(pinnedItemsCount: pinnedItemsCount)
         return containerSize.width - fixedWidthUsed
+    }
+
+    func widthForAllPinnedItems(pinnedItemsCount: Int) -> CGFloat {
+        guard pinnedItemsCount > 0 else { return 0 }
+        let allPinnedsWidth: CGFloat = Array(0..<pinnedItemsCount).reduce(into: 0) { partialResult, index in
+            partialResult += width(forItemAtIndex: index, selected: false, pinned: true) + separatorWidth
+        }
+        return separatorBetweenPinnedAndOther + allPinnedsWidth - separatorWidth
     }
 
     func width(forItemAtIndex index: Int, selected: Bool, pinned: Bool) -> CGFloat {
@@ -114,7 +122,12 @@ final class TabsListWidthProvider {
         if let itemId = item?.id, let customWidth = computedFixedWidths[itemId] {
             return customWidth
         }
-        guard !pinned else { return defaultPinnedWidth }
+        guard !pinned else {
+            if item?.tab?.mediaPlayerController?.isPlaying == true {
+                return pinnedWidthWithMedia
+            }
+            return defaultPinnedWidth
+        }
         var pinnedItemsCount = pinnedItemsCount
         if dragModel?.draggingOverPins == true && !currentItemIsPinned {
             pinnedItemsCount += 1
@@ -128,7 +141,10 @@ final class TabsListWidthProvider {
         var tabWidth = availableWidthWithoutSeparators / CGFloat(dynamicItemsCount)
         if tabWidth < minimumActiveWidth {
             // not enough space for all tabs
-            tabWidth = (availableWidthWithoutSeparators - minimumActiveWidth) / CGFloat(dynamicItemsCount - 1)
+            let numberOfUnpinnedActiveItems = currentItemIsPinned ? 0 : 1
+            let numberOfInactiveDynamicItems = CGFloat(dynamicItemsCount - numberOfUnpinnedActiveItems)
+            let availableWidthForInactiveDynamicItems = availableWidthWithoutSeparators - minimumActiveWidth * CGFloat(numberOfUnpinnedActiveItems)
+            tabWidth = availableWidthForInactiveDynamicItems / numberOfInactiveDynamicItems
         }
         return max(selected ? minimumActiveWidth : minimumWidth, tabWidth)
     }

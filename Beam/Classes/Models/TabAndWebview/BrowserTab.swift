@@ -507,6 +507,7 @@ import BeamCore
     }
 
     fileprivate func tabWillLeaveCurrentPage() {
+        mediaPlayerController = .init(page: self)
         pointAndShoot?.leavePage()
         mouseHoveringLocation = .none
         cancelSearch()
