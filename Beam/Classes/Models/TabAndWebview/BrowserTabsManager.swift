@@ -362,6 +362,11 @@ extension BrowserTabsManager {
                 tabs.insert(tab, at: toIndexInTabs)
                 self.tabs = tabs
             }
+            if !tab.isPinned && toListIndex < listItems.pinnedItems.count {
+                pinTab(tab)
+            } else if tab.isPinned && toListIndex >= listItems.pinnedItems.count {
+                unpinTab(tab)
+            }
         }
         if destinationGroup != movedItem.group {
             moveTabToGroup(tab.id, group: destinationGroup)
