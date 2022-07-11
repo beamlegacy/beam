@@ -143,6 +143,7 @@
         "PnSAddToNoteTests",
         "RightClickImageMenuTests",
         "RightClickLinkMenuTests",
+        "RightClickPageMenuTests",
         "RightClickTextMenuTests",
         "SearchOnCardTests",
         "SearchOnNoteTests",

@@ -22,6 +22,10 @@ class RightClickMenuTestView: BaseView {
         menuItem(item.accessibilityIdentifier).clickOnExistence()
     }
     
+    func clickPageMenu(_ item: RightClickMenuViewLocators.PageMenuItems) {
+        menuItem(item.accessibilityIdentifier).clickOnExistence()
+    }
+    
     func clickCommonMenu(_ item: RightClickMenuViewLocators.CommonMenuItems) {
         menuItem(item.accessibilityIdentifier).clickOnExistence()
     }
