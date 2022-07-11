@@ -346,7 +346,7 @@ extension Configuration {
 
 extension Configuration {
     struct DailyUrlStats {
-        static let daysToKeep = branchType == .develop ? 60 : 2
+        static let daysToKeep = branchType == .develop ? 60 : 15
     }
 }
 
