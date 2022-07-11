@@ -13,7 +13,7 @@ var AdvancedPreferencesViewController: PreferencePane = PreferencesPaneBuilder.b
 //swiftlint:disable:next function_body_length type_body_length
 struct AdvancedPreferencesView: View, BeamDocumentSource {
     public static var sourceId: String { "\(Self.self)"}
-    
+
     @State private var apiHostname: String = Configuration.apiHostname
     @State private var restApiHostname: String = Configuration.restApiHostname
     @State private var publicAPIpublishServer: String = Configuration.publicAPIpublishServer
@@ -620,7 +620,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showPNSView].publisher.first()) {
+            .onChange(of: showPNSView) {
                 PreferencesManager.showPNSView = $0
             }
     }
@@ -631,7 +631,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([pnsJSIsOn].publisher.first()) {
+            .onChange(of: pnsJSIsOn) {
                 PreferencesManager.PnsJSIsOn = $0
             }
     }
@@ -642,7 +642,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([browsingSessionCollectionIsOn].publisher.first()) {
+            .onChange(of: browsingSessionCollectionIsOn) {
                 PreferencesManager.browsingSessionCollectionIsOn = $0
             }
     }
@@ -653,7 +653,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showDebugSection].publisher.first()) {
+            .onChange(of: showDebugSection) {
                 PreferencesManager.showDebugSection = $0
             }
     }
@@ -664,7 +664,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showOmniboxScoreSection].publisher.first()) {
+            .onChange(of: showOmniboxScoreSection) {
                 PreferencesManager.showOmniboxScoreSection = $0
             }
     }
@@ -675,7 +675,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([includeHistoryContentsInOmniBox].publisher.first()) {
+            .onChange(of: includeHistoryContentsInOmniBox) {
                 PreferencesManager.includeHistoryContentsInOmniBox = $0
             }
     }
@@ -686,7 +686,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([enableOmnibeams].publisher.first()) {
+            .onChange(of: enableOmnibeams) {
                 PreferencesManager.enableOmnibeams = $0
             }
     }
@@ -697,7 +697,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showClusteringSettingsMenu].publisher.first()) {
+            .onChange(of: showClusteringSettingsMenu) {
                 PreferencesManager.showClusteringSettingsMenu = $0
             }
     }
@@ -708,7 +708,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([isDirectDownloadOn].publisher.first()) {
+            .onChange(of: isDirectDownloadOn) {
                 Configuration.beamObjectDataOnSeparateCall = $0
             }
     }
@@ -719,7 +719,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([isDirectUploadOn].publisher.first()) {
+            .onChange(of: isDirectUploadOn) {
                 Configuration.beamObjectDataUploadOnSeparateCall = $0
             }
     }
@@ -730,7 +730,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([isDirectUploadNIOOn].publisher.first()) {
+            .onChange(of: isDirectUploadNIOOn) {
                 Configuration.directUploadNIO = $0
             }
     }
@@ -741,7 +741,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([restBeamObject].publisher.first()) {
+            .onChange(of: restBeamObject) {
                 Configuration.beamObjectOnRest = $0
             }
     }
@@ -752,7 +752,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([isDataBackupOnUpdateOn].publisher.first()) {
+            .onChange(of: isDataBackupOnUpdateOn) {
                 PreferencesManager.isDataBackupOnUpdateOn = $0
             }
     }
@@ -1048,7 +1048,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onReceive([isCollectFeedbackEnabled].publisher.first()) {
+                .onChange(of: isCollectFeedbackEnabled) {
                     PreferencesManager.isCollectFeedbackEnabled = $0
                 }
             Toggle(isOn: $showsCollectFeedbackAlert) {
@@ -1056,7 +1056,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onReceive([showsCollectFeedbackAlert].publisher.first()) {
+                .onChange(of: showsCollectFeedbackAlert) {
                     PreferencesManager.showsCollectFeedbackAlert = $0
                 }
         }
@@ -1158,7 +1158,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showWebOnLaunchIfTabs].publisher.first()) {
+            .onChange(of: showWebOnLaunchIfTabs) {
                 PreferencesManager.showWebOnLaunchIfTabs = $0
             }
     }
@@ -1169,7 +1169,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([createJournalOncePerWindow].publisher.first()) {
+            .onChange(of: createJournalOncePerWindow) {
                 PreferencesManager.createJournalOncePerWindow = $0
             }
     }
@@ -1180,7 +1180,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([useSidebar].publisher.first()) {
+            .onChange(of: useSidebar) {
                 PreferencesManager.useSidebar = $0
             }
     }
@@ -1191,7 +1191,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([enableDailySummary].publisher.first()) {
+            .onChange(of: enableDailySummary) {
                 PreferencesManager.enableDailySummary = $0
             }
     }
