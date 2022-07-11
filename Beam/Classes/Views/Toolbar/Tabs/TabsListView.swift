@@ -231,7 +231,7 @@ struct TabsListView: View {
                                                   collapsed: group.collapsed, itemsCount: item.count ?? group.pageIds.count,
                                                   onTap: { (isRightMouse, event) in
                         if isRightMouse {
-                            showContextMenu(forGroup: group, atLocation: event?.locationInWindow ?? .zero)
+                            showContextMenu(forGroup: group, with: event)
                         } else {
                             browserTabsManager.toggleGroupCollapse(group)
                         }
@@ -681,50 +681,60 @@ extension TabsListView {
         }
     }
 
-    private func showContextMenu(forGroup group: TabGroup, atLocation location: CGPoint) {
-        let menuKey = "GroupContextMenu"
-        let dismiss: () -> Void = {
-            CustomPopoverPresenter.shared.dismissPopovers(key: menuKey)
-        }
-        let nameAndColorView = TabClusteringNameColorPickerView(groupName: group.title ?? "",
-                                                                selectedColor: group.color?.designColor ?? .red, onChange: { [weak state] newValues in
-            if group.title != newValues.name {
-                state?.browserTabsManager.renameGroup(group, title: newValues.name)
-            }
-            if group.color != newValues.color, let newColor = newValues.color {
-                state?.browserTabsManager.changeGroupColor(group, color: newColor)
-            }
-        }, onFinish: dismiss)
+    private func showContextMenu(forGroup group: TabGroup, with event: NSEvent?) {
+        let menu = NSMenu()
+
         weak var state = self.state
-        let items = [
-            ContextMenuItem(title: "Name and Color",
-                            customContent: AnyView(nameAndColorView)) { },
-            ContextMenuItem.separator(allowPadding: false),
-            ContextMenuItem(title: "New Tab in Group", icon: "tool-new") {
-                state?.browserTabsManager.createNewTab(inGroup: group)
-                dismiss()
+
+        let nameAndColorView = TabClusteringNameColorPickerView(
+            groupName: group.title ?? "",
+            selectedColor: group.color?.designColor ?? .red,
+            onChange: { [weak state] newValues in
+                if group.title != newValues.name {
+                    state?.browserTabsManager.renameGroup(group, title: newValues.name)
+                }
+                if group.color != newValues.color, let newColor = newValues.color {
+                    state?.browserTabsManager.changeGroupColor(group, color: newColor)
+                }
             },
-            ContextMenuItem(title: "Move Group in New Window", icon: "tabs-group_move") {
-                dismiss()
-                state?.browserTabsManager.moveGroupToNewWindow(group)
-            },
-            ContextMenuItem.separator(),
-            ContextMenuItem(title: group.collapsed ? "Expand Group" : "Collapse Group",
-                            icon: group.collapsed ? "tabs-group_expand" : "tabs-group_collapse") {
-                                dismiss()
-                                state?.browserTabsManager.toggleGroupCollapse(group)
-                            },
-            ContextMenuItem(title: "Ungroup", icon: "tabs-group_ungroup") {
-                dismiss()
-                state?.browserTabsManager.ungroupTabsInGroup(group)
-            },
-            ContextMenuItem(title: "Close Group", icon: "tool-close") {
-                dismiss()
-                state?.browserTabsManager.closeTabsInGroup(group)
-            }
-        ]
-        let menu = ContextMenuFormatterView(key: menuKey, items: items, canBecomeKey: true)
-        CustomPopoverPresenter.shared.presentFormatterView(menu, atPoint: location)
+            onFinish: { [weak menu] in menu?.cancelTracking() })
+
+        let nameAndColorItem = ContentViewMenuItem(
+            title: "Name your group item",
+            contentView: { nameAndColorView },
+            insets: NSEdgeInsets(top: 4, left: 9, bottom: 8, right: 14),
+            customization: { hostingView in
+                hostingView.widthAnchor.constraint(equalToConstant: 230).isActive = true
+                hostingView.heightAnchor.constraint(equalToConstant: 16).isActive = true
+            })
+
+        menu.addItem(nameAndColorItem)
+        menu.addItem(.fullWidthSeparator())
+
+        menu.addItem(withTitle: "New Tab in Group") { _ in
+            state?.browserTabsManager.createNewTab(inGroup: group)
+        }
+        menu.addItem(withTitle: "Move Group in New Window") { _ in
+            state?.browserTabsManager.moveGroupToNewWindow(group)
+        }
+
+        menu.addItem(.separator())
+
+        menu.addItem(withTitle: group.collapsed ? "Expand Group" : "Collapse Group") { _ in
+            state?.browserTabsManager.toggleGroupCollapse(group)
+        }
+        menu.addItem(withTitle: "Ungroup") { _ in
+            state?.browserTabsManager.ungroupTabsInGroup(group)
+        }
+        menu.addItem(withTitle: "Close Group") { _ in
+            state?.browserTabsManager.closeTabsInGroup(group)
+        }
+
+        if let event = event {
+            menu.popUp(positioning: nil, at: event.locationInWindow, in: event.window?.contentView)
+        } else {
+            menu.popUp(positioning: nil, at: .zero, in: nil)
+        }
     }
 }
 

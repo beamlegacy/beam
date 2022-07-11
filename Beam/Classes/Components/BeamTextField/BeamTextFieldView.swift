@@ -6,14 +6,29 @@
 
 import Cocoa
 
-class BeamTextFieldViewFieldEditor: NSTextView {
+final class BeamTextFieldViewFieldEditor: NSTextView {
     var disableAutomaticScrollOnType: Bool = false
+    var caretWidth: CGFloat?
 
     override func preferredPasteboardType(from availableTypes: [NSPasteboard.PasteboardType], restrictedToTypesFrom allowedTypes: [NSPasteboard.PasteboardType]?) -> NSPasteboard.PasteboardType? {
         if availableTypes.contains(.string) {
             return .string
         }
         return super.preferredPasteboardType(from: availableTypes, restrictedToTypesFrom: allowedTypes)
+    }
+
+    override func drawInsertionPoint(in rect: NSRect, color: NSColor, turnedOn flag: Bool) {
+        guard let caretWidth = caretWidth else { return super.drawInsertionPoint(in: rect, color: color, turnedOn: flag) }
+        var newRect = rect
+        newRect.size.width = caretWidth
+        super.drawInsertionPoint(in: newRect, color: color, turnedOn: flag)
+    }
+
+    override func setNeedsDisplay(_ rect: NSRect, avoidAdditionalLayout flag: Bool) {
+        guard let caretWidth = caretWidth else { return super.setNeedsDisplay(rect, avoidAdditionalLayout: flag) }
+        var newRect = rect
+        newRect.size.width += caretWidth - 1
+        super.setNeedsDisplay(newRect, avoidAdditionalLayout: flag)
     }
 
     override func scrollRangeToVisible(_ range: NSRange) {
@@ -51,6 +66,7 @@ protocol BeamNSTextFieldProtocol {
     func setPlaceholder(_ placeholder: String, font: NSFont?, icon: NSImage?)
     func updateTextSelectionColor(_ color: NSColor?)
     func updateCaretColor(_ color: NSColor?)
+    func updateCaretWidth(_ width: CGFloat?)
 
 }
 
@@ -177,11 +193,17 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
     }
 
     func updateCaretColor(_ color: NSColor? = nil) {
-        guard let newColor = color, _caretColor != newColor else { return }
-        _caretColor = newColor
-        if let textView = textField?.currentEditor() as? NSTextView {
+        guard let textView = textField?.currentEditor() as? NSTextView, let newColor = color else { return }
+        if _caretColor != newColor {
+            _caretColor = newColor
             textView.insertionPointColor = newColor
         }
+    }
+
+    func updateCaretWidth(_ width: CGFloat?) {
+        guard let textView = textField?.currentEditor() as? BeamTextFieldViewFieldEditor else { return }
+        guard textView.caretWidth != width else { return }
+        textView.caretWidth = width
     }
 
     // MARK: Out of BeamNSTextFieldProtocol
@@ -191,7 +213,6 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
             NSAttributedString.Key.foregroundColor: foregroundColor,
             NSAttributedString.Key.font: font ?? NSFont.systemFont(ofSize: 13)
         ]
-
         return attrs
     }
 
@@ -206,6 +227,7 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
             parent?.onFocusChanged(true)
         }
         updateTextSelectionColor(_selectionRangeColor)
+        updateCaretColor(_caretColor)
     }
 
     func handleResignFirstResponder(resigned: Bool) {
@@ -222,9 +244,25 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
     }
 }
 
+/// Custom NSTextFieldCell subclass overriding a single method to provide our custom field editor.
+private final class BeamNSTextFieldCell: NSTextFieldCell {
+    let editor = BeamTextFieldViewFieldEditor()
+
+    override func fieldEditor(for controlView: NSView) -> NSTextView? {
+        return editor
+    }
+}
+
 class BeamNSTextField: NSTextField, BeamNSTextFieldProtocol {
 
     private var sharedImpl = BeamNSTextFieldProtocolSharedImpl(textField: nil)
+
+    override class var cellClass: AnyClass? {
+        get {
+            return BeamNSTextFieldCell.self
+        }
+        set { }
+    }
 
     var isFirstResponder: Bool {
         sharedImpl.isFirstResponder
@@ -282,6 +320,10 @@ class BeamNSTextField: NSTextField, BeamNSTextFieldProtocol {
         sharedImpl.updateCaretColor(color)
     }
 
+    func updateCaretWidth(_ width: CGFloat?) {
+        sharedImpl.updateCaretWidth(width)
+    }
+
     @discardableResult
     override func becomeFirstResponder() -> Bool {
         sharedImpl.ignoreResponderChanges = true
@@ -317,16 +359,6 @@ class BeamNSTextField: NSTextField, BeamNSTextFieldProtocol {
 extension BeamNSTextField: NSTextViewDelegate {
     func textViewDidChangeSelection(_ notification: Notification) {
         sharedImpl.handleSelectionChange()
-    }
-}
-
-extension BeamNSTextField: CustomWindowFieldEditorProvider {
-    static let customFieldEditor: NSText = {
-        BeamTextFieldViewFieldEditor()
-    }()
-
-    func fieldEditor(_ createFlag: Bool) -> NSText? {
-        return Self.customFieldEditor
     }
 }
 
@@ -390,6 +422,11 @@ class BeamNSSecureTextField: NSSecureTextField, BeamNSTextFieldProtocol {
 
     func updateCaretColor(_ color: NSColor?) {
         sharedImpl.updateCaretColor(color)
+    }
+
+    func updateCaretWidth(_ width: CGFloat?) {
+        // unfortunately unsupported for secure fields currently, crashing with a custom cell...
+        sharedImpl.updateCaretWidth(width)
     }
 
     @discardableResult
