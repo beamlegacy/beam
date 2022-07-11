@@ -24,6 +24,7 @@ struct BeamTextField: NSViewRepresentable {
     var selectedRange: Range<Int>?
     var selectedRangeColor: NSColor?
     var caretColor: NSColor?
+    var caretWidth: CGFloat?
     var multiline = false
     var secure = false
     var contentType: NSTextContentType?
@@ -76,6 +77,9 @@ struct BeamTextField: NSViewRepresentable {
         if let caretColor = caretColor {
             textField.updateCaretColor(caretColor)
         }
+        if let caretWidth = caretWidth {
+            textField.updateCaretWidth(caretWidth)
+        }
         textField.setText(text, font: font, icon: nil, skipGuards: false)
         textField.setPlaceholder(placeholder, font: placeholderFont ?? font, icon: nil)
 
@@ -101,9 +105,10 @@ struct BeamTextField: NSViewRepresentable {
     }
 
     func updateNSView(_ view: Self.NSViewType, context: Self.Context) {
+        guard var textField = view as? BeamNSTextFieldProtocol else { return }
+
         let coordinator = context.coordinator
 
-        guard var textField = view as? BeamNSTextFieldProtocol else { return }
         if view.textColor != textColor {
             view.textColor = textColor
         }
@@ -113,6 +118,9 @@ struct BeamTextField: NSViewRepresentable {
         }
         if let caretColor = caretColor {
             textField.updateCaretColor(caretColor)
+        }
+        if let caretWidth = caretWidth {
+            textField.updateCaretWidth(caretWidth)
         }
 
         textField.setText(text, font: font, icon: nil, skipGuards: false)
