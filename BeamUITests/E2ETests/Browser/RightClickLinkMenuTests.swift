@@ -17,14 +17,6 @@ class RightClickLinkMenuTests: BaseTest {
     let omniboxTestView = OmniBoxTestView()
 
     var app = XCUIApplication()
-
-    private func verifyShareMenuForLink () {
-        rightClickMenuTestView.waitForShareMenuToBeDisplayed()
-        
-        for item in RightClickMenuViewLocators.ShareCommonMenuItems.allCases {
-            XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
-        }
-    }
     
     private func verifyMenuForLink () {
         //wait for menu to be displayed - inspect element should always be displayed
@@ -39,7 +31,7 @@ class RightClickLinkMenuTests: BaseTest {
     }
         
     override func setUp() {
-        step("Given I start mock server") {
+        step("Given I open test page") {
             launchApp()
             uiMenu.loadUITestPage2()
         }
@@ -128,7 +120,7 @@ class RightClickLinkMenuTests: BaseTest {
         }
         
         step("Then Share options are displayed") {
-            verifyShareMenuForLink()
+            XCTAssertTrue(rightClickMenuTestView.isShareCommonMenuDisplayed())
         }
     }
     
@@ -140,6 +132,17 @@ class RightClickLinkMenuTests: BaseTest {
         
         step("Then Developer Menu is opened") {
             XCTAssertTrue(app.webViews.tabs["Elements"].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+    }
+    
+    func testServicesLink() throws {
+
+        step("When I want to use services") {
+            rightClickMenuTestView.clickLinkMenu(.services)
+        }
+        
+        step("Then Services options are displayed") {
+            XCTAssertTrue(rightClickMenuTestView.isServiceMenuDisplayed())
         }
     }
 }
