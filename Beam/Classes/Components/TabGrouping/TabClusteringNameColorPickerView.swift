@@ -75,6 +75,7 @@ struct TabClusteringNameColorPickerView: View {
                               placeholderColor: BeamColor.Generic.placeholder.nsColor,
                               selectedRangeColor: nscolor.withAlphaComponent(0.14),
                               caretColor: nscolor,
+                              caretWidth: 2.0,
                               onCommit: { _ in
                     onChange?((groupName, selectedTabGroupingColor))
                     onFinish?()
@@ -83,6 +84,7 @@ struct TabClusteringNameColorPickerView: View {
                 })
                 .accessibility(identifier: "TabGroupNameTextField")
                 .transition(.opacity.animation(BeamAnimation.easingBounce(duration: 0.2)))
+                .blendModeLightMultiplyDarkScreen()
             }
             if isEditing && !groupName.isEmpty {
                 Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
