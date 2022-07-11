@@ -141,6 +141,7 @@
         "ReferencesTests",
         "ReportBugFeatureTests",
         "RightClickImageMenuTests",
+        "RightClickPageMenuTests",
         "RightClickTextMenuTests",
         "SearchOnCardTests",
         "SearchOnNoteTests",
