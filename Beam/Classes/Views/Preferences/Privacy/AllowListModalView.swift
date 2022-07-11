@@ -65,7 +65,7 @@ struct AllowListModalView: View {
                 Button(action: {
                     save()
                 }, label: {
-                    Text("Save")
+                    Text("Apply")
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .frame(maxWidth: .infinity)
