@@ -36,6 +36,15 @@ enum RightClickMenuViewLocators {
         case services = "Services"
     }
     
+    enum PageMenuItems: String, CaseIterable, UIElement {
+        case back = "Back"
+        case forward = "Forward"
+        case reloadPage = "Reload Page"
+        case copyPageAddress = "Copy Page Address"
+        case printPage = "Print Page..."
+        case inspectElement = "Inspect Element"
+    }
+    
     enum CommonMenuItems: String, CaseIterable, UIElement {
         case share = "WKMenuItemIdentifierShareMenu"
         case inspectElement = "Inspect Element"
