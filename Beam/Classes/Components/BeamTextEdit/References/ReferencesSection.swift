@@ -50,13 +50,13 @@ class ReferencesSection: LinksSection {
     }
 
     override func updateInitialHeading() {
-        updateHeading(note.fastReferences.count - note.links.count)
+        updateHeading(max(0, note.fastReferences.count - note.links.count)) // shouldn't be negative
     }
 
     override func updateHeading(_ count: Int) {
         performLayerChanges {
             self.sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", count)
-            self.selfVisible = count != 0
+            self.selfVisible = count > 0
             self.visible = self.selfVisible
             self.sectionTitleLayer.isHidden = !self.selfVisible
             self.separatorLayer.isHidden = !self.selfVisible
