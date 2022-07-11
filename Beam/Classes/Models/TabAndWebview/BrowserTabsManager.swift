@@ -114,21 +114,21 @@ class BrowserTabsManager: ObservableObject {
 
     private func updateCurrentTabObservers() {
         currentTabScope.removeAll()
-        currentTab?.$canGoBack.receive(on: DispatchQueue.main).sink { [unowned self]  v in
-            guard let tab = self.currentTab else { return }
-            self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: v, canGoForward: tab.canGoForward)
+        currentTab?.$canGoBack.receive(on: DispatchQueue.main).sink { [weak self]  v in
+            guard let tab = self?.currentTab else { return }
+            self?.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: v, canGoForward: tab.canGoForward)
         }.store(in: &currentTabScope)
-        currentTab?.$canGoForward.receive(on: DispatchQueue.main).sink { [unowned self] v in
-            guard let tab = self.currentTab else { return }
-            self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: tab.canGoBack, canGoForward: v)
+        currentTab?.$canGoForward.receive(on: DispatchQueue.main).sink { [weak self] v in
+            guard let tab = self?.currentTab else { return }
+            self?.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: tab.canGoBack, canGoForward: v)
         }.store(in: &currentTabScope)
         currentTab?.$title.receive(on: DispatchQueue.main).removeDuplicates()
-            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main).sink { [unowned self] _ in
-            self.delegate?.tabsManagerCurrentTabDidChangeDisplayInformation(currentTab)
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main).sink { [weak self] _ in
+                self?.delegate?.tabsManagerCurrentTabDidChangeDisplayInformation(self?.currentTab)
         }.store(in: &currentTabScope)
         currentTab?.$url.receive(on: DispatchQueue.main).removeDuplicates()
-            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main).sink { [unowned self] _ in
-            self.delegate?.tabsManagerCurrentTabDidChangeDisplayInformation(currentTab)
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main).sink { [weak self] _ in
+                self?.delegate?.tabsManagerCurrentTabDidChangeDisplayInformation(self?.currentTab)
         }.store(in: &currentTabScope)
     }
 
