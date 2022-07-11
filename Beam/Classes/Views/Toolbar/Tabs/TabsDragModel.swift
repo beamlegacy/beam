@@ -146,7 +146,11 @@ class TabsDragModel: ObservableObject {
         var minX: CGFloat = pinnedSectionMaxX
         var endIndex = atIndex
         if let ignoringItemAtIndex = ignoringItemAtIndex, ignoringItemAtIndex < atIndex {
-            endIndex += 1
+            if ignoringItemAtIndex < pinnedItemsCount {
+                minX -= widthProvider.width(forItemAtIndex: ignoringItemAtIndex, selected: false, pinned: true) + spaceBetweenItems
+            } else {
+                endIndex += 1
+            }
         }
         for i in pinnedItemsCount..<endIndex {
             guard i != ignoringItemAtIndex else { continue }
@@ -261,6 +265,7 @@ class TabsDragModel: ObservableObject {
                 } else if gestureX > thresholdMaxX {
                     newDragIndex = draggingOverIndex + 1
                 }
+                newDragIndex = newDragIndex?.clamp(0, itemsCount - 1)
                 if let idx = newDragIndex ?? self.draggingOverIndex {
                     self.draggingOverGroup = calculateDraggingOverGroup(idx, dragStartIndex: dragStartIndex, offsetX: gestureX)
                 }
