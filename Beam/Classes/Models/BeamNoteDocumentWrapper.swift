@@ -11,7 +11,8 @@ import BeamCore
 /// A representation of the note document written to disk when exported by the application.
 final class BeamNoteDocumentWrapper: NSDocument {
     private(set) var note: BeamNote?
-    struct File {
+
+    private struct File {
         var id: UUID
         var name: String
         var data: Data
@@ -48,11 +49,11 @@ final class BeamNoteDocumentWrapper: NSDocument {
         noteWrapper.preferredFilename = FileContentKey.note.rawValue
 
         rootWrapper.addFileWrapper(noteWrapper)
-        rootWrapper.preferredFilename = note.title + ".beamNote"
+        rootWrapper.preferredFilename = Self.preferredFilename(for: note, withExtension: true)
 
         var files = [String: FileWrapper]()
         for (fileId, file) in self.files {
-            let filename = "\(fileId)-\(file.name)"
+            let filename = "\(fileId)-\(file.name.prefix(Self.maxLength))"
             let fileWrapper = FileWrapper(regularFileWithContents: file.data)
             fileWrapper.preferredFilename = filename
             files[filename] = fileWrapper
@@ -115,6 +116,17 @@ final class BeamNoteDocumentWrapper: NSDocument {
 
     static let fileExtension = "beamNote"
     static let documentTypeName = "co.beamapp.note"
+
+    static func preferredFilename(for note: BeamNote, withExtension: Bool = false) -> String {
+        let fileName = "\(note.title.prefix(maxLength))-\(note.id.uuidString)"
+        if withExtension {
+            return "\(fileName).\(fileExtension)"
+        }
+        return fileName
+    }
+
+    /// max length for title in notes filename sand file name for medias.
+    private static let maxLength: Int = 50
 
     enum Error: Swift.Error {
         case incompleteNoteDocument
