@@ -20,17 +20,19 @@ struct PasswordsPreferencesView: View {
     var passwordsViewModel: PasswordListViewModel
     var creditCardsViewModel: CreditCardListViewModel
 
-    // view stays unlocked for 5 minutes.
-    @State private var lastUnlockDate: Date?
-    private var isUnlocked: Bool {
-        lastUnlockDate != nil && (lastUnlockDate?.timeIntervalSinceNow ?? -300 > -300)
-    }
+    @Environment(\.controlActiveState) var controlActiveState
+
+    @State private var isUnlocked: Bool = false
 
     private func checkAuthentication() {
         Task { @MainActor in
             await passwordsViewModel.checkAuthentication()
-            lastUnlockDate = passwordsViewModel.isUnlocked ? BeamDate.now : nil
+            isUnlocked = passwordsViewModel.isUnlocked
         }
+    }
+
+    private func lock() {
+        isUnlocked = false
     }
 
     var body: some View {
@@ -47,9 +49,16 @@ struct PasswordsPreferencesView: View {
                                      alignment: .center)
                         }
                 }
+                .onChange(of: controlActiveState) { newState in
+                    guard newState == .inactive && AppDelegate.main.preferencesWindowController.window?.isVisible == false else { return }
+                    lock()
+                }
                 .onAppear {
                     guard !self.isUnlocked && AppDelegate.main.openedPrefPanelOnce else { return }
                     checkAuthentication()
+                }
+                .onDisappear {
+                    lock()
                 }
             }
             Preferences.Section {
