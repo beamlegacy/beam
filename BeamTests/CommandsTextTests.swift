@@ -39,12 +39,12 @@ class CommandsTextTests: QuickSpec, BeamDocumentSource {
 
             """
             expect(rootNode.printTree()).to(equal(tree))
-            BeamNote.clearCancellables()
+            BeamNote.clearFetchedNotes()
         }
 
         describe("TextNode Editing Commands") {
             beforeEach {
-                BeamNote.clearCancellables()
+                BeamNote.clearFetchedNotes()
 
                 guard let note = try? self.setupAndResetTree() else {
                     fail("Unable to setup and reset tree")
@@ -115,7 +115,7 @@ class CommandsTextTests: QuickSpec, BeamDocumentSource {
 
                     expect(rootNode.printTree()).to(equal(newEditedTree))
                     expect(rootNode.cursorPosition).to(equal(13))
-                    BeamNote.clearCancellables()
+                    BeamNote.clearFetchedNotes()
 
                 }
 
@@ -140,7 +140,7 @@ class CommandsTextTests: QuickSpec, BeamDocumentSource {
                     editor.redo(String("Redo"))
                     expect(rootNode.printTree()).to(equal(editedTree))
                     expect(rootNode.cursorPosition).to(equal(7))
-                    BeamNote.clearCancellables()
+                    BeamNote.clearFetchedNotes()
 
                 }
 
@@ -168,7 +168,7 @@ class CommandsTextTests: QuickSpec, BeamDocumentSource {
                     expect(rootNode.printTree()).to(equal(editedTree))
                     expect(rootNode.cursorPosition).to(equal((5)))
                     expect(rootNode.selectedTextRange.isEmpty).to(equal(true))
-                    BeamNote.clearCancellables()
+                    BeamNote.clearFetchedNotes()
 
                 }
 
@@ -212,7 +212,7 @@ class CommandsTextTests: QuickSpec, BeamDocumentSource {
                     editor.redo(String("Redo"))
                     expect(rootNode.printTree()).to(equal(insertedEditedTree))
                     expect(rootNode.cursorPosition).to(equal(18))
-                    BeamNote.clearCancellables()
+                    BeamNote.clearFetchedNotes()
 
                 }
             }
@@ -221,7 +221,7 @@ class CommandsTextTests: QuickSpec, BeamDocumentSource {
 
     private func setupAndResetTree() throws -> BeamNote {
         // Setup a simple node tree
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
         let note = try BeamNote.fetchOrCreate(self, title: "TestEditCommands")
 
         let bullet1 = BeamElement("First bullet")

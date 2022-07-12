@@ -41,12 +41,12 @@ class CommandNodeTests: QuickSpec, BeamDocumentSource {
             """
 
             expect(rootNode.printTree()).to(equal(tree))
-            BeamNote.clearCancellables()
+            BeamNote.clearFetchedNotes()
         }
 
         describe("Indented tree") {
             beforeEach {
-                BeamNote.clearCancellables()
+                BeamNote.clearFetchedNotes()
                 guard let note = try? self.setupTree() else {
                     fail("Unable to create note for test")
                     return
@@ -68,7 +68,7 @@ class CommandNodeTests: QuickSpec, BeamDocumentSource {
                 expect(rootNode.printTree()).to(equal(tree))
             }
             afterEach {
-                BeamNote.clearCancellables()
+                BeamNote.clearFetchedNotes()
             }
             context("Decrease") {
                 it("decreases indentation") {
@@ -93,7 +93,7 @@ class CommandNodeTests: QuickSpec, BeamDocumentSource {
 
         describe("Not Intended") {
             beforeEach {
-                BeamNote.clearCancellables()
+                BeamNote.clearFetchedNotes()
                 guard let note = try? self.setupTree() else {
                     fail("Unable to create note for test")
                     return
@@ -114,7 +114,7 @@ class CommandNodeTests: QuickSpec, BeamDocumentSource {
                 expect(rootNode.printTree()).to(equal(tree))
             }
             afterEach {
-                BeamNote.clearCancellables()
+                BeamNote.clearFetchedNotes()
             }
             context("Insert & Increase") {
                 it("increases indentation") {
@@ -192,7 +192,7 @@ class CommandNodeTests: QuickSpec, BeamDocumentSource {
 
         describe("Delete Commands") {
             beforeEach {
-                BeamNote.clearCancellables()
+                BeamNote.clearFetchedNotes()
                 guard let note = try? self.setupTree() else {
                     fail("Unable to create note for test")
                     return
@@ -213,7 +213,7 @@ class CommandNodeTests: QuickSpec, BeamDocumentSource {
                 expect(rootNode.printTree()).to(equal(tree))
             }
             afterEach {
-                BeamNote.clearCancellables()
+                BeamNote.clearFetchedNotes()
             }
             context("Not Indented") {
                 it("deletes node backward") {
@@ -273,7 +273,7 @@ class CommandNodeTests: QuickSpec, BeamDocumentSource {
         BeamTestsHelper.logout()
 
         try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
         let note = try BeamNote.fetchOrCreate(self, title: "TestCommands")
 
         let bullet1 = BeamElement("First bullet")
