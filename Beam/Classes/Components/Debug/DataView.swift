@@ -263,6 +263,7 @@ class DataView: NSView, NSOutlineViewDataSource, MenuOutlineViewDelegate, BeamDo
     @objc func deleteDatabase(_ sender: Any) {
         guard let databaseNode = itemUnderMenu as? DatabaseTreeNode else { return }
         databaseNode.database?.deletedAt = BeamDate.now
+        databaseNode.database?.updatedAt = BeamDate.now
         try? databaseNode.database?.save(self)
     }
 
