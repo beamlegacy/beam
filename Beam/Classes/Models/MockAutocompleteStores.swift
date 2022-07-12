@@ -71,6 +71,7 @@ class MockCreditCardStore: CreditCardStore {
         var updatedRecord = try creditCard(matching: record.uuid)
         if updatedRecord.deletedAt == nil {
             updatedRecord.deletedAt = BeamDate.now
+            updatedRecord.updatedAt = BeamDate.now
             creditCards[record.uuid] = updatedRecord
         }
         return updatedRecord
@@ -82,6 +83,7 @@ class MockCreditCardStore: CreditCardStore {
             var record = record
             if record.deletedAt == nil {
                 record.deletedAt = BeamDate.now
+                record.updatedAt = BeamDate.now
             }
             return record
         }
