@@ -13,6 +13,7 @@ class OmniboxViewTests: BaseTest {
     
     let omniboxView = OmniBoxTestView()
     let noteView = NoteTestView()
+    var journalView: JournalTestView!
     var stopMockServer = false
     
     override func tearDown() {
@@ -22,13 +23,15 @@ class OmniboxViewTests: BaseTest {
         super.tearDown()
     }
     
+    override func setUp() {
+        step("Given I launch the app") {
+            journalView = launchApp()
+        }
+    }
+    
     func testOmniBoxSearchField() {
         let textInput = "Hello World"
         let omniboxSearchField = omniboxView.getOmniBoxSearchField()
-        
-        step("Given I launch the app") {
-            launchApp()
-        }
 
         step("Then Omnibox search field is focused on launched") {
             XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
@@ -66,8 +69,7 @@ class OmniboxViewTests: BaseTest {
     }
     
     func testOmniboxPivotButtonClicking() {
-        let journalView = launchApp()
-        
+
         step("Given I open 2 test pages"){
             uiMenu.loadUITestPage1()
             uiMenu.loadUITestPage2()
@@ -108,16 +110,17 @@ class OmniboxViewTests: BaseTest {
     }
 
     func testOmniboxDefaultActions() {
-        let journalView = launchApp()
+
         let helper = BeamUITestsHelper(journalView.app)
         let omniboxHelper = OmniBoxUITestsHelper(OmniBoxTestView().app)
-        let noteATitle = "Note A"
-        let noteBTitle = "Note B"
+        let noteATitle = "Test1"
+        let noteBTitle = "Test2"
 
         step("Given I have at least 4 notes"){
-            journalView.createNoteViaOmniboxSearch(noteATitle)
-            journalView.createNoteViaOmniboxSearch(noteBTitle)
-            journalView.createNoteViaOmniboxSearch("Note C")
+            //Open is required to make it appear in autocomplete
+            uiMenu.createAndOpenNote()
+            uiMenu.createAndOpenNote()
+            uiMenu.createAndOpenNote()
         }
         let results = omniboxView.getAutocompleteResults()
         let noteResults = results.matching(omniboxHelper.autocompleteNotePredicate)
@@ -135,7 +138,6 @@ class OmniboxViewTests: BaseTest {
             XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
             XCTAssertEqual(noteResults.count, 3)
         }
-
 
         // In a note
         step("When I open omnibox in a note view"){
@@ -207,7 +209,6 @@ class OmniboxViewTests: BaseTest {
         let replacedSourceToSearchInTab = "nestediframe.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
         let expectedReplacedSourceToSearchURL = "http://nestediframe.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
         
-        launchApp()
         uiMenu.startMockHTTPServer()
         stopMockServer = true
         
@@ -266,12 +267,12 @@ class OmniboxViewTests: BaseTest {
     }
     
     func testOmniboxCreateNoteMode() {
-        let journalView = launchApp()
-        let omniboxHelper = OmniBoxUITestsHelper(OmniBoxTestView().app)
-        let noteATitle = "Note A"
+
+        let omniboxHelper = OmniBoxUITestsHelper(journalView.app)
+        let noteATitle = "Test1"
 
         step("Given I have at least 1 note"){
-            journalView.createNoteViaOmniboxSearch(noteATitle)
+            uiMenu.createAndOpenNote()
         }
         
         let results = omniboxView.getAutocompleteResults()
@@ -302,7 +303,7 @@ class OmniboxViewTests: BaseTest {
             XCTAssertEqual(results.count, defaultSuggestionsCount)
         }
 
-        let secondNoteTitle = "Not"
+        let secondNoteTitle = "Tes"
         step("When I enter create note mode and type a new note name"){
             omniboxView.enterCreateNoteMode()
             omniboxView.typeInOmnibox(secondNoteTitle)
@@ -328,10 +329,6 @@ class OmniboxViewTests: BaseTest {
     
     // BE-2546
     func testOmniboxIsDismissedWhenSummonedTwice() {
-        
-        step("Given I launch the app") {
-            launchApp()
-        }
 
         step("When I open omnibox with shortcut") {
             omniboxView.focusOmniBoxSearchField()
