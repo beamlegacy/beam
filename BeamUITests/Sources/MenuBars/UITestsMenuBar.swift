@@ -245,4 +245,16 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.omniboxEnableSearchInHistoryContent.rawValue)
         return self
     }
+    
+    @discardableResult
+    func createPublishedNote() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.createPublishedNote.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func createAndOpenPublishedNote() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.createAndOpenPublishedNote.rawValue)
+        return self
+    }
 }
