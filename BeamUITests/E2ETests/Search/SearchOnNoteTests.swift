@@ -192,6 +192,7 @@ class SearchOnNoteTests: BaseTest {
     func prepareTest(populateNoteTimes: Int) -> SearchTestView {
         let searchView = SearchTestView()
         launchApp().createNoteViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
+        //https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
         step("Given I populate the note"){
             for _ in 1...populateNoteTimes {
                 uiMenu.insertTextInCurrentNote()
