@@ -4,7 +4,6 @@ import Combine
 import WebKit
 import BeamCore
 
-
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, Scorable {
@@ -220,7 +219,6 @@ import BeamCore
             self.webView = beamWebView
             self.contentView = NSViewContainerView(contentView: beamWebView)
         }
-
         browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin, isIncognito: state.isIncognito)
         noteController = WebNoteController(note: note, rootElement: rootElement)
 
@@ -433,6 +431,10 @@ import BeamCore
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
                 self?.pointAndShoot?.dismissActiveShootGroup()
             }
+        }.store(in: &observersCancellables)
+
+        PreferencesManager.$isTabToHighlightOn.sink { [unowned self] newValue in
+            self.webView.configurationWithoutMakingCopy.preferences.tabFocusesLinks = newValue
         }.store(in: &observersCancellables)
     }
 
