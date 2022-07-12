@@ -138,13 +138,15 @@ public extension CALayer {
             delayedInit = true
             let rect = nodesRect
             let refsAndLinks = note.fastLinksAndReferences.compactMap { $0.noteID }
-            BeamNote.loadNotes(refsAndLinks) { _ in
+            BeamNote.loadNotes(refsAndLinks) { notes in
                 DispatchQueue.main.async {
+                    self.preloadedLinksAndRefs = notes
                     let root = initRootNode()
                     DispatchQueue.global(qos: .userInteractive).async {
                         root.setLayout(rect)
                         DispatchQueue.main.async {
                             initLayout(root)
+                            self.preloadedLinksAndRefs = []
                             self.sign.end(Signs.updateRoot_delayedInit)
                         }
                     }
@@ -154,6 +156,8 @@ public extension CALayer {
             initLayout(initRootNode())
         }
     }
+
+    private var preloadedLinksAndRefs = [BeamNote]()
 
     private func clearRoot() {
         if let layers = layer?.sublayers {
