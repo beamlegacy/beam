@@ -654,9 +654,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
     }
 
     func fetchLinks(toNote noteId: UUID) throws -> [BidirectionalLink] {
-        Logger.shared.logInfo("Fetch links for note \(noteId)", category: .search)
         return try self.read({ db in
-//            let all = try BidirectionalLink.fetchAll(db)
             let found = try BidirectionalLink
                 .filter(BidirectionalLink.Columns.linkedNoteId == noteId)
                 .fetchAll(db)

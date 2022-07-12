@@ -99,9 +99,7 @@ public struct BeamDocument {
             let beamNote = try BeamNote.instanciateNote(self,
                                                         keepInMemory: false,
                                                         decodeChildren: true)
-            guard beamNote.isEntireNoteEmpty() else { return false }
-
-            return true
+            return beamNote.isEntireNoteEmpty()
         } catch {
             Logger.shared.logError("Can't decode Document \(titleAndId): \(error.localizedDescription)",
                                    category: .document)
