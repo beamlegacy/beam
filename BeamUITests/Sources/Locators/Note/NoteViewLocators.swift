@@ -80,6 +80,7 @@ enum NoteViewLocators {
     enum OtherElements: String, CaseIterable, UIElement {
         case breadCrumb = "BreadCrumb"
         case beginningPartOfContextItem = "ContextMenuItem-"
+        case addToProfileToggle = "ContextMenuItem-add to profile-toggle"
     }
     
     enum Splitters: String, CaseIterable, UIElement {
