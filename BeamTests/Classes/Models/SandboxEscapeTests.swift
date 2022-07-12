@@ -14,9 +14,11 @@ class SandboxEscapeTests: XCTestCase {
         let bundle = Bundle(for: type(of: self))
         let mainURL = try XCTUnwrap(bundle.url(forResource: "safariHistory", withExtension: "db"))
         let fileGroup = SandboxEscape.FileGroup(mainFile: mainURL, dependentFiles: ["safariHistory.db-shm", "safariHistory.db-wal", "safariHistory.nonexistent"])
-        let endorsedGroup = try XCTUnwrap(SandboxEscape.endorsedGroup(for: fileGroup))
+        var fileCount = SandboxEscape.FileCount(currentCount: 0, estimatedTotal: 4)
+        let endorsedGroup = try XCTUnwrap(SandboxEscape.endorsedGroup(for: fileGroup, fileCount: &fileCount))
         XCTAssertEqual(endorsedGroup.mainFile, mainURL)
         XCTAssertEqual(endorsedGroup.dependentFiles, ["safariHistory.db-shm", "safariHistory.db-wal"])
+        XCTAssertEqual(fileCount.currentCount, 3)
     }
 
     func testTemporaryCopy() throws {
