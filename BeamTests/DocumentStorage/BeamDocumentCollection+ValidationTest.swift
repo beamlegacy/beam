@@ -106,6 +106,7 @@ class BeamDocumentCollectionValidationTest: XCTestCase, BeamDocumentSource {
         // Delete document: make sure we can't save a deleted document locally!
         docC.title = "note-a"
         docC.deletedAt = BeamDate.now
+        docC.updatedAt = BeamDate.now
         XCTAssertThrowsError(try documentCollection.save(self, docC, indexDocument: true))
 
         // Undelete

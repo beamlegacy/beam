@@ -174,7 +174,8 @@ struct FileDetail: View {
     }
 
     private func softDelete() {
-        self.file.deletedAt = BeamDate.now
+        file.deletedAt = BeamDate.now
+        file.updatedAt = BeamDate.now
 
         do {
             try BeamFileDBManager.shared?.insert(files: [file])
