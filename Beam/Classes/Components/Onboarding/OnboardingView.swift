@@ -191,8 +191,10 @@ struct OnboardingView: View {
 
     struct LoadingView: View {
         var message: String = "Setting up your beam"
-        private var subtitle: String {
-            "Syncing \(detailToDisplay)"
+        var subtitle: String?
+        var additionalDetails: String?
+        private var loadingSubtitle: String {
+            subtitle ?? "Syncing \(detailToDisplay)"
         }
         private let defaultDetails = [
             "account", "notes", "images", "embeds"
@@ -218,8 +220,13 @@ struct OnboardingView: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: BeamColor.LightStoneGray.swiftUI))
                             .scaleEffect(0.5, anchor: .center)
                             .frame(width: 16, height: 16)
-                        Text(subtitle)
+                        Text(loadingSubtitle)
                             .font(BeamFont.regular(size: 14).swiftUI)
+                            .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                    }
+                    if let additionalDetails = additionalDetails {
+                        Text(additionalDetails)
+                            .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                     }
                 }
