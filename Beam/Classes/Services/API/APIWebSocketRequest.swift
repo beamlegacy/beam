@@ -239,7 +239,9 @@ class APIWebSocketRequest: APIRequest {
                         }
 
                         guard let beamObjects = inputResult.data?.beamObjectsUpdated?.beamObjects else {
+                            #if DEBUG
                             Logger.shared.logDebug("No beam objects!", category: .webSocket)
+                            #endif
                             return
                         }
 
