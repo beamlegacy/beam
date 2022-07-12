@@ -115,9 +115,11 @@ struct PointAndShootView: View {
         // MARK: - CollectedFrames
         if pns.isAltKeyDown && !pns.hasActiveSelection {
             ForEach(pns.collectedGroups, id: \.id) { collectedGroup in
-                PointAndShootPathFrame(group: pns.translateAndScaleGroup(collectedGroup), isCollected: true, scrollEventCallback: webViewScrollEvent)
-                    .id(collectedGroup.id)
-                    .allowsHitTesting(!pns.isAltKeyDown)
+                if !collectedGroup.fullPageCollect {
+                    PointAndShootPathFrame(group: pns.translateAndScaleGroup(collectedGroup), isCollected: true, scrollEventCallback: webViewScrollEvent)
+                        .id(collectedGroup.id)
+                        .allowsHitTesting(!pns.isAltKeyDown)
+                }
             }
         }
 

@@ -2,7 +2,6 @@ import Foundation
 import BeamCore
 import SwiftSoup
 
-
 struct PointAndShootError: LocalizedError {
     var errorDescription: String?
     var failureReason: String?
@@ -79,7 +78,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     func handleMouseClick(_ mousePos: NSPoint) {
         if let group = self.activeShootGroup {
             for target in group.targets {
-                if !hasGraceRectAndMouseOverlap(target, group.href, mousePos) {
+                if !hasGraceRectAndMouseOverlap(target, group.href, mousePos) || group.fullPageCollect {
                     cancelShoot()
                 }
             }
