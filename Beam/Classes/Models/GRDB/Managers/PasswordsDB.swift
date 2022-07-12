@@ -356,6 +356,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
                     .filter(LocalPasswordRecord.Columns.entryId == self.id(for: hostname, and: username) && LocalPasswordRecord.Columns.deletedAt == nil)
                     .fetchOne(db) {
                     password.deletedAt = BeamDate.now
+                    password.updatedAt = BeamDate.now
                     try password.update(db)
                     return password
                 }
@@ -373,11 +374,12 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
                 let now = BeamDate.now
                 try LocalPasswordRecord
                     .filter(Column("deletedAt") == nil)
-                    .updateAll(db, Column("deletedAt").set(to: now))
+                    .updateAll(db, Column("deletedAt").set(to: now), Column("updatedAt").set(to: now))
 
                 let passwords = try LocalPasswordRecord
                     .filter(LocalPasswordRecord.Columns.deletedAt == now)
                     .fetchAll(db)
+                // send to network
                 return passwords
             }
         } catch {
