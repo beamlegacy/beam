@@ -299,6 +299,7 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
             return try write { db in
                 var updatedRecord = record
                 updatedRecord.deletedAt = BeamDate.now
+                updatedRecord.updatedAt = BeamDate.now
                 try updatedRecord.save(db)
                 return updatedRecord
             }
@@ -314,7 +315,7 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
                 let now = BeamDate.now
                 try CreditCardRecord
                     .filter(Column("deletedAt") == nil)
-                    .updateAll(db, Column("deletedAt").set(to: now))
+                    .updateAll(db, Column("deletedAt").set(to: now), Column("updatedAt").set(to: now))
 
                 let records = try CreditCardRecord
                     .filter(CreditCardRecord.Columns.deletedAt == now)

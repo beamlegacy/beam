@@ -133,6 +133,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
             toNotify = try self.fetch(filters: filters).map({ originalDocument in
                 var deletedDocument = originalDocument
                 deletedDocument.deletedAt = BeamDate.now
+                deletedDocument.updatedAt = BeamDate.now
                 return deletedDocument
             })
             try Self.fetchRequest(filters: filters, sortingKey: nil).deleteAll(db)

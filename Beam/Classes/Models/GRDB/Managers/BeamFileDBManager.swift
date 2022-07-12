@@ -335,6 +335,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                     if try BeamFileRefRecord.filter(BeamFileRefRecord.Columns.fileId == to).fetchCount(db) == 0 {
                         if var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == to).filter(BeamFileRecord.Columns.deletedAt == nil).fetchOne(db) {
                             file.deletedAt = BeamDate.now
+                            file.updatedAt = BeamDate.now
                             try file.save(db)
                             if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
                                 try self.saveOnNetwork(file)
@@ -382,6 +383,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                     do {
                         guard var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == fileId).filter(BeamFileRecord.Columns.deletedAt == nil).fetchOne(db) else { continue }
                         file.deletedAt = BeamDate.now
+                        file.updatedAt = BeamDate.now
                         try file.save(db)
                         if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
                             try self.saveOnNetwork(file)

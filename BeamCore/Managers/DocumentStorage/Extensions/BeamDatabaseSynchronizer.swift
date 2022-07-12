@@ -96,6 +96,7 @@ class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
                             Logger.shared.logInfo("Sending delete database to server \(database)", category: .database)
                             try BeamObjectChecksum.deletePreviousChecksum(object: database)
                             database.deletedAt = BeamDate.now
+                            database.updatedAt = BeamDate.now
                             try await self?.saveOnBeamObjectAPI(database)
                         } catch {
                             Logger.shared.logError("Failed to send database \(database) to remote sync? \(error)", category: .database)
