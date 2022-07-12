@@ -126,8 +126,9 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
         textField?.wantsLayer = true
         textField?.isBordered = false
         textField?.drawsBackground = false
-        textField?.lineBreakMode = .byTruncatingTail
         textField?.allowsEditingTextAttributes = true
+        textField?.lineBreakMode = .byTruncatingTail
+        textField?.cell?.truncatesLastVisibleLine = true
         if flagsMonitor == nil {
             flagsMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: commandKey(evt:))
         }
@@ -209,9 +210,12 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
     // MARK: Out of BeamNSTextFieldProtocol
 
     private func attributedStringAttributes(_ foregroundColor: NSColor, _ font: NSFont?) -> [NSAttributedString.Key: Any] {
+        let style = NSMutableParagraphStyle()
+        style.allowsDefaultTighteningForTruncation = false
         let attrs = [
             NSAttributedString.Key.foregroundColor: foregroundColor,
-            NSAttributedString.Key.font: font ?? NSFont.systemFont(ofSize: 13)
+            NSAttributedString.Key.font: font ?? NSFont.systemFont(ofSize: 13),
+            NSAttributedString.Key.paragraphStyle: style
         ]
         return attrs
     }
