@@ -1115,6 +1115,7 @@
 		A55C98BD2805F60200717D3E /* ShareHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98BC2805F60200717D3E /* ShareHelper.swift */; };
 		A55C98C52806FB5F00717D3E /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98C42806FB5F00717D3E /* ShareService.swift */; };
 		A55C98C7280767CA00717D3E /* ShareHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98C6280767CA00717D3E /* ShareHelperTests.swift */; };
+		A5614804287C5EC4005F921A /* SplashScreenWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5614803287C5EC4005F921A /* SplashScreenWindow.swift */; };
 		A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */; };
 		A56696B12614CF7F00B814D2 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56696B02614CF7F00B814D2 /* TableView.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
@@ -3027,6 +3028,7 @@
 		A55C98BC2805F60200717D3E /* ShareHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHelper.swift; sourceTree = "<group>"; };
 		A55C98C42806FB5F00717D3E /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
 		A55C98C6280767CA00717D3E /* ShareHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHelperTests.swift; sourceTree = "<group>"; };
+		A5614803287C5EC4005F921A /* SplashScreenWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreenWindow.swift; sourceTree = "<group>"; };
 		A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NSMenu.swift"; sourceTree = "<group>"; };
 		A56696B02614CF7F00B814D2 /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
@@ -4305,6 +4307,7 @@
 				370794BE27D7A21A00D2768B /* FloatingToolbar.swift */,
 				A5E497DE286B745800B8A4B7 /* TouchBarController.swift */,
 				33A6EDBE286B3A7E00905057 /* BeamNote+Views.swift */,
+				A5614803287C5EC4005F921A /* SplashScreenWindow.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -9579,6 +9582,7 @@
 				968948A82840DF2500F97AAD /* BeamManagerOwner.swift in Sources */,
 				873528BA27342F85005E7CBC /* BrowserHistoryImporter.swift in Sources */,
 				A0C7D120283636D1002EDF4C /* BeamTableCellTwoTextFieldView.swift in Sources */,
+				A5614804287C5EC4005F921A /* SplashScreenWindow.swift in Sources */,
 				DA5C63F1274D0873001F7CEF /* AppDelegate+LinkDB.swift in Sources */,
 				A05D81692828D5950082455D /* DropDownButton.swift in Sources */,
 				BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */,
