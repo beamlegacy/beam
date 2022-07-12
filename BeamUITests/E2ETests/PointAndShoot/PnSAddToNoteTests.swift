@@ -10,7 +10,7 @@ import XCTest
 
 class PnSAddToNoteTests: BaseTest {
        
-    let noteNameToBeCreated = "PnS Note"
+    let noteNameToBeCreated = "Test1"
     let pnsView = PnSTestView()
     let titles = [
         "Point And Shoot Test Fixture Ultralight Beam",
@@ -19,10 +19,15 @@ class PnSAddToNoteTests: BaseTest {
     ]
     var noteNodes: [XCUIElement]!
     var noteView: NoteTestView!
+    var journalView: JournalTestView!
 
+    override func setUp() {
+        journalView = launchApp()
+        uiMenu.resizeSquare1000()
+    }
+    
     func SKIPtestAddTextToTodaysNote() throws {
         try XCTSkipIf(true, "Skipped so far, to replace NavigationCollectUITests")
-        let journalView = launchApp()
         let expectedItemText1 = "Point And Shoot Test Fixture Cursor"
         let expectedItemText2 = "Go to UITests-1"
         var todaysDateInNoteTitleFormat: String?
@@ -56,7 +61,6 @@ class PnSAddToNoteTests: BaseTest {
     }
     
     func testAddTextToNewNote() {
-        launchApp()
         
         step("Given I open Test page"){
             uiMenu.loadUITestPage3()
@@ -79,10 +83,11 @@ class PnSAddToNoteTests: BaseTest {
     }
     
     func testAddTextToExistingNote() {
-        let journalView = launchApp()
+
         step("Given I create \(noteNameToBeCreated) note"){
             //To be replaced with UITests helper - note creation
-            noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
+            uiMenu.createNote()
+            noteView = NoteTestView()
         }
         
         step("Given I open Test page"){
@@ -113,10 +118,11 @@ class PnSAddToNoteTests: BaseTest {
     }
     
     func testAddTextUsingNotes() {
-        let journalView = launchApp()
+        
         step("Given I create \(noteNameToBeCreated) note"){
             //To be replaced with UITests helper - note creation
-            noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
+            uiMenu.createNote()
+            noteView = NoteTestView()
         }
         
         step("Given I open Test page"){
@@ -138,10 +144,9 @@ class PnSAddToNoteTests: BaseTest {
     }
     
     func testCollectImage() {
-        let journalView = launchApp()
-        uiMenu.resizeSquare1000()
+        
         step("Given I create \(noteNameToBeCreated) note"){
-            journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
+            uiMenu.createNote()
         }
         
         step ("Then I successfully collect gif"){
@@ -163,7 +168,6 @@ class PnSAddToNoteTests: BaseTest {
     }
     
     func testCollectVideo() throws {
-        let journalView = launchApp()
         uiMenu.loadUITestPageMedia()
         
         let itemToCollect = pnsView.app.groups.containing(.button, identifier:"Play Video").children(matching: .group).element.children(matching: .group).element
@@ -184,7 +188,7 @@ class PnSAddToNoteTests: BaseTest {
     }
     
     func testCollectSVG() throws {
-        launchApp()
+
         uiMenu.loadUITestSVG()
         uiMenu.resetCollectAllert()
         webView.waitForWebViewToLoad()
@@ -213,10 +217,8 @@ class PnSAddToNoteTests: BaseTest {
 
     func testFailedToCollect() throws {
         // If this test is flakey, make sure browsing collect is disabled first
-        let journalView = launchApp()
-        uiMenu.resetCollectAllert()
-
         step ("When the journal is first loaded the note is empty by default"){
+            uiMenu.resetCollectAllert()
             noteView = NoteTestView()
             let beforeNoteNodes = noteView.getNoteNodesForVisiblePart()
             XCTAssertEqual(beforeNoteNodes.count, 1)
@@ -269,7 +271,7 @@ class PnSAddToNoteTests: BaseTest {
     }
     
     func testFramePositionPlacementOnSelect() {
-        let journalView = launchApp()
+
         let helper = BeamUITestsHelper(journalView.app)
         uiMenu.resizeWindowLandscape()
         uiMenu.loadUITestPage1()
@@ -322,7 +324,7 @@ class PnSAddToNoteTests: BaseTest {
     
     func testFramePositionPlacementOnPoint() throws {
         //Point "frame position placement"
-        let helper = BeamUITestsHelper(launchApp().app)
+        let helper = BeamUITestsHelper(journalView.app)
         var center: XCUICoordinate?
         step ("Given I open test page in landscape mode"){
             uiMenu
@@ -443,8 +445,6 @@ class PnSAddToNoteTests: BaseTest {
     
     func testOpensShootCardPickerWithoutNavigatingPage() {
         //"opens ShootCardPicker and not navigate the page"
-        launchApp()
-
         step ("Given I open a test page"){
             uiMenu.loadUITestPage1()
         }
@@ -465,7 +465,6 @@ class PnSAddToNoteTests: BaseTest {
     
     func testNavigateLinksInCollectedText() throws {
         //"can navigate links in collected text"
-        let journalView = launchApp()
         let helper = BeamUITestsHelper(journalView.app)
 
         let journalScrollView = journalView.app.scrollViews["journalView"]
