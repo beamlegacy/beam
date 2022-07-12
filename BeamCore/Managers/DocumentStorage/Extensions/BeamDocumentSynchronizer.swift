@@ -20,7 +20,11 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
     public private(set) static var backgroundQueue = DispatchQueue.global(qos: .default)
 
     private var scope = Set<AnyCancellable>()
-    private var documentsToSave: [UUID: Task<(), Never>] = [:]
+
+    private let throttleDelay: Int = Configuration.env != .test ? 1 : 0
+
+    private var documentsCancellables: [UUID: AnyCancellable] = [:]
+    private var subjects: [UUID: PassthroughSubject<BeamDocument, Never>] = [:]
 
     init(account: BeamAccount) {
         self.account = account
@@ -46,35 +50,49 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
             }.store(in: &scope)
     }
 
+    // swiftlint:disable function_body_length
     private func sendSavedDocument(_ document: BeamDocument) {
         Logger.shared.logInfo("BeamDocumentSynchronizer.sendSavedDocument called with \(document.id)", category: .sync)
-        if let previousTask = documentsToSave[document.id] {
-            previousTask.cancel()
-        }
-
-        let task = Task.init { [weak self] in
-            do {
-                let delay: UInt64 = Configuration.env != .test ? 1 : 0
-                try await Task.sleep(nanoseconds: delay * 1_000_000_000)
-
-                if document.deletedAt == nil {
-                    guard let updatedDocument = try document.collection?.fetchWithId(document.id) else {
-                        Logger.shared.logError("Failed to reload document \(document)", category: .sync)
-                        return
+        if documentsCancellables[document.id] != nil {
+            let subject = subjects[document.id]
+            subject?.send(document)
+            Logger.shared.logInfo("Reused publisher for \(document.id)", category: .sync)
+        } else {
+            let subject = PassthroughSubject<BeamDocument, Never>()
+            let publisher = subject.eraseToAnyPublisher()
+            let cancellable = publisher.debounce(for: .seconds(throttleDelay), scheduler: DispatchQueue.main)
+                .sink { [weak self] document in
+                    defer {
+                        self?.documentsCancellables.removeValue(forKey: document.id)
+                        self?.subjects.removeValue(forKey: document.id)
                     }
-                    try await self?.saveOnBeamObjectAPI(updatedDocument)
-                    Logger.shared.logInfo("\(updatedDocument.id) saved on server", category: .sync)
-                } else {
-                    // a deleted document doesn't exist anymore, so we wont be able to reload it
-                    try await self?.saveOnBeamObjectAPI(document)
+
+                    Task.init { [weak self] in
+                        do {
+                            var updatedDocument: BeamDocument!
+                            if document.deletedAt != nil {
+                                updatedDocument = document
+                            } else {
+                                guard let reloadedDocument = try document.collection?.fetchWithId(document.id) else {
+                                    Logger.shared.logError("Failed to reload document \(document)", category: .sync)
+                                    return
+                                }
+                                updatedDocument = reloadedDocument
+                            }
+                            try await self?.saveOnBeamObjectAPI(updatedDocument)
+                            if Configuration.env == .test {
+                                try await Task.sleep(nanoseconds: 1 * 100_000_000)
+                            }
+                            Logger.shared.logInfo("\(document.id) saved on server", category: .sync)
+                        } catch {
+                            Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
+                        }
+                    }
                 }
-            } catch _ as CancellationError {
-                // we have been cancelled, this is not really an error
-            } catch {
-                Logger.shared.logError("Failed to send document \(document) to remote sync \(error)", category: .sync)
-            }
+            documentsCancellables[document.id] = cancellable
+            subjects[document.id] = subject
+            subject.send(document)
         }
-        documentsToSave[document.id] = task
     }
 
     private func sendDeletedDocument(_ deletedDocument: BeamDocument) {
