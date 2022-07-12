@@ -25,6 +25,11 @@ enum SandboxEscape {
         var dependentFiles: [String]
     }
 
+    struct FileCount {
+        var currentCount: Int
+        var estimatedTotal: Int
+    }
+
     final class TemporaryCopy: URLProvider {
         private let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
 
@@ -81,12 +86,18 @@ enum SandboxEscape {
         }
     }
 
+    static func message(url: URL, fileCount: FileCount) -> String {
+        "Please open \"\(url.lastPathComponent)\" (\(fileCount.currentCount + 1)/\(fileCount.estimatedTotal))"
+    }
+
     /// Allow access to file referenced by URL through Powerbox
     /// - Parameter url: file URL
+    /// - Parameter fileCount: currently opened files (updated on success) + estimated total count
     /// - Returns: the URL to be used to access the file contents, or nil if the user cancelled the operation
     /// - Throws: any filesystem error, typically NSFileNoSuchFileError
-    static func endorsedURL(for url: URL) throws -> URL? {
+    static func endorsedURL(for url: URL, fileCount: inout FileCount) throws -> URL? {
         if try canOpen(url: url) {
+            fileCount.currentCount += 1
             return url
         }
         let panel = NSOpenPanel()
@@ -97,34 +108,39 @@ enum SandboxEscape {
         panel.allowsMultipleSelection = false
         panel.directoryURL = url.deletingLastPathComponent()
         panel.delegate = delegate
-        panel.message = "Please open \"\(url.lastPathComponent)\""
+        panel.message = message(url: url, fileCount: fileCount)
 
         let response = panel.runModal()
         if response == .OK, let url = panel.url {
+            fileCount.currentCount += 1
             return url
         }
         return nil
     }
 
-    private static func endorsementStatus(url: URL) -> FileEndorsement {
+    private static func endorsementStatus(url: URL, fileCount: inout FileCount) -> FileEndorsement {
         do {
-            return try endorsedURL(for: url) == nil ? .denied : .endorsed
+            return try endorsedURL(for: url, fileCount: &fileCount) == nil ? .denied : .endorsed
         } catch {
             let decodedError = error as NSError
-            return decodedError.domain == NSCocoaErrorDomain && decodedError.code == NSFileNoSuchFileError ? .nonexistent : .denied
+            let endorsement: FileEndorsement = decodedError.domain == NSCocoaErrorDomain && decodedError.code == NSFileNoSuchFileError ? .nonexistent : .denied
+            if endorsement == .nonexistent {
+                fileCount.estimatedTotal -= 1
+            }
+            return endorsement
         }
     }
 
-    static func endorsedIfExists(url: URL) -> Bool {
-        endorsementStatus(url: url) != .denied
+    static func endorsedIfExists(url: URL, fileCount: inout FileCount) -> Bool {
+        endorsementStatus(url: url, fileCount: &fileCount) != .denied
     }
 
-    static func endorsedGroup(for group: FileGroup) throws -> FileGroup? {
-        guard let endorsedMainFile = try endorsedURL(for: group.mainFile) else { return nil }
+    static func endorsedGroup(for group: FileGroup, fileCount: inout FileCount) throws -> FileGroup? {
+        guard let endorsedMainFile = try endorsedURL(for: group.mainFile, fileCount: &fileCount) else { return nil }
         let parentURL = endorsedMainFile.deletingLastPathComponent()
         var endorsedDependentFiles = [String]()
         for fileName in group.dependentFiles {
-            switch endorsementStatus(url: parentURL.appendingPathComponent(fileName)) {
+            switch endorsementStatus(url: parentURL.appendingPathComponent(fileName), fileCount: &fileCount) {
             case .endorsed:
                 endorsedDependentFiles.append(fileName)
             case .denied:
