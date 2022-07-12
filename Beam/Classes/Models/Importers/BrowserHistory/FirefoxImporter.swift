@@ -95,12 +95,13 @@ final class FirefoxImporter: BrowserHistoryImporter {
     }
 
     private func defaultHistoryDatabase(firefoxDirectory: URL) throws -> URLProvider? {
-        guard let firefoxProfile = try SandboxEscape.endorsedURL(for: firefoxDirectory.appendingPathComponent("profiles.ini")) else { return nil }
+        var fileCount = SandboxEscape.FileCount(currentCount: 0, estimatedTotal: 4)
+        guard let firefoxProfile = try SandboxEscape.endorsedURL(for: firefoxDirectory.appendingPathComponent("profiles.ini"), fileCount: &fileCount) else { return nil }
         let directoryPath = try defaultDirectoryPath(profilesFile: firefoxProfile)
         let defaultDirectory = firefoxDirectory.appendingPathComponent(directoryPath, isDirectory: true)
         let historyDatabase = defaultDirectory.appendingPathComponent("places.sqlite")
         let historyDatabaseGroup = SandboxEscape.FileGroup(mainFile: historyDatabase, dependentFiles: ["places.sqlite-shm", "places.sqlite-wal"])
-        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: historyDatabaseGroup),
+        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: historyDatabaseGroup, fileCount: &fileCount),
               let historyDatabaseCopy = SandboxEscape.TemporaryCopy(group: endorsedGroup) else { return nil }
         return historyDatabaseCopy
     }
