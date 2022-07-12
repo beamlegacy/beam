@@ -30,6 +30,7 @@ class BaseTest: XCTestCase {
     let username = "AutomationTestSignin"
     let host = "form.lvh.me"
     let mockBaseUrl = "http://form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
+    let stagingEnvironmentServerAddress = "staging-web-server.ew.r.appspot.com"
     
     let uiMenu = UITestsMenuBar()
     let shortcutHelper = ShortcutsHelper()

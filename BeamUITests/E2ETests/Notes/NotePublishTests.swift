@@ -120,6 +120,61 @@ class NotePublishTests: BaseTest {
         }
     }
     
+    func testProfileAddAndRemovePublishedNote() {
+        
+        let notPublishedNotesLabel = "No Published Notes - beam"
+        let publishedNoteName = "Test1"
+        
+        step("GIVEN I created and publish a note") {
+            setupStaging(withRandomAccount: true)
+            uiMenu.createAndOpenPublishedNote()
+            noteView = NoteTestView()
+            noteView.waitForNoteViewToLoad()
+            noteView.clickPublishedMenuDisclosureTriangle()
+        }
+        
+        step("THEN profile link doesn't exist") {
+            XCTAssertFalse(noteView.getStagingProfileLinkElement().exists)
+        }
+        
+        step("THEN profile link appears exist on Add to profile toggle click") {
+            noteView.getAddToProfileToggleElement().tapInTheMiddle()
+            XCTAssertTrue(noteView.getStagingProfileLinkElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        
+        step("THEN profile web page is opened on profile link click") {
+            noteView.getStagingProfileLinkElement().tapInTheMiddle()
+            webView.waitForWebViewToLoad()
+            webView.activateSearchFieldFromTab(index: 1)
+            let tabURL = webView.getTabUrlAtIndex(index: 1)
+            XCTAssertTrue(tabURL.starts(with: BaseTest().stagingEnvironmentServerAddress), "\(tabURL) doesn't start with staging environment server address: \(BaseTest().stagingEnvironmentServerAddress)")
+            XCTAssertTrue(webView.staticText(publishedNoteName).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        
+        step("WHEN I open the note and disable the toggle") {
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            noteView.waitForNoteViewToLoad()
+            noteView
+                .clickPublishedMenuDisclosureTriangle().getAddToProfileToggleElement().tapInTheMiddle()
+        }
+        
+        step("THEN the profile link disappears") {
+            XCTAssertTrue(waitForDoesntExist(noteView.getStagingProfileLinkElement()), "\(BaseTest().stagingEnvironmentServerAddress) link is still visible")
+        }
+        
+        step("WHEN I reload profile web page") {
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            webView.waitForWebViewToLoad()
+            shortcutHelper.shortcutActionInvoke(action: .reloadPage)
+            webView.waitForWebViewToLoad()
+        }
+        
+        step("THEN I see \(notPublishedNotesLabel) label and \(publishedNoteName) note link doesn't exist") {
+            XCTAssertTrue(webView.app.windows[notPublishedNotesLabel].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertFalse(webView.staticText(publishedNoteName).exists)
+        }
+    }
+    
     func SKIPtestPublishedNoteContentCorrectness() throws {
         try XCTSkipIf(true, "TBD Make sure the content is correctly applied on changes")
     }
