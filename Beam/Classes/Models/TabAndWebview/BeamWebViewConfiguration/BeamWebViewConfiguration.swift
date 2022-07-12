@@ -68,7 +68,7 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
         super.init()
 
         preferences.javaScriptCanOpenWindowsAutomatically = true
-        preferences.tabFocusesLinks = true
+        preferences.tabFocusesLinks = PreferencesManager.isTabToHighlightOn
         //        preferences.plugInsEnabled = true
 
         preferences.isFraudulentWebsiteWarningEnabled = true
