@@ -274,10 +274,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
             }.store(in: &scope)
 
         BeamData.shared.$currentDatabase
+            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] db in
-                guard let self = self else { return }
-                BeamNote.unloadAllNotes()
+                guard let self = self,
+                      db != BeamData.shared.currentDatabase
+                else { return }
+                BeamNote.clearFetchedNotes()
                 try? self.reloadJournal()
 
                 let dbID = db?.id
