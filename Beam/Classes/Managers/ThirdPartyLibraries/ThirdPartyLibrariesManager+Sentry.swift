@@ -21,6 +21,7 @@ extension ThirdPartyLibrariesManager {
 
         SentrySDK.start { options in
             options.dsn = "https://\(Configuration.Sentry.key)@\(Configuration.Sentry.hostname)/\(Configuration.Sentry.projectID)"
+#if DEBUG
             options.beforeSend = { event in
                 Logger.shared.logDebug("Event: \(event.type ?? "-") \(event.level) \(event.message?.message ?? "-")",
                                        category: .sentry)
@@ -29,8 +30,10 @@ extension ThirdPartyLibrariesManager {
             options.beforeBreadcrumb = { event in
                 Logger.shared.logDebug("Breadcrumb: \(event.type ?? "-") \(event.category) \(event.message ?? "-") \(event.data?.description ?? "-")",
                                        category: .sentry)
+
                 return event
             }
+#endif
             options.debug = false
             options.tracesSampleRate = 1.0
             options.releaseName = Information.appVersionAndBuild
