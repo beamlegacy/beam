@@ -11,19 +11,21 @@ import XCTest
 class NoteEditTests: BaseTest {
     
     var noteView: NoteTestView!
+    var journalView: JournalTestView!
+    
+    override func setUp() {
+        journalView = launchApp()
+        noteView = NoteTestView()
+    }
     
     func testRenameNoteSuccessfully() {
-        let noteNameToBeCreated = "RenameNote"
-        let expectedNoteRenameFirstTime = "Rename"
-        let expectedNoteRenameSecondTime = "Renamed2"
+        let expectedNoteRenameFirstTime = "T"
+        let expectedNoteRenameSecondTime = "Td2"
         let numberOfLetterToBeDeleted = 4
-        
-        let journalView = launchApp()
-        
                                                 
-        step("Given I create \(noteNameToBeCreated) note"){
-            //To be replaced with UITests helper - note creation
-            noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
+        step("Given I create and open a note"){
+            uiMenu.createAndOpenNote()
+            noteView.waitForNoteViewToLoad()
         }
         
         step("When I delete \(numberOfLetterToBeDeleted) letters from the title"){
@@ -48,23 +50,18 @@ class NoteEditTests: BaseTest {
     }
     
     func testRenameNoteError() throws {
-        let noteNameToBeCreated = "Rename"
-        let noteTwoNameToBeCreated = "Renamed"
         let expectedErrorMessage = "This note’s title already exists in your knowledge base"
         
-        let journalView = launchApp()
-        
-        step("Given I create \(noteNameToBeCreated) note"){
-            //To be replaced with UITests helper - note creation
-            noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
+        step("Given I create and open a note"){
+            uiMenu.createNote()
+            uiMenu.createAndOpenNote()
+            noteView.waitForNoteViewToLoad()
         }
         
         step("When I delete last letter from the title"){
-            shortcutHelper.shortcutActionInvoke(action: .newTab)
-            journalView.searchInOmniBox(noteTwoNameToBeCreated, false)
-            webView.selectCreateNote(noteTwoNameToBeCreated)
             noteView.makeNoteTitleEditable()
             noteView.typeKeyboardKey(.delete)
+            noteView.noteTitle.typeText("1")
         }
         
         step("Then the following error appears \(expectedErrorMessage)"){
@@ -73,12 +70,10 @@ class NoteEditTests: BaseTest {
     }
     
     func testNoteDeleteSuccessfully() {
-        let noteNameToBeCreated = "Delete me"
-        let journalView = launchApp()
+        let noteNameToBeCreated = "Test1"
         
-        step("Given I create \(noteNameToBeCreated) note"){
-            //To be replaced with UITests helper - note creation
-            noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
+        step("Given I create and open \(noteNameToBeCreated) note"){
+            uiMenu.createAndOpenNote()
         }
         
         step("When I try to delete \(noteNameToBeCreated) and cancel it"){
@@ -106,7 +101,6 @@ class NoteEditTests: BaseTest {
         let pnsView = PnSTestView()
         
         step("When I add image to a note"){
-            launchApp()
             uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
@@ -114,7 +108,6 @@ class NoteEditTests: BaseTest {
         
         step("Then it has a source icon"){
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            noteView = NoteTestView()
             noteView.waitForNoteViewToLoad()
             let imageNote = noteView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
@@ -134,7 +127,6 @@ class NoteEditTests: BaseTest {
         let pnsView = PnSTestView()
 
         step("When I add image to a note"){
-            launchApp()
             uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
@@ -142,7 +134,6 @@ class NoteEditTests: BaseTest {
 
         step("Then it has a move handle"){
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            noteView = NoteTestView()
             noteView.waitForNoteViewToLoad()
             let imageNote = noteView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
@@ -154,14 +145,14 @@ class NoteEditTests: BaseTest {
         var nodesBeforeChange = [String]()
         step("GIVEN I populate today's note with the rows") {
             noteView = launchApp()
-                .createNoteViaOmniboxSearch("Bullets")
+                .createNoteViaOmniboxSearch("Bullets") //https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
             uiMenu.insertTextInCurrentNote()
             waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5, elementQuery: noteView.getNoteNodesElementQuery())
             nodesBeforeChange = noteView.getNoteTextsForVisiblePart()
         }
         
         step("WHEN I drag the bullet down") {
-            noteView?.typeKeyboardKey(.downArrow, 2)
+            noteView.typeKeyboardKey(.downArrow, 2)
             shortcutHelper.shortcutActionInvoke(action: .moveBulletDown)
         }
         
@@ -172,7 +163,7 @@ class NoteEditTests: BaseTest {
         }
         
         step("WHEN I drag the bullet up") {
-            noteView?.typeKeyboardKey(.downArrow)
+            noteView.typeKeyboardKey(.downArrow)
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .moveBulletUp, numberOfTimes: 3)
         }
         
@@ -188,8 +179,7 @@ class NoteEditTests: BaseTest {
         let firstPart = "text "
         let secondPart = "to be "
         let thirdPart = "deleted"
-        let journalView = launchApp()
-        noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
+        noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)//https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
         
         step("When I use Option+backspace and CMD+backspace on empty note"){
             shortcutHelper.shortcutActionInvoke(action: .removeLastWord)
@@ -197,11 +187,11 @@ class NoteEditTests: BaseTest {
         }
         
         step("Then nothing happens"){
-            XCTAssertTrue(waitForStringValueEqual(emptyString, (noteView?.getTextNodeByIndex(nodeIndex: 0))!))
+            XCTAssertTrue(waitForStringValueEqual(emptyString, (noteView.getTextNodeByIndex(nodeIndex: 0))))
         }
         
         step("When I populate the row with the text \(firstPart + secondPart + thirdPart)") {
-            noteView?.typeInNoteNodeByIndex(noteIndex: 0, text: firstPart + secondPart + thirdPart, needsActivation: true)
+            noteView.typeInNoteNodeByIndex(noteIndex: 0, text: firstPart + secondPart + thirdPart, needsActivation: true)
         }
         
         step("When I use Option+backspace once"){
@@ -209,7 +199,7 @@ class NoteEditTests: BaseTest {
         }
         
         step("Then the following part of text is left:\(firstPart + secondPart)"){
-            XCTAssertTrue(waitForStringValueEqual(firstPart + secondPart, (noteView?.getTextNodeByIndex(nodeIndex: 0))!))
+            XCTAssertTrue(waitForStringValueEqual(firstPart + secondPart, (noteView.getTextNodeByIndex(nodeIndex: 0))))
         }
         
         step("When I use Option+backspace twice") {
@@ -217,11 +207,11 @@ class NoteEditTests: BaseTest {
         }
         
         step("Then the following part of text is left:\(firstPart)"){
-            XCTAssertTrue(waitForStringValueEqual(firstPart, (noteView?.getTextNodeByIndex(nodeIndex: 0))!))
+            XCTAssertTrue(waitForStringValueEqual(firstPart, (noteView.getTextNodeByIndex(nodeIndex: 0))))
         }
         
         step("When I add to the row the following text \(secondPart + thirdPart)") {
-            noteView?.typeInNoteNodeByIndex(noteIndex: 0, text: secondPart + thirdPart, needsActivation: true)
+            noteView.typeInNoteNodeByIndex(noteIndex: 0, text: secondPart + thirdPart, needsActivation: true)
         }
         
         step("When I use CMD+backspace twice") {
@@ -229,7 +219,7 @@ class NoteEditTests: BaseTest {
         }
         
         step("Then the row is empty"){
-            XCTAssertTrue(waitForStringValueEqual(emptyString, (noteView?.getTextNodeByIndex(nodeIndex: 0))!))
+            XCTAssertTrue(waitForStringValueEqual(emptyString, (noteView.getTextNodeByIndex(nodeIndex: 0))))
         }
     }
 }

@@ -33,7 +33,6 @@ class UpdateViewTests: BaseTest {
         step ("Given I enable Update for the app"){
             uiMenu.setAutoUpdateToMock()
             XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            journalView.createNoteViaOmniboxSearch("Update")
         }
 
         step ("Then it is visible in note view"){
@@ -41,7 +40,8 @@ class UpdateViewTests: BaseTest {
         }
 
         step ("Then it is visible in All notes view"){
-            let allNotesView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllNotesMenu()
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            let allNotesView = AllNotesTestView()
             XCTAssertTrue(allNotesView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
     }

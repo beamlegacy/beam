@@ -10,8 +10,8 @@ import XCTest
 
 class BlockReferenceTests: BaseTest {
     
-    let noteName1 = "Block 1"
-    let noteName2 = "Block 2"
+    let noteName1 = "Test1"
+    let noteName2 = "Test2"
     var noteView = NoteTestView()
     var noteForReference: String?
     
@@ -97,7 +97,7 @@ class BlockReferenceTests: BaseTest {
     
     @discardableResult
     func createBlockRefForTwoNotes(_ view: JournalTestView, _ noteName1: String, _ noteName2: String) -> String {
-        view.createNoteViaOmniboxSearch(noteName1)
+        uiMenu.createNote()
         view.createNoteViaOmniboxSearch(noteName2)
         uiMenu.insertTextInCurrentNote()
         

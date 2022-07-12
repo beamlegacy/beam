@@ -71,10 +71,10 @@ class NotePublishTests: BaseTest {
 
         journalView = setupStaging(withRandomAccount: true)
         shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-        let noteNameToBeCreated = "Note publish"
+        let noteNameToBeCreated = "Test1"
         
         step("Given I create \(noteNameToBeCreated) note"){
-            noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
+            uiMenu.createAndOpenNote()
         }
         
         step("When I publish the note") {
