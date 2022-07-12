@@ -37,13 +37,6 @@ class PinnedNotesManager: ObservableObject {
     init() {
         self.fetchPinned()
         self.observeDocuments()
-
-        NotificationCenter.default
-            .publisher(for: .defaultDatabaseUpdate, object: nil)
-            .sink { [weak self] _ in
-                self?.fetchPinned()
-            }
-            .store(in: &scope)
     }
 
     private func fetchPinned() {
@@ -65,6 +58,14 @@ class PinnedNotesManager: ObservableObject {
                     self?.pinnedNotes.remove(at: index)
                 }
             }.store(in: &scope)
+
+        BeamData.shared.$currentDatabase
+            .sink { [weak self] db in
+                self?.pinnedNotes.removeAll(where: { document in
+                    document.databaseId != db?.id
+                })
+            }.store(in: &scope)
+
     }
 
     func canPin(notes: [BeamNote]) -> Bool {

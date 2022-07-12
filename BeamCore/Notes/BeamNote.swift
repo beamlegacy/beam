@@ -150,7 +150,7 @@ public class BeamNote: BeamElement {
     public var tombstones = Set<UUID>()
 
     public var titleAndId: String {
-        "\(title) {\(id)} v\(version)"
+        "\(title) {\(id)} v\(version.load(ordering: .relaxed))"
     }
 
     public override var note: BeamNote? {
@@ -360,13 +360,13 @@ public class BeamNote: BeamElement {
     public static func appendToFetchedNotes(_ note: BeamNote) {
         fetchedLock.writeLock()
         defer { fetchedLock.writeUnlock() }
-        fetchedNotes[note.id] = WeakReference<BeamNote>(note)
-        fetchedNotesTitles[cacheKeyFromTitle(note.title)] = note.id
+
         let cancellableKey = cancellableKeyFromNote(note)
         fetchedNotesCancellables.removeValue(forKey: cancellableKey)
 
         fetchedNotesCancellables[cancellableKey] =
             note.changed
+            .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak note] _ in
                 guard let note = note as? BeamNoteDocument else { return }
@@ -380,17 +380,10 @@ public class BeamNote: BeamElement {
     public static func clearFetchedNotes() {
         fetchedLock.writeLock()
         defer { fetchedLock.writeUnlock() }
+
         fetchedNotes.removeAll()
         fetchedNotesTitles.removeAll()
         fetchedNotesCancellables.removeAll()
-    }
-
-    public static func clearCancellables() {
-        fetchedLock.writeLock()
-        defer { fetchedLock.writeUnlock() }
-
-        fetchedNotesCancellables.removeAll()
-        fetchedNotes.removeAll()
     }
 
     public override func childChanged(_ child: BeamElement, _ type: ChangeType) {
@@ -399,16 +392,6 @@ public class BeamNote: BeamElement {
             note.lastChangedElement = child
         }
         if !isInitializingFromDecoder { recordScoreWordCount() }
-    }
-
-    public static func unloadAllNotes() {
-        fetchedLock.writeLock()
-        defer { fetchedLock.writeUnlock() }
-
-        fetchedNotesCancellables.removeAll()
-        fetchedNotes.removeAll()
-        fetchedNotesTitles.removeAll()
-        clearCancellables()
     }
 
     public static func unload(note: BeamNote) {
