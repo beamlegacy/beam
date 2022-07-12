@@ -64,10 +64,11 @@ final class SafariImporter: BrowserHistoryImporter {
     }
 
     func historyDatabaseURL() throws -> URLProvider? {
+        var fileCount = SandboxEscape.FileCount(currentCount: 0, estimatedTotal: 3)
         let safariDirectory = SandboxEscape.actualHomeDirectory().appendingPathComponent("Library").appendingPathComponent("Safari")
         let historyDatabase = safariDirectory.appendingPathComponent("History.db")
         let historyDatabaseGroup = SandboxEscape.FileGroup(mainFile: historyDatabase, dependentFiles: ["History.db-shm", "History.db-wal"])
-        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: historyDatabaseGroup),
+        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: historyDatabaseGroup, fileCount: &fileCount),
               let historyDatabaseCopy = SandboxEscape.TemporaryCopy(group: endorsedGroup) else { return nil }
         return historyDatabaseCopy
     }

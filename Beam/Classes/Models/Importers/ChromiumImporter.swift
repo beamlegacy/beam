@@ -15,7 +15,7 @@ class ChromiumImporter {
         self.browser = browser
     }
 
-    func chromiumDirectory() throws -> URL? {
+    func chromiumDirectory(fileCount: inout SandboxEscape.FileCount) throws -> URL? {
         struct Profile: Decodable {
             var lastUsed: String
         }
@@ -25,7 +25,7 @@ class ChromiumImporter {
         let applicationSupportDirectory = SandboxEscape.actualHomeDirectory().appendingPathComponent("Library").appendingPathComponent("Application Support")
         let browserDirectory = applicationSupportDirectory.appendingPathComponent(browser.databaseDirectory)
         do {
-            guard let localStateFile = try SandboxEscape.endorsedURL(for: browserDirectory.appendingPathComponent("Local State")) else {
+            guard let localStateFile = try SandboxEscape.endorsedURL(for: browserDirectory.appendingPathComponent("Local State"), fileCount: &fileCount) else {
                 return nil // cancelled by user
             }
             let localStateData = try Data(contentsOf: localStateFile)
