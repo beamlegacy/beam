@@ -83,8 +83,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // swiftlint:disable:next function_body_length
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        splashScreen?.close()
-        splashScreen = nil
+        splashScreenWindow?.close()
+        splashScreenWindow = nil
 
         data = BeamData()
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
@@ -440,73 +440,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
-    var deleteAllLocalDataAtStartup = false
-    class SplashScreen: NSWindow {
-        var nextReport = BeamDate.now
-        var text: String = "Migrating orignal data" {
-            didSet {
-                splashText.stringValue = text
-
-                tick()
-            }
-        }
-
-        func tick() {
-            let now = BeamDate.now
-            if nextReport < now {
-                RunLoop.main.run(mode: .modalPanel, before: BeamDate.now.addingTimeInterval(0.01))
-                nextReport = BeamDate.now.addingTimeInterval(0.2)
-            }
-        }
-
-        var splashText = NSTextField(labelWithString: "Migrating local database:")
-
-        init() {
-            let rect = NSRect(x: 0, y: 0, width: 500, height: 70)
-            splashText.stringValue = text
-            splashText.isEditable = false
-            splashText.isBordered = false
-            splashText.alignment = .center
-            splashText.isSelectable = false
-            splashText.isBezeled = false
-            super.init(contentRect: rect, styleMask: [], backing: .buffered, defer: false)
-            let title = NSTextField(labelWithAttributedString: NSAttributedString(string: "Migrating local databases:", attributes: [.font: NSFont.systemFont(ofSize: 14, weight: .bold)]))
-            title.alignment = .center
-            var iconView: NSImageView?
-            if let icon = NSImage(named: Bundle.main.iconFileName ?? "FileDatabase") {
-                iconView = NSImageView(image: icon)
-            }
-            let views = [iconView, title, splashText]
-            let stackView = NSStackView(views: views.compactMap({ $0 }))
-            stackView.orientation = .vertical
-            self.contentView = stackView
-            self.isReleasedWhenClosed = false
-            self.level = .floating
-            self.isOpaque = false
-            self.hasShadow = true
-        }
-
-    }
-    private var splashScreen: SplashScreen?
-    var progressText: String = "Migrating orignal data" {
+    private var splashScreenWindow: SplashScreenWindow?
+    private var legacyMigrationProgressText: String = "" {
         didSet {
-            splashScreen?.text = progressText
+            splashScreenWindow?.text = legacyMigrationProgressText
         }
     }
 
     private func migrateLegacyData() {
         BeamAccount.disableSync()
         if !BeamAccount.hasValidAccount(in: BeamData.accountsPath) {
-            splashScreen = SplashScreen()
-            splashScreen?.center()
-            splashScreen?.makeKeyAndOrderFront(nil)
-            splashScreen?.orderFrontRegardless()
-            splashScreen?.display()
-            splashScreen?.update()
+            splashScreenWindow = SplashScreenWindow()
+            splashScreenWindow?.presentWindow()
 
-            splashScreen?.tick()
-
-            self.progressText = "Backup existing data"
+            self.legacyMigrationProgressText = "Backup existing data"
             BeamData.backup(overrideArchiveName: "Beam Backup before GRDB migration")
 
             // try to migrate the old databases
@@ -522,7 +469,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             let importer = LegacyDataImporter(account: account, database: database) { text in
                 DispatchQueue.mainSync {
-                    self.progressText = text
+                    self.legacyMigrationProgressText = text
                 }
             }
             do {
@@ -536,6 +483,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         BeamAccount.enableSync()
     }
 
+    private var deleteAllLocalDataAtStartup = false
     func applicationWillFinishLaunching(_ notification: Notification) {
         // We need to migrate the legacy database BEFORE initializing CoreData so that we can access the sqlite store without making a super slow backup
         BeamData.registerDefaultManagers()
