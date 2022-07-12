@@ -176,9 +176,7 @@ extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
     func fillCredentials(_ entry: PasswordManagerEntry) {
         Logger.shared.logDebug("Clicked on entry: \(entry.username) @ \(entry.minimizedHost)")
         Task { @MainActor in
-            if await PasswordManager.shared.checkDeviceAuthentication() {
-                delegate?.fillCredentials(entry)
-            }
+            delegate?.fillCredentials(entry)
         }
     }
 
