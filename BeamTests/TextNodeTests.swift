@@ -111,7 +111,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         """
 
         XCTAssertEqual(str1, root.printTree())
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testFoldNode() throws {
@@ -136,7 +136,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         """
 
         XCTAssertEqual(str1, root.printTree())
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testRemoveNode() throws {
@@ -161,7 +161,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testAddNodeToRoot() throws {
@@ -190,7 +190,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     // MARK: - Insert
@@ -219,7 +219,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testAddNodeToBullet() throws {
@@ -247,7 +247,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testInsertNodeIntoBullet() throws {
@@ -276,7 +276,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testAddTreeToBullet() throws {
@@ -308,7 +308,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testInsertTreeIntoBullet() throws {
@@ -340,7 +340,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testRemoveBulletFromNote() throws {
@@ -365,7 +365,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testRemoveBulletFromBullet() throws {
@@ -392,7 +392,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 
         XCTAssertEqual(str1, root.printTree())
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     // swiftlint:disable:next function_body_length
@@ -450,7 +450,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         XCTAssert(root.selectedTextRange.isEmpty)
 
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     // swiftlint:disable:next function_body_length
@@ -507,7 +507,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     // swiftlint:disable:next function_body_length
@@ -567,7 +567,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         XCTAssertEqual(root.cursorPosition, 7)
         XCTAssert(root.selectedTextRange.isEmpty)
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testInsertTextAroundInternalLink() throws {
@@ -584,7 +584,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         root.insertText(string: "Hello ", replacementRange: nil)
         XCTAssertEqual(node.text.text, "before link Hello My Internal Note Beam after link")
 
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testInsertTextInsideInternalLink() throws {
@@ -597,7 +597,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         root.insertText(string: "Hello Beam", replacementRange: nil)
         XCTAssertEqual(node.text.text, "before link Hello Beam after link")
 
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     // MARK: - Delete
@@ -626,7 +626,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
 //        Logger.shared.logDebug("Tree:\n\(root.printTree())\n")
 //        note.debugNote()
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testDeleteBackwardAfterLink() throws {
@@ -639,7 +639,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         XCTAssertEqual(node.text.text, "before link My Internal Noteafter link")
         root.deleteBackward()
         XCTAssertEqual(node.text.text, "before link after link")
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     // swiftlint:disable:next function_body_length
@@ -671,7 +671,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         }
         XCTAssertEqual(root.children.first?.children.count, 1)
         validateRootWithNote(root: root, note: note)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testDeleteForwardBeforeLink() throws {
@@ -684,7 +684,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         XCTAssertEqual(node.text.text, "before linkMy Internal Note after link")
         root.deleteForward()
         XCTAssertEqual(node.text.text, "before link after link")
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     // MARK: - Stripped Text
@@ -695,7 +695,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         editor.prepareRoot()
         let root = editor.rootNode!
         XCTAssertEqual(" bullet1 bullet11 bullet12 bullet2 bullet21 bullet22 bullet23", root.fullStrippedText)
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     // MARK: - Links finder
@@ -726,7 +726,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         XCTAssertNil(node.linkRangeAt(index: 12))
         XCTAssertNil(node.linkRangeAt(index: 29))
 
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
     func testInternalLinkFinder() throws {
@@ -741,7 +741,7 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         XCTAssertNil(node.internalLinkRangeAt(index: 12))
         XCTAssertNil(node.internalLinkRangeAt(index: 29))
 
-        BeamNote.clearCancellables()
+        BeamNote.clearFetchedNotes()
     }
 
 }
