@@ -145,11 +145,11 @@ final class ChromiumPasswordImporter: ChromiumImporter {
 
     private var currentSubject: PassthroughSubject<BrowserPasswordResult, Swift.Error>?
 
-    private func passwordsDatabaseURL(fileName: String) throws -> URLProvider? {
-        guard let browserDirectory = try chromiumDirectory() else { return nil }
+    private func passwordsDatabaseURL(fileName: String, fileCount: inout SandboxEscape.FileCount) throws -> URLProvider? {
+        guard let browserDirectory = try chromiumDirectory(fileCount: &fileCount) else { return nil }
         let passwordsDatabase = browserDirectory.appendingPathComponent(fileName)
         let passwordsDatabaseGroup = SandboxEscape.FileGroup(mainFile: passwordsDatabase, dependentFiles: ["\(fileName)-journal"])
-        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: passwordsDatabaseGroup),
+        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: passwordsDatabaseGroup, fileCount: &fileCount),
               let passwordsDatabaseCopy = SandboxEscape.TemporaryCopy(group: endorsedGroup) else { return nil }
         return passwordsDatabaseCopy
     }
@@ -169,7 +169,13 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
     }
 
     func importPasswords(importedCountCallback: (Int) -> Void) throws {
-        let databaseURLs = try ["Login Data", "Login Data For Account"].compactMap(endorsedDatabaseURL(fileName:))
+        var fileCount = SandboxEscape.FileCount(currentCount: 0, estimatedTotal: 6)
+        var databaseURLs: [URLProvider] = []
+        for profile in ["Login Data", "Login Data For Account"] {
+            if let url = try endorsedDatabaseURL(fileName: profile, fileCount: &fileCount) {
+                databaseURLs.append(url)
+            }
+        }
         guard !databaseURLs.isEmpty else {
             throw Error.noDatabaseURL
         }
@@ -177,9 +183,9 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
         try importPasswords(from: databaseURLs, keychainSecret: keychainSecret, importedCountCallback: importedCountCallback)
     }
 
-    private func endorsedDatabaseURL(fileName: String) throws -> URLProvider? {
+    private func endorsedDatabaseURL(fileName: String, fileCount: inout SandboxEscape.FileCount) throws -> URLProvider? {
         do {
-            return try passwordsDatabaseURL(fileName: fileName)
+            return try passwordsDatabaseURL(fileName: fileName, fileCount: &fileCount)
         } catch {
             let decodedError = error as NSError
             guard decodedError.domain == NSCocoaErrorDomain && decodedError.code == NSFileNoSuchFileError else {
