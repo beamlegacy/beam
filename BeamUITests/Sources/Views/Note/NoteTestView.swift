@@ -393,6 +393,15 @@ class NoteTestView: TextEditorContextTestView {
         return getTextNodeByIndex(nodeIndex: index).buttons[NoteViewLocators.Buttons.checkbox.accessibilityIdentifier]
     }
     
+    func getAddToProfileToggleElement() -> XCUIElement {
+        return app.otherElements[NoteViewLocators.OtherElements.addToProfileToggle.accessibilityIdentifier].firstMatch
+    }
+    
+    func getStagingProfileLinkElement() -> XCUIElement {
+        let staginEnvPredicate = NSPredicate(format: "value BEGINSWITH '\(BaseTest().stagingEnvironmentServerAddress)'")
+        return app.staticTexts.matching(staginEnvPredicate).firstMatch
+    }
+    
     @discardableResult
     func createCheckboxAtNote(_ noteNumber: Int) -> XCUIElement {
         let index = noteNumber - 1
