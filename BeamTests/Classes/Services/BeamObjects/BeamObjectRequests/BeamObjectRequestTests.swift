@@ -16,7 +16,7 @@ class BeamObjectsRequests: QuickSpec {
 
         beforeEach {
             sut = BeamObjectRequest()
-            Beam.Configuration.reset()
+            Configuration.reset()
             Configuration.beamObjectsPageSize = 10
 
             BeamDate.freeze("2021-03-19T12:21:03Z")
@@ -35,7 +35,6 @@ class BeamObjectsRequests: QuickSpec {
 
             Configuration.reset()
             beamHelper.endNetworkRecording()
-            Beam.Configuration.reset()
             BeamDate.reset()
         }
 

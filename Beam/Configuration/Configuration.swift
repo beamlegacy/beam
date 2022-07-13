@@ -283,11 +283,23 @@ struct Configuration {
     }
 
     static func reset() {
+        // URLs
         UserDefaults.standard.removeObject(forKey: publicAPIpublishServerKey)
         UserDefaults.standard.removeObject(forKey: publicAPIembedKey)
         UserDefaults.standard.removeObject(forKey: apiHostnameKey)
         UserDefaults.standard.removeObject(forKey: restApiHostnameKey)
+
+        // Download & upload settings
         UserDefaults.standard.removeObject(forKey: beamObjectsPageSizeKey)
+        UserDefaults.standard.removeObject(forKey: beamObjectDataOnSeparateCallKey)
+        UserDefaults.standard.removeObject(forKey: beamObjectDataUploadOnSeparateCallKey)
+        UserDefaults.standard.removeObject(forKey: beamObjectOnRestKey)
+        UserDefaults.standard.removeObject(forKey: directUploadNIOKey)
+
+        // Websocket
+        UserDefaults.standard.removeObject(forKey: websocketEnabledKey)
+
+        // Logout
         BeamData.shared.currentAccount?.logout()
     }
 
