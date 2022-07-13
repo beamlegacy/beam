@@ -820,4 +820,18 @@ class HtmlNoteAdapterTests: XCTestCase {
         wait(for: [expectation], timeout: 10.0)
     }
 
+    func testUrls() {
+        let url = URL(string: "../static/beam-icn.jpg", relativeTo: URL(string:"https://deploy.netlify.app/")!)
+        XCTAssertEqual(url?.standardized.absoluteString, "https://deploy.netlify.app/static/beam-icn.jpg")
+    }
+
+    func testUrlsUpFolder() {
+        let url = URL(string: "../static/beam-icn.jpg", relativeTo: URL(string:"https://deploy.netlify.app/folder")!)
+        XCTAssertEqual(url?.standardized.absoluteString, "https://deploy.netlify.app/static/beam-icn.jpg")
+    }
+
+    func testUrlsUpFolderMoreFolders() {
+        let url = URL(string: "../static/beam-icn.jpg", relativeTo: URL(string:"https://deploy.netlify.app/folder1/folder2")!)
+        XCTAssertEqual(url?.standardized.absoluteString, "https://deploy.netlify.app/folder1/static/beam-icn.jpg")
+    }
 }
