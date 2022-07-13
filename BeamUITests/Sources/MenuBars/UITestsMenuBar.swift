@@ -127,9 +127,9 @@ class UITestsMenuBar: BaseMenuBar {
     }
     
     @discardableResult
-    func createAndOpenNote() -> UITestsMenuBar {
+    func createAndOpenNote() -> NoteTestView {
         beeper.beep(identifier: UITestMenuAvailableCommands.createAndOpenNote.rawValue)
-        return self
+        return NoteTestView()
     }
     
     @discardableResult
