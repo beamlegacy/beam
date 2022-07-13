@@ -17,7 +17,7 @@ public extension BeamDocumentCollection {
     /// This publisher is triggered anytime we are completely removing a note from the DB.
     static let documentDeleted = PassthroughSubject<BeamDocument, Never>()
 
-    private static var notificationLock = RWLock()
+    private static let notificationLock = RWLock()
     private static var waitingSavedNotifications = [UUID: BeamDocument]()
     private static var waitingDeletedNotifications = Set<BeamDocument>()
     private static var notificationStatus = 1
