@@ -34,6 +34,7 @@ class RightClickLinkMenuTests: BaseTest {
         step("Given I open test page") {
             launchApp()
             uiMenu.loadUITestPage2()
+                .resizeSquare1000()
         }
         
         step("When I right click on an image") {
@@ -107,6 +108,7 @@ class RightClickLinkMenuTests: BaseTest {
         
         step("Then link has been copied") {
             shortcutHelper.shortcutActionInvoke(action: .openLocation)
+            _ = omniboxTestView.getOmniBoxSearchField().waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             shortcutHelper.shortcutActionInvoke(action: .paste)
 
             XCTAssertEqual(omniboxTestView.getSearchFieldValue(), "file:///wiki/Structural_steel")

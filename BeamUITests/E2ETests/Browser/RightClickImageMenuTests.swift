@@ -14,6 +14,7 @@ class RightClickImageMenuTests: BaseTest {
     let imageName = "800px-Beam_mode_2.gif"
     let imageToRightClickOn = WebTestView().image("File:Beam mode 2.gif")
     let rightClickMenuTestView = RightClickMenuTestView()
+    let omniboxTestView = OmniBoxTestView()
     
     var app = XCUIApplication()
     private var helper: BeamUITestsHelper!
@@ -120,9 +121,10 @@ class RightClickImageMenuTests: BaseTest {
         
         step("Then image address has been copied") {
             shortcutHelper.shortcutActionInvoke(action: .openLocation)
+            _ = omniboxTestView.getOmniBoxSearchField().waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             shortcutHelper.shortcutActionInvoke(action: .paste)
 
-            XCTAssertEqual(OmniBoxTestView().getSearchFieldValue(), "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Beam_mode_2.gif/800px-Beam_mode_2.gif")
+            XCTAssertEqual(omniboxTestView.getSearchFieldValue(), "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Beam_mode_2.gif/800px-Beam_mode_2.gif")
         }
     }
     
