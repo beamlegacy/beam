@@ -284,6 +284,9 @@ enum BrowsingTreeStoreManagerError: Error, Equatable {
 
 extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
+    static var uploadType: BeamObjectRequestUploadType {
+        Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+    }
     internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "BrowsingTreeStoreManager BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     func willSaveAllOnBeamObjectApi() {}
