@@ -41,7 +41,7 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
     /// This makes a safety net where the user would not loose pages when closing tabs.
     /// - Returns: whether or not we decided to save the group
     @discardableResult
-    func groupDidUpdate(_ group: TabGroup, origin: GroupUpdateOrigin, openTabs: [BrowserTab]) -> Bool {
+    func groupDidUpdate(_ group: TabGroup, origin: GroupUpdateOrigin, openTabs: [BrowserTab]) async  -> Bool {
         guard group.shouldBePersisted && group.title?.isEmpty == false else { return false }
 
         let existingValue = fetch(byIds: [group.id]).first
@@ -52,11 +52,24 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
                 return false
             }
         }
-        let pages: [TabGroupBeamObject.PageInfo] = group.pageIds.compactMap { id in
-            guard let tab = openTabs.first(where: { $0.browsingTree.current.link == id }), let url = tab.url else { return nil }
-            return TabGroupBeamObject.PageInfo(id: id, url: url, title: tab.title)
+
+        let tabs: [(BrowserTab, UUID) ] = group.pageIds.compactMap { id -> (BrowserTab, UUID)? in
+            guard let tab = openTabs.first(where: { $0.browsingTree.current.link == id }), tab.url != nil else { return nil }
+            return (tab, id)
         }
-        let object = convertGroupToBeamObject(group, pages: pages)
+
+        let screenshots = await screenshots(for: tabs)
+
+        let pages = tabs.compactMap { (tab, id) -> TabGroupBeamObject.PageInfo? in
+            guard let url = tab.url else { return nil }
+            var snapshotData: Data?
+            if let snapshot = screenshots[tab], snapshot.isValid {
+                snapshotData = snapshot.jpegRepresentation
+            }
+            return TabGroupBeamObject.PageInfo(id: id, url: url, title: tab.title, snapshot: snapshotData)
+        }
+
+        let object = Self.convertGroupToBeamObject(group, pages: pages)
         Logger.shared.logInfo("Saving Tab Group '\(object.title ?? "untitled")' (\(pages.count) pages)", category: .tabGrouping)
         save(groups: [object])
         if AuthenticationManager.shared.isAuthenticated {
@@ -67,6 +80,16 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
             }
         }
         return true
+    }
+
+    func screenshots(for tabs: [(BrowserTab, UUID)]) async -> [BrowserTab: NSImage] {
+        var screenshots: [BrowserTab: NSImage] = [:]
+        for (tab, _) in tabs {
+            if let screenshot = await tab.screenshotTab() {
+                screenshots[tab] = screenshot
+            }
+        }
+        return screenshots
     }
 
     override func prepareMigration(migrator: inout DatabaseMigrator) throws {
@@ -86,13 +109,34 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
     }
 }
 
-private extension TabGroupingStoreManager {
-    func convertGroupToBeamObject(_ group: TabGroup, pages: [TabGroupBeamObject.PageInfo]) -> TabGroupBeamObject {
+extension TabGroupingStoreManager {
+    static func convertGroupToBeamObject(_ group: TabGroup, pages: [TabGroupBeamObject.PageInfo]) -> TabGroupBeamObject {
         TabGroupBeamObject(id: group.id, title: group.title, color: group.color, pages: pages, isLocked: group.isLocked)
     }
 
-    func convertBeamObjectToGroup(_ beamObject: TabGroupBeamObject) -> TabGroup {
+    static func convertBeamObjectToGroup(_ beamObject: TabGroupBeamObject) -> TabGroup {
         TabGroup(id: beamObject.id, pageIds: beamObject.pages.map { $0.id }, title: beamObject.title, color: beamObject.color, isLocked: beamObject.isLocked)
+    }
+
+    static func suggestedDefaultTitle(for group: TabGroup) -> String {
+        guard let firstPage = group.pageIds.first, let link = LinkStore.shared.getLinks(for: [firstPage]).first?.value else { return "Empty Tab Group" }
+        let otherPages = group.pageIds.count - 1
+
+        var suggestedTitle = ""
+        if let title = link.title {
+            suggestedTitle.append(contentsOf: title)
+        } else {
+            return "\(group.pageIds.count) grouped tabs"
+        }
+        switch otherPages {
+        case 1:
+            suggestedTitle.append(contentsOf: " and \(otherPages) other tab")
+        case 2...:
+            suggestedTitle.append(contentsOf: " and \(otherPages) other tabs")
+        default:
+            break
+        }
+        return suggestedTitle
     }
 }
 
@@ -100,7 +144,7 @@ private extension TabGroupingStoreManager {
 extension TabGroupingStoreManager {
     func searchGroups(forText searchTerm: String) -> [TabGroup] {
         let objects = fetch(byTitle: searchTerm)
-        return objects.map { convertBeamObjectToGroup($0) }
+        return objects.map { Self.convertBeamObjectToGroup($0) }
     }
 }
 
@@ -155,7 +199,7 @@ extension TabGroupingStoreManager: BeamObjectManagerDelegate {
 // MARK: - Database
 extension TabGroupingStoreManager {
 
-    fileprivate func save(groups: [TabGroupBeamObject]) {
+    func save(groups: [TabGroupBeamObject]) {
         do {
             try write { db in
                 try groups.forEach { group in
@@ -187,7 +231,7 @@ extension TabGroupingStoreManager {
         }
     }
 
-    fileprivate func fetch(byIds ids: [UUID]) -> [TabGroupBeamObject] {
+    func fetch(byIds ids: [UUID]) -> [TabGroupBeamObject] {
         do {
             return try read { db in
                 return try TabGroupBeamObject

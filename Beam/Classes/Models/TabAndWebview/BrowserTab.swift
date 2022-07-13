@@ -639,11 +639,26 @@ import BeamCore
 
     private func tabDidChangeWindow() {
         guard isPinned else { return }
-        let config = WKSnapshotConfiguration()
-        config.afterScreenUpdates = false
-        webView.takeSnapshot(with: config) { [weak self] image, _ in
-            self?.screenshotCapture = image
+        Task {
+            await updateTabScreenshot()
         }
+    }
+
+    /// Takes a screenshot of the webpage and updates the screenshotCapture property of the BrowserTab
+    @MainActor
+    func updateTabScreenshot() async {
+        self.screenshotCapture = await screenshotTab()
+    }
+
+    /// Screenshot the current tab
+    /// - Returns: NSImage of the current tab if screenshot is successful
+    @MainActor
+    func screenshotTab() async -> NSImage? {
+        let config = WKSnapshotConfiguration()
+        config.afterScreenUpdates = true
+        let snapshot = try? await webView.takeSnapshot(configuration: config)
+        guard snapshot?.isValid == true else { return nil }
+        return snapshot
     }
 
     internal func sendTree(grouped: Bool = false) {
