@@ -49,8 +49,8 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         case .setAutoUpdateToMock: setAutoUpdateToMock()
         case .cleanDownloads: cleanDownloadFolder()
         case .omniboxFillHistory: fillHistory()
-        case .omniboxEnableSearchInHistoryContent: omniboxEnableSearchInHistoryContent()
-        case .omniboxDisableSearchInHistoryContent: omniboxDisableSearchInHistoryContent()
+        case .omniboxEnableSearchInHistoryContent: omniboxSetEnableSearchInHistoryContent(enabled: true)
+        case .omniboxDisableSearchInHistoryContent: omniboxSetEnableSearchInHistoryContent(enabled: false)
         case .signInWithTestAccount: signInWithTestAccount()
         case .signUpWithRandomTestAccount: signUpWithRandomTestAccount()
         case .showWebViewCount: showWebViewCount()
@@ -60,8 +60,8 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         case .clearCreditCardsDB: clearCreditCardsDatabase()
         case .startMockHttpServer: startMockHttpServer()
         case .stopMockHttpServer: stopMockHttpServer()
-        case .enableCreateJournalOnce: enableCreateJournalOnce()
-        case .disableCreateJournalOnce: disableCreateJournalOnce()
+        case .enableCreateJournalOnce: setCreateJournalOnce(enabled: true)
+        case .disableCreateJournalOnce: setCreateJournalOnce(enabled: false)
         case .deletePrivateKeys: deletePrivateKeys()
         case .deleteAllRemoteObjects: deleteAllRemoteObjects()
         case .resetAPIEndpoints: connectToProductionServer()
@@ -72,6 +72,8 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         case .createAndOpenNote: createNote(open: true)
         case .createPublishedNote: createPublishedNote()
         case .createAndOpenPublishedNote: createPublishedNote(open: true)
+        case .startBeamOnTabs: setStartBeamOn(.webTabs)
+        case .startBeamOnDefault: setStartBeamOn(nil)
         default: break
         }
     }
@@ -100,10 +102,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
 
     private func resizeSquare1000() {
         AppDelegate.main.resizeWindow(width: 1000, height: 1000)
-    }
-
-    private func setBrowsingSessionCollection(_ value: Bool) {
-        PreferencesManager.browsingSessionCollectionIsOn = value
     }
 
     private func insertTextInCurrentNote() {
@@ -232,14 +230,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
                          title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.")
         addPageToHistory(url: "https://www.google.com/search?q=Beam%20the%20best%20browser&client=safari", title: "Beam the best browser")
         addPageToHistory(url: "https://beamapp.co", aliasUrl: "https://alternateurl.com", title: "Beam")
-    }
-
-    private func omniboxEnableSearchInHistoryContent() {
-        PreferencesManager.includeHistoryContentsInOmniBox = true
-    }
-
-    private func omniboxDisableSearchInHistoryContent() {
-        PreferencesManager.includeHistoryContentsInOmniBox = false
     }
 
     private func addPageToHistory(url: String, aliasUrl: String? = nil, title: String) {
@@ -373,24 +363,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         MockHttpServer.stop()
     }
 
-    private func resetCollectAlert() {
-        PreferencesManager.isCollectFeedbackEnabled = true
-        PreferencesManager.showsCollectFeedbackAlert = true
-    }
-
-    private func enableCreateJournalOnce() {
-        PreferencesManager.createJournalOncePerWindow = true
-    }
-
-    private func disableCreateJournalOnce() {
-        PreferencesManager.createJournalOncePerWindow = false
-        // Destroy the cached journal view if needed
-        for window in AppDelegate.main.windows {
-            window.state.cachedJournalStackView = nil
-            window.state.cachedJournalScrollView = nil
-        }
-    }
-
     private func deletePrivateKeys() {
         Persistence.Encryption.privateKeys = nil
         Persistence.Encryption.updateDate = BeamDate.now
@@ -434,7 +406,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     private func createFakeDailySummary() {
         let now = BeamDate.now
         let cal = Calendar(identifier: .iso8601)
-        let sem = DispatchSemaphore(value: 0)
 
         guard let pastday = cal.date(byAdding: .day, value: -2, to: now) else { return }
         BeamDate.freeze(pastday)
@@ -529,4 +500,37 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         AppDelegate.main.window?.state.mode = .note
         AppDelegate.main.window?.state.currentNote = note
     }
+}
+
+// MARK: - Preferences toggles
+extension BeamUITestsMenuGenerator {
+
+    private func setStartBeamOn(_ value: PreferencesManager.PreferencesDefaultWindowMode?) {
+        PreferencesManager.defaultWindowMode = value ?? .journal
+    }
+
+    private func setBrowsingSessionCollection(_ value: Bool) {
+        PreferencesManager.browsingSessionCollectionIsOn = value
+    }
+
+    private func omniboxSetEnableSearchInHistoryContent(enabled: Bool) {
+        PreferencesManager.includeHistoryContentsInOmniBox = enabled
+    }
+
+    private func resetCollectAlert() {
+        PreferencesManager.isCollectFeedbackEnabled = true
+        PreferencesManager.showsCollectFeedbackAlert = true
+    }
+
+    private func setCreateJournalOnce(enabled: Bool) {
+        PreferencesManager.createJournalOncePerWindow = enabled
+        if !enabled {
+            // Destroy the cached journal view if needed
+            for window in AppDelegate.main.windows {
+                window.state.cachedJournalStackView = nil
+                window.state.cachedJournalScrollView = nil
+            }
+        }
+    }
+
 }
