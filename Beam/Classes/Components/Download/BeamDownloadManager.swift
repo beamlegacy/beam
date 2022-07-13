@@ -28,7 +28,7 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         }
         for (index, url) in urls.enumerated() {
             dispatchGroup.enter()
-            var request = URLRequest(url: url)
+            var request = URLRequest(url: url.standardized)
             request.httpMethod = "GET"
             for (key, value) in headers {
                 request.setValue(value, forHTTPHeaderField: key)
