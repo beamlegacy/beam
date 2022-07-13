@@ -47,6 +47,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
         }
 
         afterEach {
+            Configuration.reset()
             beamHelper.endNetworkRecording()
 
             BeamDate.reset()
