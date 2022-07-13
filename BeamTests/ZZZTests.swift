@@ -26,6 +26,11 @@ class ZZZTests: QuickSpec {
         afterEach {
             beamHelper.endNetworkRecording()
             BeamDate.reset()
+
+            // reset settings after running tests
+            // so that we do not mess up with any current beam app
+            // already installed on machine
+            Configuration.reset()
         }
 
         describe("BeamObjects") {
