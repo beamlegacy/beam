@@ -118,6 +118,24 @@ struct Configuration {
         }
     }
 
+    static private(set) var directUploadAllObjectsDefault = false
+
+    static private var directUploadAllObjectsKey = "directUploadAllObjects"
+    static var directUploadAllObjects: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: directUploadAllObjectsKey) != nil {
+                return UserDefaults.standard.bool(forKey: directUploadAllObjectsKey)
+            }
+
+            return directUploadAllObjectsDefault
+        }
+        set {
+            if newValue != directUploadAllObjects {
+                UserDefaults.standard.set(newValue, forKey: directUploadAllObjectsKey)
+            }
+        }
+    }
+
     static private(set) var beamObjectOnRestDefault = true
 
     static private var beamObjectOnRestKey = "beamObjectOnRestKey"

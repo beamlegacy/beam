@@ -1355,6 +1355,7 @@
 		BAA67DDD4452566DFF99171E /* WebAutofillController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670958C9BAC6322CDA80A /* WebAutofillController.swift */; };
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
+		BF23885A2876D5F800955F74 /* S3Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2388592876D5F800955F74 /* S3Upload.swift */; };
 		BFEA487D286A1519007A73BD /* AsyncHTTPClient in Frameworks */ = {isa = PBXBuildFile; productRef = BFEA487C286A1519007A73BD /* AsyncHTTPClient */; };
 		CE304C2D27DB544B005AE274 /* GCPAuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C2C27DB544B005AE274 /* GCPAuthenticationManager.swift */; };
 		CE304C2F27DB5469005AE274 /* Digest+convert.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C2E27DB5469005AE274 /* Digest+convert.swift */; };
@@ -3275,6 +3276,7 @@
 		BAA67DD5764226E47DFA6F9E /* WebPositions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebPositions.swift; sourceTree = "<group>"; };
 		BAA67E198CBE7B676642992F /* PointAndShoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShoot.swift; sourceTree = "<group>"; };
 		BAA67F5672D6E4512AF90CAC /* JSNavigationMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSNavigationMessageHandler.swift; sourceTree = "<group>"; };
+		BF2388592876D5F800955F74 /* S3Upload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = S3Upload.swift; sourceTree = "<group>"; };
 		CE304C2C27DB544B005AE274 /* GCPAuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCPAuthenticationManager.swift; sourceTree = "<group>"; };
 		CE304C2E27DB5469005AE274 /* Digest+convert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Digest+convert.swift"; sourceTree = "<group>"; };
 		CE304C3027DB547C005AE274 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
@@ -4724,6 +4726,7 @@
 				52019A7826DE49C2005E8278 /* BeamObjectManagerProtocol+Foundation.swift */,
 				05EE43AD281BCC440032292D /* BeamObjectManagerProtocol+async.swift */,
 				523060A727426D1400A03844 /* BeamObjectManagerCall.swift */,
+				BF2388592876D5F800955F74 /* S3Upload.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -9509,6 +9512,7 @@
 				A570D2F227583BD4003B239D /* TabsListView.swift in Sources */,
 				8768565D27709210002A8069 /* BrowserPasswordImporter.swift in Sources */,
 				414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */,
+				BF23885A2876D5F800955F74 /* S3Upload.swift in Sources */,
 				A0C7D122283636E7002EDF4C /* BeamTableCellIconButtonView.swift in Sources */,
 				52DB02642716D07900F3881D /* AppDelegate+Log.swift in Sources */,
 				33D5F85A2697478E002C4F25 /* PopupView.swift in Sources */,
@@ -11451,6 +11455,7 @@
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR/BeamCore.framework/Frameworks/**",
 				);
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"BEAM_WEBKIT_ENHANCEMENT_ENABLED=1",
 					"DEBUG=1",
