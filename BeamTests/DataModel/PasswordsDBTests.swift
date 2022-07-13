@@ -264,6 +264,7 @@ class PasswordsDBTests: XCTestCase {
 
     private func stopNetworkTests() {
         BeamObjectTestsHelper().deleteAll()
+        Configuration.reset()
         beamHelper.endNetworkRecording()
         BeamDate.reset()
     }
