@@ -2,6 +2,8 @@ import SwiftUI
 
 struct PDFToolbar: View {
 
+    @State private var didDownloadFileLottiePlaying = false
+
     var body: some View {
         FloatingToolbar(spacing: 0, contentLeadingPadding: 10) {
             Group {
@@ -51,16 +53,32 @@ struct PDFToolbar: View {
                 .accessibilityIdentifier("print-pdf")
 
                 ButtonLabel(
-                    icon: "download-file_download",
-                    customStyle: buttonLabelStyle
-                ) {
-                    contentState.saveDocument()
-                }
+                    lottie: "download-file",
+                    lottiePlaying: didDownloadFileLottiePlaying,
+                    lottieLoopMode: .playOnce,
+                    lottieCompletion: { didDownloadFileLottiePlaying = false },
+                    customStyle: buttonLabelStyle,
+                    action: downloadFile)
+                // Force a new view when the playing state changes, this is needed
+                // because of animation glitches from the underlying lottie view.
+                .id(didDownloadFileLottiePlaying)
                 .padding(.leading, 1)
                 .tooltipOnHover("Save")
-                .accessibilityIdentifier("save-pdf")
+                // We are using an overlay to workaround an issue where .accessibilityElement()
+                // is seemingly broken when a child view is an NSViewRepresentable (the lottie
+                // view in this case).
+                .overlay(
+                    Rectangle()
+                        .opacity(0)
+                        .accessibilityElement()
+                        .accessibilityAddTraits(.isButton)
+                        .accessibilityLabel("Download file")
+                        .accessibilityAction { downloadFile() }
+                        .accessibilityIdentifier("save-pdf")
+                )
             }
         }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("pdf-toolbar")
     }
 
@@ -95,6 +113,12 @@ struct PDFToolbar: View {
         darkColor: BeamColor.Mercury,
         darkAlpha: 0.5
     )
+
+    private func downloadFile() {
+        if contentState.saveDocument() {
+            didDownloadFileLottiePlaying = true
+        }
+    }
 
     init(contentState: PDFContentState) {
         self.contentState = contentState
