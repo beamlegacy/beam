@@ -322,6 +322,9 @@ final class PasswordManager {
 // MARK: - BeamObjectManagerDelegate
 extension PasswordManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
+    static var uploadType: BeamObjectRequestUploadType {
+        Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+    }
     internal static var backgroundQueue = DispatchQueue(label: "PasswordManager BeamObjectManager backgroundQueue", qos: .userInitiated)
     func willSaveAllOnBeamObjectApi() {}
 
