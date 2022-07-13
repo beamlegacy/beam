@@ -54,6 +54,7 @@ struct TabClusteringNameColorPickerView: View {
                         ColorPickerItem(color: color.color.swiftUI, selected: selected && isPickingColor)
                     }
                     .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
                     .onTapGesture {
                         selectedColor = color
                         isPickingColor.toggle()
@@ -94,7 +95,6 @@ struct TabClusteringNameColorPickerView: View {
                     .frame(maxWidth: isPickingColor ? .infinity : 16)
             }
         }
-        .padding(.horizontal, BeamSpacing._50)
         .frame(maxHeight: .infinity)
     }
 }
