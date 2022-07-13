@@ -257,4 +257,10 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.createAndOpenPublishedNote.rawValue)
         return self
     }
+
+    @discardableResult
+    func setStartBeamOnTabs(_ value: Bool) -> UITestsMenuBar {
+        beeper.beep(identifier: (value ? UITestMenuAvailableCommands.startBeamOnTabs : UITestMenuAvailableCommands.startBeamOnDefault).rawValue)
+        return self
+    }
 }

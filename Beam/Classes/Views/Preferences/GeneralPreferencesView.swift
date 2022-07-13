@@ -17,7 +17,7 @@ struct GeneralPreferencesView: View {
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(bottomDivider: true) {
+            Preferences.Section(bottomDivider: false) {
                 VStack(alignment: .center) {
                     Text("Appearance:")
                         .font(BeamFont.regular(size: 13).swiftUI)
@@ -26,6 +26,13 @@ struct GeneralPreferencesView: View {
             } content: {
                 AppearanceSection()
             }
+
+            Preferences.Section(bottomDivider: true) {
+                Text("").labelsHidden()
+            } content: {
+                NewWindowLaunchOption()
+            }
+
             Preferences.Section(bottomDivider: true) {
                 Text("Accessibility:")
                     .font(BeamFont.regular(size: 13).swiftUI)
@@ -48,6 +55,38 @@ struct GeneralPreferencesView: View {
 struct GeneralPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
         GeneralPreferencesView()
+    }
+}
+
+private struct NewWindowLaunchOption: View {
+
+    @State private var selectedDefaultWindowMode: PreferencesManager.PreferencesDefaultWindowMode = PreferencesManager.defaultWindowMode
+
+    private var withOpenedTabsBinding: Binding<Bool> {
+        Binding<Bool>(
+            get: { selectedDefaultWindowMode == .webTabs },
+            set: { selectedDefaultWindowMode = $0 ? .webTabs : .journal }
+        )
+    }
+    var body: some View {
+        VStack(alignment: .leading) {
+            Toggle(isOn: withOpenedTabsBinding) {
+                Text("Start beam with opened tabs")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+            Text("Always start on the web if there are pinned \nor opened tabs")
+                .font(BeamFont.regular(size: 11).swiftUI)
+                .foregroundColor(BeamColor.Corduroy.swiftUI)
+                .frame(minHeight: 30)
+                .lineLimit(nil)
+                .multilineTextAlignment(.leading)
+                .padding(.leading, 18)
+        }
+        .onChange(of: selectedDefaultWindowMode) {
+            PreferencesManager.defaultWindowMode = $0
+        }
+
     }
 }
 
@@ -136,7 +175,7 @@ struct AccessibilitySection: View {
             Text("Option-Tab to highlights each item.")
                 .font(BeamFont.regular(size: 11).swiftUI)
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
-                .padding(.leading, 22)
+                .padding(.leading, 18)
                 .lineLimit(nil)
                 .multilineTextAlignment(.leading)
         }
