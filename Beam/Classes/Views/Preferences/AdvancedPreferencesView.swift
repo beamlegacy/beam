@@ -44,7 +44,6 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
     @State private var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
     @State private var isWebsocketEnabled = Configuration.websocketEnabled
     @State private var restBeamObject = Configuration.beamObjectOnRest
-    @State private var showWebOnLaunchIfTabs = PreferencesManager.showWebOnLaunchIfTabs
     @State private var createJournalOncePerWindow = PreferencesManager.createJournalOncePerWindow
     @State private var useSidebar = PreferencesManager.useSidebar
     @State private var includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBox
@@ -530,14 +529,6 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
                     PnsJSEnabledCheckbox
-                }
-
-                Preferences.Section(bottomDivider: true) {
-                    Text("Show Web on launch with tabs")
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                } content: {
-                    showWebOnLaunchIfTabsView
                 }
 
                 Preferences.Section(bottomDivider: true) {
@@ -1164,17 +1155,6 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
     func migrateOldPrivateKeyToCurrentAccount() {
         _ = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
         updateKeys()
-    }
-
-    private var showWebOnLaunchIfTabsView: some View {
-        return Toggle(isOn: $showWebOnLaunchIfTabs) {
-            Text("Enabled")
-        }.toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onChange(of: showWebOnLaunchIfTabs) {
-                PreferencesManager.showWebOnLaunchIfTabs = $0
-            }
     }
 
     private var createJournalOncePerWindowView: some View {

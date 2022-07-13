@@ -4,9 +4,6 @@ import AppKit
 public enum UITestMenuAvailableCommands: String, CaseIterable {
     // Clean up
     case destroyDB = "Destroy Databases"
-    case signInWithTestAccount = "Sign in with Test Account"
-    case signUpWithRandomTestAccount = "Sign up with Random Test Account"
-    case logout = "Logout"
     case deleteLogs = "Delete Logs"
     case deletePrivateKeys = "Delete Private Keys"
     case deleteAllRemoteObjects = "Delete All Remote Objects"
@@ -14,16 +11,26 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case showOnboarding = "Reset Onboarding"
     case resetCollectAlert = "Reset Collect Alert"
 
+    // Account
+    case signInWithTestAccount = "Sign in with Test Account"
+    case signUpWithRandomTestAccount = "Sign up with Random Test Account"
+    case logout = "Logout"
+
+    // Preferences
+    case startBeamOnDefault = "Start beam on: default"
+    case startBeamOnTabs = "Start beam on: opened tabs"
+    case separatorInPreferencesA // before: public prefs, after: advanced only prefs
+    case enableBrowsingSessionCollection = "BrowsingSession Collect: Enable"
+    case disableBrowsingSessionCollection = "BrowsingSession Collect: Disable"
+    case enableCreateJournalOnce = "Create Journal once per window: Enable"
+    case disableCreateJournalOnce = "Create Journal once per window: Disable"
+
     case separatorA
 
     // Resize Window
     case resizeWindowLandscape = "Resize Window to Landscape"
     case resizeWindowPortrait = "Resize Window to Portrait"
     case resizeSquare1000 = "Resize Window Square"
-
-    // Browsing Session
-    case enableBrowsingSessionCollection = "Enable BrowsingSession Collect"
-    case disableBrowsingSessionCollection = "Disable BrowsingSession Collect"
 
     // Load HTML Page
     case loadUITestPage1 = "Load UITests Page 1"
@@ -70,23 +77,19 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
 
     // Omnibox setup
     case omniboxFillHistory = "Fill History with Results"
-    case omniboxEnableSearchInHistoryContent = "Enable search in history content"
-    case omniboxDisableSearchInHistoryContent = "Disable search in history content"
+    case omniboxEnableSearchInHistoryContent = "Search in history content: Enable"
+    case omniboxDisableSearchInHistoryContent = "Search in history content: Disable"
+
+    // Remote server
+    case resetAPIEndpoints = "Set API Endpoints to production server"
+    case setAPIEndpointsToStaging = "Set API Endpoints to staging server"
+    case deleteRemoteAccount = "Delete remote account"
 
     // Others
     case separatorB
     case setAutoUpdateToMock = "Set Autoupdate to Mock"
     case cleanDownloads = "Clean SF-Symbols-3.dmg from Downloads"
     case showWebViewCount = "Show Number of WebView in Memory"
-
-    // Journal
-    case enableCreateJournalOnce = "Enable Create Journal once per window"
-    case disableCreateJournalOnce = "Disable Create Journal once per window"
-
-    // Remote server
-    case resetAPIEndpoints = "Set API Endpoints to production server"
-    case setAPIEndpointsToStaging = "Set API Endpoints to staging server"
-    case deleteRemoteAccount = "Delete remote account"
 
     var group: UITestMenuGroup? {
         switch self {
@@ -99,22 +102,21 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .notes
         case .create1000Links, .create10000Links, .create50000Links:
             return .links
-        case .enableBrowsingSessionCollection, .disableBrowsingSessionCollection:
-            return .browsingSession
         case .resizeSquare1000, .resizeWindowPortrait, .resizeWindowLandscape:
             return .resizeWindow
-        case .populatePasswordsDB, .clearPasswordsDB:
-            return .passwords
-        case .populateCreditCardsDB, .clearCreditCardsDB:
-            return .creditCards
+        case .populatePasswordsDB, .clearPasswordsDB, .populateCreditCardsDB, .clearCreditCardsDB:
+            return .passwordsAndCards
         case .startMockHttpServer, .stopMockHttpServer:
             return .mockHttpServer
-        case .omniboxFillHistory:
+        case .omniboxFillHistory, .omniboxEnableSearchInHistoryContent, .omniboxDisableSearchInHistoryContent:
             return .omniboxSetup
-        case .enableCreateJournalOnce, .disableCreateJournalOnce:
-            return .journal
         case .resetAPIEndpoints, .setAPIEndpointsToStaging, .deleteRemoteAccount:
             return .remoteServer
+        case .separatorInPreferencesA, .startBeamOnDefault, .startBeamOnTabs, .enableCreateJournalOnce, .disableCreateJournalOnce,
+                .enableBrowsingSessionCollection, .disableBrowsingSessionCollection:
+            return .preferences
+        case .signInWithTestAccount, .signUpWithRandomTestAccount, .logout:
+            return .account
         default:
             return nil
         }
@@ -129,15 +131,14 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
 }
 
 public enum UITestMenuGroup: String, CaseIterable {
-    case browsingSession = "Browsing Session"
+    case account = "Account"
     case loadHTMLPage = "Load UITest HTML Page"
     case notes = "Notes"
     case links = "Links"
     case omniboxSetup = "Omnibox Setup"
-    case passwords = "Passwords"
-    case creditCards = "Credit Cards"
+    case passwordsAndCards = "Passwords & Credit Cards"
     case mockHttpServer = "Mock HTTP Server"
     case resizeWindow = "Resize Window"
-    case journal = "Journal"
     case remoteServer = "Remote server"
+    case preferences = "Preferences"
 }

@@ -19,7 +19,6 @@ extension PreferencesManager {
     private static let collectFeedbackKey = "collectFeedback"
     private static let showsCollectFeedbackAlertKey = "showsCollectFeedbackAlert"
     private static let enableTabGroupingKey = "enableTabGrouping"
-    private static let showWebOnLaunchIfTabsKey = "showWebOnLaunchIfTabs"
     private static let createJournalOncePerWindowKey = "createJournalOncePerWindow"
     private static let useSidebarKey = "useSidebar"
     private static let includeHistoryContentsInOmniBoxKey = "includeHistoryContentsInOmniBox"
@@ -41,7 +40,6 @@ extension PreferencesManager {
     private static let collectFeedbackDefault = true
     private static let showsCollectFeedbackAlertDefault = true
     private static let enableTabGroupingDefault = true
-    private static let showWebOnLaunchIfTabsDefault = true
     private static let createJournalOncePerWindowDefault = true
     private static let useSidebarDefault = false
     static let includeHistoryContentsInOmniBoxDefault = false
@@ -79,9 +77,6 @@ extension PreferencesManager {
     static var enableTabGroupingFeedback: Bool {
         Configuration.branchType == .develop && Configuration.env != .test && enableTabGrouping
     }
-
-    @UserDefault(key: showWebOnLaunchIfTabsKey, defaultValue: showWebOnLaunchIfTabsDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
-    static var showWebOnLaunchIfTabs: Bool
 
     @UserDefault(key: createJournalOncePerWindowKey, defaultValue: createJournalOncePerWindowDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var createJournalOncePerWindow: Bool
