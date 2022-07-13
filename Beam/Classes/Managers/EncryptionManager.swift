@@ -29,7 +29,7 @@ extension EncryptionManagerError: LocalizedError {
 // https://medium.com/swlh/common-cryptographic-operations-in-swift-with-cryptokit-b30a4becc895
 class EncryptionManager {
     static let shared = EncryptionManager()
-    private var lock = RWLock()
+    private let lock = RWLock()
 
     enum Algorithm: String, CaseIterable {
         case ChaChaPoly

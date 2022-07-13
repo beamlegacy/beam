@@ -14,31 +14,33 @@ public protocol RWLockable {
     func writeUnlock()
 }
 
-public class RWLock: RWLockable {
-    private var lock = pthread_rwlock_t()
+public final class RWLock: RWLockable {
+    private let lock = UnsafeMutablePointer<pthread_rwlock_t>.allocate(capacity: 1)
 
     public init() {
-        pthread_rwlock_init(&lock, nil)
+        lock.initialize(to: pthread_rwlock_t())
+        pthread_rwlock_init(lock, nil)
     }
 
     public func readLock() {
-        pthread_rwlock_rdlock(&lock)
+        pthread_rwlock_rdlock(lock)
     }
 
     public func readUnlock() {
-        pthread_rwlock_unlock(&lock)
+        pthread_rwlock_unlock(lock)
     }
 
     public func writeLock() {
-        pthread_rwlock_wrlock(&lock)
+        pthread_rwlock_wrlock(lock)
     }
 
     public func writeUnlock() {
-        pthread_rwlock_unlock(&lock)
+        pthread_rwlock_unlock(lock)
     }
 
     deinit {
-        pthread_rwlock_destroy(&lock)
+        pthread_rwlock_destroy(lock)
+        lock.deallocate()
     }
 }
 
