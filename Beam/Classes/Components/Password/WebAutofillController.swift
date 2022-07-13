@@ -18,9 +18,9 @@ struct WebFieldAutofill: Codable {
     var background: String?
 }
 
-enum PasswordSaveAction {
+enum PasswordSaveAction: Equatable {
     case save
-    case update
+    case update(entry: PasswordManagerEntry)
     case saveSilently
 }
 
@@ -476,17 +476,18 @@ class WebAutofillController: NSObject, WebPageRelated {
             switch saveAction {
             case .save, .saveSilently:
                 savedHostname = HostnameCanonicalizer.shared.canonicalHostname(for: hostname) ?? hostname
-            case .update:
-                savedHostname = hostname
+            case .update(let entry):
+                savedHostname = entry.minimizedHost
             }
             self.passwordManager.save(hostname: savedHostname, username: credentials.username ?? "", password: credentials.password)
         }
     }
 
     private func saveCredentialsAction(hostname: String, credentials: PasswordManagerCredentialsBuilder.StoredCredentials) -> PasswordSaveAction? {
-        if let storedPassword = try? passwordManager.password(hostname: hostname, username: credentials.username ?? "") {
+        if let storedEntry = passwordManager.bestMatchingEntry(hostname: hostname, exactUsername: credentials.username ?? ""),
+           let storedPassword = try? passwordManager.password(hostname: storedEntry.minimizedHost, username: credentials.username ?? "") {
             guard credentials.password != storedPassword else { return nil }
-            return .update
+            return .update(entry: storedEntry)
         }
         return credentials.askSaveConfirmation ? .save : .saveSilently
     }
