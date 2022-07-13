@@ -146,6 +146,8 @@ public class BeamNote: BeamElement {
     public var contactId: UUID? { didSet { change(.meta) } }
     @Published public var noteSettings: NoteMetadata? = NoteMetadata() { didSet { change(.meta) } }
 
+    @Published public var tabGroups: [UUID] = [] { didSet { change(.meta) } }
+
     /// Tombstones is an array containing all the beamelement that once where in this note but that have been erased from it at some point.
     public var tombstones = Set<UUID>()
 
@@ -210,6 +212,7 @@ public class BeamNote: BeamElement {
         case contactId
         case tombstones
         case noteSettings
+        case tabGroups
     }
 
     private var isInitializingFromDecoder = false
@@ -251,6 +254,7 @@ public class BeamNote: BeamElement {
         contactId = try? container.decodeIfPresent(UUID.self, forKey: .contactId)
         tombstones = (try? container.decodeIfPresent(Set<UUID>.self, forKey: .tombstones)) ?? tombstones
         noteSettings = (try? container.decodeIfPresent(NoteMetadata.self, forKey: .noteSettings)) ?? NoteMetadata()
+        tabGroups = (try? container.decodeIfPresent([UUID].self, forKey: .tabGroups)) ?? []
         switch type {
         case .note:
             break
@@ -276,6 +280,9 @@ public class BeamNote: BeamElement {
         try container.encode(contactId, forKey: .contactId)
         try container.encode(noteSettings, forKey: .noteSettings)
         try container.encode(tombstones, forKey: .tombstones)
+        if !tabGroups.isEmpty {
+            try container.encode(tabGroups, forKey: .tabGroups)
+        }
         try super.encode(to: encoder)
     }
 
@@ -293,6 +300,7 @@ public class BeamNote: BeamElement {
         newNote.savedVersion = savedVersion
         newNote.publicationStatus = publicationStatus
         newNote.noteSettings = noteSettings
+        newNote.tabGroups = tabGroups
         if !withNewId { // We don't need to copy the tombstones if we create a separate new note
             newNote.tombstones = tombstones
         }

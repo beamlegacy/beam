@@ -42,6 +42,8 @@ extension NoteHeaderView {
         private var copyLinkDispatchItem: DispatchWorkItem?
         private var noteObservers = Set<AnyCancellable>()
 
+        @Published private(set) var tabGroupObjects: [TabGroupBeamObject]
+
         var canEditTitle: Bool {
             note?.type.isJournal == false
         }
@@ -49,6 +51,11 @@ extension NoteHeaderView {
         init(note: BeamNote? = nil, state: BeamState? = nil) {
             self.state = state
             self.note = note
+
+            tabGroupObjects = []
+            if let savedUUIDs = note?.tabGroups {
+                setTabGroups(with: savedUUIDs)
+            }
         }
 
         private func updateOnNoteChanged() {
@@ -288,6 +295,13 @@ extension NoteHeaderView {
                 return
             }
             state.data.pinnedManager.togglePin(note)
+        }
+
+        // MARK: - TabGroup
+        func setTabGroups(with tabGroupIds: [UUID]) {
+            guard let storeManager = TabGroupingStoreManager.shared else { return }
+            let tabs = storeManager.fetch(byIds: tabGroupIds)
+            self.tabGroupObjects = tabs
         }
     }
 }
