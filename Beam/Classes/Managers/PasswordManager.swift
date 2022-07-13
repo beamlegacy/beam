@@ -121,6 +121,15 @@ final class PasswordManager {
             .sorted(by: { $0.username.count > $1.username.count })
     }
 
+    func bestMatchingEntry(hostname: String, exactUsername username: String) -> PasswordManagerEntry? {
+        var matchingEntries = entries(for: hostname, options: .fuzzy)
+            .filter { username == $0.username }
+        if matchingEntries.count > 1 {
+            matchingEntries = matchingEntries.filter { $0.minimizedHost == hostname }
+        }
+        return matchingEntries.first
+    }
+
     func credentials(for host: String, completion: @escaping ([Credential]) -> Void) {
         guard let passwordsDB = passwordsDB else {
             completion([])
