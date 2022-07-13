@@ -31,8 +31,10 @@ struct LottieView: NSViewRepresentable {
 
     var animationSize: CGSize?
 
+    var completion: (() -> Void)?
+
     func makeNSView(context: NSViewRepresentableContext<LottieView>) -> AnimationContainerView {
-        AnimationContainerView(animationSize: animationSize)
+        AnimationContainerView(animationSize: animationSize, completion: completion)
     }
 
     func updateNSView(_ animationContainerView: AnimationContainerView, context: NSViewRepresentableContext<LottieView>) {
@@ -41,9 +43,11 @@ struct LottieView: NSViewRepresentable {
         animationContainerView.isPlaying = playing
         animationContainerView.speed = speed
         animationContainerView.loopMode = loopMode
+        animationContainerView.completion = completion
     }
 
     final class AnimationContainerView: NSView {
+        var completion: (() -> Void)?
 
         var animationName: String? {
             didSet {
@@ -75,7 +79,9 @@ struct LottieView: NSViewRepresentable {
                 guard isPlaying != oldValue else { return }
 
                 if isPlaying {
-                    animationView.play()
+                    animationView.play(completion: { _ in
+                        self.completion?()
+                    })
                 } else {
                     animationView.stop()
                 }
@@ -98,7 +104,9 @@ struct LottieView: NSViewRepresentable {
 
         private let animationView: AnimationView
 
-        init(animationSize: CGSize?) {
+        init(animationSize: CGSize?, completion: (() -> Void)?) {
+            self.completion = completion
+            
             animationView = AnimationView()
             animationView.contentMode = .scaleAspectFit
             animationView.loopMode = loopMode
