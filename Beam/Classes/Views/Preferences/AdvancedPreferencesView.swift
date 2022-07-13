@@ -41,6 +41,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
     @State private var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
     @State private var isDirectUploadOn = Configuration.beamObjectDataUploadOnSeparateCall
     @State private var isDirectUploadNIOOn = Configuration.directUploadNIO
+    @State private var isDirectUploadAllObjectsOn = Configuration.directUploadAllObjects
     @State private var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
     @State private var isWebsocketEnabled = Configuration.websocketEnabled
     @State private var restBeamObject = Configuration.beamObjectOnRest
@@ -157,9 +158,13 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                 Preferences.Section(title: "Direct Upload") {
                     DirectUpload
                 }
-                Preferences.Section(title: "Direct Upload use NIO") {
+                Preferences.Section(title: "Direct Upload use NIO (requires resync from scratch)") {
                     DirectUploadNIO
                 }
+                Preferences.Section(title: "Direct Upload All Objects (requires resync from scratch)") {
+                    DirectUploadAllObjects
+                }
+
                 Preferences.Section(title: "Direct Download") {
                     DirectDownload
                 }
@@ -737,6 +742,17 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onChange(of: isDirectUploadNIOOn) {
                 Configuration.directUploadNIO = $0
+            }
+    }
+
+    private var DirectUploadAllObjects: some View {
+        return Toggle(isOn: $isDirectUploadAllObjectsOn) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([isDirectUploadAllObjectsOn].publisher.first()) {
+                Configuration.directUploadAllObjects = $0
             }
     }
 
