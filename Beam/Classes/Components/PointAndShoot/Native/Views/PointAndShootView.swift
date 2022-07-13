@@ -135,7 +135,7 @@ struct PointAndShootView: View {
                         if let targetNote = targetNote,
                            let shootGroup = pns.activeShootGroup {
                             pns.addShootToNote(targetNote: targetNote, withNote: note, group: shootGroup, completion: {
-                                completion()
+                                completion(nil)
                                 self.offset = 10
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
                                     self.offset = 0

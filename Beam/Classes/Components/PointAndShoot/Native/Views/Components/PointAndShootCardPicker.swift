@@ -20,7 +20,12 @@ struct PointAndShootCardPicker: View {
 
     var focusOnAppear = true
     var onShare: ((_ service: ShareService?) -> Void)?
-    var onComplete: ((_ targetNote: BeamNote?, _ comment: String?, _ completion: @escaping () -> Void) -> Void)?
+    var onComplete: ((_ targetNote: BeamNote?, _ comment: String?, _ completion: @escaping (ExternalCaptureConfirmation?) -> Void) -> Void)?
+    var canShowCopyShareView: Bool = true
+
+    typealias ExternalCaptureConfirmation = PointAndShoot.ShootConfirmation
+    @State var externalCaptureConfirmation: PointAndShoot.ShootConfirmation?
+    var captureFromOutsideWebPage = false
 
     @StateObject private var autocompleteModel = DestinationNoteAutocompleteList.Model()
 
@@ -124,18 +129,26 @@ struct PointAndShootCardPicker: View {
         )
     }
 
+    var confirmation: PointAndShoot.ShootConfirmation? {
+        if captureFromOutsideWebPage {
+            return externalCaptureConfirmation
+        } else {
+            return completedGroup?.confirmation
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // MARK: - Top Half
             HStack(spacing: BeamSpacing._40) {
                 // MARK: - Prefix
-                PrefixLabel(completed: completed && completedGroup != nil, confirmation: completedGroup?.confirmation)
+                PrefixLabel(completed: completed, confirmation: captureFromOutsideWebPage ? externalCaptureConfirmation : completedGroup?.confirmation)
 
                 // MARK: - TextField
                 ZStack {
                     if !completed {
                         textFieldView
-                    } else if completedGroup?.confirmation == .success {
+                    } else if confirmation == .success {
                         Text(destinationCardName ?? getFinalCardName())
                             .foregroundColor(BeamColor.Beam.swiftUI)
                             .font(BeamFont.regular(size: 13).swiftUI)
@@ -146,12 +159,12 @@ struct PointAndShootCardPicker: View {
                 Spacer()
 
                 // MARK: - Icon
-                if completed, let group = completedGroup {
-                    let confirmationIcon = group.confirmation == .success ? "collect-generic" : "tool-close"
+                if completed {
+                    let confirmationIcon = confirmation == .success ? "collect-generic" : "tool-close"
                     Icon(name: confirmationIcon, width: 16, color: BeamColor.Generic.text.swiftUI)
                         .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15).delay(0.05)))
                         .onTapGesture {
-                            if group.confirmation != .failure {
+                            if confirmation != .failure, let group = completedGroup {
                                 state.navigateToNote(id: group.noteInfo.id)
                             }
                         }
@@ -316,7 +329,7 @@ extension PointAndShootCardPicker {
 
     private func onCancelEditing() {
         guard !completed else { return }
-        onComplete?(nil, nil, {})
+        onComplete?(nil, nil, {_ in})
     }
 
     private func onFinishEditing(_ withOption: Bool = false) {
@@ -328,15 +341,23 @@ extension PointAndShootCardPicker {
         if !withOption,
            let date = autocompleteModel.getDateForCardReplacementJournalNote(cardSearchField) {
             let note = fetchOrCreateJournalNote(date: date)
-            onComplete?(note, nil, {
+            onComplete?(note, nil) { externalShootConfirmation in
                 shootCompleted = true
-            })
+
+                if captureFromOutsideWebPage {
+                    externalCaptureConfirmation = externalShootConfirmation
+                }
+            }
         } else {
             let cardName = getFinalCardName(withOption)
             let note = fetchOrCreateNote(named: cardName)
-            onComplete?(note, nil, {
+            onComplete?(note, nil) { externalShootConfirmation in
                 shootCompleted = true
-            })
+
+                if captureFromOutsideWebPage {
+                    externalCaptureConfirmation = externalShootConfirmation
+                }
+            }
         }
     }
 
@@ -444,7 +465,7 @@ extension PointAndShootCardPicker {
     }
 
     private var shouldShowCopyShareView: Bool {
-        !completed && (cardSearchField.isEmpty || !userInputtedText)
+        !completed && (cardSearchField.isEmpty || !userInputtedText) && canShowCopyShareView
     }
 
     private var copyShareView: some View {
@@ -475,6 +496,63 @@ extension PointAndShootCardPicker {
             .padding(BeamSpacing._80)
             .blendModeLightMultiplyDarkScreen()
         }
+    }
+}
+
+extension PointAndShootCardPicker {
+
+    static func captureWindowAppearAnimation() -> CAAnimation {
+        let scale = CASpringAnimation()
+        scale.stiffness = 400
+        scale.damping = 24
+        let duration = 0.2
+
+        scale.duration = duration
+        scale.fromValue = CATransform3DMakeScale(0.9, 0.9, 1.0)
+        scale.toValue = CATransform3DMakeScale(1.0, 1.0, 1.0)
+        scale.keyPath = "transform"
+
+        let opacity = CABasicAnimation()
+        opacity.duration = 0.2
+        opacity.fromValue = 0
+        opacity.toValue = 1
+        opacity.keyPath = "opacity"
+
+        let group = CAAnimationGroup()
+        group.animations = [scale, opacity]
+
+        return group
+    }
+
+    static func captureWindowDisappearAnimationAndClose(in window: NSWindow?) -> CAAnimation {
+        let scaleUp = CABasicAnimation()
+        scaleUp.duration = 0.1
+        scaleUp.fromValue = CATransform3DMakeScale(1.0, 1.0, 1.0)
+        scaleUp.toValue = CATransform3DMakeScale(1.03, 1.03, 1.0)
+        scaleUp.keyPath = "transform"
+
+        let scaleDown = CABasicAnimation()
+        scaleDown.duration = 0.25
+        scaleDown.fromValue = CATransform3DMakeScale(1.03, 1.03, 1.0)
+        scaleDown.toValue = CATransform3DMakeScale(0.8, 0.8, 1.0)
+        scaleDown.keyPath = "transform"
+        scaleDown.beginTime = 0.1
+
+        let opacity = CABasicAnimation()
+        opacity.duration = 0.2
+        opacity.fromValue = 1
+        opacity.toValue = 0
+        opacity.keyPath = "opacity"
+
+        let group = CAAnimationGroup()
+        group.animations = [scaleUp, scaleDown, opacity]
+        group.completion = { completed in
+            window?.close()
+        }
+
+        window?.contentView?.layer?.opacity = 0
+
+        return group
     }
 }
 

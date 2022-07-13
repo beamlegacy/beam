@@ -27,66 +27,69 @@ class TabGroupingStoreManagerTests: XCTestCase {
         return tab
     }
 
-    func testGroupIsSavedWhenUserChangesMetadata() {
+    @MainActor
+    func testGroupIsSavedWhenUserChangesMetadata() async {
         let group = TabGroup(pageIds: [])
-        var saved = sut.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: [])
+        var saved = await sut.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: [])
         XCTAssertFalse(saved) // no title, not saved
 
         group.changeTitle("New Title")
-        saved = sut.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: [])
+        saved = await sut.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: [])
         XCTAssertTrue(saved)
 
         group.changeColor(.init())
-        saved = sut.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: [])
+        saved = await sut.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: [])
         XCTAssertTrue(saved)
     }
 
-    func testGroupIsSavedWhenClusteringAddPages() {
+    @MainActor
+    func testGroupIsSavedWhenClusteringAddPages() async {
         var ids = [UUID(), UUID()]
         var tabs = ids.map { tab(withPageId: $0) }
         let group = TabGroup(pageIds: ids, title: "Title")
-        var saved = sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
+        var saved = await sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
         XCTAssertTrue(saved)
 
         // same pages, no save
-        saved = sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
+        saved = await sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
         XCTAssertFalse(saved)
 
         ids.append(UUID())
         tabs = ids.map { tab(withPageId: $0) }
         group.updatePageIds(ids)
         // adding page, we save
-        saved = sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
+        saved = await sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
         XCTAssertTrue(saved)
 
         ids.removeLast()
         tabs = ids.map { tab(withPageId: $0) }
         group.updatePageIds(ids)
         // less pages, no save
-        saved = sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
+        saved = await sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
         XCTAssertFalse(saved)
 
     }
 
-    func testGroupIsSavedWhenUserChangePages() {
+    @MainActor
+    func testGroupIsSavedWhenUserChangePages() async {
         var ids = [UUID(), UUID()]
         var tabs = ids.map { tab(withPageId: $0) }
         let group = TabGroup(pageIds: ids, title: "Title")
-        var saved = sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
+        var saved = await sut.groupDidUpdate(group, origin: .clustering, openTabs: tabs)
         XCTAssertTrue(saved)
 
         ids.append(UUID())
         tabs = ids.map { tab(withPageId: $0) }
         group.updatePageIds(ids)
         // adding page, we save
-        saved = sut.groupDidUpdate(group, origin: .userGroupReordering, openTabs: tabs)
+        saved = await sut.groupDidUpdate(group, origin: .userGroupReordering, openTabs: tabs)
         XCTAssertTrue(saved)
 
         ids.removeLast()
         tabs = ids.map { tab(withPageId: $0) }
         group.updatePageIds(ids)
         // less pages from user, we save
-        saved = sut.groupDidUpdate(group, origin: .userGroupReordering, openTabs: tabs)
+        saved = await sut.groupDidUpdate(group, origin: .userGroupReordering, openTabs: tabs)
         XCTAssertTrue (saved)
     }
 

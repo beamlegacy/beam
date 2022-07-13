@@ -43,4 +43,41 @@ extension NSImage {
         let jpegData = bitmapRep.representation(using: NSBitmapImageRep.FileType.jpeg, properties: [:])!
         return jpegData
     }
+
+    // MARK: - Resizing
+    /// Resize the image to the given size.
+    ///
+    /// - Parameter size: The size to resize the image to.
+    /// - Returns: The resized image.
+    func resize(withSize targetSize: NSSize) -> NSImage? {
+        let frame = NSRect(x: 0, y: 0, width: targetSize.width, height: targetSize.height)
+        guard let representation = self.bestRepresentation(for: frame, context: nil, hints: nil) else {
+            return nil
+        }
+        let image = NSImage(size: targetSize, flipped: false, drawingHandler: { (_) -> Bool in
+            return representation.draw(in: frame)
+        })
+
+        return image
+    }
+
+    /// Copy the image and resize it to the supplied size, while maintaining it's
+    /// original aspect ratio.
+    ///
+    /// - Parameter size: The target size of the image.
+    /// - Returns: The resized image.
+    func resizeMaintainingAspectRatio(withSize targetSize: NSSize) -> NSImage? {
+        let newSize: NSSize
+        let widthRatio  = targetSize.width / self.size.width
+        let heightRatio = targetSize.height / self.size.height
+
+        if widthRatio > heightRatio {
+            newSize = NSSize(width: floor(self.size.width * widthRatio),
+                             height: floor(self.size.height * widthRatio))
+        } else {
+            newSize = NSSize(width: floor(self.size.width * heightRatio),
+                             height: floor(self.size.height * heightRatio))
+        }
+        return self.resize(withSize: newSize)
+    }
 }

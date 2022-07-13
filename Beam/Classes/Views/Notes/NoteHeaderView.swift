@@ -13,7 +13,7 @@ struct NoteHeaderView: View {
 
     private static let leadingPadding: CGFloat = 18
     static let topPadding: CGFloat = PreferencesManager.editorHeaderTopPadding
-    @ObservedObject var model: NoteHeaderView.ViewModel
+    @StateObject var model: NoteHeaderView.ViewModel = NoteHeaderView.ViewModel()
     @ObservedObject var pinnedManager: PinnedNotesManager
     @EnvironmentObject var data: BeamData
     @EnvironmentObject var windowInfo: BeamWindowInfo
@@ -49,6 +49,7 @@ struct NoteHeaderView: View {
                                 model.commitRenameCard(fromTextField: true)
                               })
                     .allowsHitTesting(model.isEditingTitle)
+                    .frame(height: 40)
             } else {
                 Text(model.titleText)
                     .lineLimit(2)
@@ -62,9 +63,6 @@ struct NoteHeaderView: View {
         .animation(nil)
         .wiggleEffect(animatableValue: model.wiggleValue)
         .animation(model.wiggleValue > 0 ? BeamAnimation.easeInOut(duration: 0.3) : nil)
-        // force reloading the view on note change to clean up text states
-        // and enables appear/disappear events between notes
-        .id(model.note)
         .onDisappear {
             model.commitRenameCard(fromTextField: false)
         }
@@ -244,6 +242,11 @@ struct NoteHeaderView: View {
                     actionsView
                 }
                 subtitleInfoView
+                if let note = model.note, !model.tabGroupObjects.isEmpty {
+                    EditorTabGroupsContainerView(tabGroups: model.tabGroupObjects, note: note)
+                        .padding(.top, 45)
+                        .padding(.bottom, 45)
+                }
             }
         }
         .padding(.top, self.topPadding)

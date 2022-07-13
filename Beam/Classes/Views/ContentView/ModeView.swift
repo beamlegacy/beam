@@ -35,21 +35,17 @@ struct ModeView: View {
         .transition(.webContentTransition(windowInfo.windowIsResizing))
     }
 
-    private var noteContent: some View {
-        Group {
-            if let currentNote = state.currentNote {
-                NoteView(note: currentNote, containerGeometry: containerGeometry, topInset: cardScrollViewTopInset, leadingPercentage: PreferencesManager.editorLeadingPercentage,
-                         centerText: false, initialFocusedState: state.notesFocusedStates.currentFocusedState) { scrollPoint in
+    @ViewBuilder private var noteContent: some View {
+        if let currentNote = state.currentNote {
+            NoteView(note: currentNote, containerGeometry: containerGeometry, topInset: cardScrollViewTopInset, leadingPercentage: PreferencesManager.editorLeadingPercentage,
+                     centerText: false, initialFocusedState: state.notesFocusedStates.currentFocusedState) { scrollPoint in
 
-                    let isScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle - cardScrollViewTopInset
-                    setContentIsScrolled(isScrolled)
-                    CustomPopoverPresenter.shared.dismissPopovers()
-                }
-                .onAppear {
-                    setContentIsScrolled(false)
-                }
-                .transition(.noteContentTransition(transitionModel: transitionModel))
+                let isScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle - cardScrollViewTopInset
+                setContentIsScrolled(isScrolled)
+                CustomPopoverPresenter.shared.dismissPopovers()
             }
+                     .onAppear { setContentIsScrolled(false) }
+                     .transition(.noteContentTransition(transitionModel: transitionModel))
         }
     }
 

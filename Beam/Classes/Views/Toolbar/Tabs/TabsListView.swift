@@ -710,6 +710,12 @@ extension TabsListView {
         menu.addItem(nameAndColorItem)
         menu.addItem(.fullWidthSeparator())
 
+        menu.addItem(withTitle: "Capture Group to a Note…") { _ in
+            let location = event?.locationInWindow ?? .zero
+            presentCaptureWindow(for: group, at: location)
+        }
+        menu.addItem(.separator())
+
         menu.addItem(withTitle: "New Tab in Group") { _ in
             state?.browserTabsManager.createNewTab(inGroup: group)
         }
@@ -733,6 +739,60 @@ extension TabsListView {
             menu.popUp(positioning: nil, at: event.locationInWindow, in: event.window?.contentView)
         } else {
             menu.popUp(positioning: nil, at: .zero, in: nil)
+        }
+    }
+
+    private func presentCaptureWindow(for group: TabGroup, at location: CGPoint) {
+        guard let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(withShadow: false, movable: false) else {
+            return
+        }
+
+        let extraPadding = 60.0
+        window.extraPadding = extraPadding
+
+        let view = buildExternalCaptureView(for: group, in: window)
+        window.setView(with: view, at: CGPoint(x: location.x - extraPadding, y: location.y + extraPadding), fromTopLeft: true)
+
+        guard let view = window.contentView else { return }
+        let animation = PointAndShootCardPicker.captureWindowAppearAnimation()
+        view.layer?.add(animation, forKey: "appearance")
+
+        window.makeKeyAndOrderFront(nil)
+    }
+
+    private func buildExternalCaptureView(for group: TabGroup, in window: NSWindow) -> some View {
+        FormatterViewBackgroundV2 {
+            PointAndShootCardPicker(allowAnimation: .constant(true), onComplete: { targetNote, _, completion in
+                addGroup(group, toNote: targetNote, from: window, completion: completion)
+            }, canShowCopyShareView: false, captureFromOutsideWebPage: true)
+        }
+            .environmentObject(state)
+            .environmentObject(state.data)
+            .environmentObject(state.browserTabsManager)
+            .frame(width: 300)
+            .fixedSize()
+    }
+
+    private func addGroup(_ group: TabGroup,
+                          toNote targetNote: BeamNote?,
+                          from window: NSWindow,
+                          completion: (PointAndShootCardPicker.ExternalCaptureConfirmation?)->()) {
+        guard let note = targetNote else {
+            let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
+            window.contentView?.layer?.add(anim, forKey: "disappear")
+            return
+        }
+        let tabGroupingManager = state.data.tabGroupingManager
+        let copiedGroup = tabGroupingManager.copyForSharing(group)
+        if copiedGroup.title == nil {
+            let title = TabGroupingStoreManager.suggestedDefaultTitle(for: group)
+            tabGroupingManager.renameGroup(copiedGroup, title: title)
+        }
+        note.tabGroups.append(copiedGroup.id)
+        completion(.success)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+            let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
+            window.contentView?.layer?.add(anim, forKey: "disappear")
         }
     }
 }
