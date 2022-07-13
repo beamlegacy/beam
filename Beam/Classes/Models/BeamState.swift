@@ -959,12 +959,15 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
 
     private func setDefaultDisplayMode() {
-        if PreferencesManager.showWebOnLaunchIfTabs {
-            let openTabs = browserTabsManager.tabs
-            if openTabs.count > 0 {
-                mode = .web
-            }
-            return
+        let destinationMode: Mode
+        switch PreferencesManager.defaultWindowMode {
+        case .webTabs where hasBrowserTabs:
+            destinationMode = .web
+        default:
+            destinationMode = .today
+        }
+        if mode != destinationMode {
+            mode = destinationMode
         }
     }
 

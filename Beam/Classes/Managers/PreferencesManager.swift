@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 class PreferencesManager {
     static let contentWidth = 726.0
@@ -59,23 +60,25 @@ enum BeamAppearance: Int {
 }
 
 // MARK: - Keys
-extension PreferencesManager {
+private extension PreferencesManager {
     static let beamAppearanceKey = "beamAppearance"
     static let fontMinKey = "fontMin"
     static let fontSizeIndexKey = "fontSizeIndex"
     static let tabToHighlightKey = "tabToHighlight"
     static let autoUpdateKey = "autoUpdate"
     static let dataBackupOnUpdate = "dataBackupOnUpdate"
+    static let defaultWindowModeKey = "defaultWindowMode"
 }
 
 // MARK: - Default Values
-extension PreferencesManager {
+private extension PreferencesManager {
     static let beamAppearancePreferenceDefault = 2
     static let isFontMinOnPreferenceDefault = false
     static let fontSizeIndexPreferenceDefault = 5
     static let isTabToHighlightOnDefault = false
     static let isAutoUpdateOnDefault = true
     static let isDataBackupOnUpdateOnDefault = true
+    static let defaultWindowModeDefault = PreferencesDefaultWindowMode.journal
 }
 
 extension PreferencesManager {
@@ -96,4 +99,27 @@ extension PreferencesManager {
 
     @UserDefault(key: dataBackupOnUpdate, defaultValue: isDataBackupOnUpdateOnDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
     static var isDataBackupOnUpdateOn: Bool
+
+    @UserDefault(key: defaultWindowModeKey, defaultValue: defaultWindowModeDefault.rawValue, suiteName: BeamUserDefaults.generalPreferences.suiteName)
+    private static var defaultWindowModeValue: Int
+    static var defaultWindowMode: PreferencesDefaultWindowMode {
+        get { .init(rawValue: defaultWindowModeValue) ?? defaultWindowModeDefault }
+        set { defaultWindowModeValue = newValue.rawValue }
+    }
+}
+
+extension PreferencesManager {
+    enum PreferencesDefaultWindowMode: Int, CaseIterable, Identifiable {
+        case journal
+        case webTabs
+
+        var id: Int { rawValue }
+
+        var description: LocalizedStringKey {
+            switch self {
+            case .journal: return "Journal"
+            case .webTabs: return "Web Tabs"
+            }
+        }
+    }
 }
