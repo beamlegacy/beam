@@ -256,8 +256,6 @@ class BeamObjectManager {
     internal func parseFilteredObjects(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws {
         var objectsInErrors: Set<String> = Set()
 
-        let group = DispatchGroup()
-
         var errors: [Error] = []
 
         // swiftlint:disable:next date_init
@@ -295,7 +293,7 @@ class BeamObjectManager {
             }
 
             do {
-                try translator(managerInstance, objects.filter({ $0.deletedAt == nil }))
+                try translator(managerInstance, objects)
             } catch {
                 Logger.shared.logError("Error parsing remote \(key) beamobjects: \(error.localizedDescription). Retrying one by one.",
                                        category: .beamObjectNetwork)
