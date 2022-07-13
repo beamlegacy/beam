@@ -36,6 +36,7 @@ struct ButtonLabelStyle {
     var backgroundCornerRadius: CGFloat = 4
     var radiusCorners = RectCorner.allCorners
     var leadingPaddingAdjustment: CGFloat = 0
+    var trailingPaddingAdjustment: CGFloat = 0
 }
 
 struct ButtonLabel: View {
@@ -130,7 +131,7 @@ struct ButtonLabel: View {
             }
         }
         .padding(.leading, style.horizontalPadding - style.leadingPaddingAdjustment)
-        .padding(.trailing, style.horizontalPadding)
+        .padding(.trailing, style.horizontalPadding - style.trailingPaddingAdjustment)
         .padding(.vertical, style.verticalPadding)
         .background(backgroundColor)
         .if(style.disableAnimations) {

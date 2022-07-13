@@ -27,6 +27,8 @@ class PopoverWindow: NSWindow {
     private var _useBeamShadow: Bool
     private var _autocloseIfNotMoved: Bool
 
+    var extraPadding: CGFloat = 0
+
     var didClose: (() -> Void)?
 
     init(canBecomeMain: Bool, canBecomeKey: Bool = true, useBeamShadow: Bool = false, lightBeamShadow: Bool = false, autocloseIfNotMoved: Bool = true) {
@@ -183,6 +185,8 @@ class PopoverWindow: NSWindow {
     }
 
     private func updateViewIfNeeded<Content>(_ view: Content)  -> some View where Content: View {
-        view.if(_useBeamShadow, transform: { $0.background(RoundedRectangle(cornerRadius: 10.0).stroke(strokeColor.swiftUI, lineWidth: 1)).shadow(color: self.shadowColor.swiftUI, radius: 15, x: 0, y: 12).padding(Self.customShadowPadding) })
+        view
+            .if(_useBeamShadow, transform: { $0.background(RoundedRectangle(cornerRadius: 10.0).stroke(strokeColor.swiftUI, lineWidth: 1)).shadow(color: self.shadowColor.swiftUI, radius: 15, x: 0, y: 12).padding(Self.customShadowPadding) })
+            .padding(extraPadding)
     }
 }
