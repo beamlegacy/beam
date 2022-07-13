@@ -8,7 +8,18 @@ final class ContentViewMenuItem<ContentView: View>: NSMenuItem {
 
     private final class ContainerView: NSView {
         override var acceptsFirstResponder: Bool {
-            return true
+            return storage
+        }
+
+        private let storage: Bool
+
+        init(acceptsFirstResponder: Bool) {
+            self.storage = acceptsFirstResponder
+            super.init(frame: .zero)
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
         }
     }
 
@@ -16,6 +27,7 @@ final class ContentViewMenuItem<ContentView: View>: NSMenuItem {
     /// - Parameters:
     ///   - title: The title of the menu item.
     ///   - keyEquivalent: A string representing a keyboard key to be used as the key equivalent.
+    ///   - acceptsFirstResponder: A Boolean value that indicates whether the responder accepts first responder status, defaults to `true.
     ///   - contentView: A ``SwiftUI/ViewBuilder`` that produces the view.
     ///   - insets: A ``NSEdgeInsets`` for the content, defaults to `.zero`.
     ///   - customization: A closure allowing to further customize the view hosting the SwiftUI view.
@@ -25,6 +37,7 @@ final class ContentViewMenuItem<ContentView: View>: NSMenuItem {
     init(
         title: String,
         keyEquivalent: String = "",
+        acceptsFirstResponder: Bool = true,
         @ViewBuilder contentView: @escaping ContentBuilder,
         insets: NSEdgeInsets = .init(top: .zero, left: .zero, bottom: .zero, right: .zero),
         customization: CustomizationHandler? = nil
@@ -34,7 +47,7 @@ final class ContentViewMenuItem<ContentView: View>: NSMenuItem {
         let hostingView = NSHostingView<ContentView>(rootView: contentView())
         hostingView.translatesAutoresizingMaskIntoConstraints = false
 
-        let container = ContainerView(frame: .zero)
+        let container = ContainerView(acceptsFirstResponder: acceptsFirstResponder)
         container.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(hostingView)
 
