@@ -70,11 +70,12 @@ class NotePublishTests: BaseTest {
     func testPublishUnpublishNote() throws {
 
         journalView = setupStaging(withRandomAccount: true)
-        shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+        OmniBoxTestView().navigateToNoteViaPivotButton()
         let noteNameToBeCreated = "Test1"
         
         step("Given I create \(noteNameToBeCreated) note"){
-            uiMenu.createAndOpenNote()
+            noteView = uiMenu.createAndOpenNote()
+            XCTAssertTrue(noteView.waitForNoteViewToLoad(), "Note view wasn't loaded")
         }
         
         step("When I publish the note") {
@@ -94,7 +95,7 @@ class NotePublishTests: BaseTest {
             noteView.shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             noteView.unpublishNote()
         }
-        
+        /*https://linear.app/beamapp/issue/BE-4753/activate-unpublishing-ui-test-scenario
         step("Then I can not open it in the web") {
             switchReloadAndAssert(noteName: noteNameToBeCreated, isPublished: false)
         }
@@ -117,7 +118,7 @@ class NotePublishTests: BaseTest {
         
         step("Then I can not open it in the web") {
             switchReloadAndAssert(noteName: noteNameToBeCreated, isPublished: false)
-        }
+        }*/
     }
     
     func testProfileAddAndRemovePublishedNote() {
