@@ -27,7 +27,7 @@ enum PasswordSaveAction {
 // swiftlint:disable type_body_length
 class WebAutofillController: NSObject, WebPageRelated {
     private var scope = Set<AnyCancellable>()
-    private var lock = RWLock()
+    private let lock = RWLock()
     private let passwordManager: PasswordManager
     private let creditCardManager: CreditCardAutofillManager
     private let userInfoStore: UserInformationsStore

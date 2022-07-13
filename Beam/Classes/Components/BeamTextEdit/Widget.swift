@@ -793,7 +793,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return nil
     }
 
-    private var lock = RWLock()
+    private let lock = RWLock()
     private var _layers: [String: Layer] = [:]
     internal var layers: [String: Layer] {
         get {

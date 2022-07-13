@@ -440,7 +440,7 @@ public class BeamNote: BeamElement {
     private static var fetchedNotes: [UUID: WeakReference<BeamNote>] = [:]
     private static var fetchedNotesTitles: [String: UUID] = [:]
     private static var fetchedNotesCancellables: [UUID: Cancellable] = [:]
-    private static var fetchedLock = RWLock()
+    private static let fetchedLock = RWLock()
 
     public func createdByUser() {
         score += 0.1
@@ -466,7 +466,7 @@ public class BeamNote: BeamElement {
         return "BeamNode(\(id)) [\(children.count) children]: \(title)"
     }
 
-    public var lock = RWLock()
+    public let lock = RWLock()
 
     public override func readLock() {
         lock.readLock()
