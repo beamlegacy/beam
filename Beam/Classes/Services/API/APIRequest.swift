@@ -6,23 +6,12 @@ import Vinyl
 // swiftlint:disable file_length
 
 class BeamURLSession {
-    static var configuration: URLSessionConfiguration = {
-        // swiftlint:disable:next force_cast
-        var conf = URLSessionConfiguration.default.copy() as! URLSessionConfiguration
-        if Configuration.env == .test {
-            return conf
-        }
-        conf.httpShouldUsePipelining = true
-        // Used for fast parallel S3 object requests.
-        conf.httpMaximumConnectionsPerHost = 100
-        return conf
-    }()
-    static var shared = URLSession(configuration: BeamURLSession.configuration,
+    static var shared = URLSession(configuration: URLSessionConfiguration.default,
                                    delegate: BeamURLSessionDelegate(),
                                    delegateQueue: nil)
     static var shouldNotBeVinyled = false
     static func reset() {
-        Self.shared = URLSession(configuration: BeamURLSession.configuration,
+        Self.shared = URLSession(configuration: URLSessionConfiguration.default,
                                  delegate: BeamURLSessionDelegate(),
                                  delegateQueue: nil)
     }

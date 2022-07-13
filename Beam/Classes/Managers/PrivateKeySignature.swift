@@ -53,6 +53,9 @@ class PrivateKeySignatureManager: BeamObjectManagerDelegate {
     static var shared = PrivateKeySignatureManager()
 
     internal static var conflictPolicy: BeamObjectConflictResolution = .replace
+    static var uploadType: BeamObjectRequestUploadType {
+        Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+    }
     internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "PrivateKeySignatureManager BeamObjectManager backgroundQueue", qos: .userInitiated)
     var privateKeySignature: PrivateKeySignature { PrivateKeySignature() }
 

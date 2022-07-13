@@ -164,6 +164,9 @@ class ContactsManager {
 
 extension ContactsManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
+    static var uploadType: BeamObjectRequestUploadType {
+        Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+    }
     internal static var backgroundQueue = DispatchQueue(label: "ContactsManager BeamObjectManager backgroundQueue", qos: .userInitiated)
     func willSaveAllOnBeamObjectApi() {}
 
