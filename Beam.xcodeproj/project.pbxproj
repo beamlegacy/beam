@@ -107,6 +107,10 @@
 		3315DC922667859A002A47CF /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB72325B9AAA200959146 /* Fakery */; };
 		3315DC952667859A002A47CF /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 964FE5E02625D8AA00966E03 /* GRDB */; };
 		3315DC962667859A002A47CF /* OAuthSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 52CA277B26401D7000146A00 /* OAuthSwift */; };
+		3318B42A28528101002ACA34 /* EditorTabGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3318B42928528101002ACA34 /* EditorTabGroupView.swift */; };
+		3318B434285281AA002ACA34 /* TabCapsule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3318B433285281AA002ACA34 /* TabCapsule.swift */; };
+		3318B436285281F1002ACA34 /* TabPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3318B435285281F1002ACA34 /* TabPreview.swift */; };
+		3318B44028534D08002ACA34 /* EditorTabGroupsContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3318B43F28534D08002ACA34 /* EditorTabGroupsContainerView.swift */; };
 		3320D92B283D0D5D002A2CA4 /* PinnedNotesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3320D92A283D0D5D002A2CA4 /* PinnedNotesManager.swift */; };
 		332AB2F026FE17D6007717D8 /* AppDelegate+UserInfos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */; };
 		332AB2F626FE2461007717D8 /* PublishNoteAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332AB2F526FE2461007717D8 /* PublishNoteAPITests.swift */; };
@@ -1719,6 +1723,10 @@
 		330D3823265FC6B200A2536B /* DownloadCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadCell.swift; sourceTree = "<group>"; };
 		3312203328097382006A5EA1 /* UpdatePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePanel.swift; sourceTree = "<group>"; };
 		331220352809BFEB006A5EA1 /* SimpleHostingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHostingWindow.swift; sourceTree = "<group>"; };
+		3318B42928528101002ACA34 /* EditorTabGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorTabGroupView.swift; sourceTree = "<group>"; };
+		3318B433285281AA002ACA34 /* TabCapsule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabCapsule.swift; sourceTree = "<group>"; };
+		3318B435285281F1002ACA34 /* TabPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPreview.swift; sourceTree = "<group>"; };
+		3318B43F28534D08002ACA34 /* EditorTabGroupsContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorTabGroupsContainerView.swift; sourceTree = "<group>"; };
 		3320D92A283D0D5D002A2CA4 /* PinnedNotesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedNotesManager.swift; sourceTree = "<group>"; };
 		332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+UserInfos.swift"; sourceTree = "<group>"; };
 		332AB2F526FE2461007717D8 /* PublishNoteAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishNoteAPITests.swift; sourceTree = "<group>"; };
@@ -3745,6 +3753,17 @@
 			path = Update;
 			sourceTree = "<group>";
 		};
+		3318B4322852818C002ACA34 /* TabGroup */ = {
+			isa = PBXGroup;
+			children = (
+				3318B42928528101002ACA34 /* EditorTabGroupView.swift */,
+				3318B433285281AA002ACA34 /* TabCapsule.swift */,
+				3318B435285281F1002ACA34 /* TabPreview.swift */,
+				3318B43F28534D08002ACA34 /* EditorTabGroupsContainerView.swift */,
+			);
+			path = TabGroup;
+			sourceTree = "<group>";
+		};
 		33353EB326F0EA6B00063078 /* Help and Feedback */ = {
 			isa = PBXGroup;
 			children = (
@@ -4415,6 +4434,7 @@
 				A587690326FA0E8200E8CC93 /* NoteHeaderPublishButton.swift */,
 				A05D81632828D5950082455D /* DropDownButton.swift */,
 				A0F49B3928293C4B00D75330 /* SocialShareContextMenu.swift */,
+				3318B4322852818C002ACA34 /* TabGroup */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -8797,6 +8817,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3318B44028534D08002ACA34 /* EditorTabGroupsContainerView.swift in Sources */,
 				37B85B8027A2C81B003871F9 /* DownloadListProtocol.swift in Sources */,
 				525098EA264E9824002D1548 /* HyperlinkFormatterView.swift in Sources */,
 				A03E64A6282CFF8D0003A7B2 /* RoundedCornersModifier.swift in Sources */,
@@ -8807,6 +8828,7 @@
 				DA52E980276CE026008D4990 /* BrowsingTreeProcessor.swift in Sources */,
 				522D48A62719D1F20038DB81 /* LoggerSplitViewController.swift in Sources */,
 				0325629326051D3B006513E4 /* RBKVO.m in Sources */,
+				3318B436285281F1002ACA34 /* TabPreview.swift in Sources */,
 				032562FD26051DCB006513E4 /* RBMockClient.m in Sources */,
 				660325B6285B7D32008F4471 /* BeamWebContextMenu+Data.swift in Sources */,
 				A5D88596274E919300F37859 /* NodeHeaderViewModel.swift in Sources */,
@@ -8848,6 +8870,7 @@
 				87F47CC92669415800D01960 /* WebFieldClassifier.swift in Sources */,
 				4181722E2581107C00317ED8 /* AutocompleteItemView.swift in Sources */,
 				A0A84FE126371A4B008F0326 /* WebFieldAutofillActionCell.swift in Sources */,
+				3318B434285281AA002ACA34 /* TabCapsule.swift in Sources */,
 				A5B1DBFB26CFDC4800F1F81A /* BeamTextEdit+CardReference.swift in Sources */,
 				A580D5EE26427BCB00EB2E24 /* ContextMenuView.swift in Sources */,
 				87C539BD26162C3400D51877 /* WebFieldAutofillMenuCell.swift in Sources */,
@@ -8996,6 +9019,7 @@
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
 				37DB5A0B27BB514400534760 /* EmbedAnimator.swift in Sources */,
 				3312203428097382006A5EA1 /* UpdatePanel.swift in Sources */,
+				3318B42A28528101002ACA34 /* EditorTabGroupView.swift in Sources */,
 				5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */,
 				A0CB5AEA268B231400D1EF02 /* NotesPreferencesView.swift in Sources */,
 				873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */,

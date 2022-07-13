@@ -11,6 +11,7 @@ import BeamCore
 import Combine
 
 struct NoteView: View {
+
     @EnvironmentObject var state: BeamState
 
     static var topSpacingBeforeTitle: CGFloat {
@@ -26,12 +27,26 @@ struct NoteView: View {
     var initialFocusedState: NoteEditFocusedState?
     var onScroll: ((CGPoint) -> Void)?
 
-    @State private var headerViewModel = NoteHeaderView.ViewModel()
-    @State private var headerLayoutModel = HeaderViewContainer.LayoutModel()
-    @State var searchViewModel: SearchViewModel?
+    @StateObject private var headerViewModel = NoteHeaderView.ViewModel()
+    @StateObject private var headerLayoutModel = HeaderViewContainer.LayoutModel()
+    @State private var searchViewModel: SearchViewModel?
+    @State private var tabGroups: [UUID] = []
 
     private var headerHeight: CGFloat {
         NoteHeaderView.topPadding + 90
+    }
+
+    private var topOffset: CGFloat {
+        var tabGroupSpace: CGFloat = 0
+        if !headerViewModel.tabGroupObjects.isEmpty {
+            let numberOfLines = (CGFloat(headerViewModel.tabGroupObjects.count) / 4.0).rounded(.up)
+            let lineSpacing = 6.0
+            let lineHeight = EditorTabGroupView.height + lineSpacing
+            let topSpace = 45.0
+
+            tabGroupSpace = numberOfLines * lineHeight + topSpace
+        }
+        return headerHeight + tabGroupSpace
     }
 
     var body: some View {
@@ -56,7 +71,7 @@ struct NoteView: View {
                 onSearchToggle: { search in
                     self.searchViewModel = search
                 },
-                topOffset: headerHeight,
+                topOffset: topOffset,
                 scrollViewTopInset: topInset,
                 footerHeight: 60,
                 leadingPercentage: leadingPercentage,
@@ -66,7 +81,7 @@ struct NoteView: View {
                 initialScrollOffset: state.lastScrollOffset[note.id],
                 headerView: {
                     HeaderViewContainer(layoutModel: headerLayoutModel, headerViewModel: headerViewModel)
-                        .frame(height: headerHeight)
+                        .frame(height: topOffset)
                         .frame(maxWidth: .infinity)
                 }
             )
@@ -77,19 +92,26 @@ struct NoteView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(BeamColor.Generic.background.swiftUI)
         .onReceive(Just(note)) { newNote in
-            // Ideally we could use @StateObject in NoteHeaderView to let it manage its model
-            // But its macOS > 11. So the parent need to own the model.
             guard headerViewModel.note != newNote else { return }
             headerLayoutModel.centerText = centerText
             headerLayoutModel.leadingPercentage = leadingPercentage
             headerViewModel.state = state
             headerViewModel.note = newNote
+            tabGroups = newNote.tabGroups
+            headerViewModel.setTabGroups(with: newNote.tabGroups)
         }
         .onReceive(note.changed.debounce(for: .seconds(10), scheduler: RunLoop.main)) { changed in
             let (_, change) = changed
             guard change != .meta else { return }
             guard note.publicationStatus != .unpublished else { return }
             BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, publicationGroups: note.publicationStatus.publicationGroups)
+        }
+        .onReceive(note.changed) { changed in
+            let (element, _) = changed
+            if let note = element as? BeamNote, tabGroups != note.tabGroups {
+                tabGroups = note.tabGroups
+                headerViewModel.setTabGroups(with: note.tabGroups)
+            }
         }
     }
 

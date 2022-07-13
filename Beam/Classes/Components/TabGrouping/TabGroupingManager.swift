@@ -39,12 +39,14 @@ class TabGroup: Identifiable {
         self.pageIds = pageIds
     }
 
-    func copy() -> TabGroup? {
+    func copy(locked: Bool = false, discardPages: Bool = true) -> TabGroup {
         let newGroup = TabGroup(pageIds: pageIds)
         newGroup.title = title
         newGroup.color = color
         newGroup.collapsed = collapsed
         newGroup.shouldBePersisted = shouldBePersisted
+        newGroup.isLocked = locked
+        newGroup.pageIds = discardPages ? [] : pageIds
         return newGroup
     }
 }
@@ -130,6 +132,13 @@ class TabGroupingManager {
 
 // MARK: - Group Editing
 extension TabGroupingManager {
+
+    func copyForSharing(_ group: TabGroup) -> TabGroup {
+        let newGroup = group.copy(locked: true, discardPages: false)
+        groupDidChangeMetadata(newGroup)
+        return newGroup
+    }
+
     func renameGroup(_ group: TabGroup, title: String) {
         group.changeTitle(title)
         groupDidChangeMetadata(group)
@@ -165,16 +174,22 @@ extension TabGroupingManager {
     }
 
     private func groupDidChangeMetadata(_ group: TabGroup) {
-        storeManager?.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: allOpenTabs())
+        Task { @MainActor in
+            await storeManager?.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: allOpenTabs())
+        }
     }
 
     private func groupDidChangeContent(_ group: TabGroup, fromUser: Bool) {
-        storeManager?.groupDidUpdate(group, origin: fromUser ? .userGroupReordering : .clustering, openTabs: allOpenTabs())
+        Task { @MainActor in
+            await storeManager?.groupDidUpdate(group, origin: fromUser ? .userGroupReordering : .clustering, openTabs: allOpenTabs())
+        }
     }
 
     private func groupsWereUpdatedByClustering(_ groups: Set<TabGroup>) {
         groups.forEach { group in
-            storeManager?.groupDidUpdate(group, origin: .clustering, openTabs: allOpenTabs())
+            Task { @MainActor in
+                await storeManager?.groupDidUpdate(group, origin: .clustering, openTabs: allOpenTabs())
+            }
         }
     }
 }
