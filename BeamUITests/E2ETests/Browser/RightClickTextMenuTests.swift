@@ -11,6 +11,7 @@ import XCTest
 class RightClickTextMenuTests: BaseTest {
     var app = XCUIApplication()
     let rightClickMenuTestView = RightClickMenuTestView()
+    let omniboxTestView = OmniBoxTestView()
     
     let textToRightClickOn = WebTestView().staticText("H-beam")
     let expectedSearchTextPart1 = "beam - "
@@ -94,9 +95,10 @@ class RightClickTextMenuTests: BaseTest {
         
         step("Then link has been copied") {
             shortcutHelper.shortcutActionInvoke(action: .openLocation)
+            _ = omniboxTestView.getOmniBoxSearchField().waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             shortcutHelper.shortcutActionInvoke(action: .paste)
 
-            XCTAssertEqual(OmniBoxTestView().getSearchFieldValue(), "beam")
+            XCTAssertEqual(omniboxTestView.getSearchFieldValue(), "beam")
         }
     }
     
