@@ -80,9 +80,9 @@ final class PDFContentState: ObservableObject {
         printOperation?.run()
     }
 
-    func saveDocument() {
+    func saveDocument() -> Bool {
         guard let tentativeSaveLocationURL = destinationDirectoryURL()?.appendingPathComponent(filename) else {
-            return
+            return false
         }
 
         var saveLocationURL = tentativeSaveLocationURL.availableFileURL()
@@ -93,7 +93,9 @@ final class PDFContentState: ObservableObject {
 
         if pdfDocument?.write(to: saveLocationURL) == true {
             try? NSWorkspace.shared.bounceDockStack(with: saveLocationURL)
+            return true
         }
+        return false
     }
 
     func setCurrentSelection(_ selection: String?) {
