@@ -106,6 +106,10 @@ class BrowserPinnedTabTests: BaseTest {
         step("When I pin the tab"){
             webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
         }
+
+        step("And enable start on opened tabs"){
+            UITestsMenuBar().setStartBeamOnTabs(true)
+        }
         
         step("And I restart the app"){
             restartApp()
@@ -114,6 +118,7 @@ class BrowserPinnedTabTests: BaseTest {
         step("Then tab is still pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
             XCTAssertEqual(webView.getNumberOfUnpinnedTabs(wait: true), 0)
+            UITestsMenuBar().setStartBeamOnTabs(false)
         }
     }
     
