@@ -216,7 +216,7 @@ class BeamObjectManager {
 
          We should use that order when sending objects to the API, and when receiving new objects.
          */
-        managerOrder = [.privateKeySignature, .database, .contact, .file, .document, .password, .link, .noteFrecency, .tabGroup]
+        managerOrder = [.privateKeySignature, .database, .contact, .file, .tabGroup, .document, .password, .link, .noteFrecency]
         if treeSyncEnabled {
             managerOrder.append(.browsingTree)
         }

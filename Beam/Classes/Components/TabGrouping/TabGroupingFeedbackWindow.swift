@@ -20,7 +20,7 @@ class TabGroupingFeedbackViewModel: ObservableObject {
     private func prepareData() {
         let pagesGroups = (self.clusteringManager.tabGroupingManager?.builtPagesGroups ?? [:]).values
         for pagesGroup in pagesGroups where !self.groups.contains(pagesGroup) {
-            guard let pageGroupCopy = pagesGroup.copy() else { continue }
+            let pageGroupCopy = pagesGroup.copy()
             self.groups.append(pageGroupCopy)
         }
 

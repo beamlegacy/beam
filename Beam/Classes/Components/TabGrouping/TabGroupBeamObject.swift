@@ -10,7 +10,7 @@ import BeamCore
 import GRDB
 
 /// Database representation of a Tab Group (aka `Beam.TabGroup`), conforming to BeamObjectProtocol.
-struct TabGroupBeamObject {
+struct TabGroupBeamObject: Identifiable {
 
     var id: UUID = .null
     var title: String?
@@ -25,7 +25,7 @@ struct TabGroupBeamObject {
     var updatedAt: Date = BeamDate.now
     var deletedAt: Date?
 
-    struct PageInfo: Codable, DatabaseValueConvertible {
+    struct PageInfo: Codable, Identifiable, Hashable, DatabaseValueConvertible {
         let id: ClusteringManager.PageID
         let url: URL
         let title: String
@@ -42,11 +42,14 @@ extension TabGroupBeamObject: BeamObjectProtocol {
     }
 
     static func == (lhs: TabGroupBeamObject, rhs: TabGroupBeamObject) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id && lhs.title == rhs.title && lhs.color == rhs.color && lhs.pages == rhs.pages
     }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+        hasher.combine(title)
+        hasher.combine(color)
+        hasher.combine(pages)
     }
 
     var beamObjectId: UUID {

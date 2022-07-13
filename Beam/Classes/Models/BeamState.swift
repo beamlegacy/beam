@@ -502,15 +502,31 @@ import Sentry
         }
     }
 
-    func openTabGroup(_ group: TabGroup) {
+    enum TabOpeningOption {
+        case inBackground, newWindow
+    }
+
+    func openTabGroup(_ group: TabGroup, openingOption: Set<TabOpeningOption> = []) {
         let links = LinkStore.shared.getLinks(for: group.pageIds)
         let urls = group.pageIds.compactMap({ URL(string: links[$0]?.url ?? "") })
-        let tabs: [BrowserTab] = urls.compactMap { url in
-            if let tab = browserTabsManager.openedTab(for: url) { return tab }
-            return createTab(withURLRequest: URLRequest(url: url))
+
+        let state: BeamState
+        if openingOption.contains(.newWindow), let window = AppDelegate.main.createWindow(frame: nil) {
+            state = window.state
+        } else {
+            state = self
         }
-        browserTabsManager.reopenGroup(group, withTabs: tabs)
-        if mode != .web && hasBrowserTabs {
+
+        let inBackground = openingOption.contains(.inBackground)
+
+        let tabs: [BrowserTab] = urls.compactMap { url in
+            if let tab = state.browserTabsManager.openedTab(for: url) { return tab }
+            return state.createTab(withURLRequest: URLRequest(url: url), setCurrent: !inBackground)
+        }
+        
+        state.browserTabsManager.reopenGroup(group, withTabs: tabs)
+
+        if mode != .web && hasBrowserTabs && !inBackground {
             mode = .web
         }
         stopFocusOmnibox()
