@@ -511,6 +511,7 @@
 		66F9AED3283E215100C28EE3 /* MouseOverAndSelectionUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBB283E215100C28EE3 /* MouseOverAndSelectionUI.ts */; };
 		66F9AED4283E215100C28EE3 /* MouseOverAndSelection.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBC283E215100C28EE3 /* MouseOverAndSelection.ts */; };
 		66F9AED5283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBD283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts */; };
+		6ED5E8CB287DA62F00EA7DA1 /* download-file.json in Resources */ = {isa = PBXBuildFile; fileRef = 6ED5E8CA287DA62F00EA7DA1 /* download-file.json */; };
 		7521342B26F4A00D00BBBD6D /* GenericErrorPage.html in Resources */ = {isa = PBXBuildFile; fileRef = 7521342A26F4A00D00BBBD6D /* GenericErrorPage.html */; };
 		759442D726FCA86E00CBFB7A /* ErrorPageManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759442D626FCA86E00CBFB7A /* ErrorPageManagerTests.swift */; };
 		75A1E5B52719A7DA000824B1 /* topdomains_v0.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 75A1E5B42719A7DA000824B1 /* topdomains_v0.1.txt */; };
@@ -2165,6 +2166,7 @@
 		66F9AEBB283E215100C28EE3 /* MouseOverAndSelectionUI.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelectionUI.ts; sourceTree = "<group>"; };
 		66F9AEBC283E215100C28EE3 /* MouseOverAndSelection.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelection.ts; sourceTree = "<group>"; };
 		66F9AEBD283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelectionUI_web.ts; sourceTree = "<group>"; };
+		6ED5E8CA287DA62F00EA7DA1 /* download-file.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "download-file.json"; sourceTree = "<group>"; };
 		7521342A26F4A00D00BBBD6D /* GenericErrorPage.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = GenericErrorPage.html; sourceTree = "<group>"; };
 		759442D626FCA86E00CBFB7A /* ErrorPageManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPageManagerTests.swift; sourceTree = "<group>"; };
 		75A1E5B42719A7DA000824B1 /* topdomains_v0.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = topdomains_v0.1.txt; sourceTree = "<group>"; };
@@ -7406,6 +7408,7 @@
 				A5347A692763B53A006EEF8C /* nav-pivot_web.json */,
 				33551D2127FC6F4600598164 /* nav-pivot_incognito.json */,
 				A5A3BB2328083C2D00D7B4C5 /* nav-pivot_tab_increment.json */,
+				6ED5E8CA287DA62F00EA7DA1 /* download-file.json */,
 			);
 			path = Lotties;
 			sourceTree = "<group>";
@@ -8449,6 +8452,7 @@
 				A52A559327592E9A002D0C99 /* Inter-Bold.otf in Resources */,
 				33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */,
 				0521EB24282BFC9800A922CE /* delete_account.graphql in Resources */,
+				6ED5E8CB287DA62F00EA7DA1 /* download-file.json in Resources */,
 				66F9AEC0283E215100C28EE3 /* MouseOverAndSelection.d.ts in Resources */,
 				A5347A6A2763B53A006EEF8C /* nav-pivot_web.json in Resources */,
 				52F78D2827872F55007A9F53 /* prepare_beam_objects.graphql in Resources */,

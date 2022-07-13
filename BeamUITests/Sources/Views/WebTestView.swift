@@ -247,7 +247,7 @@ class WebTestView: BaseView {
     }
     
     func getPDFDownloadButton() -> XCUIElement {
-        return image(WebViewLocators.PDFElements.downloadButton.accessibilityIdentifier)
+        return button(WebViewLocators.PDFElements.downloadButton.accessibilityIdentifier)
     }
     
     func getPDFZoomInButton() -> XCUIElement {

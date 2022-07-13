@@ -33,11 +33,11 @@ enum WebViewLocators {
     }
     
     enum PDFElements: String, CaseIterable, UIElement {
-        case downloadButton = "download-file_download"
+        case downloadButton = "save-pdf"
         case printButton = "download-file_print"
         case zoomInButton = "download-file_zoomin"
         case zoomOutButton = "download-file_zoomout"
-        case zoomRatio = "pdf-toolbar"
+        case zoomRatio = "zoom-level"
     }
     
     enum MenuItem: String, CaseIterable, UIElement {

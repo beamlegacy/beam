@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import enum Lottie.LottieLoopMode
 
 enum ButtonLabelState {
     case normal
@@ -43,6 +44,9 @@ struct ButtonLabel: View {
     var text: String?
     var iconName: String?
     var lottieName: String?
+    var lottiePlaying: Bool?
+    var lottieLoopMode: LottieLoopMode?
+    var lottieCompletion: (() -> Void)?
     let defaultState: ButtonLabelState
     let variant: ButtonLabelVariant
     // TODO replace style by a custom modifier like .buttonLabelStyle()
@@ -65,10 +69,13 @@ struct ButtonLabel: View {
         self.action = action
     }
 
-    init(_ text: String? = nil, lottie: String, state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary,
+    init(_ text: String? = nil, lottie: String, lottiePlaying: Bool = true, lottieLoopMode: LottieLoopMode = .loop, lottieCompletion: (() -> Void)? = nil, state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary,
          customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
         self.text = text
         self.lottieName = lottie
+        self.lottiePlaying = lottiePlaying
+        self.lottieLoopMode = lottieLoopMode
+        self.lottieCompletion = lottieCompletion
         self.defaultState = state
         self.variant = variant
         self.style = customStyle
@@ -116,7 +123,12 @@ struct ButtonLabel: View {
                     Icon(name: icon, width: style.iconSize, color: foregroundColor)
                 }
                 if let lottie = lottieName {
-                    LottieView(name: lottie, playing: true, color: foregroundNSColor, animationSize: CGSize(width: style.iconSize, height: style.iconSize))
+                    LottieView(name: lottie,
+                               playing: lottiePlaying ?? true,
+                               color: foregroundNSColor,
+                               loopMode: lottieLoopMode ?? .loop,
+                               animationSize: CGSize(width: style.iconSize, height: style.iconSize),
+                               completion: lottieCompletion)
                         .alignmentGuide(.lastTextBaseline) { dimensions in dimensions[VerticalAlignment.center] }
                 }
                 if let text = text {
