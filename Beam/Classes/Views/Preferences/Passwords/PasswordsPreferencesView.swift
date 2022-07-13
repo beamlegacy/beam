@@ -294,7 +294,9 @@ struct Passwords: View {
             for entry in passwordsViewModel.selectedEntries {
                 PasswordManager.shared.markDeleted(hostname: entry.minimizedHost, for: entry.username)
             }
-            if !searchString.isEmpty { searchString.removeAll() }
+            if passwordsViewModel.filteredPasswordEntries.count == passwordsViewModel.selectedEntries.count && !searchString.isEmpty {
+                searchString.removeAll()
+            }
         }
     }
 
