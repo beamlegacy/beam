@@ -32,6 +32,7 @@ public enum DocumentFilter {
     case type(DocumentType)
     case updatedSince(Date)
     case updatedBetween(Date, Date)
+    case isPublic(Bool)
 
     case limit(Int, offset: Int?)
 }
@@ -261,6 +262,8 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
 
             case let .limit(limit, offset: offset):
                 request = request.limit(limit, offset: offset)
+            case let .isPublic(isPublic):
+                request = request.filter(BeamDocument.Columns.isPublic == isPublic)
             }
         }
 
