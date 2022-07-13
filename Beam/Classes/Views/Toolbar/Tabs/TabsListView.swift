@@ -698,12 +698,16 @@ extension TabsListView {
             },
             onFinish: { [weak menu] in menu?.cancelTracking() })
 
+        let nameAndColorItemInsets = NSEdgeInsets(top: 4, left: 14, bottom: 8, right: 14)
+
         let nameAndColorItem = ContentViewMenuItem(
             title: "Name your group item",
+            acceptsFirstResponder: !(group.title?.isEmpty == true),
             contentView: { nameAndColorView },
-            insets: NSEdgeInsets(top: 4, left: 9, bottom: 8, right: 14),
+            insets: nameAndColorItemInsets,
             customization: { hostingView in
-                hostingView.widthAnchor.constraint(equalToConstant: 230).isActive = true
+                let width = 230 - (nameAndColorItemInsets.left + nameAndColorItemInsets.right)
+                hostingView.widthAnchor.constraint(equalToConstant: width).isActive = true
                 hostingView.heightAnchor.constraint(equalToConstant: 16).isActive = true
             })
 
