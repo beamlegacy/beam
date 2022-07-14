@@ -11,6 +11,7 @@ import XCTest
 class BrowserPreferencesTests: BaseTest {
     
     let browserPref = BrowserPreferencesTestView()
+    let omnibox = OmniBoxTestView()
     let searchWord = "beam"
     
     override func setUpWithError() throws {
@@ -32,7 +33,7 @@ class BrowserPreferencesTests: BaseTest {
             browserPref.selectSearchEngine(engine)
             shortcutHelper.shortcutActionInvoke(action: .close)
             waitForDoesntExist(browserPref.getSuggestionEngineCheckbox())
-            OmniBoxTestView().searchInOmniBox(searchWord, true)
+            omnibox.searchInOmniBox(searchWord, true)
             webView.waitForWebViewToLoad()
         }
         
@@ -49,6 +50,31 @@ class BrowserPreferencesTests: BaseTest {
             step("GIVEN I open preferences") {
                 shortcutHelper.shortcutActionInvoke(action: .close)
                 JournalTestView().waitForJournalViewToLoad()
+                shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+            }
+        }
+    }
+    
+    private func assertSearchEngineSuggestion(_ engine: BrowserPreferencesViewLocators.MenuItemsSearchEngine, _ prepareNextSteps: Bool = true, _ searchEngingeSuggestionEnabled: Bool = true) {
+        
+        step("WHEN I select \(engine) ") {
+            browserPref.selectSearchEngine(engine)
+            shortcutHelper.shortcutActionInvoke(action: .close)
+            waitForDoesntExist(browserPref.getSuggestionEngineCheckbox())
+            omnibox.searchInOmniBox(searchWord, false)
+        }
+        
+        step("THEN") {
+            let searchEngineSuggestionLabel = omnibox.getAutocompleteResults().firstMatch.label
+            if searchEngingeSuggestionEnabled {
+                XCTAssertTrue(searchEngineSuggestionLabel.contains(engine.rawValue))
+            } else {
+                XCTAssertFalse(searchEngineSuggestionLabel.contains(engine.rawValue))
+            } //multiple localizations handling e.g. "beam - Recherche Google"
+        }
+        
+        if prepareNextSteps {
+            step("GIVEN I open preferences") {
                 shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             }
         }
@@ -95,16 +121,21 @@ class BrowserPreferencesTests: BaseTest {
         step("THEN engine suggestion checkbox exists and is enabled by default") {
             XCTAssertTrue(browserPref.getSuggestionEngineCheckbox().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertEqual(browserPref.getSuggestionEngineCheckbox().title, "Include search engine suggestions")
-            XCTAssertTrue(browserPref.getSuggestionEngineCheckbox().isSettingEnabled())
-            shortcutHelper.shortcutActionInvoke(action: .close)
+            if !browserPref.getSuggestionEngineCheckbox().isSettingEnabled() {
+                browserPref.getSuggestionEngineCheckbox().tapInTheMiddle()
+            } //to be solved via Beam preferences reset to default set via BE-4769
         }
         
-        /*step("THEN engine suggestion is available during the web search") {
-            blocked by https://linear.app/beamapp/issue/BE-4533/add-the-way-to-define-search-engine-type-in-omnibox-for-xcuitests
-        }*/
+        step("THEN engine suggestion is available during the web search") {
+            assertSearchEngineSuggestion(.duck)
+            assertSearchEngineSuggestion(.google)
+            assertSearchEngineSuggestion(.ecosia)
+        }
         
-        //negative scenario test is blocked by https://linear.app/beamapp/issue/BE-4532/search-engine-suggestion-appears-even-with-the-option-disabled
-        //step("THEN search engine suggestion is unavailable on checkbox disableing") { }
+        step("THEN search engine suggestion is unavailable on checkbox disabling") {
+            browserPref.getSuggestionEngineCheckbox().tapInTheMiddle()
+            assertSearchEngineSuggestion(.google, false, false)
+        }
     }
     
     func testImportBrowserDataTrigger() {
