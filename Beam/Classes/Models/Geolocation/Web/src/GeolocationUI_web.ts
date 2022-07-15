@@ -26,7 +26,7 @@ export class GeolocationUI_web implements GeolocationUI {
   listenerAdded(): void {
     throw new Error("Method not implemented.")
   }
-  listenerRemmoved(): void {
+  listenerRemoved(): void {
     throw new Error("Method not implemented.")
   }
 

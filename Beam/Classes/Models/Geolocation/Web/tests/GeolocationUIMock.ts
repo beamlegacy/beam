@@ -5,7 +5,7 @@ export class GeolocationUIMock extends EventsMock implements GeolocationUI {
   listenerAdded(): void {
     throw new Error("Method not implemented.")
   }
-  listenerRemmoved(): void {
+  listenerRemoved(): void {
     throw new Error("Method not implemented.")
   }
 }
