@@ -61,8 +61,24 @@ indirect enum BeamColor {
             return BeamColor.From(color: NSColor(withLightColor: lightColor.nsColor, darkColor: darkColor.nsColor))
         }
         return BeamColor.From(color: NSColor(name: nil) { appearance in
-            appearance.isDarkMode ? darkColor.nsColor.withAlphaComponent(darkAlpha) : lightColor.nsColor.withAlphaComponent(lightAlpha)
+            appearance.fastIsDarkMode ? darkColor.nsColor.withAlphaComponent(darkAlpha) : lightColor.nsColor.withAlphaComponent(lightAlpha)
         })
+    }
+}
+
+private extension NSAppearance {
+    private static var isDarkModeCache = [NSAppearance.Name: Bool]()
+    /// Performance helper. Use isDarkMode unless needed.
+    /// For BeamColor.combining we need a fast way to repeatedly know if an appearance is dark,
+    /// the origina NSAppearance.bestMatch() can be quite slow, so we're caching its answer.
+    var fastIsDarkMode: Bool {
+        let cached = Self.isDarkModeCache[self.name]
+        if let cached = cached {
+            return cached
+        }
+        let isDarkMode = self.isDarkMode
+        Self.isDarkModeCache[self.name] = isDarkMode
+        return isDarkMode
     }
 }
 
@@ -89,7 +105,16 @@ extension BeamColor {
         default:
             colorName = String(describing: self)
         }
-        return NSColor.loadColor(named: colorName)
+        let shouldBeCached = shouldBeCached
+        let cacheKey = cacheKey
+        if shouldBeCached, let cached = Self.nsColorCache[cacheKey] {
+            return cached
+        }
+        let color = NSColor.loadColor(named: colorName)
+        if shouldBeCached {
+            Self.nsColorCache[cacheKey] = color
+        }
+        return color
     }
 
     func nsColor(for appearanceName: NSAppearance.Name) -> NSColor {
@@ -115,10 +140,22 @@ extension BeamColor {
     }
 
     var cgColor: CGColor {
+        let shouldBeCached = shouldBeCached
+        var cgCacheKey = ""
+        if shouldBeCached {
+            let currentAppearance = NSAppearance.currentAppearance.name.rawValue
+            cgCacheKey = cacheKey + "-" + currentAppearance
+            if let cached = Self.cgColorCache[cgCacheKey] {
+                return cached
+            }
+        }
         var color: CGColor?
         NSAppearance.withAppAppearance {
             // Since we're inside a non-escaping closure, we will be able to return `color` outside of it.
             color = nsColor.cgColor
+        }
+        if shouldBeCached {
+            Self.cgColorCache[cgCacheKey] = color
         }
         return color ?? nsColor.cgColor
     }
@@ -130,6 +167,56 @@ extension BeamColor {
         var alpha: CGFloat = 0
         self.nsColor.usingColorSpace(.deviceRGB)?.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
         return String(format: "#%02x%02x%02x%02x", Int(red * 255), Int(green * 255), Int(blue * 255), Int(alpha * 255))
+    }
+}
+
+// MARK: - Performance
+// See investigation: BE-4790
+extension BeamColor {
+    private var shouldBeCached: Bool {
+        switch self {
+        case .From: return false
+        default: return true
+        }
+    }
+
+    private var cacheKey: String {
+        description
+    }
+
+    /// We're caching color accessor locally to avoid looking into asset catalog too much. [performance]
+    private static var nsColorCache: [String: NSColor] = [:]
+    /// We're caching color accessor locally to avoid converting colors too much. [performance]
+    private static var cgColorCache: [String: CGColor] = [:]
+}
+
+extension BeamColor: CustomStringConvertible {
+
+    // Using a custom description because String(describing: self) for an enum can be quite slow.
+    var description: String {
+        switch self {
+        case .AlphaGray: return "AlphaGray"
+        case .Beam: return "Beam"
+        case .Bluetiful: return "Bluetiful"
+        case .CharmedGreen: return "CharmedGreen"
+        case .Corduroy: return "Corduroy"
+        case .InvertedAlphaGray: return "InvertedAlphaGray"
+        case .InvertedCorduroy: return "InvertedCorduroy"
+        case .InvertedLightStoneGray: return "InvertedLightStoneGray"
+        case .InvertedNiobium: return "InvertedNiobium"
+        case .LightStoneGray: return "LightStoneGray"
+        case .Mercury: return "Mercury"
+        case .Nero: return "Nero"
+        case .Niobium: return "Niobium"
+        case .Sanskrit: return "Sanskrit"
+        case .Shiraz: return "Shiraz"
+        case .Tundora: return "Tundora"
+        case .Custom(let named): return named
+        case .From(let color, let alpha): return "From(\(color.componentsRGBAArray),a:\(alpha ?? 1)"
+        #if DEBUG
+        case .Random: return "Random"
+        #endif
+        }
     }
 }
 

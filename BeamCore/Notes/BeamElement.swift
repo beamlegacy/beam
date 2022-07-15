@@ -332,7 +332,7 @@ public enum ElementChildrenFormat: String, Codable {
 // Editable Text Data:
 //swiftlint:disable:next type_body_length
 open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, CustomDebugStringConvertible {
-    @Published open var id = UUID() { didSet { change(.meta) } }
+    open var id = UUID() { didSet { change(.meta) } }
     @Published open var text = BeamText() { didSet { change(.text) } }
     @Published open var open = true { didSet { change(.meta) } }
     @Published open var collapsed = false { didSet { change(.meta) } }

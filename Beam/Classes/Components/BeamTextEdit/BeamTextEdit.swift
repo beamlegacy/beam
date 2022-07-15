@@ -744,7 +744,7 @@ public extension CALayer {
 
     public var enabled = true
 
-    @Published var hasFocus = false
+    var hasFocus = false
 
     public override func becomeFirstResponder() -> Bool {
         blinkPhase = true
