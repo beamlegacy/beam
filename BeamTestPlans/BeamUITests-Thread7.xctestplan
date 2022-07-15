@@ -102,6 +102,7 @@
         "DeleteNotesTests",
         "DownloadsTest",
         "EditorShortcutsTests",
+        "GeneralPreferencesTests",
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
         "IncognitoModeTests",
