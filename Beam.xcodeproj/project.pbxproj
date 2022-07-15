@@ -1000,6 +1000,8 @@
 		A325D9C4283EA87F0019C5D0 /* AllNotesTableLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A325D9C3283EA87F0019C5D0 /* AllNotesTableLocators.swift */; };
 		A325D9CB283EA8A60019C5D0 /* AllNotesTestTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A325D9CA283EA8A60019C5D0 /* AllNotesTestTable.swift */; };
 		A3372E2F283F7BA000F86DA7 /* NotesNavigationHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3372E2E283F7BA000F86DA7 /* NotesNavigationHistoryTests.swift */; };
+		A340D039288035CF00980545 /* GeneralPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A340D038288035CF00980545 /* GeneralPreferencesTests.swift */; };
+		A340D03B2880383100980545 /* GeneralPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A340D03A2880383100980545 /* GeneralPreferencesViewLocators.swift */; };
 		A3539E2428326EA100035A21 /* CreditCardTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3539E2328326EA100035A21 /* CreditCardTestView.swift */; };
 		A35DE6882847808100C697D9 /* BaseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35DE6872847808100C697D9 /* BaseRow.swift */; };
 		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
@@ -2918,6 +2920,8 @@
 		A325D9C3283EA87F0019C5D0 /* AllNotesTableLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesTableLocators.swift; sourceTree = "<group>"; };
 		A325D9CA283EA8A60019C5D0 /* AllNotesTestTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesTestTable.swift; sourceTree = "<group>"; };
 		A3372E2E283F7BA000F86DA7 /* NotesNavigationHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesNavigationHistoryTests.swift; sourceTree = "<group>"; };
+		A340D038288035CF00980545 /* GeneralPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPreferencesTests.swift; sourceTree = "<group>"; };
+		A340D03A2880383100980545 /* GeneralPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		A3539E2328326EA100035A21 /* CreditCardTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardTestView.swift; sourceTree = "<group>"; };
 		A35DE6872847808100C697D9 /* BaseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseRow.swift; sourceTree = "<group>"; };
 		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
@@ -6948,6 +6952,14 @@
 			path = Tables;
 			sourceTree = "<group>";
 		};
+		A340D032288035B100980545 /* General */ = {
+			isa = PBXGroup;
+			children = (
+				A340D038288035CF00980545 /* GeneralPreferencesTests.swift */,
+			);
+			path = General;
+			sourceTree = "<group>";
+		};
 		A38D1A1E284A10A1007EBB25 /* TableRows */ = {
 			isa = PBXGroup;
 			children = (
@@ -7732,6 +7744,7 @@
 				D71D7483282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift */,
 				D7858BCE283BC4E000D0336A /* AutoFillCCViewLocators.swift */,
 				A3B6C9892863181F00E7F78C /* BrowserPreferencesViewLocators.swift */,
+				A340D03A2880383100980545 /* GeneralPreferencesViewLocators.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -7848,6 +7861,7 @@
 		B5FAE2F1270ECEC500EAC8A3 /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
+				A340D032288035B100980545 /* General */,
 				A3B6C96B2861F13E00E7F78C /* Account */,
 				A3B6C9762862FB6800E7F78C /* Browser */,
 				D7E38CE6282A93460059F60D /* Privacy */,
@@ -9903,6 +9917,7 @@
 				D7E38CF1282A96BA0059F60D /* AdBlockerTestView.swift in Sources */,
 				B551F3C726BD10C300B72D27 /* AppWebsiteViewLocators.swift in Sources */,
 				B5DC1F8126B1975900A4C94B /* ToolbarLocators.swift in Sources */,
+				A340D03B2880383100980545 /* GeneralPreferencesViewLocators.swift in Sources */,
 				8AA6D91D27FAF9AB00F42FAB /* BrowserOpenModalTests.swift in Sources */,
 				B579258F275E473E0093B32B /* DeleteNotesTests.swift in Sources */,
 				A3E7B4BB27AC1A0C0074C9BB /* MockHTTPWebPages.swift in Sources */,
@@ -9941,6 +9956,7 @@
 				B5DC1F8A26B19C8700A4C94B /* OmniBoxTestView.swift in Sources */,
 				A3539E2428326EA100035A21 /* CreditCardTestView.swift in Sources */,
 				D75EEB402844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift in Sources */,
+				A340D039288035CF00980545 /* GeneralPreferencesTests.swift in Sources */,
 				A325D9CB283EA8A60019C5D0 /* AllNotesTestTable.swift in Sources */,
 				B50E1C9926FCC8AD00E767AE /* PasswordManagerHelper.swift in Sources */,
 				A53C8F532644B22B003A5DF8 /* OmniBoxUITestsHelper.swift in Sources */,
