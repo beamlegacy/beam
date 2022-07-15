@@ -661,11 +661,17 @@ public extension BeamDocument {
 extension BeamNote: BeamNoteDocument {
     public var lastChangedElement: BeamElement? {
         get {
-            BeamData.shared?.lastChangedElement
+            var element: BeamElement?
+            DispatchQueue.mainSync {
+                element = BeamData.shared?.lastChangedElement
+            }
+            return element
         }
         set {
             guard changePropagationEnabled else { return }
-            BeamData.shared?.lastChangedElement = newValue
+            DispatchQueue.main.async {
+                BeamData.shared?.lastChangedElement = newValue
+            }
         }
     }
 
