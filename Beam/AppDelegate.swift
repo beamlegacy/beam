@@ -449,6 +449,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func migrateLegacyData() {
         BeamAccount.disableSync()
+        defer {
+            BeamAccount.enableSync()
+        }
+
         if !BeamAccount.hasValidAccount(in: BeamData.accountsPath) {
             splashScreenWindow = SplashScreenWindow()
             splashScreenWindow?.presentWindow()
@@ -476,11 +480,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 try importer.importAllFrom(path: BeamData.dataFolder)
             } catch {
                 Logger.shared.logError("Error during legacy data migration: \(error)", category: .accountManager)
-                return
             }
         }
-
-        BeamAccount.enableSync()
     }
 
     private var deleteAllLocalDataAtStartup = false
