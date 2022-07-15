@@ -15,15 +15,17 @@ extension NSPasteboard.PasteboardType {
 class BeamNoteDataHolder: NSObject, Codable {
 
     var noteData: Data
+    var imageData: [UUID: BeamFileRecord]
 
-    init(noteData: Data) {
+    init(noteData: Data, includedImages: [UUID: BeamFileRecord]) {
         self.noteData = noteData
+        self.imageData = includedImages
     }
 
     required convenience init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType) {
         guard let data = propertyList as? Data,
             let elementHolder = try? PropertyListDecoder().decode(BeamNoteDataHolder.self, from: data) else { return nil }
-        self.init(noteData: elementHolder.noteData)
+        self.init(noteData: elementHolder.noteData, includedImages: elementHolder.imageData)
     }
 }
 
