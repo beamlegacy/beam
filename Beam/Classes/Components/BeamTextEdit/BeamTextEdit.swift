@@ -1187,7 +1187,6 @@ public extension CALayer {
     internal var inputDetectorLastInput: String = ""
 
     // MARK: Paste properties
-    internal let supportedCopyTypes: [NSPasteboard.PasteboardType] = [.rtf, .string]
     internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSURL.self, NSImage.self, NSAttributedString.self, NSString.self]
     internal let supportedPasteAsPlainTextObjects = [BeamTextHolder.self, NSAttributedString.self, NSString.self]
 
