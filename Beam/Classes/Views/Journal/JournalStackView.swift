@@ -338,7 +338,9 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
 
     override func viewDidMoveToWindow() {
         initialLayout = false
-        if let offset = state.lastScrollOffset[UUID.null] {
+        if let offset = state.lastScrollOffset[UUID.null],
+           let clipView = enclosingScrollView?.contentView,
+           clipView.bounds.origin.y != offset {
             scroll(NSPoint(x: 0, y: offset))
         }
     }
