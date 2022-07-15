@@ -18,7 +18,7 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
 
     public private(set) static var conflictPolicy = BeamObjectConflictResolution.fetchRemoteAndError
     public private(set) static var backgroundQueue = DispatchQueue.global(qos: .default)
-    private var documentsQueue = DispatchQueue.global(qos: .userInitiated)
+    private var documentsQueue: DispatchQueue = DispatchQueue(label: "BeamDocumentSynchronizer documentsQueue", qos: .userInitiated)
 
     private var scope = Set<AnyCancellable>()
 
@@ -80,9 +80,7 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
                                 }
                                 updatedDocument = reloadedDocument
                             }
-                            let semaphore = DispatchSemaphore(value: 0)
                             try self?.saveOnBeamObjectAPI(updatedDocument) { result in
-                                semaphore.signal()
                                 switch result {
                                 case .success:
                                     Logger.shared.logInfo("\(document.id) saved on server", category: .sync)
@@ -90,7 +88,6 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
                                     Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
                                 }
                             }
-                            semaphore.wait()
                         } catch {
                             Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
                         }
