@@ -16,19 +16,22 @@ class CloseTab: WebCommand {
     var tabIndex: Int
     var appIsClosing: Bool = false
     var wasCurrentTab: Bool = false
+    var group: TabGroup?
 
     enum CodingKeys: String, CodingKey {
         case tab
         case tabData
         case tabIndex
         case wasCurrentTab
+        case group
     }
 
-    init(tab: BrowserTab, appIsClosing: Bool = false, tabIndex: Int, wasCurrentTab: Bool) {
+    init(tab: BrowserTab, appIsClosing: Bool = false, tabIndex: Int, wasCurrentTab: Bool, group: TabGroup? = nil) {
         self.tab = tab
         self.appIsClosing = appIsClosing
         self.tabIndex = tabIndex
         self.wasCurrentTab = wasCurrentTab
+        self.group = group
 
         super.init(name: Self.name)
         self.tabData = encode(tab: tab)
@@ -43,6 +46,7 @@ class CloseTab: WebCommand {
 
         tabData = try values.decode(Data.self, forKey: .tabData)
         wasCurrentTab = try values.decode(Bool.self, forKey: .wasCurrentTab)
+        group = try? values.decode(TabGroup.self, forKey: .group)
     }
 
     override func encode(to encoder: Encoder) throws {
@@ -53,6 +57,7 @@ class CloseTab: WebCommand {
         try container.encode(tabData, forKey: .tabData)
         try container.encode(tabIndex, forKey: .tabIndex)
         try container.encode(wasCurrentTab, forKey: .wasCurrentTab)
+        try? container.encode(group, forKey: .group)
     }
 
     // swiftlint:disable:next cyclomatic_complexity
@@ -81,7 +86,8 @@ class CloseTab: WebCommand {
               let data = self.tabData,
               let tab = decode(data: data) else { return false }
 
-        if context.browserTabsManager.tabs.contains(where: { $0.id == tab.id && $0.url == tab.preloadUrl }) {
+        let tabsManager = context.browserTabsManager
+        if tabsManager.tabs.contains(where: { $0.id == tab.id && $0.url == tab.preloadUrl }) {
             // Doesn't needs to be undone since it's already existing
             return true
         }
@@ -91,7 +97,7 @@ class CloseTab: WebCommand {
             urlRequest = URLRequest(url: url)
         }
 
-        context.browserTabsManager.addNewTabAndNeighborhood(
+        tabsManager.addNewTabAndNeighborhood(
             tab,
             setCurrent: wasCurrentTab,
             withURLRequest: urlRequest,
@@ -99,10 +105,14 @@ class CloseTab: WebCommand {
         )
 
         if tab.isPinned {
-            context.browserTabsManager.pinTab(tab)
+            tabsManager.pinTab(tab)
         }
         if !wasCurrentTab {
             tab.postLoadSetup(state: context)
+        }
+        if var group = group {
+            group = tabsManager.tabGroupingManager.existingGroup(forGroupID: group.id) ?? group
+            tabsManager.moveTabToGroup(tab.id, group: group)
         }
         self.tab = tab
         return true
