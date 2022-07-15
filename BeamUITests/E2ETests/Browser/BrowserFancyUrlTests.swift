@@ -14,11 +14,9 @@ class BrowserFancyUrlTests: BaseTest {
         let omniboxTestView = OmniBoxTestView()
         let journalView = launchApp()
 
-        let httpUrlsToTest = [
+        let urlsToTest = [
             "localhost:3000",
             "www.anne.cafe",
-        ]
-        let httpsUrlsToTest = [
             "nyxt.atlas.engineer",
             "www.julie.design",
             "www.amaZon.com" // checking if capital cases are handled
@@ -26,9 +24,6 @@ class BrowserFancyUrlTests: BaseTest {
         
         var url: String?
 
-        var urlsToTest: [String] = []
-        urlsToTest.append(contentsOf: httpUrlsToTest)
-        urlsToTest.append(contentsOf: httpsUrlsToTest)
         for urlToTest in urlsToTest {
             step("Given I open \(urlToTest) web page"){
                 journalView.openWebsite(urlToTest)
@@ -42,16 +37,9 @@ class BrowserFancyUrlTests: BaseTest {
                 webView.typeKeyboardKey(.escape)
             }
 
-            if httpsUrlsToTest.contains(urlToTest) {
-                step("And \(urlToTest) is opened"){
-                    // Verify that https is correctly added
-                    XCTAssertTrue(url!.contains("https://" + urlToTest.lowercased()), "\(url!) does not contain \("https://" + urlToTest.lowercased())")
-                }
-            } else {
-                step("And \(urlToTest) is opened"){
-                    // Verify that http is correctly added
-                    XCTAssertTrue(url!.contains("http://" + urlToTest.lowercased()), "\(url!) does not contain \("http://" + urlToTest.lowercased())")
-                }
+            step("Then \(urlToTest) is opened with https/http is correctly added") {
+                let lowercasedUrl = urlToTest.lowercased()
+                XCTAssertTrue(url!.contains("https://" + lowercasedUrl) || url!.contains("http://" + lowercasedUrl), "\(url!) does not contain \("https://" + lowercasedUrl) OR \("http://" + lowercasedUrl)")
             }
         }
     }
