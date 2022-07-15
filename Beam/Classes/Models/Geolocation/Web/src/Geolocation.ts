@@ -28,43 +28,45 @@ export class Geolocation<UI extends GeolocationUI> {
 
   listeners = {}
 
+  overrideGetCurrentPosition(success, error, options) {
+    const id = this.id()
+    this.listeners[id] = {
+      onetime: true,
+      success: success || this.noop,
+      error: error || this.noop
+    }
+    this.ui.listenerAdded()
+  }
+
+  overrideWatchPosition(success, error, options) {
+    const id = this.id()
+    this.listeners[id] = {
+      onetime: false,
+      success: success || this.noop,
+      error: error || this.noop
+    }
+    this.ui.listenerAdded()
+    return id
+  }
+
+  overrideClearWatch(id) {
+    const idExists = this.listeners[id] ? true : false
+    if (idExists) {
+      this.listeners[id] = null
+      delete this.listeners[id]
+      this.ui.listenerRemoved()
+    }
+  }
+
   overrideNavigatorGeolocation(): void {
     // @override getCurrentPosition()
-    navigator.geolocation.getCurrentPosition = function (
-      success,
-      error,
-      options
-    ) {
-      const id = this.id()
-      this.listeners[id] = {
-        onetime: true,
-        success: success || this.noop,
-        error: error || this.noop
-      }
-      this.ui.listenerAdded()
-    }
+    navigator.geolocation.getCurrentPosition = this.overrideGetCurrentPosition.bind(this)
 
     // @override watchPosition()
-    navigator.geolocation.watchPosition = function (success, error, options) {
-      const id = this.id()
-      this.listeners[id] = {
-        onetime: false,
-        success: success || this.noop,
-        error: error || this.noop
-      }
-      this.ui.listenerAdded()
-      return id
-    }
+    navigator.geolocation.watchPosition = this.overrideWatchPosition.bind(this) 
 
     // @override clearWatch()
-    navigator.geolocation.clearWatch = function (id) {
-      const idExists = this.listeners[id] ? true : false
-      if (idExists) {
-        this.listeners[id] = null
-        delete this.listeners[id]
-        this.ui.listenerRemoved()
-      }
-    }
+    navigator.geolocation.clearWatch = this.overrideClearWatch.bind(this)
   }
 
   noop() {}

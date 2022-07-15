@@ -23,11 +23,13 @@ class GeolocationMessageHandler: SimpleBeamMessageHandler, CLLocationManagerDele
 
     var locationManager = CLLocationManager()
     var listenersCount = 0
-    weak var webView: WKWebView?
+
+    private weak var localWebPage: WebPage?
+    private let JSObjectName = "Geolocation"
 
     init() {
         let messages = GeolocationMessages.self.allCases.map { $0.rawValue }
-        super.init(messages: messages, jsFileName: "Geolocation")
+        super.init(messages: messages, jsFileName: "Geolocation_prod")
         locationManager.delegate = self
     }
 
@@ -47,20 +49,20 @@ class GeolocationMessageHandler: SimpleBeamMessageHandler, CLLocationManagerDele
         return (status == .restricted || status == .denied) ? true : false
     }
 
-    func onLocationServicesIsDisabled() {
-        webView?.evaluateJavaScript("navigator.geolocation.helper.error(2, 'Location services disabled');")
+    func onLocationServicesIsDisabled(webPage: WebPage?) {
+        sendError(code: 2, message: "Location services disabled", in: webPage)
     }
 
     func onAuthorizationStatusNeedRequest() {
         locationManager.requestWhenInUseAuthorization()
     }
 
-    func onAuthorizationStatusIsGranted() {
+    func onAuthorizationStatusIsGranted(webPage: WebPage?) {
         locationManager.startUpdatingLocation()
     }
 
-    func onAuthorizationStatusIsDenied() {
-        webView?.evaluateJavaScript("navigator.geolocation.helper.error(1, 'App does not have location permission');")
+    func onAuthorizationStatusIsDenied(webPage: WebPage?) {
+        sendError(code: 1, message: "App does not have location permission", in: webPage)
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
@@ -71,17 +73,16 @@ class GeolocationMessageHandler: SimpleBeamMessageHandler, CLLocationManagerDele
 
         switch messageKey {
         case .Geolocation_listenerAdded:
-            webView = webPage.webView
             listenersCount += 1
-
+            localWebPage = webPage
             if !locationServicesIsEnabled() {
-                onLocationServicesIsDisabled()
+                onLocationServicesIsDisabled(webPage: webPage)
             } else if authorizationStatusIsDenied(status: locationManager.authorizationStatus) {
-                onAuthorizationStatusIsDenied()
+                onAuthorizationStatusIsDenied(webPage: webPage)
             } else if authorizationStatusNeedRequest(status: locationManager.authorizationStatus) {
                 onAuthorizationStatusNeedRequest()
             } else if authorizationStatusIsGranted(status: locationManager.authorizationStatus) {
-                onAuthorizationStatusIsGranted()
+                onAuthorizationStatusIsGranted(webPage: webPage)
             }
         case .Geolocation_listenerRemoved:
             listenersCount -= 1
@@ -89,7 +90,7 @@ class GeolocationMessageHandler: SimpleBeamMessageHandler, CLLocationManagerDele
             // no listener left in web view to wait for position
             if listenersCount == 0 {
                 locationManager.stopUpdatingLocation()
-                webView = nil
+                localWebPage = nil
             }
         }
     }
@@ -99,21 +100,36 @@ class GeolocationMessageHandler: SimpleBeamMessageHandler, CLLocationManagerDele
         // count before doing anything otherwise app will start location service without reason
         if listenersCount > 0 {
             if authorizationStatusIsDenied(status: status) {
-                onAuthorizationStatusIsDenied()
+                onAuthorizationStatusIsDenied(webPage: localWebPage)
             } else if authorizationStatusIsGranted(status: status) {
-                onAuthorizationStatusIsGranted()
+                onAuthorizationStatusIsGranted(webPage: localWebPage)
             }
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.last {
-            webView?.evaluateJavaScript("navigator.geolocation.helper.success('\(location.timestamp)', \(location.coordinate.latitude), \(location.coordinate.longitude), \(location.altitude), \(location.horizontalAccuracy), \(location.verticalAccuracy), \(location.course), \(location.speed));")
+            sendLocation(location, in: localWebPage)
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        webView?.evaluateJavaScript("navigator.geolocation.helper.error(2, 'Failed to get position (\(error.localizedDescription))');")
+        sendError(code: 2, message: "Failed to get position (\(error.localizedDescription))", in: localWebPage)
     }
 
+}
+
+// MARK: Send to JS
+
+private extension GeolocationMessageHandler {
+
+    func sendLocation(_ location: CLLocation, in webPage: WebPage?) {
+        webPage?.executeJS("success('\(location.timestamp)', \(location.coordinate.latitude), \(location.coordinate.longitude), \(location.altitude), \(location.horizontalAccuracy), \(location.verticalAccuracy), \(location.course), \(location.speed));",
+                           objectName: JSObjectName, frameInfo: nil, successLogCategory: .javascript, nil)
+    }
+
+    func sendError(code: Int, message: String, in webPage: WebPage?) {
+        webPage?.executeJS("error(\(code), '\(message)');",
+                           objectName: JSObjectName, frameInfo: nil, successLogCategory: .javascript, nil)
+    }
 }
