@@ -106,6 +106,7 @@ struct TabClusteringGroupCapsuleView: View {
 
                     .blendMode(forLightScheme: .normal, forDarkScheme: .screen)
             })
+            .accessibilityIdentifier("TabGroupNameStaticText")
             .overlay(ClickCatchingView(onRightTap: { event in
                 onTap?(true, event)
             }))
