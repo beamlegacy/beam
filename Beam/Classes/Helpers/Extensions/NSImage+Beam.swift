@@ -44,6 +44,13 @@ extension NSImage {
         return jpegData
     }
 
+    var pngRepresentation: Data {
+        let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+        let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
+        let pngData = bitmapRep.representation(using: NSBitmapImageRep.FileType.png, properties: [:])!
+        return pngData
+    }
+
     // MARK: - Resizing
     /// Resize the image to the given size.
     ///
