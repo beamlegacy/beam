@@ -67,18 +67,13 @@ extension TabGroupBeamObject: BeamObjectProtocol {
         case deletedAt
     }
 
-    private struct CodableColor: Codable, DatabaseValueConvertible {
-        var colorName: String?
-        var hueTint: Double?
-    }
-
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         createdAt = try values.decode(Date.self, forKey: .createdAt)
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         deletedAt = try values.decodeIfPresent(Date.self, forKey: .deletedAt)
         title = try values.decode(String.self, forKey: .title)
-        let codableColor = try values.decode(CodableColor.self, forKey: .color)
+        let codableColor = try values.decode(TabGroupingColor.CodableColor.self, forKey: .color)
         color = TabGroupingColor(designColor: .init(rawValue: codableColor.colorName ?? ""), randomColorHueTint: codableColor.hueTint)
         pages = try values.decode([PageInfo].self, forKey: .pages)
         isLocked = try values.decode(Bool.self, forKey: .isLocked)
@@ -87,7 +82,7 @@ extension TabGroupBeamObject: BeamObjectProtocol {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(title, forKey: .title)
-        try container.encode(CodableColor(colorName: color?.designColor?.rawValue, hueTint: color?.randomColorHueTint), forKey: .color)
+        try container.encode(TabGroupingColor.CodableColor(colorName: color?.designColor?.rawValue, hueTint: color?.randomColorHueTint), forKey: .color)
         try container.encode(pages, forKey: .pages)
         try container.encode(isLocked, forKey: .isLocked)
         try container.encode(createdAt, forKey: .createdAt)

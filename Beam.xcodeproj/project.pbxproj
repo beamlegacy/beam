@@ -1174,6 +1174,7 @@
 		A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */; };
 		A5B37AD927046A1500989479 /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B37AD827046A1500989479 /* CheckboxView.swift */; };
 		A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B532422703525D007FC8B8 /* MeetingModalView.swift */; };
+		A5B68435287DE9FE00213BD7 /* TabGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B68434287DE9FE00213BD7 /* TabGroup.swift */; };
 		A5B71852274B92E70010FE8E /* Omnibox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B71851274B92E70010FE8E /* Omnibox.swift */; };
 		A5BAD84E27BF520F00B9AFF3 /* SoundEffectPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BAD84D27BF520F00B9AFF3 /* SoundEffectPlayer.swift */; };
 		A5BAD85527BF533900B9AFF3 /* begin_record.caf in Resources */ = {isa = PBXBuildFile; fileRef = A5BAD85427BF533900B9AFF3 /* begin_record.caf */; };
@@ -3095,6 +3096,7 @@
 		A5B268A326845549001797ED /* BeamTextAttributedStringBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextAttributedStringBuilder.swift; sourceTree = "<group>"; };
 		A5B37AD827046A1500989479 /* CheckboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxView.swift; sourceTree = "<group>"; };
 		A5B532422703525D007FC8B8 /* MeetingModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModalView.swift; sourceTree = "<group>"; };
+		A5B68434287DE9FE00213BD7 /* TabGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroup.swift; sourceTree = "<group>"; };
 		A5B71851274B92E70010FE8E /* Omnibox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Omnibox.swift; sourceTree = "<group>"; };
 		A5BAD84D27BF520F00B9AFF3 /* SoundEffectPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEffectPlayer.swift; sourceTree = "<group>"; };
 		A5BAD85427BF533900B9AFF3 /* begin_record.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = begin_record.caf; sourceTree = "<group>"; };
@@ -6799,6 +6801,7 @@
 			isa = PBXGroup;
 			children = (
 				A0A4301526655993003A3C08 /* ClusteringManager.swift */,
+				A5B68434287DE9FE00213BD7 /* TabGroup.swift */,
 				4E0556E027B4004E00B4A42F /* TabGroupingManager.swift */,
 				A543C6B828573935009C7C13 /* TabGroupingStoreManager.swift */,
 				A5DA47EB285B8997005E744B /* TabGroupBeamObject.swift */,
@@ -9313,6 +9316,7 @@
 				52842D572715D2620099602C /* FileRow.swift in Sources */,
 				A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */,
 				52F4E4A8264180000067B017 /* Identity.swift in Sources */,
+				A5B68435287DE9FE00213BD7 /* TabGroup.swift in Sources */,
 				8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */,
 				964E5F8E2845027F0065EEC5 /* BeamDocumentSynchronizer.swift in Sources */,
 				A043B7E7265937DA00E267E5 /* AppDelegate+TabGrouping.swift in Sources */,

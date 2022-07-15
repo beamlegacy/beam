@@ -476,8 +476,9 @@ import Sentry
         cmdManager.beginGroup(with: groupName)
         for tab in tabs {
             guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
-            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab),
-                           on: self)
+            let cmd = CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab,
+                               group: browserTabsManager.group(forTab: tab))
+            cmdManager.run(command: cmd, on: self)
         }
         cmdManager.endGroup(forceGroup: true)
     }
@@ -492,7 +493,9 @@ import Sentry
             return false
         }
         guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { return false }
-        return cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self, needsToBeSaved: tab.url != nil)
+        let cmd = CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab,
+                           group: browserTabsManager.group(forTab: tab))
+        return cmdManager.run(command: cmd, on: self, needsToBeSaved: tab.url != nil)
     }
 
     /// Reloads all tabs which have a `.network` error
