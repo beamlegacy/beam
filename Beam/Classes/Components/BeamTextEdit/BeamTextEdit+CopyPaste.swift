@@ -34,9 +34,8 @@ extension BeamTextEdit {
             return NSAttributedString()
         }
 
-        let attachmentCell: NSTextAttachmentCell = NSTextAttachmentCell(imageCell: image)
         let attachment: NSTextAttachment = NSTextAttachment()
-        attachment.attachmentCell = attachmentCell
+        attachment.image = image
         let attrString: NSAttributedString = NSAttributedString(attachment: attachment)
         return attrString
     }
@@ -106,23 +105,44 @@ extension BeamTextEdit {
     // swiftlint:disable:next function_body_length
     private func setPasteboard() {
         guard let rootNode = rootNode else { return }
+        
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.declareTypes(supportedCopyTypes, owner: nil)
+
         let strNodes = NSMutableAttributedString()
         var beamText: BeamText?
         var noteData: Data?
+
+        /// This is the UUID/BeamFileRecord association that will be used when copying multiple nodes into a BeamNoteDataHolder
+        /// The data will be used when copy and pasting between two beam instances to preserve images
+        var images: [UUID: BeamFileRecord] = [:]
+
+        /// Raw images will be used if we only copy ImageNodes, to put only the images inside the pasteboard
+        var rawImages: [NSImage] = []
 
         if  let note = rootNode.note,
             let sortedNodes = rootNode.state.nodeSelection?.sortedNodes, !sortedNodes.isEmpty {
             var sortedSelectedElements: [BeamElement] = []
             sortedNodes.forEach { (node) in
                 sortedSelectedElements.append(node.element)
+                if case .image(let id, _, _) = node.element.kind {
+                    guard let imageRecord = try? BeamFileDBManager.shared?.fetch(uid: id), let image = NSImage(data: imageRecord.data) else { return }
+                    images[id] = imageRecord
+                    rawImages.append(image)
+                }
             }
+
+            // We only copied images, so let's just use put raw images in the pasteboard
+            if sortedNodes.count == rawImages.count {
+                pasteboard.writeObjects(rawImages)
+                return
+            }
+
             guard let clonedNote: BeamNote = note.deepCopy(withNewId: false, selectedElements: sortedSelectedElements, includeFoldedChildren: true) else {
                 Logger.shared.logError("Copy error, unable to copy \(note)", category: .noteEditor)
                 return
             }
+
             do {
                 noteData = try JSONEncoder().encode(clonedNote)
             } catch {
@@ -130,6 +150,8 @@ extension BeamTextEdit {
             }
             strNodes.append(buildStringFrom(nodes: sortedNodes))
         } else {
+            // We only selected partial text inside a TextNode.
+            // We will copy the text as BeamText for beam paste destination, and prepare a NSAttributedString for non-beam paste destination
             if let node = focusedWidget as? TextNode {
                 let range = NSRange(location: selectedTextRange.lowerBound, length: selectedTextRange.count)
                 let attributedString = node.attributedString.attributedSubstring(from: range)
@@ -142,7 +164,7 @@ extension BeamTextEdit {
 
         do {
             if let noteData = noteData, !noteData.isEmpty {
-                let elementHolder = BeamNoteDataHolder(noteData: noteData)
+                let elementHolder = BeamNoteDataHolder(noteData: noteData, includedImages: images)
                 let elementHolderData = try PropertyListEncoder().encode(elementHolder)
                 pasteboard.addTypes([.noteDataHolder], owner: nil)
                 pasteboard.setData(elementHolderData, forType: .noteDataHolder)
@@ -153,16 +175,21 @@ extension BeamTextEdit {
                 pasteboard.addTypes([.bTextHolder], owner: nil)
                 pasteboard.setData(beamTextData, forType: .bTextHolder)
             }
-            // Added this to clean lineSpacing, while lineSpacing in TextNode is not working
-            let style = NSMutableParagraphStyle()
-            style.lineSpacing = 0
-            strNodes.addAttribute(.paragraphStyle, value: style, range: strNodes.wholeRange)
-            let docAttrRtf: [NSAttributedString.DocumentAttributeKey: Any] = [.documentType: NSAttributedString.DocumentType.rtf, .characterEncoding: String.Encoding.utf8]
-            let rtfData = try strNodes.data(from: NSRange(location: 0, length: strNodes.length), documentAttributes: docAttrRtf)
-            pasteboard.setData(rtfData, forType: .rtf)
-            pasteboard.setString(strNodes.string, forType: .string)
+
+            // If we prepared a NSAttributedString, we create a rtf or rtfd (if we have images) document in the pastebaord for non-beam paste destination
+            if strNodes.length > 0 {
+                // Added this to clean lineSpacing, while lineSpacing in TextNode is not working
+                let style = NSMutableParagraphStyle()
+                style.lineSpacing = 0
+                strNodes.addAttribute(.paragraphStyle, value: style, range: strNodes.wholeRange)
+                let docAttrRtf: [NSAttributedString.DocumentAttributeKey: Any] = [.documentType: rawImages.isEmpty ? NSAttributedString.DocumentType.rtf : NSAttributedString.DocumentType.rtfd, .characterEncoding: String.Encoding.utf8]
+                let rtfData = try strNodes.data(from: NSRange(location: 0, length: strNodes.length), documentAttributes: docAttrRtf)
+
+                pasteboard.setData(rtfData, forType: rawImages.isEmpty ? .rtf : .rtfd )
+                pasteboard.setString(strNodes.string, forType: .string)
+            }
         } catch {
-            Logger.shared.logError("Error creating RTF from Attributed String", category: .general)
+            Logger.shared.logError("Error when encoding content for the pasteboard", category: .general)
         }
     }
 
@@ -193,12 +220,14 @@ extension BeamTextEdit {
     }
 
     private func paste(beamTextHolder: BeamTextHolder, fromRawPaste: Bool = false) {
+
+        let bText = beamTextHolder.bText.resolvedNotesNames() ?? beamTextHolder.bText
         if fromRawPaste {
             rootNode?.insertText(string: beamTextHolder.bText.text, replacementRange: nil)
         } else {
-            rootNode?.insertText(text: beamTextHolder.bText, replacementRange: nil)
+            rootNode?.insertText(text: bText, replacementRange: nil)
         }
-        addNoteSourceFrom(text: beamTextHolder.bText)
+        addNoteSourceFrom(text: bText)
     }
 
     @objc func pasteAsPlainText(_ sender: Any) {
@@ -225,6 +254,7 @@ extension BeamTextEdit {
                 Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
                 return
             }
+
             let cmdManager = mngrNode.cmdManager
             cmdManager.beginGroup(with: "PasteElementContent")
             defer { cmdManager.endGroup() }
@@ -250,9 +280,15 @@ extension BeamTextEdit {
                     Logger.shared.logError("Paste error, unable to copy \(element)", category: .noteEditor)
                     return
                 }
+                element.updateNoteNamesInInternalLinks(recursive: true)
                 guard let node = focusedWidget as? ElementNode else {
                     return
                 }
+
+                if case .image(let id, _, _) = element.kind {
+                    importImageIfNeeded(id: id, elementHolder: elementHolder)
+                }
+
                 node.cmdManager.insertElement(newElement, inNode: parent, afterElement: node.element)
                 node.cmdManager.focus(newElement, in: node)
                 addNoteSourceFrom(text: element.text)
@@ -263,6 +299,12 @@ extension BeamTextEdit {
         } catch {
             Logger.shared.logError("Can't encode Cloned Note", category: .general)
         }
+    }
+
+    private func importImageIfNeeded(id: UUID, elementHolder: BeamNoteDataHolder) {
+        let existingFileRecord = try? BeamFileDBManager.shared?.fetch(uid: id)
+        guard let fileRecord = elementHolder.imageData[id], existingFileRecord == nil else { return }
+        try? BeamFileDBManager.shared?.insert(files: [fileRecord])
     }
 
     private func paste(url: URL) {
