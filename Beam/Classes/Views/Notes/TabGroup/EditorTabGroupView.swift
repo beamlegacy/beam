@@ -15,16 +15,19 @@ struct EditorTabGroupView: View {
 
     @Binding var hoveredTab: TabGroupBeamObject.PageInfo?
     @Binding var hoveredGroupFrame: CGPoint?
+    @Binding var hoveredGroupColor: Color?
 
     @State private var isHoverArrow: Bool = false
     @EnvironmentObject var state: BeamState
     @Environment(\.colorScheme) private var colorScheme
 
+    @State private var nillify: DispatchWorkItem?
+
     static var height: CGFloat = 34.0
 
     var body: some View {
         GeometryReader { proxy in
-            VStack(spacing: 4) {
+            VStack(spacing: 1) {
                 ZStack {
                     HStack {
                         title
@@ -51,16 +54,25 @@ struct EditorTabGroupView: View {
                             })
                             .onHover { h in
                                 if h {
+                                    nillify?.cancel()
+                                    nillify = nil
+
                                     hoveredTab = tab
                                     let frame = proxy.frame(in: .global)
-                                    hoveredGroupFrame = CGPoint(x: frame.origin.x + frame.width / 2 , y: frame.origin.y + frame.height / 2)
+                                    hoveredGroupFrame = CGPoint(x: frame.origin.x + frame.width / 2, y: frame.origin.y + frame.height / 2)
+                                    hoveredGroupColor = tabGroup.color?.mainColor?.swiftUI ?? .red
                                 } else if hoveredTab == tab {
-                                    hoveredTab = nil
-                                    hoveredGroupFrame = nil
+                                    let nillify = DispatchWorkItem {
+                                        hoveredTab = nil
+                                        hoveredGroupFrame = nil
+                                        hoveredGroupColor = nil
+                                    }
+                                    self.nillify = nillify
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100), execute: nillify)
                                 }
                             }
                     }
-                }
+                }.animation(.easeIn(duration: 0.1))
             }
             .padding(.horizontal, 8)
             .padding(.top, 5)

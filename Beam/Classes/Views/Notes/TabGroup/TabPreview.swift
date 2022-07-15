@@ -9,19 +9,22 @@ import SwiftUI
 import BeamCore
 
 struct TabPreview: View {
-    
+
     let tab: TabGroupBeamObject.PageInfo
 
     @State private var isHovered: Bool = false
     @State private var favicon: Image?
+    var placeholderTintColor: Color
+
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         VStack(spacing: 0) {
             preview
+                .frame(width: 176, height: 114)
                 .cornerRadius(4)
                 .background(
-                    RoundedRectangle(cornerRadius: 6).stroke(Color(red: 0, green: 0, blue: 0).opacity(0.1), lineWidth: 0.5))
+                    RoundedRectangle(cornerRadius: 6).stroke(Color.black.opacity(0.1), lineWidth: 0.5))
                 .padding(2)
             HStack(spacing: 4) {
                 Group {
@@ -40,7 +43,7 @@ struct TabPreview: View {
                     .font(BeamFont.medium(size: 12).swiftUI)
                     .foregroundColor(BeamColor.Niobium.swiftUI)
                     .lineLimit(1)
-                    .animation(nil)
+                Spacer(minLength: 0)
             }
             .frame(height: 36, alignment: .center)
             .padding(.horizontal, 10)
@@ -48,6 +51,7 @@ struct TabPreview: View {
         }
         .frame(width: 180)
         .background(background)
+        .animation(nil)
         .transition(.opacity.animation(.easeInOut(duration: 0.15)))
         .onAppear {
             FaviconProvider.shared.favicon(fromURL: tab.url) { favicon in
@@ -72,14 +76,30 @@ struct TabPreview: View {
             Image(nsImage: image)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
-                .frame(width: 176, height: 114)
+        } else {
+            ZStack {
+                previewBackground
+                placeholderTintColor.opacity(0.05)
+                Image("tabs-group_thumbnail")
+                    .foregroundColor(placeholderTintColor.opacity(colorScheme == .dark ? 0.4 : 0.3))
+                    .blendModeLightMultiplyDarkScreen()
+            }
+        }
+    }
+
+    private var previewBackground: Color {
+        switch colorScheme {
+        case .dark:
+            return BeamColor.Mercury.swiftUI
+        default:
+            return .white
         }
     }
 }
 
 struct TabPreview_Previews: PreviewProvider {
     static var previews: some View {
-        TabPreview(tab: TabGroupBeamObject.PageInfo(id: UUID(), url: URL(string: "https://fr.wikipedia.org/wiki/Jean_Baudrillard")!, title: "Jean Baudrillard - Wikipedia"))
+        TabPreview(tab: TabGroupBeamObject.PageInfo(id: UUID(), url: URL(string: "https://fr.wikipedia.org/wiki/Jean_Baudrillard")!, title: "Jean Baudrillard - Wikipedia"), placeholderTintColor: TabGroupingColor.DesignColor.pink.color.swiftUI)
             .padding()
             .background(Color.green)
     }

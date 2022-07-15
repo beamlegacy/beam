@@ -780,7 +780,7 @@ extension TabsListView {
     private func addGroup(_ group: TabGroup,
                           toNote targetNote: BeamNote?,
                           from window: NSWindow,
-                          completion: (PointAndShootCardPicker.ExternalCaptureConfirmation?)->()) {
+                          completion: (PointAndShootCardPicker.ExternalCaptureConfirmation?) -> Void) {
         guard let note = targetNote else {
             let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
             window.contentView?.layer?.add(anim, forKey: "disappear")
