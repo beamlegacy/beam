@@ -489,7 +489,7 @@ extension BrowserTabsManager {
 // MARK: - Tabs Clustering
 extension BrowserTabsManager {
 
-    private var tabGroupingManager: TabGroupingManager {
+    var tabGroupingManager: TabGroupingManager {
         data.tabGroupingManager
     }
 
@@ -534,6 +534,10 @@ extension BrowserTabsManager {
     private func tabs(inGroup group: TabGroup) -> [BrowserTab] {
         let tabsIDs = tabsIds(inGroup: group)
         return tabs.filter { tabsIDs.contains($0.id) }
+    }
+
+    func group(forTab tab: BrowserTab) -> TabGroup? {
+        listItems.allItems.first(where: { $0.tab == tab })?.group
     }
 
     private func updateClusteringOpenPages() {
@@ -654,6 +658,7 @@ extension BrowserTabsManager {
 
     func reopenGroup(_ group: TabGroup, withTabs tabs: [BrowserTab]) {
         pauseListItemsUpdate = true
+        let group = tabGroupingManager.existingGroup(forGroupID: group.id) ?? group
         tabs.forEach { tab in
             tabGroupingManager.moveTab(tab, inGroup: group)
         }

@@ -37,15 +37,16 @@ final class RestoreTabsManager {
         for window in windowsToSave where window.state.hasBrowserTabs {
             let windowID = window.windowNumber
             tmpCmdManager.beginGroup(with: ClosedTabDataPersistence.closeTabCmdGrp)
-
-            for tab in window.state.browserTabsManager.tabs.reversed() {
-                guard tab.url != nil, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
+            let tabsManager = window.state.browserTabsManager
+            for tab in tabsManager.tabs.reversed() where tab.url != nil {
+                guard let index = tabsManager.tabs.firstIndex(of: tab) else { continue }
                 // Since we don't run the cmd when closing the app we need to do this out of the CloseTab Cmd
                 if isTerminatingApp {
                     tab.appWillClose()
                 }
                 if tab.isPinned { continue }
-                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true, tabIndex: index, wasCurrentTab: window.state.browserTabsManager.currentTab === tab)
+                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true, tabIndex: index, wasCurrentTab: tabsManager.currentTab === tab,
+                                           group: tabsManager.group(forTab: tab))
 
                 tmpCmdManager.appendToDone(command: closeTabCmd)
             }
