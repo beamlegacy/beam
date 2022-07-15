@@ -341,10 +341,13 @@ public class TextRoot: ElementNode {
     // MARK: - Placeholder
 
     private func setPlaceholder() {
+        guard let first = children.first as? TextNode,
+              first.placeholder.isEmpty
+        else { return }
+
         if let note = self.note, note.fastLinksAndReferences.isEmpty,
             note.isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
-            let first = children.first as? TextNode
-            first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World!")
+            first.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World!")
         }
     }
 
@@ -370,34 +373,41 @@ public class TextRoot: ElementNode {
     }
 
     func updateSummary() {
-        if PreferencesManager.enableDailySummary {
-            if dailySummaryNode != nil {
-                updateDailySummary()
-            } else {
-                createDailyNode()
-                updateTextChildren(elements: element.children)
-            }
-            if continueToSummaryNode != nil {
-                updateContinueToSummary()
-            } else {
-                createContinueToSummaryNode()
-                updateTextChildren(elements: element.children)
-            }
+        guard PreferencesManager.enableDailySummary else { return }
+        if dailySummaryNode != nil {
+            updateDailySummary()
+        } else {
+            createDailyNode()
+            updateTextChildren(elements: element.children)
+        }
+        if continueToSummaryNode != nil {
+            updateContinueToSummary()
+        } else {
+            createContinueToSummaryNode()
+            updateTextChildren(elements: element.children)
         }
     }
 
     private func updateDailySummary() {
-        if let dailySummaryElement = SummaryEngine.getDailySummary() {
-            if dailySummaryNode?.text.text != dailySummaryElement.text.text {
-                dailySummaryNode?.element = dailySummaryElement
+        DispatchQueue.global(qos: .userInitiated).async {
+            if let dailySummaryElement = SummaryEngine.getDailySummary() {
+                DispatchQueue.mainSync {
+                    if self.dailySummaryNode?.text.text != dailySummaryElement.text.text {
+                        self.dailySummaryNode?.element = dailySummaryElement
+                    }
+                }
             }
         }
     }
 
     private func updateContinueToSummary() {
-        if let continueToSummaryElement = SummaryEngine.getContinueToSummary() {
-            if continueToSummaryNode?.text.text != continueToSummaryElement.text.text {
-                continueToSummaryNode?.element = continueToSummaryElement
+        DispatchQueue.global(qos: .userInitiated).async {
+            if let continueToSummaryElement = SummaryEngine.getContinueToSummary() {
+                DispatchQueue.mainSync {
+                    if self.continueToSummaryNode?.text.text != continueToSummaryElement.text.text {
+                        self.continueToSummaryNode?.element = continueToSummaryElement
+                    }
+                }
             }
         }
     }
