@@ -20,8 +20,13 @@ public extension BeamDocumentCollection {
             throw BeamDocumentCollectionError.missingSource
         }
         try checkJournalDay(document)
+
+        #if DEBUG
+        // Disabling these checks for performance while typing. Should be checked only when the respective properties change. BE-4790
         try checkDuplicateJournalDates(document)
         try checkDuplicateTitles(document)
+        #endif
+
         try checkVersion(document)
     }
 
