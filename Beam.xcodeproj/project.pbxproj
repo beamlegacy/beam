@@ -1382,6 +1382,9 @@
 		D77A5A8428780F2100652727 /* RightClickLinkMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */; };
 		D77A5A912878688500652727 /* RightClickTextMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A902878688500652727 /* RightClickTextMenuTests.swift */; };
 		D77A5A9C287C55C800652727 /* RightClickPageMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A9B287C55C800652727 /* RightClickPageMenuTests.swift */; };
+		D77A5AAD287EB43B00652727 /* TabGroupNameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5AAC287EB43B00652727 /* TabGroupNameTests.swift */; };
+		D77A5AAF287EB48400652727 /* TabGroupMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5AAE287EB48400652727 /* TabGroupMenuView.swift */; };
+		D77A5AB1287EBF6100652727 /* TabGroupMenuViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5AB0287EBF6100652727 /* TabGroupMenuViewLocators.swift */; };
 		D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D77D4792282273940006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D780BA54285083E600F5CBC8 /* BrowserPinnedTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */; };
@@ -3306,6 +3309,9 @@
 		D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickLinkMenuTests.swift; sourceTree = "<group>"; };
 		D77A5A902878688500652727 /* RightClickTextMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickTextMenuTests.swift; sourceTree = "<group>"; };
 		D77A5A9B287C55C800652727 /* RightClickPageMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickPageMenuTests.swift; sourceTree = "<group>"; };
+		D77A5AAC287EB43B00652727 /* TabGroupNameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupNameTests.swift; sourceTree = "<group>"; };
+		D77A5AAE287EB48400652727 /* TabGroupMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupMenuView.swift; sourceTree = "<group>"; };
+		D77A5AB0287EBF6100652727 /* TabGroupMenuViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupMenuViewLocators.swift; sourceTree = "<group>"; };
 		D77D4788282269640006847A /* CrossTargetBeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetBeeper.swift; sourceTree = "<group>"; };
 		D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPinnedTabTests.swift; sourceTree = "<group>"; };
 		D7858BC5283BB5A000D0336A /* CreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
@@ -7627,6 +7633,7 @@
 				D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */,
 				D7D6F029284E2BA100C3EE7F /* AddLinkViewLocators.swift */,
 				D7F5BF0B2875630C008FE546 /* RightClickMenuViewLocators.swift */,
+				D77A5AB0287EBF6100652727 /* TabGroupMenuViewLocators.swift */,
 			);
 			path = Locators;
 			sourceTree = "<group>";
@@ -7653,6 +7660,7 @@
 				A5EB6EAE26FDFC55001442E7 /* ContextMenuTestView.swift */,
 				D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */,
 				D77A5A7928770F0D00652727 /* RightClickMenuTestView.swift */,
+				D77A5AAE287EB48400652727 /* TabGroupMenuView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -7660,6 +7668,7 @@
 		B57A9B3E26AB091A002C954D /* E2ETests */ = {
 			isa = PBXGroup;
 			children = (
+				D77A5AA6287EB42200652727 /* TabGrouping */,
 				A3B6C9602861C48900E7F78C /* HelpersTests */,
 				A3EE7D55284F236B00DD3EBB /* Synchronization */,
 				D71D7485282B9C7600D8D6F5 /* Privacy */,
@@ -7977,6 +7986,14 @@
 				D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */,
 			);
 			path = Ads;
+			sourceTree = "<group>";
+		};
+		D77A5AA6287EB42200652727 /* TabGrouping */ = {
+			isa = PBXGroup;
+			children = (
+				D77A5AAC287EB43B00652727 /* TabGroupNameTests.swift */,
+			);
+			path = TabGrouping;
 			sourceTree = "<group>";
 		};
 		D7D6F0052849DF5F00C3EE7F /* Trackers */ = {
@@ -9876,6 +9893,7 @@
 				B5F845E326F8CCA700B15209 /* LinksTests.swift in Sources */,
 				D7858BD1283BDAB500D0336A /* CreditCardSaveTests.swift in Sources */,
 				B52744CD270B03730045805F /* SearchOnNoteTests.swift in Sources */,
+				D77A5AAF287EB48400652727 /* TabGroupMenuView.swift in Sources */,
 				B507CB34275F8CB800DFF11A /* SlashMenuTests.swift in Sources */,
 				B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */,
 				D77A5A8428780F2100652727 /* RightClickLinkMenuTests.swift in Sources */,
@@ -9932,6 +9950,7 @@
 				B52C147D27FF051800D67EE5 /* ReportBugFeatureTests.swift in Sources */,
 				B5FB3A2027E8C32800037FD5 /* OnboardingImportDataViewLocators.swift in Sources */,
 				A36F2A342864A0F500B0F971 /* BrowserTabsPreferencesTests.swift in Sources */,
+				D77A5AAD287EB43B00652727 /* TabGroupNameTests.swift in Sources */,
 				375D83CB278D6AE80064C246 /* BrowserStatusBarTests.swift in Sources */,
 				B551F3BF26BD0EBF00B72D27 /* WebsiteAuthTest.swift in Sources */,
 				B575360526BDA6260053CE2D /* LoginTest.swift in Sources */,
@@ -9961,6 +9980,7 @@
 				B57A9B4126AB0947002C954D /* NoteCreationTests.swift in Sources */,
 				B55B4E3F26C108B900604850 /* OmniboxViewTests.swift in Sources */,
 				B5BA077D26AF3AE400D31FED /* NoteTestView.swift in Sources */,
+				D77A5AB1287EBF6100652727 /* TabGroupMenuViewLocators.swift in Sources */,
 				B57535ED26BD48040053CE2D /* JournalTest.swift in Sources */,
 				B5FAE302270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift in Sources */,
 				A325D9C4283EA87F0019C5D0 /* AllNotesTableLocators.swift in Sources */,
