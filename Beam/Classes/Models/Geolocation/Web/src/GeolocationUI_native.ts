@@ -38,7 +38,7 @@ export class GeolocationUI_native implements GeolocationUI {
     this.native.sendMessage("listenerAdded", {})
   }
 
-  listenerRemmoved(): void {
+  listenerRemoved(): void {
     this.native.sendMessage("listenerRemoved", {})
   }
 
