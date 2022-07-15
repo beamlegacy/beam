@@ -46,10 +46,10 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
     func observeNotesChanges() {
         // automatically rescan the journal when the notes change:
         BeamData.shared.$lastIndexedElement
-            .throttle(for: 2, scheduler: RunLoop.current, latest: true)
+            .debounce(for: 2, scheduler: RunLoop.current)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                guard let self = self else { return }
+                guard let self = self, self.state.mode == .today else { return }
                 self.setNotes(self.notes, focussingOn: nil, force: true)
             }.store(in: &scope)
 
