@@ -166,6 +166,7 @@
         "SlashMenuTests\/testCheckBoxCreationMovementDeletion()",
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SlashMenuTests\/testNoteDividerCreation()",
+        "TabGroupNameTests",
         "TrackersBlockerTests",
         "UITestFrameworkTests",
         "UpdateViewTests",

@@ -157,6 +157,7 @@
         "SlashMenuTests",
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SyncTests",
+        "TabGroupNameTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "UITestFrameworkTests",
