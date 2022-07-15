@@ -77,7 +77,7 @@ class BeamTextEditTests: XCTestCase {
         fromNote.owner = BeamData.shared.currentDatabase
         fromNote.addChild(BeamElement(BeamText(attributedString: NSAttributedString(string: "abc \n\(url) efg"))))
         let noteData = try JSONEncoder().encode(fromNote)
-        let elementHolder = BeamNoteDataHolder(noteData: noteData)
+        let elementHolder = BeamNoteDataHolder(noteData: noteData, includedImages: [:])
         let elementHolderData = try PropertyListEncoder().encode(elementHolder)
         pasteboard.setData(elementHolderData, forType: .noteDataHolder)
         try pasteAndCheckNoteSourceFor(url: url)
