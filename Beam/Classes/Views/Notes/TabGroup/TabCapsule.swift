@@ -29,7 +29,7 @@ struct TabCapsule: View {
             .onTouchDown({ touchDown in
                 isClicked = touchDown
             })
-            .animation(.easeOut(duration: 0.1), value: isHovered)
+            .animation(isHovered ? .easeIn(duration: 0.1) : .easeOut(duration: 0.1), value: isHovered)
     }
 
     private var foregroundColor: Color {
