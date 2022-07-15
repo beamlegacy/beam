@@ -46,6 +46,8 @@ struct LottieView: NSViewRepresentable {
         animationContainerView.completion = completion
     }
 
+    public static var cache = LRUAnimationCache()
+
     final class AnimationContainerView: NSView {
         var completion: (() -> Void)?
 
@@ -58,7 +60,7 @@ struct LottieView: NSViewRepresentable {
                     return
                 }
 
-                animationView.animation = Animation.named(animationName)
+                animationView.animation = Animation.named(animationName, animationCache: cache)
             }
         }
 
@@ -106,7 +108,7 @@ struct LottieView: NSViewRepresentable {
 
         init(animationSize: CGSize?, completion: (() -> Void)?) {
             self.completion = completion
-            
+
             animationView = AnimationView()
             animationView.contentMode = .scaleAspectFit
             animationView.loopMode = loopMode
