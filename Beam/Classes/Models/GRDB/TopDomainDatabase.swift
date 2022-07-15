@@ -75,6 +75,7 @@ extension TopDomainRecord: MutablePersistableRecord {
 
 enum TopDomainDatabaseError: Error {
     case notFound
+    case notAnURL
 }
 
 extension TopDomainDatabase {
