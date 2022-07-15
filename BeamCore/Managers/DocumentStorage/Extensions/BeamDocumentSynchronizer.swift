@@ -18,6 +18,7 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
 
     public private(set) static var conflictPolicy = BeamObjectConflictResolution.fetchRemoteAndError
     public private(set) static var backgroundQueue = DispatchQueue.global(qos: .default)
+    private var documentsQueue = DispatchQueue.global(qos: .userInitiated)
 
     private var scope = Set<AnyCancellable>()
 
@@ -67,7 +68,7 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
                         self?.subjects.removeValue(forKey: document.id)
                     }
 
-                    Task.init { [weak self] in
+                    self?.documentsQueue.async {
                         do {
                             var updatedDocument: BeamDocument!
                             if document.deletedAt != nil {
@@ -79,11 +80,17 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
                                 }
                                 updatedDocument = reloadedDocument
                             }
-                            try await self?.saveOnBeamObjectAPI(updatedDocument)
-                            if Configuration.env == .test {
-                                try await Task.sleep(nanoseconds: 1 * 100_000_000)
+                            let semaphore = DispatchSemaphore(value: 0)
+                            try self?.saveOnBeamObjectAPI(updatedDocument) { result in
+                                semaphore.signal()
+                                switch result {
+                                case .success:
+                                    Logger.shared.logInfo("\(document.id) saved on server", category: .sync)
+                                case .failure(let error):
+                                    Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
+                                }
                             }
-                            Logger.shared.logInfo("\(document.id) saved on server", category: .sync)
+                            semaphore.wait()
                         } catch {
                             Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
                         }
