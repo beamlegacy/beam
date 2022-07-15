@@ -241,7 +241,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defer {
                 self.synchronizationTaskDidStop()
                 self.synchronizationSemaphore.signal()
-                self.indexAllNotes()
             }
 
             // swiftlint:disable:next date_init
