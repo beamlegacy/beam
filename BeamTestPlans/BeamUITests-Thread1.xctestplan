@@ -91,6 +91,7 @@
         "CreditCardsTests",
         "DailySummaryTests",
         "EditorShortcutsTests",
+        "GeneralPreferencesTests",
         "HelpAndFeedbackTests",
         "IncognitoModeTests",
         "InsideAdsBlockerTests",
