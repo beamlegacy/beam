@@ -24,4 +24,8 @@ extension NSAppearance {
             block()
         }
     }
+
+    static var currentAppearance: NSAppearance {
+        self.currentDrawing()
+    }
 }
