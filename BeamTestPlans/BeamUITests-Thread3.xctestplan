@@ -97,6 +97,7 @@
         "DeleteNotesTests",
         "DownloadsTest",
         "EditorShortcutsTests",
+        "GeneralPreferencesTests",
         "GoogleSheetsTests",
         "IncognitoModeTests",
         "InsideAdsBlockerTests",
