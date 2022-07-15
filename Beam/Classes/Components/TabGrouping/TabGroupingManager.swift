@@ -1,65 +1,5 @@
 import Foundation
 
-class TabGroup: Identifiable {
-
-    typealias GroupID = UUID
-
-    private(set) var id = GroupID()
-    /// List of Link ids
-
-    private(set) var title: String?
-    fileprivate(set) var color: TabGroupingColor?
-    fileprivate(set) var pageIds: [ClusteringManager.PageID]
-    fileprivate(set) var collapsed = false
-    fileprivate(set) var isLocked: Bool = false
-
-    /// Whether or not the group has been interacted with by the user and should therefore be persisted
-    private(set) var shouldBePersisted: Bool = false
-
-    init(id: GroupID = GroupID(), pageIds: [ClusteringManager.PageID],
-         title: String? = nil, color: TabGroupingColor? = nil, isLocked: Bool = false) {
-        self.id = id
-        self.pageIds = pageIds
-        self.title = title
-        self.color = color
-        shouldBePersisted = title?.isEmpty == false
-    }
-
-    func changeTitle(_ title: String) {
-        self.title = title
-        shouldBePersisted = !title.isEmpty
-    }
-
-    func changeColor(_ color: TabGroupingColor) {
-        self.color = color
-        shouldBePersisted = true
-    }
-
-    func updatePageIds(_ pageIds: [ClusteringManager.PageID]) {
-        self.pageIds = pageIds
-    }
-
-    func copy(locked: Bool = false, discardPages: Bool = true) -> TabGroup {
-        let newGroup = TabGroup(pageIds: pageIds)
-        newGroup.title = title
-        newGroup.color = color
-        newGroup.collapsed = collapsed
-        newGroup.shouldBePersisted = shouldBePersisted
-        newGroup.isLocked = locked
-        newGroup.pageIds = discardPages ? [] : pageIds
-        return newGroup
-    }
-}
-
-extension TabGroup: Equatable, Hashable {
-    static func == (lhs: TabGroup, rhs: TabGroup) -> Bool {
-        lhs.id == rhs.id
-    }
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
-
 struct TabForcedGroup {
     var inGroup: TabGroup?
     var outOfGroup: TabGroup?
@@ -104,6 +44,10 @@ class TabGroupingManager {
     /// The UI might want to temporarily force a tab in or out a group, independently of its page.
     /// Either for temporary UI states (opening a new tab in group). Or while we're waiting for Clustering to update.
     private(set) var forcedTabsGroup = [BrowserTab.TabID: TabForcedGroup]()
+
+    func existingGroup(forGroupID: TabGroup.GroupID) -> TabGroup? {
+        builtPagesGroups.values.first { $0.id == forGroupID }
+    }
 
     /// Manually assign a tab to a group, or prevent from being assigned to that group.
     func moveTab(_ tab: BrowserTab, inGroup: TabGroup?, outOfGroup: TabGroup? = nil) {
@@ -151,22 +95,22 @@ extension TabGroupingManager {
 
     func pageWasMoved(pageId: ClusteringManager.PageID, fromGroup: TabGroup?, toGroup: TabGroup?) {
         if let fromGroup = fromGroup {
-            fromGroup.pageIds.removeAll { $0 == pageId }
+            fromGroup.updatePageIds(fromGroup.pageIds.filter { $0 != pageId })
             groupDidChangeContent(fromGroup, fromUser: true)
         }
         if let toGroup = toGroup {
-            toGroup.pageIds.append(pageId)
+            toGroup.updatePageIds(toGroup.pageIds + [pageId])
             groupDidChangeContent(toGroup, fromUser: true)
         }
     }
 
     func ungroup(_ group: TabGroup) {
-        group.pageIds.removeAll()
+        group.updatePageIds([])
         groupDidChangeContent(group, fromUser: true)
     }
 
     func toggleCollapse(_ group: TabGroup) {
-        group.collapsed.toggle()
+        group.toggleCollapsed()
     }
 
     private func allOpenTabs() -> [BrowserTab] {
@@ -366,7 +310,7 @@ extension TabGroupingManager {
         }
         groupsAndTheirPages.forEach { (group: TabGroup, pages: [PageID]) in
             if group.color == nil {
-                group.color = colorGenerator.generateNewColor()
+                group.changeColor(colorGenerator.generateNewColor(), isInitialColor: true)
             }
             group.updatePageIds(pages)
         }
