@@ -44,7 +44,7 @@ class BeamTableCellLottieView: NSTableCellView {
 
     func updateWithLottie(named: String) {
         guard animationName != named else { return }
-        let animation = Animation.named(named)
+        let animation = Animation.named(named, animationCache: LottieView.cache)
         lottieView.animation = animation
         lottieView.setColor(BeamColor.LightStoneGray)
         lottieView.play()
