@@ -10,4 +10,8 @@ import XCTest
 
 class GeneralPreferenceTestView: PreferencesBaseView {
     
+    func getStartBeamWithOpenedTabsElement() -> XCUIElement {
+        return checkBox(GeneralPreferencesViewLocators.Checkboxes.startBeam.accessibilityIdentifier)
+    }
+    
 }

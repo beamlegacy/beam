@@ -92,6 +92,7 @@
         "DailySummaryTests",
         "DeleteNotesTests",
         "DownloadsTest",
+        "GeneralPreferencesTests",
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
         "IncognitoModeTests",
