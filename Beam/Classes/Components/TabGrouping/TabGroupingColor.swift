@@ -81,6 +81,10 @@ struct TabGroupingColor: Identifiable, Hashable {
         textSelectionColor = mainColor?.alpha(0.14)
     }
 
+    struct CodableColor: Codable {
+        var colorName: String?
+        var hueTint: Double?
+    }
 }
 
 final class TabGroupingColorGenerator {
