@@ -523,7 +523,7 @@ import Sentry
             if let tab = state.browserTabsManager.openedTab(for: url) { return tab }
             return state.createTab(withURLRequest: URLRequest(url: url), setCurrent: !inBackground)
         }
-        
+
         state.browserTabsManager.reopenGroup(group, withTabs: tabs)
 
         if mode != .web && hasBrowserTabs && !inBackground {
