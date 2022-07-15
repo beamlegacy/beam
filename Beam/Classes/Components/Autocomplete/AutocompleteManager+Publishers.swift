@@ -248,10 +248,14 @@ extension AutocompleteManager {
             let start = DispatchTime.now()
             TopDomainDatabase.shared.search(withPrefix: query) { result in
                 switch result {
-                case .failure(let error): promise(.failure(error))
+                case .failure(let error):
+                    switch error {
+                        case TopDomainDatabaseError.notFound: promise(.success([]))
+                        default: promise(.failure(error))
+                    }
                 case .success(let topDomain):
                     guard let url = URL(string: topDomain.url) else {
-                        promise(.failure(TopDomainDatabaseError.notFound))
+                        promise(.failure(TopDomainDatabaseError.notAnURL))
                         return
                     }
 
