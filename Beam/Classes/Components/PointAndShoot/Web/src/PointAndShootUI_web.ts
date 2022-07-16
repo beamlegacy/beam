@@ -95,7 +95,6 @@ export class PointAndShootUI_web implements PointAndShootUI {
   constructor(win) {
     this.win = win
     this.logger = new BeamLogger(win, BeamLogCategory.pointAndShoot)
-    this.logger.log(`${this.toString()} instantiated`)
   }
   log(arg0: string): void {
     throw new Error("Method not implemented.")

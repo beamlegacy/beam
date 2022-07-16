@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 protocol BeamWebViewConfiguration {
     var id: UUID { get }
@@ -99,6 +100,7 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
                 addJS(source: jsCode, when: handler.jsCodePosition, forMainFrameOnly: handler.forMainFrameOnly)
             }
         }
+        Logger.shared.logDebug("Registered \(handlers.map({ $0.className }).joined(separator: ", ")) on WebView ", category: .web)
     }
 
     func addJS(source: String, when: WKUserScriptInjectionTime, forMainFrameOnly: Bool = false) {
