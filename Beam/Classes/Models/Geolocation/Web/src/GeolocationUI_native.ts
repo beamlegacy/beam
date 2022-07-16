@@ -13,7 +13,6 @@ export class GeolocationUI_native implements GeolocationUI {
    */
   constructor(protected native: Native<any>) {
     this.logger = new BeamLogger(this.native.win, BeamLogCategory.embedNode)
-    this.logger.log(`${this.toString()} instantiated`)
   }
 
   /**

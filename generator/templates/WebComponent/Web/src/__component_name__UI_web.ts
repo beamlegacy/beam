@@ -22,7 +22,6 @@ export class __component_name__UI_web implements __component_name__UI {
     const documentLanguage = doc.documentElement.lang
     this.lang = navigatorLanguage || documentLanguage
     this.logger = new BeamLogger(win, BeamLogCategory.embedNode)
-    this.logger.log(`${this.toString()} instantiated`)
   }
 
   /**
