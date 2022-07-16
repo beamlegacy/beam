@@ -13,7 +13,6 @@ export class PasswordManagerUI_native implements PasswordManagerUI {
    */
   constructor(protected native: Native<any>) {
     this.logger = new BeamLogger(this.native.win, BeamLogCategory.webAutofillInternal)
-    this.logger.log(`${this.toString()} instantiated`)
   }
 
   /**

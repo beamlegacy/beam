@@ -21,7 +21,6 @@ export class SearchWebPageUI_web implements SearchWebPageUI {
     const documentLanguage = doc.documentElement.lang
     this.lang = navigatorLanguage || documentLanguage
     this.logger = new BeamLogger(win, BeamLogCategory.embedNode)
-    this.logger.log(`${this.toString()} instantiated`)
   }
 
   /**
