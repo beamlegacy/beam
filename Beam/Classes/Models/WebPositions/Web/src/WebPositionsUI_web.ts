@@ -18,7 +18,6 @@ export class WebEventsUI_web implements WebPositionsUI {
     const documentLanguage = doc.documentElement.lang
     this.lang = navigatorLanguage || documentLanguage
     this.logger = new BeamLogger(win, BeamLogCategory.webpositions)
-    this.logger.log(`${this.toString()} instantiated`)
   }
 
   /**

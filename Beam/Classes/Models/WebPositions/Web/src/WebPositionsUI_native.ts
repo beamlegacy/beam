@@ -9,7 +9,6 @@ export class WebPositionsUI_native implements WebPositionsUI {
    */
   constructor(protected native: Native<any>) {
     this.logger = new BeamLogger(native.win, BeamLogCategory.webpositions)
-    this.logger.log(`${this.toString()} instantiated`)
   }
 
   /**
