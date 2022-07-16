@@ -278,9 +278,8 @@ extension BrowserTabsManager {
             index += 1
             tab = tabs[index]
         }
-        if index == tabs.count {
-            guard let firstTab = visibleTabs.first else { return }
-            tab = firstTab
+        if index == tabs.count - 1 && !visibleTabs.contains(tab) {
+            tab = visibleTabs[0]
         }
         currentTab = tab
     }
