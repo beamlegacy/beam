@@ -21,7 +21,6 @@ export class GeolocationUI_web implements GeolocationUI {
     const documentLanguage = doc.documentElement.lang
     this.lang = navigatorLanguage || documentLanguage
     this.logger = new BeamLogger(win, BeamLogCategory.embedNode)
-    this.logger.log(`${this.toString()} instantiated`)
   }
   listenerAdded(): void {
     throw new Error("Method not implemented.")
