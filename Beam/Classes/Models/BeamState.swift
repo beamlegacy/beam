@@ -477,7 +477,7 @@ import Sentry
         for tab in tabs {
             guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
             let cmd = CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab,
-                               group: browserTabsManager.group(forTab: tab))
+                               group: browserTabsManager.group(for: tab))
             cmdManager.run(command: cmd, on: self)
         }
         cmdManager.endGroup(forceGroup: true)
@@ -494,7 +494,7 @@ import Sentry
         }
         guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { return false }
         let cmd = CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab,
-                           group: browserTabsManager.group(forTab: tab))
+                           group: browserTabsManager.group(for: tab))
         return cmdManager.run(command: cmd, on: self, needsToBeSaved: tab.url != nil)
     }
 
@@ -698,6 +698,8 @@ import Sentry
         super.init()
         setup(data: data)
 
+        backForwardList.push(.journal)
+
         data.downloadManager.downloadList.$downloads.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &scope)
@@ -708,9 +710,12 @@ import Sentry
 
     enum CodingKeys: String, CodingKey {
         case currentNote
+        case currentPage
         case mode
         case tabs
         case currentTab
+        case tabGroups
+        case tabGroupIDs
         case backForwardList
     }
 
@@ -724,6 +729,11 @@ import Sentry
         if let currentNoteTitle = try? container.decode(String.self, forKey: .currentNote) {
             currentNote = BeamNote.fetch(title: currentNoteTitle)
         }
+        if let page = try? container.decode(String.self, forKey: .currentPage) {
+            if let pageID = WindowPageID(rawValue: page) {
+                currentPage = WindowPage.page(for: pageID)
+            }
+        }
         backForwardList = try container.decode(NoteBackForwardList.self, forKey: .backForwardList)
 
         browserTabsManager.tabs = try container.decode([BrowserTab].self, forKey: .tabs)
@@ -731,8 +741,30 @@ import Sentry
             browserTabsManager.setCurrentTab(at: tabIndex)
         }
 
+        let tabGroups = try container.decode([TabGroup].self, forKey: .tabGroups)
+        let tabGroupIDs = try container.decode([BrowserTab.ID: TabGroup.ID].self, forKey: .tabGroupIDs)
+
+        for tab in browserTabsManager.tabs {
+            if let groupID = tabGroupIDs[tab.id],
+               let group = tabGroups.first(where: { $0.id == groupID }) {
+                browserTabsManager.moveTabToGroup(tab.id, group: group)
+            }
+        }
+        
+        for group in tabGroups {
+            if group.collapsed {
+                browserTabsManager.groupTabsInGroup(group)
+            }
+        }
+
         setup(data: data)
-        mode = try container.decode(Mode.self, forKey: .mode)
+
+        if PreferencesManager.defaultWindowMode == .webTabs && hasBrowserTabs {
+            mode = .web
+        } else {
+            mode = try container.decode(Mode.self, forKey: .mode)
+        }
+
         setupObservers()
     }
 
@@ -742,17 +774,32 @@ import Sentry
         if let note = currentNote {
             try container.encode(note.title, forKey: .currentNote)
         }
+        if let page = currentPage {
+            try container.encode(page.id.rawValue, forKey: .currentPage)
+        }
         try container.encode(backForwardList, forKey: .backForwardList)
         try container.encode(mode, forKey: .mode)
         try container.encode(browserTabsManager.tabs, forKey: .tabs)
         if let tab = currentTab {
             try container.encode(browserTabsManager.tabs.firstIndex(of: tab), forKey: .currentTab)
         }
+
+        var tabGroups: Set<TabGroup> = []
+        var tabGroupIDs: [BrowserTab.ID: TabGroup.ID] = [:]
+
+        for tab in browserTabsManager.tabs {
+            if let group = browserTabsManager.group(for: tab) {
+                tabGroups.insert(group)
+                tabGroupIDs[tab.id] = group.id
+            }
+        }
+
+        try container.encode(Array(tabGroups), forKey: .tabGroups)
+        try container.encode(tabGroupIDs, forKey: .tabGroupIDs)
     }
 
     func setup(data: BeamData) {
         destinationCardName = data.todaysName
-        backForwardList.push(.journal)
 
         BeamDocumentCollection.documentDeleted.receive(on: DispatchQueue.main)
             .sink { [weak self] deletedDocument in

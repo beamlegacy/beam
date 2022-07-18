@@ -287,7 +287,6 @@ struct TabsSection: View {
     @State private var newTabWindowMakeActive = PreferencesManager.newTabWindowMakeActive
     @State private var cmdNumberSwitchTabs = PreferencesManager.cmdNumberSwitchTabs
     @State private var showWebsiteIconTab = PreferencesManager.showWebsiteIconTab
-    @State private var restoreLastBeamSession = PreferencesManager.restoreLastBeamSession
     @State private var enableTabGrouping = PreferencesManager.enableTabGrouping
 
     var body: some View {
@@ -323,14 +322,6 @@ struct TabsSection: View {
     //        Toggle(isOn: $showWebsiteIconTab) {
     //            Text("Show website icons in tabs")
     //        }.toggleStyle(CheckboxToggleStyle())
-
-            Toggle(isOn: $restoreLastBeamSession) {
-                Text("Restore all tabs from last session")
-            }.accessibilityIdentifier("restore-tabs-checkbox")
-                .toggleStyle(CheckboxToggleStyle())
-                .onChange(of: restoreLastBeamSession, perform: {
-                    PreferencesManager.restoreLastBeamSession = $0
-                })
         }
         .font(BeamFont.regular(size: 13).swiftUI)
         .foregroundColor(BeamColor.Generic.text.swiftUI)

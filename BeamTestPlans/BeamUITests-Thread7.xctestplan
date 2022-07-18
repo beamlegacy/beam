@@ -69,6 +69,7 @@
         "AllNotesViewTests",
         "AllowListPreferencesTests\/testCancelAllowUrlOperation()",
         "AllowListPreferencesTests\/testSearchForAllowUrl()",
+        "AppLifecycleTests",
         "BaseCreditCardTest",
         "BaseTest",
         "BlockReferenceTests",

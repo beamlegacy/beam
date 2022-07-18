@@ -30,6 +30,15 @@ class BrowserTabTests: XCTestCase {
         XCTAssertFalse(tab.browsingTree.isPinned)
     }
 
+    func testEncodeTab() throws {
+        let url = URL(string: "http://elmundo.es")!
+        let tab = BrowserTab(pinnedTabWithId: UUID(), url: url, title: "El journal")
+        let data = try PropertyListEncoder().encode(tab)
+        let decodedTab = try PropertyListDecoder().decode(BrowserTab.self, from: data)
+
+        XCTAssert(decodedTab.preloadUrl == url)
+    }
+
     func testPerformance_InitTab() throws {
         self.measure {
             let _ = BrowserTab(state: BeamState(), browsingTreeOrigin: nil, originMode: .note, note: note)

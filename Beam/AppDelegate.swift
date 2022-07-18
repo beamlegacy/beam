@@ -103,7 +103,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSSetUncaughtExceptionHandler { _ in
             guard let prevHandler = NSGetUncaughtExceptionHandler() else { return }
             DispatchQueue.mainSync {
-                RestoreTabsManager.shared.saveOpenedTabsBeforeTerminatingApp()
+                AppDelegate.main.storeAllWindowsFromCurrentSession()
             }
             NSSetUncaughtExceptionHandler(prevHandler)
         }
@@ -125,7 +125,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startDisplayingBrowserImportCompletions()
 
         if !isRunningTests {
-            createWindow(frame: nil, restoringTabs: true)
+            if !shouldRestoreSession() || !reopenAllWindowsFromLastSession() {
+                createWindow(frame: nil)
+            }
         }
 
         Logger.shared.logInfo("This version of Beam was built from a \(EnvironmentVariables.branchType) branch", category: .general)
@@ -348,11 +350,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func newWindow(_ sender: Any?) {
-        self.createWindow(frame: nil, restoringTabs: false)
+        self.createWindow(frame: nil)
     }
 
     @IBAction func newIncognitoWindow(_ sender: Any?) {
-        self.createWindow(frame: nil, restoringTabs: false, isIncognito: true)
+        self.createWindow(frame: nil, isIncognito: true)
     }
 
     @discardableResult
@@ -373,7 +375,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @discardableResult
-    func createWindow(frame: NSRect?, title: String? = nil, restoringTabs: Bool = false, isIncognito: Bool = false, becomeMain: Bool = true) -> BeamWindow? {
+    func createWindow(frame: NSRect?, title: String? = nil, isIncognito: Bool = false, becomeMain: Bool = true) -> BeamWindow? {
         guard !data.onboardingManager.needsToDisplayOnboard else {
             data.onboardingManager.delegate = self
             data.onboardingManager.presentOnboardingWindow()
@@ -400,9 +402,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         windows.append(window)
         subscribeToStateChanges(for: window.state)
-        if PreferencesManager.restoreLastBeamSession, restoringTabs {
-            window.reOpenClosedTab(nil)
-        }
         return window
     }
 
@@ -412,6 +411,52 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             return defaultWindowMinimumSize
         }
+    }
+
+    // MARK: Restoration
+
+    @UserDefault(key: "RestoreSession", defaultValue: true, suiteName: BeamUserDefaults.restoration.suiteName)
+    private var restoreSession: Bool
+
+    private func shouldRestoreSession() -> Bool {
+        return restoreSession && !PreferencesManager.isWindowsRestorationPrevented
+    }
+
+    func storeAllWindowsFromCurrentSession() {
+        guard !windows.isEmpty else {
+            return
+        }
+
+        do {
+            let session = try PropertyListEncoder().encode(windows)
+            let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
+            try session.write(to: sessionURL, options: .atomic)
+        } catch {
+            Logger.shared.logError("Failed to store session. \(error)", category: .general)
+        }
+    }
+
+    @discardableResult
+    func reopenAllWindowsFromLastSession() -> Bool {
+        do {
+            let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
+            let data = try Data(contentsOf: sessionURL)
+            let windows = try PropertyListDecoder().decode([BeamWindow].self, from: data)
+            for window in windows {
+                self.windows.append(window)
+                subscribeToStateChanges(for: window.state)
+                window.makeKeyAndOrderFront(nil)
+            }
+        } catch {
+            Logger.shared.logError("Failed to restore session. \(error)", category: .general)
+            return false
+        }
+        return !windows.isEmpty
+    }
+
+    func deleteSessionData() {
+        let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
+        try? FileManager.default.removeItem(at: sessionURL)
     }
 
     // MARK: - Tabs
@@ -433,7 +478,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag && data != nil {
-            createWindow(frame: nil, restoringTabs: false)
+            createWindow(frame: nil)
         }
 
         return true
@@ -557,7 +602,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         data.currentAccount?.logoutIfNeeded()
         data.saveData()
-        RestoreTabsManager.shared.saveOpenedTabsBeforeTerminatingApp()
+
         _ = self.data.browsingTreeSender?.groupWait()
         _ = BrowsingTreeStoreManager.shared.groupWait()
         // Save changes in the application's managed object context before the application terminates.
@@ -593,10 +638,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateCancel
         }
 
+        // Holding down the option key while quitting should reverse the logic.
+        let restorationEnabled = PreferencesManager.isWindowsRestorationEnabled
+        let alternateModifier = NSEvent.modifierFlags.contains(.option)
+
+        restoreSession = (restorationEnabled && !alternateModifier) || (!restorationEnabled && alternateModifier)
+
+        // We need to notify all tabs of imminent termination *before* we store the current session.
+        for window in windows {
+            for tab in window.state.browserTabsManager.tabs {
+                tab.appWillClose()
+            }
+        }
+
+        storeAllWindowsFromCurrentSession()
+
         //We need to trigger full sync before quitting the app
         //To make it feel more instant, we first close all the windows
         windows.forEach {
-            $0.close()
+            $0.close(terminatingApplication: true)
         }
 
         //Then start the full sync.

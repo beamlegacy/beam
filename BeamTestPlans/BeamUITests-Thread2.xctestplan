@@ -69,6 +69,7 @@
         "AllNotesPublishProfileTests",
         "AllNotesSortingTests",
         "AllowListPreferencesTests",
+        "AppLifecycleTests",
         "BaseCreditCardTest",
         "BaseTest",
         "BlockReferenceTests",

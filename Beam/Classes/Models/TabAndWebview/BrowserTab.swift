@@ -316,6 +316,8 @@ import BeamCore
         contentView = NSViewContainerView(contentView: beamWebView)
 
         super.init()
+
+        updateFavIcon(fromWebView: false)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -326,11 +328,12 @@ import BeamCore
         if let originalQuery = originalQuery {
             try container.encode(originalQuery, forKey: .originalQuery)
         }
-        if let currentURL = webView.url {
+        if let currentURL = webView.url ?? preloadUrl {
             try container.encode(currentURL, forKey: .url)
         }
 
-        if #available(macOS 12.0, *), let interactionStateData = webView.interactionState as? Data {
+        if #available(macOS 12.0, *),
+           let interactionStateData = (restoredInteractionState ?? webView.interactionState) as? Data {
             try container.encode(interactionStateData, forKey: .interactionState)
         } else {
             let backForwardUrlList: [URL] = webView.backForwardList.backList.map { $0.url }
@@ -377,7 +380,7 @@ import BeamCore
 
     private var updateFavIconDispatchItem: DispatchWorkItem?
     func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false, clearIfNotFound: Bool = false) {
-        guard let url = url else { favIcon = nil; return }
+        guard let url = (url ?? preloadUrl) else { favIcon = nil; return }
         updateFavIconDispatchItem?.cancel()
         let dispatchItem = DispatchWorkItem { [weak self] in
             guard !fromWebView || cacheOnly || (self?.webView != nil && self?.isLoading != true) else { return }
@@ -491,6 +494,7 @@ import BeamCore
         // Reload the state and url
         if #available(macOS 12.0, *), let restoredInteractionState = restoredInteractionState {
             self.webView.interactionState = restoredInteractionState
+            self.url = webView.url
         } else {
             // This doesn't really work. We could manipulate history with JS like Firefox does
             // https://github.com/mozilla-mobile/firefox-ios/wiki/History-Restoration-in-WKWebView-(and-Error-Pages)
