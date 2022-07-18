@@ -396,7 +396,7 @@
                                                 <action selector="createEmptyTabWithCurrentNote:" target="Ady-hI-5gd" id="4Wf-w8-oWg"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Re-Open Closed Tab" keyEquivalent="T" id="11s-ye-snn" userLabel="Re-Open Closed Tab">
+                                        <menuItem title="Reopen Closed Tab" keyEquivalent="T" id="11s-ye-snn" userLabel="Reopen Closed Tab">
                                             <connections>
                                                 <action selector="reOpenClosedTab:" target="Ady-hI-5gd" id="f8F-r4-bRg"/>
                                             </connections>
@@ -1279,6 +1279,12 @@
                                         </menuItem>
                                         <menuItem title="Merge All Windows" tag="4" hidden="YES" enabled="NO" id="N64-k2-oKz" userLabel="Merge All Windows">
                                             <modifierMask key="keyEquivalentModifierMask"/>
+                                        </menuItem>
+                                        <menuItem title="Reopen All Windows from Last Session" id="Vwo-QO-7VV">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reopenAllWindowsFromLastSession:" target="Voe-Tx-rLC" id="933-TI-CjR"/>
+                                            </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="k1W-lq-tQq"/>
                                         <menuItem title="Mute This Tab" tag="4" id="x3e-qD-Fxs" userLabel="Mute This Tab">

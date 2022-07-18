@@ -68,8 +68,6 @@ extension BeamWindow {
                 state.mode = .web
             }
             _ = state.cmdManager.undo(context: state)
-        } else {
-            RestoreTabsManager.shared.reopendSavedClosedTabsIfPossible()
         }
     }
 

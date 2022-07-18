@@ -69,7 +69,6 @@ extension PreferencesManager {
     static let newTabWindowMakeActiveKey = "newTabWindowMakeActive"
     static let cmdNumberSwitchTabsKey = "cmdNumberSwitchTabs"
     static let showWebsiteIconTabKey = "showWebsiteIconTab"
-    static let restoreLastBeamSessionKey = "restoreLastBeamSession"
     static let showsStatusBarKey = "showsStatusBar"
     static let collectSoundsKey = "collectSounds"
 }
@@ -85,7 +84,6 @@ extension PreferencesManager {
     static let newTabWindowMakeActiveDefault = true
     static let cmdNumberSwitchTabsDefault = false
     static let showWebsiteIconTabDefault = true
-    static let restoreLastBeamSessionDefault = false
     static let showsStatusBarDefault = false
     static let collectSoundsDefault = true
 }
@@ -117,9 +115,6 @@ extension PreferencesManager {
 
     @UserDefault(key: showWebsiteIconTabKey, defaultValue: showWebsiteIconTabDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var showWebsiteIconTab: Bool
-
-    @UserDefault(key: restoreLastBeamSessionKey, defaultValue: restoreLastBeamSessionDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
-    static var restoreLastBeamSession: Bool
 
     @UserDefault(key: showsStatusBarKey, defaultValue: showsStatusBarDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var showsStatusBar: Bool

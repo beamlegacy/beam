@@ -132,7 +132,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
 
         try? BeamData.shared.currentDocumentCollection?.delete(self, filters: [])
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        RestoreTabsManager.shared.clearSavedClosedTabs()
+        AppDelegate.main.deleteSessionData()
         PinnedBrowserTabsManager().savePinnedTabs(tabs: [])
         ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }        
         KeychainDailyNoteScoreStore.shared.clear()
@@ -344,7 +344,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         AppDelegate.main.windows.forEach { window in
             window.close()
         }
-        AppDelegate.main.createWindow(frame: nil, restoringTabs: false)
+        AppDelegate.main.createWindow(frame: nil)
     }
 
     private func clearPasswordsDatabase() {

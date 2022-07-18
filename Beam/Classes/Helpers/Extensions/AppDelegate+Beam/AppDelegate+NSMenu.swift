@@ -160,6 +160,12 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
         menuItem.title = title
     }
 
+    // MARK: - Actions
+
+    @IBAction func reopenAllWindowsFromLastSession(_ sender: NSMenuItem) {
+        reopenAllWindowsFromLastSession()
+    }
+
     // MARK: - NSMenu Delegate
     func menuWillOpen(_ menu: NSMenu) {
         toggleVisibility(false, ofAlternatesKeyEquivalentsItems: menu.items)

@@ -16,7 +16,7 @@ class TabGroupNameTests: BaseTest {
 
     override func setUp() {
         step("Given I open multiple times same test page") {
-            launchApp()
+            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             uiMenu.loadUITestPage2()
             uiMenu.loadUITestPage2()
         }
@@ -102,5 +102,30 @@ class TabGroupNameTests: BaseTest {
             XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupNameSpecialChars)
         }
     }
-    
+
+    func testTabGroupRestoration() throws {
+        step("When I restart the app") {
+            restartApp(storeSessionWhenTerminated: true)
+        }
+
+        step("Then the tab group is restored") {
+            XCTAssertTrue(tabGroupMenu.getFirstTabGroup().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+        }
+
+        step("When I collapse tab group, set a tab group name and restart the app") {
+            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.waitForMenuToBeDisplayed()
+            tabGroupMenu.clickTabGroupMenu(.tabGroupCollapse)
+
+            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.waitForMenuToBeDisplayed()
+            tabGroupMenu.setTabGroupName(tabGroupName: tabGroupName)
+
+            restartApp(storeSessionWhenTerminated: true)
+        }
+
+        step("Then tab group name is set and contains the number of tabs") {
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (2)")
+        }
+    }
 }

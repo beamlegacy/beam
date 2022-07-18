@@ -16,7 +16,7 @@ class BrowserShortcutsTests: BaseTest {
     var testHelper = BeamUITestsHelper(JournalTestView().app)
     
     override func setUp() {
-        journalView = launchApp()
+        journalView = launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
     }
     
     func testWebTabsJumpOpenCloseReopen() {
@@ -116,7 +116,7 @@ class BrowserShortcutsTests: BaseTest {
         }
         
         step ("When I quit the app"){
-            restartApp()
+            restartApp(storeSessionWhenTerminated: false)
         }
     
         step ("Then tabs are reopened on app relaunch"){
