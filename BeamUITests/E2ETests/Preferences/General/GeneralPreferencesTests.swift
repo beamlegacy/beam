@@ -73,4 +73,24 @@ class GeneralPreferencesTests: BaseTest {
                             .isJournalOpened())
         }
     }
+    
+    func testGeneralPrefsAppearanceElements() {
+        
+        step("THEN Appearance elements are correctly displayed") {
+            XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.appearanceLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            for buttonID in GeneralPreferencesViewLocators.Buttons.allCases {
+                XCTAssertTrue(generalPrefView.button(buttonID.accessibilityIdentifier).exists)
+            }
+        }
+        
+    }
+    
+    func testGeneralPrefsAccessibilityElements() {
+        
+        step("THEN Accessibility checkbox is correctly displayed") {
+            XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.accessibilityLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(generalPrefView.checkBox(GeneralPreferencesViewLocators.Checkboxes.highlightTab.accessibilityIdentifier).exists)
+            XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.highlightCheckboxDescription.accessibilityIdentifier).exists)
+        }
+    }
 }
