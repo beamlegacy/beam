@@ -17,7 +17,7 @@ class GeneralPreferencesTests: BaseTest {
     var startBeamCheckbox: XCUIElement!
     
     override func setUp() {
-        journalView = launchApp()
+        journalView = launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
         openGeneralPrefs()
         startBeamCheckbox = generalPrefView.getStartBeamWithOpenedTabsElement()
     }
@@ -34,20 +34,17 @@ class GeneralPreferencesTests: BaseTest {
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.startBeamlabel.accessibilityIdentifier).exists)
         }
         
-        step("WHEN Start beam with opened tabs and Restore all tabs from last session checkboxes are enabled") {
+        step("WHEN Start beam with opened tabs") {
             if !startBeamCheckbox.isSettingEnabled() {
                 startBeamCheckbox.tapInTheMiddle()
-            }
-            basePrefView.navigateTo(preferenceView: .browser)
-            if !browserPrefView.getRestoreTabsCheckbox().isSettingEnabled() {
-                browserPrefView.getRestoreTabsCheckbox().tapInTheMiddle()
             }
             shortcutHelper.shortcutActionInvoke(action: .close)
         }
         
         step("THEN Webview is opened on restart with openned tab") {
             uiMenu.loadUITestPage1()
-            self.restartApp()
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            self.restartApp(storeSessionWhenTerminated: true)
             XCTAssertTrue(webView.waitForWebViewToLoad())
             XCTAssertEqual(webView.getNumberOfTabs(), 1)
         }
@@ -55,19 +52,21 @@ class GeneralPreferencesTests: BaseTest {
         if !isBigSurOS() {
             step("THEN Webview is opened on restart with pinned tab") {
                 webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
-                self.restartApp()
+                self.restartApp(storeSessionWhenTerminated: true)
                 XCTAssertTrue(webView.waitForWebViewToLoad())
                 XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
             }
         }
         
         step("WHEN I disable Start beam with opened tabs checkbox") {
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             openGeneralPrefs()
             startBeamCheckbox.clickOnExistence()
+            shortcutHelper.shortcutActionInvoke(action: .close)
         }
         
         step("THEN Journal view is opened on restart") {
-            self.restartApp()
+            self.restartApp(storeSessionWhenTerminated: true)
             XCTAssertTrue(journalView
                             .waitForJournalViewToLoad()
                             .isJournalOpened())

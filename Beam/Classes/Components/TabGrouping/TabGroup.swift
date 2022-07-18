@@ -33,11 +33,12 @@ final class TabGroup: Identifiable {
     required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         id = try values.decode(GroupID.self, forKey: .id)
-        title = try values.decode(String.self, forKey: .title)
+        title = try? values.decode(String.self, forKey: .title)
         let codableColor = try values.decode(TabGroupingColor.CodableColor.self, forKey: .color)
         color = TabGroupingColor(designColor: .init(rawValue: codableColor.colorName ?? ""), randomColorHueTint: codableColor.hueTint)
         pageIds = try values.decode([ClusteringManager.PageID].self, forKey: .pages)
         isLocked = try values.decode(Bool.self, forKey: .isLocked)
+        collapsed = try values.decode(Bool.self, forKey: .collapsed)
     }
 
     func changeTitle(_ title: String) {
@@ -89,6 +90,7 @@ extension TabGroup: Codable {
         case color
         case pages
         case isLocked
+        case collapsed
     }
 
     func encode(to encoder: Encoder) throws {
@@ -98,5 +100,6 @@ extension TabGroup: Codable {
         try container.encode(TabGroupingColor.CodableColor(colorName: color?.designColor?.rawValue, hueTint: color?.randomColorHueTint), forKey: .color)
         try container.encode(pageIds, forKey: .pages)
         try container.encode(isLocked, forKey: .isLocked)
+        try container.encode(collapsed, forKey: .collapsed)
     }
 }

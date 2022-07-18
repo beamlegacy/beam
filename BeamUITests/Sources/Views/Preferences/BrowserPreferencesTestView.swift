@@ -38,10 +38,6 @@ class BrowserPreferencesTestView: PreferencesBaseView {
         return checkBox(BrowserPreferencesViewLocators.Checkboxes.switchTabs.accessibilityIdentifier)
     }
     
-    func getRestoreTabsCheckbox() -> XCUIElement {
-        return checkBox(BrowserPreferencesViewLocators.Checkboxes.restoreTabs.accessibilityIdentifier)
-    }
-    
     @discardableResult
     func selectDownloadFolder(_ item: BrowserPreferencesViewLocators.MenuItemsDownload) -> BrowserPreferencesTestView {
         popUpButton(BrowserPreferencesViewLocators.Buttons.downloadFolderButton.accessibilityIdentifier).tapInTheMiddle()

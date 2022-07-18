@@ -55,4 +55,13 @@ extension WindowPage {
             AnyView(DiscoverShortcutsView())
         }
     }
+
+    static func page(for pageID: WindowPageID) -> WindowPage {
+        switch pageID {
+        case .allNotes:
+            return .allNotesWindowPage
+        case .shortcuts:
+            return .shortcutsWindowPage
+        }
+    }
 }
