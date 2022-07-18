@@ -24,6 +24,7 @@ public class TextNode: ElementNode {
     }
     var emptyTextFrame: TextFrame?
 
+    var mouseDownLocation = NSPoint.zero
     var mouseIsDragged = false
     var lastHoverMouseInfo: MouseInfo?
     var interlineFactor: CGFloat {
@@ -622,18 +623,9 @@ public class TextNode: ElementNode {
 
         if contentsFrame.containsY(mouseInfo.position) {
 
+            mouseDownLocation = mouseInfo.position
+
             let clickPos = positionAt(point: mouseInfo.position)
-
-            if let link = linkAt(point: mouseInfo.position) {
-                let inBackground = mouseInfo.event.modifierFlags.contains(.command)
-                openExternalLink(link: link, element: element, inBackground: inBackground)
-                return true
-            }
-
-            if let link = internalLinkAt(point: mouseInfo.position) {
-                editor.openCard(link, nil, nil)
-                return true
-            }
 
             if mouseInfo.event.clickCount == 1 && editor.inlineFormatter != nil {
                 focus(position: clickPos)
@@ -714,8 +706,22 @@ public class TextNode: ElementNode {
 
         if mouseIsDragged, allowSelection {
             editor.showInlineFormatterOnKeyEventsAndClick(isKeyEvent: false)
-            mouseIsDragged = false
         }
+
+        if !mouseIsDragged, contentsFrame.containsY(mouseInfo.position) {
+            if let link = linkAt(point: mouseInfo.position) {
+                let inBackground = mouseInfo.event.modifierFlags.contains(.command)
+                openExternalLink(link: link, element: element, inBackground: inBackground)
+                return true
+            }
+
+            if let link = internalLinkAt(point: mouseInfo.position) {
+                editor.openCard(link, nil, nil)
+                return true
+            }
+        }
+
+        mouseIsDragged = false
         return false
     }
 
@@ -766,6 +772,13 @@ public class TextNode: ElementNode {
 
     override func mouseDragged(mouseInfo: MouseInfo) -> Bool {
         guard let editor = self.editor, isFocused else { return false }
+
+        // Prevent accidental drag for very small movements.
+        guard abs(mouseInfo.position.x - mouseDownLocation.x) >= 1.0 ||
+              abs(mouseInfo.position.y - mouseDownLocation.y) >= 1.0 else {
+            return false
+        }
+
         let p = positionAt(point: mouseInfo.position)
         root?.cursorPosition = p
 
