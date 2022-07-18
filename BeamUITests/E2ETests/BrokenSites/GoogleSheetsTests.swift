@@ -9,26 +9,39 @@ import Foundation
 import XCTest
 
 
-class GoogleSheetsTests: BaseTest {
+class GoogleServicesTests: BaseTest {
 
     let omniboxView = OmniBoxTestView()
 
-    let url = "https://docs.google.com/spreadsheets/d/1bOh2DVaDn9M8ihPDysgpBt0ewVaLsWbJGBRcC8ZqTF8/edit?usp=sharing"
+    let spreadsheetURL = "https://docs.google.com/spreadsheets/d/17hgmlXZWZEfjt-nxjvFL_Us3IYGpn8LsVe7SAJYTTjs/edit?usp=sharing"
+    let docURL = "https://docs.google.com/document/d/194j8pkB9K9g4d8UBm29wlbO5K9hHbVJrFGLjj0haLJM/edit?usp=sharing"
 
-    override func setUpWithError() throws {
-        XCUIApplication().launch()
+    override func setUp() {
+        launchApp()
+    }
+    
+    func runTest(url: String, docTitle: String) {
+        
+        step("GIVEN I open Google sheet website: \(url)"){
+            omniboxView.searchInOmniBox(url, true)
+        }
+        
+        step("THEN \(docTitle) is successfully loaded"){
+            
+            webView.waitForWebViewToLoad()
+            let unableToLoadError = webView.staticText("Unable to load file")
+            
+            XCTAssertFalse(unableToLoadError.waitForExistence(timeout: BaseTest.minimumWaitTimeout), "No alert should be shown")
+            XCTAssertTrue(webView.staticText(docTitle).exists, "The document is not loaded") // it is also important the file is loaded as far as error message could be changed by Google
+        }
     }
 
-    func testGoogleSheetsIsUnableToLoadFile() throws {
-        var webView: WebTestView?
-        step("Given I open website: \(url)"){
-            webView = omniboxView.searchInOmniBox(url, true)
-        }
-        step("Then browser tab bar appears"){
-            XCTAssertTrue(webView!.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            let textElement = XCUIApplication().windows.staticTexts["Unable to load file"].firstMatch
-            XCTAssertTrue(waitForDoesntExist(textElement), "No alert should be shown")
-        }
+    func testGoogleSheetsFileLoading() {
+        runTest(url: spreadsheetURL, docTitle: "Google spreadsheet")
+    }
+    
+    func testGoogleDocFileLoading() {
+        runTest(url: docURL, docTitle: "Google doc")
     }
 
 }
