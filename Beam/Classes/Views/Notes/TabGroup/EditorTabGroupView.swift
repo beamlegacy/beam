@@ -19,6 +19,8 @@ struct EditorTabGroupView: View {
 
     @State private var isHoverArrow: Bool = false
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
+
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var nillify: DispatchWorkItem?
@@ -72,13 +74,17 @@ struct EditorTabGroupView: View {
                                 }
                             }
                     }
-                }.animation(.easeIn(duration: 0.1))
+                }.animation(allowAnimation ? .easeIn(duration: 0.1) : nil)
             }
             .padding(.horizontal, 8)
             .padding(.top, 5)
         }
         .background(background)
         .frame(minWidth: 100, maxWidth: 200, idealHeight: Self.height)
+    }
+
+    private var allowAnimation: Bool {
+        !windowInfo.windowIsResizing
     }
 
     @ViewBuilder private var title: some View {
@@ -92,9 +98,7 @@ struct EditorTabGroupView: View {
                 .lineLimit(1)
                 .foregroundColor(BeamColor.Editor.link.swiftUI)
                 .transition(titleTransition(reversed: false))
-                .overlay(ClickCatchingView(onTap: nil, onRightTap: { event in
-                    showContextMenu(atLocation: event.locationInWindow)
-                }, onDoubleTap: nil))
+                .allowsHitTesting(false)
         }
     }
 
@@ -105,7 +109,7 @@ struct EditorTabGroupView: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(backgroundColor)
         }.overlay(ClickCatchingView(onTap: nil, onRightTap: { event in
-            showContextMenu(atLocation: event.locationInWindow)
+            showContextMenu(with: event)
         }, onDoubleTap: nil))
     }
 
@@ -143,50 +147,65 @@ struct EditorTabGroupView: View {
 
     private let arrowButtonStyle: ButtonLabelStyle = ButtonLabelStyle(iconSize: 10, foregroundColor: BeamColor.AlphaGray.swiftUI, activeForegroundColor: BeamColor.Corduroy.swiftUI, activeBackgroundColor: .clear, trailingPaddingAdjustment: 6)
 
-    private func showContextMenu(atLocation location: CGPoint) {
-        let menuKey = "EditorGroupContextMenu"
-        let dismiss: () -> Void = {
-            CustomPopoverPresenter.shared.dismissPopovers(key: menuKey)
-        }
-        let nameAndColorView = TabClusteringNameColorPickerView(groupName: tabGroup.title ?? "",
-                                                                selectedColor: tabGroup.color?.designColor ?? .red, onChange: { [weak state] newValues in
-            if tabGroup.title != newValues.name {
-                tabGroup.title = newValues.name
-                state?.data.tabGroupingDBManager?.save(groups: [tabGroup])
-            }
-            if tabGroup.color != newValues.color, let newColor = newValues.color {
-                tabGroup.color = newColor
-                state?.data.tabGroupingDBManager?.save(groups: [tabGroup])
-            }
-        }, onFinish: dismiss)
-        let items = [
-            ContextMenuItem(title: "Name and Color",
-                            customContent: AnyView(nameAndColorView)) { },
-            ContextMenuItem.separator(allowPadding: false),
-            ContextMenuItem(title: "Open Group in Background") {
-                openAllTabs(options: [.inBackground])
-                dismiss()
-            },
-            ContextMenuItem(title: "Open Group in New Window") {
-                openAllTabs(options: [.newWindow])
-                dismiss()
-            },
-//            ContextMenuItem.separator(),
-//            ContextMenuItem(title: "Share") {
-//                dismiss()
-//            },
-            ContextMenuItem.separator(),
-            ContextMenuItem(title: "Delete Group") {
-                let group = TabGroupingStoreManager.convertBeamObjectToGroup(tabGroup)
-                TabGroupingManager().ungroup(group)
-                if let index = note.tabGroups.firstIndex(of: group.id) {
-                    note.tabGroups.remove(at: index)
+    private func showContextMenu(with event: NSEvent) {
+        let menu = NSMenu()
+        weak var state = self.state
+
+        let nameAndColorView = TabClusteringNameColorPickerView(
+            groupName: tabGroup.title ?? "",
+            selectedColor: tabGroup.color?.designColor ?? .red,
+            onChange: { [weak state] newValues in
+                if tabGroup.title != newValues.name {
+                    tabGroup.title = newValues.name
+                    state?.data.tabGroupingDBManager?.save(groups: [tabGroup])
                 }
-                dismiss()
+                if tabGroup.color != newValues.color, let newColor = newValues.color {
+                    tabGroup.color = newColor
+                    state?.data.tabGroupingDBManager?.save(groups: [tabGroup])
+                }
+            },
+            onFinish: { [weak menu] in menu?.cancelTracking() })
+
+        let nameAndColorItemInsets = NSEdgeInsets(top: 4, left: 14, bottom: 8, right: 14)
+
+        let nameAndColorItem = ContentViewMenuItem(
+            title: "Name your group item",
+            acceptsFirstResponder: !(tabGroup.title?.isEmpty == true),
+            contentView: { nameAndColorView },
+            insets: nameAndColorItemInsets,
+            customization: { hostingView in
+                let width = 230 - (nameAndColorItemInsets.left + nameAndColorItemInsets.right)
+                hostingView.widthAnchor.constraint(equalToConstant: width).isActive = true
+                hostingView.heightAnchor.constraint(equalToConstant: 16).isActive = true
+            })
+
+        menu.addItem(nameAndColorItem)
+        menu.addItem(.fullWidthSeparator())
+
+        menu.addItem(withTitle: "Open in Background") { _ in
+            openAllTabs(options: [.inBackground])
+        }
+        menu.addItem(withTitle: "Open in New Window") { _ in
+            openAllTabs(options: [.newWindow])
+        }
+        menu.addItem(.separator())
+
+        menu.addItem(withTitle: "Delete Group") { _ in
+            let group = TabGroupingStoreManager.convertBeamObjectToGroup(tabGroup)
+            TabGroupingManager().ungroup(group)
+            if let index = note.tabGroups.firstIndex(of: group.id) {
+                note.tabGroups.remove(at: index)
             }
-        ]
-        let menu = ContextMenuFormatterView(key: menuKey, items: items, canBecomeKey: true)
-        CustomPopoverPresenter.shared.presentFormatterView(menu, atPoint: location)
+        }
+
+        var location = event.locationInWindow
+
+        // When displayed in the MiniEditorPanel, we need to flip as the contentView is a SwiftUI NSHostingView
+        if let window = windowInfo.window, window is MiniEditorPanel {
+            location = location.flippedPointToTopLeftOrigin(in: window)
+        }
+
+        menu.popUp(positioning: nil, at: location, in: windowInfo.window?.contentView)
     }
 
     private func openAllTabs(options: Set<BeamState.TabOpeningOption> = []) {
