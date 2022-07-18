@@ -47,11 +47,13 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
         let existingValue = fetch(byIds: [group.id]).first
         if origin == .clustering, let existingValue = existingValue {
             let existingPagesIds = existingValue.pages.map { $0.id }
-            if existingPagesIds == group.pageIds || existingPagesIds.count > group.pageIds.count {
+            if existingPagesIds.count > group.pageIds.count || Set(existingPagesIds) == Set(group.pageIds) {
                 Logger.shared.logDebug("Not Saving Tab Group '\(group.title ?? "untitled")' because unimportant pages change", category: .tabGrouping)
                 return false
             }
         }
+
+        sortPageIdsInGroup(group, withOpenTabs: openTabs)
 
         let tabs: [(BrowserTab, UUID) ] = group.pageIds.compactMap { id -> (BrowserTab, UUID)? in
             guard let tab = openTabs.first(where: { $0.browsingTree.current.link == id }), tab.url != nil else { return nil }
@@ -80,6 +82,18 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
             }
         }
         return true
+    }
+
+    private func sortPageIdsInGroup(_ group: TabGroup, withOpenTabs openTabs: [BrowserTab]) {
+        var groupPageIds = group.pageIds
+        var sortedPageIds = [ClusteringManager.PageID]()
+        openTabs.forEach { tab in
+            guard let index = groupPageIds.firstIndex(where: { $0 == tab.pageId }) else { return }
+            let pageId = groupPageIds.remove(at: index)
+            sortedPageIds.append(pageId)
+        }
+        sortedPageIds.append(contentsOf: groupPageIds)
+        group.updatePageIds(sortedPageIds)
     }
 
     func screenshots(for tabs: [(BrowserTab, UUID)]) async -> [BrowserTab: NSImage] {

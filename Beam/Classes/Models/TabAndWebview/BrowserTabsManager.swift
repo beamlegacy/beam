@@ -374,6 +374,8 @@ extension BrowserTabsManager {
         }
         if destinationGroup != movedItem.group {
             moveTabToGroup(tab.id, group: destinationGroup)
+        } else if let destinationGroup = destinationGroup {
+            tabGroupingManager.pageWasMovedInsideSameGroup(pageId: tab.pageId, group: destinationGroup)
         }
     }
 
