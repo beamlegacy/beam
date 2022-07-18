@@ -69,6 +69,7 @@
         "AllowListPreferencesTests\/testAddAllowUrlItem()",
         "AllowListPreferencesTests\/testRemoveAllowUrlItem()",
         "AllowListPreferencesTests\/testSortAllowUrlItem()",
+        "AppLifecycleTests",
         "BaseCreditCardTest",
         "BaseTest",
         "BlockReferenceTests",

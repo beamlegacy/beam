@@ -535,8 +535,8 @@ extension BrowserTabsManager {
         return tabs.filter { tabsIDs.contains($0.id) }
     }
 
-    func group(forTab tab: BrowserTab) -> TabGroup? {
-        listItems.allItems.first(where: { $0.tab == tab })?.group
+    func group(for tab: BrowserTab) -> TabGroup? {
+        localTabsGroup[tab.id]
     }
 
     private func updateClusteringOpenPages() {
@@ -573,18 +573,22 @@ extension BrowserTabsManager {
         tabGroupingManager.toggleCollapse(group)
 
         if group.collapsed {
-            let tabsInGroup = tabsIds(inGroup: group)
-            pauseListItemsUpdate = true
-            defer { pauseListItemsUpdate = false }
-            collapsedTabsInGroup[group.id] = tabsInGroup
-            gatherTabsInGroupTogether(group)
-            updateListItems()
-            if let currentTab = currentTab, tabsInGroup.contains(currentTab.id) {
-                changeCurrentTabIfNotVisible(previousTabsList: tabs)
-            }
+            groupTabsInGroup(group)
         } else {
             collapsedTabsInGroup.removeValue(forKey: group.id)
             updateListItems()
+        }
+    }
+
+    func groupTabsInGroup(_ group: TabGroup) {
+        let tabsInGroup = tabsIds(inGroup: group)
+        pauseListItemsUpdate = true
+        defer { pauseListItemsUpdate = false }
+        collapsedTabsInGroup[group.id] = tabsInGroup
+        gatherTabsInGroupTogether(group)
+        updateListItems()
+        if let currentTab = currentTab, tabsInGroup.contains(currentTab.id) {
+            changeCurrentTabIfNotVisible(previousTabsList: tabs)
         }
     }
 

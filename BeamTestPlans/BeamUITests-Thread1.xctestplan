@@ -72,6 +72,7 @@
         "AllNotesPublishProfileTests",
         "AllNotesViewTests",
         "AllowListPreferencesTests",
+        "AppLifecycleTests",
         "BaseTest",
         "BrowserFancyUrlTests",
         "BrowserOpenModalTests",

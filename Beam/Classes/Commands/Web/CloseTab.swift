@@ -34,7 +34,6 @@ class CloseTab: WebCommand {
         self.group = group
 
         super.init(name: Self.name)
-        self.tabData = encode(tab: tab)
     }
 
     required init(from decoder: Decoder) throws {
@@ -63,14 +62,17 @@ class CloseTab: WebCommand {
     // swiftlint:disable:next cyclomatic_complexity
     override func run(context: BeamState?) -> Bool {
         guard let context = context, let tab = self.tab else { return false }
-        if tab.isPinned {
-            context.browserTabsManager.unpinTab(tab)
-        }
 
         if !appIsClosing {
             tab.tabWillClose()
         }
         tab.cancelObservers()
+
+        tabData = encode(tab: tab)
+
+        if tab.isPinned {
+            context.browserTabsManager.unpinTab(tab)
+        }
 
         if let i = context.browserTabsManager.tabs.firstIndex(of: tab) {
             self.tabIndex = i

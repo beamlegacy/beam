@@ -70,6 +70,7 @@
         "AllNotesSortingTests",
         "AllNotesViewTests",
         "AllowListPreferencesTests",
+        "AppLifecycleTests",
         "BaseTest",
         "BlockReferenceTests",
         "BrowserFancyUrlTests",

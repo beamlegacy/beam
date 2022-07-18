@@ -85,7 +85,7 @@ extension BrowserTab: WebPage {
         var newWebView: BeamWebView
         var newWindow: NSWindow
         if menubar && statusBar && toolBars && resizing,
-           let newBeamWindow = AppDelegate.main.createWindow(frame: windowFeatures.toRect(), restoringTabs: false) {
+           let newBeamWindow = AppDelegate.main.createWindow(frame: windowFeatures.toRect()) {
             // we are being asked for the full browser experience, give it to them...
             let tab = createNewTab(
                 request,
