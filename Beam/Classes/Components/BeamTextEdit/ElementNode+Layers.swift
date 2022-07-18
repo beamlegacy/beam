@@ -107,6 +107,7 @@ extension ElementNode {
         moveLayer.layer.backgroundColor = BeamColor.Editor.bullet.cgColor
 
         moveLayer.mouseDown = { [weak self] mouseInfo in
+            guard mouseInfo.rightMouse == false else { return false }
             guard let self = self else { return false }
             guard let moveLayer = self.layers[LayerName.moveHandle.rawValue] else { return false }
             guard let editor = self.editor, editor.widgetDidStartMoving(self, at: mouseInfo.globalPosition) else { return false }
