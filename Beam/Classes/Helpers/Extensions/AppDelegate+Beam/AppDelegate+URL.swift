@@ -146,7 +146,7 @@ extension AppDelegate {
     @discardableResult
     func processWebURL(components: NSURLComponents) -> Bool {
         if windows.isEmpty && isActive {
-            createWindow(frame: nil, restoringTabs: false)
+            createWindow(frame: nil)
         }
 
         let canProcessWebURL = components.url != nil

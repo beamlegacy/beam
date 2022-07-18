@@ -513,6 +513,8 @@
 		66F9AED4283E215100C28EE3 /* MouseOverAndSelection.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBC283E215100C28EE3 /* MouseOverAndSelection.ts */; };
 		66F9AED5283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBD283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts */; };
 		6ED5E8CB287DA62F00EA7DA1 /* download-file.json in Resources */ = {isa = PBXBuildFile; fileRef = 6ED5E8CA287DA62F00EA7DA1 /* download-file.json */; };
+		6E8393CC287C9CC7004633BC /* AppLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8393CB287C9CC7004633BC /* AppLifecycleTests.swift */; };
+		6EC995B8287D6F8400691668 /* WindowMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC995B2287D6F8400691668 /* WindowMenu.swift */; };
 		7521342B26F4A00D00BBBD6D /* GenericErrorPage.html in Resources */ = {isa = PBXBuildFile; fileRef = 7521342A26F4A00D00BBBD6D /* GenericErrorPage.html */; };
 		759442D726FCA86E00CBFB7A /* ErrorPageManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759442D626FCA86E00CBFB7A /* ErrorPageManagerTests.swift */; };
 		75A1E5B52719A7DA000824B1 /* topdomains_v0.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 75A1E5B42719A7DA000824B1 /* topdomains_v0.1.txt */; };
@@ -891,7 +893,6 @@
 		A050049F25DAEE73009CFEB6 /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */; };
 		A05123CA27708D88009B81CF /* MeetingCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05123C927708D88009B81CF /* MeetingCalendar.swift */; };
 		A05123D927720F00009B81CF /* AccountCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05123D827720F00009B81CF /* AccountCalendar.swift */; };
-		A055CE7A274E8DD5003DB3D0 /* RestoreTabsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A055CE79274E8DD5003DB3D0 /* RestoreTabsManager.swift */; };
 		A05ADF3F264D67D3002DF91A /* PasswordsDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05ADF3E264D67D3002DF91A /* PasswordsDB.swift */; };
 		A05ADF6C264D8C34002DF91A /* OverlayViewCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05ADF6B264D8C34002DF91A /* OverlayViewCenter.swift */; };
 		A05ADF6E264D8C59002DF91A /* OverlayViewCenterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05ADF6D264D8C59002DF91A /* OverlayViewCenterViewModel.swift */; };
@@ -2176,6 +2177,8 @@
 		66F9AEBC283E215100C28EE3 /* MouseOverAndSelection.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelection.ts; sourceTree = "<group>"; };
 		66F9AEBD283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelectionUI_web.ts; sourceTree = "<group>"; };
 		6ED5E8CA287DA62F00EA7DA1 /* download-file.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "download-file.json"; sourceTree = "<group>"; };
+		6E8393CB287C9CC7004633BC /* AppLifecycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppLifecycleTests.swift; sourceTree = "<group>"; };
+		6EC995B2287D6F8400691668 /* WindowMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowMenu.swift; sourceTree = "<group>"; };
 		7521342A26F4A00D00BBBD6D /* GenericErrorPage.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = GenericErrorPage.html; sourceTree = "<group>"; };
 		759442D626FCA86E00CBFB7A /* ErrorPageManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPageManagerTests.swift; sourceTree = "<group>"; };
 		75A1E5B42719A7DA000824B1 /* topdomains_v0.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = topdomains_v0.1.txt; sourceTree = "<group>"; };
@@ -2820,7 +2823,6 @@
 		A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
 		A05123C927708D88009B81CF /* MeetingCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCalendar.swift; sourceTree = "<group>"; };
 		A05123D827720F00009B81CF /* AccountCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCalendar.swift; sourceTree = "<group>"; };
-		A055CE79274E8DD5003DB3D0 /* RestoreTabsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestoreTabsManager.swift; sourceTree = "<group>"; };
 		A05ADF3E264D67D3002DF91A /* PasswordsDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsDB.swift; sourceTree = "<group>"; };
 		A05ADF6B264D8C34002DF91A /* OverlayViewCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayViewCenter.swift; sourceTree = "<group>"; };
 		A05ADF6D264D8C59002DF91A /* OverlayViewCenterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayViewCenterViewModel.swift; sourceTree = "<group>"; };
@@ -5276,6 +5278,14 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		6E8393CA287C9CC7004633BC /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				6E8393CB287C9CC7004633BC /* AppLifecycleTests.swift */,
+			);
+			path = Application;
+			sourceTree = "<group>";
+		};
 		759442D426FCA85500CBFB7A /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
@@ -7211,7 +7221,6 @@
 				BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */,
 				A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */,
 				33D0D90A2732BFAB00D6C924 /* FullPageCollectAnimator.swift */,
-				A055CE79274E8DD5003DB3D0 /* RestoreTabsManager.swift */,
 				66F9AE9C283E215100C28EE3 /* MouseOverAndSelection */,
 				375D83BA278D636D0064C246 /* ScriptMessageBodyDecodable.swift */,
 				370794D827D7AB0E00D2768B /* BrowserContentDescription.swift */,
@@ -7685,6 +7694,7 @@
 			children = (
 				D77A5AA6287EB42200652727 /* TabGrouping */,
 				A3B6C9602861C48900E7F78C /* HelpersTests */,
+				6E8393CA287C9CC7004633BC /* Application */,
 				A3EE7D55284F236B00DD3EBB /* Synchronization */,
 				D71D7485282B9C7600D8D6F5 /* Privacy */,
 				B51C99A82805C44100A2577E /* Incognito mode */,
@@ -7777,6 +7787,7 @@
 				B5BA078826AF3E4700D31FED /* UITestsMenuBar.swift */,
 				B5EB9A7526C28192004C798A /* GoMenu.swift */,
 				B5792590275E4FE30093B32B /* FileMenu.swift */,
+				6EC995B2287D6F8400691668 /* WindowMenu.swift */,
 			);
 			path = MenuBars;
 			sourceTree = "<group>";
@@ -9646,7 +9657,6 @@
 				8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserImport.swift in Sources */,
 				BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */,
 				6635D9832853E73A00F4B775 /* BeamWebContextMenu.swift in Sources */,
-				A055CE7A274E8DD5003DB3D0 /* RestoreTabsManager.swift in Sources */,
 				A5D88585274E4E2100F37859 /* BlendModePerColorScheme.swift in Sources */,
 				BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */,
 				968948A82840DF2500F97AAD /* BeamManagerOwner.swift in Sources */,
@@ -9916,6 +9926,7 @@
 				B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */,
 				D77A5A8428780F2100652727 /* RightClickLinkMenuTests.swift in Sources */,
 				A307FBE6285A776F001DE30D /* SignOutTests.swift in Sources */,
+				6EC995B8287D6F8400691668 /* WindowMenu.swift in Sources */,
 				A3B6C98A2863181F00E7F78C /* BrowserPreferencesViewLocators.swift in Sources */,
 				B51DC76C26F44F990074ACCA /* PnSAddToNoteTests.swift in Sources */,
 				D7D6F016284A0A7900C3EE7F /* CookieBannerBlockerTests.swift in Sources */,
@@ -10002,6 +10013,7 @@
 				B5BA077D26AF3AE400D31FED /* NoteTestView.swift in Sources */,
 				D77A5AB1287EBF6100652727 /* TabGroupMenuViewLocators.swift in Sources */,
 				B57535ED26BD48040053CE2D /* JournalTest.swift in Sources */,
+				6E8393CC287C9CC7004633BC /* AppLifecycleTests.swift in Sources */,
 				B5FAE302270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift in Sources */,
 				A325D9C4283EA87F0019C5D0 /* AllNotesTableLocators.swift in Sources */,
 				B5E949AE27DA404E001AAA82 /* AlertViewLocators.swift in Sources */,

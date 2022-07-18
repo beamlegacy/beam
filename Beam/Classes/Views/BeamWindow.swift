@@ -10,7 +10,9 @@ import Combine
 import SwiftUI
 import BeamCore
 
-class BeamWindow: NSWindow, NSDraggingDestination {
+// swiftlint:disable file_length
+
+class BeamWindow: NSWindow, NSDraggingDestination, Codable {
     var state: BeamState
     var windowInfo: BeamWindowInfo = BeamWindowInfo()
     var data: BeamData
@@ -41,9 +43,9 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     private(set) var touchBarController: TouchBarController?
 
     // swiftlint:disable:next function_body_length
-    init(contentRect: NSRect, data: BeamData, title: String? = nil, isIncognito: Bool = false, minimumSize: CGSize? = nil) {
+    init(contentRect: NSRect, data: BeamData, state: BeamState? = nil, title: String? = nil, isIncognito: Bool = false, minimumSize: CGSize? = nil) {
         self.data = data
-        state = BeamState(incognito: isIncognito)
+        self.state = state ?? BeamState(incognito: isIncognito)
 
         try? data.setupJournal(firstSetup: true)
 
@@ -59,7 +61,13 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.isReleasedWhenClosed = false
 
         self.tabbingMode = .disallowed
+
         setFrameAutosaveName("BeamWindow")
+
+        // If we are restoring, we need to fix the frame again after setting the autosave name.
+        if state != nil {
+            setFrame(frameRect(forContentRect: contentRect), display: false)
+        }
 
         self.setupWindowButtons()
         self.setTitleBarAccessoryView()
@@ -68,10 +76,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
         let mainView = ContentView()
-            .environmentObject(state)
+            .environmentObject(self.state)
             .environmentObject(data)
             .environmentObject(windowInfo)
-            .environmentObject(state.browserTabsManager)
+            .environmentObject(self.state.browserTabsManager)
             .environment(\.showHelpAction, HelpAction(showHelpAndFeedbackMenuView))
             .frame(minWidth: minimumSize.width, maxWidth: .infinity, minHeight: minimumSize.height, maxHeight: .infinity)
 
@@ -97,6 +105,30 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
         // Adding the window item to the app's windowsMenu with prefilled title if any
         NSApp.addWindowsItem(self, title: title ?? "Beam", filename: false)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case contentRect
+        case state
+    }
+
+    convenience required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let contentRect = try container.decode(NSRect.self, forKey: .contentRect)
+        let state = try container.decode(BeamState.self, forKey: .state)
+
+        self.init(contentRect: contentRect,
+                  data: BeamData.shared,
+                  state: state,
+                  minimumSize: AppDelegate.defaultWindowMinimumSize)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        let contentRect = contentRect(forFrameRect: frame)
+
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(contentRect, forKey: .contentRect)
+        try container.encode(state, forKey: .state)
     }
 
     func showHelpAndFeedbackMenuView() {
@@ -156,9 +188,14 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         }
     }
 
-    private func cleanUpWindowContentBeforeClosing() {
+    private func cleanUpWindowContentBeforeClosing(terminatingApplication: Bool) {
         self.contentView = nil
-        RestoreTabsManager.shared.saveOpenedTabsBeforeClosingWindow(self)
+
+        if !terminatingApplication {
+            for tab in state.browserTabsManager.tabs {
+                tab.tabWillClose()
+            }
+        }
 
         let idToRemove = state.browserTabsManager.browserTabManagerId
         let updatedOpenTrees = data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != idToRemove }
@@ -168,13 +205,15 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         NSApp.removeWindowsItem(self)
     }
 
-    override func close() {
-        AppDelegate.main.windows.removeAll { window in
-            if window === self {
-                window.cleanUpWindowContentBeforeClosing()
-            }
-            return window === self
+    func close(terminatingApplication: Bool) {
+        cleanUpWindowContentBeforeClosing(terminatingApplication: terminatingApplication)
+
+        // Store session if the user is closing the last window.
+        if !terminatingApplication, AppDelegate.main.windows.count == 1 {
+            AppDelegate.main.storeAllWindowsFromCurrentSession()
         }
+
+        AppDelegate.main.windows.removeAll { $0 === self }
 
         AppDelegate.main.panels.forEach { (_, panel) in
             if panel.state === state {
@@ -183,6 +222,10 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         }
 
         super.close()
+    }
+
+    override func close() {
+        close(terminatingApplication: false)
     }
 
     override func restoreState(with coder: NSCoder) {

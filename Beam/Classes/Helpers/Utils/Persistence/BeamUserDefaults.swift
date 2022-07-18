@@ -11,7 +11,7 @@ import BeamCore
 enum BeamUserDefaults: String, CaseIterable {
     case supportedEmbedDomains
     case pinnedBrowserTabs
-    case savedClosedTabs
+    case restoration
     case generalPreferences
     case browserPreferences
     case cardsPreferences
