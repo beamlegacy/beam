@@ -251,6 +251,7 @@ struct NoteHeaderView: View {
         }
         .padding(.top, self.topPadding)
         .padding(.leading, Self.leadingPadding)
+        .id(model.note)
     }
 
     private var buttonLabelStyle: ButtonLabelStyle {
