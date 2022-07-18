@@ -43,11 +43,11 @@ xctests:
       - logs
       - scan_results
       - allure-report
-      - cobertura.xml
+      # - cobertura.xml
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
+      # coverage_report:
+      #   coverage_format: cobertura
+      #   path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
