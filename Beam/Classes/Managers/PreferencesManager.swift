@@ -106,6 +106,16 @@ extension PreferencesManager {
         get { .init(rawValue: defaultWindowModeValue) ?? defaultWindowModeDefault }
         set { defaultWindowModeValue = newValue.rawValue }
     }
+
+    static var isWindowsRestorationEnabled: Bool {
+        // NSQuitAlwaysKeepsWindows matches the following system setting:
+        // System Preferences > General > Close windows when quitting an app
+        return UserDefaults.standard.bool(forKey: "NSQuitAlwaysKeepsWindows")
+    }
+
+    static var isWindowsRestorationPrevented: Bool {
+        return UserDefaults.standard.bool(forKey: "WindowsRestorationPrevented")
+    }
 }
 
 extension PreferencesManager {

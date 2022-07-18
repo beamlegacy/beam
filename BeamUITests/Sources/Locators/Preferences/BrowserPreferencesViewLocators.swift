@@ -36,7 +36,6 @@ enum BrowserPreferencesViewLocators {
         case searchEngine = "search-engine-suggestion"
         case cmdClick = "cmd-click-checkbox"
         case switchTabs = "switch-tabs-checkbox"
-        case restoreTabs = "restore-tabs-checkbox"
         case captureSounds = "capture-sounds-checkbox"
     }
 }

@@ -10,7 +10,7 @@ import Foundation
 extension AppDelegate: OnboardingManagerDelegate {
     func onboardingManagerDidFinish(userDidSignUp: Bool) {
         guard windows.isEmpty else { return }
-        let window = createWindow(frame: nil, restoringTabs: false)
+        let window = createWindow(frame: nil)
         if userDidSignUp {
             window?.state.displayWelcomeTour()
         }

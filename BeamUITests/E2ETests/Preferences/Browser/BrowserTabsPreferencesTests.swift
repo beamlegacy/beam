@@ -12,7 +12,6 @@ class BrowserTabsPreferencesTests: BaseTest {
     
     let browserPref = BrowserPreferencesTestView()
     let omnibox = OmniBoxTestView()
-    var journalView: JournalTestView!
     
     override func setUpWithError() throws {
         step ("GIVEN I open Browser preferences"){
@@ -37,53 +36,6 @@ class BrowserTabsPreferencesTests: BaseTest {
         }
         
         //Checkbox disabling check is blocked by https://linear.app/beamapp/issue/BE-4535/optiontab-highlighting-is-skips-some-elements-on-web-pages
-    }
-    
-    func testRestoreAllTabsFromLastSession() {
-        
-        let expectedCheckboxTitle = "Restore all tabs from last session"
-        
-        step("WHEN I prepare checkbox that has title: \(expectedCheckboxTitle)") {
-            XCTAssertEqual(browserPref.getRestoreTabsCheckbox().title, expectedCheckboxTitle)
-            if browserPref.getRestoreTabsCheckbox().isSettingEnabled() {
-                browserPref.getRestoreTabsCheckbox().tapInTheMiddle()
-            }
-            browserPref.getRestoreTabsCheckbox().tapInTheMiddle()
-            shortcutHelper.shortcutActionInvoke(action: .close)
-        }
-        
-        step("WHEN I open multiple tabs") {
-            uiMenu.loadUITestPage1()
-            uiMenu.loadUITestPage2()
-            webView.waitForWebViewToLoad()
-        }
-        
-        step("WHEN I restart the app") {
-            journalView = restartApp()
-        }
-        
-        step("THEN I'm on the web view with 2 tabs reopened") {
-            XCTAssertTrue(webView.waitForWebViewToLoad())
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
-        }
-        
-        step("WHEN I disable Restore tabs checkbox") {
-            openBrowserPrefs()
-            browserPref.waitForViewToLoad()
-            browserPref.getRestoreTabsCheckbox().tapInTheMiddle()
-            shortcutHelper.shortcutActionInvoke(action: .close)
-        }
-        
-        step("WHEN I restart the app") {
-            journalView = restartApp()
-        }
-        
-        step("THEN I'm on the Journal view") {
-            XCTAssertTrue(journalView
-                            .waitForJournalViewToLoad()
-                            .isJournalOpened())
-        }
-        
     }
     
     func testSwitchTabsUsingCMDNumber() {

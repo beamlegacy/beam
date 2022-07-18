@@ -8,17 +8,33 @@
 import Foundation
 import BeamCore
 
+// swiftlint:disable nesting
+
 class NoteBackForwardList: Codable {
     enum Element: Codable, Equatable {
         case note(BeamNote)
         case page(WindowPage)
         case journal
 
-        //swiftlint:disable:next nesting
+        enum Mode: String {
+            case note, page, journal
+        }
+
         enum CodingKeys: String, CodingKey {
             case mode
             case note
             case page
+        }
+
+        var mode: Mode {
+            switch self {
+            case .note:
+                return .note
+            case .page:
+                return .page
+            case .journal:
+                return .journal
+            }
         }
 
         static func == (lhs: NoteBackForwardList.Element, rhs: NoteBackForwardList.Element) -> Bool {
@@ -47,11 +63,18 @@ class NoteBackForwardList: Codable {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self = .journal
 
-            switch try container.decode(Int.self, forKey: .mode) {
-            case 0:
+            let mode = try container.decode(String.self, forKey: .mode)
+
+            switch Mode(rawValue: mode) {
+            case .note:
                 let noteTitle = try container.decode(String.self, forKey: .note)
                 if let note = BeamNote.fetch(title: noteTitle) {
                     self = .note(note)
+                }
+            case .page:
+                let page = try container.decode(String.self, forKey: .page)
+                if let pageID = WindowPageID(rawValue: page) {
+                    self = .page(WindowPage.page(for: pageID))
                 }
             default:
                 break
@@ -62,12 +85,12 @@ class NoteBackForwardList: Codable {
             var container = encoder.container(keyedBy: CodingKeys.self)
             switch self {
             case .journal:
-                try container.encode(1, forKey: .mode)
+                try container.encode(mode.rawValue, forKey: .mode)
             case .note(let note):
-                try container.encode(0, forKey: .mode)
+                try container.encode(mode.rawValue, forKey: .mode)
                 try container.encode(note.title, forKey: .note)
             case .page(let page):
-                try container.encode(0, forKey: .mode)
+                try container.encode(mode.rawValue, forKey: .mode)
                 try container.encode(page.id.rawValue, forKey: .page)
             }
         }

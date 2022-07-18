@@ -85,17 +85,32 @@ class BaseTest: XCTestCase {
     }
     
     @discardableResult
-    func launchApp() -> JournalTestView {
-        continueAfterFailure = false
-        XCUIApplication().launch()
-        return JournalTestView()
+    func launchApp(storeSessionWhenTerminated: Bool = false,
+                   preventSessionRestore: Bool = false) -> JournalTestView {
+        return launchAppWithArguments([],
+                                      storeSessionWhenTerminated: storeSessionWhenTerminated,
+                                      preventSessionRestore: preventSessionRestore)
     }
     
     @discardableResult
-    func launchAppWithArgument(_ argument: String) -> JournalTestView {
+    func launchAppWithArgument(_ argument: String,
+                               storeSessionWhenTerminated: Bool = false,
+                               preventSessionRestore: Bool = false) -> JournalTestView {
+        return launchAppWithArguments([argument],
+                                      storeSessionWhenTerminated: storeSessionWhenTerminated,
+                                      preventSessionRestore: preventSessionRestore)
+    }
+
+    @discardableResult
+    func launchAppWithArguments(_ arguments: [String],
+                                storeSessionWhenTerminated: Bool = false,
+                                preventSessionRestore: Bool = false) -> JournalTestView {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments = [argument]
+        var args: [String] = arguments
+        args.append(contentsOf: ["-NSQuitAlwaysKeepsWindows", storeSessionWhenTerminated ? "1" : "0"])
+        args.append(contentsOf: ["-WindowsRestorationPrevented", preventSessionRestore ? "1" : "0"])
+        app.launchArguments = args
         app.launch()
         return JournalTestView()
     }
@@ -103,7 +118,10 @@ class BaseTest: XCTestCase {
     /// terminateImmediately means the app won't receive the proper termination events (aka applicationShouldTerminate),
     /// and therefore none of our sync or save mechanism will be triggered
     @discardableResult
-    func restartApp(terminateImmediately: Bool = false) -> JournalTestView {
+    func restartApp(terminateImmediately: Bool = false,
+                    storeSessionWhenTerminated: Bool = false,
+                    preventSessionRestore: Bool = false,
+                    arguments: [String] = []) -> JournalTestView {
         let app = XCUIApplication()
         if !terminateImmediately {
             shortcutHelper.shortcutActionInvoke(action: .quitApp)
@@ -112,6 +130,11 @@ class BaseTest: XCTestCase {
         }
         let background = app.wait(for: .notRunning, timeout: 5)
         XCTAssertTrue(background)
+
+        var args: [String] = arguments
+        args.append(contentsOf: ["-NSQuitAlwaysKeepsWindows", storeSessionWhenTerminated ? "1" : "0"])
+        args.append(contentsOf: ["-WindowsRestorationPrevented", preventSessionRestore ? "1" : "0"])
+        app.launchArguments = args
         app.launch()
         return JournalTestView()
     }

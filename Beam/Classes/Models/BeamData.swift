@@ -274,6 +274,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
             }.store(in: &scope)
 
         BeamData.shared.$currentDatabase
+            // Drop the very first event that is sent during subscription as it's sent before we
+            // even set the current database to any meaningful value.
             .dropFirst()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] db in
