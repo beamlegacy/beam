@@ -182,3 +182,11 @@ update_curl_jq_image:
 	docker push registry.gitlab.com/beamgroup/beam/curl-jq
 
 setup: git_checkout install_dependencies install_swiftlint install_cmake install_direnv install_variable_injector install_js
+
+#Feature Flags
+
+# Warning set_ff_sync_enabled_false disables all API calls from Beam client 
+set_ff_sync_enabled_true_danger:
+	curl https://s3.eu-west-3.amazonaws.com/downloads.beamapp.co/flags/api.prod.beamapp.co.json | jq '.syncEnabled=true' |aws s3 cp - s3://downloads.beamapp.co/flags/api.prod.beamapp.co.json
+set_ff_sync_enabled_false_danger:
+	curl https://s3.eu-west-3.amazonaws.com/downloads.beamapp.co/flags/api.prod.beamapp.co.json | jq '.syncEnabled=false' |aws s3 cp - s3://downloads.beamapp.co/flags/api.prod.beamapp.co.json

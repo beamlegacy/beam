@@ -22,6 +22,10 @@ extension APIRequest {
                                                                   postParams: C? = nil,
                                                                   authenticatedCall: Bool? = nil,
                                                                   completionHandler: @escaping (Result<T, Error>) -> Void) throws -> Foundation.URLSessionDataTask {
+        guard FeatureFlags.current.syncEnabled else {
+            throw APIRequestError.syncDisabledByFeatureFlag
+        }
+
         let path: String = {
             switch path {
             case .fetchAll:
