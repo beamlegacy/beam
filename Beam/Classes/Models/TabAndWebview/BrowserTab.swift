@@ -763,6 +763,7 @@ extension BrowserTab: WebViewControllerDelegate {
         } else {
             browsingTree.goBack()
         }
+        tabWillLeaveCurrentPage()
     }
 
     func webViewControllerIsNavigatingToANewPage(_ controller: WebViewController) {
