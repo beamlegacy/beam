@@ -91,7 +91,7 @@ open class InMemoryDailyNoteScoreStore: DailyNoteScoreStoreProtocol {
         }
     }
 
-    public func getNoteIdsLastChangedAtAndAfter(daysAgo: Int) -> (Set<UUID>, Set<UUID>)  {
+    public func getNoteIdsLastChangedAtAndAfter(daysAgo: Int) -> (Set<UUID>, Set<UUID>) {
         let day = Calendar(identifier: .iso8601).date(byAdding: .day, value: -daysAgo, to: BeamDate.now)?.localDayString()
         guard let day = day else { return (Set<UUID>(), Set<UUID>()) }
         return Self.backgroundQueue.sync {
