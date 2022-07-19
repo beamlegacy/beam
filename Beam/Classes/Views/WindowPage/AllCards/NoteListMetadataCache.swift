@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 struct NoteListMetadata {
-    var mentions: Int
+    var links: Int
     var wordsCount: Int
 }
 
