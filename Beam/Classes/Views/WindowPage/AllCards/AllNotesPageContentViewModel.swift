@@ -131,7 +131,7 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
             let note = BeamNote.getFetchedNote(doc.id)
             let item = NoteTableViewItem(document: doc, note: note)
             if let metadata = notesMetadataCache.metadata(for: item.id) {
-                item.mentions = metadata.mentions
+                item.links = metadata.links
                 if item.words < 0 {
                     item.words = metadata.wordsCount
                 }
@@ -155,7 +155,7 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
         var shouldReload = false
         allNotesItems = allNotesItems.map { item in
             if let metadata = notesMetadataCache.metadata(for: item.id), let note = fetchedNotes[item.id] {
-                item.mentions = metadata.mentions
+                item.links = metadata.links
                 item.words = metadata.wordsCount
                 item.note = note
                 shouldReload = true
@@ -182,10 +182,9 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
             var fetchedNotes = [UUID: BeamNote]()
             DispatchQueue.global(qos: .userInteractive).async {
                 notesItems.forEach { item in
-                    guard item.note == nil || item.mentions < 0 else { return }
                     guard let note = item.note ?? item.getNote() else { return }
-                    let mentions = note.mentionsCount
-                    let metadata = NoteListMetadata(mentions: mentions, wordsCount: note.textStats.wordsCount)
+                    guard item.links != note.links.count || item.note == nil || item.links < 0 else { return }
+                    let metadata = NoteListMetadata(links: note.links.count, wordsCount: note.textStats.wordsCount)
                     metadatas[item.id] = metadata
                     fetchedNotes[item.id] = note
                 }
@@ -244,7 +243,7 @@ class NoteTableViewItem: IconButtonTableViewItem {
     var updatedAt: Date = BeamDate.now
     var isJournal: Bool = false
     var words: Int = -1
-    var mentions: Int = -1
+    var links: Int = -1
     var copyLinkIconName: String?
     var copyAction: (() -> Void)?
 
