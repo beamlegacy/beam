@@ -346,7 +346,8 @@ extension AutocompleteManager {
             }
 
             let queryLowercase = query.lowercased()
-            results.append(contentsOf: links.compactMap({ (_, link) in
+            results.append(contentsOf: group.pageIds.enumerated().compactMap({ (index, pageId) in
+                guard let link = links[pageId] else { return nil }
                 guard query.isEmpty || link.title?.lowercased().contains(queryLowercase) == true || link.url.contains(queryLowercase) else {
                     return nil
                 }
@@ -355,9 +356,10 @@ extension AutocompleteManager {
                 let title = link.title ?? ""
                 let url = URL(string: link.url)
                 let urlString = url?.urlStringByRemovingUnnecessaryCharacters ?? link.url
+                let score = query.isEmpty ? Float(group.pageIds.count - index) : link.frecencyVisitSortScore
                 return AutocompleteResult(text: hasTitle ? title : urlString, source: .url, url: url,
                                           information: hasTitle ? urlString : nil, completingText: query,
-                                          uuid: link.id, score: link.frecencyVisitSortScore, urlFields: hasTitle ? .info : .text,
+                                          uuid: link.id, score: score, urlFields: hasTitle ? .info : .text,
                                           handler: { state in
                     guard let url = url else { return }
                     state.createTab(withURLRequest: URLRequest(url: url))

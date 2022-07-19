@@ -93,6 +93,10 @@ extension TabGroupingManager {
         groupDidChangeMetadata(group)
     }
 
+    func pageWasMovedInsideSameGroup(pageId: ClusteringManager.PageID, group: TabGroup) {
+        groupDidChangeContent(group, fromUser: true)
+    }
+
     func pageWasMoved(pageId: ClusteringManager.PageID, fromGroup: TabGroup?, toGroup: TabGroup?) {
         if let fromGroup = fromGroup {
             fromGroup.updatePageIds(fromGroup.pageIds.filter { $0 != pageId })
