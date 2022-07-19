@@ -134,7 +134,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         AppDelegate.main.deleteSessionData()
         PinnedBrowserTabsManager().savePinnedTabs(tabs: [])
-        ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }        
+        ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }
         KeychainDailyNoteScoreStore.shared.clear()
         try? BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
     }

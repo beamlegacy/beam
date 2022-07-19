@@ -265,7 +265,7 @@ class BeamNSTextField: NSTextField, BeamNSTextFieldProtocol {
         get {
             return BeamNSTextFieldCell.self
         }
-        set { }
+        set { _ = newValue }
     }
 
     var isFirstResponder: Bool {

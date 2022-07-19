@@ -122,16 +122,11 @@ struct MeetingsListView: View {
         .padding(.horizontal, BeamSpacing._80)
         .padding(.vertical, BeamSpacing._50)
         .onPreferenceChange(TimeWidthPreferenceKey.self) {
-            maxTimeWidth = $0
+            maxTimeWidth = $0 ?? .zero
         }
     }
 
-    private struct TimeWidthPreferenceKey: PreferenceKey {
-        static let defaultValue: CGFloat = 0
-        static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-            value = max(value, nextValue())
-        }
-    }
+    private struct TimeWidthPreferenceKey: FloatPreferenceKey {}
 
 }
 

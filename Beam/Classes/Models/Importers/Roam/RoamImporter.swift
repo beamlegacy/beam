@@ -68,7 +68,7 @@ class RoamImporter: BeamDocumentSource {
 
             newNote.creationDate = roamNote.createTime ?? newNote.creationDate
             newNote.updateDate = roamNote.editTime ?? newNote.updateDate
-            newNote.save(self)
+            _ = newNote.save(self)
         }
 
         return roamNotes

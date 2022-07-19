@@ -8,13 +8,6 @@
 import SwiftUI
 import BeamCore
 
-struct HeightKey: PreferenceKey {
-    static let defaultValue: CGFloat? = nil
-    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
-        value = nextValue() ?? value
-    }
-}
-
 struct PasswordManagerMenu: View {
     @ObservedObject var viewModel: PasswordManagerMenuViewModel
 
@@ -86,6 +79,8 @@ struct PasswordManagerMenu: View {
         }
         return 255
     }
+
+    private struct HeightKey: FloatPreferenceKey {}
 }
 
 struct PasswordManagerMenu_Previews: PreviewProvider {

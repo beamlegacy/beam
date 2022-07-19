@@ -35,7 +35,7 @@ class NoteAutoSaveService: ObservableObject, BeamDocumentSource {
 
     func saveNotes() {
         for note in notesToSave {
-            note.key.save(self)
+            _ = note.key.save(self)
 //            if note.value {
 //                BeamNote.requestLinkDetection()
 //            }
