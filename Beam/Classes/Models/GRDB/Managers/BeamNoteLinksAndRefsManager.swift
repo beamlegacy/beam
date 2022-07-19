@@ -663,25 +663,42 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
     }
 
     // MARK: - FrecencyNoteRecord
-    func saveFrecencyNote(_ frecencyNote: FrecencyNoteRecord) throws {
-        try write { db in
-            try frecencyNote.save(db)
+    private func save(frecencyNote: FrecencyNoteRecord, db: GRDB.Database) throws {
+        guard var existing = try? fetchOneFrecencyNote(noteId: frecencyNote.noteId, paramKey: frecencyNote.frecencyKey, db: db) else {
+            try frecencyNote.insert(db)
+            return
         }
+        if existing.lastAccessAt < frecencyNote.lastAccessAt {
+            existing.lastAccessAt = frecencyNote.lastAccessAt
+            existing.frecencyScore = frecencyNote.frecencyScore
+            existing.frecencySortScore = frecencyNote.frecencySortScore
+        }
+        existing.updatedAt = BeamDate.now
+        existing.deletedAt = frecencyNote.deletedAt
+        try existing.update(db)
+    }
+
+    func saveFrecencyNote(_ frecencyNote: FrecencyNoteRecord) throws {
+        try write { db in try self.save(frecencyNote: frecencyNote, db: db) }
     }
     func save(noteFrecencies: [FrecencyNoteRecord]) throws {
         try write { db in
             for frecency in noteFrecencies {
-                try frecency.save(db)
+                try self.save(frecencyNote: frecency, db: db)
             }
         }
     }
 
+    private func fetchOneFrecencyNote(noteId: UUID, paramKey: FrecencyParamKey, db: GRDB.Database) throws -> FrecencyNoteRecord? {
+        return try FrecencyNoteRecord
+            .filter(FrecencyNoteRecord.Columns.noteId == noteId.uuidString)
+            .filter(FrecencyNoteRecord.Columns.frecencyKey == paramKey)
+            .fetchOne(db)
+    }
+
     func fetchOneFrecencyNote(noteId: UUID, paramKey: FrecencyParamKey) throws -> FrecencyNoteRecord? {
-        try self.read { db in
-            return try FrecencyNoteRecord
-                .filter(FrecencyNoteRecord.Columns.noteId == noteId.uuidString)
-                .filter(FrecencyNoteRecord.Columns.frecencyKey == paramKey)
-                .fetchOne(db)
+        return try self.read { db in
+            try self.fetchOneFrecencyNote(noteId: noteId, paramKey: paramKey, db: db)
         }
     }
     func fetchNoteFrecencies(noteId: UUID) -> [FrecencyNoteRecord] {
