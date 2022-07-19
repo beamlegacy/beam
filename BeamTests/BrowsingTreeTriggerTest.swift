@@ -69,6 +69,37 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         XCTAssertEqual(current.url, url1)
         XCTAssertEqual(current.parent?.events.last?.type, .exitForward)
     }
+    func testNavigationWithRedirectFromOtherFrame() {
+        //redirection from an iframe trigger navigation recording
+        let url0 = "http://lvh.me:\(Configuration.MockHttpServer.port)/otherframe/index?topredirect=true"
+
+        let indexExpectations = (0...1).map { i in expectation(description: "index \(i)") }
+        var i = 0
+        mockIndexingDelegate?.onIndexingFinished = { _ in
+            indexExpectations[i].fulfill()
+            i += 1
+        }
+        tab.load(request: URLRequest(url: URL(string: url0)!))
+        wait(for: indexExpectations, timeout: 1)
+        XCTAssertEqual(tab.browsingTree.current.parent?.url, url0)
+        XCTAssertEqual(tab.browsingTree.currentLink, "http://lvh.me:\(Configuration.MockHttpServer.port)/")
+    }
+    func testNavigationWithoutRedirectionFromOtherFrame() {
+        //redirection within an iframe doesnt trigger navigation recording
+        let url0 = "http://lvh.me:\(Configuration.MockHttpServer.port)/otherframe/index?topredirect=false"
+
+        let indexExpectations = (0...1).map { i in expectation(description: "index \(i)") }
+        var i = 0
+        mockIndexingDelegate?.onIndexingFinished = { _ in
+            indexExpectations[i].fulfill()
+            i += 1
+        }
+        tab.load(request: URLRequest(url: URL(string: url0)!))
+        XCTExpectFailure("There should be only one indexing") {
+            wait(for: indexExpectations, timeout: 1)
+        }
+        XCTAssertEqual(tab.browsingTree.currentLink, url0)
+    }
 
     func testJsBackwardForward() {
         let url0 = "http://localhost:8080/"

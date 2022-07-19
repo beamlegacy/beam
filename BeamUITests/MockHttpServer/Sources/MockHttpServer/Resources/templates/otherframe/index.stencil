@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Main window</title>
+</head>
+<body>
+  <iframe src="http://lvh.me:{{ params.port }}/otherframe/redirectingframe?topredirect={{ params.topredirect }}" frameborder="0"></iframe>
+  <p>Cool content</p>
+</body>
+</html>
