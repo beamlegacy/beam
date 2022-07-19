@@ -8,7 +8,6 @@
 import XCTest
 @testable import BeamCore
 
-
 private class FakeDailyScoreStore: DailyUrlScoreStoreProtocol {
     let scores: [UUID: DailyURLScore]
     init(scores: [UUID: DailyURLScore], repeatedUrls: Set<String> = Set<String>()) {
@@ -17,7 +16,7 @@ private class FakeDailyScoreStore: DailyUrlScoreStoreProtocol {
     func apply(to urlId: UUID, changes: (DailyURLScore) -> Void) {}
     func getScores(daysAgo: Int) -> [UUID: DailyURLScore] { scores }
     func getDailyRepeatingUrlsWithoutFragment(between offset0: Int, and offset1: Int, minRepeat: Int) -> Set<String> { Set<String>() }
-    func getUrlWithoutFragmentDistinctVisitDayCount(between offset0: Int, and offset1: Int) -> [String : Int] { [String: Int]() }
+    func getUrlWithoutFragmentDistinctVisitDayCount(between offset0: Int, and offset1: Int) -> [String: Int] { [String: Int]() }
 }
 
 class DailyUrlScorerTest: XCTestCase {

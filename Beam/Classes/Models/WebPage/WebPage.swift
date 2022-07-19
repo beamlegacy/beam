@@ -1,6 +1,5 @@
 import BeamCore
 
-
 /**
  The expected API for a WebPage to work (received messages, point and shoot) with.
 
