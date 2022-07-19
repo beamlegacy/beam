@@ -64,17 +64,19 @@ public class ImportsManager: NSObject, ObservableObject {
     func startBrowserHistoryImport(from importer: BrowserHistoryImporter) {
         let id = UUID()
         let batchImporter = BatchHistoryImporter(sourceBrowser: importer.sourceBrowser)
-        var receivedCount = 0
-        let timer = BeamTimer()
-        let start = BeamDate.now
         do {
-            let cancellable = importer.publisher.sink(receiveCompletion: { completion in
+            var receivedCount = 0
+            let timer = BeamTimer()
+            let start = BeamDate.now
+            let cancellable = importer.publisher.sink(receiveCompletion: { [weak self] completion in
+                guard let self = self else { return }
                 switch completion {
                 case .finished:
                     batchImporter.finalize {
                         self.sendError(ErrorType.saveError, action: .history, importer: importer)
                     }
                     let end = BeamDate.now
+                    self.sendSuccess(action: .history, importer: importer, count: receivedCount)
                     Logger.shared.logInfo("Import finished successfully", category: .browserImport)
                     timer.log(category: .browserImport)
                     Logger.shared.logInfo("total: \(end.timeIntervalSince(start)) sec", category: .browserImport)
@@ -91,9 +93,7 @@ public class ImportsManager: NSObject, ObservableObject {
                 batchImporter.add(item: result.item)
             })
             cancellableScope[id] = cancellable
-            try importer.importHistory(startDate: Persistence.ImportedBrowserHistory.getMaxDate(for: importer.sourceBrowser)) { [weak self] importedCount in
-                self?.sendSuccess(action: .history, importer: importer, count: importedCount)
-            }
+            try importer.importHistory(startDate: Persistence.ImportedBrowserHistory.getMaxDate(for: importer.sourceBrowser)) { _ in }
         } catch {
             Logger.shared.logError("Import didn't start: \(error)", category: .browserImport)
             sendError(error, action: .history, importer: importer)
@@ -104,30 +104,33 @@ public class ImportsManager: NSObject, ObservableObject {
     func startBrowserPasswordImport(from importer: BrowserPasswordImporter) {
         let id = UUID()
         do {
+            var importedCount = 0
             let cancellable = importer.passwordsPublisher
                 .sink(receiveCompletion: { [weak self] completion in
+                    guard let self = self else { return }
                     switch completion {
                     case .finished:
                         Logger.shared.logInfo("Import Password finished successfully", category: .browserImport)
+                        self.sendSuccess(action: .passwords, importer: importer, count: importedCount)
                     case .failure(let error):
                         Logger.shared.logError("Import Password failed with error: \(error)", category: .browserImport)
-                        self?.sendError(error, action: .passwords, importer: importer)
+                        self.sendError(error, action: .passwords, importer: importer)
                     }
-                    self?.cancellableScope.removeValue(forKey: id)
+                    self.cancellableScope.removeValue(forKey: id)
                 }, receiveValue: { record in
                     if let hostname = record.item.url.minimizedHost, let password = String(data: record.item.password, encoding: .utf8) {
                         Logger.shared.logDebug("[\(record.itemCount)] Saving password for \(record.item.username) at \(record.item.url)", category: .browserImport)
                         if PasswordManager.shared.save(hostname: hostname, username: record.item.username, password: password) == nil {
                             Logger.shared.logError("Failed to save password for \(record.item.username) at \(record.item.url)", category: .browserImport)
+                        } else {
+                            importedCount += 1
                         }
                     } else {
                         Logger.shared.logError("Password could not be imported for \(record.item.username) at \(record.item.url)", category: .browserImport)
                     }
                 })
             cancellableScope[id] = cancellable
-            try importer.importPasswords { importedCount in
-                sendSuccess(action: .passwords, importer: importer, count: importedCount)
-            }
+            try importer.importPasswords { _ in }
         } catch {
             Logger.shared.logError("Import didn't start: \(error)", category: .browserImport)
             sendError(error, action: .passwords, importer: importer)
