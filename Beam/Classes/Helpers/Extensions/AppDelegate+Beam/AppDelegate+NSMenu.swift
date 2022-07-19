@@ -21,6 +21,7 @@ private enum MenuEnablingConditionTag: Int {
     case hasTabGroupingFeedbackOn = 1101
     case isDebugMode = 1111
     case sidebarEnabled = 2000
+    case reopenAllWindowsFromLastSession = 3000
 }
 
 extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
@@ -84,6 +85,8 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             return PreferencesManager.enableTabGroupingFeedback
         } else if tagEnum == .sidebarEnabled {
             return state?.useSidebar ?? false
+        } else if tagEnum == .reopenAllWindowsFromLastSession {
+            return canRestoreSession
         }
         return false
     }
