@@ -9,6 +9,9 @@ extension APIRequest {
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil,
                                                                                 completionHandler: @escaping (Swift.Result<T, Error>) -> Void) throws -> Foundation.URLSessionDataTask {
+        guard FeatureFlags.current.syncEnabled else {
+            throw APIRequestError.syncDisabledByFeatureFlag
+        }
 
         let request = try makeUrlRequest(bodyParamsRequest, authenticatedCall: authenticatedCall)
 

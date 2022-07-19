@@ -56,15 +56,45 @@ class APIRequestTests: QuickSpec {
                             }
                         }
                     }
+
+                    context("with FeatureFlags.values.syncEnabled=false") {
+                        var oldSyncEnabled:Bool = false
+
+                        beforeEach {
+                            oldSyncEnabled = FeatureFlags.current.syncEnabled
+                            FeatureFlags.testSetSyncEnabled(false)
+                        }
+
+                        afterEach {
+                            FeatureFlags.testSetSyncEnabled(oldSyncEnabled)
+
+                        }
+
+                        it("fails fast") {
+                            waitUntil(timeout: .seconds(1)) { done in
+                                expect {
+                                    _ = try self.sut.performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UserMe, Error>) in
+                                        fail("Should not actually send a response")
+                                        done()
+                                    }
+                                }.to(throwError {(error: APIRequestError) in
+                                    expect(error).to(matchError(APIRequestError.syncDisabledByFeatureFlag))
+                                })
+                                done()
+                            }
+                        }
+                    }
                 }
 
                 context("with wrong api hostname") {
+                    let originalApiHostname = Configuration.apiHostname
                     beforeEach {
                         Configuration.apiHostname = "http://localhost2"
                         beamHelper.disableNetworkRecording()
                         BeamURLSession.shouldNotBeVinyled = true
                     }
                     afterEach {
+                        Configuration.apiHostname = originalApiHostname
                         BeamURLSession.shouldNotBeVinyled = false
                     }
 
@@ -91,9 +121,36 @@ class APIRequestTests: QuickSpec {
                         let forgotPassword: ForgotPassword = try await self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,authenticatedCall: false)
                         expect(forgotPassword.success).to(beTrue())
                     }
+                    context("with FeatureFlags.values.syncEnabled=false") {
+                        var oldSyncEnabled:Bool = false
+
+                        beforeEach {
+                            oldSyncEnabled = FeatureFlags.current.syncEnabled
+                            FeatureFlags.testSetSyncEnabled(false)
+                        }
+
+                        afterEach {
+                            FeatureFlags.testSetSyncEnabled(oldSyncEnabled)
+
+                        }
+                        asyncIt("fails fast") {
+                            do {
+                                let _: ForgotPassword = try await self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,authenticatedCall: false)
+                            } catch {
+                                switch error as! APIRequestError {
+                                case .syncDisabledByFeatureFlag:
+                                    return;
+                                default:
+                                    fail("Wrong error: \(error)")
+                                }
+                            }
+                            fail("Failed to throw error")
+                        }
+                    }
                 }
 
                 context("with wrong api hostname") {
+                    let originalApiHostname = Configuration.apiHostname
                     beforeEach {
                         Configuration.apiHostname = "http://localhost2"
                         beamHelper.disableNetworkRecording()
@@ -101,6 +158,7 @@ class APIRequestTests: QuickSpec {
                     }
                     afterEach {
                         BeamURLSession.shouldNotBeVinyled = false
+                        Configuration.apiHostname = originalApiHostname
                     }
 
                    asyncIt("manages errors") {

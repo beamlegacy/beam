@@ -16,6 +16,7 @@ enum APIRequestError: Error {
     case apiRequestErrors([APIRequest.ErrorData])
     case operationCancelled
     case duplicateTitle
+    case syncDisabledByFeatureFlag
 }
 
 extension APIRequestError: LocalizedError {
@@ -66,6 +67,8 @@ extension APIRequestError: LocalizedError {
             return errors.compactMap {
                 $0.message
             }.joined(separator: ", ")
+        case .syncDisabledByFeatureFlag:
+            return loc("error.api.syncDisabledByFeatureFlag")
         }
     }
 }
