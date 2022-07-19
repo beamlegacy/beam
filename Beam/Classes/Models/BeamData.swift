@@ -299,7 +299,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
             }.store(in: &scope)
 
         PreferencesManager.$alwaysShowBullets
-            .receive(on: DispatchQueue.global(qos: .userInitiated))
+            .receive(on: DispatchQueue.main)
             .sink { alwaysShowBullets in
                 guard let collection = BeamData.shared.currentDocumentCollection else { return }
                 let allDocuments = (try? collection.fetch(filters: [.isPublic(true)])) ?? []
@@ -307,7 +307,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
                 var allPublicNotes: [BeamNote] = []
                 let newBulletVisibility: BulletPointType = alwaysShowBullets ? .regular : .empty
                 for document in allDocuments {
-                    guard let note = BeamNote.getFetchedNote(document.id), note.publicationStatus.isPublic, note.noteSettings?.bulletPointVisibility != newBulletVisibility else { continue }
+                    guard let note = BeamNote.getFetchedNote(document.id), note.publicationStatus.isPublic else { continue }
                     note.noteSettings?.bulletPointVisibility = newBulletVisibility
                     allPublicNotes.append(note)
                 }
