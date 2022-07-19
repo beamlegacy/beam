@@ -108,10 +108,10 @@ class NoteEditTests: BaseTest {
         
         step("Then it has a source icon"){
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            noteView.waitForNoteViewToLoad()
+            noteView.waitForTodayNoteViewToLoad()
             let imageNote = noteView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
-            XCTAssertTrue(noteView.button(NoteViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(noteView.button(NoteViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
         
         step("Then I'm redirected to the source page when clicking on the icon"){
