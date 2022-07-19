@@ -407,7 +407,7 @@ struct TabView: View {
                             .accessibilityHidden(true)
                     )
                     .background(!isSingleTab || isDragging ? nil : GeometryReader { prxy in
-                        Color.clear.preference(key: SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
+                        Color.clear.preference(key: TabsListView.SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
                     })
                     .if(isDragging && applyDraggingStyle) {
                         $0.opacity(0.9).scaleEffect(1.07)

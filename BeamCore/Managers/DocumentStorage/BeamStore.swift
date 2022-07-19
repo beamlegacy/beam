@@ -9,5 +9,5 @@ import Foundation
 import BeamCore
 
 protocol BeamStore {
-    
+
 }
