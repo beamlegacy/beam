@@ -96,7 +96,8 @@ final class ChromiumPasswordImporter: ChromiumImporter {
         return secret
     }
 
-    static func derivedKey(secret: String) throws -> Data {
+    // can't be made private (used in unit tests)
+    internal static func derivedKey(secret: String) throws -> Data {
         let salt = "saltysalt"
         let iterations: UInt32 = 1003
         let keySize = 16
