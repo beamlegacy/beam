@@ -54,7 +54,7 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
     }
 
     private func tabs(containerGeometry: GeometryProxy) -> some View {
-        TabsListView(sections: browserTabsManager.listItems, currentTab: browserTabsManager.currentTab, globalContainerGeometry: containerGeometry)
+        TabsListView(globalContainerGeometry: containerGeometry)
             .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
             .frame(maxHeight: .infinity)
             .transition(.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.12).delay(0.05))
