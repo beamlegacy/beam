@@ -262,7 +262,7 @@ extension WebViewController: WebViewNavigationHandler {
         switch action.navigationType {
         case .other:
             // this is a redirect, we keep the requested url as is to update its title once the actual destination is reached
-            break
+            return
         case .formSubmitted, .formResubmitted:
             // We found at that `action.sourceFrame` can be null for `.formResubmitted` even if it's not an optional
             // Assigning it to an optional to check if we have a value
@@ -272,20 +272,19 @@ extension WebViewController: WebViewNavigationHandler {
                 Logger.shared.logDebug("Form submitted for \(sourceFrame.request.url?.absoluteString ?? "(no source frame URL)")", category: .web)
                 page?.handleFormSubmit(frameInfo: sourceFrame)
             }
-            fallthrough
         case .backForward:
             handleBackForwardAction(navigationAction: action)
-            fallthrough
         default:
-            lastNavigationWasTriggeredByBeamUI = false
-            Logger.shared.logInfo("Nav Redirecting toward: \(action.request.url?.absoluteString ?? "nilURL"), type:\(action.navigationType)",
-                                  category: .web)
-            // update the requested url as it is not from a redirection but from a user action:
-            if let url = action.request.url {
-                self.requestedURL = url
-            }
+            break
         }
-        delegate?.webViewControllerIsNavigatingToANewPage(self)
+
+        lastNavigationWasTriggeredByBeamUI = false
+        Logger.shared.logInfo("Nav Redirecting toward: \(action.request.url?.absoluteString ?? "nilURL"), type:\(action.navigationType)",
+                              category: .web)
+        // update the requested url as it is not from a redirection but from a user action:
+        if let url = action.request.url {
+            self.requestedURL = url
+        }
     }
 
     func webView(_ webView: WKWebView, didFinishNavigationToURL url: URL, source: WebViewControllerNavigationSource) {
