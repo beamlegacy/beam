@@ -48,6 +48,7 @@ public class MockHttpServer {
         installBrowserHandlers(to: router)
         installRedirectionHandlers(to: router)
         installAdBlockHandlers(to: router)
+        installOtherFrameHandlers(to: router)
         router.all("/view", middleware: BodyParser())
         router.post("/view", handler: submitHandler)
         router.all("/signinstep2", middleware: BodyParser())
@@ -91,6 +92,15 @@ public class MockHttpServer {
             }
         }
     }
+    private func installOtherFrameHandlers(to router: Router) {
+        for templateName in otherFrameNames {
+            router.get("/otherframe/\(templateName)") { request, response, next in
+                let topRedirect = request.queryParameters["topredirect"] ?? "true"
+                self.renderStencil(request, response, "otherframe/\(templateName)", additionalParams: ["port": "\(self.serverPort)", "topredirect": topRedirect])
+                next()
+            }
+        }
+    }
 
     private func rootHandler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
         if let formTemplateName = request.hostname.removingSuffix(".form.lvh.me") {
@@ -103,6 +113,8 @@ public class MockHttpServer {
             renderStencil(request, response, "adblock/\(redirectionTemplateName)")
         } else if request.hostname == "download.lvh.me" {
             fileDownloadHandler(request: request, response: response, next: next)
+        } else if request.hostname == "otherframe.lvh.me" {
+            renderStencil(request, response, "otherframe/index", additionalParams: ["port": "\(serverPort)"])
         } else {
             listHandler(request: request, response: response, next: next)
         }
@@ -235,6 +247,11 @@ public class MockHttpServer {
     private var styleNames: [String] {
         Bundle.module.paths(forResourcesOfType: "css", inDirectory: "/Resources/static")
             .compactMap { $0.lastPathComponent.removingSuffix(".css") }
+    }
+    
+    private var otherFrameNames: [String] {
+        Bundle.module.paths(forResourcesOfType: "stencil", inDirectory: "/Resources/templates/otherframe")
+            .compactMap { $0.lastPathComponent.removingSuffix(".stencil") }
     }
 
     fileprivate func renderStencil(_ request: RouterRequest, _ response: RouterResponse, _ stencilName: String) {
