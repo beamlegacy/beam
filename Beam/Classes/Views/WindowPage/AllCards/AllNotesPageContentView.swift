@@ -53,7 +53,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                         width: 58, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: ColumnID.mentions.rawValue, title: loc("Links"),
+        TableViewColumn(key: ColumnID.links.rawValue, title: loc("Links"),
                         width: 50, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
@@ -362,7 +362,7 @@ private enum ColumnID: String {
     case title
     case isPublic
     case words
-    case mentions
+    case links
     case createdAt
     case updatedAt
 }

@@ -82,7 +82,7 @@ class AllNotesViewTests: BaseTest {
         
         step ("THEN links counter is updated correctly for \(linkedNoteName)") {
             let row = openAllNotesAndGetRowFor(noteTitle: linkedNoteName)
-            XCTAssertEqual(row.links, 1)
+            XCTAssertEqual(row.links, 0)
         }
         
         step ("WHEN I create a link from \(linkNoteName) to \(linkedNoteName)") {
@@ -93,7 +93,7 @@ class AllNotesViewTests: BaseTest {
         
         step ("THEN links counter is updated correctly for \(linkedNoteName)") {
             let row = openAllNotesAndGetRowFor(noteTitle: linkedNoteName)
-            XCTAssertEqual(row.links, 2)
+            XCTAssertEqual(row.links, 1)
         }
     }
     
