@@ -71,6 +71,7 @@ public enum LogCategory: String, CaseIterable {
     case tabGrouping
     case analyticsCollection
     case sync
+    case featureFlags
 }
 
 public final class Logger {

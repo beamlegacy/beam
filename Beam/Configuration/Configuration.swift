@@ -52,6 +52,8 @@ struct Configuration {
     static private(set) var apiHostnameDefaultDev = "https://api.beam.lvh.me"
     static private(set) var restApiHostnameDefaultDev = "https://api.beam.lvh.me"
 
+    static private(set) var featureFlagURL = "https://s3.eu-west-3.amazonaws.com/downloads.beamapp.co/flags"
+
     static private(set) var beamObjectsPageSizeDefault = 1000
 
     static private(set) var beamObjectDataOnSeparateCallDefault = true
