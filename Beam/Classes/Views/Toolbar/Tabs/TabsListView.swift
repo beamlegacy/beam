@@ -73,8 +73,6 @@ struct TabsListView: View {
     @EnvironmentObject var windowInfo: BeamWindowInfo
     @Environment(\.isMainWindow) private var isMainWindow
 
-    var sections: TabsListItemsSections
-    var currentTab: BrowserTab?
     var globalContainerGeometry: GeometryProxy?
 
     @StateObject private var dragModel = TabsDragModel()
@@ -93,6 +91,14 @@ struct TabsListView: View {
 
     @StateObject private var externalDragModel = TabsListExternalDragViewModel()
     @StateObject private var viewModel = TabsListViewModel()
+
+    private var sections: TabsListItemsSections {
+        browserTabsManager.listItems
+    }
+
+    private var currentTab: BrowserTab? {
+        browserTabsManager.currentTab
+    }
 
     private var isDraggingATab: Bool {
         dragModel.draggingOverIndex != nil
@@ -991,7 +997,7 @@ struct TabsListView_Previews: PreviewProvider {
         return TabsListItemsSections(allItems: items, pinnedItems: [], unpinnedItems: items)
     }
     static var previews: some View {
-        TabsListView(sections: .init(), currentTab: currentab)
+        TabsListView()
             .environmentObject(state)
             .frame(width: 500)
     }
