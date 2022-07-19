@@ -225,7 +225,10 @@ public class ElementNode: Widget {
             }.store(in: &scope)
 
         PreferencesManager.$alwaysShowBullets.sink { [unowned self] alwaysShowBullets in
-            self.editor?.note.note?.noteSettings?.bulletPointVisibility = alwaysShowBullets ? .regular : .empty
+            let newBulletPointVisibility: BulletPointType = alwaysShowBullets ? .regular : .empty
+            if self.editor?.note.note?.noteSettings?.bulletPointVisibility != newBulletPointVisibility {
+                self.editor?.note.note?.noteSettings?.bulletPointVisibility = newBulletPointVisibility
+            }
         }.store(in: &scope)
 
         self.editor?.note.note?.$noteSettings.sink { [unowned self] _ in
