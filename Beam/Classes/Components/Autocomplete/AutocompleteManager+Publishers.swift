@@ -250,8 +250,8 @@ extension AutocompleteManager {
                 switch result {
                 case .failure(let error):
                     switch error {
-                        case TopDomainDatabaseError.notFound: promise(.success([]))
-                        default: promise(.failure(error))
+                    case TopDomainDatabaseError.notFound: promise(.success([]))
+                    default: promise(.failure(error))
                     }
                 case .success(let topDomain):
                     guard let url = URL(string: topDomain.url) else {

@@ -31,7 +31,7 @@ class AccountsViewModel: ObservableObject {
             }
         }.store(in: &scope)
 
-        AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
+        AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] _ in
             self?.isloggedIn = AuthenticationManager.shared.isLoggedIn
         }.store(in: &scope)
     }

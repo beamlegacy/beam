@@ -90,7 +90,7 @@ struct SmallUpdateIndicatorView: View {
         }
         .opacity(opacity)
         .background(geometryReaderView)
-        .onPreferenceChange(FramePreferenceKey.self) { frame in
+        .onPreferenceChange(ButtonFramePreferenceKey.self) { frame in
             indicatorFrameInGlobalCoordinates = frame
         }
         .onHover { hover in
@@ -101,7 +101,7 @@ struct SmallUpdateIndicatorView: View {
     private var geometryReaderView: some View {
         GeometryReader { proxy in
             let frame = proxy.frame(in: .global)
-            Color.clear.preference(key: FramePreferenceKey.self, value: frame)
+            Color.clear.preference(key: ButtonFramePreferenceKey.self, value: frame)
         }
     }
 
@@ -149,12 +149,7 @@ struct SmallUpdateIndicatorView: View {
         UpdatePanel.showReleaseNoteWindow(with: release, versionChecker: versionChecker)
     }
 
-    private struct FramePreferenceKey: PreferenceKey {
-        static var defaultValue: CGRect?
-        static func reduce(value: inout Value, nextValue: () -> Value) {
-            value = value ?? nextValue()
-        }
-    }
+    private struct ButtonFramePreferenceKey: FramePreferenceKey {}
 
 }
 

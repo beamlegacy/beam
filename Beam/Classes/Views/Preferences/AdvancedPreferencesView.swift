@@ -371,7 +371,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                             .fetchIds(filters: [])
                             .forEach {
                                 let note = BeamNote.fetch(id: $0, keepInMemory: false)
-                                note?.save(self)
+                                _ = note?.save(self)
                             }
                     }, label: {
                         Text("Notes browsing sessions").frame(minWidth: 100)

@@ -1229,6 +1229,7 @@
 		A5EBF15526D8F2FD00597A1C /* VisualEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */; };
 		A5ECC8FF2679EBB500D8A087 /* HoverVisibleModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */; };
 		A5EE8C6427BB861D00800661 /* AutocompleteManager+ActionsItems.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EE8C6327BB861D00800661 /* AutocompleteManager+ActionsItems.swift */; };
+		A5EF312028857CCF0025D598 /* PreferenceKeyConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EF311F28857CCF0025D598 /* PreferenceKeyConvenience.swift */; };
 		A5F1DC30280EF6B0006C7FB8 /* TabsExternalDraggingSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F1DC2F280EF6B0006C7FB8 /* TabsExternalDraggingSource.swift */; };
 		A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */; };
 		A5F47EBB26F8AEB2004B7CDE /* Tooltip.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */; };
@@ -3154,6 +3155,7 @@
 		A5EBF15426D8F2FD00597A1C /* VisualEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectView.swift; sourceTree = "<group>"; };
 		A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoverVisibleModifier.swift; sourceTree = "<group>"; };
 		A5EE8C6327BB861D00800661 /* AutocompleteManager+ActionsItems.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+ActionsItems.swift"; sourceTree = "<group>"; };
+		A5EF311F28857CCF0025D598 /* PreferenceKeyConvenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferenceKeyConvenience.swift; sourceTree = "<group>"; };
 		A5F1DC2F280EF6B0006C7FB8 /* TabsExternalDraggingSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsExternalDraggingSource.swift; sourceTree = "<group>"; };
 		A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteSharingUtils.swift; sourceTree = "<group>"; };
 		A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tooltip.swift; sourceTree = "<group>"; };
@@ -4600,6 +4602,7 @@
 				370794B727D7A17F00D2768B /* CursorOverrideModifier.swift */,
 				A03E64A5282CFF8D0003A7B2 /* RoundedCornersModifier.swift */,
 				66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */,
+				A5EF311F28857CCF0025D598 /* PreferenceKeyConvenience.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -9255,6 +9258,7 @@
 				DABFD3B726FCAC8300C1F7F0 /* Csv.swift in Sources */,
 				523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */,
 				A0D0403C2719E16E00C0B71C /* CalendarView.swift in Sources */,
+				A5EF312028857CCF0025D598 /* PreferenceKeyConvenience.swift in Sources */,
 				96CD67A62838F48800EA952A /* BeamDatabase+BeamObject.swift in Sources */,
 				9634DD79264AA1A10065383E /* TextFrameLayer.swift in Sources */,
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,

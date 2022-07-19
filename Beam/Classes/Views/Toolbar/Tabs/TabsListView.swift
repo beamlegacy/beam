@@ -16,6 +16,7 @@ private class TabsListViewModel: ObservableObject {
     var lastTouchWasOnUnselectedTab: Bool = false
     var singleTabCenteringAdjustment: CGFloat = 0
     var singleTabCurrentFrame: CGRect?
+    var lastItemCurrentFrame: CGRect?
     weak var mouseMoveMonitor: AnyObject?
     weak var otherMouseDownMonitor: AnyObject?
 }
@@ -219,6 +220,8 @@ struct TabsListView: View {
         || (!isTheLastItem && ((!isTabItem && nextItemIsTab) || (isTabItem && !nextItemIsTab) || group != nextGroup))
         || (!isDraggingATab && (selectedIndex == index + 1 || selectedIndex == index || hoveredIndex == index + 1 || hoveredIndex == index))
 
+        let width = max(0, widthProvider.width(forItem: item, selected: selected, pinned: isPinned) - centeringAdjustment)
+        let areTabsFillingSpace = width < TabView.maximumWidth
         return HStack(spacing: 0) {
             if showLeadingDragSpacer {
                 emptyDragSpacer
@@ -244,11 +247,14 @@ struct TabsListView: View {
                     })
                 }
             }
-            .frame(width: isTheDraggedTab ? 0 : max(0, widthProvider.width(forItem: item, selected: selected, pinned: isPinned) - centeringAdjustment))
+            .frame(width: isTheDraggedTab ? 0 : width)
             .opacity(isTheDraggedTab ? 0 : 1)
             .onHover { if $0 { hoveredIndex = index } }
             .background(!selected ? nil : GeometryReader { prxy in
                 Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: .init(index: index, frame: prxy.safeTopLeftGlobalFrame(in: nil).rounded()))
+            })
+            .background(!isTheLastItem || areTabsFillingSpace ? nil : GeometryReader { prxy in
+                Color.clear.preference(key: LastTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
             })
             .contextMenu {
                 if let tab = item.tab {
@@ -384,7 +390,7 @@ struct TabsListView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(
                 // limit the drag gesture space
-                Path(draggableContentPath(tabsSections: sections, geometry: geometry))
+                Path(draggableContentPath(geometry: geometry))
             )
             .simultaneousGesture(
                 // removing the drag gesture completely otherwise it is never stopped by the external drag
@@ -403,24 +409,21 @@ struct TabsListView: View {
             .onAppear {
                 startOtherMouseDownMonitor()
                 externalDragModel.setup(withState: state, tabsMananger: browserTabsManager)
-                updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider, singleTabFrame: viewModel.singleTabCurrentFrame)
+                updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider, singleTabFrame: viewModel.singleTabCurrentFrame, lastItemFrame: viewModel.lastItemCurrentFrame)
             }
             .onDisappear {
                 removeMouseMonitors()
                 updateDraggableTabsAreas(with: nil, tabsSections: sections, widthProvider: widthProvider)
             }
             .onPreferenceChange(CurrentTabGlobalFrameKey.self) { [weak state] newValue in
-                guard !isDraggingATab && newValue != nil else { return }
-                guard newValue?.index == selectedIndex else { return }
-                state?.browserTabsManager.currentTabUIFrame = newValue?.frame
-                guard !isSingleTab(atIndex: selectedIndex, in: sections) || !hasUnpinnedTabs else { return }
-                updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider, singleTabFrame: viewModel.singleTabCurrentFrame)
+                currentTabFrameDidChange(newValue: newValue, state: state, hasUnpinnedTabs: hasUnpinnedTabs,
+                                         geometry: geometry, widthProvider: widthProvider)
             }
             .onPreferenceChange(SingleTabGlobalFrameKey.self) { newValue in
-                guard !isDraggingATab else { return }
-                viewModel.singleTabCurrentFrame = newValue
-                guard let newValue = newValue else { return }
-                updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider, singleTabFrame: newValue)
+                importantTabFrameDidChange(newValue: newValue, isSingle: true, geometry: geometry, widthProvider: widthProvider)
+            }
+            .onPreferenceChange(LastTabGlobalFrameKey.self) { newValue in
+                importantTabFrameDidChange(newValue: newValue, isLast: true, geometry: geometry, widthProvider: widthProvider)
             }
             .onChange(of: sections.allItems.count) { _ in
                 guard hoveredIndex != nil else { return }
@@ -435,7 +438,7 @@ struct TabsListView: View {
 // MARK: - Actions
 extension TabsListView {
     private func updateDraggableTabsAreas(with geometry: GeometryProxy?, tabsSections: TabsListItemsSections,
-                                          widthProvider: TabsListWidthProvider, singleTabFrame: CGRect? = nil) {
+                                          widthProvider: TabsListWidthProvider, singleTabFrame: CGRect? = nil, lastItemFrame: CGRect? = nil) {
         guard let geometry = geometry else {
             draggableTabsAreas = []
             return
@@ -455,7 +458,13 @@ extension TabsListView {
             areas.append(singleTabFrame)
         } else if tabsSections.unpinnedItems.count != 0 {
             if tabsSections.unpinnedItems.contains(where: { $0.isATab }) {
-                areas = [globalFrame]
+                if let lastItemFrame = lastItemFrame {
+                    var frame = globalFrame
+                    frame.size.width = lastItemFrame.maxX - globalFrame.minX
+                    areas = [frame]
+                } else {
+                    areas = [globalFrame]
+                }
             } else {
                 let itemsWidth = tabsSections.unpinnedItems.reduce(0, { partialResult, item in
                     return partialResult + widthProvider.width(forItem: item, selected: false, pinned: false)
@@ -469,9 +478,11 @@ extension TabsListView {
         draggableTabsAreas = areas
     }
 
-    private func draggableContentPath(tabsSections: TabsListItemsSections, geometry: GeometryProxy) -> CGPath {
-        var path = CGMutablePath(rect: CGRect(x: 0, y: 12, width: geometry.size.width, height: TabView.height), transform: nil)
-        if tabsSections.unpinnedItems.count <= 1 {
+    private func draggableContentPath(geometry: GeometryProxy) -> CGPath {
+        let path: CGMutablePath
+        if draggableTabsAreas.isEmpty {
+            path = CGMutablePath(rect: CGRect(x: 0, y: 12, width: geometry.size.width, height: TabView.height), transform: nil)
+        } else {
             path = CGMutablePath()
             let relativeOrigin = geometry.safeTopLeftGlobalFrame(in: nil).origin
             draggableTabsAreas.forEach { r in
@@ -591,21 +602,41 @@ extension TabsListView {
     }
 }
 
-struct CurrentTabGlobalFrameKey: PreferenceKey {
-    struct TabFrame: Equatable {
+// MARK: - Tab items frames handlers
+extension TabsListView {
+    private struct TabFrame: Equatable {
         var index: Int
         var frame: CGRect
     }
-    static let defaultValue: TabFrame? = nil
-    static func reduce(value: inout TabFrame?, nextValue: () -> TabFrame?) {
-        value = nextValue() ?? value
+    private struct CurrentTabGlobalFrameKey: PreferenceKey {
+        static func reduce(value: inout TabFrame?, nextValue: () -> TabFrame?) {
+            value = nextValue() ?? value
+        }
     }
-}
+    private struct LastTabGlobalFrameKey: FramePreferenceKey {}
+    struct SingleTabGlobalFrameKey: FramePreferenceKey {}
 
-struct SingleTabGlobalFrameKey: PreferenceKey {
-    static let defaultValue: CGRect? = nil
-    static func reduce(value: inout CGRect?, nextValue: () -> CGRect?) {
-        value = nextValue() ?? value
+    private func importantTabFrameDidChange(newValue: CGRect?, isSingle: Bool = false, isLast: Bool = false,
+                                            geometry: GeometryProxy?, widthProvider: TabsListWidthProvider) {
+        guard (isSingle || isLast) && !isDraggingATab else { return }
+        if isSingle {
+            viewModel.singleTabCurrentFrame = newValue
+        } else if isLast {
+            viewModel.lastItemCurrentFrame = newValue
+        }
+        guard let newValue = newValue else { return }
+        updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider,
+                                 singleTabFrame: isSingle ? newValue : viewModel.singleTabCurrentFrame,
+                                 lastItemFrame: isLast ? newValue : viewModel.lastItemCurrentFrame)
+    }
+    private func currentTabFrameDidChange(newValue: TabFrame?, state: BeamState?, hasUnpinnedTabs: Bool,
+                                          geometry: GeometryProxy?, widthProvider: TabsListWidthProvider) {
+        guard !isDraggingATab && newValue != nil else { return }
+        guard newValue?.index == selectedIndex else { return }
+        state?.browserTabsManager.currentTabUIFrame = newValue?.frame
+        guard !isSingleTab(atIndex: selectedIndex, in: sections) || !hasUnpinnedTabs else { return }
+        updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider,
+                                 singleTabFrame: viewModel.singleTabCurrentFrame, lastItemFrame: viewModel.lastItemCurrentFrame)
     }
 }
 
@@ -745,11 +776,7 @@ extension TabsListView {
             state?.browserTabsManager.closeTabsInGroup(group)
         }
 
-        if let event = event {
-            menu.popUp(positioning: nil, at: event.locationInWindow, in: event.window?.contentView)
-        } else {
-            menu.popUp(positioning: nil, at: .zero, in: nil)
-        }
+        menu.popUp(positioning: nil, at: event?.locationInWindow ?? .zero, in: event?.window?.contentView)
     }
 
     private func presentCaptureWindow(for group: TabGroup, at location: CGPoint) {

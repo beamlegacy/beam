@@ -109,17 +109,12 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
     }
 
     @State private var buttonFrameInGlobalCoordinates: CGRect?
-    private struct FramePreferenceKey: PreferenceKey {
-        static var defaultValue: CGRect?
-        static func reduce(value: inout Value, nextValue: () -> Value) {
-            value = value ?? nextValue()
-        }
-    }
+    private struct ButtonFramePreferenceKey: FramePreferenceKey {}
 
     private var geometryReaderView: some View {
         GeometryReader { proxy in
             let frame = proxy.frame(in: .global)
-            Color.clear.preference(key: FramePreferenceKey.self, value: frame)
+            Color.clear.preference(key: ButtonFramePreferenceKey.self, value: frame)
         }
     }
 
@@ -186,7 +181,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                             showFiltersContextualMenu()
                         })
                         .background(geometryReaderView)
-                        .onPreferenceChange(FramePreferenceKey.self) { frame in
+                        .onPreferenceChange(ButtonFramePreferenceKey.self) { frame in
                             buttonFrameInGlobalCoordinates = frame
                         }
                     }
