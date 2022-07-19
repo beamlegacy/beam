@@ -417,7 +417,7 @@ class WebAutofillController: NSObject, WebPageRelated {
     private func requestValuesFromTextFields(ids: [String], frameInfo: WKFrameInfo?, completion: @escaping (([String]?) -> Void)) {
         let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
         let script = "passwordHelper.getTextFieldValues('[\(formattedList)]')"
-        self.page?.executeJS(script, objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal)  { result in
+        self.page?.executeJS(script, objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal) { result in
             switch result {
             case .success(let jsResult):
                 if let jsonString = jsResult as? String,

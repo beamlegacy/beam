@@ -113,7 +113,6 @@ extension TabGroupBeamObject {
 
         let tab3 = TabGroupBeamObject.PageInfo(id: UUID(), url: URL(string: "https://fr.wikipedia.org/wiki/Le_Syst%C3%A8me_des_objets")!, title: "Le Système de objets - Wikipedia", snapshot: NSImage(named: "amazon")?.jpegRepresentation)
 
-
         let group = TabGroupBeamObject(id: UUID(), title: "Baudrillard", color: TabGroupingColor(designColor: .blue), pages: [tab1, tab2, tab3], isLocked: true)
         return group
     }

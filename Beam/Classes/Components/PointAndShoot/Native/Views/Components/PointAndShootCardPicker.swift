@@ -546,7 +546,7 @@ extension PointAndShootCardPicker {
 
         let group = CAAnimationGroup()
         group.animations = [scaleUp, scaleDown, opacity]
-        group.completion = { completed in
+        group.completion = { _ in
             window?.close()
         }
 

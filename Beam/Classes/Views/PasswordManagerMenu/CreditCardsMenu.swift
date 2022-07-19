@@ -51,6 +51,7 @@ struct CreditCardsMenu: View {
         .frame(width: 305, height: height, alignment: .top)
         .animation(nil)
     }
+    private struct HeightKey: FloatPreferenceKey {}
 }
 
 struct CreditCardsMenu_Previews: PreviewProvider {

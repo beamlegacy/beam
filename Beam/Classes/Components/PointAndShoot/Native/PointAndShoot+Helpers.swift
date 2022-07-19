@@ -8,7 +8,6 @@
 import Foundation
 import BeamCore
 
-
 extension PointAndShoot {
 
     /// Dismiss activeShootGroup. Group gets added to dismissedGroups array and activeShootGroup gets cleared.

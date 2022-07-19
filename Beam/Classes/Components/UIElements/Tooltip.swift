@@ -84,23 +84,24 @@ struct TooltipHoverModifier: ViewModifier {
         Tooltip(title: title)
             .fixedSize()
             .background(GeometryReader {
-                Color.clear.preference(key: TooltipSizeKey.self, value: $0.size)
+                Color.clear.preference(key: TooltipFrameKey.self, value: $0.frame(in: .global))
             })
-            .onPreferenceChange(TooltipSizeKey.self) { tooltipSize in
+            .onPreferenceChange(TooltipFrameKey.self) { tooltipFrame in
+                let tooltipSize = tooltipFrame?.size ?? .zero
                 var offset = CGSize(width: 0, height: 0)
                 if alignment.vertical == .top {
-                    offset.height = -(tooltipSize?.height ?? 0)
+                    offset.height = -tooltipSize.height
                 } else if alignment.vertical == .bottom {
-                    offset.height = tooltipSize?.height ?? 0
+                    offset.height = tooltipSize.height
                 }
                 if alignment.horizontal == .leading {
-                    offset.width = -(tooltipSize?.width ?? 0)
+                    offset.width = -tooltipSize.width
                 } else if alignment.horizontal == .trailing {
-                    offset.width = tooltipSize?.width ?? 0
+                    offset.width = tooltipSize.width
                 }
                 let parentFrame = containerGeometry.frame(in: .global)
-                let tooltipMaxX = parentFrame.midX + (tooltipSize?.width ?? 0) / 2 + tooltipMargin
-                let tooltipMinX = parentFrame.midX - (tooltipSize?.width ?? 0) / 2 - tooltipMargin
+                let tooltipMaxX = parentFrame.midX + tooltipSize.width / 2 + tooltipMargin
+                let tooltipMinX = parentFrame.midX - tooltipSize.width / 2 - tooltipMargin
                 if tooltipMaxX > windowFrame.width {
                     offset.width = windowFrame.width - tooltipMaxX
                 } else if tooltipMinX < 0 {
@@ -149,12 +150,7 @@ struct TooltipHoverModifier: ViewModifier {
             }
     }
 
-    private struct TooltipSizeKey: PreferenceKey {
-        static let defaultValue: CGSize? = nil
-        static func reduce(value: inout CGSize?, nextValue: () -> CGSize?) {
-            value = nextValue() ?? value
-        }
-    }
+    private struct TooltipFrameKey: FramePreferenceKey { }
 }
 
 extension View {

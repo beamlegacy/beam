@@ -13,5 +13,5 @@ class BeamWindowInfo: ObservableObject {
     var undraggableWindowRects: [CGRect] = []
     @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
-    weak var window: NSWindow? = nil
+    weak var window: NSWindow?
 }
