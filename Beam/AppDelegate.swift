@@ -126,6 +126,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if !isRunningTests {
             if !shouldRestoreSession() || !reopenAllWindowsFromLastSession() {
+                setupCanRestoreSession()
                 createWindow(frame: nil)
             }
         }
@@ -418,6 +419,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @UserDefault(key: "RestoreSession", defaultValue: true, suiteName: BeamUserDefaults.restoration.suiteName)
     private var restoreSession: Bool
 
+    var canRestoreSession = false
+
+    private func setupCanRestoreSession() {
+        let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
+        canRestoreSession = FileManager.default.fileExists(atPath: sessionURL.path)
+    }
+
     private func shouldRestoreSession() -> Bool {
         return restoreSession && !PreferencesManager.isWindowsRestorationPrevented
     }
@@ -431,6 +439,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let session = try PropertyListEncoder().encode(windows)
             let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
             try session.write(to: sessionURL, options: .atomic)
+            canRestoreSession = true
         } catch {
             Logger.shared.logError("Failed to store session. \(error)", category: .general)
         }
@@ -447,6 +456,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 subscribeToStateChanges(for: window.state)
                 window.makeKeyAndOrderFront(nil)
             }
+            canRestoreSession = false
         } catch {
             Logger.shared.logError("Failed to restore session. \(error)", category: .general)
             return false
