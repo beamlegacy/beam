@@ -159,7 +159,7 @@ import Sentry
     private var scope = Set<AnyCancellable>()
     let cmdManager = CommandManager<BeamState>()
 
-    func goBack() {
+    func goBack(openingInNewTab: Bool = false) {
         guard canGoBackForward.back else { return }
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         switch mode {
@@ -175,13 +175,17 @@ import Sentry
                 }
             }
         case .web:
-            currentTab?.goBack()
+            if openingInNewTab, let url = currentTab?.backForwardList.backItem?.url {
+                createTab(withURLRequest: URLRequest(url: url), setCurrent: false)
+            } else {
+                currentTab?.goBack()
+            }
         }
 
         updateCanGoBackForward()
     }
 
-    func goForward() {
+    func goForward(openingInNewTab: Bool = false) {
         guard canGoBackForward.forward else { return }
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         switch mode {
@@ -197,7 +201,11 @@ import Sentry
                 }
             }
         case .web:
-            currentTab?.goForward()
+            if openingInNewTab, let url = currentTab?.backForwardList.forwardItem?.url {
+                createTab(withURLRequest: URLRequest(url: url), setCurrent: false)
+            } else {
+                currentTab?.goForward()
+            }
         }
 
         updateCanGoBackForward()
@@ -441,9 +449,19 @@ import Sentry
     }
 
     func duplicate(tab: BrowserTab) {
-        guard let url = tab.url else { return }
-        let duplicatedTab = BrowserTab(state: self, browsingTreeOrigin: tab.browsingTreeOrigin, originMode: .web, note: nil)
-        browserTabsManager.addNewTabAndNeighborhood(duplicatedTab, setCurrent: true, withURLRequest: URLRequest(url: url))
+        guard let url = tab.url ?? tab.preloadUrl else { return }
+
+        let interactionState = tab.interactionState
+
+        let duplicatedTab = BrowserTab(state: self,
+                                       browsingTreeOrigin: tab.browsingTreeOrigin,
+                                       originMode: .web,
+                                       note: nil,
+                                       interactionState: interactionState)
+
+        let request: URLRequest? = (interactionState == nil) ? URLRequest(url: url) : nil
+
+        browserTabsManager.addNewTabAndNeighborhood(duplicatedTab, setCurrent: true, withURLRequest: request)
     }
 
     func closeTab(_ index: Int, allowClosingPinned: Bool = false) {
