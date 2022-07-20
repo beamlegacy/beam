@@ -5,8 +5,10 @@
 //  Created by Remi Santos on 01/12/2021.
 //
 // swiftlint:disable file_length
-import SwiftUI
+
 import BeamCore
+import SwiftUI
+import UniformTypeIdentifiers
 
 struct TabView: View {
     static let minimumWidth: CGFloat = 29
@@ -36,6 +38,7 @@ struct TabView: View {
     var onClose: (() -> Void)?
     var onCopy: (() -> Void)?
     var onToggleMute: (() -> Void)?
+    var onFileDrop: ((URL) -> Void)?
 
     private let localCoordinateSpaceName = "TabCoordinateSpace"
     private let defaultFadeTransition = AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
@@ -147,7 +150,7 @@ struct TabView: View {
 
     private var closeIcon: some View {
         TabContentIcon(name: "tabs-close_xs",
-                       color: isIncognito ?  BeamColor.InvertedLightStoneGray: BeamColor.LightStoneGray,
+                       color: isIncognito ? BeamColor.InvertedLightStoneGray: BeamColor.LightStoneGray,
                        hoveredColor: isIncognito ?  BeamColor.InvertedCorduroy: BeamColor.Corduroy,
                        pressedColor: isIncognito ? BeamColor.InvertedNiobium : BeamColor.Niobium,
                        action: onClose)
@@ -404,7 +407,7 @@ struct TabView: View {
                             .simultaneousGesture(TapGesture().onEnded {
                                 onTap?()
                             })
-                            .accessibilityHidden(true)
+                            .accessibilityHidden(!isDragging)
                     )
                     .background(!isSingleTab || isDragging ? nil : GeometryReader { prxy in
                         Color.clear.preference(key: TabsListView.SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
@@ -420,6 +423,28 @@ struct TabView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .onDrop(of: [UTType.fileURL], delegate: FileDropDelegate(onFileDrop: onFileDrop))
+    }
+}
+
+private struct FileDropDelegate: DropDelegate {
+    let onFileDrop: ((URL) -> Void)?
+
+    func performDrop(info: DropInfo) -> Bool {
+        guard let onFileDrop = onFileDrop, let item = info.itemProviders(for: [UTType.fileURL]).first else {
+            return false
+        }
+        item.loadItem(forTypeIdentifier: kUTTypeFileURL as String, options: nil) { data, error in
+            do {
+                let url = try (Result(data, error).get() as? Data)
+                    .flatMap { String(data: $0, encoding: .utf8) }
+                    .flatMap(URL.init(string:))
+                url.map { url in DispatchQueue.main.async(execute: { onFileDrop(url) })  }
+            } catch {
+                UserAlert.showError(error: error)
+            }
+        }
+        return true
     }
 }
 
