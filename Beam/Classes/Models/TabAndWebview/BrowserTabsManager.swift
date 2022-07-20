@@ -137,52 +137,89 @@ class BrowserTabsManager: ObservableObject {
         }.store(in: &currentTabScope)
     }
 
+    private class ItemsSegment {
+        var group: TabGroup?
+        var tabs: [BrowserTab] = []
+        var displayGroupCapsule = false
+        var pinned = false
+        init(pinned: Bool = false) {
+            self.pinned = pinned
+        }
+    }
+    // swiftlint:disable:next function_body_length
     private func updateListItems() {
         var sections = TabsListItemsSections()
         let groups = localTabsGroup
         var previousGroup: TabGroup?
         var alreadyAddedGroups: [UUID: Int] = [:]
-        var visibleTabs: [BrowserTab] = []
+        let pinnedSegment = ItemsSegment(pinned: true)
+        var segments = [ItemsSegment]()
+
+        // We first create segments of tabs, by group/kind.
         tabs.forEach { tab in
+            if tab.isPinned {
+                pinnedSegment.tabs.append(tab)
+                return
+            }
+
+            // Get the suggested or manual group
             let forcedGroups = tabGroupingManager.forcedTabsGroup[tab.id]
             let suggestedGroup = groups[tab.id]
             var currentGroup: TabGroup?
             if forcedGroups?.inGroup != nil {
                 currentGroup = forcedGroups?.inGroup
             } else if forcedGroups?.outOfGroup == nil, let suggestedGroup = suggestedGroup {
-                let tabsCountInThatGroup = groups.filter { $0.value == suggestedGroup }.count
-                if suggestedGroup.shouldBePersisted || tabsCountInThatGroup > 1 {
-                    currentGroup = suggestedGroup
-                }
+                currentGroup = suggestedGroup
             }
 
-            if tab.isPinned {
-                let tabItem = TabsListItem(tab: tab, group: nil)
-                sections.pinnedItems.append(tabItem)
-                visibleTabs.append(tab)
+            let segment: ItemsSegment
+            if let lastSegment = segments.last, currentGroup == previousGroup {
+                segment = lastSegment
             } else {
-                let tabItem = TabsListItem(tab: tab, group: currentGroup)
-                if let currentGroup = currentGroup {
-                    if currentGroup != previousGroup && alreadyAddedGroups[currentGroup.id] == nil {
-                        let groupItem = TabsListItem(group: currentGroup)
-                        sections.unpinnedItems.append(groupItem)
-                    }
-                    alreadyAddedGroups[currentGroup.id, default: 0] += 1
+                segment = ItemsSegment()
+                segments.append(segment)
+            }
+
+            if let currentGroup = currentGroup {
+                segment.group = currentGroup
+                if currentGroup != previousGroup && alreadyAddedGroups[currentGroup.id] == nil {
+                    segment.displayGroupCapsule = true
                 }
-                previousGroup = currentGroup
-                if currentGroup?.collapsed != true || collapsedTabsInGroup[currentGroup?.id ?? UUID()]?.contains(tab.id) != true {
-                    sections.unpinnedItems.append(tabItem)
-                    visibleTabs.append(tab)
+                alreadyAddedGroups[currentGroup.id, default: 0] += 1
+            }
+            if currentGroup?.collapsed != true || collapsedTabsInGroup[currentGroup?.id ?? UUID()]?.contains(tab.id) != true {
+                segment.tabs.append(tab)
+            }
+            previousGroup = currentGroup
+        }
+
+        // Then we compile them into actual list of items next to each other.
+        var visibleTabs: [BrowserTab] = []
+        let pinnedItems: [TabsListItem] = pinnedSegment.tabs.map {
+            visibleTabs.append($0)
+            return TabsListItem(tab: $0, group: nil)
+        }
+        let unpinnedItems = segments.reduce(into: [TabsListItem]()) { result, portion in
+            var groupForTabs: TabGroup?
+            if let group = portion.group {
+                let tabsCountInThatGroup = alreadyAddedGroups[group.id] ?? group.pageIds.count
+                if group.shouldBePersisted || group.isLocked || tabsCountInThatGroup > 1 {
+                    groupForTabs = group
+                    if portion.displayGroupCapsule {
+                        let item = TabsListItem(group: group, count: tabsCountInThatGroup)
+                        result.append(item)
+                    }
                 }
             }
+            let tabsItems: [TabsListItem] = portion.tabs.map {
+                visibleTabs.append($0)
+                return TabsListItem(tab: $0, group: groupForTabs)
+            }
+            result.append(contentsOf: tabsItems)
         }
-        sections.unpinnedItems = sections.unpinnedItems.map { item in
-            guard item.isAGroupCapsule, let group = item.group else { return item }
-            var item = item
-            item.count = alreadyAddedGroups[group.id] ?? group.pageIds.count
-            return item
-        }
-        sections.allItems = sections.pinnedItems + sections.unpinnedItems
+        sections.pinnedItems = pinnedItems
+        sections.unpinnedItems = unpinnedItems
+        sections.allItems = pinnedItems + unpinnedItems
         self.visibleTabs = visibleTabs
         self.listItems = sections
     }
