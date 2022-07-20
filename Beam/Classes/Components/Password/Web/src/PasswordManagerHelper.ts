@@ -115,7 +115,7 @@ export class PasswordManagerHelper {
         if (this.isTextField(element) && this.isEnabled(element)) {
           this.getOrCreateBeamId(element)
           const attributes = element.attributes
-          const textField = {}
+          const textField = {tagName: element.tagName}
           for (let a = 0; a < attributes.length; a++) {
             const attr = attributes.item(a)
             textField[attr.name] = attr.value
