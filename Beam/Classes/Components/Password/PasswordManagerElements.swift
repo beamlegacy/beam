@@ -8,6 +8,12 @@
 import Foundation
 import BeamCore
 
+enum DOMTagName: String, Codable {
+    case input = "INPUT"
+    case select = "SELECT"
+    case textArea = "TEXTAREA"
+}
+
 enum DOMInputElementType: String, Codable {
     case text
     case email
@@ -28,6 +34,7 @@ enum DOMInputMode: String, Codable {
 }
 
 struct DOMInputElement: Codable, Equatable, Hashable {
+    var tagName: DOMTagName? = .input
     var type: DOMInputElementType?
     var beamId: String
     var autocomplete: String?
@@ -41,6 +48,7 @@ struct DOMInputElement: Codable, Equatable, Hashable {
     var visible: Bool
 
     private enum CodingKeys: String, CodingKey {
+        case tagName
         case type
         case beamId = "data-beam-id"
         case autocomplete
@@ -61,11 +69,11 @@ extension DOMInputElement {
     }
 
     static var debugHeader: [String] {
-        ["beamId", "type", "visible", "autocomplete", "autofocus", "inputmode", "id", "name", "class", "required", "value"]
+        ["beamId", "tag", "type", "visible", "autocomplete", "autofocus", "inputmode", "id", "name", "class", "required", "value"]
     }
 
     var debugValues: [String] {
-        [beamId, unwrap(type?.rawValue), "\(visible)", unwrap(autocomplete), unwrap(autofocus), unwrap(inputmode?.rawValue), unwrap(elementId), unwrap(name), unwrap(elementClass), unwrap(required), unwrap(value)]
+        [beamId, unwrap(tagName?.rawValue), unwrap(type?.rawValue), "\(visible)", unwrap(autocomplete), unwrap(autofocus), unwrap(inputmode?.rawValue), unwrap(elementId), unwrap(name), unwrap(elementClass), unwrap(required), unwrap(value)]
     }
 
     private func unwrap(_ value: String?) -> String {
