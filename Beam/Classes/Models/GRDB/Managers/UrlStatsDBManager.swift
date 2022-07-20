@@ -161,7 +161,7 @@ class UrlStatsDBManager: GRDBHandler, BeamManager {
                     AND s.localDay BETWEEN \(leftBound) AND \(rightBound)
                     AND s.visitCount >= 1
                 GROUP BY 1
-                HAVING COUNT(1) >= \(minRepeat)
+                HAVING COUNT(DISTINCT s.localDay) >= \(minRepeat)
                 """
                 )
             return try self.read { db in
@@ -175,7 +175,7 @@ class UrlStatsDBManager: GRDBHandler, BeamManager {
                 WHEN INSTR(l.url, '#') > 0 THEN SUBSTR(l.url, 0, INSTR(l.url, '#'))
                 ELSE l.url
             END AS urlWithoutFragment,
-            COUNT(1) AS distinctDayCount
+            COUNT(DISTINCT s.localDay) AS distinctDayCount
             FROM Link AS l
             JOIN DailyUrlScore AS s ON l.id = s.urlId
             WHERE
