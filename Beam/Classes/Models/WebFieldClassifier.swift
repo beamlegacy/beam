@@ -337,6 +337,15 @@ final class WebFieldClassifier {
         var element: DOMInputElement
         var evaluation: [WebAutofillAction: WeightedRole]
 
+        var respondsToFocusEvents: Bool {
+            switch element.tagName {
+            case .input, .textArea:
+                return true
+            default:
+                return false
+            }
+        }
+
         func bestMatch(thresholds: [WebAutofillAction: Match]) -> RoleInContext? {
             let candidates = evaluation.filter { $0.value.match != .never }
             let perfectMatches = candidates.filter { $0.value.match == .always }
@@ -509,6 +518,8 @@ final class WebFieldClassifier {
             return WebAutofillRules(discardAutocompleteAttribute: .forAutocompleteValues(["new-password"]))
         case "netflix.com", "payment-netflix.form.lvh.me":
             return WebAutofillRules(ignoreTelAutocompleteOff: .always, discardAutocompleteAttribute: .whenPasswordFieldPresent, mergeIncompleteCardExpirationDate: true)
+        case "booking.com", "payment-booking.form.lvh.me":
+            return WebAutofillRules(ignoreTextAutocompleteOff: .always)
         case "calendar.amie.so":
             return WebAutofillRules(discardAutocompleteAttribute: .forAutocompleteValues(["new-password"]), discardTypeAttribute: .forAutocompleteValues(["new-password"]))
         default:
@@ -569,8 +580,10 @@ final class WebFieldClassifier {
         for field in fields {
             if let group = makeAutofillGroup(from: field, in: fields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction, incompleteCardExpirationDate: incompleteCardExpirationDate) {
                 let id = field.element.beamId
-                groups[id] = group
                 activeFields.append(id)
+                if field.respondsToFocusEvents {
+                    groups[id] = group
+                }
             }
         }
         Logger.shared.logDebug("Autocomplete groups: \(groups)", category: .webAutofillInternal)
