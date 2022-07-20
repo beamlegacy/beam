@@ -49,11 +49,11 @@ class TouchBarController: NSObject {
     }
 
     @objc private func goBack() {
-        window?.goBack(self)
+        window?.navigateBack(self)
     }
 
     @objc private func goForward() {
-        window?.goForward(self)
+        window?.navigateForward(self)
     }
 
     private var showLaserPistol = false {
