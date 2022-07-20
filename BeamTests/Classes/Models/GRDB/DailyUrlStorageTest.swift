@@ -109,7 +109,8 @@ class DailyUrlStorageTest: XCTestCase {
         let urls = [
             "http://colors.com/#red",
             "http://colors.com/#blue",
-            "http://here.com/"
+            "http://here.com/",
+            "http://here.com/#or_there"
         ]
         let linkStore = LinkStore(linkManager: BeamLinkDB(overridenManager: urlHistoryDb))
         let storage = GRDBDailyUrlScoreStore(db: urlStatsDb, daysToKeep: 1)
@@ -120,6 +121,8 @@ class DailyUrlStorageTest: XCTestCase {
         BeamDate.travel(10 * 24 * 60 * 60)
         storage.apply(to: urlIds[0]) { $0.visitCount = 1 }
         storage.apply(to: urlIds[2]) { $0.visitCount = 1 }
+        storage.apply(to: urlIds[3]) { $0.visitCount = 1 }
+
 
         BeamDate.travel(24 * 60 * 60)
         storage.apply(to: urlIds[1]) { $0.visitCount = 1 }
