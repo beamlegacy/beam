@@ -18,10 +18,9 @@ class TabGroupingFeedbackViewModel: ObservableObject {
     }
 
     private func prepareData() {
-        let pagesGroups = (self.clusteringManager.tabGroupingManager?.builtPagesGroups ?? [:]).values
-        for pagesGroup in pagesGroups where !self.groups.contains(pagesGroup) {
-            let pageGroupCopy = pagesGroup.copy()
-            self.groups.append(pageGroupCopy)
+        let tabGroups = Set((self.clusteringManager.tabGroupingManager?.builtPagesGroups ?? [:]).values)
+        tabGroups.forEach { tabGroup in
+            self.groups.append(tabGroup.copy(locked: false, discardPages: false))
         }
 
         let pages = self.clusteringManager.openBrowsing.allOpenBrowsingPages
