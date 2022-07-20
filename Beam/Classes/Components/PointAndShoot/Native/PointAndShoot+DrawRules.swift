@@ -14,7 +14,7 @@ extension PointAndShoot {
     /// - Returns: true if target rect contains mouselocation
     func hasGraceRectAndMouseOverlap(_ target: Target, _ href: String, _ mouse: NSPoint) -> Bool {
         let translatedTarget = translateAndScaleTargetIfNeeded(target, href) ?? target
-        let graceDistance: CGFloat = -40
+        let graceDistance: CGFloat = -20
         let graceArea: NSRect = translatedTarget.rect.insetBy(dx: graceDistance, dy: graceDistance)
         return graceArea.contains(mouse)
     }
