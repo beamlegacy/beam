@@ -350,9 +350,16 @@ import Sentry
     }
 
     func navigateCurrentTab(toURLRequest request: URLRequest) {
+        guard let currentTab = currentTab else {
+            Logger.shared.logError("Unable to navigate current tab without any tab", category: .general); return
+        }
+        navigateTab(currentTab, toURLRequest: request)
+    }
+
+    func navigateTab(_ tab: BrowserTab, toURLRequest request: URLRequest) {
         EventsTracker.logBreadcrumb(message: "\(#function) toURLRequest \(request)", category: "BeamState")
-        currentTab?.willSwitchToNewUrl(url: request.url)
-        currentTab?.load(request: request)
+        tab.willSwitchToNewUrl(url: request.url)
+        tab.load(request: request)
 
         guard let currentTabId = currentTab?.id else { return }
         browserTabsManager.removeFromTabNeighborhood(tabId: currentTabId)
