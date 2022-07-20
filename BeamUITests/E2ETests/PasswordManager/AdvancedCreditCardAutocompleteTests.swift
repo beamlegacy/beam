@@ -46,12 +46,12 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testBookingAutofill() {
-        navigateToPayment(page: .paymentBookingForm)
-        verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
+        navigateToPayment(page: .paymentBookingShortForm) // must be dedicated domain name to apply rule for booking.com
+        verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
         verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateMonthLabel, autocomplete: false)
-        verifyAutoFillIsDisplayed(title: creditCardNumberLabel, autocomplete: false)
+        verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
     }
     
     func testSportDecouverteAutofill() {
