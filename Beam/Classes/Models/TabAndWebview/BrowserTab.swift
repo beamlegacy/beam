@@ -49,7 +49,16 @@ import UniformTypeIdentifiers
         }
     }
     var preloadUrl: URL?
-    var restoredInteractionState: Any?
+
+    private var restoredInteractionState: Any?
+
+    var interactionState: Any? {
+        if #available(macOS 12.0, *) {
+            return restoredInteractionState ?? webView.interactionState
+        }
+        return nil
+    }
+
     var backForwardUrlList: [URL]?
     var originMode: Mode
     let uiDelegateController = BeamWebkitUIDelegateController()
@@ -200,8 +209,14 @@ import UniformTypeIdentifiers
        - id:
        - webView:
      */
-    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, originMode: Mode, note: BeamNote?, rootElement: BeamElement? = nil,
-         id: UUID = UUID(), webView: BeamWebView? = nil) {
+    init(state: BeamState,
+         browsingTreeOrigin: BrowsingTreeOrigin?,
+         originMode: Mode,
+         note: BeamNote?,
+         rootElement: BeamElement? = nil,
+         id: UUID = UUID(),
+         webView: BeamWebView? = nil,
+         interactionState: Any? = nil) {
         self.state = state
         self.id = id
         self.browsingTreeOrigin = browsingTreeOrigin
@@ -237,6 +252,10 @@ import UniformTypeIdentifiers
         mediaPlayerController = MediaPlayerController(page: self)
         addTreeToNote()
         observeWebView()
+
+        if #available(macOS 12.0, *), let state = interactionState {
+            self.webView.interactionState = state
+        }
     }
 
     init(pinnedTabWithId id: UUID, url: URL, title: String) {
@@ -333,8 +352,7 @@ import UniformTypeIdentifiers
             try container.encode(currentURL, forKey: .url)
         }
 
-        if #available(macOS 12.0, *),
-           let interactionStateData = (restoredInteractionState ?? webView.interactionState) as? Data {
+        if #available(macOS 12.0, *), let interactionStateData = interactionState as? Data {
             try container.encode(interactionStateData, forKey: .interactionState)
         } else {
             let backForwardUrlList: [URL] = webView.backForwardList.backList.map { $0.url }

@@ -143,12 +143,14 @@ extension BeamWindow {
     }
 
     // MARK: Navigation
-    @IBAction func goBack(_ sender: Any?) {
-        state.goBack()
+    @IBAction func navigateBack(_ sender: Any?) {
+        let newTab = NSApp.currentEvent.map({ ($0.type != .keyDown) && $0.modifierFlags.contains(.command) }) ?? false
+        state.goBack(openingInNewTab: newTab)
     }
 
-    @IBAction func goForward(_ sender: Any?) {
-        state.goForward()
+    @IBAction func navigateForward(_ sender: Any?) {
+        let newTab = NSApp.currentEvent.map({ ($0.type != .keyDown) && $0.modifierFlags.contains(.command) }) ?? false
+        state.goForward(openingInNewTab: newTab)
     }
 
     @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
