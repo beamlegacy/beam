@@ -111,11 +111,10 @@ struct TabGroupingFeedbackContentView: View {
         VStack {
             Text("Please, re-arrange the groups in a way that makes sense to you:")
                 .padding(.bottom, 34)
-            Spacer()
 
             ScrollView {
                 ForEach(viewModel.groups) { tabGroup in
-                    VStack {
+                    VStack(spacing: 4) {
                         ForEach(tabGroup.pageIds, id: \.self) { tabId in
                             if let url = viewModel.urlFor(pageId: tabId),
                                let title = viewModel.titleFor(pageId: tabId) {
@@ -196,6 +195,7 @@ private struct TabGroupingFeedbackTabView: View {
                 .padding(.vertical, 6)
                 .padding(.horizontal, 8)
             Text(title)
+                .lineLimit(1)
                 .font(BeamFont.regular(size: 11).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
             Spacer()
