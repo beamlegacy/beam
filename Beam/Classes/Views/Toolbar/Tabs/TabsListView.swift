@@ -233,8 +233,13 @@ struct TabsListView: View {
                             disableAnimations: isAnimatingDrop, disableHovering: isChangingTabsCountWhileHovering,
                             isInMainWindow: isMainWindow,
                             onTouchDown: { onTabTouched(at: index) }, onTap: { onTabTapped(at: index) },
-                            onClose: { onItemClose(at: index) }, onCopy: { onItemCopy(at: index)},
-                            onToggleMute: { onTabToggleMute(at: index) })
+                            onClose: { onItemClose(at: index) }, onCopy: { onItemCopy(at: index) },
+                            onToggleMute: { onTabToggleMute(at: index) },
+                            onFileDrop: { [unowned tab] url in
+                                // this dance is unfortunate... should be reworked in the future
+                                // first we need to avoid leaks, and then we need to access state to navigate properly
+                                tab.state?.navigateTab(tab, toURLRequest: .init(url: url))
+                            })
                 } else if let group = item.group, let color = group.color {
                     TabClusteringGroupCapsuleView(title: group.title ?? "", color: color,
                                                   collapsed: group.collapsed, itemsCount: item.count ?? group.pageIds.count,

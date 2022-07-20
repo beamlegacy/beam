@@ -3,6 +3,7 @@ import SwiftUI
 import Combine
 import WebKit
 import BeamCore
+import UniformTypeIdentifiers
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
@@ -465,7 +466,8 @@ import BeamCore
 
         numberOfLinksOpenedInANewTab = 0
         if url.isFileURL {
-            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+            let mayLoadLocalResources = UTType(filenameExtension: url.pathExtension) == .html
+            webView.loadFileURL(url, allowingReadAccessTo: mayLoadLocalResources ? url.deletingLastPathComponent() : url)
         } else {
             webView.load(request)
         }
