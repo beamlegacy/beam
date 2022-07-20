@@ -1196,12 +1196,12 @@
                                     <items>
                                         <menuItem title="Back" keyEquivalent="[" id="vfj-M7-Iu5" userLabel="Back" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="goBack:" target="Ady-hI-5gd" id="dp8-wy-cmJ"/>
+                                                <action selector="navigateBack:" target="Ady-hI-5gd" id="dp8-wy-cmJ"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Forward" keyEquivalent="]" id="jIn-Gg-R6F" userLabel="Forward" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="goForward:" target="Ady-hI-5gd" id="YCt-1o-xMT"/>
+                                                <action selector="navigateForward:" target="Ady-hI-5gd" id="YCt-1o-xMT"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="Hyi-3c-HLP"/>

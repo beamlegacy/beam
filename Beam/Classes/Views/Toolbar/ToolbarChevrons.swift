@@ -40,11 +40,13 @@ struct ToolbarChevrons: View {
     }
 
     func goBack() {
-        state.goBack()
+        let newTab = NSEvent.modifierFlags.contains(.command)
+        state.goBack(openingInNewTab: newTab)
     }
 
     func goForward() {
-        state.goForward()
+        let newTab = NSEvent.modifierFlags.contains(.command)
+        state.goForward(openingInNewTab: newTab)
     }
 
 }
