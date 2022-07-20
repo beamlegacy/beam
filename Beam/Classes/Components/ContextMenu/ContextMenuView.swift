@@ -173,7 +173,6 @@ struct ContextMenuItemView: View {
               let url = URL(string: subtitleButton),
               let state = AppDelegate.main.window?.state else { return }
         _ = state.createTab(withURLRequest: URLRequest(url: url.urlWithScheme), originalQuery: nil)
-
     }
 }
 
@@ -280,6 +279,12 @@ struct ContextMenuView: View {
                             }
                         }
                     }
+                    .transition(
+                        .asymmetric(
+                            insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.05).delay(0.1)),
+                            removal: .identity
+                        )
+                    )
                 }
                 .frame(maxWidth: .infinity)
             }
