@@ -85,7 +85,6 @@ public class TextNode: ElementNode {
             if newValue.isEmpty { updateActionLayerVisibility(hidden: true) }
 
             displayedElement.text = newValue
-            displayedElement.note?.modifiedByUser()
         }
     }
 
