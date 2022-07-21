@@ -54,11 +54,6 @@ class WebNoteController: Encodable, Decodable {
 
     var nested: Bool = false
 
-    public var score: Float {
-        get { element.score }
-        set { element.score = newValue }
-    }
-
     static private var defaultNote: BeamNote {
         BeamData.shared.todaysNote
     }

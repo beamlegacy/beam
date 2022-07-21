@@ -5,7 +5,7 @@ import BeamCore
 
  Defining this protocol allows to provide a mock implementation for testing.
  */
-protocol WebPage: AnyObject, Scorable {
+protocol WebPage: AnyObject {
 
     var webView: BeamWebView { get }
     var webviewWindow: NSWindow? { get }
