@@ -167,15 +167,15 @@ extension BeamWindow {
     }
 
     @IBAction func resetPageZoom(_ sender: Any) {
-        state.browserTabsManager.currentTab?.webView.zoomReset()
+        state.browserTabsManager.currentTab?.zoom(.reset)
     }
 
     @IBAction func zoomPageIn(_ sender: Any) {
-        state.browserTabsManager.currentTab?.webView.zoomIn()
+        state.browserTabsManager.currentTab?.zoom(.in)
     }
 
     @IBAction func zoomPageOut(_ sender: Any) {
-        state.browserTabsManager.currentTab?.webView.zoomOut()
+        state.browserTabsManager.currentTab?.zoom(.out)
     }
 
     @IBAction func dumpBrowsingTree(_ sender: Any?) {
