@@ -248,8 +248,26 @@ public extension BeamNote {
             version.store(originalVersion, ordering: .relaxed)
             return false
         }
+
+        self.recalculateFileReferences()
+
         sign.end(Signs.save)
         return true
+    }
+
+    func recalculateFileReferences() {
+        guard let fileDBManager = self.database?.fileDBManager else { return }
+
+        // remove all file references:
+        do {
+            try fileDBManager.removeReference(fromNote: self.id, element: nil)
+            // and recreate them:
+            for fileElement in self.allFileElements {
+                try fileDBManager.addReference(fromNote: self.id, element: fileElement.1.id, to: fileElement.0)
+            }
+        } catch {
+            Logger.shared.logError("Error while updating file references for note \(self.titleAndId)", category: .document)
+        }
     }
 
     static func instanciateNoteWithPreviousData(_ document: BeamDocument,
