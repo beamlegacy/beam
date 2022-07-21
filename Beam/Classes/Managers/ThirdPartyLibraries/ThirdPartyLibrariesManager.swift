@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import BeamCore
 import Sentry
 
@@ -7,7 +8,12 @@ import Sentry
 class ThirdPartyLibrariesManager: NSObject {
     static let shared = ThirdPartyLibrariesManager()
 
-    @Published var firebaseReady: Bool = false
+    let firebaseReadyPublisher = CurrentValueSubject<Bool, Never>(false)
+    var firebaseReady: Bool = false {
+        didSet {
+            firebaseReadyPublisher.send(firebaseReady)
+        }
+    }
 
     var sentryUser: Sentry.User?
 
