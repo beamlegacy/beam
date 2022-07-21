@@ -412,6 +412,9 @@ struct TabView: View {
                     .background(!isSingleTab || isDragging ? nil : GeometryReader { prxy in
                         Color.clear.preference(key: TabsListView.SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
                     })
+                    .background(isDragging ? nil :
+                            Color.clear.onDrop(of: [UTType.fileURL], delegate: FileDropDelegate(onFileDrop: onFileDrop))
+                    )
                     .if(isDragging && applyDraggingStyle) {
                         $0.opacity(0.9).scaleEffect(1.07)
                             .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 6)
@@ -423,7 +426,6 @@ struct TabView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .onDrop(of: [UTType.fileURL], delegate: FileDropDelegate(onFileDrop: onFileDrop))
     }
 }
 
