@@ -421,7 +421,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: Restoration
 
     @UserDefault(key: "RestoreSession", defaultValue: true, suiteName: BeamUserDefaults.restoration.suiteName)
-    private var restoreSession: Bool
+    var restoreSession: Bool
 
     var canRestoreSession = false
 
@@ -434,9 +434,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return restoreSession && !PreferencesManager.isWindowsRestorationPrevented
     }
 
-    func storeAllWindowsFromCurrentSession() {
+    @discardableResult
+    func storeAllWindowsFromCurrentSession() -> Bool {
         guard !windows.isEmpty else {
-            return
+            return false
         }
 
         do {
@@ -444,8 +445,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
             try session.write(to: sessionURL, options: .atomic)
             canRestoreSession = true
+            return true
         } catch {
             Logger.shared.logError("Failed to store session. \(error)", category: .general)
+            return false
         }
     }
 
@@ -652,12 +655,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateCancel
         }
 
-        // Holding down the option key while quitting should reverse the logic.
-        let restorationEnabled = PreferencesManager.isWindowsRestorationEnabled
-        let alternateModifier = NSEvent.modifierFlags.contains(.option)
-
-        restoreSession = (restorationEnabled && !alternateModifier) || (!restorationEnabled && alternateModifier)
-
         // We need to notify all tabs of imminent termination *before* we store the current session.
         for window in windows {
             for tab in window.state.browserTabsManager.tabs {
@@ -665,7 +662,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        storeAllWindowsFromCurrentSession()
+        if storeAllWindowsFromCurrentSession() {
+            let restorationEnabled = PreferencesManager.isWindowsRestorationEnabled
+            let alternateModifier = NSEvent.modifierFlags.contains(.option)
+            restoreSession = (restorationEnabled && !alternateModifier) || (!restorationEnabled && alternateModifier)
+        } else {
+            restoreSession = false
+        }
 
         //We need to trigger full sync before quitting the app
         //To make it feel more instant, we first close all the windows
