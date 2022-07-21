@@ -831,6 +831,7 @@ extension TabsListView {
             tabGroupingManager.renameGroup(copiedGroup, title: title)
         }
         note.tabGroups.append(copiedGroup.id)
+        Logger.shared.logInfo("Added group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note) id: \(note.id)", category: .tabGrouping)
         completion(.success)
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
             let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
