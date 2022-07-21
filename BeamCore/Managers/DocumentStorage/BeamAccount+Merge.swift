@@ -75,8 +75,8 @@ extension BeamAccount {
                 Logger.shared.logInfo("Merging \(source) into \(destination)", category: .sync)
 
                 do {
-                    let movedDocuments = try moveDocuments(source, destination)
                     try moveFiles(source, destination)
+                    let movedDocuments = try moveDocuments(source, destination)
                     try moveNoteFrecencies(source, destination, movedDocuments)
 
                     databasesToDelete.append(source)
