@@ -71,18 +71,21 @@ enum PasswordImporter {
         }
     }
 
-    static func importPasswords(fromCSV text: String) throws {
+    static func importPasswords(fromCSV text: String) throws -> Int {
         let seq = CSVUnescapingSequence(input: text)
         var parser = CSVParser(input: seq)
 
         guard let header = parser.next() else { throw Error.headerNotFound }
         let decoder = try RecordDecoder(header: header)
 
+        var importedCount = 0
         for record in parser {
             if let entry = decoder.decode(record) {
                 PasswordManager.shared.save(hostname: entry.hostname, username: entry.username, password: entry.password)
+                importedCount += 1
             }
         }
+        return importedCount
     }
 
     static func exportPasswords(toCSV file: URL, completion: ((PasswordExportResult) -> Void)? = nil) throws {
@@ -115,9 +118,9 @@ enum PasswordImporter {
             .joined(separator: ",")
     }
 
-    static func importPasswords(fromCSV file: URL) throws {
+    static func importPasswords(fromCSV file: URL) throws -> Int {
         let text = try String(contentsOf: file, encoding: .utf8)
-        try importPasswords(fromCSV: text)
+        return try importPasswords(fromCSV: text)
     }
 }
 
