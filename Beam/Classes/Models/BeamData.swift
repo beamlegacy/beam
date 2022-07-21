@@ -67,13 +67,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     var browsingTreeSender: BrowsingTreeSender?
     var noteFrecencyScorer: FrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
     var versionChecker: VersionChecker
-    var onboardingManager = OnboardingManager()
+    lazy var onboardingManager = OnboardingManager(analyticsCollector: analyticsCollector)
     private var pinnedTabsManager = PinnedBrowserTabsManager()
     private(set) lazy var pinnedManager: PinnedNotesManager = {
         PinnedNotesManager()
     }()
     let signpost = SignPost("BeamData")
-    var analyticsCollector = AnalyticsCollector()
+    let analyticsCollector = AnalyticsCollector()
 
     static var dataFolder: String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
