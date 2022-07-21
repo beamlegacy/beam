@@ -184,9 +184,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         setupSubscribers()
         configureAutoUpdate()
 
-        if Configuration.branchType == .develop {
-            analyticsCollector.add(backend: FirebaseAnalyticsBackend())
-        }
+        analyticsCollector.add(backend: FirebaseAnalyticsBackend())
 
         // Importing legacy data may fail so make sure the pinned tabs are ok anyway:
         defer {
