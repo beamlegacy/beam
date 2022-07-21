@@ -390,7 +390,12 @@ extension BeamDocumentSynchronizer {
             }
         }
 
-        let indexDocument = BeamObjectManager.fullSyncRunning.load(ordering: .relaxed) == false
-        _ = try doc.collection?.save(self, doc, indexDocument: indexDocument)
+        _ = try doc.collection?.save(self, doc, indexDocument: true)
+        try recalculateFileReferences(doc)
+    }
+
+    func recalculateFileReferences(_ document: BeamDocument) throws {
+        let note = try BeamNote.instanciateNote(document, keepInMemory: false)
+        note.recalculateFileReferences()
     }
 }
