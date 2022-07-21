@@ -482,7 +482,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Insert code here to tear down your application
         do {
             try BeamFileDBManager.shared?.purgeUndo()
-            try BeamFileDBManager.shared?.purgeUnlinkedFiles()
         } catch {
             Logger.shared.logError("Unable to purge unused files: \(error)", category: .fileDB)
         }

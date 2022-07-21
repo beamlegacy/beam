@@ -210,6 +210,13 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
     }
 
     func postMigrationSetup() throws {
+        DispatchQueue.main.async {
+            do {
+                try AppDelegate.main.data.reindexFileReferences()
+            } catch {
+                Logger.shared.logError("Error while reindexing all file references: \(error)", category: .fileDB)
+            }
+        }
         try purgeUndo()
         try purgeUnlinkedFiles()
     }
@@ -376,9 +383,10 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
 
     func purgeUnlinkedFiles() throws {
         _ = try write { db in
-            let rows = try Row.fetchCursor(db, sql: "SELECT uid FROM \(BeamFileRecord.tableName)")
+            let rows = try Row.fetchCursor(db, sql: "SELECT uid, deletedAt FROM \(BeamFileRecord.tableName)")
             while let row = try rows.next() {
                 let fileId: UUID = row[BeamFileRecord.Columns.uid]
+                let deletedAt: Date? = row[BeamFileRecord.Columns.deletedAt]
                 if try BeamFileRefRecord.filter(BeamFileRefRecord.Columns.fileId == fileId).fetchCount(db) == 0 {
                     do {
                         guard var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == fileId).filter(BeamFileRecord.Columns.deletedAt == nil).fetchOne(db) else { continue }
@@ -391,6 +399,18 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
 
                     } catch {
                         Logger.shared.logError("Unable to delete unreferenced file \(fileId)", category: .fileDB)
+                    }
+                } else if deletedAt != nil {
+                    do {
+                        guard var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == fileId).fetchOne(db) else { continue }
+                        file.deletedAt = nil
+                        file.updatedAt = BeamDate.now
+                        try file.save(db)
+                        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+                            try self.saveOnNetwork(file)
+                        }
+                    } catch {
+                        Logger.shared.logError("Unable to undelete file \(fileId)", category: .fileDB)
                     }
                 }
             }
