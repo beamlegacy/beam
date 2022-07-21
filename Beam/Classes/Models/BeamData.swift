@@ -505,7 +505,8 @@ extension BeamData {
         }
         self.versionChecker.customPostinstall = { installed in
             if installed {
-                (NSApp.delegate as? AppDelegate)?.skipTerminateMethods = true
+                AppDelegate.main.skipTerminateMethods = true
+                AppDelegate.main.restoreSession = AppDelegate.main.storeAllWindowsFromCurrentSession()
                 NSApp.relaunch()
             }
         }
