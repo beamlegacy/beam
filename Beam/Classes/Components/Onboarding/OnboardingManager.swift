@@ -10,7 +10,7 @@ import Combine
 import BeamCore
 
 struct OnboardingStep: Equatable {
-    enum StepType {
+    enum StepType: String {
         case welcome
         case profile
         case emailConnect
@@ -52,6 +52,8 @@ class OnboardingManager: ObservableObject {
     @Published var viewIsLoading = false
     @Published private(set) var stepsHistory = [OnboardingStep]()
 
+    private let analyticsCollector: AnalyticsCollector?
+
     var currentStepIsFromHistory = false
     var onlyConnect: Bool = false
     var onlyImport: Bool = false
@@ -65,7 +67,9 @@ class OnboardingManager: ObservableObject {
     private weak var window: NSWindow?
     private var cancellables = Set<AnyCancellable>()
 
-    init(onlyImport: Bool = false) {
+    init(onlyImport: Bool = false, analyticsCollector: AnalyticsCollector? = nil) {
+        self.analyticsCollector = analyticsCollector
+
         let needsToDisplayOnboard = Configuration.env != .test && Persistence.Authentication.hasSeenOnboarding != true
         var step: OnboardingStep?
         if needsToDisplayOnboard {
@@ -146,9 +150,11 @@ class OnboardingManager: ObservableObject {
             } else {
                 stepsHistory.append(previous)
             }
+            analyticsCollector?.record(event: OnboardingEvent(step: currentStep))
         } else {
             needsToDisplayOnboard = false
             dismissOnboardingWindow()
+            analyticsCollector?.record(event: OnboardingEvent(step: nil))
         }
     }
 
@@ -248,6 +254,7 @@ extension OnboardingManager {
         newWindow.isReleasedWhenClosed = false
         window = newWindow
         onboardingDidStart()
+        analyticsCollector?.record(event: OnboardingEvent(step: currentStep))
         return
     }
 

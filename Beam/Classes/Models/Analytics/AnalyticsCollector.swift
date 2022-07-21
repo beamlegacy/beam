@@ -16,6 +16,9 @@ struct FirebaseMetrics {
         case exitState = "omnibox_exit_state"
         case resultCount = "omnibox_result_count"
     }
+    enum Onboarding: String {
+        case step = "onboarding_step"
+    }
 }
 enum AnalyticsUserProperties: String {
     case branchType = "application_branch_type"
@@ -23,6 +26,7 @@ enum AnalyticsUserProperties: String {
 
 enum AnalyticsEventType: String {
     case omniboxQuery = "omnibox_query"
+    case onboarding
 }
 
 enum AnalyticsBackendType {
@@ -79,6 +83,17 @@ struct OmniboxQueryAnalyticsEvent: AnalyticsEvent {
     }
 }
 
+struct OnboardingEvent: AnalyticsEvent {
+    let type: AnalyticsEventType = .onboarding
+    let step: OnboardingStep?
+
+    var firebaseEventParameters: [String: Any] {
+        [
+            FirebaseMetrics.Onboarding.step.rawValue: step?.type.rawValue ?? "done"
+        ]
+    }
+}
+
 class InMemoryAnalyticsBackend: AnalyticsBackend {
     let type: AnalyticsBackendType = .inMemory
     var userProperties = [AnalyticsUserProperties: String]()
@@ -100,26 +115,38 @@ class InMemoryAnalyticsBackend: AnalyticsBackend {
 
 class FirebaseAnalyticsBackend: AnalyticsBackend {
     let type: AnalyticsBackendType = .firebase
+    private var pendingEvents: [AnalyticsEvent] = []
+    private var cancelable: Cancellable?
+
     func send(event: AnalyticsEvent) {
-        Analytics.logEvent(event.type.rawValue, parameters: event.firebaseEventParameters)
+        if ThirdPartyLibrariesManager.shared.firebaseReady {
+            Analytics.logEvent(event.type.rawValue, parameters: event.firebaseEventParameters)
+        } else {
+            pendingEvents.append(event)
+        }
     }
+    
     func setUserProperty(property: AnalyticsUserProperties, value: String?) {
         Analytics.setUserProperty(value, forName: property.rawValue)
     }
-    var cancelable: Cancellable?
 
-    private func delaySetUserPropertiesAtLaunch() {
+    private func delaySetup() {
         if !ThirdPartyLibrariesManager.shared.firebaseReady {
-            cancelable = ThirdPartyLibrariesManager.shared.$firebaseReady.sink { ready in
+            cancelable = ThirdPartyLibrariesManager.shared.firebaseReadyPublisher.sink { [self] ready in
                 if ready {
-                    self.setUserPropertiesAtLaunch()
-                    self.cancelable?.cancel()
+                    setUserPropertiesAtLaunch()
+                    cancelable?.cancel()
+
+                    pendingEvents.forEach(send(event:))
+                    pendingEvents.removeAll()
                 }
             }
-        } else { setUserPropertiesAtLaunch() }
+        } else {
+            setUserPropertiesAtLaunch()
+        }
     }
     init() {
-        delaySetUserPropertiesAtLaunch()
+        delaySetup()
     }
 }
 
