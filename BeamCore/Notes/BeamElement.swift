@@ -338,7 +338,6 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     @Published open var collapsed = false { didSet { change(.meta) } }
     @Published open var children = [BeamElement]() { didSet { change(.tree) } }
     @Published open var readOnly = false { didSet { change(.meta) } }
-    @Published open var score: Float = 0 { didSet { change(.meta) } }
     @Published open var creationDate = BeamDate.now { didSet { change(.meta) } }
     @Published open var updateDate = BeamDate.now
     @Published open var kind: ElementKind = .bullet { didSet { change(.meta) } }
@@ -367,7 +366,6 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         case collapsed
         case children
         case readOnly
-        case score
         case creationDate
         case kind
         case childrenFormat
@@ -422,10 +420,6 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             readOnly = try container.decode(Bool.self, forKey: .readOnly)
         }
 
-        if container.contains(.score) {
-            score = try container.decode(Float.self, forKey: .score)
-        }
-
         if container.contains(.creationDate) {
             creationDate = try container.decode(Date.self, forKey: .creationDate)
         }
@@ -475,9 +469,6 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             try container.encode(readOnly, forKey: .readOnly)
         }
 
-        if score != 0 {
-            try container.encode(score, forKey: .score)
-        }
         try container.encode(creationDate, forKey: .creationDate)
         if textStats.wordsCount != 0 {
             try container.encode(textStats, forKey: .textStats)
@@ -765,7 +756,6 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         text = other.text
         open = other.open
         readOnly = other.readOnly
-        score = other.score
         creationDate = other.creationDate
         updateDate = other.updateDate
         kind = other.kind

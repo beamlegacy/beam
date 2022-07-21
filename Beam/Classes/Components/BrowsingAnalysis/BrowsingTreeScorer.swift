@@ -27,15 +27,10 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
     func scoreApply(changes: @escaping (UrlScoreProtocol) -> Void) {
         browsingTree.current.scoreApply(changes: changes)
     }
-    func updateScore() {
-        let score = browsingTree.current.score.score
-        self.page?.score = score
-    }
 
     func addTextSelection() {
         currentScore.textSelections += 1
         scoreApply {$0.textSelections += 1}
-        updateScore()
     }
 
     /// Update the score with scroll information of the current webpage frame
@@ -55,7 +50,6 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
                 $0.scrollRatioX = max(currentScrollRatioX, $0.scrollRatioX)
                 $0.scrollRatioY = max(currentScrollRatioY, $0.scrollRatioY)
             }
-            updateScore()
         }
     }
 }
