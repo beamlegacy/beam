@@ -12,6 +12,11 @@ import GRDB
 import KeychainAccess
 
 public class ImportsManager: NSObject, ObservableObject {
+    enum ImportSource {
+        case csv
+        case browser(BrowserType)
+    }
+
     enum ImportAction {
         case passwords
         case history
@@ -29,13 +34,13 @@ public class ImportsManager: NSObject, ObservableObject {
     }
 
     struct ImportError: Swift.Error {
-        var browser: BrowserType
+        var source: ImportSource
         var action: ImportAction
         var error: ErrorType
     }
 
     struct ImportSuccess {
-        var browser: BrowserType
+        var source: ImportSource
         var action: ImportAction
         var count: Int
     }
@@ -73,16 +78,16 @@ public class ImportsManager: NSObject, ObservableObject {
                 switch completion {
                 case .finished:
                     batchImporter.finalize {
-                        self.sendError(ErrorType.saveError, action: .history, importer: importer)
+                        self.sendError(ErrorType.saveError, action: .history, source: .browser(importer.sourceBrowser))
                     }
                     let end = BeamDate.now
-                    self.sendSuccess(action: .history, importer: importer, count: receivedCount)
+                    self.sendSuccess(action: .history, source: .browser(importer.sourceBrowser), count: receivedCount)
                     Logger.shared.logInfo("Import finished successfully", category: .browserImport)
                     timer.log(category: .browserImport)
                     Logger.shared.logInfo("total: \(end.timeIntervalSince(start)) sec", category: .browserImport)
                 case .failure(let error):
                     Logger.shared.logError("Import History failed with error: \(error)", category: .browserImport)
-                    self.sendError(error, action: .history, importer: importer)
+                    self.sendError(error, action: .history, source: .browser(importer.sourceBrowser))
                 }
                 self.cancellableScope.removeValue(forKey: id)
             }, receiveValue: { result in
@@ -96,7 +101,7 @@ public class ImportsManager: NSObject, ObservableObject {
             try importer.importHistory(startDate: Persistence.ImportedBrowserHistory.getMaxDate(for: importer.sourceBrowser)) { _ in }
         } catch {
             Logger.shared.logError("Import didn't start: \(error)", category: .browserImport)
-            sendError(error, action: .history, importer: importer)
+            sendError(error, action: .history, source: .browser(importer.sourceBrowser))
             cancellableScope.removeValue(forKey: id)
         }
     }
@@ -111,10 +116,10 @@ public class ImportsManager: NSObject, ObservableObject {
                     switch completion {
                     case .finished:
                         Logger.shared.logInfo("Import Password finished successfully", category: .browserImport)
-                        self.sendSuccess(action: .passwords, importer: importer, count: importedCount)
+                        self.sendSuccess(action: .passwords, source: .browser(importer.sourceBrowser), count: importedCount)
                     case .failure(let error):
                         Logger.shared.logError("Import Password failed with error: \(error)", category: .browserImport)
-                        self.sendError(error, action: .passwords, importer: importer)
+                        self.sendError(error, action: .passwords, source: .browser(importer.sourceBrowser))
                     }
                     self.cancellableScope.removeValue(forKey: id)
                 }, receiveValue: { record in
@@ -133,21 +138,23 @@ public class ImportsManager: NSObject, ObservableObject {
             try importer.importPasswords { _ in }
         } catch {
             Logger.shared.logError("Import didn't start: \(error)", category: .browserImport)
-            sendError(error, action: .passwords, importer: importer)
+            sendError(error, action: .passwords, source: .browser(importer.sourceBrowser))
             cancellableScope.removeValue(forKey: id)
         }
     }
 
     func startBrowserPasswordImport(from csvURL: URL) {
         do {
-            try PasswordImporter.importPasswords(fromCSV: csvURL)
+            let importedCount = try PasswordImporter.importPasswords(fromCSV: csvURL)
+            sendSuccess(action: .passwords, source: .csv, count: importedCount)
         } catch {
             Logger.shared.logError("Error importing passwords \(String(describing: error))", category: .browserImport)
+            sendError(error, action: .passwords, source: .csv)
         }
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func sendError(_ error: Swift.Error, action: ImportAction, importer: BrowserImporter) {
+    private func sendError(_ error: Swift.Error, action: ImportAction, source: ImportSource) {
         let decodedError: ErrorType
         let cocoaError = error as NSError
         if cocoaError.domain == NSCocoaErrorDomain, cocoaError.code == NSFileNoSuchFileError {
@@ -177,17 +184,17 @@ public class ImportsManager: NSObject, ObservableObject {
         } else {
             decodedError = .other(underlyingError: error)
         }
-        sendError(decodedError, action: action, importer: importer)
+        sendError(decodedError, action: action, source: source)
     }
 
-    private func sendError(_ decodedError: ErrorType, action: ImportAction, importer: BrowserImporter) {
-        let importError = ImportError(browser: importer.sourceBrowser, action: action, error: decodedError)
+    private func sendError(_ decodedError: ErrorType, action: ImportAction, source: ImportSource) {
+        let importError = ImportError(source: source, action: action, error: decodedError)
         importErrorSubject.send(importError)
     }
 
-    private func sendSuccess(action: ImportAction, importer: BrowserImporter, count: Int) {
+    private func sendSuccess(action: ImportAction, source: ImportSource, count: Int) {
         guard count != 0 else { return }
-        let importSuccess = ImportSuccess(browser: importer.sourceBrowser, action: action, count: count)
+        let importSuccess = ImportSuccess(source: source, action: action, count: count)
         importSuccessSubject.send(importSuccess)
     }
 }
