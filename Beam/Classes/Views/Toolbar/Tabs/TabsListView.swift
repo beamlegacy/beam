@@ -76,7 +76,6 @@ struct TabsListView: View {
 
     var globalContainerGeometry: GeometryProxy?
 
-    @StateObject private var dragModel = TabsDragModel()
     @State private var disableAnimation: Bool = false
     @State private var isAnimatingDrop: Bool = false
 
@@ -90,6 +89,7 @@ struct TabsListView: View {
         }
     }
 
+    @StateObject private var dragModel = TabsDragModel()
     @StateObject private var externalDragModel = TabsListExternalDragViewModel()
     @StateObject private var viewModel = TabsListViewModel()
 
@@ -997,6 +997,7 @@ extension TabsListView: TabsExternalDropDelegateHandler {
 
         guard !cancelled else {
             externalDragModel.dropOfExternalTabExitedWindow(tab: tab)
+            dragModel.cleanAfterDrag()
             return
         }
         let startLocation = externalDragModel.dropStartLocation ?? startLocation
