@@ -124,6 +124,17 @@ enum PasswordImporter {
     }
 }
 
+extension PasswordImporter.Error: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .unexpectedFormat:
+            return "Beam couldn't import your passwords because the file isn't in the expected format."
+        case .headerNotFound:
+            return "Beam couldn't import your passwords because the CSV file doesn't have the expected header."
+        }
+    }
+}
+
 fileprivate extension String {
     var quotedForCSV: String {
         "\"" + replacingOccurrences(of: "\"", with: "\"\"") + "\""
