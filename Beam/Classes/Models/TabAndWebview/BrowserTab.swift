@@ -749,6 +749,22 @@ import UniformTypeIdentifiers
             self?.hasCopiedURL = false
         }
     }
+
+    enum ZoomType { case `in`, out, reset }
+    func zoom(_ type: ZoomType) {
+        let pdfState = (contentDescription as? PDFContentDescription)?.contentState
+        switch type {
+        case .in:
+            pdfState?.zoomIn()
+            webView.zoomIn()
+        case .out:
+            pdfState?.zoomOut()
+            webView.zoomOut()
+        case .reset:
+            pdfState?.scaleToActualSize()
+            webView.zoomReset()
+        }
+    }
 }
 
 // MARK: - WebPositionsDelegate
