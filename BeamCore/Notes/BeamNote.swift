@@ -442,26 +442,6 @@ public class BeamNote: BeamElement {
     private static var fetchedNotesCancellables: [UUID: Cancellable] = [:]
     private static let fetchedLock = RWLock()
 
-    public func createdByUser() {
-        score += 0.1
-    }
-
-    public func viewedByUser() {
-        score += 0.1
-    }
-
-    public func referencedByUser() {
-        score += 0.1
-    }
-
-    public func modifiedByUser() {
-        score += 0.1
-    }
-
-    public func importedByUser() {
-        score += 0.1
-    }
-
     public override var debugDescription: String {
         return "BeamNode(\(id)) [\(children.count) children]: \(title)"
     }

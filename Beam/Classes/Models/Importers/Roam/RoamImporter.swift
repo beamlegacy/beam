@@ -59,7 +59,6 @@ class RoamImporter: BeamDocumentSource {
 
         for roamNote in roamNotes {
             let newNote = try BeamNote.fetchOrCreate(self, title: roamNote.title)
-            newNote.importedByUser()
             newNote.clearChildren()
 
             if let children = roamNote.children {
