@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
-@objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, Scorable {
+@objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable {
 
     typealias TabID = UUID
     var id: TabID = TabID()
@@ -67,11 +67,6 @@ import UniformTypeIdentifiers
     internal var isFromNoteSearch: Bool = false
     var allowsPictureInPicture: Bool {
         BeamWebViewConfigurationBase.allowsPictureInPicture
-    }
-
-    public var score: Float {
-        get { noteController.score }
-        set { noteController.score = newValue }
     }
 
     var creationDate: Date = BeamDate.now
@@ -424,12 +419,6 @@ import UniformTypeIdentifiers
         updateFavIconDispatchItem = dispatchItem
         let deadline: DispatchTime = .now() + .milliseconds(fromWebView && !cacheOnly ? 500 : 0)
         DispatchQueue.main.asyncAfter(deadline: deadline, execute: dispatchItem)
-    }
-
-    func updateScore() {
-        let score = browsingTree.current.score.score
-//            Logger.shared.logDebug("updated score[\(url!.absoluteString)] = \(s)", category: .general)
-        noteController.score = score
     }
 
     private func setupWebViewController() {
@@ -810,7 +799,6 @@ extension BrowserTab: WebViewControllerDelegate {
         let url = navigationDescription.url
         let isLinkActivation = navigationDescription.isLinkActivation
 
-        updateScore()
         updateFavIcon(fromWebView: true)
         if isLinkActivation {
             pointAndShoot?.leavePage()
