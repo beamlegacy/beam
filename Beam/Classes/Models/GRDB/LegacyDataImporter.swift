@@ -157,7 +157,7 @@ struct LegacyDataImporter: BeamDocumentSource {
             throw BeamDataError.databaseNotFound
         }
         let dbQueue = try DatabaseQueue(path: path)
-        try copyTable("contactRecord", from: dbQueue, to: currentDatabase.grdbStore.writer)
+        try copyTable("beamFileRecord", from: dbQueue, to: currentDatabase.grdbStore.writer)
     }
 
     let columnSuppressor = [
