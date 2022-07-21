@@ -98,6 +98,16 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
         try refreshDatabases()
         setupSync()
+
+        DispatchQueue.main.async {
+            do {
+                if let data = AppDelegate.main.data {
+                    try data.reindexFileReferences()
+                }
+            } catch {
+                Logger.shared.logError("Error while reindexing all file references: \(error)", category: .fileDB)
+            }
+        }
     }
 
     public func loadDatabase(_ id: UUID) throws -> BeamDatabase {
