@@ -54,13 +54,15 @@ class BrowserShortcutsTests: BaseTest {
 
     }
     
-    func testJumpBetweenWebTabs() {
+    func testJumpBetweenWebTabs() throws {
+        try XCTSkipIf(isBigSurOS(), "Tab not hittable on BigSur OS - BE-4874 to fix it")
+ 
         step ("Given I open web pages"){
             uiMenu.loadUITestPagePassword()
                 .loadUITestPageMedia()
                 .loadUITestPageAlerts()
         }
-    
+        
         step ("Then I can jump between tabs using shortcuts"){
             shortcutHelper.shortcutActionInvoke(action: .jumpToPreviousTab)
             XCTAssertTrue(self.isMediaPageOpened())
