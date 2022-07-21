@@ -30,9 +30,8 @@ final class BeamNoteDocumentWrapper: NSDocument {
 
         for (fileId, _) in note.allFileElements {
             guard let file = try? BeamFileDBManager.shared?.fetch(uid: fileId) else { continue }
-            let filename = "\(fileId)-\(file.name)"
             let data = file.data
-            files[filename] = File(id: fileId, name: file.name, data: data)
+            files[fileId.uuidString] = File(id: fileId, name: file.name, data: data)
         }
 
         super.init()
