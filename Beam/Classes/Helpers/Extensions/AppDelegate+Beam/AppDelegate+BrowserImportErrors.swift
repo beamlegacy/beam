@@ -49,6 +49,17 @@ extension BrowserType {
     }
 }
 
+extension ImportsManager.ImportSource {
+    var description: String {
+        switch self {
+        case .csv:
+            return "CSV file"
+        case .browser(let browser):
+            return browser.description
+        }
+    }
+}
+
 extension ImportsManager.ImportError {
     var failureDescription: String {
         switch action {
@@ -64,17 +75,22 @@ extension ImportsManager.ImportError {
         case .userCancelled, .other:
             return "" // handled separately
         case .fileNotFound:
-            return "The database file from \(browser.description) couldn't be found."
+            switch source {
+            case .csv:
+                return "The CSV file couldn't be found."
+            case .browser(let browser):
+                return "The database file from \(browser.description) couldn't be found."
+            }
         case .databaseInUse:
-            return "Beam can only \(actionDescription) if \(browser.description) is closed. Close it and try again."
+            return "Beam can only \(actionDescription) if \(source.description) is closed. Close it and try again."
         case .concurrentImport:
             return "Another import is in progress. Try again later."
         case .keychainError:
             return "Unable to extract the encryption key from the keychain."
         case .invalidFormat:
-            return "The database from \(browser.description) couldn't be read."
+            return "The database from \(source.description) couldn't be read."
         case .saveError:
-            return "Imported data from \(browser.description) couldn't be saved."
+            return "Imported data from \(source.description) couldn't be saved."
         }
     }
 
@@ -101,9 +117,9 @@ extension ImportsManager.ImportSuccess {
     var successInformation: String {
         switch action {
         case .passwords:
-            return "Beam successfully imported your \(count) passwords from \(browser.description)."
+            return "Beam successfully imported your \(count) passwords from \(source.description)."
         case .history:
-            return "Beam successfully imported your history from \(browser.description)."
+            return "Beam successfully imported your history from \(source.description)."
         }
     }
 }
