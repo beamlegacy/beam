@@ -92,6 +92,7 @@ struct TabsListView: View {
     @StateObject private var dragModel = TabsDragModel()
     @StateObject private var externalDragModel = TabsListExternalDragViewModel()
     @StateObject private var viewModel = TabsListViewModel()
+    @State private var contextMenuManager: TabsListContextMenuBuilder?
 
     private var sections: TabsListItemsSections {
         browserTabsManager.listItems
@@ -245,7 +246,7 @@ struct TabsListView: View {
                                                   collapsed: group.collapsed, itemsCount: item.count ?? group.pageIds.count,
                                                   onTap: { (isRightMouse, event) in
                         if isRightMouse {
-                            showContextMenu(forGroup: group, with: event)
+                            contextMenuManager?.showContextMenu(forGroup: group, with: event)
                         } else {
                             browserTabsManager.toggleGroupCollapse(group)
                         }
@@ -263,7 +264,9 @@ struct TabsListView: View {
             })
             .contextMenu {
                 if let tab = item.tab {
-                    contextMenuItems(forTab: tab, atIndex: index)
+                    contextMenuManager?.contextMenuItems(forTab: tab, atListIndex: index, sections: sections, onCloseItem: {
+                        onItemClose(at: $0, fromContextMenu: true)
+                    })
                 }
             }
             if !isSingle && !isTheDraggedTab {
@@ -415,6 +418,7 @@ struct TabsListView: View {
                 startOtherMouseDownMonitor()
                 externalDragModel.setup(withState: state, tabsMananger: browserTabsManager)
                 updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider, singleTabFrame: viewModel.singleTabCurrentFrame, lastItemFrame: viewModel.lastItemCurrentFrame)
+                contextMenuManager = .init(state: state)
             }
             .onDisappear {
                 removeMouseMonitors()
@@ -560,13 +564,6 @@ extension TabsListView {
         tab?.copyURLToPasteboard()
     }
 
-    private func pasteAndGo(on tab: BrowserTab) {
-        guard let query = NSPasteboard.general.string(forType: .string) else {  return }
-        state.autocompleteManager.searchQuery = query
-        state.omniboxInfo.wasFocusedFromTab = true
-        state.startOmniboxQuery()
-    }
-
     private func onTabToggleMute(at index: Int) {
         guard index < sections.allItems.count else { return }
         let tab = sections.allItems[index].tab
@@ -642,201 +639,6 @@ extension TabsListView {
         guard !isSingleTab(atIndex: selectedIndex, in: sections) || !hasUnpinnedTabs else { return }
         updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider,
                                  singleTabFrame: viewModel.singleTabCurrentFrame, lastItemFrame: viewModel.lastItemCurrentFrame)
-    }
-}
-
-// MARK: - Context Menu Items
-extension TabsListView {
-
-    private func contextMenuItems(forTab tab: BrowserTab, atIndex index: Int) -> some View {
-        let item = sections.allItems[index]
-        let firstGroup = Group {
-            Button("Capture Page") {
-                tab.collectTab()
-            }.disabled(tab.url == nil || state.browserTabsManager.currentTab != tab || tab.isLoading)
-            Button("Refresh Tab") {
-                tab.reload()
-            }.disabled(tab.url == nil)
-            Button("Duplicate Tab") {
-                state.duplicate(tab: tab)
-            }
-            Button("\(tab.isPinned ? "Unpin" : "Pin") Tab") {
-                if tab.isPinned {
-                    state.browserTabsManager.unpinTab(tab)
-                } else {
-                    state.browserTabsManager.pinTab(tab)
-                }
-            }.disabled(!tab.isPinned && tab.url == nil)
-            Button(tab.mediaPlayerController?.isMuted == true ? "Unmute Tab" : "Mute Tab") {
-                tab.mediaPlayerController?.toggleMute()
-            }.disabled(tab.mediaPlayerController?.isPlaying != true)
-            if item.group != nil {
-                Button("Ungroup") {
-                    state.browserTabsManager.moveTabToGroup(tab.id, group: nil)
-                }
-            }
-        }
-        let secondGroup = Group {
-            Button("Copy Address") {
-                tab.copyURLToPasteboard()
-            }.disabled(tab.url == nil)
-            Button("Paste and Go") {
-                pasteAndGo(on: tab)
-            }
-        }
-
-        return Group {
-            firstGroup
-            Divider()
-            secondGroup
-            Divider()
-            contextMenuItemCloseGroup(forTabAtIndex: index)
-            if Configuration.branchType == .develop {
-                Divider()
-                contextMenuItemDebugGroup()
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func contextMenuItemCloseGroup(forTabAtIndex index: Int) -> some View {
-        Button("Close Tab") {
-            onItemClose(at: index, fromContextMenu: true)
-        }
-        Button("Close Other Tabs") {
-            guard let tabIndex = state.browserTabsManager.tabIndex(forListIndex: index) else { return }
-            state.closeAllTabs(exceptedTabAt: tabIndex)
-        }.disabled(sections.unpinnedItems.isEmpty || sections.allItems.count <= 1)
-        Button("Close Tabs to the Right") {
-            guard let tabIndex = state.browserTabsManager.tabIndex(forListIndex: index) else { return }
-            state.closeTabsToTheRight(of: tabIndex)
-        }.disabled(index + 1 >= sections.allItems.count || sections.unpinnedItems.isEmpty)
-    }
-
-    @ViewBuilder
-    private func contextMenuItemDebugGroup() -> some View {
-        if PreferencesManager.enableTabGroupingFeedback {
-            Button("Tab Grouping Feedback") {
-                AppDelegate.main.showTabGroupingFeedbackWindow(self)
-            }
-        }
-    }
-
-    private func showContextMenu(forGroup group: TabGroup, with event: NSEvent?) {
-        let menu = NSMenu()
-
-        weak var state = self.state
-
-        let nameAndColorView = TabClusteringNameColorPickerView(
-            groupName: group.title ?? "",
-            selectedColor: group.color?.designColor ?? .red,
-            onChange: { [weak state] newValues in
-                if group.title != newValues.name {
-                    state?.browserTabsManager.renameGroup(group, title: newValues.name)
-                }
-                if group.color != newValues.color, let newColor = newValues.color {
-                    state?.browserTabsManager.changeGroupColor(group, color: newColor)
-                }
-            },
-            onFinish: { [weak menu] in menu?.cancelTracking() })
-
-        let nameAndColorItemInsets = NSEdgeInsets(top: 4, left: 14, bottom: 8, right: 14)
-
-        let nameAndColorItem = ContentViewMenuItem(
-            title: "Name your group item",
-            acceptsFirstResponder: !(group.title?.isEmpty == true),
-            contentView: { nameAndColorView },
-            insets: nameAndColorItemInsets,
-            customization: { hostingView in
-                let width = 230 - (nameAndColorItemInsets.left + nameAndColorItemInsets.right)
-                hostingView.widthAnchor.constraint(equalToConstant: width).isActive = true
-                hostingView.heightAnchor.constraint(equalToConstant: 16).isActive = true
-            })
-
-        menu.addItem(nameAndColorItem)
-        menu.addItem(.fullWidthSeparator())
-
-        menu.addItem(withTitle: "Capture Group to a Note…") { _ in
-            let location = event?.locationInWindow ?? .zero
-            presentCaptureWindow(for: group, at: location)
-        }
-        menu.addItem(.separator())
-
-        menu.addItem(withTitle: "New Tab in Group") { _ in
-            state?.browserTabsManager.createNewTab(inGroup: group)
-        }
-        menu.addItem(withTitle: "Move Group in New Window") { _ in
-            state?.browserTabsManager.moveGroupToNewWindow(group)
-        }
-
-        menu.addItem(.separator())
-
-        menu.addItem(withTitle: group.collapsed ? "Expand Group" : "Collapse Group") { _ in
-            state?.browserTabsManager.toggleGroupCollapse(group)
-        }
-        menu.addItem(withTitle: "Ungroup") { _ in
-            state?.browserTabsManager.ungroupTabsInGroup(group)
-        }
-        menu.addItem(withTitle: "Close Group") { _ in
-            state?.browserTabsManager.closeTabsInGroup(group)
-        }
-
-        menu.popUp(positioning: nil, at: event?.locationInWindow ?? .zero, in: event?.window?.contentView)
-    }
-
-    private func presentCaptureWindow(for group: TabGroup, at location: CGPoint) {
-        guard let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(withShadow: false, movable: false) else {
-            return
-        }
-
-        let extraPadding = 60.0
-        window.extraPadding = extraPadding
-
-        let view = buildExternalCaptureView(for: group, in: window)
-        window.setView(with: view, at: CGPoint(x: location.x - extraPadding, y: location.y + extraPadding), fromTopLeft: true)
-
-        guard let view = window.contentView else { return }
-        let animation = PointAndShootCardPicker.captureWindowAppearAnimation()
-        view.layer?.add(animation, forKey: "appearance")
-
-        window.makeKeyAndOrderFront(nil)
-    }
-
-    private func buildExternalCaptureView(for group: TabGroup, in window: NSWindow) -> some View {
-        FormatterViewBackgroundV2 {
-            PointAndShootCardPicker(allowAnimation: .constant(true), onComplete: { targetNote, _, completion in
-                addGroup(group, toNote: targetNote, from: window, completion: completion)
-            }, canShowCopyShareView: false, captureFromOutsideWebPage: true)
-        }
-            .environmentObject(state)
-            .environmentObject(state.data)
-            .environmentObject(state.browserTabsManager)
-            .frame(width: 300)
-            .fixedSize()
-    }
-
-    private func addGroup(_ group: TabGroup,
-                          toNote targetNote: BeamNote?,
-                          from window: NSWindow,
-                          completion: (PointAndShootCardPicker.ExternalCaptureConfirmation?) -> Void) {
-        guard let note = targetNote else {
-            let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
-            window.contentView?.layer?.add(anim, forKey: "disappear")
-            return
-        }
-        let tabGroupingManager = state.data.tabGroupingManager
-        let copiedGroup = tabGroupingManager.copyForSharing(group)
-        if copiedGroup.title == nil {
-            let title = TabGroupingStoreManager.suggestedDefaultTitle(for: group)
-            tabGroupingManager.renameGroup(copiedGroup, title: title)
-        }
-        note.tabGroups.append(copiedGroup.id)
-        Logger.shared.logInfo("Added group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note) id: \(note.id)", category: .tabGrouping)
-        completion(.success)
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-            let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
-            window.contentView?.layer?.add(anim, forKey: "disappear")
-        }
     }
 }
 
