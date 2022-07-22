@@ -114,6 +114,7 @@
         "NoteViewEmbedsTests",
         "NoteViewTests",
         "NotesNavigationHistoryTests",
+        "NotesPreferencesTests",
         "OmniboxAutocompleteTests",
         "OmniboxViewTests",
         "OnboardingTests",

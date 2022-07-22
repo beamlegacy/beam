@@ -458,4 +458,16 @@ class NoteTestView: TextEditorContextTestView {
         let number = app.buttons.matching(identifier: ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier).count
         return number
     }
+    
+    func isBulletVisible() -> Bool {
+        return getFirstBulletElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
+    
+    func getFirstBulletElement() -> XCUIElement {
+        return app.buttons[NoteViewLocators.Buttons.bullet.accessibilityIdentifier]
+    }
+    
+    func getNumberOfVisibleBullets() -> Int {
+        return isBulletVisible() ? app.buttons.matching(identifier: NoteViewLocators.Buttons.bullet.accessibilityIdentifier).count : 0
+    }
 }
