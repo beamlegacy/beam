@@ -80,9 +80,8 @@ class BrowserShortcutsTests: BaseTest {
             
             shortcutHelper.shortcutActionInvoke(action: .jumpToPreviousTab)
             XCTAssertTrue(self.isMediaPageOpened())
-
         }
-        
+
     }
     
     func testWebPageReload() {

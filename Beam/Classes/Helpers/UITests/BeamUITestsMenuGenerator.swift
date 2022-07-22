@@ -36,6 +36,8 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         case .loadUITestPageAlerts: loadUITestsPage(identifier: "Alerts")
         case .loadUITestPageMedia: loadUITestsPage(identifier: "Media")
         case .loadUITestSVG: loadUITestsPage(identifier: "SVG")
+        case .createTabGroup: createTabGroup(named: false)
+        case .createTabGroupNamed: createTabGroup(named: true)
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: Self.createNotes(count: 100, journalRatio: 0.2, futureRatio: 0.1)
         case .create100NormalNotes: Self.createNotes(count: 100, journalRatio: 0.0, futureRatio: 0.0)
@@ -139,10 +141,16 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         try? BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
-    private func loadUITestsPage(identifier: String) {
-        if let localUrl = Bundle.main.url(forResource: "UITests-\(identifier)", withExtension: "html", subdirectory: nil) {
-            _ = AppDelegate.main.window?.state.createTab(withURLRequest: URLRequest(url: localUrl), originalQuery: nil)
-        }
+    private func urlForTestPage(identifier: String) -> URL? {
+        Bundle.main.url(forResource: "UITests-\(identifier)",
+                        withExtension: "html", subdirectory: nil)
+    }
+
+    @discardableResult
+    private func loadUITestsPage(identifier: String, setCurrent: Bool = true) -> BrowserTab? {
+        guard let localUrl = urlForTestPage(identifier: identifier) else { return nil }
+        return AppDelegate.main.window?.state.createTab(withURLRequest: URLRequest(url: localUrl),
+                                                        originalQuery: nil, setCurrent: setCurrent)
     }
 
     private func populateWithJournalNote(count: Int) {
@@ -159,7 +167,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
             return
         }
         do {
-            try PasswordImporter.importPasswords(fromCSV: url)
+            _ = try PasswordImporter.importPasswords(fromCSV: url)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .passwordManager)
         }
@@ -499,6 +507,32 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     private func open(note: BeamNote) {
         AppDelegate.main.window?.state.mode = .note
         AppDelegate.main.window?.state.currentNote = note
+    }
+}
+
+// MARK: - Tab Group
+extension BeamUITestsMenuGenerator {
+    private func createTabGroup(named: Bool) {
+        guard let tabsManager = AppDelegate.main.window?.state.browserTabsManager else { return }
+        let pagesToOpen = ["1", "2", "3", "4"]
+        let tabs = pagesToOpen.compactMap { identifier in
+            loadUITestsPage(identifier: identifier, setCurrent: false)
+        }
+
+        var title: String?
+        if named {
+            let existingGroups = Set(tabsManager.tabGroupingManager.builtPagesGroups.values)
+            var index = 1
+            title = "Test\(index)"
+            while existingGroups.contains(where: { $0.title == title }) {
+                index += 1
+                title = "Test\(index)"
+            }
+        }
+        let group = TabGroup(pageIds: [], title: title)
+        tabs.forEach { tab in
+            tabsManager.moveTabToGroup(tab.id, group: group)
+        }
     }
 }
 
