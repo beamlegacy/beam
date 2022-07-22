@@ -71,12 +71,17 @@ extension TabsListContextMenuBuilder {
             let title = tabsManager.describingTitle(forGroup: group, truncated: false)
             tabGroupingManager.renameGroup(copiedGroup, title: title)
         }
-        note.tabGroups.append(copiedGroup.id)
-        Logger.shared.logInfo("Added group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note) id: \(note.id)", category: .tabGrouping)
-        completion(.success)
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-            let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
-            window.contentView?.layer?.add(anim, forKey: "disappear")
+        note.addTabGroup(copiedGroup.id)
+        if note.save(self) {
+            Logger.shared.logInfo("Added group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note) id: \(note.id)", category: .tabGrouping)
+            completion(.success)
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+                let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
+                window.contentView?.layer?.add(anim, forKey: "disappear")
+            }
+        } else {
+            Logger.shared.logInfo("Failed to add group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note) id: \(note.id)", category: .tabGrouping)
+            completion(.failure)
         }
     }
 }
@@ -307,4 +312,8 @@ extension TabsListContextMenuBuilder {
             })
         return item
     }
+}
+
+extension TabsListContextMenuBuilder: BeamDocumentSource {
+    static var sourceId: String { "\(Self.self)" }
 }
