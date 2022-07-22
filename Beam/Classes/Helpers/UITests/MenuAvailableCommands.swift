@@ -32,7 +32,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case resizeWindowPortrait = "Resize Window to Portrait"
     case resizeSquare1000 = "Resize Window Square"
 
-    // Load HTML Page
+    // Web Tabs
     case loadUITestPage1 = "Load UITests Page 1"
     case loadUITestPage2 = "Load UITests Page 2"
     case loadUITestPage3 = "Load UITests Page 3"
@@ -42,6 +42,9 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case loadUITestPageAlerts = "Load JS/Native alert panels"
     case loadUITestPageMedia = "Load Media test page"
     case loadUITestSVG = "Load UITests SVG"
+    case separatorWebTabsA
+    case createTabGroup = "Create Tab Group"
+    case createTabGroupNamed = "Create Tab Group with Name"
 
     // Notes
     case populateDBWithJournal = "Populate Journal"
@@ -94,8 +97,9 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     var group: UITestMenuGroup? {
         switch self {
         case .loadUITestPage1, .loadUITestPage2, .loadUITestPage3, .loadUITestPage4, .loadUITestPageMedia, .loadUITestSVG,
-             .loadUITestPageAlerts, .loadUITestPagePassword, .loadUITestPagePlayground:
-            return .loadHTMLPage
+             .loadUITestPageAlerts, .loadUITestPagePassword, .loadUITestPagePlayground,
+             .separatorWebTabsA, .createTabGroup, .createTabGroupNamed:
+            return .webTabs
         case .populateDBWithJournal, .insertTextInCurrentNote,
                 .create100Notes, .create100NormalNotes, .create100JournalNotes, .create10Notes, .create10NormalNotes, .create10JournalNotes,
                 .createFakeDailySummary, .createNote, .createAndOpenNote, .createPublishedNote, .createAndOpenPublishedNote:
@@ -132,7 +136,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
 
 public enum UITestMenuGroup: String, CaseIterable {
     case account = "Account"
-    case loadHTMLPage = "Load UITest HTML Page"
+    case webTabs = "Web Tabs"
     case notes = "Notes"
     case links = "Links"
     case omniboxSetup = "Omnibox Setup"
