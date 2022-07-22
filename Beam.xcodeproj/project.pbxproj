@@ -1409,6 +1409,7 @@
 		D7E38CED282A93580059F60D /* AdBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEC282A93580059F60D /* AdBlockerTests.swift */; };
 		D7E38CEF282A95250059F60D /* AdBlockerViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */; };
 		D7E38CF1282A96BA0059F60D /* AdBlockerTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */; };
+		D7EC4AF02887097E00D6EA9F /* TabGroupCloseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7EC4AEF2887097E00D6EA9F /* TabGroupCloseTests.swift */; };
 		D7F5BF0528756231008FE546 /* RightClickImageMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5BF0428756231008FE546 /* RightClickImageMenuTests.swift */; };
 		D7F5BF0C2875630C008FE546 /* RightClickMenuViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7F5BF0B2875630C008FE546 /* RightClickMenuViewLocators.swift */; };
 		DA0BBE6A282D006600437AA1 /* BrowsingTreeTriggerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0BBE69282D006600437AA1 /* BrowsingTreeTriggerTest.swift */; };
@@ -3343,6 +3344,7 @@
 		D7E38CEC282A93580059F60D /* AdBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerTests.swift; sourceTree = "<group>"; };
 		D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerViewLocators.swift; sourceTree = "<group>"; };
 		D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerTestView.swift; sourceTree = "<group>"; };
+		D7EC4AEF2887097E00D6EA9F /* TabGroupCloseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupCloseTests.swift; sourceTree = "<group>"; };
 		D7F5BF0428756231008FE546 /* RightClickImageMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickImageMenuTests.swift; sourceTree = "<group>"; };
 		D7F5BF0B2875630C008FE546 /* RightClickMenuViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickMenuViewLocators.swift; sourceTree = "<group>"; };
 		DA0BBE69282D006600437AA1 /* BrowsingTreeTriggerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowsingTreeTriggerTest.swift; path = BeamTests/BrowsingTreeTriggerTest.swift; sourceTree = SOURCE_ROOT; };
@@ -8032,6 +8034,7 @@
 			isa = PBXGroup;
 			children = (
 				D77A5AAC287EB43B00652727 /* TabGroupNameTests.swift */,
+				D7EC4AEF2887097E00D6EA9F /* TabGroupCloseTests.swift */,
 			);
 			path = TabGrouping;
 			sourceTree = "<group>";
@@ -10075,6 +10078,7 @@
 				A388B449280D7547008D2247 /* CaptureCopyShareTests.swift in Sources */,
 				A5EB6EAF26FDFC55001442E7 /* ContextMenuTestView.swift in Sources */,
 				B55E4D2F27FEE1E200F73218 /* SearchOnPDFTests.swift in Sources */,
+				D7EC4AF02887097E00D6EA9F /* TabGroupCloseTests.swift in Sources */,
 				B57A9B3926AB0809002C954D /* BaseView.swift in Sources */,
 				B557155526FA250300F6C9D4 /* UpdateViewTests.swift in Sources */,
 				D75EEB4F2845F8B000994C17 /* InsideAdsBlockerTests.swift in Sources */,
