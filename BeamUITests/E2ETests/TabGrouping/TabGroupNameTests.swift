@@ -32,7 +32,7 @@ class TabGroupNameTests: BaseTest {
             tabGroupMenu.openFirstTabGroupMenu()
         }
         
-        step("Then Tab Group Menu") {
+        step("Then Tab Group Menu is displayed") {
             XCTAssertTrue(tabGroupMenu.waitForMenuToBeDisplayed())
         }
         
