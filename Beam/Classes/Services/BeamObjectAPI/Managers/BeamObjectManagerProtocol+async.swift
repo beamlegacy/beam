@@ -17,7 +17,14 @@ extension BeamObjectManagerDelegate {
         var savedCount = 0
         var objects: [BeamObjectType] = []
 
-        let objectsToSave = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
+        let objectsToSaveWithoutChangedObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
+        objectsToSaveWithoutChangedObjects.forEach {
+            changedObjects[$0.beamObjectId] = $0
+        }
+
+        let objectsToSave = changedObjects.values
+
+        changedObjects.removeAll()
 
         var chunk = objectsToSave.count / 100
         let min = 1000
@@ -264,9 +271,8 @@ extension BeamObjectManagerDelegate {
         return try await objectManager.fetchAllObjects(raisePrivateKeyError: raisePrivateKeyError)
     }
 
-    @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
-                             force: Bool = false) async throws -> BeamObjectType {
+                             force: Bool = false) async throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -283,6 +289,12 @@ extension BeamObjectManagerDelegate {
         Logger.shared.logDebug("saveOnBeamObjectAPI called. Object \(object.beamObjectId), type: \(type(of: object).beamObjectType)",
                                category: .beamObjectNetwork)
 
+        let fullSyncRunning = BeamObjectManager.fullSyncRunning.load(ordering: .relaxed) == true
+        if fullSyncRunning {
+            addChangedObject(object)
+            return
+        }
+
         let semaphore = BeamObjectManagerCall.objectSemaphore(uuid: object.beamObjectId)
         let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
 
@@ -293,14 +305,14 @@ extension BeamObjectManagerDelegate {
 
         do {
             let remoteObject = try await objectManager.saveToAPI(object, force: force, requestUploadType: Self.uploadType)
-            return self.saveOnBeamObjectAPISuccess(object: object,
-                                                   remoteObject: remoteObject,
-                                                   semaphore: semaphore)
+            _ = self.saveOnBeamObjectAPISuccess(object: object,
+                                                remoteObject: remoteObject,
+                                                semaphore: semaphore)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
-            return try await self.saveOnBeamObjectAPIError(object: object,
-                                                           semaphore: semaphore,
-                                                           error: error)
+            _ = try await self.saveOnBeamObjectAPIError(object: object,
+                                                        semaphore: semaphore,
+                                                        error: error)
         }
     }
 
@@ -351,8 +363,6 @@ extension BeamObjectManagerDelegate {
             if let remoteObject = remoteObjects.first(where: { $0.beamObjectId == conflictedObject.beamObjectId }) {
                 let mergedObject = try manageConflict(conflictedObject, remoteObject)
                 mergedObjects.append(mergedObject)
-
-                try BeamObjectChecksum.savePreviousChecksum(object: remoteObject)
             } else {
                 // The remote object doesn't exist, we can just resend it without a `previousChecksum` to create it
                 // server-side

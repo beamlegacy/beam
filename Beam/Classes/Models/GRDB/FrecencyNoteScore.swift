@@ -134,6 +134,8 @@ class NoteFrecencyApiSaveLimiter {
 }
 
 public class GRDBNoteFrecencyStorage: FrecencyStorage {
+    var changedObjects: [UUID: FrecencyNoteRecord] = [:]
+
     let providedDb: BeamNoteLinksAndRefsManager?
     var db: BeamNoteLinksAndRefsManager? {
         let currentDb = providedDb ?? BeamData.shared.noteLinksAndRefsManager

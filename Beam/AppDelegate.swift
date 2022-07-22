@@ -12,6 +12,7 @@ import Combine
 import Sentry
 import Preferences
 import BeamCore
+import UUIDKit
 
 @objc(BeamApplication)
 public class BeamApplication: SentryCrashExceptionApplication {
@@ -544,9 +545,43 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    static func machineSerialNumber() -> String? {
+        let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
+
+        guard let serialNumberAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformSerialNumberKey as CFString, kCFAllocatorDefault, 0) else { fatalError("Can not get serialNumberAsCFString") }
+
+        IOObjectRelease(platformExpert)
+
+        let value = (serialNumberAsCFString.takeRetainedValue() as? String)
+        if value?.isEmpty == true {
+            return nil
+        }
+        return value
+    }
+
     private var deleteAllLocalDataAtStartup = false
     func applicationWillFinishLaunching(_ notification: Notification) {
         // We need to migrate the legacy database BEFORE initializing CoreData so that we can access the sqlite store without making a super slow backup
+        if Persistence.Device.id == nil {
+            let uuid: UUID
+            if let id = Self.machineSerialNumber() {
+                uuid = UUID.v5(name: "https://macosdevice.beamapp.co/\(id)-\(getuid())", namespace: .oid)
+            } else {
+                uuid = UUID()
+            }
+
+            Persistence.Device.id = uuid
+        }
+
+        BeamDocument.formatVersionVariant = Information.appVersionAndBuild
+        BeamNote.formatVersionVariant = Information.appVersionAndBuild
+        BeamNote.resetHistory = { note in
+            DispatchQueue.mainSync {
+                note.resetCommandManager()
+            }
+        }
+
+        BeamVersion.setupLocalDevice(Persistence.Device.id)
         BeamData.registerDefaultManagers()
 
         migrateLegacyData()

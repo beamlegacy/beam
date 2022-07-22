@@ -119,6 +119,7 @@ struct LinkWithFrecency: FetchableRecord {
 }
 
 public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
+    var changedObjects: [UUID : Link] = [:]
     static let tableName = "link"
     static var shared = BeamLinkDB()
     static var uploadType: BeamObjectRequestUploadType {
