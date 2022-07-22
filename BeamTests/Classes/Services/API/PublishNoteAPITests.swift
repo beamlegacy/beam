@@ -50,8 +50,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
         self.testNoteDocument = try BeamData.shared.currentDocumentCollection?.save(self, testNoteDocument!, indexDocument: false, autoIncrementVersion: true)
 
         // Consecutive saves expect both those variable to be up to date
-        testNote!.version.store(self.testNoteDocument.version, ordering: .relaxed)
-        testNote!.savedVersion = testNote!.version
+        testNote!.version = self.testNoteDocument.version
     }
 
     override func tearDownWithError() throws {

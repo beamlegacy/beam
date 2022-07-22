@@ -1,19 +1,14 @@
 {
   "id" : "25D3E6DB-FEA2-43A1-B84C-C14B4F567AB4",
-  "textStats" : {
-    "wordsCount" : 4
-  },
-  "version" : {
-    "vector" : [
-      "AB0E725C-9431-423A-B4B1-3D1D6B2B7A3F",
-      76,
-      "FAEC192E-0641-4956-AA78-31FF3484AB6C",
-      14
-    ]
-  },
   "visitedSearchResults" : [
 
   ],
+  "version" : {
+    "vector" : [
+      "AAEC192E-0641-4956-AA78-31FF3484AB6C",
+      0
+    ]
+  },
   "sources" : {
     "sources" : [
 
@@ -26,22 +21,7 @@
   "searchQueries" : [
 
   ],
-  "contactId" : null,
   "children" : [
-    {
-      "creationDate" : 666777188.05344701,
-      "id" : "FC3B2F1C-A89A-4047-9A4E-A83069C376E3",
-      "textStats" : {
-        "wordsCount" : 4
-      },
-      "text" : {
-        "ranges" : [
-          {
-            "string" : "The second bullet point"
-          }
-        ]
-      }
-    },
     {
       "creationDate" : 666777188.05344701,
       "id" : "AB3B2F1C-A89A-4047-9A4E-A83069C37600",
@@ -51,11 +31,11 @@
       "text" : {
         "ranges" : [
           {
-            "string" : "The first bullet point"
+            "string" : "The first bullet point has some new text from noteB"
           }
         ]
       }
-    }
+    },
   ],
   "browsingSessionIds" : [
 

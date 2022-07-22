@@ -213,14 +213,12 @@ class BeamLinkDBTests: XCTestCase {
     }
 
     func testConflictManagement() throws {
-        beforeNetworkTests()
-        let beamObjectHelper = BeamObjectTestsHelper()
         let store = GRDBStore(writer: DatabaseQueue())
         let db = try UrlHistoryManager(holder: nil, store: store)
         let linkstore = BeamLinkDB(overridenManager: db)
         try store.migrate()
         let now = BeamDate.now
-        var link = Link(
+        let remoteLink = Link(
             url: "httpl://abc.fr/",
             title: "Alphabet", content: nil,
             destination: nil,
@@ -230,31 +228,24 @@ class BeamLinkDBTests: XCTestCase {
             createdAt: now,
             updatedAt: now
         )
-        beamObjectHelper.saveOnAPIAndSaveChecksum(link)
-        //create a conflict by making local previous checksum different from remote checksum
-        link.frecencyVisitScore = 1
-        link.frecencyVisitSortScore = 1
-        link.frecencyVisitLastAccessAt = now
-        link.title = "Something Else"
-        link.updatedAt = now - Double(1) //forces to choose remote version in merge
-        try db.insert(links: [link])
-        try? BeamObjectChecksum.savePreviousChecksum(object: link)
-        //making current local checksum differ from local previous checksum to allow for remote save
-        link.frecencyVisitScore = 2
-        try db.insert(links: [link])
-        let expectation = self.expectation(description: "network save")
-        try _ = linkstore.saveAllOnBeamObjectApi { _ in expectation.fulfill() }
-        waitForExpectations(timeout: 5, handler: nil)
+        let link = Link(
+            url: "httpl://abc.fr/",
+            title: "Something Else", content: nil,
+            destination: nil,
+            frecencyVisitLastAccessAt: now,
+            frecencyVisitScore: 2,
+            frecencyVisitSortScore: 1,
+            createdAt: now,
+            updatedAt: now - Double(1)
+        )
+        let postConflictLink = try linkstore.manageConflict(link, remoteLink)
 
-        let postConflictLink = try XCTUnwrap(linkstore.linkFor(id: link.id))
         //local non nul frecency fields are kept
         XCTAssertEqual(postConflictLink.frecencyVisitScore, 2)
         XCTAssertEqual(postConflictLink.frecencyVisitSortScore, 1)
         XCTAssertEqual(postConflictLink.frecencyVisitLastAccessAt, now)
         //while remote more recent fields are chosen
         XCTAssertEqual(postConflictLink.title, "Alphabet")
-
-        stopNetworkTests()
     }
     func testTitleNotReplacedByEmpty() throws {
         let linkstore = BeamLinkDB()

@@ -20,6 +20,7 @@ struct Email: Codable, Hashable {
 }
 
 class ContactsManager {
+    var changedObjects: [UUID: ContactRecord] = [:]
     static let shared = ContactsManager()
     private var contactsDB: ContactsDB? { BeamData.shared.contactsDB }
 

@@ -11,6 +11,8 @@ import Combine
 import Accelerate
 
 class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
+    var changedObjects: [UUID: BeamDocument] = [:]
+
     static var beamObjectType = BeamObjectObjectType.document
     static var sourceId: String { "\(Self.self)" }
 
@@ -26,6 +28,13 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
 
     private var documentsCancellables: [UUID: AnyCancellable] = [:]
     private var subjects: [UUID: PassthroughSubject<BeamDocument, Never>] = [:]
+
+    private var disableSyncLock = RWLock()
+    private var _disableSync = false
+    private var disableSync: Bool {
+        get { disableSyncLock.read { self._disableSync } }
+        set { disableSyncLock.write { self._disableSync = newValue } }
+    }
 
     init(account: BeamAccount) {
         self.account = account
@@ -53,6 +62,7 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
 
     // swiftlint:disable function_body_length
     private func sendSavedDocument(_ document: BeamDocument) {
+        guard !disableSync else { return }
         Logger.shared.logInfo("BeamDocumentSynchronizer.sendSavedDocument called with \(document.id)", category: .sync)
         if documentsCancellables[document.id] != nil {
             let subject = subjects[document.id]
@@ -206,7 +216,9 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
             return remoteObject
         }
 
+        disableSync = true
         try receivedObjects([remoteObject])
+        disableSync = false
 
         if let updatedObject = try collection.fetchWithId(remoteObject.id) {
             Logger.shared.logError("Document \(remoteObject) was changed to \(updatedObject) during conflict resolution", category: .sync)
@@ -221,6 +233,7 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
 
     func saveObjectsAfterConflict(_ objects: [BeamDocument]) throws {
         // We have already saved everything that needs to be saved during manageConflict
+
     }
 }
 
@@ -248,8 +261,19 @@ extension BeamDocumentSynchronizer {
         DispatchQueue.mainSync {
             // We have to block the main thread to merge the document
             // other wise the editor may have a race condition
-            note.merge(other: remoteNote, ancestor: ancestorNote, advantageOther: false)
-            _ = note.save(self)
+            let res = note.withoutAutoSave {
+                note.merge(other: remoteNote, ancestor: ancestorNote, advantageOther: false)
+            }
+
+            switch res {
+            case .ancestor:
+                _ = note.save(self, autoIncrementVersion: false)
+            case .conflict:
+                _ = note.save(self, autoIncrementVersion: true)
+            default:
+                // Do not save anything in case of equal or descendent as the db already contains what's needed
+                break
+            }
         }
     }
 
@@ -266,8 +290,19 @@ extension BeamDocumentSynchronizer {
                 // then we merge the changes in the local note
                 let ancestorStruct = document.previousSavedObject ?? document
                 let ancestorNote = try? BeamNote.instanciateNote(ancestorStruct, keepInMemory: false)
-                note.merge(other: remoteNote, ancestor: ancestorNote ?? note, advantageOther: false)
-                _ = note.save(self)
+                let res = note.withoutAutoSave {
+                    note.merge(other: remoteNote, ancestor: ancestorNote ?? note, advantageOther: false)
+                }
+
+                switch res {
+                case .ancestor:
+                    _ = note.save(self, autoIncrementVersion: false)
+                case .conflict:
+                    _ = note.save(self, autoIncrementVersion: true)
+                default:
+                    // Do not save anything in case of equal or descendent as the db already contains what's needed
+                    break
+                }
             } else {
                 self.mergeToBestNote(note: note, document: document)
             }
@@ -304,10 +339,30 @@ extension BeamDocumentSynchronizer {
             Logger.shared.logInfo("-> Choose to keep remoteNote", category: .sync)
         }
 
-        noteToKeep.merge(other: noteToDelete, ancestor: ancestorNote ?? noteToKeep, advantageOther: false)
-        try? noteToDelete.database?.collection?.delete(self, filters: [.id(noteToDelete.id)])
-        DispatchQueue.mainSync {
-            _ = noteToKeep.save(self)
+        let res = noteToKeep.withoutAutoSave {
+            noteToKeep.merge(other: noteToDelete, ancestor: ancestorNote ?? noteToKeep, advantageOther: false)
+        }
+
+        let filter: [DocumentFilter] = [.id(noteToDelete.id)]
+        if (try? noteToDelete.database?.collection?.count(filters: filter)) ?? 0 > 0 {
+            try? noteToDelete.database?.collection?.delete(self, filters: filter)
+        } else if var doc = noteToDelete.document {
+            doc.updatedAt = BeamDate.now
+            doc.deletedAt = BeamDate.now
+            sendDeletedDocument(doc)
+        }
+        switch res {
+        case .ancestor:
+            DispatchQueue.mainSync {
+                _ = noteToKeep.save(self, autoIncrementVersion: false)
+            }
+        case .conflict:
+            DispatchQueue.mainSync {
+                _ = noteToKeep.save(self, autoIncrementVersion: true)
+            }
+        default:
+            // Do not save anything in case of equal or descendent as the db already contains what's needed
+            break
         }
     }
 
@@ -351,9 +406,9 @@ extension BeamDocumentSynchronizer {
             note.updateTitle(self, newTitle)
         }
         var doc = document
-        if doc.version > 0 {
+        if !doc.version.isInitial {
             // Start at zero if this note it new
-            doc.version += 1
+            doc.version = doc.version.incremented()
         }
         _ = try doc.collection?.save(self, doc, indexDocument: true)
     }
@@ -368,6 +423,14 @@ extension BeamDocumentSynchronizer {
         }
 
         guard !localNote.isEntireNoteEmpty() else {
+            let filter: [DocumentFilter] = [.id(localNote.id)]
+            if (try? localNote.database?.collection?.count(filters: filter)) ?? 0 > 0 {
+                try? localNote.database?.collection?.delete(self, filters: filter)
+            } else if var doc = localNote.document {
+                doc.updatedAt = BeamDate.now
+                doc.deletedAt = BeamDate.now
+                sendDeletedDocument(doc)
+            }
             try? collection.delete(self, filters: [.id(localNote.id)])
 
             let localDocument = try? collection.fetchFirst(filters: [.id(document.id)])
@@ -381,7 +444,7 @@ extension BeamDocumentSynchronizer {
         Logger.shared.logInfo("receiveDocument \(document.titleAndId) (local: \(localDocument?.titleAndId ?? "nil"))", category: .sync)
         var doc = document
         if let localDocument = localDocument {
-            doc.version = localDocument.version + 1
+            doc.version = doc.version.receive(other: localDocument.version)
 
             if document.title != localDocument.title {
                 DispatchQueue.mainSync {

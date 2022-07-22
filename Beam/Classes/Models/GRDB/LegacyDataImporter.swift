@@ -100,7 +100,7 @@ struct LegacyDataImporter: BeamDocumentSource {
                                 _ = try account.loadDatabase(database.id)
                             }
                             if deletedAt == nil, let data = data {
-                                let document = BeamDocument(id: id, source: self, database: database, title: name, createdAt: createdAt, updatedAt: updatedAt, data: data, documentType: DocumentType(rawValue: type)!, version: 0, isPublic: isPublic != 0, journalDate: journalDay)
+                                let document = BeamDocument(id: id, source: self, database: database, title: name, createdAt: createdAt, updatedAt: updatedAt, data: data, documentType: DocumentType(rawValue: type)!, version: BeamVersion(), isPublic: isPublic != 0, journalDate: journalDay)
                                 _ = try database.collection?.save(self, document, indexDocument: false)
                             }
                         }

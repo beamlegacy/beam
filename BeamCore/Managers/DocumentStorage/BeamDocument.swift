@@ -42,7 +42,7 @@ public struct BeamDocument {
             }
         }
     }
-    public var version: Int64 = 0
+    public var version = BeamVersion()
     public var isPublic: Bool = false
 
     public var beamObjectId: UUID {
@@ -68,7 +68,7 @@ public struct BeamDocument {
                 deletedAt: Date? = nil,
                 data: Data,
                 documentType: DocumentType,
-                version: Int64,
+                version: BeamVersion,
                 isPublic: Bool,
                 journalDate: Int64) {
         self.id = id
@@ -136,10 +136,14 @@ public extension BeamDocument {
         case documentType
         case isPublic
         case journalDate
+        case version
+        case formatVersion
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        try Self.checkFormatVersion(try container.decodeIfPresent(String.self, forKey: .formatVersion))
         let syncDatabaseId = decoder.userInfo[BeamObject.beamObjectId] as? UUID ?? UUID.null
         id = (try container.decodeIfPresent(UUID.self, forKey: .id)) ?? syncDatabaseId
         databaseId = try container.decode(UUID.self, forKey: .databaseId)
@@ -150,6 +154,9 @@ public extension BeamDocument {
         deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         isPublic = try container.decode(Bool.self, forKey: .isPublic)
         data = try container.decode(String.self, forKey: .data).asData
+        if container.contains(.version) {
+            version = (try? container.decode(BeamVersion.self, forKey: .version)) ?? BeamVersion()
+        }
 
         journalDate = 0
 
@@ -177,8 +184,8 @@ public extension BeamDocument {
             try container.encode(id, forKey: .id)
             try container.encode(source, forKey: .source)
         }
-        if let database = database {
-            try container.encode(database.id, forKey: .databaseId)
+        if let dbId = database?.id ?? databaseId {
+            try container.encode(dbId, forKey: .databaseId)
         }
         try container.encode(title, forKey: .title)
         try container.encode(createdAt, forKey: .createdAt)
@@ -197,6 +204,9 @@ public extension BeamDocument {
         }
 
         try container.encode(isPublic, forKey: .isPublic)
+        try container.encode(version, forKey: .version)
+
+        try container.encode(Self.formatVersion, forKey: .formatVersion)
     }
 }
 
@@ -253,6 +263,37 @@ extension BeamDocument: Hashable {
     }
 }
 
+extension BeamVersion: DatabaseValueConvertible {
+    public var databaseValue: DatabaseValue {
+        let encoder = JSONEncoder()
+        let data: Data
+        do {
+            data = try encoder.encode(self)
+        } catch {
+            Logger.shared.logError("Error while encoding BeamVersion: \(error)", category: .document)
+            fatalError("Error while encoding BeamVersion: \(error)")
+        }
+
+        guard let value = DatabaseValue(value: data) else {
+            fatalError("Error while making BeamVersion a DatabaseValue: \(self) - \(data)")
+        }
+        return value
+    }
+
+    public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> Self? {
+        guard let data = Data.fromDatabaseValue(dbValue) else {
+            return nil
+        }
+
+        let decoder = JSONDecoder()
+        if let version = try? decoder.decode(Self.self, from: data) {
+            return version
+        }
+        return nil
+    }
+
+}
+
 extension BeamDocument: TableRecord {
     public enum Columns: String, ColumnExpression {
         case id, source, title, createdAt, updatedAt, data, documentType, version, isPublic, journalDate
@@ -284,7 +325,17 @@ extension BeamDocument: FetchableRecord {
         updatedAt = row[Columns.updatedAt]
         data = row[Columns.data]
         documentType = row[Columns.documentType]
-        version = row[Columns.version]
+        let versionValue = row[Columns.version]
+        if let versionData = versionValue as? Data {
+            let decoder = JSONDecoder()
+            if let v = try? decoder.decode(BeamVersion.self, from: versionData) {
+                version = v
+            } else {
+                version = BeamVersion()
+            }
+        } else if let v = versionValue as? Int {
+            version = BeamVersion(localVersion: v)
+        }
         isPublic = row[Columns.isPublic]
         journalDate = row[Columns.journalDate]
     }
@@ -314,5 +365,14 @@ public extension BeamDocument {
                                                     decodeChildren: true)
 
         return beamNote.textDescription()
+    }
+}
+
+public extension BeamDocument {
+    private(set) static var formatVersionMain = "0.1.0"
+    static var formatVersionVariant = ""
+    static var formatVersion: String { [formatVersionMain, formatVersionVariant].joined(separator: " - ") }
+    static private func checkFormatVersion(_ version: String?) throws {
+        // Do nothing for now
     }
 }

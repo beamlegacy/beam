@@ -10,6 +10,7 @@ import Combine
 
 // Minimal manager
 class MyRemoteObjectManager {
+    var changedObjects: [UUID: MyRemoteObject] = [:]
     static var receivedMyRemoteObjects: [MyRemoteObject] = []
     static var store: [UUID: MyRemoteObject] = [:]
 }

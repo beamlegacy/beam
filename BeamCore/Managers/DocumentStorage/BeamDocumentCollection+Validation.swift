@@ -11,6 +11,7 @@ import BeamCore
 public extension BeamDocumentCollection {
     // MARK: Validations
     func checkValidations(_ document: BeamDocument) throws {
+        #if DEBUG
         guard document.deletedAt == nil else {
             throw BeamDocumentCollectionError.deletedDocumentsCantBeSavedLocally
         }
@@ -28,6 +29,7 @@ public extension BeamDocumentCollection {
         #endif
 
         try checkVersion(document)
+        #endif
     }
 
     private func checkJournalDay(_ document: BeamDocument) throws {
@@ -69,7 +71,7 @@ public extension BeamDocumentCollection {
 
         guard let existingDocument = try? fetchWithId(document.id) else { return }
 
-        if existingDocument.version >= document.version {
+        if document.version <= existingDocument.version {
             Logger.shared.logError("\(document.title): stored version: \(existingDocument.version) should be < newVersion: \(document.version)", category: .document)
             throw BeamDocumentCollectionError.failedVersionCheck(document, existingVersion: existingDocument.version, newVersion: document.version)
         }

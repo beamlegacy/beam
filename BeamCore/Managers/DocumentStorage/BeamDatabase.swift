@@ -128,6 +128,7 @@ public class BeamDatabase: CustomStringConvertible, Codable, Identifiable, Equat
         if migrate {
             try grdbStore.migrate()
         }
+        try postMigrationSetup()
     }
 
     func unload() throws {

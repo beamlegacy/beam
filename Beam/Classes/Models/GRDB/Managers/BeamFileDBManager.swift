@@ -168,6 +168,7 @@ protocol BeamFileStorage {
 }
 
 class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoImportDisabler {
+    var changedObjects: [UUID: BeamFileRecord] = [:]
     static var id = UUID()
     static var name = "BeamFileDBManager"
 
