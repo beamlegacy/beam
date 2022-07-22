@@ -47,6 +47,7 @@ enum NoteViewLocators {
         case newNoteCreation = "NewNoteButton"
         case checkbox = "checkbox"
         case pinUnpinButton = "pin-unpin-button"
+        case bullet = "bullet"
     }
     
     enum TextFields: String, CaseIterable, UIElement {

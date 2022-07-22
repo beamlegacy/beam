@@ -118,6 +118,7 @@
         "NoteViewEmbedsTests",
         "NoteViewTests",
         "NotesNavigationHistoryTests",
+        "NotesPreferencesTests",
         "OmniboxViewTests",
         "OmniboxViewTests\/testOmniBoxSearchField()",
         "OmniboxViewTests\/testOmniboxCreateNoteMode()",
