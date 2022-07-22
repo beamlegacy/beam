@@ -8,6 +8,12 @@
 import Foundation
 import Combine
 import Atomics
+import UUIDKit
+
+public protocol BeamDocumentSource {
+    static var sourceId: String { get }
+    var sourceId: String { get }
+}
 
 public protocol BeamOwner: AnyObject {
     var id: UUID { get }
@@ -136,8 +142,21 @@ public class BeamNote: BeamElement {
     @Published public var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } }
     public var browsingSessionIds = [UUID]() { didSet { change(.meta) } }
     public var sources = NoteSources()
-    @Published public var version = ManagedAtomic<Int64>(0)
-    @Published public var savedVersion = ManagedAtomic<Int64>(0)
+    private var _version = BeamVersion()
+    private var versionLock = RWLock()
+    public var version: BeamVersion {
+        get {
+            versionLock.read {
+                self._version
+            }
+        }
+
+        set {
+            versionLock.write {
+                self._version = newValue
+            }
+        }
+    }
     public var databaseId: UUID? { owner?.id }
     public weak var owner: BeamOwner?
     @Published public var saving = ManagedAtomic<Bool>(false)
@@ -150,9 +169,18 @@ public class BeamNote: BeamElement {
 
     /// Tombstones is an array containing all the beamelement that once where in this note but that have been erased from it at some point.
     public var tombstones = Set<UUID>()
+    private var _disableAutoSave = false
+    public func withoutAutoSave<T>(_ block: @escaping () -> T) -> T {
+        _disableAutoSave = true
+        let res = block()
+        _disableAutoSave = false
+        return res
+    }
 
+    // This is a bridge to beam's resetCommandManager
+    public static var resetHistory: (BeamNote) -> Void = { _ in }
     public var titleAndId: String {
-        "\(title) {\(id)} v\(version.load(ordering: .relaxed))"
+        "\(title) {\(id)} v\(version.localVersion)"
     }
 
     public override var note: BeamNote? {
@@ -213,6 +241,8 @@ public class BeamNote: BeamElement {
         case tombstones
         case noteSettings
         case tabGroups
+        case version
+        case formatVersion
     }
 
     private var isInitializingFromDecoder = false
@@ -220,6 +250,8 @@ public class BeamNote: BeamElement {
     public required init(from decoder: Decoder) throws {
         isInitializingFromDecoder = true
         let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        try Self.checkFormatVersion(try container.decodeIfPresent(String.self, forKey: .formatVersion))
 
         let ttl = try container.decode(String.self, forKey: .title)
         title = ttl
@@ -262,9 +294,19 @@ public class BeamNote: BeamElement {
             let date = type.journalDate ?? creationDate
             title = BeamDate.journalNoteTitle(for: date)
         }
+
+        version = (try? container.decodeIfPresent(BeamVersion.self, forKey: .version)) ?? BeamVersion()
+
         open = true
         checkHasNote()
         isInitializingFromDecoder = false
+    }
+
+    public private(set) static var formatVersionMain = "0.1.0"
+    public static var formatVersionVariant = ""
+    public static var formatVersion: String { [formatVersionMain, formatVersionVariant].joined(separator: " - ") }
+    static private func checkFormatVersion(_ version: String?) throws {
+        // Do nothing for now
     }
 
     override public func encode(to encoder: Encoder) throws {
@@ -283,6 +325,8 @@ public class BeamNote: BeamElement {
         if !tabGroups.isEmpty {
             try container.encode(tabGroups, forKey: .tabGroups)
         }
+        //try container.encode(version, forKey: .version)
+        try container.encode(Self.formatVersion, forKey: .formatVersion)
         try super.encode(to: encoder)
     }
 
@@ -296,8 +340,7 @@ public class BeamNote: BeamElement {
         newNote.creationDate = creationDate
         newNote.updateDate = updateDate
         newNote.type = type
-        newNote.version.store(version.load(ordering: .relaxed), ordering: .relaxed)
-        newNote.savedVersion = savedVersion
+        newNote.version = version
         newNote.publicationStatus = publicationStatus
         newNote.noteSettings = noteSettings
         newNote.tabGroups = tabGroups
@@ -375,7 +418,10 @@ public class BeamNote: BeamElement {
         fetchedNotesCancellables[cancellableKey] =
             note.changed
             .dropFirst()
-            .receive(on: DispatchQueue.main)
+            .filter({ (element, _) in
+                ((element as? BeamNote)?._disableAutoSave) ?? true
+            })
+            .throttle(for: .milliseconds(16), scheduler: RunLoop.main, latest: true)
             .sink { [weak note] _ in
                 guard let note = note as? BeamNoteDocument else { return }
                 note.autoSave()
@@ -509,6 +555,28 @@ public class BeamNote: BeamElement {
         if !isInitializingFromDecoder { recordScoreWordCount() }
     }
 
+    public func updateWith(_ other: BeamNote) {
+        self.title = other.title
+        self.type = other.type
+        self.publicationStatus = other.publicationStatus
+        self.ongoingPublicationOperation = other.ongoingPublicationOperation
+        self.searchQueries = other.searchQueries
+        self.visitedSearchResults = other.visitedSearchResults
+        self.browsingSessionIds = other.browsingSessionIds
+        self.sources = other.sources
+        self.version = other.version
+        self.owner = other.owner
+        self.saving = other.saving
+        self.updateAttempts = other.updateAttempts
+        self.updates = other.updates
+        self.contactId = other.contactId
+        self.noteSettings = other.noteSettings
+        self.tabGroups = other.tabGroups
+        self.tombstones = other.tombstones
+
+        let existingElements = [UUID: BeamElement](uniqueKeysWithValues: flatElements.map({($0.id, $0)}))
+        super.updateWith(other, allExistingElements: existingElements)
+    }
 }
 
 public func beamCheckMainThread() {

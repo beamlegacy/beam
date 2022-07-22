@@ -13,7 +13,15 @@ extension BeamObjectManagerDelegate {
         // swiftlint:disable:next date_init
         let localTimer = Date()
 
-        let toSaveObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
+        let objectsToSaveWithoutChangedObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
+        objectsToSaveWithoutChangedObjects.forEach {
+            changedObjects[$0.beamObjectId] = $0
+        }
+
+        let toSaveObjects = Array(changedObjects.values)
+
+        changedObjects.removeAll()
+
 
         Logger.shared.logDebug("\(Self.BeamObjectType.beamObjectType.rawValue) manager returned \(toSaveObjects.count) objects",
                                category: .beamObjectNetwork,
@@ -325,6 +333,12 @@ extension BeamObjectManagerDelegate {
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
+        let fullSyncRunning = BeamObjectManager.fullSyncRunning.load(ordering: .relaxed) == true
+        if fullSyncRunning {
+            addChangedObject(object)
+            return nil
+        }
+
         Logger.shared.logDebug("saveOnBeamObjectAPI called. Object \(object.beamObjectId), type: \(type(of: object).beamObjectType)",
                                category: .beamObjectNetwork)
 
@@ -362,6 +376,10 @@ extension BeamObjectManagerDelegate {
         }
 
         return networkTask
+    }
+
+    internal func addChangedObject(_ object: BeamObjectType) {
+        changedObjects[object.beamObjectId] = object
     }
 
     internal func saveOnBeamObjectAPISuccess(object: BeamObjectType,
@@ -426,7 +444,6 @@ extension BeamObjectManagerDelegate {
                     let mergedObject = try manageConflict(conflictedObject, remoteObject)
                     mergedObjects.append(mergedObject)
 
-                    try BeamObjectChecksum.savePreviousChecksum(object: remoteObject)
                 } else {
                     // The remote object doesn't exist, we can just resend it without a `previousChecksum` to create it
                     // server-side

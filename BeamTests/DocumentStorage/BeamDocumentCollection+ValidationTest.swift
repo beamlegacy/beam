@@ -119,7 +119,7 @@ class BeamDocumentCollectionValidationTest: XCTestCase, BeamDocumentSource {
     func testVersions() throws {
         let docA = try documentCollection.fetchOrCreate(self, type: .note(title: "note-a"))
         XCTAssertNotNil(docA)
-        XCTAssertEqual(0, docA.version, "Wrong version number")
+        XCTAssert(docA.version.isInitial, "Wrong version number")
 
         var updatedDocA = try documentCollection.save(self, docA, indexDocument: true)
 
@@ -127,17 +127,17 @@ class BeamDocumentCollectionValidationTest: XCTestCase, BeamDocumentSource {
         XCTAssertEqual(docA.updatedAt, updatedDocA.updatedAt, "updatedAt should not be updated")
 
         // But version is
-        XCTAssertEqual(1, updatedDocA.version, "Version should have been updated")
+        XCTAssertEqual(BeamVersion(localVersion: 1), updatedDocA.version, "Version should have been updated")
 
         // And can be handled by caller too
-        updatedDocA.version = 12
+        updatedDocA.version = BeamVersion(localVersion: 12)
         updatedDocA = try documentCollection.save(self, updatedDocA, indexDocument: true)
-        XCTAssertEqual(13, updatedDocA.version)
+        XCTAssertEqual(BeamVersion(localVersion: 13), updatedDocA.version)
 
-        XCTAssertEqual(0, docA.version, "Wrong version number")
+        XCTAssertEqual(BeamVersion(localVersion: 0), docA.version, "Wrong version number")
 
         // But cannot be lower than current version
-        updatedDocA.version = 11
+        updatedDocA.version = BeamVersion(localVersion: 11)
         XCTAssertThrowsError(try documentCollection.save(self, updatedDocA, indexDocument: true), "Error while trying to avoid previous version")
     }
 

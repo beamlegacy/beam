@@ -149,6 +149,7 @@ protocol BrowsingTreeStoreProtocol {
 }
 
 class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
+    var changedObjects: [UUID : BrowsingTreeRecord] = [:]
     let providedDb: BrowsingTreeDBManager?
     var db: BrowsingTreeDBManager? {
         let currentDb = providedDb ?? BeamData.shared.browsingTreeDBManager

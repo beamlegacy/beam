@@ -50,7 +50,7 @@ class BeamElementJoinTests: XCTestCase {
         parentElement.addChild(paragraph1)
         parentElement.addChild(paragraph2)
         let beamText: BeamText = parentElement.joinTexts
-        XCTAssertEqual(beamText.text, "lorem ipsum... dolor met...")
+        XCTAssertEqual(beamText.text, "lorem ipsum...\n dolor met...\n")
         XCTAssertEqual(beamText.ranges.count, 1)
     }
 
@@ -60,7 +60,7 @@ class BeamElementJoinTests: XCTestCase {
         parentElement.addChild(paragraph1)
         parentElement.addChild(paragraph2)
         let beamText: BeamText = parentElement.joinTexts
-        XCTAssertEqual(beamText.text, "wikipedia dolor met...")
+        XCTAssertEqual(beamText.text, "wikipedia\n dolor met...\n")
         XCTAssertEqual(beamText.ranges.count, 2)
     }
 

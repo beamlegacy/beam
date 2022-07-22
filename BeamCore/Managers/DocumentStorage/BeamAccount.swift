@@ -74,14 +74,17 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
         case signedIn
     }
 
-    public init(id: UUID, email: String, name: String, path: String, overrideDatabasePath: String? = nil, migrate: Bool = true) throws {
+    /// Only use nil as a path for testing purposes
+    public init(id: UUID, email: String, name: String, path: String?, overrideDatabasePath: String? = nil, migrate: Bool = true) throws {
         self.id = id
         self.name = name
         self.email = email
-        self.path = path
+        self.path = path ?? ""
 
-        try createPath()
-        try setup(overrideDatabasePath: overrideDatabasePath, migrate: migrate)
+        if path != nil {
+            try createPath()
+            try setup(overrideDatabasePath: overrideDatabasePath, migrate: migrate)
+        }
     }
 
     private func setup(overrideDatabasePath: String?, migrate: Bool) throws {
