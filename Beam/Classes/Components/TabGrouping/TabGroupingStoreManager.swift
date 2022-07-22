@@ -132,25 +132,31 @@ extension TabGroupingStoreManager {
         TabGroup(id: beamObject.id, pageIds: beamObject.pages.map { $0.id }, title: beamObject.title, color: beamObject.color, isLocked: beamObject.isLocked)
     }
 
-    static func suggestedDefaultTitle(for group: TabGroup) -> String {
-        guard let firstPage = group.pageIds.first, let link = LinkStore.shared.getLinks(for: [firstPage]).first?.value else { return "Empty Tab Group" }
-        let otherPages = group.pageIds.count - 1
-
-        var suggestedTitle = ""
-        if let title = link.title {
-            suggestedTitle.append(contentsOf: title)
+    static func suggestedDefaultTitle(for group: TabGroup, withTabs tabs: [BrowserTab]? = nil, truncated: Bool) -> String {
+        let firstPageTitle: String
+        if let firstTab = tabs?.first {
+            firstPageTitle = firstTab.title
+        } else if let firstPage = group.pageIds.first, let link = LinkStore.shared.getLinks(for: [firstPage]).first?.value {
+            firstPageTitle = link.title ?? ""
         } else {
-            return "\(group.pageIds.count) grouped tabs"
+            return "Empty Tab Group"
         }
-        switch otherPages {
-        case 1:
-            suggestedTitle.append(contentsOf: " and \(otherPages) other tab")
-        case 2...:
-            suggestedTitle.append(contentsOf: " and \(otherPages) other tabs")
-        default:
-            break
+        var result: String = ""
+        let count = tabs?.count ?? group.pageIds.count
+        if !firstPageTitle.isEmpty {
+            if truncated {
+                result = "”\(firstPageTitle.truncated(limit: 25, position: .tail))”"
+            } else {
+                result = firstPageTitle
+            }
+
+            if count > 1 {
+                result += " & \(count - 1) more"
+            }
+        } else {
+            result = "\(count) grouped tab\(count > 1 ? "s" : "")"
         }
-        return suggestedTitle
+        return result
     }
 }
 

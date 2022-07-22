@@ -28,5 +28,4 @@ extension String {
         }
         return self[indexPosition]
     }
-    
 }

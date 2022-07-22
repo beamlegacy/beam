@@ -541,6 +541,11 @@ extension BrowserTabsManager {
         localTabsGroup[tab.id]
     }
 
+    func describingTitle(forGroup group: TabGroup, truncated: Bool = false) -> String {
+        let tabs = tabs(inGroup: group)
+        return TabGroupingStoreManager.suggestedDefaultTitle(for: group, withTabs: tabs, truncated: truncated)
+    }
+
     private func updateClusteringOpenPages() {
         var openTabs: [ClusteringManager.BrowsingTreeOpenInTab] = []
         for tab in tabs where !tab.isPinned {
@@ -646,7 +651,14 @@ extension BrowserTabsManager {
         updateListItems()
     }
 
-    func moveTabToGroup(_ tabId: BrowserTab.TabID, group toGroup: TabGroup?) {
+    func createNewGroup(withTabs tabs: [BrowserTab]) {
+        let group = tabGroupingManager.createNewGroup()
+        tabs.forEach {
+            moveTabToGroup($0.id, group: group)
+        }
+    }
+
+    func moveTabToGroup(_ tabId: BrowserTab.TabID, group toGroup: TabGroup?, reorderInList: Bool = false) {
         guard let item = listItems.allItems.first(where: { $0.tab?.id == tabId }), let tab = item.tab else { return }
         guard let pageId = item.tab?.pageId else { return }
         let beWith: [ClusteringManager.PageID] = toGroup?.pageIds ?? []
@@ -657,6 +669,9 @@ extension BrowserTabsManager {
         tabGroupingManager.pageWasMoved(pageId: pageId, fromGroup: item.group, toGroup: toGroup)
 
         state?.data.clusteringManager.shouldBeWithAndApart(pageId: pageId, beWith: beWith, beApart: beApart)
+        if let toGroup = toGroup, reorderInList {
+            gatherTabsInGroupTogether(toGroup)
+        }
         updateListItems()
         pauseListItemsUpdate = false
     }
