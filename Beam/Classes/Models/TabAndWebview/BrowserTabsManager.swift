@@ -96,17 +96,17 @@ class BrowserTabsManager: ObservableObject {
     private var isModifyingPinnedTabs = false
     private func setupPinnedTabObserver() {
         data.$pinnedTabs
-            .scan(([], [])) { ($0.1, $1) }
-            .sink { [weak self] (previousPinnedTab, newPinnedTabs) in
+            .scan(([], [])) { ($0.1.map({ $0.id }), $1) } // getting the previous pinned tabs ids to avoid leaks (BE-4882)
+            .sink { [weak self] (previousPinnedTabsIds, newPinnedTabs) in
                 guard self?.isModifyingPinnedTabs == false else { return }
-                guard previousPinnedTab != newPinnedTabs else { return }
+                let newPinnedTabsIds = newPinnedTabs.map { $0.id }
+                guard previousPinnedTabsIds != newPinnedTabsIds else { return }
                 // receiving updated pinned tabs from another window
                 let previousTabs = self?.tabs
                 var tabs = previousTabs ?? []
-                let previousIds = previousPinnedTab.map { $0.id }
-                let statePinnedTabs = tabs.filter { $0.isPinned || previousIds.contains($0.id) }
+                let statePinnedTabs = tabs.filter { $0.isPinned || previousPinnedTabsIds.contains($0.id) }
                 guard statePinnedTabs != newPinnedTabs else { return }
-                tabs.removeAll { previousIds.contains($0.id) }
+                tabs.removeAll { previousPinnedTabsIds.contains($0.id) }
                 tabs.insert(contentsOf: newPinnedTabs, at: 0)
                 self?.tabs = tabs
                 self?.changeCurrentTabIfNotVisible(previousTabsList: previousTabs)
