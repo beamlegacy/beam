@@ -189,12 +189,15 @@ extension ElementNode {
             bulletLayer.frame.origin = CGPoint(x: Self.bulletLayerPositionX, y: bulletLayerPositionY)
         }
         let showBullet = self.editor?.note.note?.noteSettings?.bulletPointVisibility == .regular
-        bulletLayer.layer.opacity = Float((showDisclosureButton || !showBullet) ? 0 : 1)
-        bulletLayer.layer.isHidden = !self.isFocused && self.elementText.isEmpty && element.kind.isText
-        if let placeHolder = (self as? TextNode)?.placeholder, !placeHolder.isEmpty, !(editor?.hasFocus ?? false) {
-            bulletLayer.layer.isHidden = false
+        // invisible != hidden. We differentiate for animation and spacing purposes.
+        let isInvisible = showDisclosureButton || !showBullet
+        var isHidden = !self.isFocused && self.elementText.isEmpty && element.kind.isText
+        if isHidden, let placeHolder = (self as? TextNode)?.placeholder, !placeHolder.isEmpty, !(editor?.hasFocus ?? false) {
+            isHidden = false
         }
-
+        bulletLayer.layer.opacity = isInvisible ? 0 : 1
+        bulletLayer.layer.isHidden = isHidden
+        bulletLayer.setAccessibilityRole(!isInvisible && !isHidden ? NSAccessibility.Role.button : NSAccessibility.Role.unknown)
         bulletLayer.layer.backgroundColor = BeamColor.Editor.bullet.cgColor
     }
 
