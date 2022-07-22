@@ -25,6 +25,7 @@ struct PointAndShootCardPicker: View {
 
     typealias ExternalCaptureConfirmation = PointAndShoot.ShootConfirmation
     @State var externalCaptureConfirmation: PointAndShoot.ShootConfirmation?
+    @State var externalCaptureSelectedNote: BeamNote?
     var captureFromOutsideWebPage = false
 
     @StateObject private var autocompleteModel = DestinationNoteAutocompleteList.Model()
@@ -164,8 +165,8 @@ struct PointAndShootCardPicker: View {
                     Icon(name: confirmationIcon, width: 16, color: BeamColor.Generic.text.swiftUI)
                         .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15).delay(0.05)))
                         .onTapGesture {
-                            if confirmation != .failure, let group = completedGroup {
-                                state.navigateToNote(id: group.noteInfo.id)
+                            if confirmation != .failure, let noteId = completedGroup?.noteInfo.id ?? externalCaptureSelectedNote?.id {
+                                state.navigateToNote(id: noteId)
                             }
                         }
                 }
@@ -206,8 +207,8 @@ struct PointAndShootCardPicker: View {
             }
         }
         .onTapGesture {
-            guard let group = completedGroup else { return }
-            state.navigateToNote(id: group.noteInfo.id)
+            guard let noteId = completedGroup?.noteInfo.id ?? externalCaptureSelectedNote?.id else { return }
+            state.navigateToNote(id: noteId)
         }
         .onReceive(autocompleteModel.$results.dropFirst()) { _ in
             enableResizeAnimation()
@@ -346,6 +347,7 @@ extension PointAndShootCardPicker {
 
                 if captureFromOutsideWebPage {
                     externalCaptureConfirmation = externalShootConfirmation
+                    externalCaptureSelectedNote = note
                 }
             }
         } else {
@@ -356,6 +358,7 @@ extension PointAndShootCardPicker {
 
                 if captureFromOutsideWebPage {
                     externalCaptureConfirmation = externalShootConfirmation
+                    externalCaptureSelectedNote = note
                 }
             }
         }

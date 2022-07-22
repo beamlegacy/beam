@@ -194,9 +194,7 @@ struct EditorTabGroupView: View {
         menu.addItem(withTitle: "Delete Group") { _ in
             let group = TabGroupingStoreManager.convertBeamObjectToGroup(tabGroup)
             TabGroupingManager().ungroup(group)
-            if let index = note.tabGroups.firstIndex(of: group.id) {
-                note.tabGroups.remove(at: index)
-            }
+            note.removeTabGroup(group.id)
         }
 
         var location = event.locationInWindow
