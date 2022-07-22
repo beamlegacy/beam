@@ -197,6 +197,9 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     }
 
     private func createPath() throws {
+        if !FileManager.default.fileExists(atPath: path) {
+            accountWillBeCreated()
+        }
         try FileManager.default.createDirectory(at: URL(fileURLWithPath: path), withIntermediateDirectories: true)
     }
 
@@ -286,6 +289,11 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     func clear() {
         databases.values.forEach { $0.clear() }
         clearManagersDB()
+    }
+
+    private func accountWillBeCreated() {
+        Persistence.Sync.BeamObjects.last_received_at = nil
+        Persistence.Sync.BeamObjects.last_updated_at = nil
     }
 }
 
