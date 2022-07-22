@@ -17,6 +17,9 @@ protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol
     associatedtype BeamObjectType: BeamObjectProtocol
     static var uploadType: BeamObjectRequestUploadType { get }
     static var backgroundQueue: DispatchQueue { get }
+
+    var changedObjects: [UUID: BeamObjectType] { get set }
+
     func registerOnBeamObjectManager()
 
     /// When new objects have been received and should be stored locally by the manager

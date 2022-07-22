@@ -1035,4 +1035,41 @@ extension BeamElement {
         guard let parent = parent, let index = indexInParent else { return IndexPath() }
         return parent.indexPath.appending(index)
     }
+
+    public func updateWith(_ other: BeamElement, allExistingElements: [UUID: BeamElement]) {
+        self.text = other.text
+        self.open = other.open
+        self.collapsed = other.collapsed
+
+        let newChildren = other.children.compactMap { element -> BeamElement? in
+            // Try to keep the existing children
+            let newElement: BeamElement
+            if let existingChild = allExistingElements[element.id] {
+                existingChild.updateWith(element, allExistingElements: allExistingElements)
+                newElement = existingChild
+            } else {
+                newElement = element.deepCopy(withNewId: false, selectedElements: nil, includeFoldedChildren: true) ?? element
+            }
+            return newElement
+        }
+        self.replaceChildren(newChildren)
+        self.readOnly = other.readOnly
+        self.creationDate = other.creationDate
+        self.updateDate = other.updateDate
+        self.kind = other.kind
+        self.childrenFormat = other.childrenFormat
+    }
+
+    func replaceChildren(_ newChildren: [BeamElement]) {
+        let toUpdate = newChildren.filter { $0.parent != self }
+        let toRemoveFromParent = [BeamElement: BeamElement?](uniqueKeysWithValues: toUpdate.map { ($0, $0.parent) })
+        toUpdate.forEach { $0.parent = self }
+        children = newChildren
+
+        toRemoveFromParent.forEach { (child, previousParent) in
+            previousParent?.removeChild(child)
+            dispatchChildAdded(child)
+        }
+
+    }
 }

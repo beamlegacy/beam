@@ -10,11 +10,6 @@ import Combine
 import GRDB
 import BeamCore
 
-public protocol BeamDocumentSource {
-    static var sourceId: String { get }
-    var sourceId: String { get }
-}
-
 extension BeamDocumentSource {
     public var sourceId: String { Self.sourceId }
 }
@@ -56,7 +51,7 @@ public enum BeamDocumentCollectionError: Error {
     case invalidJournalDay(BeamDocument)
     case duplicateJournalEntry(BeamDocument)
     case duplicateTitle(BeamDocument)
-    case failedVersionCheck(BeamDocument, existingVersion: Int64, newVersion: Int64)
+    case failedVersionCheck(BeamDocument, existingVersion: BeamVersion, newVersion: BeamVersion)
     case databaseError
     case deletedDocumentsCantBeSavedLocally
 
@@ -90,6 +85,26 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                 table.column("version", .integer).notNull()
                 table.column("isPublic", .boolean).notNull()
                 table.column("journalDate", .integer)
+            }
+        }
+
+        migrator.registerMigration("BeamDocumentCollection.addRealVersion") { db in
+            let documents = try BeamDocument.fetchAll(db)
+            try db.drop(table: BeamDocument.databaseTableName)
+            try db.create(table: BeamDocument.databaseTableName) { table in
+                table.column("id", .blob).notNull().indexed().primaryKey()
+                table.column("source", .text).notNull()
+                table.column("title", .text).notNull().indexed()
+                table.column("createdAt", .date).notNull()
+                table.column("updatedAt", .date).notNull()
+                table.column("data", .blob).notNull()
+                table.column("documentType", .integer).notNull()
+                table.column("version", .blob).notNull()
+                table.column("isPublic", .boolean).notNull()
+                table.column("journalDate", .integer)
+            }
+            for document in documents {
+                _ = try document.inserted(db)
             }
         }
     }
@@ -165,7 +180,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
         var doc = document
         doc.source = source.sourceId
         if autoIncrementVersion {
-            doc.version += 1
+            doc.version = doc.version.incremented()
         }
         try checkValidations(doc)
 
@@ -325,13 +340,17 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                                     deletedAt: nil,
                                     data: noteData,
                                     documentType: note.type.isJournal ? .journal : .note,
-                                    version: note.version.load(ordering: .relaxed),
+                                    version: note.version,
                                     isPublic: note.publicationStatus.isPublic,
                                     journalDate: JournalDateConverter.toInt(from: note.type.journalDateString ?? "0")
         )
 
         try checkValidations(document)
-        try write { try document.insert($0) }
+        do {
+            try write { try document.insert($0) }
+        } catch {
+            Logger.shared.logError("Error creating document \(document) for note \(note): \(error)", category: .document)
+        }
         Self.notifyDocumentSaved(document)
         return document
     }

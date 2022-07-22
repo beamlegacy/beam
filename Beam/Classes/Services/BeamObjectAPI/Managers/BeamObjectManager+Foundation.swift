@@ -713,17 +713,17 @@ extension BeamObjectManager {
                 try BeamObjectChecksum.deletePreviousChecksum(object: conflictedObject)
             }
 
+            if let fetchedObject = fetchedObject {
+                // Remote object was found, we store its checksum
+                try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
+                conflictedObject = manageConflict(conflictedObject, fetchedObject)
+            } else {
+                // Object wasn't found, we delete checksum to resave with `nil` as previousChecksum
+                try BeamObjectChecksum.deletePreviousChecksum(object: conflictedObject)
+            }
+
             switch self.conflictPolicyForSave {
             case .replace:
-                if let fetchedObject = fetchedObject {
-                    // Remote object was found, we store its checksum
-                    try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
-                    conflictedObject = manageConflict(conflictedObject, fetchedObject)
-                } else {
-                    // Object wasn't found, we delete checksum to resave with `nil` as previousChecksum
-                    try BeamObjectChecksum.deletePreviousChecksum(object: conflictedObject)
-                }
-
                 _ = try self.saveToAPI(conflictedObject) { result in
                     switch result {
                     case .failure(let error): completion(.failure(error))
@@ -1062,6 +1062,7 @@ extension BeamObjectManager {
                 try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
                 _ = try self.saveToAPI(newSaveObject, completion)
             case .fetchRemoteAndError:
+                try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
                 completion(.failure(BeamObjectManagerObjectError<T>.invalidChecksum([conflictedObject],
                                                                                     [],
                                                                                     [fetchedObject].compactMap { $0 })))

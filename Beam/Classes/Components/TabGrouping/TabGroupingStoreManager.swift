@@ -10,6 +10,7 @@ import BeamCore
 import GRDB
 
 class TabGroupingStoreManager: GRDBHandler, BeamManager {
+    var changedObjects: [UUID: TabGroupBeamObject] = [:]
 
     static var id = UUID()
     static var name = "TabGroupingStoreManager"

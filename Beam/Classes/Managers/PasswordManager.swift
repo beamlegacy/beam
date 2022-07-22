@@ -5,6 +5,8 @@ import CryptoKit
 import LocalAuthentication
 
 final class PasswordManager {
+    var changedObjects: [UUID: RemotePasswordRecord] = [:]
+
     enum Error: Swift.Error {
         case databaseError(errorMsg: String)
         case decryptionError(errorMsg: String)

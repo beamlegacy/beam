@@ -82,6 +82,7 @@ class APIWebSocketRequest: APIRequest {
                                     delegateQueue: OperationQueue())
 
         webSocketTask = urlSession.webSocketTask(with: request)
+        webSocketTask?.maximumMessageSize = 50*1024*1024 // increase maximum size from 1MB to 50MB
 
         receive_messages()
 

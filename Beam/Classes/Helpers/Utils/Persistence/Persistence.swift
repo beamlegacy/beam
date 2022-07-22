@@ -5,6 +5,9 @@ import BeamCore
 // Inspired from https://www.avanderlee.com/swift/property-wrappers/
 
 struct Persistence {
+    enum Device {
+        @StandardStorable("device.id") static var id: UUID?
+    }
     enum Authentication {
         @KeychainStorable("authentication.accessToken") static var accessToken: String?
         @KeychainStorable("authentication.refreshToken") static var refreshToken: String?

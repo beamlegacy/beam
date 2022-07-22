@@ -62,7 +62,8 @@ public extension BeamElement {
         children.forEach({ child in
             dump(child.kind)
             child.allTexts.forEach({ (_, text) in
-                childrenText.append(text)
+                childrenText.append(text.trimming(.controlCharacters))
+                childrenText.append("\n")
             })
         })
         return childrenText

@@ -50,6 +50,7 @@ extension PrivateKeySignature: BeamObjectProtocol {
 }
 
 class PrivateKeySignatureManager: BeamObjectManagerDelegate {
+    var changedObjects: [UUID: PrivateKeySignature] = [:]
     static var shared = PrivateKeySignatureManager()
 
     internal static var conflictPolicy: BeamObjectConflictResolution = .replace

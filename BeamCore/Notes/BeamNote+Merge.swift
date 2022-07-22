@@ -8,8 +8,32 @@
 import Foundation
 
 public extension BeamNote {
-    func merge(other: BeamNote, ancestor: BeamNote, advantageOther: Bool) {
+    func merge(other: BeamNote, ancestor: BeamNote, advantageOther: Bool) -> BeamVersion.Comparison {
+        if self.id == other.id {
+            switch version.compare(with: other.version) {
+            case .ancestor:
+                Logger.shared.logWarning("BeamNote.merge \(self) and \(other) -> fast forward", category: .document)
+                // We're an ancestor of other so we should forward ourself to it:
+                self.updateWith(other)
+                Self.resetHistory(self)
+                return .ancestor
+            case .descendant:
+                Logger.shared.logWarning("BeamNote.merge \(self) and \(other) -> descendant (do nothing)", category: .document)
+                // We're a direct descendant of other so we already have everything we need, bailout
+                return .descendant
+            case .equal:
+                Logger.shared.logWarning("BeamNote.merge \(self) and \(other) -> equal (do nothing)", category: .document)
+                // We're the same version so we already have everything we need, bailout
+                return .equal
+            case .conflict:
+                Logger.shared.logWarning("BeamNote.merge \(self) and \(other) -> conflict, actual merge", category: .document)
+            }
+        }
+        if self.id != other.id {
+            Logger.shared.logWarning("BeamNote.merge \(self) and \(other) -> conflict or heterogen notes, merge", category: .document)
+        }
         // Merge tombstones and remove elements that have been removed on any parts
+        self.version = self.version.receive(other: other.version)
         let tombstones = self.tombstones.union(other.tombstones)
 
         var ancestorElems = [UUID: BeamElement]()
@@ -59,6 +83,10 @@ public extension BeamNote {
                 element.childrenFormat = otherElement.childrenFormat
             }
         }
+
+        Self.resetHistory(self)
+
+        return .conflict
     }
 
     func concatenate(other: BeamNote) {
@@ -158,6 +186,6 @@ fileprivate extension BeamElement {
             }
         }
 
-        children = newChildren
+        replaceChildren(newChildren)
     }
 }

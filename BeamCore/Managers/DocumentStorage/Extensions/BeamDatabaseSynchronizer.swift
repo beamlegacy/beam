@@ -10,6 +10,8 @@ import BeamCore
 import Combine
 
 class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
+    var changedObjects: [UUID: BeamDatabase] = [:]
+
     static var beamObjectType = BeamObjectObjectType.database
     public static var sourceId: String { "\(Self.self)" }
     weak public private(set) var account: BeamAccount?
