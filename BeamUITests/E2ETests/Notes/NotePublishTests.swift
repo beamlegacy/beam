@@ -148,7 +148,7 @@ class NotePublishTests: BaseTest {
             webView.waitForWebViewToLoad()
             webView.activateSearchFieldFromTab(index: 1)
             let tabURL = webView.getTabUrlAtIndex(index: 1)
-            XCTAssertTrue(tabURL.starts(with: BaseTest().stagingEnvironmentServerAddress), "\(tabURL) doesn't start with staging environment server address: \(BaseTest().stagingEnvironmentServerAddress)")
+            XCTAssertTrue(tabURL.starts(with: self.stagingEnvironmentServerAddress), "\(tabURL) doesn't start with staging environment server address: \(self.stagingEnvironmentServerAddress)")
             XCTAssertTrue(webView.staticText(publishedNoteName).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
@@ -160,7 +160,7 @@ class NotePublishTests: BaseTest {
         }
         
         step("THEN the profile link disappears") {
-            XCTAssertTrue(waitForDoesntExist(noteView.getStagingProfileLinkElement()), "\(BaseTest().stagingEnvironmentServerAddress) link is still visible")
+            XCTAssertTrue(waitForDoesntExist(noteView.getStagingProfileLinkElement()), "\(self.stagingEnvironmentServerAddress) link is still visible")
         }
         
         step("WHEN I reload profile web page") {

@@ -112,7 +112,6 @@ class OmniboxViewTests: BaseTest {
     func testOmniboxDefaultActions() {
 
         let helper = BeamUITestsHelper(journalView.app)
-        let omniboxHelper = OmniBoxUITestsHelper(OmniBoxTestView().app)
         let noteATitle = "Test1"
         let noteBTitle = "Test2"
 
@@ -123,7 +122,7 @@ class OmniboxViewTests: BaseTest {
             uiMenu.createAndOpenNote()
         }
         let results = omniboxView.getAutocompleteResults()
-        let noteResults = results.matching(omniboxHelper.autocompleteNotePredicate)
+        let noteResults = omniboxView.getNoteAutocompleteElementQuery()
 
         // In all note
         step("When I open omnibox in all notes"){
@@ -268,7 +267,6 @@ class OmniboxViewTests: BaseTest {
     
     func testOmniboxCreateNoteMode() {
 
-        let omniboxHelper = OmniBoxUITestsHelper(journalView.app)
         let noteATitle = "Test1"
 
         step("Given I have at least 1 note"){
@@ -313,7 +311,7 @@ class OmniboxViewTests: BaseTest {
             XCTAssertEqual(results.count, 2)
             XCTAssertEqual(results.element(boundBy: 0).label, OmniboxLocators.Labels.createNotePrefix.accessibilityIdentifier)
             XCTAssertEqual(results.element(boundBy: 1).getStringValue(), noteATitle)
-            XCTAssertEqual(results.matching(omniboxHelper.autocompleteCreateNotePredicate).count, 1)
+            XCTAssertEqual(omniboxView.getCreateNoteAutocompleteElementQuery().count, 1)
         }
         
         step("When I press enter"){

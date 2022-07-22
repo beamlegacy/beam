@@ -9,8 +9,7 @@ import Foundation
 import XCTest
 
 class OmniBoxTestView: BaseView {
-
-
+    
     func focusOmniBoxSearchField(forCurrenTab: Bool = false) {
         shortcutHelper.shortcutActionInvoke(action: forCurrenTab ? .openLocation : .newTab)
         _ = getOmniBoxSearchField().waitForExistence(timeout: BaseTest.maximumWaitTimeout)
@@ -35,6 +34,18 @@ class OmniBoxTestView: BaseView {
     
     func getAutocompleteResults() -> XCUIElementQuery {
         return app.links.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Link.autocompleteResult.accessibilityIdentifier)'"))
+    }
+    
+    func getSelectedAutocompleteElementQuery() -> XCUIElementQuery {
+        return getAutocompleteResults().matching(NSPredicate(format: "identifier CONTAINS '-selected'"))
+    }
+    
+    func getCreateNoteAutocompleteElementQuery() -> XCUIElementQuery {
+        return getAutocompleteResults().matching(NSPredicate(format: "identifier CONTAINS '-createNote'"))
+    }
+    
+    func getNoteAutocompleteElementQuery() -> XCUIElementQuery {
+        return getAutocompleteResults().matching(NSPredicate(format: "identifier CONTAINS '-note'"))
     }
     
     func getSearchFieldValue() -> String {
