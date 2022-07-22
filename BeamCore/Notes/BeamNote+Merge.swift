@@ -59,6 +59,11 @@ public extension BeamNote {
             }
         }
 
+        // Merge the tabGroups
+        let allTabGroups = Set(tabGroups).union(Set(other.tabGroups))
+        let tabGroupsByRemovingDeleted = allTabGroups.subtracting(tombstones)
+        self.tabGroups = Array(tabGroupsByRemovingDeleted)
+
         self.tombstones = tombstones
 
         var placed = Set<UUID>()

@@ -165,7 +165,7 @@ public class BeamNote: BeamElement {
     public var contactId: UUID? { didSet { change(.meta) } }
     @Published public var noteSettings: NoteMetadata? = NoteMetadata() { didSet { change(.meta) } }
 
-    @Published public var tabGroups: [UUID] = [] { didSet { change(.meta) } }
+    @Published public internal(set) var tabGroups: [UUID] = [] { didSet { change(.meta) } }
 
     /// Tombstones is an array containing all the beamelement that once where in this note but that have been erased from it at some point.
     public var tombstones = Set<UUID>()
@@ -489,7 +489,7 @@ public class BeamNote: BeamElement {
     private static let fetchedLock = RWLock()
 
     public override var debugDescription: String {
-        return "BeamNode(\(id)) [\(children.count) children]: \(title)"
+        return "BeamNote(\(id)) [\(children.count) children]: \(title)"
     }
 
     public let lock = RWLock()
@@ -584,5 +584,18 @@ public func beamCheckMainThread() {
         fatalError()
     }
     #endif
+}
+
+extension BeamNote {
+    public func addTabGroup(_ id: UUID) {
+        self.tabGroups.append(id)
+    }
+
+    public func removeTabGroup(_ id: UUID) {
+        if let index = tabGroups.firstIndex(of: id) {
+            tabGroups.remove(at: index)
+            self.tombstones.insert(id)
+        }
+    }
 }
 // swiftlint:enable file_length
