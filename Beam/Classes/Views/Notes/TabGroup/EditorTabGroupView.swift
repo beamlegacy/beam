@@ -95,6 +95,7 @@ struct EditorTabGroupView: View {
         } else {
             Text(tabGroup.title ?? "Unnamed Tab Group")
                 .font(BeamFont.medium(size: 11).swiftUI)
+                .truncationMode(.middle)
                 .lineLimit(1)
                 .foregroundColor(BeamColor.Editor.link.swiftUI)
                 .transition(titleTransition(reversed: false))
