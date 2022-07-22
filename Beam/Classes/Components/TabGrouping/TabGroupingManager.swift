@@ -72,6 +72,9 @@ class TabGroupingManager {
         }
     }
 
+    func createNewGroup() -> TabGroup {
+        TabGroup(pageIds: [], color: colorGenerator.generateNewColor())
+    }
 }
 
 // MARK: - Group Editing
@@ -254,7 +257,7 @@ extension TabGroupingManager {
                     finalGroup = manualGroupWithMostMatches.group
                 } else {
                     // no group? create one for leftovers.
-                    finalGroup = .init(pageIds: [])
+                    finalGroup = createNewGroup()
                 }
 
             } else if suggestedGroupsFound.count == 1, let first = suggestedGroupsFound.first {
@@ -276,10 +279,10 @@ extension TabGroupingManager {
                 if bestCount > 0, let bestGroup = bestGroup {
                     finalGroup = bestGroup
                 } else {
-                    finalGroup = .init(pageIds: [])
+                    finalGroup = createNewGroup()
                 }
             } else {
-                finalGroup = .init(pageIds: [])
+                finalGroup = createNewGroup()
             }
 
             unassignedPages.forEach { pageId in

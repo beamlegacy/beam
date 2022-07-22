@@ -28,7 +28,6 @@ class BrowserTabsManagerTests: XCTestCase {
         return tab
     }
 
-
     func testMoveItemWithTabsOnly() {
         let tabs = [
             tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D")
@@ -254,6 +253,37 @@ class BrowserTabsManagerTests: XCTestCase {
         sut.addNewTabAndNeighborhood(tabD, setCurrent: true, at: 0)
         XCTAssertEqual(sut.tabs, [tabA, tabD, tabB, tabC])
         XCTAssertFalse(tabD.isPinned)
+    }
+
+    func testTitleDescribingGroup() {
+        var tabs = [
+            tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D With Very Long Title truncated")
+        ]
+        let groupA = TabGroup(pageIds: [])
+        let tabGroups = [
+            tabs[1].id: groupA,
+            tabs[3].id: groupA
+        ]
+        sut.tabs = tabs
+        sut._testSetLocalTabsGroups(tabGroups)
+
+        var result = sut.describingTitle(forGroup: groupA, truncated: true)
+        XCTAssertEqual(result, "”Tab B” & 1 more")
+        result = sut.describingTitle(forGroup: groupA, truncated: false)
+        XCTAssertEqual(result, "Tab B & 1 more")
+
+        tabs.move(fromOffsets: IndexSet(integer: 3), toOffset: 0)
+        sut.tabs = tabs
+        result = sut.describingTitle(forGroup: groupA, truncated: true)
+        XCTAssertEqual(result, "”Tab D With Very Long Titl…” & 1 more")
+        result = sut.describingTitle(forGroup: groupA, truncated: false)
+        XCTAssertEqual(result, "Tab D With Very Long Title truncated & 1 more")
+
+        sut._testSetLocalTabsGroups([ tabs[0].id: groupA ])
+        result = sut.describingTitle(forGroup: groupA, truncated: true)
+        XCTAssertEqual(result, "”Tab D With Very Long Titl…”")
+        result = sut.describingTitle(forGroup: groupA, truncated: false)
+        XCTAssertEqual(result, "Tab D With Very Long Title truncated")
     }
 }
 
