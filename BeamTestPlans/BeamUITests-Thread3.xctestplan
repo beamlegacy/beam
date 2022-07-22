@@ -120,6 +120,7 @@
         "NoteViewEmbedsTests",
         "NoteViewTests",
         "NotesNavigationHistoryTests",
+        "NotesPreferencesTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
         "OmniboxViewTests",
