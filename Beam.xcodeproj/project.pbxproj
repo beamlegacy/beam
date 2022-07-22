@@ -1016,6 +1016,9 @@
 		A38D1A29284A11B6007EBB25 /* Equalable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38D1A28284A11B6007EBB25 /* Equalable.swift */; };
 		A39F7259284F92970085DDCA /* AllNotesPublishProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */; };
 		A3A89D952837CD2E00A47B2E /* test_SVG.svg in Resources */ = {isa = PBXBuildFile; fileRef = A3A89D942837CD2E00A47B2E /* test_SVG.svg */; };
+		A3AF8CF02888918B00FB6310 /* NotesPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AF8CEF2888918B00FB6310 /* NotesPreferencesTests.swift */; };
+		A3AF8CF22888926800FB6310 /* NotesPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AF8CF12888926800FB6310 /* NotesPreferencesTestView.swift */; };
+		A3AF8CF4288893AE00FB6310 /* NotesPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AF8CF3288893AE00FB6310 /* NotesPreferencesViewLocators.swift */; };
 		A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C9662861C4A900E7F78C /* UITestFrameworkTests.swift */; };
 		A3B6C9722861F15600E7F78C /* AccountPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C9712861F15600E7F78C /* AccountPreferencesTests.swift */; };
 		A3B6C97D2862FC0000E7F78C /* BrowserPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C97C2862FC0000E7F78C /* BrowserPreferencesTests.swift */; };
@@ -2947,6 +2950,9 @@
 		A38D1A28284A11B6007EBB25 /* Equalable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Equalable.swift; sourceTree = "<group>"; };
 		A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesPublishProfileTests.swift; sourceTree = "<group>"; };
 		A3A89D942837CD2E00A47B2E /* test_SVG.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = test_SVG.svg; sourceTree = "<group>"; };
+		A3AF8CEF2888918B00FB6310 /* NotesPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesPreferencesTests.swift; sourceTree = "<group>"; };
+		A3AF8CF12888926800FB6310 /* NotesPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesPreferencesTestView.swift; sourceTree = "<group>"; };
+		A3AF8CF3288893AE00FB6310 /* NotesPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		A3B6C9662861C4A900E7F78C /* UITestFrameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestFrameworkTests.swift; sourceTree = "<group>"; };
 		A3B6C9712861F15600E7F78C /* AccountPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPreferencesTests.swift; sourceTree = "<group>"; };
 		A3B6C97C2862FC0000E7F78C /* BrowserPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPreferencesTests.swift; sourceTree = "<group>"; };
@@ -7004,6 +7010,14 @@
 			path = TableRows;
 			sourceTree = "<group>";
 		};
+		A3AF8CE92888916300FB6310 /* Notes */ = {
+			isa = PBXGroup;
+			children = (
+				A3AF8CEF2888918B00FB6310 /* NotesPreferencesTests.swift */,
+			);
+			path = Notes;
+			sourceTree = "<group>";
+		};
 		A3B6C9602861C48900E7F78C /* HelpersTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -7767,6 +7781,7 @@
 				A3539E2328326EA100035A21 /* CreditCardTestView.swift */,
 				D7858BCC283BC4C700D0336A /* AutoFillCCTestView.swift */,
 				A3B6C982286317E200E7F78C /* BrowserPreferencesTestView.swift */,
+				A3AF8CF12888926800FB6310 /* NotesPreferencesTestView.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -7784,6 +7799,7 @@
 				D7858BCE283BC4E000D0336A /* AutoFillCCViewLocators.swift */,
 				A3B6C9892863181F00E7F78C /* BrowserPreferencesViewLocators.swift */,
 				A340D03A2880383100980545 /* GeneralPreferencesViewLocators.swift */,
+				A3AF8CF3288893AE00FB6310 /* NotesPreferencesViewLocators.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -7901,6 +7917,7 @@
 		B5FAE2F1270ECEC500EAC8A3 /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
+				A3AF8CE92888916300FB6310 /* Notes */,
 				A340D032288035B100980545 /* General */,
 				A3B6C96B2861F13E00E7F78C /* Account */,
 				A3B6C9762862FB6800E7F78C /* Browser */,
@@ -9914,6 +9931,7 @@
 				B58A175027514E0100A588C4 /* NoteViewEmbedsTests.swift in Sources */,
 				B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */,
 				D775219A2852262B007408DA /* NotePinUnpinTests.swift in Sources */,
+				A3AF8CF22888926800FB6310 /* NotesPreferencesTestView.swift in Sources */,
 				B5A76EB927FB3E1100964340 /* OnboardingSignupWithEmailViewLocators.swift in Sources */,
 				B5FB3A2227E8D30C00037FD5 /* OnboardingImportDataTestView.swift in Sources */,
 				A3D2898B280864DD00FA0D3A /* OnboardingLostPKTestView.swift in Sources */,
@@ -10012,6 +10030,7 @@
 				B551F3C326BD100300B72D27 /* WebsiteAuthPopupViewLocators.swift in Sources */,
 				D7858BC6283BB5A000D0336A /* CreditCardAutocompleteTests.swift in Sources */,
 				B5DC1F8A26B19C8700A4C94B /* OmniBoxTestView.swift in Sources */,
+				A3AF8CF02888918B00FB6310 /* NotesPreferencesTests.swift in Sources */,
 				A3539E2428326EA100035A21 /* CreditCardTestView.swift in Sources */,
 				D75EEB402844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift in Sources */,
 				A340D039288035CF00980545 /* GeneralPreferencesTests.swift in Sources */,
@@ -10064,6 +10083,7 @@
 				B5984C9A27031F3B00192B5F /* AutoFillPasswordsTestView.swift in Sources */,
 				A38D1A25284A10DC007EBB25 /* RowCreditCardsTestTable.swift in Sources */,
 				B5CDFF31274E400F00742CC9 /* OnboardingLandingViewLocators.swift in Sources */,
+				A3AF8CF4288893AE00FB6310 /* NotesPreferencesViewLocators.swift in Sources */,
 				A388B452280DE43F008D2247 /* PDFFilesBrowserViewTests.swift in Sources */,
 				8AA6D92427FB4E3400F42FAB /* UITestPageBrowserWindow.swift in Sources */,
 				B5BA078D26B0027A00D31FED /* NoteEditTests.swift in Sources */,

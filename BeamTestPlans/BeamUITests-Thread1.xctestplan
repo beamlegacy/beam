@@ -113,6 +113,7 @@
         "NotePublishTests",
         "NotePublishTests\/testDefaultPublishStatus()",
         "NotesNavigationHistoryTests",
+        "NotesPreferencesTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
         "OmniboxViewTests",
