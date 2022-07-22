@@ -59,4 +59,36 @@ class BeamAccountTest: XCTestCase, BeamDocumentSource {
         XCTAssertNoThrow(try account.save())
         XCTAssertNoThrow(try BeamAccount.load(fromFolder: "\(basePath)/foo"))
     }
+
+    func testAccountWillBeCreated() throws {
+        BeamDate.freeze("2021-01-01T15:00:00+000")
+        let now = BeamDate.now
+
+        let previousLastReceivedAt = Persistence.Sync.BeamObjects.last_received_at
+        let previousLastUpdatedAt = Persistence.Sync.BeamObjects.last_updated_at
+
+        Persistence.Sync.BeamObjects.last_received_at = now
+        Persistence.Sync.BeamObjects.last_updated_at = now
+
+        if FileManager.default.fileExists(atPath: "\(basePath)/foo") {
+            try FileManager.default.removeItem(atPath: "\(basePath)/foo")
+        }
+        let account = try BeamAccount(id: UUID(), email: "test@beamapp.co", name: "test", path: "\(basePath)/foo")
+        XCTAssertNil(Persistence.Sync.BeamObjects.last_received_at)
+        XCTAssertNil(Persistence.Sync.BeamObjects.last_updated_at)
+
+        Persistence.Sync.BeamObjects.last_received_at = BeamDate.now
+        Persistence.Sync.BeamObjects.last_updated_at = BeamDate.now
+
+        XCTAssertNoThrow(try account.save())
+
+        XCTAssertNotNil(Persistence.Sync.BeamObjects.last_received_at)
+        XCTAssertNotNil(Persistence.Sync.BeamObjects.last_updated_at)
+
+        try FileManager.default.removeItem(atPath: "\(basePath)/foo")
+
+        Persistence.Sync.BeamObjects.last_received_at = previousLastReceivedAt
+        Persistence.Sync.BeamObjects.last_updated_at = previousLastUpdatedAt
+
+    }
 }
