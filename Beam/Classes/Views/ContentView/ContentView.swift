@@ -12,7 +12,9 @@ struct ContentView: View {
     @EnvironmentObject var windowInfo: BeamWindowInfo
 
     @State private var contentIsScrolled = false
-    @State var sideNoteWidth: CGFloat = 600
+    
+    @State var sideNoteWidth: CGFloat = 500
+    @State private var previousDragChangeTime: Date?
 
     private var isToolbarAboveContent: Bool {
         contentIsScrolled && [.note, .today].contains(state.mode)
@@ -65,10 +67,25 @@ struct ContentView: View {
                 .foregroundColor(.clear)
                 .cursorOverride(.resizeLeftRight)
                 .gesture(DragGesture().onChanged { value in
+                    // This is a basic throttling mecanism to prevent to many relayout during the resize.
+                    // Too many relayout seems to cause a loop inside AttributedGraph's code
+                    if let previousDragChangeTime = previousDragChangeTime,
+                        value.time.timeIntervalSince(previousDragChangeTime) < 0.01 {
+                        return
+                    }
+                    previousDragChangeTime = value.time
                     let newWidth = sideNoteWidth - value.translation.width
-                    sideNoteWidth = newWidth.clamp(400, 800)
+                    sideNoteWidth = newWidth.clamp(400, maxWidthForSplitView)
                 })
         }
+    }
+
+    private var maxWidthForSplitView: CGFloat {
+        guard let associatedWindow = state.associatedWindow else { return 500 }
+        let currentWindowWidth = associatedWindow.frame.width
+        let minWidth = AppDelegate.minimumSize(for: associatedWindow).width
+
+        return min(currentWindowWidth - minWidth, 800)
     }
 
     var body: some View {
