@@ -37,8 +37,8 @@ class PnSTestView: BaseView {
         typeKeyboardKey(.delete)
         destinationNote.typeText(noteName)
 
-        let helper = OmniBoxUITestsHelper(app)
-        let notesResults = helper.allAutocompleteResults.matching(createNote ? helper.autocompleteCreateNotePredicate : helper.autocompleteNotePredicate)
+        let omniboxView = OmniBoxTestView()
+        let notesResults = createNote ? omniboxView.getCreateNoteAutocompleteElementQuery() : omniboxView.getNoteAutocompleteElementQuery()
         XCTAssertTrue(notesResults.firstMatch.waitForExistence(timeout: BaseTest.implicitWaitTimeout), "PnS Note picker drop down didn't appear")
         notesResults.element(boundBy: 0).clickOnExistence()
     }

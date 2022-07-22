@@ -23,7 +23,7 @@ class RightClickTextMenuTests: BaseTest {
 
         for item in RightClickMenuViewLocators.TextMenuItems.allCases {
             // Translate menu not available on Big Sur
-            if !(BaseTest().isBigSurOS() && item.accessibilityIdentifier == "WKMenuItemIdentifierTranslate") {
+            if !(self.isBigSurOS() && item.accessibilityIdentifier == "WKMenuItemIdentifierTranslate") {
                 XCTAssertTrue(app.menuItems[item.accessibilityIdentifier].exists)
             }
         }
