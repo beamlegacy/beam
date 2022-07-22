@@ -443,17 +443,23 @@ extension BeamDocumentSynchronizer {
     private func receiveDocument(_ document: BeamDocument, localDocument: BeamDocument? = nil) throws {
         Logger.shared.logInfo("receiveDocument \(document.titleAndId) (local: \(localDocument?.titleAndId ?? "nil"))", category: .sync)
         var doc = document
+
+        var mustDisableSync = true
         if let localDocument = localDocument {
             doc.version = doc.version.receive(other: localDocument.version)
 
             if document.title != localDocument.title {
                 DispatchQueue.mainSync {
                     BeamNote.updateTitleLocally(self, id: document.id, document.title)
+                    mustDisableSync = false
                 }
             }
         }
 
-        _ = try doc.collection?.save(self, doc, indexDocument: true)
+        // This is a document that comes straight from the sync and that hasn't been updated, store it as is
+        disableSync = mustDisableSync
+        _ = try doc.collection?.save(self, doc, indexDocument: true, autoIncrementVersion: false)
+        disableSync = false
         try recalculateFileReferences(doc)
     }
 
