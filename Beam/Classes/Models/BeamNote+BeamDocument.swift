@@ -47,7 +47,7 @@ public extension BeamNote {
                             updatedAt: updateDate,
                             data: Data(),
                             documentType: type.isJournal ? .journal : .note,
-                            version: version.load(ordering: .relaxed),
+                            version: version,
                             isPublic: publicationStatus.isPublic,
                             journalDate: JournalDateConverter.toInt(from: type.journalDateString ?? "0")
         )
@@ -62,10 +62,10 @@ public extension BeamNote {
             decoder.userInfo[BeamElement.recursiveCoding] = false
         }
         let note = try decoder.decode(BeamNote.self, from: document.data)
-        note.version.store(document.version, ordering: .relaxed)
+        note.version = document.version
         note.owner = document.database
-        note.savedVersion.store(note.version.load(ordering: .relaxed), ordering: .relaxed)
         note.updateDate = document.updatedAt
+
         if keepInMemory {
             appendToFetchedNotes(note)
         }
@@ -103,8 +103,8 @@ public extension BeamNote {
                                    category: .documentNotification)
             return
         }
-        if note.version.load(ordering: .relaxed) >= document.version, note.id == document.id {
-            Logger.shared.logDebug("\(note.titleAndId) observer skipped \(document.version) (must be > \(note.version.load(ordering: .relaxed))",
+        if document.version <= note.version, note.id == document.id {
+            Logger.shared.logDebug("\(note.titleAndId) observer skipped \(document.version) (must be > \(note.version)",
                                    category: .documentNotification)
             return
         }
@@ -145,8 +145,8 @@ public extension BeamNote {
     func updateWithDocument(_ document: BeamDocument, file: StaticString = #file, line: UInt = #line) {
         beamCheckMainThread()
         let context = "file: \(file):\(line)"
-        if self.version.load(ordering: .relaxed) >= document.version, self.id == document.id {
-            Logger.shared.logDebug("\(self.titleAndId) update skipped \(document.version) (must be > \(self.version.load(ordering: .relaxed))) [caller: \(context)]",
+        if document.version <= self.version , self.id == document.id {
+            Logger.shared.logDebug("\(self.titleAndId) update skipped \(document.version) (must be > \(self.version)) [caller: \(context)]",
                                    category: .document)
             return
         }
@@ -169,10 +169,8 @@ public extension BeamNote {
         self.searchQueries = newSelf.searchQueries
         self.visitedSearchResults = newSelf.visitedSearchResults
 
-        self.version.store(document.version, ordering: .relaxed)
+        self.version = document.version
         self.owner = document.database
-
-        self.savedVersion.store(self.version.load(ordering: .relaxed), ordering: .relaxed)
 
         Logger.shared.logDebug("updateWithDocument updating \(title) - \(id) [caller: \(context)]", category: .document)
         recursiveUpdate(other: newSelf)
@@ -228,14 +226,16 @@ public extension BeamNote {
         sign.end(Signs.indexContents)
     }
 
-    func save(_ source: BeamDocumentSource) -> Bool {
-        let originalVersion = version.load(ordering: .relaxed)
-        version.wrappingIncrement(ordering: .relaxed)
+    func save(_ source: BeamDocumentSource, autoIncrementVersion: Bool = true) -> Bool {
+        let originalVersion = version
+        if autoIncrementVersion {
+            version = originalVersion.incremented()
+        }
 
         guard let document = document,
               let collection = document.collection
         else {
-            version.store(originalVersion, ordering: .relaxed)
+            version = originalVersion
             return false
         }
 
@@ -245,7 +245,7 @@ public extension BeamNote {
             indexContents()
         } catch {
             Logger.shared.logError("Failed to save note \(self): \(error)", category: .document)
-            version.store(originalVersion, ordering: .relaxed)
+            version = originalVersion
             return false
         }
 
@@ -280,9 +280,8 @@ public extension BeamNote {
         guard let previousData = BeamObjectChecksum.sentData(object: document) else { return nil }
 
         let note = try decoder.decode(BeamNote.self, from: previousData)
-        note.version.store(document.version, ordering: .relaxed)
+        note.version = document.version
         note.owner = document.database
-        note.savedVersion.store(note.version.load(ordering: .relaxed), ordering: .relaxed)
         note.updateDate = document.updatedAt
 
         return note

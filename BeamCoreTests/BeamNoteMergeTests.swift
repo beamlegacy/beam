@@ -44,7 +44,7 @@ class BeamNoteMergeTests: XCTestCase {
     func runScenario(_ scenario: String) throws {
         try XCTContext.runActivity(named: "BeamNoteMerge.\(scenario)") { _ in
             let (ancestor, noteA, noteB, result) = try notesFor(scenario: scenario)
-            noteA.merge(other: noteB, ancestor: ancestor, advantageOther: false)
+            _ = noteA.merge(other: noteB, ancestor: ancestor, advantageOther: false)
             if scenario.contains("[fail]") {
                 XCTAssertNotEqual(noteA.joinTexts, result.joinTexts, "scenario \(scenario) failed")
             } else {

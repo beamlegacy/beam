@@ -15,6 +15,8 @@ class BeamDocumentCollectionTest: XCTestCase, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
     var store: GRDBStore!
     var documentCollection: BeamDocumentCollection!
+    var account: BeamAccount!
+    var database: BeamDatabase!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -22,7 +24,9 @@ class BeamDocumentCollectionTest: XCTestCase, BeamDocumentSource {
         let db = try DatabaseQueue(path: dbPath)
         store = GRDBStore(writer: db)
         try store.erase()
-        documentCollection = try BeamDocumentCollection(holder: nil, store: store)
+        account = try BeamAccount(id: UUID(), email: "test@beamapp.co", name: "testAccount", path: nil)
+        database = BeamDatabase(account: account, id: UUID(), name: "testDB")
+        documentCollection = try BeamDocumentCollection(holder: database, store: store)
         try store.migrate()
     }
 

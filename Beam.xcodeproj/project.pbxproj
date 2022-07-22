@@ -692,6 +692,8 @@
 		8AF4F7D1275A67750081B6B5 /* EmbedContentCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7D0275A67750081B6B5 /* EmbedContentCache.swift */; };
 		8AF4F7D3275A67960081B6B5 /* EmbedContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7D2275A67960081B6B5 /* EmbedContent.swift */; };
 		8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */; };
+		9602A305287DC6FA00E22C2D /* BeamVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9602A304287DC6FA00E22C2D /* BeamVersion.swift */; };
+		9602A30C287E7A1200E22C2D /* BeamVersionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9602A30B287E7A1200E22C2D /* BeamVersionTests.swift */; };
 		9606616827AC1F5E007D3DD0 /* PrivateKeySignature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9606616727AC1F5E007D3DD0 /* PrivateKeySignature.swift */; };
 		9609AF502617159B00322141 /* URL+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+Beam.swift */; };
 		960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E3264C84BD0061E8D2 /* ProxyElement.swift */; };
@@ -2640,6 +2642,8 @@
 		8AF61F11267BA292006DD5C2 /* RBAllowlistEntry-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RBAllowlistEntry-Private.h"; sourceTree = "<group>"; };
 		8AF61F12267BA292006DD5C2 /* RBAllowlistEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBAllowlistEntry.h; sourceTree = "<group>"; };
 		8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RBAllowlistEntry.m; sourceTree = "<group>"; };
+		9602A304287DC6FA00E22C2D /* BeamVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamVersion.swift; sourceTree = "<group>"; };
+		9602A30B287E7A1200E22C2D /* BeamVersionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamVersionTests.swift; sourceTree = "<group>"; };
 		9606616727AC1F5E007D3DD0 /* PrivateKeySignature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateKeySignature.swift; sourceTree = "<group>"; };
 		960A57E3264C84BD0061E8D2 /* ProxyElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyElement.swift; sourceTree = "<group>"; };
 		960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProxyImageNode.swift; sourceTree = "<group>"; };
@@ -6494,6 +6498,7 @@
 				969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */,
 				DA8D947E27FF17D90073AD2D /* NoteScores.swift */,
 				A01EB6BB2840DE430032962D /* NoteMetadata.swift */,
+				9602A304287DC6FA00E22C2D /* BeamVersion.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -6555,6 +6560,7 @@
 				96F2DED127BE3504007CF466 /* BeamNoteMergeTests.swift */,
 				96A5DAEF27C04D7B00746719 /* BeamTextMergeTests.swift */,
 				DAF063F227D130F6000406DE /* Date+DayTruncatedTests.swift */,
+				9602A30B287E7A1200E22C2D /* BeamVersionTests.swift */,
 			);
 			path = BeamCoreTests;
 			sourceTree = "<group>";
@@ -8839,6 +8845,7 @@
 				A01EB6BC2840DE430032962D /* NoteMetadata.swift in Sources */,
 				BAA679844CE644AE293FDA04 /* BrowsingSession.swift in Sources */,
 				96A5DAF227C056F700746719 /* BeamText+Merge.swift in Sources */,
+				9602A305287DC6FA00E22C2D /* BeamVersion.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8877,6 +8884,7 @@
 				963DBB3B2698605600080928 /* BeamText+LinksTests.swift in Sources */,
 				96A5DAED27C0254300746719 /* DiffTests.swift in Sources */,
 				A5A6A428267F123C007F1B2F /* CommandManagerTests.swift in Sources */,
+				9602A30C287E7A1200E22C2D /* BeamVersionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

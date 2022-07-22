@@ -18,7 +18,6 @@ extension BeamObjectManager {
 
         do {
             defer {
-                // Reactivate sending object
                 Self.disableSendingObjects = false
                 Self.fullSyncRunning.store(false, ordering: .relaxed)
             }
@@ -645,17 +644,17 @@ extension BeamObjectManager {
                 try BeamObjectChecksum.deletePreviousChecksum(object: conflictedObject)
             }
 
+            if let fetchedObject = fetchedObject {
+                // Remote object was found, we store its checksum
+                try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
+                conflictedObject = manageConflict(conflictedObject, fetchedObject)
+            } else {
+                // Object wasn't found, we delete checksum to resave with `nil` as previousChecksum
+                try BeamObjectChecksum.deletePreviousChecksum(object: conflictedObject)
+            }
+
             switch self.conflictPolicyForSave {
             case .replace:
-                if let fetchedObject = fetchedObject {
-                    // Remote object was found, we store its checksum
-                    try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
-                    conflictedObject = manageConflict(conflictedObject, fetchedObject)
-                } else {
-                    // Object wasn't found, we delete checksum to resave with `nil` as previousChecksum
-                    try BeamObjectChecksum.deletePreviousChecksum(object: conflictedObject)
-                }
-
                 _ = try await self.saveToAPI(conflictedObject)
                 return goodObjects + [conflictedObject]
             case .fetchRemoteAndError:
@@ -903,6 +902,7 @@ extension BeamObjectManager {
                 try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
                 return try await self.saveToAPI(newSaveObject)
             case .fetchRemoteAndError:
+                try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
                 throw BeamObjectManagerObjectError<T>.invalidChecksum([conflictedObject],
                                                                                     [],
                                                                                     [fetchedObject].compactMap { $0 })

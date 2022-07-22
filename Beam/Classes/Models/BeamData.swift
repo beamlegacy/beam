@@ -271,31 +271,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
                 BeamNote.purgeDeletedNode(self, deletedDocument.id)
             }.store(in: &scope)
 
-        BeamData.shared.$currentDatabase
-            // Drop the very first event that is sent during subscription as it's sent before we
-            // even set the current database to any meaningful value.
-            .dropFirst()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] db in
-                guard let self = self,
-                      db != BeamData.shared.currentDatabase
-                else { return }
-                BeamNote.clearFetchedNotes()
-                try? self.reloadJournal()
-
-                let dbID = db?.id
-                for window in AppDelegate.main.windows {
-                    switch window.state.mode {
-                    case .note:
-                        if window.state.currentNote?.databaseId != dbID {
-                            window.state.navigateToJournal(note: nil, clearNavigation: true)
-                        }
-                    default:
-                        break
-                    }
-                }
-            }.store(in: &scope)
-
         PreferencesManager.$alwaysShowBullets
             .receive(on: DispatchQueue.main)
             .sink { alwaysShowBullets in
@@ -691,7 +666,21 @@ extension BeamData {
         currentDatabase = db
         currentDocumentCollection = db.collection
         Persistence.Account.currentDatabaseId = db.id
+
         registerWithBeamObjectManager()
+
+        BeamNote.clearFetchedNotes()
+
+        DispatchQueue.main.async { [weak self] in
+            try? self?.reloadJournal()
+
+            let dbID = db.id
+            for window in AppDelegate.main.windows where window.state.mode == .note {
+                if window.state.currentNote?.databaseId != dbID {
+                    window.state.navigateToJournal(note: nil, clearNavigation: true)
+                }
+            }
+        }
     }
 
     func saveAccounts() throws {
