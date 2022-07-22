@@ -635,11 +635,13 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             newChildren.remove(at: index)
             newChildren.insert(child, at: min(children.count, pos))
             children = newChildren
+            dispatchChildAdded(child)
             return
         }
         child.parent = self
         previousParent?.removeChild(child)
         children.insert(child, at: min(children.count, pos))
+        dispatchChildAdded(child)
     }
 
     func checkHasParent() {

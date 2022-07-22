@@ -419,7 +419,7 @@ public class BeamNote: BeamElement {
             note.changed
             .dropFirst()
             .filter({ (element, _) in
-                ((element as? BeamNote)?._disableAutoSave) ?? true
+                element.note?._disableAutoSave == false
             })
             .throttle(for: .milliseconds(16), scheduler: RunLoop.main, latest: true)
             .sink { [weak note] _ in
@@ -538,7 +538,6 @@ public class BeamNote: BeamElement {
 
     public override func dispatchChildRemoved(_ child: BeamElement) {
         guard changePropagationEnabled else { return }
-        guard child.parent != self else { return }
         tombstones.insert(child.id)
     }
 
