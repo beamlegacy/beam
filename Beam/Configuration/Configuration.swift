@@ -102,7 +102,7 @@ struct Configuration {
         }
     }
 
-    static private(set) var directUploadNIODefault = false
+    static private(set) var directUploadNIODefault = Configuration.branchType == .develop
 
     static private var directUploadNIOKey = "directUploadNIO"
     static var directUploadNIO: Bool {
@@ -120,7 +120,7 @@ struct Configuration {
         }
     }
 
-    static private(set) var directUploadAllObjectsDefault = false
+    static private(set) var directUploadAllObjectsDefault = Configuration.branchType == .develop
 
     static private var directUploadAllObjectsKey = "directUploadAllObjects"
     static var directUploadAllObjects: Bool {
