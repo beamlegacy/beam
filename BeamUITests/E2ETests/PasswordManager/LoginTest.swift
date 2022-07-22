@@ -19,9 +19,9 @@ class LoginTest: BaseTest {
     let testUrl = "UITests-Password.html"
         
     func preparation() -> AlertTestView {
-        let helper = BeamUITestsHelper(launchApp().app)
-        email = helper.randomEmail()
-        password = helper.randomPassword()
+        launchApp()
+        email = self.getRandomEmail()
+        password = self.getRandomPassword()
         uiMenu.loadUITestPagePassword()
         testPage.enterInput(password, .password) //password first to avoid Other Passwords cover over the Submit button
         testPage.enterInput(email, .username)

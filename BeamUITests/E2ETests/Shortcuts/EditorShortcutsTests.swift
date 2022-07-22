@@ -129,7 +129,7 @@ class EditorShortcutsTests: BaseTest {
         try XCTSkipIf(true, "WIP")
         let note1 = "Destination One"
         let note2 = "Destination Two"
-        let testHelper = BeamUITestsHelper(webView.app)
+
         let journalView = launchApp()
         step ("Given I create \(note1) note"){
             //TBD replace creation by omnibox to craetion by Destination notes search
@@ -139,7 +139,7 @@ class EditorShortcutsTests: BaseTest {
         
         step ("When I search in web and switch to note view"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            journalView.searchInOmniBox(testHelper.randomSearchTerm(), true)
+            journalView.searchInOmniBox(self.getRandomSearchTerm(), true)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
         
@@ -153,7 +153,7 @@ class EditorShortcutsTests: BaseTest {
         
         step ("When I search in web and switch to note view"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            journalView.searchInOmniBox(testHelper.randomSearchTerm(), true)
+            journalView.searchInOmniBox(self.getRandomSearchTerm(), true)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
         
