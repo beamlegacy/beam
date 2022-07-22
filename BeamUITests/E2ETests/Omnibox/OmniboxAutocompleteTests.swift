@@ -11,7 +11,6 @@ import XCTest
 class OmniboxAutocompleteTests: BaseTest {
 
     let omniboxView = OmniBoxTestView()
-    let helper = OmniBoxUITestsHelper(OmniBoxTestView().app)
     let expectedAutocompleteResultsNumber = 8
     let domainURL = "fr.wikipedia.org"
     let urlToOpen = "fr.wikipedia.org/wiki/Hello_world"
@@ -29,13 +28,11 @@ class OmniboxAutocompleteTests: BaseTest {
             omniboxView.searchInOmniBox("everest", false)
         }
         
-        let results = omniboxView.getAutocompleteResults()
         let omniboxSearchField = omniboxView.getOmniBoxSearchField()
-
         step("Then I see \(expectedAutocompleteResultsNumber) autocomplete results, no selected results and focused omnibox search"){
             //on different environment goggle offers either 8 or 7 options
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.implicitWaitTimeout, expectedNumber: expectedAutocompleteResultsNumber) || omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.implicitWaitTimeout, expectedNumber: expectedAutocompleteResultsNumber - 1))
-            XCTAssertEqual(results.matching(self.helper.autocompleteSelectedPredicate).count, 0)
+            XCTAssertEqual(omniboxView.getSelectedAutocompleteElementQuery().count, 0)
             XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
         }
 
@@ -43,7 +40,7 @@ class OmniboxAutocompleteTests: BaseTest {
             omniboxView.typeKeyboardKey(.downArrow)
         }
 
-        let autocompleteSelectedResultQuery = omniboxView.getAutocompleteResults().matching(helper.autocompleteSelectedPredicate)
+        let autocompleteSelectedResultQuery = omniboxView.getSelectedAutocompleteElementQuery()
         step("Then I see 1 selected result from autocomplete"){
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
         }
@@ -62,8 +59,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
 
         step("Then results back to default, search field is empty focused"){
-            let noteResults = results.matching(helper.autocompleteNotePredicate)
-            XCTAssertLessThanOrEqual(noteResults.count, 1) // default shows 1 today note
+            XCTAssertLessThanOrEqual(omniboxView.getNoteAutocompleteElementQuery().count, 1) // default shows 1 today note
             XCTAssertEqual(omniboxView.getSearchFieldValue(), emptyString)
             XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
         }
@@ -97,7 +93,7 @@ class OmniboxAutocompleteTests: BaseTest {
 
         let results = omniboxView.getAutocompleteResults()
         let firstResult = results.firstMatch
-        let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
+        let autocompleteSelectedResultQuery = omniboxView.getSelectedAutocompleteElementQuery()
         
         step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(domainURL) search text available"){
             XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
@@ -178,7 +174,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         let firstResult = omniboxView.getAutocompleteResults().firstMatch
-        let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
+        let autocompleteSelectedResultQuery = omniboxView.getSelectedAutocompleteElementQuery()
 
         step("Then search field value is \(expectedSearchFieldText)"){
             XCTAssertTrue(waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
@@ -274,7 +270,7 @@ class OmniboxAutocompleteTests: BaseTest {
             omniboxView.typeKeyboardKey(.rightArrow)
         }
 
-        let autocompleteSelectedResultQuery = omniboxView.getAutocompleteResults().matching(helper.autocompleteSelectedPredicate)
+        let autocompleteSelectedResultQuery = omniboxView.getSelectedAutocompleteElementQuery()
         
         step("Then I see selection is cleared"){
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)

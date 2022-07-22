@@ -1097,7 +1097,6 @@
 		A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A536DE0E269C6ABD003FAAF4 /* ToastTextIconView.swift */; };
 		A53B43F326B0946B0043D37A /* NoteListMetadataCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */; };
 		A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */; };
-		A53C8F532644B22B003A5DF8 /* OmniBoxUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F522644B22B003A5DF8 /* OmniBoxUITestsHelper.swift */; };
 		A53C9873267B4B6400D4AE90 /* AnimatableOffsetEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */; };
 		A53F1C5627B8A8A8009AE2D0 /* OmniboxLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53F1C5527B8A8A8009AE2D0 /* OmniboxLocators.swift */; };
 		A53F8A5A27C4A74E000D168D /* AvailableShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53F8A5927C4A74E000D168D /* AvailableShortcut.swift */; };
@@ -3029,7 +3028,6 @@
 		A536DE0E269C6ABD003FAAF4 /* ToastTextIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastTextIconView.swift; sourceTree = "<group>"; };
 		A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteListMetadataCache.swift; sourceTree = "<group>"; };
 		A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharingBannerInfo.swift; sourceTree = "<group>"; };
-		A53C8F522644B22B003A5DF8 /* OmniBoxUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBoxUITestsHelper.swift; sourceTree = "<group>"; };
 		A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatableOffsetEffect.swift; sourceTree = "<group>"; };
 		A53F1C5527B8A8A8009AE2D0 /* OmniboxLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxLocators.swift; sourceTree = "<group>"; };
 		A53F8A5927C4A74E000D168D /* AvailableShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableShortcut.swift; sourceTree = "<group>"; };
@@ -5053,7 +5051,6 @@
 			children = (
 				52A94E2625E90084004BAC93 /* Extensions */,
 				52DF49A525E42110009A651E /* BeamUITestsHelper.swift */,
-				A53C8F522644B22B003A5DF8 /* OmniBoxUITestsHelper.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -10012,7 +10009,6 @@
 				A340D039288035CF00980545 /* GeneralPreferencesTests.swift in Sources */,
 				A325D9CB283EA8A60019C5D0 /* AllNotesTestTable.swift in Sources */,
 				B50E1C9926FCC8AD00E767AE /* PasswordManagerHelper.swift in Sources */,
-				A53C8F532644B22B003A5DF8 /* OmniBoxUITestsHelper.swift in Sources */,
 				B5CDFF3D274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift in Sources */,
 				D7858BCD283BC4C700D0336A /* AutoFillCCTestView.swift in Sources */,
 				A315D58228316F2600579362 /* Rowable.swift in Sources */,
