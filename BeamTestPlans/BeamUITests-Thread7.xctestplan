@@ -165,6 +165,7 @@
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SlashMenuTests\/testNoteDividerCreation()",
         "SyncTests",
+        "TabGroupCloseTests",
         "TabGroupNameTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",

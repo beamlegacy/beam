@@ -148,6 +148,7 @@
         "SignUpAutocompleteTests",
         "SigninTests",
         "SyncTests",
+        "TabGroupCloseTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "TrackersBlockerTests",
