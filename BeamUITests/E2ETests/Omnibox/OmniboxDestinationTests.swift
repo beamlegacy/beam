@@ -20,7 +20,6 @@ class OmniboxDestinationTests: BaseTest {
     let omniboxView = OmniBoxTestView()
     let destinationNoteTitle = OmniBoxTestView().staticText(ToolbarLocators.Labels.noteTitleLabel.accessibilityIdentifier)
     let destinationNoteSearchField = OmniBoxTestView().searchField(ToolbarLocators.SearchFields.destinationNoteSearchField.accessibilityIdentifier)
-    let helper = OmniBoxUITestsHelper(OmniBoxTestView().app)
     
     func createDestinationNote(_ journalView: JournalTestView, _ noteNameToBeCreated: String) {
         journalView.app.terminate()
@@ -32,14 +31,13 @@ class OmniboxDestinationTests: BaseTest {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
         step("Given I clean the DB and create a note named: \(noteNameToBeCreated)"){
-            helper.cleanupDB(logout: false)
             createDestinationNote(journalView, noteNameToBeCreated)
         }
 
         step("When I search in omnibox and click on destination note"){
             omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).clickOnExistence()
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
+            omniboxView.searchInOmniBox(self.getRandomSearchTerm(), true)
             _ = destinationNoteTitle.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             destinationNoteTitle.clickOnExistence()
         }
@@ -52,7 +50,7 @@ class OmniboxDestinationTests: BaseTest {
                           "Actual note name is \(String(describing: destinationNoteSearchField.placeholderValue))")
         }
         
-        let selectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
+        let selectedResultQuery = omniboxView.getAutocompleteResults()
         step("Then Selected autocomplete note is \(expectedNumberOfAutocompletedNotes)"){
             XCTAssertEqual(selectedResultQuery.count, expectedNumberOfAutocompletedNotes)
         }
@@ -107,13 +105,12 @@ class OmniboxDestinationTests: BaseTest {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
         step("Given I clean the DB and create a note named: \(noteNameToBeCreated)"){
-            helper.cleanupDB(logout: false)
             createDestinationNote(journalView, noteNameToBeCreated)
         }
 
         step("When I search in omnibox change note using shortcut"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
+            omniboxView.searchInOmniBox(self.getRandomSearchTerm(), true)
             _ = destinationNoteTitle.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             shortcutHelper.shortcutActionInvoke(action: .changeDestinationNote)
         }
@@ -128,7 +125,7 @@ class OmniboxDestinationTests: BaseTest {
         }
 
         step("Then Selected autocomplete note is \(expectedNumberOfAutocompletedNotes)"){
-            let selectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
+            let selectedResultQuery = omniboxView.getAutocompleteResults() 
             XCTAssertEqual(selectedResultQuery.count, expectedNumberOfAutocompletedNotes)
         }
 
