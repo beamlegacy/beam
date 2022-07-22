@@ -12,8 +12,7 @@ class BrowserShortcutsTests: BaseTest {
     
     let omniboxView = OmniBoxTestView()
     let testPage = UITestPagePasswordManager()
-    var journalView = JournalTestView()
-    var testHelper = BeamUITestsHelper(JournalTestView().app)
+    var journalView: JournalTestView!
     
     override func setUp() {
         journalView = launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
@@ -32,7 +31,7 @@ class BrowserShortcutsTests: BaseTest {
 
         step ("Then I can open tabs using shortcuts"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            omniboxView.searchInOmniBox(testHelper.randomSearchTerm(), true)
+            omniboxView.searchInOmniBox(self.getRandomSearchTerm(), true)
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 3)
             XCTAssertFalse(testPage.isPasswordPageOpened())
             XCTAssertFalse(testPage.isAlertPageOpened())

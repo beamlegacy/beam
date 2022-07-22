@@ -8,6 +8,7 @@
 import Foundation
 import XCTest
 import BeamCore
+import Fakery
 
 //Designed to be inherited by Test classes.
 //It contains common setup and tear down methods as well as the common methods used in Test classes
@@ -200,5 +201,17 @@ class BaseTest: XCTestCase {
             return AccountInformation(email: elements[0], username: elements[1], password: elements[2], pk: elements[3])
         }
         return nil
+    }
+    
+    func getRandomSearchTerm() -> String {
+        Faker(locale: "en-US").commerce.color()
+    }
+    
+    func getRandomEmail() -> String {
+        Faker(locale: "en-US").internet.email()
+    }
+    
+    func getRandomPassword() -> String {
+        Faker(locale: "en-US").internet.password(minimumLength: 5, maximumLength: 17)
     }
 }

@@ -137,18 +137,6 @@ class BeamUITestsHelper {
     
 }
 
-extension BeamUITestsHelper {
-    func randomSearchTerm() -> String {
-        Faker(locale: "en-US").commerce.color()
-    }
-    func randomEmail() -> String {
-        Faker(locale: "en-US").internet.email()
-    }
-    func randomPassword() -> String {
-        Faker(locale: "en-US").internet.password(minimumLength: 5, maximumLength: 17)
-    }
-}
-
 extension XCTest {
 
     func epic(_ values: String...) {
