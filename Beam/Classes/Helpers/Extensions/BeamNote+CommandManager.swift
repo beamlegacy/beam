@@ -10,6 +10,7 @@ import BeamCore
 
 public extension BeamNote {
     private static var commandManagers: [UUID: CommandManager<Widget>] = [:]
+    
     var cmdManager: CommandManager<Widget> {
         if let manager = Self.commandManagers[self.id] {
             return manager
