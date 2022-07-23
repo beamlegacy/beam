@@ -89,85 +89,95 @@ extension TabsListContextMenuBuilder {
 // MARK: - Tab Context Menu
 extension TabsListContextMenuBuilder {
 
-    func contextMenuItems(forTab tab: BrowserTab, atListIndex listIndex: Int, sections: TabsListItemsSections,
-                          onCloseItem: @escaping (_ atIndex: Int) -> Void) -> some View {
+    func showContextMenu(forTab tab: BrowserTab, atListIndex listIndex: Int, sections: TabsListItemsSections,
+                         event: NSEvent?, onCloseItem: @escaping (_ atIndex: Int) -> Void) {
         let item = sections.allItems[listIndex]
-        let firstGroup = Group {
-            Button("Capture Page") { [weak tab] in
-                tab?.collectTab()
-            }.disabled(tab.url == nil || state?.browserTabsManager.currentTab != tab || tab.isLoading)
-            Button("Refresh Tab") { [weak tab] in
-                tab?.reload()
-            }.disabled(tab.url == nil)
-            Button("Duplicate Tab") { [weak self, weak tab] in
-                guard let tab = tab else { return }
-                self?.state?.duplicate(tab: tab)
-            }
+        let menu = NSMenu()
+        menu.autoenablesItems = false
 
-            Button("\(tab.isPinned ? "Unpin" : "Pin") Tab") { [weak tab, weak self] in
-                guard let tab = tab else { return }
-                if tab.isPinned == true {
-                    self?.state?.browserTabsManager.unpinTab(tab)
-                } else {
-                    self?.state?.browserTabsManager.pinTab(tab)
-                }
-            }.disabled(!tab.isPinned && tab.url == nil)
-            Button(tab.mediaPlayerController?.isMuted == true ? "Unmute Tab" : "Mute Tab") { [weak tab] in
-                tab?.mediaPlayerController?.toggleMute()
-            }.disabled(tab.mediaPlayerController?.isPlaying != true)
+        // First group
+        menu.addItem(withTitle: "Capture Page",
+                     enabled: tab.url != nil && state?.browserTabsManager.currentTab == tab && !tab.isLoading) { [weak tab] _ in
+            tab?.collectTab()
         }
-
-        let secondGroup = Group {
-            Button("Copy Address") { [weak tab] in
-                tab?.copyURLToPasteboard()
-            }.disabled(tab.url == nil)
-            Button("Paste and Go") { [weak self, weak tab] in
-                guard let tab = tab else { return }
-                self?.pasteAndGo(on: tab)
+        menu.addItem(withTitle: "Refresh Tab", enabled: tab.url != nil) { [weak tab] _ in
+            tab?.reload()
+        }
+        menu.addItem(withTitle: "Duplicate Tab") { [weak self, weak tab] _ in
+            guard let tab = tab else { return }
+            self?.state?.duplicate(tab: tab)
+        }
+        menu.addItem(withTitle: "\(tab.isPinned ? "Unpin" : "Pin") Tab",
+                     enabled: tab.isPinned || tab.url != nil ) { [weak tab, weak self] _ in
+            guard let tab = tab else { return }
+            if tab.isPinned == true {
+                self?.state?.browserTabsManager.unpinTab(tab)
+            } else {
+                self?.state?.browserTabsManager.pinTab(tab)
             }
         }
-
-        return Group {
-            firstGroup
-            Divider()
-            if !tab.isPinned {
-                groupingMenuItems(item: item)
-                Divider()
-            }
-            secondGroup
-            Divider()
-            contextMenuItemCloseGroup(forTabAtListIndex: listIndex, sections: sections, onCloseItem: onCloseItem)
-            if Configuration.branchType == .develop {
-                Divider()
-                contextMenuItemDebugGroup()
-            }
+        menu.addItem(withTitle: tab.mediaPlayerController?.isMuted == true ? "Unmute Tab" : "Mute Tab",
+                     enabled: tab.mediaPlayerController?.isPlaying == true) { [weak tab] _ in
+            tab?.mediaPlayerController?.toggleMute()
         }
+
+        menu.addItem(.separator())
+
+        // Tab Grouping
+        if !tab.isPinned {
+            tabContextMenuGroupingItems(for: item, in: menu)
+            menu.addItem(.separator())
+        }
+
+        // Second Group
+        menu.addItem(withTitle: "Copy Address", enabled: tab.url != nil) { [weak tab] _ in
+            tab?.copyURLToPasteboard()
+        }
+        menu.addItem(withTitle: "Paste and Go") { [weak self, weak tab] _ in
+            guard let tab = tab else { return }
+            self?.pasteAndGo(on: tab)
+        }
+        menu.addItem(.separator())
+
+        // Close Group
+        tabContextMenuCloseTabsItems(forTabAtListIndex: listIndex, sections: sections, in: menu, onCloseItem: onCloseItem)
+
+        // Debug Group
+        if Configuration.branchType == .develop {
+            menu.addItem(.separator())
+            tabContextMenuDebugGroupItems(in: menu)
+        }
+
+        menu.popUp(positioning: nil, at: event?.locationInWindow ?? .zero, in: event?.window?.contentView)
     }
 
-    @ViewBuilder
-    private func groupingMenuItems(item: TabsListItem) -> some View {
+    private func tabContextMenuGroupingItems(for item: TabsListItem, in mainMenu: NSMenu) {
         let availableGroups = availableTabGroups(forItem: item)
+        var items = [NSMenuItem]()
+        var sendToGroupItem: NSMenuItem?
+        if !availableGroups.isEmpty {
+            let menu = NSMenu()
+            let subItems = listOfTabGroupsAsMenu(item: item, availableGroups: availableGroups)
+            subItems.forEach { menu.addItem($0) }
+            let menuItem = NSMenuItem(title: "title to replace", action: nil, keyEquivalent: "")
+            mainMenu.setSubmenu(menu, for: menuItem)
+            items.append(menuItem)
+            sendToGroupItem = menuItem
+        }
         if item.group != nil {
-            Button("Ungroup") { [weak self] in
+            items.insert(HandlerMenuItem(title: "Ungroup") { [weak self] _ in
                 guard let tab = item.tab else { return }
                 self?.state?.browserTabsManager.moveTabToGroup(tab.id, group: nil)
-            }
-            if !availableGroups.isEmpty {
-                Menu("Move to Group") {
-                    listOfTabGroupsAsMenu(item: item, availableGroups: availableGroups)
-                }
-            }
+            }, at: 0)
+            sendToGroupItem?.title = "Move to Group"
         } else {
-            Button("Create Tab Group") { [weak self] in
+            items.insert(HandlerMenuItem(title: "Create Tab Group") { [weak self] _ in
                 guard let tab = item.tab else { return }
                 self?.state?.browserTabsManager.createNewGroup(withTabs: [tab])
-            }
-            if !availableGroups.isEmpty {
-                Menu("Add to Group") {
-                    listOfTabGroupsAsMenu(item: item, availableGroups: availableGroups)
-                }
-            }
+            }, at: 0)
+            sendToGroupItem?.title = "Add to Group"
         }
+        items.forEach { mainMenu.addItem($0) }
     }
 
     /// Create an image of a solid color circle. To be used as Menu Item label image
@@ -200,46 +210,41 @@ extension TabsListContextMenuBuilder {
         return self.state?.browserTabsManager.describingTitle(forGroup: group, truncated: true) ?? ""
     }
 
-    @ViewBuilder
-    private func listOfTabGroupsAsMenu(item: TabsListItem, availableGroups: [TabGroup]) -> some View {
-        ForEach(availableGroups) { group in
-            if group != item.group {
-                let color = (group.color?.mainColor ?? BeamColor.TabGrouping.red).nsColor
-                let title = self.title(forGroup: group)
-                Button(action: { [weak self] in
-                    guard let tab = item.tab else { return }
-                    self?.state?.browserTabsManager.moveTabToGroup(tab.id, group: group, reorderInList: true)
-                }, label: {
-                    HStack {
-                        Image(nsImage: self.groupCircleImage(forColor: color))
-                            .renderingMode(.original)
-                        Text(title)
-                    }
-                })
+    private func listOfTabGroupsAsMenu(item: TabsListItem, availableGroups: [TabGroup]) -> [NSMenuItem] {
+        availableGroups.compactMap { group in
+            guard group != item.group else { return nil }
+            let color = (group.color?.mainColor ?? BeamColor.TabGrouping.red).nsColor
+            let title = self.title(forGroup: group)
+            let item = HandlerMenuItem(title: title) { [weak self] _ in
+                guard let tab = item.tab else { return }
+                self?.state?.browserTabsManager.moveTabToGroup(tab.id, group: group, reorderInList: true)
             }
+            item.image = self.groupCircleImage(forColor: color)
+            return item
         }
     }
 
-    @ViewBuilder
-    private func contextMenuItemCloseGroup(forTabAtListIndex listIndex: Int, sections: TabsListItemsSections,
-                                           onCloseItem: @escaping (_ atIndex: Int) -> Void) -> some View {
-        Button("Close Tab") {
+    private func tabContextMenuCloseTabsItems(forTabAtListIndex listIndex: Int, sections: TabsListItemsSections, in menu: NSMenu,
+                                              onCloseItem: @escaping (_ atIndex: Int) -> Void) {
+        menu.addItem(withTitle: "Close Tab") { _ in
             onCloseItem(listIndex)
         }
-        Button("Close Other Tabs") { [weak self] in
+        menu.addItem(withTitle: "Close Other Tabs",
+                     enabled: !sections.unpinnedItems.isEmpty && sections.allItems.count > 1) { [weak self] _ in
             guard let tabIndex = self?.state?.browserTabsManager.tabIndex(forListIndex: listIndex) else { return }
             self?.state?.closeAllTabs(exceptedTabAt: tabIndex)
-        }.disabled(sections.unpinnedItems.isEmpty || sections.allItems.count <= 1)
-        Button("Close Tabs to the Right") { [weak self] in
+        }
+        menu.addItem(withTitle: "Close Tabs to the Right",
+                     enabled: listIndex + 1 < sections.allItems.count && !sections.unpinnedItems.isEmpty) { [weak self] _ in
             guard let tabIndex = self?.state?.browserTabsManager.tabIndex(forListIndex: listIndex) else { return }
             self?.state?.closeTabsToTheRight(of: tabIndex)
-        }.disabled(listIndex + 1 >= sections.allItems.count || sections.unpinnedItems.isEmpty)
+        }
     }
 
-    @ViewBuilder
-    private func contextMenuItemDebugGroup() -> some View {
+    private func tabContextMenuDebugGroupItems(in menu: NSMenu) {
         if PreferencesManager.enableTabGroupingFeedback {
-            Button("Tab Grouping Feedback") {
+            menu.addItem(withTitle: "Tab Grouping Feedback") { [weak self] _ in
+                guard let self = self else { return }
                 AppDelegate.main.showTabGroupingFeedbackWindow(self)
             }
         }

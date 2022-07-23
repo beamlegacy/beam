@@ -34,7 +34,7 @@ struct TabView: View {
     var hueTint: Double?
     var isInMainWindow = true
     var onTouchDown: (() -> Void)?
-    var onTap: (() -> Void)?
+    var onTap: ((_ isRightMouse: Bool, _ event: NSEvent?) -> Void)?
     var onClose: (() -> Void)?
     var onCopy: (() -> Void)?
     var onToggleMute: (() -> Void)?
@@ -401,11 +401,14 @@ struct TabView: View {
                                              isSelected: false, isForeground: isSelected,
                                              tabStyle: true, hueTint: hueTint,
                                              label: { _, _ in Group { } }, action: nil)
+                            .overlay(isDragging ? nil : ClickCatchingView(onRightTap: { event in
+                                onTap?(true, event)
+                            }))
                             .onTouchDown { down in
                                 if down { onTouchDown?() }
                             }
                             .simultaneousGesture(TapGesture().onEnded {
-                                onTap?()
+                                onTap?(false, nil)
                             })
                             .accessibilityHidden(true)
                     )
