@@ -52,9 +52,10 @@ extension NSMenu {
     ///   - handler: The closure that will be executed when this item is selected.
     /// - Returns: The created menu item.
     @discardableResult
-    func addItem(withTitle title: String, keyEquivalent: String = "", handler: @escaping HandlerMenuItem.Handler) -> NSMenuItem {
+    func addItem(withTitle title: String, keyEquivalent: String = "", enabled: Bool = true, handler: @escaping HandlerMenuItem.Handler) -> NSMenuItem {
         let item = HandlerMenuItem(title: title, keyEquivalent: keyEquivalent, handler: handler)
         addItem(item)
+        item.isEnabled = enabled
         return item
     }
 }

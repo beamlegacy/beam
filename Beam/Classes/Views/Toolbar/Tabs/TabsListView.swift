@@ -233,14 +233,11 @@ struct TabsListView: View {
                     TabView(tab: tab, isSelected: selected, isPinned: tab.isPinned, isSingleTab: isSingle, isDragging: isTheDraggedTab,
                             disableAnimations: isAnimatingDrop, disableHovering: isChangingTabsCountWhileHovering,
                             isInMainWindow: isMainWindow,
-                            onTouchDown: { onTabTouched(at: index) }, onTap: { onTabTapped(at: index) },
+                            onTouchDown: { onTabTouched(at: index) },
+                            onTap: { onTabTapped(at: index, isRightMouse: $0, event: $1) },
                             onClose: { onItemClose(at: index) }, onCopy: { onItemCopy(at: index) },
                             onToggleMute: { onTabToggleMute(at: index) },
-                            onFileDrop: { [unowned tab] url in
-                                // this dance is unfortunate... should be reworked in the future
-                                // first we need to avoid leaks, and then we need to access state to navigate properly
-                                tab.state?.navigateTab(tab, toURLRequest: .init(url: url))
-                            })
+                            onFileDrop: { onFileDrop(at: index, url: $0) })
                 } else if let group = item.group, let color = group.color {
                     TabClusteringGroupCapsuleView(title: group.title ?? "", color: color,
                                                   collapsed: group.collapsed, itemsCount: item.count ?? group.pageIds.count,
@@ -262,13 +259,6 @@ struct TabsListView: View {
             .background(!isTheLastItem || areTabsFillingSpace ? nil : GeometryReader { prxy in
                 Color.clear.preference(key: LastTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
             })
-            .contextMenu {
-                if let tab = item.tab {
-                    contextMenuManager?.contextMenuItems(forTab: tab, atListIndex: index, sections: sections, onCloseItem: {
-                        onItemClose(at: $0, fromContextMenu: true)
-                    })
-                }
-            }
             if !isSingle && !isTheDraggedTab {
                 separator.opacity(hideSeparator ? 0 : 1)
             }
@@ -515,9 +505,21 @@ extension TabsListView {
         }
     }
 
-    private func onTabTapped(at index: Int) {
+    private func onTabTapped(at index: Int, isRightMouse: Bool, event: NSEvent?) {
+        if isRightMouse {
+            onTabRightClick(at: index, event: event)
+            return
+        }
         guard !isDraggingATab, selectedIndex == index, !viewModel.lastTouchWasOnUnselectedTab else { return }
         state.startFocusOmnibox(fromTab: true)
+    }
+
+    private func onTabRightClick(at index: Int, event: NSEvent?) {
+        guard let tab = sections.allItems[index].tab else { return }
+        contextMenuManager?.showContextMenu(forTab: tab, atListIndex: index, sections: sections, event: event,
+                                            onCloseItem: { _ in
+            onItemClose(at: index, fromContextMenu: true)
+        })
     }
 
     private func startTrackingMouseMove() {
@@ -568,6 +570,11 @@ extension TabsListView {
         guard index < sections.allItems.count else { return }
         let tab = sections.allItems[index].tab
         tab?.mediaPlayerController?.toggleMute()
+    }
+
+    private func onFileDrop(at index: Int, url: URL) {
+        guard index < sections.allItems.count, let tab = sections.allItems[index].tab else { return }
+        tab.state?.navigateTab(tab, toURLRequest: .init(url: url))
     }
 
     private func tabViewId(for tab: BrowserTab) -> String {

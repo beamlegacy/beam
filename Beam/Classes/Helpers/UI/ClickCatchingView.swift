@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ClickCatchingView: NSViewRepresentable {
-
     /// sent on mouse up
     var onTap: ((NSEvent) -> Void)?
 
@@ -31,7 +30,9 @@ struct ClickCatchingView: NSViewRepresentable {
         return view
     }
 
-    func updateNSView(_ nsView: NSView, context: Context) { }
+    func updateNSView(_ nsView: NSView, context: Context) {
+        context.coordinator.parent = self
+    }
 
     private class ClickCatchingNSView: NSView {
         weak var delegate: ClickCatchingNSViewDelegate?
@@ -63,7 +64,7 @@ struct ClickCatchingView: NSViewRepresentable {
     }
 
     class Coordinator: ClickCatchingNSViewDelegate {
-        let parent: ClickCatchingView
+        var parent: ClickCatchingView
         init(parent: ClickCatchingView) {
             self.parent = parent
         }
