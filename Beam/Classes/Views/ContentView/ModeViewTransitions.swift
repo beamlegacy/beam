@@ -38,7 +38,7 @@ class ModeTransitionModel {
         }
     }
     private var transitionDelayWorkItem: DispatchWorkItem?
-    private var transitionDelay: Int = 300
+    private var transitionDelay: Int = 150
     private var cancellables = [AnyCancellable]()
 
     private(set) var previousMode: Mode?
