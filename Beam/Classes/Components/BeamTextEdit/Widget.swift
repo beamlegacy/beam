@@ -692,7 +692,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         context.saveGState()
         context.translateBy(x: 0, y: image.size.height)
         context.scaleBy(x: 1.0, y: -1.0)
-        context.draw(image.cgImage, in: rect)
+        if let image = image.cgImage(forProposedRect: rect) {
+            context.draw(image, in: rect)
+        }
         context.restoreGState()
     }
 

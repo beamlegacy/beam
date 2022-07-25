@@ -124,14 +124,14 @@ class ImageNode: ResizableNode {
         }
     }
 
-    private func createImage(from imageRecord: BeamFileRecord) -> NSImage? {
+    private func createImage(from imageRecord: BeamFileRecord, availableWidth: Double, scale: Double) -> NSImage? {
         switch imageRecord.type {
         case "image/svg+xml":
             guard let svgString = imageRecord.data.asString, case .image(_, _, let info) = element.kind, let size = info.size else { return nil }
             let svgNode = try? SVGParser.parse(text: svgString)
-            return try? svgNode?.toNativeImage(size: Size(Double(size.width), Double(size.height)), scale: NSScreen.main?.backingScaleFactor ?? 1)
+            return try? svgNode?.toNativeImage(size: Size(Double(size.width), Double(size.height)), scale: scale)
         default:
-            return NSImage(data: imageRecord.data)
+            return NSImage(data: imageRecord.data, availableWidth: availableWidth, scale: scale)
         }
     }
 
@@ -144,7 +144,9 @@ class ImageNode: ResizableNode {
             geometryDescription = .image(sized: animatedImageLayer.bounds.size)
             contentGeometry.setGeometryDescription(geometryDescription)
         } else {
-            guard let image = createImage(from: imageRecord) else {
+            let scale = NSScreen.main?.backingScaleFactor ?? 1
+            
+            guard let image = createImage(from: imageRecord, availableWidth: width, scale: scale) else {
                 Logger.shared.logError("ImageNode unable to decode image '\(uid)' from FileDB", category: .noteEditor)
                 return
             }
@@ -153,7 +155,7 @@ class ImageNode: ResizableNode {
 
             let imgRect = NSRect(x: 0, y: 0, width: width, height: 0)
             if let imageRep = image.bestRepresentation(for: imgRect, context: nil, hints: nil) {
-                imageSize = CGSize(width: imageRep.pixelsWide, height: imageRep.pixelsHigh)
+                imageSize = CGSize(width: Double(imageRep.pixelsWide)/scale, height: Double(imageRep.pixelsHigh)/scale)
             } else {
                 imageSize = image.size
             }
