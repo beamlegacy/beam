@@ -9,6 +9,7 @@ import Foundation
 import BeamCore
 import Macaw
 import Lottie
+import Combine
 
 // swiftlint:disable file_length
 class ImageNode: ResizableNode {
@@ -68,6 +69,16 @@ class ImageNode: ResizableNode {
         geometryDescription = .image(sized: .zero)
         super.init(parent: parent, element: element, availableWidth: availableWidth, contentGeometry: contentGeometry)
 
+        BeamFileDBManager.fileSaved
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] fileRecord in
+                guard let self = self,
+                      fileRecord.id == self.imageId
+                else { return }
+                if self.imageLayer == nil {
+                    self.setupImage(width: availableWidth)
+                }
+            }.store(in: &scope)
         setupImage(width: availableWidth)
     }
 
@@ -75,15 +86,18 @@ class ImageNode: ResizableNode {
         super.setBottomPaddings(withDefault: isCollapsed ? 2 : 14)
     }
 
-    private func setupImage(width: CGFloat) {
-        var uid = UUID.null
+    private var imageId: UUID? {
         switch element.kind {
         case .image(let id, _, _):
-            uid = id
+            return id
         default:
             Logger.shared.logError("ImageNode can only handle image elements, not \(element.kind)", category: .noteEditor)
-            return
+            return nil
         }
+    }
+
+    private func setupImage(width: CGFloat) {
+        guard let uid = imageId else { return }
         guard let imageRecord = try? BeamFileDBManager.shared?.fetch(uid: uid) else {
             Logger.shared.logError("ImageNode unable to fetch image '\(uid)' from FileDB", category: .noteEditor)
             return
