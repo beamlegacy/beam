@@ -280,7 +280,7 @@ final class WebFieldClassifier {
             case .visible:
                 columns += ["visible", "", "", "", "", "", "", "", ""]
             case .transformed:
-                columns += ["rules", "", "", "", "", "", "", "", ""]
+                columns += ["transformed", "", "", "", "", "", "", "", ""]
             case .candidate:
                 columns += ["candidate", "", "", "", "", "", "", "", ""]
             case .evaluated(let dict):
@@ -471,7 +471,7 @@ final class WebFieldClassifier {
             field.decodedHints.forEach { value in
                 if value.contains("cardnum") || value.contains("ccnum") {
                     result = .init(role: .cardNumber, match: .score(800))
-                } else if value.contains("cardholder") || value.contains("holdername") || value.contains("cardname") || value.contains("ccname") {
+                } else if value.contains("cardholder") || value.contains("holdername") || value.contains("cardname") || value.contains("ccname") || value.contains("nameoncard") {
                     result = .init(role: .cardHolder, match: .score(800))
                 } else if value.contains("cardexpiry") || value.contains("cardexpiration") || value.contains("expirationdate") || value.contains("expdate") {
                     result = .init(role: .cardExpirationDate, match: .score(800))
@@ -479,6 +479,8 @@ final class WebFieldClassifier {
                     result = .init(role: .cardExpirationMonth, match: .score(800))
                 } else if value.contains("expirationyear") || value.contains("expyear") || value.contains("ccyear") {
                     result = .init(role: .cardExpirationYear, match: .score(800))
+                } else if value.contains("cardinput") {
+                    result = .init(role: .cardNumber, match: .score(790))
                 } else if value.contains("expiration") {
                     result = .init(role: .cardExpirationDate, match: .score(790))
                 } else if value.contains("cvv") || value.contains("csc") || value.contains("cardverificationnumber") {
@@ -522,6 +524,12 @@ final class WebFieldClassifier {
             return WebAutofillRules(ignoreTextAutocompleteOff: .always)
         case "calendar.amie.so":
             return WebAutofillRules(discardAutocompleteAttribute: .forAutocompleteValues(["new-password"]), discardTypeAttribute: .forAutocompleteValues(["new-password"]))
+        case "kayak.com", "kayak.es", "kayak.fr", "kayak.it":
+            return WebAutofillRules(ignoreTextAutocompleteOff: .always)
+        case "expedia.com", "expedia.es", "expedia.fr", "expedia.it":
+            return WebAutofillRules(ignoreTextAutocompleteOff: .always)
+        case "edreams.com":
+            return WebAutofillRules(discardAutocompleteAttribute: .forAutocompleteValues(["nope"]))
         default:
             return .default
         }
