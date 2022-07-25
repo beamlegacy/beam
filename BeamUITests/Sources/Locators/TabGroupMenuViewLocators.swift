@@ -16,7 +16,7 @@ enum TabGroupMenuViewLocators {
         case tabGroupNewTab = "New Tab in Group"
         case tabGroupMoveNewWindow = "Move Group in New Window"
         case tabGroupCollapse = "Collapse Group"
-        case tabGroupExpandGroup = "Expand Group"
+        case tabGroupExpand = "Expand Group"
         case tabGroupUngroup = "Ungroup"
         case tabGroupCloseGroup = "Close Group"
     }

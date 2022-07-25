@@ -269,4 +269,16 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: (value ? UITestMenuAvailableCommands.startBeamOnTabs : UITestMenuAvailableCommands.startBeamOnDefault).rawValue)
         return self
     }
+    
+    @discardableResult
+    func createTabGroup() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.createTabGroup.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func createTabGroupNamed() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.createTabGroupNamed.rawValue)
+        return self
+    }
 }
