@@ -44,7 +44,7 @@ struct OtherPasswordModal: View {
             } onDoubleTap: { row in
                 do {
                     let entry = viewModel.filteredPasswordEntries[row]
-                    let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
+                    let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
                     editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
                 } catch {
                     alertMessage = .init(error: error)
