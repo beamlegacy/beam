@@ -192,25 +192,23 @@ struct Passwords: View {
     private var bottomRow: some View {
         HStack {
             Group {
-                Group {
-                    Button {
-                        showingAddPasswordSheet = true
-                    } label: {
-                        Image("basicAdd")
-                            .renderingMode(.template)
-                    }.buttonStyle(.bordered)
-                        .sheet(isPresented: $showingAddPasswordSheet) {
-                            PasswordEditView(entry: nil, password: "", editType: .create)
-                                .frame(width: 400, height: 179, alignment: .center)
-                        }
-                    Button {
-                        promptDeletePasswordsAlert()
-                    } label: {
-                        Image("basicRemove")
-                            .renderingMode(.template)
-                    }.buttonStyle(.bordered)
-                        .disabled(passwordsViewModel.selectedEntries.count == 0)
-                }
+                Button {
+                    showingAddPasswordSheet = true
+                } label: {
+                    Image("basicAdd")
+                        .renderingMode(.template)
+                }.buttonStyle(.bordered)
+                    .sheet(isPresented: $showingAddPasswordSheet) {
+                        PasswordEditView(entry: nil, password: "", editType: .create)
+                            .frame(width: 400, height: 179, alignment: .center)
+                    }
+                Button {
+                    promptDeletePasswordsAlert()
+                } label: {
+                    Image("basicRemove")
+                        .renderingMode(.template)
+                }.buttonStyle(.bordered)
+                    .disabled(passwordsViewModel.selectedEntries.count == 0)
             }
             .fixedSize()
 
