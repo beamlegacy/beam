@@ -38,26 +38,28 @@ extension AppDelegate {
 
             Logger.shared.logDebug("Writing logs at \(url)", category: .general)
             do {
-                FileManager.default.createFile(atPath: url.path,
-                                               contents: nil,
-                                               attributes: nil)
-                let fileHandle = try FileHandle(forWritingTo: url)
-
-                logEntries.forEach { logEntry in
-                    let csvLine = [logEntry.created_at?.iso8601withFractionalSeconds ?? "",
-                                   logEntry.level ?? "",
-                                   logEntry.category ?? "",
-                                   logEntry.log?.quotedForCSV ?? ""].joined(separator: ",")
-
-                    fileHandle.write(csvLine.asData)
-                    fileHandle.write("\n".asData)
-                }
-                Logger.shared.logDebug("Wrote \(logEntries.count) log entries", category: .general)
-                fileHandle.closeFile()
+                try self.writeLogEntries(logEntries, to: url)
             } catch {
                 Logger.shared.logError("Error opening \(url): \(error.localizedDescription)", category: .general)
             }
         }
+    }
+
+    private func writeLogEntries(_ logEntries: [LogEntry], to url: URL) throws {
+        FileManager.default.createFile(atPath: url.path, contents: nil, attributes: nil)
+        let fileHandle = try FileHandle(forWritingTo: url)
+
+        logEntries.forEach { logEntry in
+            let csvLines: [String] = [logEntry.created_at?.iso8601withFractionalSeconds ?? "",
+                                      logEntry.level ?? "",
+                                      logEntry.category ?? "",
+                                      logEntry.log?.quotedForCSV ?? ""]
+
+            fileHandle.write(csvLines.joined(separator: ",").asData)
+            fileHandle.write("\n".asData)
+        }
+        Logger.shared.logDebug("Wrote \(logEntries.count) log entries", category: .general)
+        fileHandle.closeFile()
     }
 }
 

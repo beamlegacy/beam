@@ -40,18 +40,23 @@ struct OnboardingImportsView: View {
         var finishWorkItem: DispatchWorkItem?
     }
 
+    @ViewBuilder
+    private func sourcePickerOption(_ source: ImportSource) -> some View {
+        if source == .passwordsCSV {
+            Divider()
+        }
+        HStack {
+            iconImage(for: source)
+            Text(source.rawValue)
+        }
+    }
+
     @State private var showNativePickerAfterAnimation = false
     private var picker: some View {
         HStack(spacing: BeamSpacing._40) {
             Picker("", selection: $selectedSource) {
                 ForEach(availableSources, id: \.self) { source in
-                    if source == .passwordsCSV {
-                        Divider()
-                    }
-                    HStack {
-                        iconImage(for: source)
-                        Text(source.rawValue)
-                    }
+                    sourcePickerOption(source)
                 }
             }
             .pickerStyle(.menu)

@@ -60,38 +60,39 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
 
     private let contentWidth: Double = PreferencesManager.contentWidth
 
+    private var apiHostnameBinding: Binding<String> { Binding<String>(get: {
+        self.apiHostname
+    }, set: {
+        let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.apiHostname = cleanValue
+        Configuration.apiHostname = cleanValue
+    })}
+
+    private var restApiHostnameBinding: Binding<String> { Binding<String>(get: {
+        self.restApiHostname
+    }, set: {
+        let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.restApiHostname = cleanValue
+        Configuration.restApiHostname = cleanValue
+    })}
+
+    private var publicAPIpublishServerBinding: Binding<String> { Binding<String>(get: {
+        self.publicAPIpublishServer
+    }, set: {
+        let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.publicAPIpublishServer = cleanValue
+        Configuration.publicAPIpublishServer = cleanValue
+    })}
+
+    private var publicAPIembedBinding: Binding<String> { Binding<String>(get: {
+        self.publicAPIembed
+    }, set: {
+        let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.publicAPIembed = cleanValue
+        Configuration.publicAPIembed = cleanValue
+    })}
+
     var body: some View {
-        let apiHostnameBinding = Binding<String>(get: {
-            self.apiHostname
-        }, set: {
-            let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
-            self.apiHostname = cleanValue
-            Configuration.apiHostname = cleanValue
-        })
-
-        let restApiHostnameBinding = Binding<String>(get: {
-            self.restApiHostname
-        }, set: {
-            let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
-            self.restApiHostname = cleanValue
-            Configuration.restApiHostname = cleanValue
-        })
-        let publicAPIpublishServerBinding = Binding<String>(get: {
-            self.publicAPIpublishServer
-        }, set: {
-            let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
-            self.publicAPIpublishServer = cleanValue
-            Configuration.publicAPIpublishServer = cleanValue
-        })
-
-        let publicAPIembedBinding = Binding<String>(get: {
-            self.publicAPIembed
-        }, set: {
-            let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
-            self.publicAPIembed = cleanValue
-            Configuration.publicAPIembed = cleanValue
-        })
-
         ScrollView(.vertical, showsIndicators: false) {
             Preferences.Container(contentWidth: contentWidth) {
                 Preferences.Section {
@@ -347,18 +348,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                     })
 
                     Button(action: {
-                        let openPanel = NSOpenPanel()
-                        openPanel.canChooseDirectories = true
-                        openPanel.canCreateDirectories = true
-                        openPanel.canChooseFiles = false
-                        openPanel.showsTagField = false
-                        openPanel.begin { (result) in
-                            guard result == .OK, let url = openPanel.url else {
-                                openPanel.close()
-                                return
-                            }
-                            export_all_browsing_sessions(to: url)
-                        }
+
                     }, label: {
                         Text("Browsing Sessions").frame(minWidth: 100)
                     })
@@ -1221,6 +1211,21 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                 window.state.closeAllTabs(closePinnedTabs: true)
             }
             AppDelegate.main.deleteAllLocalData()
+        }
+    }
+
+    private func promptExportBrowsingSessions() {
+        let openPanel = NSOpenPanel()
+        openPanel.canChooseDirectories = true
+        openPanel.canCreateDirectories = true
+        openPanel.canChooseFiles = false
+        openPanel.showsTagField = false
+        openPanel.begin { (result) in
+            guard result == .OK, let url = openPanel.url else {
+                openPanel.close()
+                return
+            }
+            export_all_browsing_sessions(to: url)
         }
     }
 }
