@@ -14,14 +14,10 @@ class TabGroupCloseTests: BaseTest {
     let journalTestView = JournalTestView()
     
     override func setUp() {
-        step("Given I open multiple times same test page") {
+        step("Given I have a tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.loadUITestPage2()
-            uiMenu.loadUITestPage2()
-        }
-        
-        step("Then tab grouping is enabled") {
-            XCTAssertTrue(tabGroupMenu.getFirstTabGroup().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            uiMenu.createTabGroup()
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
     }
     

@@ -162,6 +162,7 @@
         "SyncTests",
         "TabGroupCloseTests",
         "TabGroupNameTests",
+        "TabGroupNewTabTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "TrackersBlockerTests",
