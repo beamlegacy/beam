@@ -11,6 +11,7 @@ import BeamCore
 import GRDB
 import UUIDKit
 import Swime
+import Combine
 
 // The new version of the BeamFileRecord (where uid is an UUID)
 struct BeamFileRecord: Equatable, Hashable {
@@ -172,6 +173,9 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
     static var id = UUID()
     static var name = "BeamFileDBManager"
 
+    static let fileSaved = PassthroughSubject<BeamFileRecord, Never>()
+    static let fileDeleted = PassthroughSubject<UUID, Never>()
+
     var holder: BeamManagerOwner?
 
     override var tableNames: [String] { [BeamFileRecord.tableName, BeamFileRefRecord.tableName] }
@@ -260,6 +264,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
         try write { db in
             var f = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType, size: data.count)
             try f.insert(db)
+            Self.fileSaved.send(f)
         }
         if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
             try self.saveOnNetwork(file)
@@ -273,6 +278,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                 for file in files {
                     var fileToInsert = file
                     try fileToInsert.insert(db)
+                    Self.fileSaved.send(fileToInsert)
                 }
             }
 
@@ -288,6 +294,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
     func remove(uid: UUID) throws {
         _ = try write { db in
             try BeamFileRecord.deleteOne(db, key: ["uid": uid])
+            Self.fileDeleted.send(uid)
         }
     }
 
