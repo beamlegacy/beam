@@ -117,8 +117,6 @@
         "NoteEditTests\/testRenameNoteSuccessfully()",
         "NoteEditorTests",
         "NotePinUnpinTests",
-        "NotePublishTests\/testProfileAddAndRemovePublishedNote()",
-        "NotePublishTests\/testPublishUnpublishNote()",
         "NoteViewEmbedsTests",
         "NoteViewTests",
         "NotesNavigationHistoryTests",
