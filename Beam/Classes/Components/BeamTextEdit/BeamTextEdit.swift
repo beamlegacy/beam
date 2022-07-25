@@ -2030,7 +2030,7 @@ public extension CALayer {
         let afterNode: ElementNode? = dragResult.shouldBeAfter ? nil : dragResult.element.previousSibbling() as? ElementNode
         for url in files.reversed() {
             guard let url = url as? URL,
-                  var data = try? Data(contentsOf: url)
+                  let data = try? Data(contentsOf: url)
             else { continue }
             //Logger.shared.logInfo("File dropped: \(url) - \(data) - \(data.SHA256)")
 
@@ -2041,7 +2041,10 @@ public extension CALayer {
             }
 
             if data.count > Self.maximumImageSize {
-                data = image.jpegRepresentation
+                guard let data = image.jpegRepresentation else {
+                    Logger.shared.logError("Error while getting jpeg representation from NSImage", category: .noteEditor)
+                    return false
+                }
                 if data.count > Self.maximumImageSize {
                     UserAlert.showError(message: "This image is too large for beam.", informativeText: "Please use images that are smaller than 40MB.", buttonTitle: "Cancel")
                     return false
