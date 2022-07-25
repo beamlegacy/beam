@@ -24,7 +24,7 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
 
     private var scope = Set<AnyCancellable>()
 
-    private let throttleDelay: Int = Configuration.env != .test ? 1 : 0
+    private let throttleDelay: Int = 1
 
     private var documentsCancellables: [UUID: AnyCancellable] = [:]
     private var subjects: [UUID: PassthroughSubject<BeamDocument, Never>] = [:]
@@ -60,9 +60,14 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
             }.store(in: &scope)
     }
 
-    // swiftlint:disable function_body_length
     private func sendSavedDocument(_ document: BeamDocument) {
         guard !disableSync else { return }
+
+        guard Configuration.env != .test else {
+            reloadAndSendToServer(document)
+            return
+        }
+
         Logger.shared.logInfo("BeamDocumentSynchronizer.sendSavedDocument called with \(document.id)", category: .sync)
         if documentsCancellables[document.id] != nil {
             let subject = subjects[document.id]
@@ -79,28 +84,7 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
                     }
 
                     self?.documentsQueue.async {
-                        do {
-                            var updatedDocument: BeamDocument!
-                            if document.deletedAt != nil {
-                                updatedDocument = document
-                            } else {
-                                guard let reloadedDocument = try document.collection?.fetchWithId(document.id) else {
-                                    Logger.shared.logError("Failed to reload document \(document)", category: .sync)
-                                    return
-                                }
-                                updatedDocument = reloadedDocument
-                            }
-                            try self?.saveOnBeamObjectAPI(updatedDocument) { result in
-                                switch result {
-                                case .success:
-                                    Logger.shared.logInfo("\(document.id) saved on server", category: .sync)
-                                case .failure(let error):
-                                    Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
-                                }
-                            }
-                        } catch {
-                            Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
-                        }
+                        self?.reloadAndSendToServer(document)
                     }
                 }
             documentsCancellables[document.id] = cancellable
@@ -466,5 +450,30 @@ extension BeamDocumentSynchronizer {
     func recalculateFileReferences(_ document: BeamDocument) throws {
         let note = try BeamNote.instanciateNote(document, keepInMemory: false)
         note.recalculateFileReferences()
+    }
+
+    fileprivate func reloadAndSendToServer(_ document: BeamDocument) {
+        do {
+            var updatedDocument: BeamDocument!
+            if document.deletedAt != nil {
+                updatedDocument = document
+            } else {
+                guard let reloadedDocument = try document.collection?.fetchWithId(document.id) else {
+                    Logger.shared.logError("Failed to reload document \(document)", category: .sync)
+                    return
+                }
+                updatedDocument = reloadedDocument
+            }
+            try saveOnBeamObjectAPI(updatedDocument) { result in
+                switch result {
+                case .success:
+                    Logger.shared.logInfo("\(document.id) saved on server", category: .sync)
+                case .failure(let error):
+                    Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
+                }
+            }
+        } catch {
+            Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
+        }
     }
 }
