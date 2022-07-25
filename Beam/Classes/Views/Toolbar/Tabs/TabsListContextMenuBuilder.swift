@@ -67,7 +67,7 @@ extension TabsListContextMenuBuilder {
         }
         let tabGroupingManager = tabsManager.tabGroupingManager
         let copiedGroup = tabGroupingManager.copyForSharing(group)
-        if copiedGroup.title == nil {
+        if copiedGroup.title == nil || copiedGroup.title?.isEmpty == true {
             let title = tabsManager.describingTitle(forGroup: group, truncated: false)
             tabGroupingManager.renameGroup(copiedGroup, title: title)
         }
