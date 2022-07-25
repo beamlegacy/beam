@@ -331,7 +331,10 @@ extension BeamTextEdit {
             return
         }
 
-        let jpegImageData = image.jpegRepresentation
+        guard let jpegImageData = image.jpegRepresentation else {
+            Logger.shared.logError("Error while trying to get jpeg representation from an NSImage", category: .noteEditor)
+            return
+        }
 
         if jpegImageData.count > Self.maximumImageSize {
             UserAlert.showError(message: "This image is too large for beam.", informativeText: "Please use images that are smaller than 40MB.", buttonTitle: "Cancel")
