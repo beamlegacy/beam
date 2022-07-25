@@ -9,11 +9,9 @@ import Foundation
 import Cocoa
 
 extension NSImage {
-    var cgImage: CGImage {
-        let imageData = self.tiffRepresentation!
-        let source = CGImageSourceCreateWithData(imageData as CFData, nil).unsafelyUnwrapped
-        let maskRef = CGImageSourceCreateImageAtIndex(source, Int(0), nil)
-        return maskRef.unsafelyUnwrapped
+    func cgImage(forProposedRect proposedRect: CGRect) -> CGImage? {
+        var rect = proposedRect
+        return cgImage(forProposedRect: &rect, context: nil, hints: nil)
     }
 
     func fill(color: NSColor) -> NSImage {
@@ -57,15 +55,10 @@ extension NSImage {
     /// - Parameter size: The size to resize the image to.
     /// - Returns: The resized image.
     func resize(withSize targetSize: NSSize) -> NSImage? {
-        let frame = NSRect(x: 0, y: 0, width: targetSize.width, height: targetSize.height)
-        guard let representation = self.bestRepresentation(for: frame, context: nil, hints: nil) else {
-            return nil
-        }
-        let image = NSImage(size: targetSize, flipped: false, drawingHandler: { (_) -> Bool in
-            return representation.draw(in: frame)
+        return NSImage(size: targetSize, flipped: false, drawingHandler: { rect -> Bool in
+            self.draw(in: rect)
+            return true
         })
-
-        return image
     }
 
     /// Copy the image and resize it to the supplied size, while maintaining it's
@@ -86,5 +79,47 @@ extension NSImage {
                              height: floor(self.size.height * heightRatio))
         }
         return self.resize(withSize: newSize)
+    }
+
+    convenience init?(data: Data, availableWidth: Double, scale: Double) {
+        guard let image = CGImage.from(data: data, availableWidth: availableWidth, scale: scale) else {
+            return nil
+        }
+
+        let imageWidth = Double(image.width) / scale
+        let imageHeight = Double(image.height) / scale
+
+        self.init(cgImage: image, size: CGSize(width: imageWidth, height: imageHeight))
+    }
+}
+
+extension CGImage {
+    class func from(data: Data, availableWidth: Double, scale: Double) -> CGImage? {
+        let options: [AnyHashable: Any] = [kCGImageSourceShouldCache: false]
+
+        guard let source = CGImageSourceCreateWithData(data as CFData, options as CFDictionary),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as NSDictionary?,
+              let width = properties[kCGImagePropertyPixelWidth] as? NSNumber,
+              let height = properties[kCGImagePropertyPixelHeight] as? NSNumber else {
+            return nil
+        }
+
+        if width.doubleValue <= availableWidth * scale {
+            return CGImageSourceCreateImageAtIndex(source, 0, nil)
+        }
+
+        let maxPixelSize: Double
+
+        if width.doubleValue > height.doubleValue {
+            maxPixelSize = availableWidth * scale
+        } else {
+            maxPixelSize = (height.doubleValue * availableWidth * scale / width.doubleValue).rounded()
+        }
+
+        let downsampleOptions: [AnyHashable: Any] = [kCGImageSourceCreateThumbnailFromImageAlways: true,
+                                                       kCGImageSourceCreateThumbnailWithTransform: true,
+                                                              kCGImageSourceThumbnailMaxPixelSize: maxPixelSize]
+
+        return CGImageSourceCreateThumbnailAtIndex(source, 0, downsampleOptions as CFDictionary)
     }
 }
