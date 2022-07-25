@@ -176,7 +176,7 @@ struct Passwords: View {
             } onDoubleTap: { row in
                 let entry = passwordsViewModel.filteredPasswordEntries[row]
                 do {
-                    let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
+                    let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
                     editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
                 } catch {
                     alertMessage = .init(error: error)
@@ -215,7 +215,7 @@ struct Passwords: View {
             Button {
                 if let entry = passwordsViewModel.selectedEntries.first {
                     do {
-                        let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
+                        let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
                         editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
                     } catch {
                         alertMessage = .init(error: error)

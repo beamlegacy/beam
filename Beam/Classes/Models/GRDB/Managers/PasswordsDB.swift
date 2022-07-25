@@ -30,6 +30,7 @@ struct RemotePasswordRecord {
     var password: String
     var createdAt: Date
     var updatedAt: Date
+    var usedAt: Date
     var deletedAt: Date?
     var privateKeySignature: String?
 }
@@ -52,6 +53,7 @@ extension RemotePasswordRecord: BeamObjectProtocol {
         case password
         case createdAt
         case updatedAt
+        case usedAt
         case deletedAt
         case privateKeySignature
     }
@@ -72,7 +74,8 @@ extension RemotePasswordRecord: BeamObjectProtocol {
         password = try container.decode(String.self, forKey: .password)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
-        deletedAt = try? container.decode(Date.self, forKey: .deletedAt)
+        usedAt = try container.decodeIfPresent(Date.self, forKey: .usedAt) ?? BeamDate.now
+        deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
         privateKeySignature = try? container.decode(String.self, forKey: .privateKeySignature)
     }
 }
@@ -87,6 +90,7 @@ struct LocalPasswordRecord {
     var password: String
     var createdAt: Date
     var updatedAt: Date
+    var usedAt: Date
     var deletedAt: Date?
     var privateKeySignature: String?
 }
@@ -103,7 +107,7 @@ extension LocalPasswordRecord: TableRecord {
     static let databaseTableName = "passwordRecord"
 
     enum Columns: String, ColumnExpression {
-        case uuid, entryId, hostname, username, password, createdAt, updatedAt, deletedAt, privateKeySignature
+        case uuid, entryId, hostname, username, password, createdAt, updatedAt, usedAt, deletedAt, privateKeySignature
     }
 }
 
@@ -117,6 +121,7 @@ extension LocalPasswordRecord: FetchableRecord {
         password = row[Columns.password]
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
+        usedAt = row[Columns.usedAt]
         deletedAt = row[Columns.deletedAt]
         privateKeySignature = row[Columns.privateKeySignature]
     }
@@ -136,6 +141,7 @@ extension LocalPasswordRecord: MutablePersistableRecord {
         container[Columns.password] = password
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
+        container[Columns.usedAt] = usedAt
         container[Columns.deletedAt] = deletedAt
         container[Columns.privateKeySignature] = privateKeySignature
     }
@@ -172,6 +178,12 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
                 table.column("privateKeySignature", .text)
             }
         }
+
+        migrator.registerMigration("passwordRecency") { db in
+            try db.alter(table: PasswordsDB.tableName) { table in
+                table.add(column: "usedAt", .datetime).notNull().defaults(sql: "\"1970-01-01\"")
+            }
+        }
     }
 
     private func id(for hostname: String, and username: String) -> String {
@@ -201,7 +213,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
                 allEntries += entries
             }
         }
-        return allEntries
+        return allEntries.sorted { $0.usedAt > $1.usedAt }
     }
 
     internal func entries(for hostname: String) throws -> [LocalPasswordRecord] {
@@ -209,6 +221,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
             return try read { db in
                 let passwords = try LocalPasswordRecord
                     .filter(LocalPasswordRecord.Columns.hostname == hostname && LocalPasswordRecord.Columns.deletedAt == nil)
+                    .order(LocalPasswordRecord.Columns.usedAt.desc, LocalPasswordRecord.Columns.username)
                     .fetchAll(db)
                 return passwords
             }
@@ -223,6 +236,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
                 let passwords = try LocalPasswordRecord
                     .filter(LocalPasswordRecord.Columns.hostname == hostname || LocalPasswordRecord.Columns.hostname.like("%.\(hostname)"))
                     .filter(LocalPasswordRecord.Columns.deletedAt == nil)
+                    .order(LocalPasswordRecord.Columns.usedAt.desc, LocalPasswordRecord.Columns.username)
                     .fetchAll(db)
                 return passwords
             }
@@ -285,6 +299,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
                     password: encryptedPassword,
                     createdAt: BeamDate.now,
                     updatedAt: BeamDate.now,
+                    usedAt: BeamDate.now,
                     deletedAt: nil,
                     privateKeySignature: privateKeySignature)
                 try passwordRecord.insert(db)
@@ -345,6 +360,20 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
             try LocalPasswordRecord
                 .filter(ids.contains(LocalPasswordRecord.Columns.uuid))
                 .fetchAll(db)
+        }
+    }
+
+    @discardableResult
+    func markUsed(record: LocalPasswordRecord) throws -> LocalPasswordRecord {
+        do {
+            return try write { db in
+                var updatedRecord = record
+                updatedRecord.usedAt = BeamDate.now
+                try updatedRecord.save(db)
+                return updatedRecord
+            }
+        } catch {
+            throw PasswordDBError.cantSavePassword(errorMsg: error.localizedDescription)
         }
     }
 
