@@ -18,6 +18,11 @@ class TabGroupMenuView: BaseView {
     }
     
     @discardableResult
+    func doesTabGroupExist() -> Bool {
+        return waitForDoesntExist(app.windows.groups.matching(anyTabGroupPredicate).firstMatch)
+    }
+    
+    @discardableResult
     func openFirstTabGroupMenu() -> TabGroupMenuView {
         getFirstTabGroup().rightClickInTheMiddle()
         return self
