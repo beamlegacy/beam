@@ -35,18 +35,16 @@ extension NSImage {
         return image
     }
 
-    var jpegRepresentation: Data {
-        let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+    var jpegRepresentation: Data? {
+        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
         let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
-        let jpegData = bitmapRep.representation(using: NSBitmapImageRep.FileType.jpeg, properties: [:])!
-        return jpegData
+        return bitmapRep.representation(using: NSBitmapImageRep.FileType.jpeg, properties: [:])
     }
 
-    var pngRepresentation: Data {
-        let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+    var pngRepresentation: Data? {
+        guard let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
         let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
-        let pngData = bitmapRep.representation(using: NSBitmapImageRep.FileType.png, properties: [:])!
-        return pngData
+        return bitmapRep.representation(using: NSBitmapImageRep.FileType.png, properties: [:])
     }
 
     // MARK: - Resizing
