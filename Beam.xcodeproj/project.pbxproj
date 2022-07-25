@@ -512,6 +512,7 @@
 		66F9AED3283E215100C28EE3 /* MouseOverAndSelectionUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBB283E215100C28EE3 /* MouseOverAndSelectionUI.ts */; };
 		66F9AED4283E215100C28EE3 /* MouseOverAndSelection.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBC283E215100C28EE3 /* MouseOverAndSelection.ts */; };
 		66F9AED5283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBD283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts */; };
+		6E542C51288A8AE100DA78EA /* GIFAnimatedLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E542C50288A8AE100DA78EA /* GIFAnimatedLayer.swift */; };
 		6E8393CC287C9CC7004633BC /* AppLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8393CB287C9CC7004633BC /* AppLifecycleTests.swift */; };
 		6EC995B8287D6F8400691668 /* WindowMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC995B2287D6F8400691668 /* WindowMenu.swift */; };
 		6ED5E8CB287DA62F00EA7DA1 /* download-file.json in Resources */ = {isa = PBXBuildFile; fileRef = 6ED5E8CA287DA62F00EA7DA1 /* download-file.json */; };
@@ -2187,6 +2188,7 @@
 		66F9AEBB283E215100C28EE3 /* MouseOverAndSelectionUI.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelectionUI.ts; sourceTree = "<group>"; };
 		66F9AEBC283E215100C28EE3 /* MouseOverAndSelection.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelection.ts; sourceTree = "<group>"; };
 		66F9AEBD283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelectionUI_web.ts; sourceTree = "<group>"; };
+		6E542C50288A8AE100DA78EA /* GIFAnimatedLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GIFAnimatedLayer.swift; sourceTree = "<group>"; };
 		6E8393CB287C9CC7004633BC /* AppLifecycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppLifecycleTests.swift; sourceTree = "<group>"; };
 		6EC995B2287D6F8400691668 /* WindowMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WindowMenu.swift; sourceTree = "<group>"; };
 		6ED5E8CA287DA62F00EA7DA1 /* download-file.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "download-file.json"; sourceTree = "<group>"; };
@@ -6407,6 +6409,7 @@
 			isa = PBXGroup;
 			children = (
 				961EC4F125B4511D009FA322 /* Layer.swift */,
+				6E542C50288A8AE100DA78EA /* GIFAnimatedLayer.swift */,
 				961EC50A25B495DB009FA322 /* ButtonLayer.swift */,
 				961EC51625B5038E009FA322 /* ChevronButton.swift */,
 				A032BD32261F4677009A3576 /* ShortcutLayer.swift */,
@@ -9370,6 +9373,7 @@
 				37DB5A1027BB514400534760 /* BeamWebViewProviding.swift in Sources */,
 				96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */,
 				37B85B7F27A2C81B003871F9 /* DownloadDescription.swift in Sources */,
+				6E542C51288A8AE100DA78EA /* GIFAnimatedLayer.swift in Sources */,
 				A5D8859E274EA78800F37859 /* ToolbarButton.swift in Sources */,
 				A05ADF6C264D8C34002DF91A /* OverlayViewCenter.swift in Sources */,
 				A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */,
