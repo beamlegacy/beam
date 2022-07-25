@@ -51,7 +51,7 @@ final class MockPasswordsDB: PasswordStore {
     }
 
     func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord {
-        let record = LocalPasswordRecord(entryId: UUID().uuidString, hostname: hostname, username: username, password: encryptedPassword, createdAt: Date(), updatedAt: Date())
+        let record = LocalPasswordRecord(entryId: UUID().uuidString, hostname: hostname, username: username, password: encryptedPassword, createdAt: Date(), updatedAt: Date(), usedAt: Date())
         passwords.append(record)
         return record
     }
@@ -68,6 +68,17 @@ final class MockPasswordsDB: PasswordStore {
         if let uuid = uuid {
             newRecord.uuid = uuid
         }
+        if let index = passwords.firstIndex(of: record) {
+            passwords[index] = newRecord
+        } else {
+            passwords.append(newRecord)
+        }
+        return newRecord
+    }
+
+    func markUsed(record: LocalPasswordRecord) throws -> LocalPasswordRecord {
+        var newRecord = record
+        newRecord.usedAt = Date()
         if let index = passwords.firstIndex(of: record) {
             passwords[index] = newRecord
         } else {

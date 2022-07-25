@@ -96,7 +96,7 @@ enum PasswordImporter {
             var csvString = "\("URL"),\("Username"),\("Password")\n"
             var failedEntries: [PasswordManagerEntry] = []
             for entry in allEntries {
-                if let passwordStr = try? PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) {
+                if let passwordStr = try? PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false) {
                     let row = encodeToCSV(entry: entry, password: passwordStr)
                     csvString.append("\(row)\n")
                 } else {
