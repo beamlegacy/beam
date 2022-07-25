@@ -11,7 +11,7 @@ import SwiftUI
 class BeamTableRowView: NSTableRowView {
 
     var hasSeparator: Bool = true
-    var onHover: ((Bool) -> Void)?
+    var onHover: ((BeamTableRowView, Bool) -> Void)?
     var highlightOnSelection: Bool = true
     private var isHovering: Bool = false
     private var extraLeftHover: CGFloat = 32
@@ -64,14 +64,14 @@ class BeamTableRowView: NSTableRowView {
     override func mouseEntered(with event: NSEvent) {
         super.mouseEntered(with: event)
         isHovering = true
-        onHover?(true)
+        onHover?(self, true)
         setNeedsDisplay(bounds)
     }
 
     override func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)
         isHovering = false
-        onHover?(false)
+        onHover?(self, false)
         setNeedsDisplay(bounds)
     }
 
