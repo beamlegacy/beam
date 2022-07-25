@@ -485,7 +485,7 @@ class WebAutofillController: NSObject, WebPageRelated {
 
     private func saveCredentialsAction(hostname: String, credentials: PasswordManagerCredentialsBuilder.StoredCredentials) -> PasswordSaveAction? {
         if let storedEntry = passwordManager.bestMatchingEntry(hostname: hostname, exactUsername: credentials.username ?? ""),
-           let storedPassword = try? passwordManager.password(hostname: storedEntry.minimizedHost, username: credentials.username ?? "") {
+           let storedPassword = try? passwordManager.password(hostname: storedEntry.minimizedHost, username: credentials.username ?? "", markUsed: false) {
             guard credentials.password != storedPassword else { return nil }
             return .update(entry: storedEntry)
         }
@@ -614,7 +614,7 @@ extension WebAutofillController: PasswordManagerMenuDelegate {
             return
         }
         do {
-            let password = try passwordManager.password(hostname: entry.minimizedHost, username: entry.username)
+            let password = try passwordManager.password(hostname: entry.minimizedHost, username: entry.username, markUsed: true)
             currentOverlay?.revertMenuToDefault()
             credentialsBuilder.autofill(host: entry.minimizedHost, username: entry.username, password: password)
             Logger.shared.logDebug("Filling fields: \(String(describing: autofillGroup.relatedFields))", category: .webAutofillInternal)

@@ -51,6 +51,7 @@ protocol PasswordStore {
     func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord
     func save(passwords: [LocalPasswordRecord]) throws
     func update(record: LocalPasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord
+    @discardableResult func markUsed(record: LocalPasswordRecord) throws -> LocalPasswordRecord
     @discardableResult func markDeleted(hostname: String, username: String) throws -> LocalPasswordRecord
     @discardableResult func markAllDeleted() throws -> [LocalPasswordRecord]
     @discardableResult func deleteAll() throws -> [LocalPasswordRecord]
