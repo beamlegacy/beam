@@ -76,6 +76,8 @@ struct TableView: NSViewRepresentable {
     }
 
     func makeNSView(context: Self.Context) -> Self.NSViewType {
+        let coordinator = context.coordinator
+
         let scrollView = NSScrollView()
         let view = BeamNSTableView()
         view.backgroundColor = .clear
@@ -86,8 +88,8 @@ struct TableView: NSViewRepresentable {
         view.columnAutoresizingStyle = .reverseSequentialColumnAutoresizingStyle
         view.intercellSpacing = .zero
         view.style = .plain
-        view.onHoverTableView = { isHovering in
-            context.coordinator.tableView(isHovered: isHovering)
+        view.onHoverTableView = { [weak coordinator] isHovering in
+            coordinator?.tableView(isHovered: isHovering)
         }
 
         scrollView.documentView = view
@@ -307,7 +309,7 @@ extension TableViewCoordinator: NSTableViewDataSource {
         if isRowCreationRow(row) {
             rowView.highlightOnSelection = false
         }
-        rowView.onHover = { [weak self, weak tableView] hovering in
+        rowView.onHover = { [weak self, weak tableView] rowView, hovering in
             guard let self = self, let tableView = tableView,
                   let window = tableView.window,
                   rowView.frame.origin.y >= tableView.visibleRect.origin.y else { return }
@@ -449,11 +451,11 @@ extension TableViewCoordinator: NSTableViewDelegate {
     private func setupCheckBoxCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> CheckBoxTableCellView {
         let checkCell = CheckBoxTableCellView()
         checkCell.checked = tableView.selectedRowIndexes.contains(row)
-        checkCell.onCheckChange = { selected in
+        checkCell.onCheckChange = { [weak tableView] selected in
             if selected {
-                tableView.selectRowIndexes([row], byExtendingSelection: true)
+                tableView?.selectRowIndexes([row], byExtendingSelection: true)
             } else {
-                tableView.deselectRow(row)
+                tableView?.deselectRow(row)
             }
         }
         let isSelected = currentSelectedIndexes?.contains(row) == true
