@@ -15,14 +15,10 @@ class TabGroupNameTests: BaseTest {
     let tabGroupNameSpecialChars = "+-.,!@#$%^&*();\\/|<>\"\'"
 
     override func setUp() {
-        step("Given I open multiple times same test page") {
+        step("Given I have a tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.loadUITestPage2()
-            uiMenu.loadUITestPage2()
-        }
-        
-        step("Then tab grouping is enabled") {
-            XCTAssertTrue(tabGroupMenu.getFirstTabGroup().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            uiMenu.createTabGroup()
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
     }
     
@@ -64,7 +60,7 @@ class TabGroupNameTests: BaseTest {
         }
         
         step("Then Tab Group name contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "2")
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "4")
         }
         
         step("When I set a tab group name") {
@@ -74,7 +70,7 @@ class TabGroupNameTests: BaseTest {
         }
         
         step("Then tab group name is set and contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (2)")
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (4)")
         }
         
         // Enable next steps when https://linear.app/beamapp/issue/BE-4776/cannot-open-collapsed-tab-group-menu-after-renaming is fixed
@@ -125,7 +121,7 @@ class TabGroupNameTests: BaseTest {
         }
 
         step("Then tab group name is set and contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (2)")
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (4)")
         }
     }
 }

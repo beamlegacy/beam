@@ -149,6 +149,7 @@
         "SigninTests",
         "SyncTests",
         "TabGroupCloseTests",
+        "TabGroupNewTabTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "TrackersBlockerTests",
