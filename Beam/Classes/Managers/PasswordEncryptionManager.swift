@@ -22,7 +22,7 @@ enum PasswordEncryptionManager {
             } else {
                 Logger.shared.logError("Network password can't be decrypted with either remote or local key: \(networkPassword.hostname)", category: .passwordNetwork)
             }
-            return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: networkPassword.password, createdAt: networkPassword.createdAt, updatedAt: updatedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
+            return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: networkPassword.password, createdAt: networkPassword.createdAt, updatedAt: updatedAt, usedAt: networkPassword.usedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
         }
 
         static func tryReEncryptAfterReceive(_ networkPassword: RemotePasswordRecord) -> LocalPasswordRecord? {
@@ -33,7 +33,7 @@ enum PasswordEncryptionManager {
             do {
                 let password = try reEncrypt(networkPassword.password, encryptKey: EncryptionManager.shared.localPrivateKey())
                 let privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
-                return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: password, createdAt: networkPassword.createdAt, updatedAt: networkPassword.updatedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
+                return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: password, createdAt: networkPassword.createdAt, updatedAt: networkPassword.updatedAt, usedAt: networkPassword.usedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
             } catch {
                 Logger.shared.logError("Converting received password failed for \(networkPassword.hostname): \(error.localizedDescription)", category: .passwordNetwork)
                 throw error
@@ -48,7 +48,7 @@ enum PasswordEncryptionManager {
             do {
                 let password = try reEncrypt(localPassword.password, decryptKey: EncryptionManager.shared.localPrivateKey())
                 let privateKeySignature = try EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString().SHA256()
-                return RemotePasswordRecord(uuid: localPassword.uuid, entryId: localPassword.entryId, hostname: localPassword.hostname, username: localPassword.username, password: password, createdAt: localPassword.createdAt, updatedAt: localPassword.updatedAt, deletedAt: localPassword.deletedAt, privateKeySignature: privateKeySignature)
+                return RemotePasswordRecord(uuid: localPassword.uuid, entryId: localPassword.entryId, hostname: localPassword.hostname, username: localPassword.username, password: password, createdAt: localPassword.createdAt, updatedAt: localPassword.updatedAt, usedAt: localPassword.usedAt, deletedAt: localPassword.deletedAt, privateKeySignature: privateKeySignature)
             } catch {
                 Logger.shared.logError("Converting password before sending failed for \(localPassword.hostname): \(error.localizedDescription)", category: .passwordNetwork)
                 throw error

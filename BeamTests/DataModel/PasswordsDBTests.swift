@@ -179,10 +179,10 @@ class PasswordsDBTests: XCTestCase {
 
         let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, options: .fuzzy)
         XCTAssertEqual(entries.count, 2)
-        XCTAssertEqual(entries.last?.minimizedHost, Self.subdomain1.minimizedHost)
-        XCTAssertEqual(entries.last?.username, Self.username)
-        XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
+        XCTAssertEqual(entries.first?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(entries.first?.username, Self.username)
+        XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
+        XCTAssertEqual(entries.last?.username, Self.username)
         cleanupPasswordsAfterTest()
     }
 
