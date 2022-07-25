@@ -39,7 +39,12 @@ public struct NoteSource: Codable {
         return components.host ?? "<???>"
     }
     var addedAtDay: Date { Calendar.current.startOfDay(for: addedAt) }
-    public var score: Float { ((longTermScore?.score() ?? 1) * Float(similarity ?? 1)) / (frecencyAtAddition ?? 1) }
+    public var score: Float { (longTermScoreValue * similarityValue) / frecencyAtAdditionValue }
+
+    /// splitting into sub properties for swift type-checking performance
+    private var longTermScoreValue: Float { longTermScore?.score() ?? 1 }
+    private var similarityValue: Float { Float(similarity ?? 1) }
+    private var frecencyAtAdditionValue: Float { frecencyAtAddition ?? 1 }
 }
 
 public class NoteSources: Codable {
