@@ -57,39 +57,49 @@ struct ClusterLoadingView: View {
 struct ClusterContentView: View {
     @ObservedObject var clusteringManager: ClusteringManager
 
-    var body: some View {
-        ForEach(0..<clusteringManager.clusteredTabs.count, id: \.self) { clusterGroupIdx in
-            if clusteringManager.clusteredNotes.count > clusterGroupIdx {
-                VStack(alignment: .leading) {
-                    let clusterNoteGroup = clusteringManager.clusteredNotes[clusterGroupIdx]
-                    if !clusterNoteGroup.isEmpty {
-                        Text("Notes:")
-                            .font(BeamFont.medium(size: 13).swiftUI)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
-                        ForEach(0..<clusterNoteGroup.count, id: \.self) { clusteredNoteIdx in
-                            if let noteName = clusterNoteGroup[clusteredNoteIdx] {
-                                NoteRowView(noteName: noteName)
-                                    .padding(.bottom, clusteredNoteIdx == clusterNoteGroup.count - 1 ? 0 : 10)
-                            }
-                        }
-                    }
-                }.padding(.bottom, 5)
-            }
-
-            let clusterTabGroup = clusteringManager.clusteredTabs[clusterGroupIdx]
-            if !clusterTabGroup.isEmpty {
-                VStack(alignment: .leading) {
-                    Text("Tabs:")
+    @ViewBuilder
+    private func renderClusteredNotes(forGroupIndex clusterGroupIdx: Int) -> some View {
+        if clusteringManager.clusteredNotes.count > clusterGroupIdx {
+            VStack(alignment: .leading) {
+                let clusterNoteGroup = clusteringManager.clusteredNotes[clusterGroupIdx]
+                if !clusterNoteGroup.isEmpty {
+                    Text("Notes:")
                         .font(BeamFont.medium(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    ForEach(0..<clusterTabGroup.count, id: \.self) { clusteredTabIdx in
-                        if let tab = clusterTabGroup[clusteredTabIdx] {
-                            TabRowView(tabInfo: tab)
-                                .padding(.bottom, clusteredTabIdx == clusterTabGroup.count - 1 ? 0 : 10)
+                    ForEach(0..<clusterNoteGroup.count, id: \.self) { clusteredNoteIdx in
+                        if let noteName = clusterNoteGroup[clusteredNoteIdx] {
+                            NoteRowView(noteName: noteName)
+                                .padding(.bottom, clusteredNoteIdx == clusterNoteGroup.count - 1 ? 0 : 10)
                         }
                     }
                 }
+            }.padding(.bottom, 5)
+        }
+    }
+
+    @ViewBuilder
+    private func renderClusteredTabs(forGroupIndex clusterGroupIdx: Int) -> some View {
+        let clusterTabGroup = clusteringManager.clusteredTabs[clusterGroupIdx]
+        if !clusterTabGroup.isEmpty {
+            VStack(alignment: .leading) {
+                Text("Tabs:")
+                    .font(BeamFont.medium(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                ForEach(0..<clusterTabGroup.count, id: \.self) { clusteredTabIdx in
+                    if let tab = clusterTabGroup[clusteredTabIdx] {
+                        TabRowView(tabInfo: tab)
+                            .padding(.bottom, clusteredTabIdx == clusterTabGroup.count - 1 ? 0 : 10)
+                    }
+                }
             }
+        }
+    }
+
+    var body: some View {
+        ForEach(0..<clusteringManager.clusteredTabs.count, id: \.self) { clusterGroupIdx in
+
+            renderClusteredNotes(forGroupIndex: clusterGroupIdx)
+            renderClusteredTabs(forGroupIndex: clusterGroupIdx)
 
             if clusterGroupIdx != clusteringManager.clusteredTabs.count - 1 {
                 Separator(horizontal: true, hairline: false)

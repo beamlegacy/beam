@@ -6,15 +6,14 @@ final class CustomPDFView: PDFView {
     /// We could have instead intercept the default menu in `PDFView.willOpenMenu(_:with:)`, but unfortunately it is
     /// only called when clicking outside the bounds of the PDF document.
     override func menu(for event: NSEvent) -> NSMenu? {
-
         let menu = NSMenu()
-        menu.items = []
-        + sizingItems()
-        + [.separator()]
-        + pagingDisplayItems()
-        + [.separator()]
-        + pageNavigationtems()
-
+        var items = [NSMenuItem]()
+        items.append(contentsOf: sizingItems())
+        items.append(.separator())
+        items.append(contentsOf: pagingDisplayItems())
+        items.append(.separator())
+        items.append(contentsOf: pageNavigationtems())
+        menu.items = items
         return menu
     }
 
