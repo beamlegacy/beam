@@ -95,11 +95,13 @@ class ShareHelperTests: XCTestCase {
         let html = "<img src=\"\(imgURL)\"/>"
         let downloadManager = MockDownloadManager()
 
-        guard let image = NSImage(systemSymbolName: "face.smiling", accessibilityDescription: nil) else {
+        guard let image = NSImage(systemSymbolName: "face.smiling", accessibilityDescription: nil),
+              let imageData = image.jpegRepresentation
+        else {
             XCTFail("Error creating image")
             return
         }
-        let imageData = image.jpegRepresentation
+
         downloadManager.mockData = imageData
         downloadManager.mockFileName = "image.jpg"
         let _ = try BeamFileDBManager.shared?.insert(name: "image.jpg", data: imageData, type: "image/jpeg")
