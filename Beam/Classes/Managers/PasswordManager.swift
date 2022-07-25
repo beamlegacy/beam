@@ -143,13 +143,18 @@ final class PasswordManager {
         }
     }
 
-    func password(hostname: String, username: String) throws -> String {
+    func password(hostname: String, username: String, markUsed: Bool = false) throws -> String {
         do {
-            guard let passwordRecord = try passwordsDB?.passwordRecord(hostname: hostname, username: username) else {
+            guard let passwordsDB = passwordsDB, let passwordRecord = try passwordsDB.passwordRecord(hostname: hostname, username: username) else {
                 throw PasswordDBError.cantReadDB(errorMsg: "Database returned no entry")
             }
             guard let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password, EncryptionManager.shared.localPrivateKey()) else {
                 throw Error.decryptionError(errorMsg: "Decrypting password returned nil")
+            }
+            if markUsed, let updatedRecord = try? passwordsDB.markUsed(record: passwordRecord) {
+                if AuthenticationManager.shared.isAuthenticated {
+                    saveOnNetwork(updatedRecord)
+                }
             }
             return decryptedPassword
         } catch Error.decryptionError(let errorMsg) {
@@ -190,12 +195,13 @@ final class PasswordManager {
                 throw Error.encryptionError(errorMsg: "encryption failed")
             }
             let privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
-            let passwordRecord: LocalPasswordRecord
+            var passwordRecord: LocalPasswordRecord
             if let previousRecord = try? passwordsDB.passwordRecord(hostname: previousHostname, username: previousUsername) {
                 passwordRecord = try passwordsDB.update(record: previousRecord, hostname: hostname, username: username, encryptedPassword: encryptedPassword, privateKeySignature: privateKeySignature, uuid: uuid)
             } else {
                 passwordRecord = try passwordsDB.save(hostname: hostname, username: username, encryptedPassword: encryptedPassword, privateKeySignature: privateKeySignature, uuid: uuid)
             }
+            passwordRecord = (try? passwordsDB.markUsed(record: passwordRecord)) ?? passwordRecord
             changeSubject.send()
             if AuthenticationManager.shared.isAuthenticated {
                 self.saveOnNetwork(passwordRecord, networkCompletion)

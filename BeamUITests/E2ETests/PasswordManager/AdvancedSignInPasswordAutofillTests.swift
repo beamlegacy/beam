@@ -22,6 +22,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         launchApp()
         uiMenu.destroyDB()
             .startMockHTTPServer()
+            .clearPasswordsDB()
             .populatePasswordsDB()
     }
 
