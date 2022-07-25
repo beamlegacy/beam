@@ -260,15 +260,15 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
     /// This methods creates a CALayer and animates it from the mouse current position to the position of the downloadButton of the window
     /// It should be trigerred when a file download starts
     func downloadAnimation() {
-
         guard let buttonPosition = state.downloadButtonPosition?.flippedPointToBottomLeftOrigin(in: self) else { return }
+        let size = CGSize(width: 64, height: 64)
         let animationLayer = CALayer()
-        animationLayer.frame = CGRect(origin: CGPoint(x: 50, y: 50), size: CGSize(width: 64, height: 64))
+        animationLayer.frame = CGRect(origin: CGPoint(x: 50, y: 50), size: size)
         animationLayer.position = self.mouseLocationOutsideOfEventStream
         animationLayer.zPosition = .greatestFiniteMagnitude
 
         let flyingImage = NSImage(named: "download-file_glyph")
-        animationLayer.contents = flyingImage?.cgImage
+        animationLayer.contents = flyingImage?.cgImage(forProposedRect: CGRect(origin: .zero, size: size))
 
         self.contentView?.layer?.addSublayer(animationLayer)
 

@@ -216,56 +216,8 @@ extension Layer {
     }
 
     fileprivate static func animationForImageData(with data: Data) -> CALayer? {
-        let layer = CALayer()
-        let data = data as CFData
-        let animation = CAKeyframeAnimation(keyPath: "contents")
-        var frames = [CGImage]()
-        var delayTimes = [NSNumber]()
-        var totalTime: Float = 0.0
-        let imageSource = CGImageSourceCreateWithData(data, nil)
-        // get frame count
-        let frameCount = CGImageSourceGetCount(imageSource!)
-        guard frameCount > 1 else { return nil }
-        for i in 0..<frameCount {
-            // get each frame
-            let frame = CGImageSourceCreateImageAtIndex(imageSource!, i, nil)
-            if let frame = frame {
-                frames.append(frame)
-            }
-            // get image info with each frame
-            if let dict = CGImageSourceCopyPropertiesAtIndex(imageSource!, i, nil) as? [CFString: AnyObject] {
-                // get image size
-                if let imageWidth = (dict[kCGImagePropertyPixelWidth] as? NSNumber)?.floatValue,
-                   let imageHeight = (dict[kCGImagePropertyPixelHeight] as? NSNumber)?.floatValue {
-                    layer.frame = NSRect(x: 0, y: 0, width: imageWidth, height: imageHeight).rounded()
-                }
-                if let imageDict = dict[kCGImagePropertyGIFDictionary],
-                   let value = imageDict[kCGImagePropertyGIFDelayTime] as? NSNumber {
-                    delayTimes.append(value)
-                    totalTime += (((imageDict[kCGImagePropertyGIFDelayTime] as? NSNumber)?.floatValue)!)
-                }
-            }
-        }
-        var times = [AnyHashable](repeating: 0, count: 3)
-        var currentTime: Float = 0
-        let count: Int = delayTimes.count
-        for i in 0..<count {
-            times.append(NSNumber(value: Float((currentTime / totalTime))))
-            currentTime += delayTimes[i].floatValue
-        }
-        var images = [AnyHashable](repeating: 0, count: 3)
-        for i in 0..<count {
-            images.append(frames[i])
-        }
-        animation.keyTimes = times as? [NSNumber]
-        animation.values = images
-        animation.timingFunction = CAMediaTimingFunction(name: .linear)
-        animation.duration = CFTimeInterval(totalTime)
-        animation.repeatCount = Float.infinity
-        animation.beginTime = AVCoreAnimationBeginTimeAtZero
-        animation.isRemovedOnCompletion = false
-
-        layer.add(animation, forKey: "contents")
+        let layer = GIFAnimatedLayer(data: data)
+        layer?.startAnimating()
         return layer
     }
 
