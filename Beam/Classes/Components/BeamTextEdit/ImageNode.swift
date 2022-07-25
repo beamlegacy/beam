@@ -433,14 +433,6 @@ class ImageNode: ResizableNode {
         }
     }
 
-    override func didMoveToWindow(_ window: NSWindow?) {
-        super.didMoveToWindow(window)
-
-        if imageLayer == nil {
-            setupImage(width: availableWidth)
-        }
-    }
-
     override func elementDidChange() {
         super.elementDidChange()
 
