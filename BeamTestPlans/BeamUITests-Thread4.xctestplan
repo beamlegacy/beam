@@ -177,6 +177,7 @@
         "SlashMenuTests\/testNoteDividerCreation()",
         "TabGroupNameTests",
         "TabGroupNewTabTests",
+        "TabGroupUngroupTests",
         "TrackersBlockerTests",
         "UITestFrameworkTests",
         "UpdateViewTests",
