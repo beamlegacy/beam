@@ -46,19 +46,26 @@ public struct BID64: Codable, Hashable, Equatable {
         return uuidRef!.hashValue
     }
 
-    private func mask(_ value: Int, _ bits: Int) -> Int {
-        return (value & ((1 << bits) - 1))
-    }
-
     public init() {
         id = 0
         Self.sequence += 1
-        let t = mask(Int(CACurrentMediaTime() * 1000 - Self.baseTime), Self.timeBits)
-        id = UInt64(t << (Self.nodeBits + Self.seqBits) | (mask(Self.nodeId, Self.nodeBits) << Self.seqBits) | mask(Self.sequence, Self.seqBits))
+        id = Self.generateIDWithCurrentTime()
     }
 
     public init(id: UInt64) {
         self.id = id
+    }
+
+    /// splitting into sub functions for swift type-checking performance
+    static private func mask(_ value: Int, _ bits: Int) -> Int {
+        return (value & ((1 << bits) - 1))
+    }
+    static private func currentTimeMask() -> Int {
+        mask(Int(CACurrentMediaTime() * 1000 - baseTime), timeBits)
+    }
+    static private func generateIDWithCurrentTime() -> UInt64 {
+        let t = mask(Int(CACurrentMediaTime() * 1000 - Self.baseTime), Self.timeBits)
+        return UInt64(t << (nodeBits + seqBits) | (mask(nodeId, nodeBits) << seqBits) | mask(sequence, seqBits))
     }
 }
 
@@ -70,19 +77,27 @@ public struct BID32: Codable, Hashable, Equatable {
     private static let nodeBits = 5
     private static let seqBits = 7
     private static var sequence = 0
-    private func mask(_ value: Int, _ bits: Int) -> Int {
-        return (value & ((1 << bits) - 1))
-    }
 
     public init() {
         id = 0
         Self.sequence += 1
-        let t = mask(Int(CACurrentMediaTime() * 1000 - Self.baseTime), Self.timeBits)
-        id = UInt32(t << (Self.nodeBits + Self.seqBits) | (mask(BID64.nodeId, Self.nodeBits) << Self.seqBits) | mask(Self.sequence, Self.seqBits))
+        id = Self.generateIDWithCurrentTime()
     }
 
     public init(id: UInt32) {
         self.id = id
+    }
+
+    /// splitting into sub functions for swift type-checking performance
+    static private func mask(_ value: Int, _ bits: Int) -> Int {
+        return (value & ((1 << bits) - 1))
+    }
+    static private func currentTimeMask() -> Int {
+        mask(Int(CACurrentMediaTime() * 1000 - baseTime), timeBits)
+    }
+    static private func generateIDWithCurrentTime() -> UInt32 {
+        let t = currentTimeMask()
+        return UInt32(t << (nodeBits + seqBits) | (mask(BID64.nodeId, nodeBits) << seqBits) | mask(sequence, seqBits))
     }
 }
 
