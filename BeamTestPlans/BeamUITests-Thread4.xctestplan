@@ -176,6 +176,7 @@
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SlashMenuTests\/testNoteDividerCreation()",
         "TabGroupNameTests",
+        "TabGroupNewTabTests",
         "TrackersBlockerTests",
         "UITestFrameworkTests",
         "UpdateViewTests",
