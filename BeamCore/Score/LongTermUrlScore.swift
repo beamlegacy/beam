@@ -7,7 +7,7 @@
 
 import Foundation
 
-private let HALF_LIFE = Float(30.0 * 24.0 * 60.0 * 60.0)
+private let HALF_LIFE = Float(30.0 * 86400) // 30 days
 
 public class LongTermUrlScore: Codable, UrlScoreProtocol {
     public enum CodingKeys: String, CodingKey {

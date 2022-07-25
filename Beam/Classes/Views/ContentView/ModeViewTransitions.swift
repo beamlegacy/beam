@@ -15,26 +15,8 @@ import Combine
 class ModeTransitionModel {
     weak var state: BeamState? {
         didSet {
-            cancellables.removeAll()
-            guard let newState = state else { return }
-            newState.$mode
-                .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
-                .sink { [weak self] newMode in
-                    guard let self = self, self.previousMode != newMode else { return }
-                    self.previousMode = newMode
-                }.store(in: &cancellables)
-            newState.$mode
-                .sink { [weak self] newMode in
-                    guard let self = self, self.previousMode != newMode else { return }
-                    guard self.previousMode == .web || newMode == .web else { return }
-                    self.transitionDelayWorkItem?.cancel()
-                    self.isTransitioning = true
-                    let workItem = DispatchWorkItem { [weak self] in
-                        self?.isTransitioning = false
-                    }
-                    self.transitionDelayWorkItem = workItem
-                    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(self.transitionDelay), execute: workItem)
-                }.store(in: &cancellables)
+            guard state != oldValue else { return }
+            updateStateObservers()
         }
     }
     private var transitionDelayWorkItem: DispatchWorkItem?
@@ -46,6 +28,29 @@ class ModeTransitionModel {
         state?.mode ?? .today
     }
     private(set) var isTransitioning: Bool = false
+
+    private func updateStateObservers() {
+        cancellables.removeAll()
+        guard let newState = state else { return }
+        newState.$mode
+            .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
+            .sink { [weak self] newMode in
+                guard let self = self, self.previousMode != newMode else { return }
+                self.previousMode = newMode
+            }.store(in: &cancellables)
+        newState.$mode
+            .sink { [weak self] newMode in
+                guard let self = self, self.previousMode != newMode else { return }
+                guard self.previousMode == .web || newMode == .web else { return }
+                self.transitionDelayWorkItem?.cancel()
+                self.isTransitioning = true
+                let workItem = DispatchWorkItem { [weak self] in
+                    self?.isTransitioning = false
+                }
+                self.transitionDelayWorkItem = workItem
+                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(self.transitionDelay), execute: workItem)
+            }.store(in: &cancellables)
+    }
 }
 
 // MARK: - Web Mode Content Transition
