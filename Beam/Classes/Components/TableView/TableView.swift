@@ -431,25 +431,43 @@ extension TableViewCoordinator: NSTableViewDelegate {
     }
 
     private func setupTextCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> BeamTableCellView {
-        let textCell = BeamTableCellView()
+        let identifier = NSUserInterfaceItemIdentifier(rawValue: column.key)
+        let textCell: BeamTableCellView
+
+        if let cell = tableView.makeView(withIdentifier: identifier, owner: nil) as? BeamTableCellView {
+            textCell = cell
+        } else {
+            textCell = BeamTableCellView()
+            textCell.identifier = identifier
+            let editable = column.editable && !column.isLink
+            textCell.textField?.isEditable = editable
+            textCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
+            textCell.textField?.setAccessibilityIdentifier("\(column.title)")
+            textCell.textField?.delegate = self
+            textCell.isLink = column.isLink
+            textCell.foregroundColor = column.foregroundColor
+            textCell.selectedForegroundColor = column.selectedForegroundColor
+        }
+
         let item = sortedData[row]
         let value = item.value(forKey: column.key)
         let text = column.stringFromKeyValue(value)
-        let editable = column.editable && !column.isLink
-        textCell.textField?.isEditable = editable
-        textCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
-        textCell.textField?.setAccessibilityIdentifier("\(column.title)")
-        textCell.textField?.delegate = self
-        textCell.isLink = column.isLink
         textCell.setText(text)
-        textCell.foregroundColor = column.foregroundColor
-        textCell.selectedForegroundColor = column.selectedForegroundColor
         textCell.isSelected = currentSelectedIndexes?.contains(row) == true
         return textCell
     }
 
     private func setupCheckBoxCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> CheckBoxTableCellView {
-        let checkCell = CheckBoxTableCellView()
+        let identifier = NSUserInterfaceItemIdentifier(rawValue: column.key)
+        let checkCell: CheckBoxTableCellView
+
+        if let cell = tableView.makeView(withIdentifier: identifier, owner: nil) as? CheckBoxTableCellView {
+            checkCell = cell
+        } else {
+            checkCell = CheckBoxTableCellView()
+            checkCell.identifier = identifier
+        }
+
         checkCell.checked = tableView.selectedRowIndexes.contains(row)
         checkCell.onCheckChange = { [weak tableView] selected in
             if selected {
@@ -460,12 +478,28 @@ extension TableViewCoordinator: NSTableViewDelegate {
         }
         let isSelected = currentSelectedIndexes?.contains(row) == true
         checkCell.alphaValue = column.visibleOnlyOnRowHoverOrSelected && !isSelected ? 0 : 1
+
         return checkCell
     }
 
     private func setupIconAndTextCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn)
     -> BeamTableCellIconAndTextView {
-        let iconAndTextCell = BeamTableCellIconAndTextView()
+        let identifier = NSUserInterfaceItemIdentifier(rawValue: column.key)
+
+        let iconAndTextCell: BeamTableCellIconAndTextView
+
+        if let cell = tableView.makeView(withIdentifier: identifier, owner: nil) as? BeamTableCellIconAndTextView {
+            iconAndTextCell = cell
+        } else {
+            iconAndTextCell = BeamTableCellIconAndTextView()
+            iconAndTextCell.identifier = identifier
+            let editable = column.editable && !column.isLink
+            iconAndTextCell.textField?.isEditable = editable
+            iconAndTextCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
+            iconAndTextCell.textField?.textColor = column.foregroundColor
+            iconAndTextCell.textField?.delegate = self
+        }
+
         let item = sortedData[row] as? IconAndTextTableViewItem
         // Placeholder Image
         let placeholderImage = NSImage(named: "field-web")
@@ -474,53 +508,67 @@ extension TableViewCoordinator: NSTableViewDelegate {
         item?.loadRemoteFavIcon(completion: { favIcon in
             iconAndTextCell.updateWithIcon(favIcon)
         })
-        let editable = column.editable && !column.isLink
         iconAndTextCell.textField?.stringValue = item?.text ?? ""
-        iconAndTextCell.textField?.isEditable = editable
-        iconAndTextCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
-        iconAndTextCell.textField?.textColor = column.foregroundColor
-        iconAndTextCell.textField?.delegate = self
+
         return iconAndTextCell
     }
 
     private func setupTwoTextFieldViewCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> BeamTableCellTwoTextFieldView {
-        let twoTextFieldViewCell = BeamTableCellTwoTextFieldView()
+        let identifier = NSUserInterfaceItemIdentifier(rawValue: column.key)
+
+        let twoTextFieldViewCell: BeamTableCellTwoTextFieldView
+
+        if let cell = tableView.makeView(withIdentifier: identifier, owner: nil) as? BeamTableCellTwoTextFieldView {
+            twoTextFieldViewCell = cell
+        } else {
+            twoTextFieldViewCell = BeamTableCellTwoTextFieldView()
+            twoTextFieldViewCell.identifier = identifier
+            let editable = column.editable && !column.isLink
+            twoTextFieldViewCell.topTextField.isEditable = editable
+            twoTextFieldViewCell.botTextField.isEditable = editable
+            let font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
+            twoTextFieldViewCell.topTextField.font = font
+            twoTextFieldViewCell.botTextField.font = font
+            twoTextFieldViewCell.topTextField.textColor = column.foregroundColor
+            twoTextFieldViewCell.botTextField.textColor = column.foregroundColor
+        }
+
         let item = sortedData[row] as? TwoTextFieldViewItem
-        let editable = column.editable && !column.isLink
 
         twoTextFieldViewCell.topTextField.stringValue = item?.topTextFieldValue ?? ""
         twoTextFieldViewCell.botTextField.stringValue = item?.botTextFieldValue ?? ""
         twoTextFieldViewCell.topTextField.placeholderString = item?.topTextFieldPlaceholder
         twoTextFieldViewCell.botTextField.placeholderString = item?.botTextFieldPlaceholder
 
-        twoTextFieldViewCell.topTextField.isEditable = editable
-        twoTextFieldViewCell.botTextField.isEditable = editable
-        let font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
-        twoTextFieldViewCell.topTextField.font = font
-        twoTextFieldViewCell.botTextField.font = font
-        twoTextFieldViewCell.topTextField.textColor = column.foregroundColor
-        twoTextFieldViewCell.botTextField.textColor = column.foregroundColor
         return twoTextFieldViewCell
     }
 
     private func setupIconButtonCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> BeamTableCellIconButtonView? {
-        let item = sortedData[row] as? IconButtonTableViewItem
+        let identifier = NSUserInterfaceItemIdentifier(rawValue: column.key)
 
-        if let iconName = item?.iconName, let action = item?.buttonAction {
-            let iconButtonViewCell = BeamTableCellIconButtonView()
+        let iconButtonViewCell: BeamTableCellIconButtonView
 
-            let iconImage = NSImage(named: iconName)?.fill(color: BeamColor.AlphaGray.nsColor)
-            iconButtonViewCell.iconButton.image = iconImage
-            iconImage?.isTemplate = false
+        if let cell = tableView.makeView(withIdentifier: identifier, owner: nil) as? BeamTableCellIconButtonView {
+            iconButtonViewCell = cell
+        } else {
+            iconButtonViewCell = BeamTableCellIconButtonView()
+            iconButtonViewCell.identifier = identifier
             iconButtonViewCell.iconButton.contentTintColor = BeamColor.AlphaGray.nsColor
-            iconButtonViewCell.hasPopover = item?.hasPopover ?? false
-            iconButtonViewCell.popoverAlignment = item?.popoverAlignment ?? .bottom
-            iconButtonViewCell.buttonAction = action
-            iconButtonViewCell.iconButton.setAccessibilityIdentifier("\(column.title)-row\(row)")
-            return iconButtonViewCell
         }
 
-        return nil
+        let item = sortedData[row] as? IconButtonTableViewItem
+
+        guard let iconName = item?.iconName, let action = item?.buttonAction else { return nil }
+
+        let iconImage = NSImage(named: iconName)?.fill(color: BeamColor.AlphaGray.nsColor)
+        iconImage?.isTemplate = false
+        iconButtonViewCell.iconButton.image = iconImage
+        iconButtonViewCell.hasPopover = item?.hasPopover ?? false
+        iconButtonViewCell.popoverAlignment = item?.popoverAlignment ?? .bottom
+        iconButtonViewCell.buttonAction = action
+        iconButtonViewCell.iconButton.setAccessibilityIdentifier("\(column.title)-row\(row)")
+
+        return iconButtonViewCell
     }
 
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
