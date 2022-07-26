@@ -68,7 +68,6 @@
         "AllNotesDeleteTests",
         "AllNotesPublishProfileTests",
         "AllNotesSortingTests",
-        "AllNotesViewTests\/testAllNotesURLCounter()",
         "AllowListPreferencesTests",
         "AppLifecycleTests",
         "BaseCreditCardTest",
