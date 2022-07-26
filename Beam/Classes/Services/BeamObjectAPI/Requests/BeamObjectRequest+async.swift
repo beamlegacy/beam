@@ -538,9 +538,19 @@ extension BeamObjectRequest {
         }()
 
         try await withThrowingTaskGroup(of: Void.self) { group in
+            let chunkSize = 60
+            var i = 0
             for beamObject in sortedBeamObjects {
                 try Task.checkCancellation()
                 guard let dataUrl = beamObject.dataUrl else { continue }
+                if i >= chunkSize {
+                    do {
+                        try await group.next()
+                    } catch {
+                        Logger.shared.logWarning("Failed to download beam object content from \(dataUrl)", category: .sync)
+                    }
+                }
+                i += 1
                 group.addTask {
                     beamObject.data = try await self.fetchDataFromUrl(urlString: dataUrl)
                 }
