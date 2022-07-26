@@ -583,11 +583,11 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     }
 
     @discardableResult
-    public func goBack() -> BrowsingNode {
+    public func goBack(startReading: Bool = true) -> BrowsingNode {
         guard let parent = current.parent else { return current }
         current.addEvent(.exitBackward)
         current = parent
-        current.addEvent(.startReading)
+        if startReading { current.addEvent(.startReading) }
         Logger.shared.logInfo("goBack to \(currentLink)", category: .web)
         return current
     }

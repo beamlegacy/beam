@@ -816,7 +816,8 @@ extension BrowserTab: WebViewControllerDelegate {
         if !BeamURL(url).isErrorPage {
             state?.webIndexingController?.tabDidNavigate(self, toURL: url, originalRequestedURL: navigationDescription.requestedURL,
                                                         shouldWaitForBetterContent: shouldWaitForBetterContent,
-                                                        isLinkActivation: isLinkActivation, currentTab: state?.browserTabsManager.currentTab)
+                                                        isLinkActivation: isLinkActivation, keepSameParent: navigationDescription.keepSameParent,
+                                                        currentTab: state?.browserTabsManager.currentTab)
             state?.browserTabsManager.tabDidFinishNavigating(self, url: url)
         }
     }
