@@ -215,13 +215,6 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
     }
 
     func postMigrationSetup() throws {
-        DispatchQueue.main.async {
-            do {
-                try AppDelegate.main.data.reindexFileReferences()
-            } catch {
-                Logger.shared.logError("Error while reindexing all file references: \(error)", category: .fileDB)
-            }
-        }
         try purgeUndo()
         try purgeUnlinkedFiles()
     }
