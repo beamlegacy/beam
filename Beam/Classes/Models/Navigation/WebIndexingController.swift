@@ -133,7 +133,8 @@ extension WebIndexingController {
     // MARK: Navigation events
 
     func tabDidNavigate(_ tab: BrowserTab, toURL url: URL, originalRequestedURL: URL?,
-                        shouldWaitForBetterContent: Bool, isLinkActivation: Bool, currentTab: BrowserTab?) {
+                        shouldWaitForBetterContent: Bool, isLinkActivation: Bool, keepSameParent: Bool = false,
+                        currentTab: BrowserTab?) {
 
         let webView = tab.webView
         let tabID = tab.id
@@ -155,6 +156,7 @@ extension WebIndexingController {
                                               isPinnedTab: tab.isPinned)
 
         previousTabBrowsingTree = nil
+        if keepSameParent { browsingTree.goBack(startReading: false) }
         browsingTree.navigateTo(url: url.absoluteString, title: indexDocument.title, startReading: startReading, isLinkActivation: isLinkActivation)
 
         let finishBlock: (Readability?) -> Void = { [weak self] readabilityResultToUse in

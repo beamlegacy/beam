@@ -49,36 +49,55 @@ class BrowserTabIndexingTests: WebBrowsingBaseTests {
             XCTAssertNil(resultLinkForInitialURL?.destination)
             XCTAssertNotEqual(resultLinkForInitialURL?.title, destinationTitle)
         }
-
+    }
+    func checkTree(redirectionType: MockHttpServer.RedirectionType, expectedNumberOfIndexingCalls: Int) {
         var currentNode = tab.browsingTree.root!
         if expectedNumberOfIndexingCalls == 2 {
             currentNode = currentNode.children[0]
-            XCTAssertEqual(currentNode.url, redirectURL(for: type).absoluteString) //intermediate node
+            XCTAssertEqual(currentNode.url, redirectURL(for: redirectionType).absoluteString) //intermediate node
         }
         currentNode = currentNode.children[0]
         XCTAssertEqual(currentNode.url, redirectURL(for: .none).absoluteString)
     }
 
     func testHTTP301RedirectionIsStoredAsAlias() {
-        performAndTestAliasRedirection(ofType: .http301, expectedNumberOfIndexingCalls: 1, destinationTitle: destinationPageTitle)
+        let redirectionType: MockHttpServer.RedirectionType = .http301
+        let expectedNumberOfIndexingCalls = 1
+        performAndTestAliasRedirection(ofType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls, destinationTitle: destinationPageTitle)
+        checkTree(redirectionType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls)
     }
 
     func testHTTP302RedirectionIsStoredAsAlias() {
-        performAndTestAliasRedirection(ofType: .http302, expectedNumberOfIndexingCalls: 1, destinationTitle: destinationPageTitle)
+        let redirectionType: MockHttpServer.RedirectionType = .http302
+        let expectedNumberOfIndexingCalls = 1
+        performAndTestAliasRedirection(ofType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls, destinationTitle: destinationPageTitle)
+        checkTree(redirectionType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls)
     }
 
     func testHTMLRedirectionIsStoredAsAlias() {
-        performAndTestAliasRedirection(ofType: .html, expectedNumberOfIndexingCalls: 2, destinationTitle: destinationPageTitle)
+        let redirectionType: MockHttpServer.RedirectionType = .html
+        let expectedNumberOfIndexingCalls = 2
+        performAndTestAliasRedirection(ofType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls, destinationTitle: destinationPageTitle)
+        checkTree(redirectionType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls)
     }
 
     func testJavascriptPushRedirectionIsNOTStoredAsAlias() {
-        performAndTestAliasRedirection(ofType: .javascriptPush, expectedNumberOfIndexingCalls: 2,
-                                       initialURLShouldBeAlias: false,
-                                       destinationTitle: jsDestinationPageTitle)
+        let redirectionType: MockHttpServer.RedirectionType = .javascriptPush
+        let expectedNumberOfIndexingCalls = 2
+        performAndTestAliasRedirection(ofType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls,
+                                       initialURLShouldBeAlias: false, destinationTitle: jsDestinationPageTitle)
+        checkTree(redirectionType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls)
     }
 
     func testJavascriptReplaceRedirectionIsStoredAsAlias() {
-        performAndTestAliasRedirection(ofType: .javascriptReplace, expectedNumberOfIndexingCalls: 2, destinationTitle: jsDestinationPageTitle)
+        let redirectionType: MockHttpServer.RedirectionType = .javascriptReplace
+        let expectedNumberOfIndexingCalls = 2
+        performAndTestAliasRedirection(ofType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls,
+                                       destinationTitle: jsDestinationPageTitle)
+        let currentNode = tab.browsingTree.root!
+        XCTAssertEqual(currentNode.children.count, 2)
+        XCTAssertEqual(currentNode.children[0].url, redirectURL(for: redirectionType).absoluteString)
+        XCTAssertEqual(currentNode.children[1].url, redirectURL(for: .none).absoluteString)
     }
 
     func testConsecutiveRedirectionsSeparatedByUILoads() {
