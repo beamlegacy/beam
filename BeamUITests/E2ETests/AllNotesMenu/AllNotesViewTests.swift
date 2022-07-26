@@ -39,8 +39,9 @@ class AllNotesViewTests: BaseTest {
     
     private func openAndRemoveAllFrom(note: String) {
         let noteView = allNotesView.openNoteByName(noteTitle: note)
-        //flakiness worfaround to make shortcuts actions applicable
+        //flakiness workaround to make shortcuts actions applicable
         noteView.waitForNoteViewToLoad()
+        noteView.waitForNoteTitleToBeVisible()
         noteView.getNoteNodeElementByIndex(0).tapInTheMiddle()
         selectAllNodesAndDeleteContent(view: noteView)
         if noteView.getNumberOfVisibleNotes() > 1 {
@@ -88,6 +89,7 @@ class AllNotesViewTests: BaseTest {
         step ("WHEN I create a link from \(linkNoteName) to \(linkedNoteName)") {
             let noteView = allNotesView.openNoteByName(noteTitle: linkNoteName)
             noteView.waitForNoteViewToLoad()
+            noteView.waitForNoteTitleToBeVisible()
             noteView.createBiDiLink(linkedNoteName)
         }
         
