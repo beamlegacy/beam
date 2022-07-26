@@ -102,14 +102,14 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
     }
 
     func testJsBackwardForward() {
-        let url0 = "http://localhost:8080/"
+        let url = "http://localhost:\(Configuration.MockHttpServer.port)/"
         let indexExpectations = (0...2).map { expectation(description: "page indexing \($0)") }
         var expectationIndex = 0
         mockIndexingDelegate?.onIndexingFinished = { _ in
             indexExpectations[expectationIndex].fulfill()
             expectationIndex += 1
         }
-        tab.load(request: URLRequest(url: URL(string: url0)!))
+        tab.load(request: URLRequest(url: URL(string: url)!))
         wait(for: [indexExpectations[0]], timeout: 1)
         let jsHistoryScript = """
         history.pushState({page: 1}, "", "?page=1");
@@ -120,12 +120,12 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
             jsExpectation.fulfill()
         }
         wait(for: [jsExpectation, indexExpectations[1], indexExpectations[2]], timeout: 1, enforceOrder: true)
-        XCTAssertEqual(tab.browsingTree.currentLink, "http://localhost:8080/?page=2")
+        XCTAssertEqual(tab.browsingTree.currentLink, url + "?page=2")
         tab.goBack()
-        expect(self.tab.browsingTree.currentLink).toEventually(equal("http://localhost:8080/?page=1"))
+        expect(self.tab.browsingTree.currentLink).toEventually(equal(url + "?page=1"))
         XCTAssertEqual(tab.browsingTree.current.children.last?.events.last?.type, .exitBackward)
         tab.goForward()
-        expect(self.tab.browsingTree.currentLink).toEventually(equal("http://localhost:8080/?page=2"))
+        expect(self.tab.browsingTree.currentLink).toEventually(equal(url + "?page=2"))
         XCTAssertEqual(tab.browsingTree.current.parent?.events.last?.type, .exitForward)
 
     }
