@@ -414,15 +414,19 @@ struct TabsListView: View {
                 removeMouseMonitors()
                 updateDraggableTabsAreas(with: nil, tabsSections: sections, widthProvider: widthProvider)
             }
-            .onPreferenceChange(CurrentTabGlobalFrameKey.self) { [weak state] newValue in
+            .onPreferenceChangeDebounced(CurrentTabGlobalFrameKey.self, delay: .milliseconds(500)) { [weak state] newValue in
                 currentTabFrameDidChange(newValue: newValue, state: state, hasUnpinnedTabs: hasUnpinnedTabs,
                                          geometry: geometry, widthProvider: widthProvider)
             }
-            .onPreferenceChange(SingleTabGlobalFrameKey.self) { newValue in
+            .onPreferenceChangeDebounced(SingleTabGlobalFrameKey.self, delay: .milliseconds(500)) { newValue in
                 importantTabFrameDidChange(newValue: newValue, isSingle: true, geometry: geometry, widthProvider: widthProvider)
             }
-            .onPreferenceChange(LastTabGlobalFrameKey.self) { newValue in
+            .onPreferenceChangeDebounced(LastTabGlobalFrameKey.self, delay: .milliseconds(500)) { newValue in
                 importantTabFrameDidChange(newValue: newValue, isLast: true, geometry: geometry, widthProvider: widthProvider)
+            }
+            .onChange(of: widthProvider.computedFixedWidths) { _ in
+                guard browserTabsManager.currentTabUIFrame == .zero else { return }
+                updateDraggableTabsAreas(with: nil, tabsSections: sections, widthProvider: widthProvider)
             }
             .onChange(of: sections.allItems.count) { _ in
                 guard hoveredIndex != nil else { return }
@@ -501,7 +505,7 @@ extension TabsListView {
         }
         viewModel.lastTouchWasOnUnselectedTab = true
         if let tab = sections.allItems[index].tab {
-            state.browserTabsManager.setCurrentTab(tab)
+            browserTabsManager.setCurrentTab(tab)
         }
     }
 
@@ -556,7 +560,7 @@ extension TabsListView {
     }
 
     private func onItemClose(at index: Int, fromContextMenu: Bool = false) {
-        guard let tabIndex = state.browserTabsManager.tabIndex(forListIndex: index) else { return }
+        guard let tabIndex = browserTabsManager.tabIndex(forListIndex: index) else { return }
         state.closeTab(tabIndex, allowClosingPinned: fromContextMenu)
     }
 
