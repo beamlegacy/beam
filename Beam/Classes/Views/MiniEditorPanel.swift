@@ -69,7 +69,6 @@ class MiniEditorPanel: NSPanel {
         self.contentView = hostingView
 
         self.isReleasedWhenClosed = false
-        self.isMovableByWindowBackground = true
         self.isOpaque = false
         self.backgroundColor = .clear
 
@@ -111,6 +110,10 @@ class MiniEditorPanel: NSPanel {
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
         isMouseDown = true
+
+        if allowsWindowDragging(with: event) {
+            performDrag(with: event)
+        }
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -179,6 +182,10 @@ extension MiniEditorPanel: NSWindowDelegate {
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
         let minSize = AppDelegate.defaultWindowMinimumSize
         return CGSize(width: frameSize.width.clamp(Self.minimumPanelWidth, Self.maximumPanelWidth), height: max(frameSize.height, minSize.height + 51))
+    }
+
+    fileprivate func allowsWindowDragging(with event: NSEvent) -> Bool {
+        event.locationInWindow.flippedPointToTopLeftOrigin(in: self).y < 40
     }
 }
 
