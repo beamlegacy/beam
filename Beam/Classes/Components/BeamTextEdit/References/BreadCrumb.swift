@@ -190,13 +190,13 @@ class BreadCrumb: Widget, BeamDocumentSource {
     func selectCrumb(_ index: Int) {
         selectedCrumb = index
         let crumb = crumbChain[index]
-        guard let ref = nodeFor(crumb, withParent: self) as? ProxyNode else { return }
+        guard let ref = proxyNodeFor(crumb, withParent: self) as? ProxyNode else { return }
 
         currentLinkedRefNode = ref
 
         for i in index ..< crumbChain.count {
             let crumb = crumbChain[i]
-            guard let ref = nodeFor(crumb, withParent: self) as? ProxyNode else { return }
+            guard let ref = proxyNodeFor(crumb, withParent: self) as? ProxyNode else { return }
             if crumbChain.last?.id != crumb.id {
                 ref.unfold()
             }
