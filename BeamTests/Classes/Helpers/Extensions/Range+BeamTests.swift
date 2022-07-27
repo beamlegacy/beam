@@ -50,4 +50,24 @@ class Range_BeamTests: XCTestCase {
         XCTAssertEqual(range.join(22..<25), range)
     }
 
+    func testSafeRange() {
+        // Valid ranges (lowerBound<=upperBound)
+        XCTAssertNotNil(Range<Int>(safeBounds: (.zero, .zero)))
+        XCTAssertNotNil(Range<Int>(safeBounds: (.zero, .max)))
+        XCTAssertNotNil(Range<Int>(safeBounds: (.max, .max)))
+        // Valid closed ranges (lowerBound<=upperBound)
+        XCTAssertNotNil(ClosedRange<Int>(safeBounds: (.zero, .zero)))
+        XCTAssertNotNil(ClosedRange<Int>(safeBounds: (.zero, .max)))
+        XCTAssertNotNil(ClosedRange<Int>(safeBounds: (.max, .max)))
+
+        // Invalid ranges (upperBound>lowerBound)
+        XCTAssertNil(Range<Int>(safeBounds: (.zero, .min)))
+        XCTAssertNil(Range<Int>(safeBounds: (.max, .min)))
+        XCTAssertNil(Range<Int>(safeBounds: (.max, .zero)))
+        // Invalid closed ranges (upperBound>lowerBound)
+        XCTAssertNil(ClosedRange<Int>(safeBounds: (.zero, .min)))
+        XCTAssertNil(ClosedRange<Int>(safeBounds: (.max, .min)))
+        XCTAssertNil(ClosedRange<Int>(safeBounds: (.max, .zero)))
+    }
+
 }
