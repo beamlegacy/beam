@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WindowPageView: View {
-    var page: WindowPage
+    let page: WindowPage
 
     var body: some View {
         VStack(spacing: BeamSpacing._400) {
