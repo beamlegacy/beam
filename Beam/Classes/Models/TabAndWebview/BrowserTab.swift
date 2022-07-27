@@ -619,6 +619,10 @@ import UniformTypeIdentifiers
         browsingTree.dump()
     }
 
+    func shouldHijackEscapeKey() -> Bool {
+        webAutofillController?.isPresentingOverlay == true
+    }
+
     func respondToEscapeKey() {
         webAutofillController?.dismiss()
     }
