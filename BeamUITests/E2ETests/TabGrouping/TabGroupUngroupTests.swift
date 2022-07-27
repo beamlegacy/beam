@@ -37,9 +37,7 @@ class TabGroupUngroupTests: BaseTest {
     func testTabGroupUngroupWhenCollapsed() throws {
         
         step("When I collapse tab group") {
-            tabGroupMenu.openFirstTabGroupMenu()
-            tabGroupMenu.waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupCollapse)
+            tabGroupMenu.collapseFirstTabGroup()
         }
         
         step("Then group is collapsed") {

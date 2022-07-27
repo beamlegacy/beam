@@ -180,6 +180,7 @@
         "SlashMenuTests\/testCheckBoxCreationMovementDeletion()",
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SlashMenuTests\/testNoteDividerCreation()",
+        "TabGroupDragTabTests",
         "TabGroupNameTests",
         "TabGroupNewTabTests",
         "TabGroupUngroupTests",

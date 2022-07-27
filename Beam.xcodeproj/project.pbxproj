@@ -1388,6 +1388,7 @@
 		D71D7491282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D7490282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift */; };
 		D7251BB7288ECE7800CD5D64 /* TabGroupNewTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7251BB6288ECE7800CD5D64 /* TabGroupNewTabTests.swift */; };
 		D7251BC0288ED32200CD5D64 /* TabGroupUngroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7251BBF288ED32200CD5D64 /* TabGroupUngroupTests.swift */; };
+		D7251BC2288ED72900CD5D64 /* TabGroupDragTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7251BC1288ED72800CD5D64 /* TabGroupDragTabTests.swift */; };
 		D75EEB402844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */; };
 		D75EEB4F2845F8B000994C17 /* InsideAdsBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */; };
 		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
@@ -3330,6 +3331,7 @@
 		D71D7490282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSignUpPasswordAutofillTests.swift; sourceTree = "<group>"; };
 		D7251BB6288ECE7800CD5D64 /* TabGroupNewTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupNewTabTests.swift; sourceTree = "<group>"; };
 		D7251BBF288ED32200CD5D64 /* TabGroupUngroupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupUngroupTests.swift; sourceTree = "<group>"; };
+		D7251BC1288ED72800CD5D64 /* TabGroupDragTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupDragTabTests.swift; sourceTree = "<group>"; };
 		D7472EAA27E0940300F629EF /* BeamUITests-Thread5.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread5.xctestplan"; sourceTree = "<group>"; };
 		D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedCreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
 		D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsideAdsBlockerTests.swift; sourceTree = "<group>"; };
@@ -8067,6 +8069,7 @@
 				D7EC4AEF2887097E00D6EA9F /* TabGroupCloseTests.swift */,
 				D7251BB6288ECE7800CD5D64 /* TabGroupNewTabTests.swift */,
 				D7251BBF288ED32200CD5D64 /* TabGroupUngroupTests.swift */,
+				D7251BC1288ED72800CD5D64 /* TabGroupDragTabTests.swift */,
 			);
 			path = TabGrouping;
 			sourceTree = "<group>";
@@ -9945,6 +9948,7 @@
 				B58A175027514E0100A588C4 /* NoteViewEmbedsTests.swift in Sources */,
 				B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */,
 				D775219A2852262B007408DA /* NotePinUnpinTests.swift in Sources */,
+				D7251BC2288ED72900CD5D64 /* TabGroupDragTabTests.swift in Sources */,
 				A3AF8CF22888926800FB6310 /* NotesPreferencesTestView.swift in Sources */,
 				B5A76EB927FB3E1100964340 /* OnboardingSignupWithEmailViewLocators.swift in Sources */,
 				B5FB3A2227E8D30C00037FD5 /* OnboardingImportDataTestView.swift in Sources */,
