@@ -46,7 +46,8 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testValidateAutoFillDataCC() {
-        
+
+        uiMenu.disablePasswordAndCardsProtection()
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel, inView: view)
         
         step("When I click on pop-up suggestion") {
@@ -76,6 +77,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         uiMenu.populateCreditCardsDB()
         
         step ("WHEN I deactivate Autofill password setting"){
+            uiMenu.disablePasswordAndCardsProtection()
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             if !passwordPreferencesView.getAutofillCCSettingElement().isSettingEnabled() {

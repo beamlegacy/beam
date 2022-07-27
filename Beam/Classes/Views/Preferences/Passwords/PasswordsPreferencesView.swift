@@ -9,7 +9,6 @@
 import SwiftUI
 import Preferences
 import BeamCore
-import LocalAuthentication
 
 let PasswordsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .passwords, title: "Passwords", imageName: "preferences-passwords") {
     PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(), creditCardsViewModel: CreditCardListViewModel())
@@ -82,8 +81,7 @@ private struct LockedPasswordsView: View {
     @State private var hasTouchID: Bool = false
     var onUnlockPressed: () -> Void
     private func updateHasTouchID() {
-        let context = LAContext()
-        hasTouchID = context.biometryType == .touchID
+        hasTouchID = DeviceAuthenticationManager.shared.deviceHasTouchID()
     }
 
     private var unlockSubtitle: String {

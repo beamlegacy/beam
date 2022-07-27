@@ -93,7 +93,7 @@ final class PasswordListViewModel: ObservableObject {
 
     @MainActor
     func checkAuthentication() async {
-        isUnlocked = await passwordManager.checkDeviceAuthentication()
+        isUnlocked = await DeviceAuthenticationManager.shared.checkDeviceAuthentication()
     }
 
     private func refresh() {

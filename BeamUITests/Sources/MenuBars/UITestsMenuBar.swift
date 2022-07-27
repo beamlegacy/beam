@@ -55,6 +55,12 @@ class UITestsMenuBar: BaseMenuBar {
     }
 
     @discardableResult
+    func disablePasswordAndCardsProtection() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.disablePasswordProtect.rawValue)
+        return self
+    }
+
+    @discardableResult
     func showWebViewCount() -> UITestsMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.showWebViewCount.rawValue)
         return self

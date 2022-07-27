@@ -2,7 +2,6 @@ import Foundation
 import Combine
 import BeamCore
 import CryptoKit
-import LocalAuthentication
 
 final class PasswordManager {
     var changedObjects: [UUID: RemotePasswordRecord] = [:]
@@ -56,26 +55,6 @@ final class PasswordManager {
 
     private func passwordManagerEntries(for passwordsRecord: [LocalPasswordRecord]) -> [PasswordManagerEntry] {
         passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.hostname, username: $0.username) }
-    }
-
-    func checkDeviceAuthentication() async -> Bool {
-        guard Configuration.env != .test else { return true }
-        let context = LAContext()
-        var error: NSError?
-        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-            do {
-                return try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "access your beam passwords")
-            } catch LAError.userCancel {
-                return false
-            } catch {
-                Logger.shared.logError("Error unlocking passwords preferences: \(error)", category: .passwordManager)
-            }
-        } else {
-            // By default, if we can't evaluate policy, let's unlock.
-            Logger.shared.logError("Could not use device authentication to unlock passwords preferences", category: .passwordManager)
-            return true
-        }
-        return false
     }
 
     func fetchAll() -> [PasswordManagerEntry] {
