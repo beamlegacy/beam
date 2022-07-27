@@ -1246,6 +1246,7 @@
 		A5FDFA2927DB82160066A670 /* DestinationNoteAutocompleteListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FDFA2827DB82160066A670 /* DestinationNoteAutocompleteListModel.swift */; };
 		A5FE1615264AD64900B7526D /* CardSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* CardSwitcher.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
+		A5FF15FD2888332B0089D76E /* DeviceAuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FF15FC2888332B0089D76E /* DeviceAuthenticationManager.swift */; };
 		B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */; };
 		B5056A8F26F88AB000FFD2A2 /* HelpTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */; };
 		B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */; };
@@ -3183,6 +3184,7 @@
 		A5FDFA2827DB82160066A670 /* DestinationNoteAutocompleteListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteListModel.swift; sourceTree = "<group>"; };
 		A5FE1614264AD64900B7526D /* CardSwitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSwitcher.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
+		A5FF15FC2888332B0089D76E /* DeviceAuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAuthenticationManager.swift; sourceTree = "<group>"; };
 		B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackTests.swift; sourceTree = "<group>"; };
 		B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTestView.swift; sourceTree = "<group>"; };
 		B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewLocators.swift; sourceTree = "<group>"; };
@@ -4500,6 +4502,7 @@
 				A545055427B11F83006AE756 /* EncryptionManager+ImportExport.swift */,
 				A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */,
 				5291CEE7268B5969001645A2 /* PasswordManager.swift */,
+				A5FF15FC2888332B0089D76E /* DeviceAuthenticationManager.swift */,
 				879CA71A281A9A0800D1C395 /* CreditCardAutofillManager.swift */,
 				A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */,
 				A5153EE2260DD58A00C84902 /* RecentsManager.swift */,
@@ -9516,6 +9519,7 @@
 				8783FDA52834D9510064C415 /* WebAutofillMenuDelegate.swift in Sources */,
 				A0A0FED1268F05CC0080EAEF /* PreferencesManager+Passwords.swift in Sources */,
 				A0440E52282DC7AE00464AAC /* ToggleView.swift in Sources */,
+				A5FF15FD2888332B0089D76E /* DeviceAuthenticationManager.swift in Sources */,
 				A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */,
 				330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */,
 				3303E0FC26FA221400E175AC /* UserInfoRequest.swift in Sources */,

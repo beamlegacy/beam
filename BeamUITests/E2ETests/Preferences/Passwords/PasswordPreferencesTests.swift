@@ -24,6 +24,7 @@ class PasswordPreferencesTests: BaseTest {
         step ("GIVEN I open password preferences"){
             launchApp()
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+            uiMenu.disablePasswordAndCardsProtection()
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
         }
     }
