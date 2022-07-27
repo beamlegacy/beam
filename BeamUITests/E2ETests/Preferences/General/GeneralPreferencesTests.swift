@@ -41,7 +41,7 @@ class GeneralPreferencesTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .close)
         }
         
-        step("THEN Webview is opened on restart with openned tab") {
+        step("THEN Webview is opened on restart with opened tab") {
             uiMenu.loadUITestPage1()
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             self.restartApp(storeSessionWhenTerminated: true)

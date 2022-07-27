@@ -15,6 +15,7 @@ enum WebViewLocators {
         case goToJournalButton = "journal"
         case goBackButton = "goBack"
         case goForwardButton = "goForward"
+        case openOmnibox = "nav-omnibox"
     }
     
     enum SearchFields: String, CaseIterable, UIElement {

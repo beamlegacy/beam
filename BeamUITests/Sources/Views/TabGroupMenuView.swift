@@ -61,4 +61,16 @@ class TabGroupMenuView: BaseView {
         menuItem(item.accessibilityIdentifier).clickOnExistence()
     }
     
+    func collapseFirstTabGroup() {
+        openFirstTabGroupMenu()
+        waitForMenuToBeDisplayed()
+        clickTabGroupMenu(.tabGroupCollapse)
+    }
+    
+    func expandFirstTabGroup() {
+        openFirstTabGroupMenu()
+        waitForMenuToBeDisplayed()
+        clickTabGroupMenu(.tabGroupExpand)
+    }
+    
 }
