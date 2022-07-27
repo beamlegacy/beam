@@ -199,6 +199,13 @@ extension BeamWindow {
     var control: Bool { NSEvent.modifierFlags.contains(.control) }
     var command: Bool { NSEvent.modifierFlags.contains(.command) }
 
+    override func sendEvent(_ event: NSEvent) {
+        if event.type == .keyDown && event.keyCode == KeyCode.escape.rawValue && state.browserTabsManager.currentTab?.shouldHijackEscapeKey() == true {
+            return keyDown(with: event)
+        }
+        super.sendEvent(event)
+    }
+
     // swiftlint:disable:next cyclomatic_complexity
     override func keyDown(with event: NSEvent) {
         if event.keyCode == KeyCode.escape.rawValue {
