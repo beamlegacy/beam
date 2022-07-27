@@ -409,7 +409,7 @@ extension BeamObjectManager {
         }
     }
 
-    fileprivate func uploadS3(beamObjectsUpload: [BeamObjectRequest.BeamObjectUpload], decoder: BeamJSONDecoder, objectsToSave: [BeamObject], chunkSize: Int, s3Upload: S3Upload) async throws -> (Int, [Error]) {
+    fileprivate func uploadS3(beamObjectsUpload: [BeamObjectRequest.BeamObjectUpload], decoder: BeamJSONDecoder, objectsToSave: [BeamObject], chunkSize: Int, s3Upload: S3Transfer) async throws -> (Int, [Error]) {
         Logger.shared.logDebug("Upload using \(s3Upload.kind)", category: .beamObjectNetwork)
         var errors: [Error] = []
         var totalSize = 0
@@ -546,7 +546,7 @@ extension BeamObjectManager {
         Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: starting",
                                category: .beamObjectNetwork)
 
-        let  s3Upload: S3Upload = S3UploadManager.shared
+        let  s3Upload: S3Transfer = S3TransferManager.shared
 
         // swiftlint:disable:next date_init
         localTimer = Date()

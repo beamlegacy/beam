@@ -9,24 +9,25 @@ import Foundation
 import AsyncHTTPClient
 import NIOCore
 import NIO
+import BeamCore
 
-// Enqueues a upload task on the given task group
-protocol S3Upload {
-    func makeOperation(uploadUrl: String, headers: [String: String], data: Data) -> (@Sendable () async -> Error?)
-    var kind: String {get}
+struct S3TransferConfiguration {
+    static let requestTimeout: TimeAmount = .seconds(30)
+    static let nioMaxBodyDownloadSize: Int = 1024 * 1024 * 10 /* 10 MB */
+    static let concurrentHTTP1ConnectionsPerHostSoftLimit = 50
+    static let nioConnectionPoolIdleTimeout:TimeAmount = .seconds(60)
 }
 
-extension S3Upload {
-    static func new() -> S3Upload {
-        (Configuration.directUploadNIO && Configuration.env != .test)  ?
-        S3UploadURLNIO.init(concurrentHTTP1ConnectionsPerHostSoftLimit: 75):
-        S3UploadURLSession.init()
-    }
+// Enqueues a upload task on the given task group
+protocol S3Transfer {
+    func makeOperation(uploadUrl: String, headers: [String: String], data: Data) -> (@Sendable () async -> Error?)
+    func makeOperation(downloadUrl: String, request: BeamObjectRequest, beamObject: BeamObject) -> (@Sendable () async throws -> Void)
+    var kind: String {get}
 }
 
 // Test recoding and playback used in tests does not work with NIO ¯\_(ツ)_/¯
 // implements S3UploadTask by using NSURLSession via BeamObjectRequest
-class S3UploadURLSession: S3Upload {
+class S3TransferURLSession: S3Transfer {
     let request: BeamObjectRequest
     let kind = "NSURLSession"
 
@@ -51,10 +52,16 @@ class S3UploadURLSession: S3Upload {
             }
         }
     }
+
+    func makeOperation(downloadUrl: String, request: BeamObjectRequest, beamObject: BeamObject) -> (@Sendable () async throws -> Void) {
+        return {
+            beamObject.data = try await request.fetchDataFromUrl(urlString: downloadUrl)
+        }
+    }
 }
 
 // implements S3UploadTask by using NIO HTTPClient managed my NIOContextManager
-class S3UploadURLNIO: S3Upload {
+class S3TransferURLNIO: S3Transfer {
     let nioContextManager: NIOContextManager
     let kind = "NIOHTTPClient"
 
@@ -78,7 +85,7 @@ class S3UploadURLNIO: S3Upload {
             }
 
             do {
-                let response = try await httpClient.execute(request, timeout: .seconds(30))
+                let response = try await httpClient.execute(request, timeout: S3TransferConfiguration.requestTimeout)
                 if response.status != .ok {
                     return BeamObjectManagerError.saveError
                 }
@@ -88,6 +95,24 @@ class S3UploadURLNIO: S3Upload {
             }
         }
 
+    }
+
+    // request is not actually needed here, only used on the alternative code path
+    func makeOperation(downloadUrl: String, request: BeamObjectRequest, beamObject: BeamObject) -> (@Sendable () async throws -> Void) {
+        let httpClient = self.nioContextManager.httpClient
+
+        return {
+            let uploadRequest = HTTPClientRequest(url: downloadUrl)
+            let response = try await httpClient.execute(uploadRequest, timeout: S3TransferConfiguration.requestTimeout)
+            if response.status != .ok {
+                // Probably should not be looged here, but there is no apparent logging at use site
+                Logger.shared.logWarning("Failed to download beam object content from \(downloadUrl) \(response)", category: .sync)
+                throw APIRequestError.error
+            }
+            // Throws if the body is bigger than asked
+            let bodyBuffer = try await response.body.collect(upTo: S3TransferConfiguration.nioMaxBodyDownloadSize)
+            beamObject.data = Data(buffer: bodyBuffer)
+        }
     }
 }
 
@@ -100,7 +125,7 @@ class NIOContextManager {
         let newEventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: 1)
         eventLoopGroup = newEventLoopGroup
         var configuration = HTTPClient.Configuration()
-        configuration.connectionPool = HTTPClient.Configuration.ConnectionPool.init(idleTimeout: .seconds(60), concurrentHTTP1ConnectionsPerHostSoftLimit: concurrentHTTP1ConnectionsPerHostSoftLimit)
+        configuration.connectionPool = HTTPClient.Configuration.ConnectionPool.init(idleTimeout: S3TransferConfiguration.nioConnectionPoolIdleTimeout, concurrentHTTP1ConnectionsPerHostSoftLimit: concurrentHTTP1ConnectionsPerHostSoftLimit)
         self.httpClient = HTTPClient(eventLoopGroupProvider: .shared(newEventLoopGroup), configuration: configuration)
 
     }
@@ -118,12 +143,12 @@ class NIOContextManager {
 }
 
 // Used to keep one event loop for the entire runtime of the application
-struct S3UploadManager {
-    static let shared = S3UploadManager.build()
+struct S3TransferManager {
+    static let shared = S3TransferManager.build()
     // Test recoding and playback used in tests does not work with NIO ¯\_(ツ)_/¯
-    private static func build() -> S3Upload {
+    private static func build() -> S3Transfer {
         return (Configuration.directUploadNIO && Configuration.env != .test)  ?
-        S3UploadURLNIO.init(concurrentHTTP1ConnectionsPerHostSoftLimit: 50) as S3Upload:
-        S3UploadURLSession.init()
+        S3TransferURLNIO.init(concurrentHTTP1ConnectionsPerHostSoftLimit: S3TransferConfiguration.concurrentHTTP1ConnectionsPerHostSoftLimit) as S3Transfer:
+        S3TransferURLSession.init()
     }
 }

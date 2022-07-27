@@ -158,7 +158,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                 Preferences.Section(title: "Direct Upload") {
                     DirectUpload
                 }
-                Preferences.Section(title: "Direct Upload use NIO (requires resync from scratch)") {
+                Preferences.Section(title: "Direct Upload/Download use NIO (requires resync from scratch)") {
                     DirectUploadNIO
                 }
                 Preferences.Section(title: "Direct Upload All Objects (requires resync from scratch)") {
