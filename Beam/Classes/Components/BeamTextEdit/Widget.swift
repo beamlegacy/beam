@@ -1259,6 +1259,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return nodeProvider?.proxyFor(element) ?? parent?.proxyFor(element)
     }
 
+    func proxyNodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
+        if let nodeProvider = nodeProvider { return nodeProvider.proxyNodeFor(element, withParent: withParent) }
+        guard let parent = parent else { fatalError("Trying to access element that is not connected to root") }
+        return parent.proxyNodeFor(element, withParent: withParent)
+    }
+
     func nodeFor(_ element: BeamElement) -> ElementNode? {
         return nodeProvider?.nodeFor(element) ?? parent?.nodeFor(element)
     }
