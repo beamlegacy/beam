@@ -18,6 +18,7 @@ final class WebAutofillPopoverContainer {
     private var scope = Set<AnyCancellable>()
 
     init(window: PopoverWindow, page: WebPage, topEdgeHeight: CGFloat? = nil, fieldLocator: WebFieldLocator, originCalculator: @escaping (CGRect) -> CGPoint) {
+        window.alphaValue = 0.0 // make window initially invisible, will be visible when its position is known
         self.window = window
         self.page = page
         self.topEdgeHeight = topEdgeHeight
