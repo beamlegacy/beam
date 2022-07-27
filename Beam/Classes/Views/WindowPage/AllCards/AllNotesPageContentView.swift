@@ -230,16 +230,16 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             .disabled(model.publishingNoteTitle != nil)
             .frame(maxHeight: .infinity)
             .background(Color.clear
-                    .onHover { hovering in
-                        if !hovering {
-                            hoveredRowIndex = nil
-                        }
+                .onHover { hovering in
+                    if !hovering {
+                        hoveredRowIndex = nil
                     }
-                    .padding(.leading, -64) // shifted for hover options menu
+                }
+                .padding(.leading, -64) // shifted for hover options menu
             )
         }
         .frame(minWidth: 616, maxWidth: 900)
-        .padding(.horizontal, compactWindowWidth == true ? 92 : 214)
+        .padding(.horizontal, compactWindowWidth ? 92 : 204)
         .id(model.id)
         .onAppear {
             model.data = data
