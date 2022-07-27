@@ -81,6 +81,10 @@ final class WebFieldAutofillOverlay {
         return newFieldLocator
     }
 
+    var hasVisibleInterface: Bool {
+        buttonPopover?.window != nil && menuPopover?.window != nil
+    }
+
     func dismiss() {
         menuViewModel.close()
         menuViewModel = .none
