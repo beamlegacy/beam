@@ -21,6 +21,12 @@ extension XCUIElement: WaitHelper {
     }
     
     @discardableResult
+    public func clickForDurationThenDragToInTheMiddle(forDuration duration: TimeInterval, thenDragTo otherElement: XCUIElement) -> XCUIElement {
+        self.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click(forDuration: duration, thenDragTo: otherElement.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
+        return self
+    }
+    
+    @discardableResult
     public func rightClickInTheMiddle() -> XCUIElement {
         self.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).rightClick()
         return self
