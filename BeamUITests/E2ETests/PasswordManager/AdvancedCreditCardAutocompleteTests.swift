@@ -179,6 +179,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     
     func testAgodaAutofill() {
         navigateToPayment(page: .paymentAgodaForm)
+        uiMenu.disablePasswordAndCardsProtection()
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, password:true, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)
@@ -195,6 +196,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     
     func testNetflixAutofill() {
         navigateToPayment(page: .paymentNetflixShortForm) // must be dedicated domain name to apply rule for netflix.com
+        uiMenu.disablePasswordAndCardsProtection()
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
@@ -243,6 +245,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     
     func testAppleAutofill() {
         navigateToPayment(page: .paymentAppleForm)
+        uiMenu.disablePasswordAndCardsProtection()
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
