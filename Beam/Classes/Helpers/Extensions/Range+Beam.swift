@@ -57,3 +57,27 @@ extension Range where Bound == Int {
         return self
     }
 }
+
+// MARK: - Convenience
+
+extension Range where Bound: AdditiveArithmetic {
+    /// Creates an instance with the given bounds or fails and returns `nil` if bounds are invalid.
+    /// - Parameter bounds: A tuple of the lower and upper bounds of the range.
+    init?(safeBounds bounds: (lower: Bound, upper: Bound)) {
+        guard bounds.lower <= bounds.upper else {
+            return nil
+        }
+        self.init(uncheckedBounds: bounds)
+    }
+}
+
+extension ClosedRange where Bound: AdditiveArithmetic {
+    /// Creates an instance with the given bounds or fails and returns `nil` if bounds are invalid.
+    /// - Parameter bounds: A tuple of the lower and upper bounds of the range.
+    init?(safeBounds bounds: (lower: Bound, upper: Bound)) {
+        guard bounds.lower <= bounds.upper else {
+            return nil
+        }
+        self.init(uncheckedBounds: bounds)
+    }
+}

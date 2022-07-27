@@ -869,7 +869,14 @@ public extension CALayer {
                 addNoteSourceFrom(url: linkString)
             }
 
-            let range = rootNode.cursorPosition ..< node.text.count
+            guard let range = Range(safeBounds: (rootNode.cursorPosition, node.text.count)) else {
+                Logger.shared.logError("""
+                    Invalid range when pressing Enter, aborting... \
+                    nodeText=\(node.text), cursorPosition=\(rootNode.cursorPosition), nodeTextCount=\(node.text.count)
+                    """,
+                    category: .noteEditor)
+                return
+            }
             let str = node.text.extract(range: range)
             if !range.isEmpty {
                 node.cmdManager.deleteText(in: node, for: range)
