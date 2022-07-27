@@ -101,9 +101,9 @@ struct Configuration {
             }
         }
     }
-    // FIXME: https://linear.app/beamapp/issue/BE-4918/directuploadniodefault-default-value-should-not-differ-for-test  
+    // FIXME: https://linear.app/beamapp/issue/BE-4918/directuploadniodefault-default-value-should-not-differ-for-test
     static private(set) var directUploadNIODefault = false || Configuration.env == .test // Configuration.branchType == .develop
-
+    // Warning: this is upload AND download as of now
     static private var directUploadNIOKey = "directUploadNIO"
     static var directUploadNIO: Bool {
         get {
