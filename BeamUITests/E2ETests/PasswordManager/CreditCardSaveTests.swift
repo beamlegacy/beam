@@ -52,6 +52,7 @@ class CreditCardSaveTests: BaseCreditCardTest {
         }
         
         step("Then CC is saved in Preferences") {
+            uiMenu.disablePasswordAndCardsProtection()
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             creditCardView = PasswordPreferencesTestView().clickEditCreditCardButton()
@@ -80,6 +81,7 @@ class CreditCardSaveTests: BaseCreditCardTest {
         }
         
         step("Then CC is not saved in Preferences") {
+            uiMenu.disablePasswordAndCardsProtection()
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             PasswordPreferencesTestView().clickEditCreditCardButton()

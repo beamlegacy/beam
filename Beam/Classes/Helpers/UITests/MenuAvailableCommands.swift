@@ -66,13 +66,13 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case create10000Links = "Create 10,000 Links"
     case create50000Links = "Create 50,000 Links"
 
-    // Passwords
-    case populatePasswordsDB = "Populate Passwords Database"
-    case clearPasswordsDB = "Clear Passwords Database"
-
-    // Credit Cards
-    case populateCreditCardsDB = "Populate Credit Cards Database"
-    case clearCreditCardsDB = "Clear Credit Cards Database"
+    // Passwords & Credit Cards
+    case populatePasswordsDB = "Passwords Database: Populate"
+    case clearPasswordsDB = "Passwords Database: Clear"
+    case populateCreditCardsDB = "Credit Cards Database: Populate"
+    case clearCreditCardsDB = "Credit Cards Database: Clear"
+    case separatorInPasswordA
+    case disablePasswordProtect = "Disable Protection for Password & Credit Cards"
 
     // Mock HTTP Server
     case startMockHttpServer = "Start Mock HTTP Server"
@@ -108,7 +108,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .links
         case .resizeSquare1000, .resizeWindowPortrait, .resizeWindowLandscape:
             return .resizeWindow
-        case .populatePasswordsDB, .clearPasswordsDB, .populateCreditCardsDB, .clearCreditCardsDB:
+        case .populatePasswordsDB, .clearPasswordsDB, .populateCreditCardsDB, .clearCreditCardsDB, .disablePasswordProtect, .separatorInPasswordA:
             return .passwordsAndCards
         case .startMockHttpServer, .stopMockHttpServer:
             return .mockHttpServer

@@ -43,6 +43,7 @@ class LoginTest: BaseTest {
         }
 
         step ("AND it is saved in password preferences"){
+            uiMenu.disablePasswordAndCardsProtection()
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(testUrl))

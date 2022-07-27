@@ -16,9 +16,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func executeCommand(_ command: UITestMenuAvailableCommands) {
         switch command {
-        case .populateDBWithJournal: populateWithJournalNote(count: 10)
-        case .populatePasswordsDB: populatePasswordsDB()
-        case .populateCreditCardsDB: populateCreditCardsDB()
         case .destroyDB: destroyDatabase()
         case .logout: logout()
         case .deleteLogs: deleteLogs()
@@ -76,6 +73,10 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         case .createAndOpenPublishedNote: createPublishedNote(open: true)
         case .startBeamOnTabs: setStartBeamOn(.webTabs)
         case .startBeamOnDefault: setStartBeamOn(nil)
+        case .populateDBWithJournal: populateWithJournalNote(count: 10)
+        case .populatePasswordsDB: populatePasswordsDB()
+        case .populateCreditCardsDB: populateCreditCardsDB()
+        case .disablePasswordProtect: disablePasswordProtection()
         default: break
         }
     }
@@ -181,6 +182,11 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         for creditCard in creditCards {
             CreditCardAutofillManager.shared.save(entry: creditCard)
         }
+    }
+
+    private func disablePasswordProtection() {
+        // Temporarily disable device authentication to access password and credit cards
+        DeviceAuthenticationManager.shared.temporarilyDisableDeviceAuthenticationProtection()
     }
 
     private func todaysName(_ date: Date) -> String {
