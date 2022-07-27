@@ -22,11 +22,8 @@ class BaseTest: XCTestCase {
     let emptyString = ""
     let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
     let uiTestModeLaunchArgument = "XCUITest"
-    let correctEmail = "qa+automationtest@beamapp.co"
     let correctEmailCamelCase = "qA+automAtiontest@beamapp.co"
     let incorrectEmail = "qa+automationtest@beamappa.co"
-    let correctPassword = "JKRZ6#ykhm_6KR!"
-    let correctEncKey = "8NwAtaGjtZCBcLvB6jPWbA4UwNiuIyHVe2CkbS2L0Tc="
     let incorrectPassword = "Incorrect1"
     let username = "AutomationTestSignin"
     let host = "form.lvh.me"
