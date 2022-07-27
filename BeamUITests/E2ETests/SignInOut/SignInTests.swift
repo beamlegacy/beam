@@ -13,7 +13,8 @@ class SigninTests: BaseTest {
     let onboardingView = OnboardingLandingTestView()
     let onboardingUsernameView = OnboardingUsernameTestView()
     let onboardingImportView = OnboardingImportDataTestView()
-    
+    var accountInfo: AccountInformation!
+
     override func setUpWithError() throws {
         try super.setUpWithError()
         step("Given I enable onboarding") {
@@ -23,7 +24,7 @@ class SigninTests: BaseTest {
     }
     
     private func assertSignUpFailure(email: String, password: String) {
-        onboardingUsernameView.populateCredentialFields(email: correctEmail, password: incorrectPassword)
+        onboardingUsernameView.populateCredentialFields(email: email, password: incorrectPassword)
         waitFor(PredicateFormat.isEnabled.rawValue, onboardingUsernameView.getConnectButtonElement(), BaseTest.minimumWaitTimeout)
         XCTAssertFalse(onboardingUsernameView.isConnectButtonEnabled())
     }
@@ -53,6 +54,14 @@ class SigninTests: BaseTest {
         
     func testSignInUsingInvalidCredentials() throws {
         try XCTSkipIf(true, "Is duplicated by testConnectWithEmailUsernameSignInRequirements. To be refactored/removed")
+        step("GIVEN I sign up an account and take credentials") {
+            setupStaging(withRandomAccount: true)
+            accountInfo = getCredentials()
+            deletePK = true
+            uiMenu.showOnboarding()
+                .deletePrivateKeys()
+        }
+        
         step("GIVEN Username view is opened"){
         XCTAssertTrue(onboardingView
                         .clickContinueWithEmailButton()
@@ -60,7 +69,7 @@ class SigninTests: BaseTest {
         }
 
         step("THEN Connect button is disabled for incorrect password"){
-        self.assertSignUpFailure(email: correctEmail, password: incorrectPassword)
+            self.assertSignUpFailure(email: accountInfo.email, password: incorrectPassword)
         }
         
         step("THEN I successfully go back to initail view and returned to user credential view"){
@@ -71,7 +80,7 @@ class SigninTests: BaseTest {
         }
         
         step("THEN Connect button is disabled for incorrect email"){
-        self.assertSignUpFailure(email: incorrectEmail, password: correctPassword)
+        self.assertSignUpFailure(email: incorrectEmail, password: accountInfo.password)
         }
     }
     
