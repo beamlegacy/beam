@@ -52,6 +52,10 @@ class WebAutofillController: NSObject, WebPageRelated {
         return WebFieldClassifiers(webFrames: webFrames)
     }()
 
+    var isPresentingOverlay: Bool {
+        currentOverlay?.hasVisibleInterface == true
+    }
+
     init(passwordManager: PasswordManager = .shared, creditCardManager: CreditCardAutofillManager = .shared, userInfoStore: UserInformationsStore) {
         self.passwordManager = passwordManager
         self.creditCardManager = creditCardManager
