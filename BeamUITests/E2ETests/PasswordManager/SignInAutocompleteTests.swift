@@ -112,6 +112,7 @@ class SignInAutocompleteTests: BaseTest {
         
         step("Given I populate passwords and load a test page"){
             uiMenu.populatePasswordsDB()
+            uiMenu.disablePasswordAndCardsProtection()
             uiMenu.loadUITestPagePassword()
         }
         let passwordPage = UITestPagePasswordManager()
@@ -192,6 +193,7 @@ class SignInAutocompleteTests: BaseTest {
 
         step("Given I populate passwords and load a test page"){
             uiMenu.populatePasswordsDB()
+            uiMenu.disablePasswordAndCardsProtection()
             uiMenu.loadUITestPagePassword()
         }
         let passwordPage = UITestPagePasswordManager()

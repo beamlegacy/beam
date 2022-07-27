@@ -23,7 +23,8 @@ class CreditCardsTests: BaseTest {
         
         step("GIVEN I open Credit cards table in Preferences") {
             launchApp()
-            
+            uiMenu.disablePasswordAndCardsProtection()
+
             if populateCardsDB {
                 uiMenu.populateCreditCardsDB()
             }

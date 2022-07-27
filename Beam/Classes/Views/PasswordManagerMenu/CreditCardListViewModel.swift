@@ -97,6 +97,6 @@ final class CreditCardListViewModel: ObservableObject {
 
     @MainActor
     func checkAuthentication() async {
-        isUnlocked = await PasswordManager.shared.checkDeviceAuthentication()
+        isUnlocked = await DeviceAuthenticationManager.shared.checkDeviceAuthentication()
     }
 }
