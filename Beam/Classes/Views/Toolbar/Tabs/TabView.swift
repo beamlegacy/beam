@@ -417,6 +417,7 @@ struct TabView: View {
                     })
                     .background(isDragging ? nil :
                             Color.clear.onDrop(of: [UTType.fileURL], delegate: FileDropDelegate(onFileDrop: onFileDrop))
+                            .accessibilityElement()
                     )
                     .if(isDragging && applyDraggingStyle) {
                         $0.opacity(0.9).scaleEffect(1.07)

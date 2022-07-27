@@ -154,6 +154,7 @@
         "SigninTests",
         "SyncTests",
         "TabGroupCloseTests",
+        "TabGroupDragTabTests",
         "TabGroupNewTabTests",
         "TabGroupUngroupTests",
         "TextEditorContextViewTests",

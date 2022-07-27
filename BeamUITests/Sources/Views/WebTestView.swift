@@ -211,8 +211,14 @@ class WebTestView: BaseView {
     
     @discardableResult
     func dragDropTab(draggedTabIndexFromSelectedTab: Int, destinationTabIndexFromSelectedTab: Int) -> WebTestView {
-        //Important! Counting starts form the next of selected tab
-        self.getTabByIndex(index: draggedTabIndexFromSelectedTab).click(forDuration: self.defaultPressDurationSeconds, thenDragTo: self.getTabByIndex(index: destinationTabIndexFromSelectedTab))
+        //Important! Counting starts from the next of selected tab
+        self.getTabByIndex(index: draggedTabIndexFromSelectedTab).clickForDurationThenDragToInTheMiddle(forDuration: self.defaultPressDurationSeconds, thenDragTo: self.getTabByIndex(index: destinationTabIndexFromSelectedTab))
+        return self
+    }
+    
+    @discardableResult
+    func dragTabOutOfTheGroup(tabIndex: Int) -> WebTestView {
+        self.getTabByIndex(index: tabIndex).clickForDurationThenDragToInTheMiddle(forDuration: self.defaultPressDurationSeconds, thenDragTo: self.button(WebViewLocators.Buttons.openOmnibox.accessibilityIdentifier))
         return self
     }
     
@@ -278,7 +284,7 @@ class WebTestView: BaseView {
     
     @discardableResult
     func openTabMenu(tabIndex: Int = 0, isPinnedTab: Bool = false) -> WebTestView {
-        self.focusTabByIndex(index:tabIndex, isPinnedTab: isPinnedTab).rightClick()
+        self.focusTabByIndex(index:tabIndex, isPinnedTab: isPinnedTab).rightClickInTheMiddle()
         return self
     }
 

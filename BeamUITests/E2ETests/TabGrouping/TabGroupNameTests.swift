@@ -73,16 +73,15 @@ class TabGroupNameTests: BaseTest {
             XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (4)")
         }
         
-        // Enable next steps when https://linear.app/beamapp/issue/BE-4776/cannot-open-collapsed-tab-group-menu-after-renaming is fixed
-//        step("When I delete tab group name") {
-//            tabGroupMenu.openFirstTabGroupMenu()
-//            tabGroupMenu.waitForMenuToBeDisplayed()
-//            tabGroupMenu.deleteTabGroupName()
-//        }
-//
-//        step("Then tab group name is unset but we still see tab group number") {
-//            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "2")
-//        }
+        step("When I delete tab group name") {
+            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.waitForMenuToBeDisplayed()
+            tabGroupMenu.deleteTabGroupName()
+        }
+
+        step("Then tab group name is unset but we still see tab group number") {
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "4")
+        }
     }
     
     func testTabGroupNameSpecialChar() throws {
