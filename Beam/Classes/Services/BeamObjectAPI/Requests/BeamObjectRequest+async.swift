@@ -537,10 +537,10 @@ extension BeamObjectRequest {
             }
         }()
 
+        let timer = Date()
         try await withThrowingTaskGroup(of: Void.self) { group in
-            let chunkSize = 60
-            var i = 0
-            for beamObject in sortedBeamObjects {
+            let chunkSize = Configuration.env == .test ? 1 : 100
+            for (i, beamObject) in sortedBeamObjects.enumerated() {
                 try Task.checkCancellation()
                 guard let dataUrl = beamObject.dataUrl else { continue }
                 if i >= chunkSize {
@@ -550,16 +550,12 @@ extension BeamObjectRequest {
                         Logger.shared.logWarning("Failed to download beam object content from \(dataUrl)", category: .sync)
                     }
                 }
-                i += 1
-                group.addTask {
-                    beamObject.data = try await self.fetchDataFromUrl(urlString: dataUrl)
-                }
-                // This code is multi-threaded, with vinyl once network calls are saved, it might take one for another
-                // because not in the same order, waiting for completion before moving on next
-                if Configuration.env == .test {
-                    try await group.waitForAll()
-                }
+                group.addTask(operation: S3TransferManager.shared.makeOperation(downloadUrl: dataUrl, request: self, beamObject: beamObject))
             }
+            try await group.waitForAll()
+        }
+        if sortedBeamObjects.count > 100 {
+            Logger.shared.logDebug("Downloaded \(sortedBeamObjects.count) objects from S3", category: .sync, localTimer: timer)
         }
         return try callback()
     }
@@ -626,7 +622,7 @@ extension BeamObjectRequest {
 
     public func fetchDataFromUrl(urlString: String) async throws -> Data {
 
-        try await withTaskCancellationHandler {
+    try await withTaskCancellationHandler {
             self.cancel()
         } operation: {
             try await withCheckedThrowingContinuation { continuation in
