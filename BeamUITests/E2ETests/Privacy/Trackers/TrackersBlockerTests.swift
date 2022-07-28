@@ -12,7 +12,6 @@ class TrackersBlockerTests: BaseTest {
     
     let privacyWindow = PrivacyPreferencesTestView()
     let url = MockHTTPWebPages().getMockPageUrl(.socialMediaAdBlock)
-    let app = XCUIApplication().windows["AdBlock"]
     let socialMediaButtons = [
         "Partager sur Facebook",
         "Envoyer par e-mail",
@@ -36,11 +35,11 @@ class TrackersBlockerTests: BaseTest {
     }
     
     private func isSocialMediaButtonDisplayed(_ button: String) -> Bool {
-        return app.buttons[button].exists
+        return app.windows["AdBlock"].buttons[button].exists
     }
     
     private func isSocialMediaLinkDisplayed(_ button: String) -> Bool {
-        return app.staticTexts[button].exists
+        return app.windows["AdBlock"].staticTexts[button].exists
     }
     
     private func verifySocialMediaButtonsDisplayed(_ status: Bool){

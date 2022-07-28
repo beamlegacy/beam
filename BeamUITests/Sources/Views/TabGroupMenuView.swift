@@ -18,6 +18,11 @@ class TabGroupMenuView: BaseView {
     }
     
     @discardableResult
+    func getTabGroupWithName(tabGroupName: String) -> XCUIElement {
+        app.windows.groups.matching(NSPredicate(format: "identifier BEGINSWITH '\(TabGroupMenuViewLocators.TabGroups.tabGroupPrefix.accessibilityIdentifier)Group(" + tabGroupName + ")'")).firstMatch
+    }
+    
+    @discardableResult
     func doesTabGroupExist() -> Bool {
         return waitForDoesntExist(app.windows.groups.matching(anyTabGroupPredicate).firstMatch)
     }
@@ -29,8 +34,19 @@ class TabGroupMenuView: BaseView {
     }
     
     @discardableResult
+    func openTabGroupMenuWithName(tabGroupName: String) -> TabGroupMenuView {
+        getTabGroupWithName(tabGroupName: tabGroupName).rightClickInTheMiddle()
+        return self
+    }
+    
+    @discardableResult
     func waitForMenuToBeDisplayed() -> Bool {
         return textField(TabGroupMenuViewLocators.MenuItems.tabGroupName.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
+    
+    @discardableResult
+    func waitForTabGroupNameToBeDisplayed(tabGroupName: String) -> Bool {
+        return getTabGroupWithName(tabGroupName: tabGroupName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
     @discardableResult

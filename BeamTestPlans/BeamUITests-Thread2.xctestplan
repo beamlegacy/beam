@@ -171,6 +171,7 @@
         "TabGroupDragTabTests",
         "TabGroupNameTests",
         "TabGroupNewTabTests",
+        "TabGroupOpenNewWindowTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "TrackersBlockerTests",
