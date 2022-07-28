@@ -295,9 +295,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                         DispatchQueue.global(qos: .userInteractive).async {
                             do {
                                 try BeamData.shared.currentAccount?.deleteEmptyDatabases()
-                                DispatchQueue.main.async {
-                                    AppDelegate.showMessage("Empty databases deleted")
-                                }
+                                AppDelegate.showMessage("Empty databases deleted")
                             } catch {
                                 DispatchQueue.main.async {
                                     AppDelegate.showError(error)
