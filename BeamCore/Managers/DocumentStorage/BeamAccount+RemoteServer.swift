@@ -215,6 +215,12 @@ extension BeamAccount {
         }
     }
 
+    func getUserInfosAsync() async throws {
+        let infos = try await userInfoRequest.getUserInfos()
+        Logger.shared.logInfo("Get user infos succeeded", category: .accountManager)
+        AuthenticationManager.shared.username = infos.username
+    }
+
     func setUsername(username: String, _ completionHandler: ((Result<String, Error>) -> Void)? = nil) {
         Task {
             do {
@@ -275,7 +281,8 @@ extension BeamAccount {
 
     // MARK: - Check private key
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func checkPrivateKey(useBuiltinPrivateKeyUI: Bool) -> ConnectionState {
+    @MainActor
+    func checkPrivateKey(useBuiltinPrivateKeyUI: Bool) async -> ConnectionState {
         guard state == .authenticated || state == .privateKeyCheck else { return state }
         moveToPrivateKeyCheck()
         guard !AppDelegate.main.isRunningTests else {
@@ -291,7 +298,7 @@ extension BeamAccount {
         guard AuthenticationManager.shared.isAuthenticated else { return state }
         var pkStatus = PrivateKeySignatureManager.DistantKeyStatus.invalid
         do {
-            pkStatus = try PrivateKeySignatureManager.shared.distantKeyStatus()
+            pkStatus = try await PrivateKeySignatureManager.shared.distantKeyStatus()
         } catch {
             Logger.shared.logError("Couldn't check the private key status: \(error)", category: .privateKeySignature)
             return state
@@ -333,7 +340,7 @@ extension BeamAccount {
                     alert.accessoryView = textField
 
                     // Display the NSAlert
-                    let choice = alert.runModal()
+                    let choice = await alert.run()
                     switch choice {
                     case .alertFirstButtonReturn:
                         // Use the private key given by the user:
@@ -346,7 +353,7 @@ extension BeamAccount {
                             Logger.shared.logInfo("New private key from user: \(textField.stringValue)", category: .privateKeySignature)
                             try EncryptionManager.shared.replacePrivateKey(for: Persistence.emailOrRaiseError(), with: pk)
                             // Check the validity of the private key with the object on server:
-                            let newStatus = try PrivateKeySignatureManager.shared.distantKeyStatus()
+                            let newStatus = try await PrivateKeySignatureManager.shared.distantKeyStatus()
                             validPrivateKey = newStatus == .valid
                             Logger.shared.logInfo("New private key status: \(newStatus), valid = \(validPrivateKey)")
                         } catch {
@@ -372,19 +379,10 @@ extension BeamAccount {
             // but first, let's try to see if the account is really empty:
             var canUploadPrivateKey = false
             do {
-                let semaphore = DispatchSemaphore(value: 0)
                 let request = BeamObjectRequest()
-                try request.fetchAllObjectPrivateKeySignatures { result in
-                    switch result {
-                    case let .failure(error):
-                        Logger.shared.logError("Error while fetching existing private key signatures from the server: \(error)", category: .privateKeySignature)
-                    case let .success(signatures):
-                        let localSignature = (try? PrivateKeySignatureManager.shared.privateKeySignature.signature.SHA256()) ?? "invalid"
-                        canUploadPrivateKey = signatures.isEmpty || signatures.contains(localSignature)
-                    }
-                    semaphore.signal()
-                }
-                semaphore.wait()
+                let signatures = try await request.fetchAllObjectPrivateKeySignatures()
+                let localSignature = (try? PrivateKeySignatureManager.shared.privateKeySignature.signature.SHA256()) ?? "invalid"
+                canUploadPrivateKey = signatures.isEmpty || signatures.contains(localSignature)
             } catch {
                 canUploadPrivateKey = false
             }
@@ -394,66 +392,37 @@ extension BeamAccount {
                 return state
             }
 
-            let semaphore = DispatchSemaphore(value: 0)
             do {
-                try PrivateKeySignatureManager.shared.saveOnNetwork(PrivateKeySignatureManager.shared.privateKeySignature) { result in
-                    switch result {
-                    case let .failure(error):
-                        Logger.shared.logError("Error while sending the private key signature to sync. \(error)", category: .privateKeySignature)
-
-                    case let .success(res):
-                        if res {
-                            Logger.shared.logInfo("Private key signature correctly synced.", category: .privateKeySignature)
-                            self.moveToSignedIn()
-                        } else {
-                            Logger.shared.logInfo("Unable to sync private key signature.", category: .privateKeySignature)
-                        }
-                    }
-                    semaphore.signal()
-                }
+                try await PrivateKeySignatureManager.shared.saveOnNetwork(PrivateKeySignatureManager.shared.privateKeySignature)
+                self.moveToSignedIn()
             } catch {
                 Logger.shared.logError("Unable to save private key signature on network: \(error)", category: .privateKeySignature)
-                semaphore.signal()
             }
-            semaphore.wait()
             return state
         }
     }
 
     func runFirstSync(useBuiltinPrivateKeyUI: Bool, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
-        var syncCompletionCalled = false
-        if checkPrivateKey(useBuiltinPrivateKeyUI: useBuiltinPrivateKeyUI) == .signedIn {
-            // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-            AppDelegate.main.beamObjectManager.liveSync { _ in
-                DispatchQueue.global(qos: .userInteractive).async {
-                    let group = DispatchGroup()
-
-                    group.enter()
-                    DispatchQueue.main.async {
-                        AppDelegate.main.syncDataWithBeamObject { _ in
-                            group.leave()
+        Task { @MainActor in
+            if await checkPrivateKey(useBuiltinPrivateKeyUI: useBuiltinPrivateKeyUI) == .signedIn {
+                // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
+                AppDelegate.main.beamObjectManager.liveSync { (firstCall, _) in
+                    Task { @MainActor in
+                        do {
+                            _ = try await AppDelegate.main.getUserInfosAsync()
+                            _ = try await AppDelegate.main.syncDataWithBeamObject()
+                        } catch {
+                            Logger.shared.logInfo("Could not get info or launch syncData: \(error)", category: .accountManager)
+                            return
                         }
-                    }
 
-                    group.enter()
-                    DispatchQueue.main.async {
-                        AppDelegate.main.getUserInfos { _ in
-                            group.leave()
-                        }
-                    }
-
-                    guard syncCompletionCalled == false else { return }
-
-                    group.wait()
-
-                    DispatchQueue.main.async {
+                        guard firstCall == true else { return }
                         syncCompletion?(.success(true))
-                        syncCompletionCalled = true
                     }
                 }
+            } else {
+                Logger.shared.logInfo("Could not signin because BeamAccount.checkPrivateKey failed", category: .accountManager)
             }
-        } else {
-            Logger.shared.logInfo("Could not signin because BeamAccount.checkPrivateKey failed", category: .accountManager)
         }
     }
 }

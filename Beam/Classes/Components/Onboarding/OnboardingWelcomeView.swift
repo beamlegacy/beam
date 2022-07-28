@@ -137,9 +137,9 @@ struct OnboardingWelcomeView: View {
     }
 
     private func onSigninDone() {
-        DispatchQueue.main.async {
+        Task {
             guard AuthenticationManager.shared.isAuthenticated else { return }
-            if let pkStatus = try? PrivateKeySignatureManager.shared.distantKeyStatus(), pkStatus == .none {
+            if let pkStatus = try? await PrivateKeySignatureManager.shared.distantKeyStatus(), pkStatus == .none {
                 // We do this to show the saveEncyptionView, user probably register his account with Google
                 onboardingManager.userDidSignUp = true
             }

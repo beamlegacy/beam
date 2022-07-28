@@ -192,7 +192,13 @@ struct Configuration {
             if newValue != networkEnabled {
                 UserDefaults.standard.set(newValue, forKey: networkEnabledKey)
                 if newValue {
-                    AppDelegate.main.syncDataWithBeamObject()
+                    Task { @MainActor in
+                        do {
+                            _ = try await AppDelegate.main.syncDataWithBeamObject()
+                        } catch {
+                            Logger.shared.logError("Error while syncing data: \(error)", category: .document)
+                        }
+                    }
                 }
             }
         }

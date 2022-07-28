@@ -19,6 +19,7 @@ struct OnboardingSetupPrivateKey: View {
     @State private var loadingState: LoadingState?
     @State private var privateKey: String = ""
     @State private var isPrivateKeyEditing: Bool = false
+    @State private var disableEditPrivateKey: Bool = false
 
     private var secondaryCenteredVariant: ActionableButtonVariant {
         var style = ActionableButtonVariant.secondary.style
@@ -74,11 +75,14 @@ struct OnboardingSetupPrivateKey: View {
                           onTextChanged: { _ in
                 updateActions()
             }, onCommit: { _ in
-                importBeamKey(privateKey)
+                disableEditPrivateKey = true
+                importBeamKey(privateKey) {
+                    disableEditPrivateKey = false
+                }
             }, onTab: {
                 isPrivateKeyEditing = false
                 return true
-            }).frame(height: 40)
+            }).frame(height: 40).disabled(disableEditPrivateKey)
 
             Separator(horizontal: true, color: BeamColor.Nero)
         }
@@ -116,12 +120,15 @@ struct OnboardingSetupPrivateKey: View {
         return true
     }
 
-    private func importBeamKey(_ keyStr: String) {
+    private func importBeamKey(_ keyStr: String, completionHandler: (() -> Void)? = nil) {
         guard let key = EncryptionManager.shared.decodeBeamKey(keyStr) else {
             UserAlert.showMessage(message: "Incorrect private key", informativeText: "This private key is corrupted.", buttonTitle: nil)
+            completionHandler?()
             return
         }
-        replaceAndCheck(key: key.asString())
+        replaceAndCheck(key: key.asString()) {
+            completionHandler?()
+        }
     }
 
     private func importBeamKey(fileUrl: String? = nil) {
@@ -134,10 +141,13 @@ struct OnboardingSetupPrivateKey: View {
         }
     }
 
-    private func replaceAndCheck(key: String) {
+    private func replaceAndCheck(key: String, completionHandler: (() -> Void)? = nil) {
         try? EncryptionManager.shared.replacePrivateKey(for: Persistence.emailOrRaiseError(), with: key)
 
         onboardingManager.checkForPrivateKey { nextStep in
+            defer {
+                completionHandler?()
+            }
             guard nextStep != nil else {
                 loadingState = .gettingInfos
                 updateActions()

@@ -222,20 +222,22 @@ class OnboardingManager: ObservableObject {
     }
 
     func checkForPrivateKey(completionHandler: @escaping (OnboardingStep?) -> Void, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
-        if let currentAccount = BeamData.shared.currentAccount {
-            switch currentAccount.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
-            case .signedIn:
-                completionHandler(nil)
-                currentAccount.runFirstSync(useBuiltinPrivateKeyUI: false) { result in
-                    syncCompletion?(result)
+        Task { @MainActor in
+            if let currentAccount = BeamData.shared.currentAccount {
+                switch await currentAccount.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
+                case .signedIn:
+                    completionHandler(nil)
+                    currentAccount.runFirstSync(useBuiltinPrivateKeyUI: false) { result in
+                        syncCompletion?(result)
+                    }
+                case .privateKeyCheck:
+                    completionHandler(OnboardingStep(type: .setupPrivateKey))
+                default:
+                    assert(false)
                 }
-            case .privateKeyCheck:
-                completionHandler(OnboardingStep(type: .setupPrivateKey))
-            default:
+            } else {
                 assert(false)
             }
-        } else {
-            assert(false)
         }
     }
 }

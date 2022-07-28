@@ -239,7 +239,6 @@ struct OnboardingEmailConnectView: View {
         guard areCredentialsValid, loadingState == nil else { return }
         isPasswordEditing = false
         loadingState = .signinin
-        var loadingStartTime = BeamDate.now
         updateButtonState()
         BeamData.shared.currentAccount?.signIn(email: emailField, password: passwordField, runFirstSync: false) { result in
             DispatchQueue.main.async {
@@ -257,25 +256,27 @@ struct OnboardingEmailConnectView: View {
                 case .success:
                     Logger.shared.logInfo("Sign in succeeded", category: .network)
                     loadingState = .gettingInfos
-                    loadingStartTime = BeamDate.now
+                    let loadingStartTime = BeamDate.now
                     updateButtonState()
 
-                    if let pkStatus = try? PrivateKeySignatureManager.shared.distantKeyStatus(), pkStatus == .none {
-                        // We do this to show the saveEncyptionView, user probably reset his account
-                        onboardingManager.userDidSignUp = true
-                    }
-
-                    onboardingManager.checkForPrivateKey { nextStep in
-                        guard nextStep != nil else {
-                            return
+                    Task {
+                        if let pkStatus = try? await PrivateKeySignatureManager.shared.distantKeyStatus(), pkStatus == .none {
+                            // We do this to show the saveEncyptionView, user probably reset his account
+                            onboardingManager.userDidSignUp = true
                         }
-                        finish(nextStep)
-                    } syncCompletion: { result in
-                        switch result {
-                        case .success:
-                            handleSyncCompletion(startTime: loadingStartTime)
-                        default:
-                            Logger.shared.logError("Run first Sync failed when trying to connect with Email", category: .network)
+
+                        onboardingManager.checkForPrivateKey { nextStep in
+                            guard nextStep != nil else {
+                                return
+                            }
+                            finish(nextStep)
+                        } syncCompletion: { result in
+                            switch result {
+                            case .success:
+                                handleSyncCompletion(startTime: loadingStartTime)
+                            default:
+                                Logger.shared.logError("Run first Sync failed when trying to connect with Email", category: .network)
+                            }
                         }
                     }
                 }

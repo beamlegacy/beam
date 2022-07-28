@@ -301,8 +301,14 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
         do {
             try self.clear()
             if AuthenticationManager.shared.isAuthenticated && includedRemote {
-                try self.deleteAllFromBeamObjectAPI { result in
-                    networkCompletion?(result)
+                Task {
+                    do {
+                        try await self.deleteAllFromBeamObjectAPI()
+                        networkCompletion?(.success(true))
+                    } catch {
+                        Logger.shared.logError("Error while deleting all contacts: \(error)", category: .contactsDB)
+                        networkCompletion?(.success(false))
+                    }
                 }
             } else {
                 networkCompletion?(.success(false))
@@ -442,21 +448,15 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
         }
     }
 
-    func refresh(_ file: BeamFileRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        try self.refreshFromBeamObjectAPI(file, true) { result in
-            switch result {
-            case .success(let remoteFile):
-                if let remoteFile = remoteFile {
-                    do {
-                        try self.insert(files: [remoteFile])
-                    } catch {
-                        networkCompletion?(.failure(error))
-                    }
-                }
-                networkCompletion?(.success(true))
-            case .failure(let error):
-                networkCompletion?(.failure(error))
+    func refresh(_ file: BeamFileRecord) async throws {
+        do {
+            if let remoteFile = try await self.refreshFromBeamObjectAPI(file, true) {
+                try self.insert(files: [remoteFile])
+            } else {
+                Logger.shared.logError("Unable to get remoteFile \(file.id)", category: .fileDB)
             }
+        } catch {
+            Logger.shared.logError("Unable to refresh file \(file.id): \(error)", category: .fileDB)
         }
     }
 }

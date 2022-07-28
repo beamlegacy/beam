@@ -56,41 +56,6 @@ class PasswordsDBTests: XCTestCase {
         cleanupPasswordsAfterTest()
     }
 
-    func testSavingPasswordOnBeamObjects() {
-        beforeNetworkTests()
-
-        let expectation = self.expectation(description: "save password")
-        let newPassword = PasswordManager.shared.save(hostname: Self.host.minimizedHost!,
-                                                      username: Self.username,
-                                                      password: Self.password,
-                                                      uuid: UUID(uuidString: "20D1B800-4436-4D25-8919-E23EF58FA13A")) { _ in
-            expectation.fulfill()
-        }
-        wait(for: [expectation], timeout: 10.0)
-
-        guard let newPasswordUnwrapped = newPassword else {
-            XCTFail("Password wasn't saved")
-            return
-        }
-
-        do {
-            var newPasswordReEncrypted = try PasswordEncryptionManager.reEncryptBeforeSend(newPasswordUnwrapped)
-            let remotePassword: RemotePasswordRecord? = try beamObjectHelper.fetchOnAPI(newPasswordReEncrypted)
-            XCTAssertNotNil(remotePassword, "Object doesn't exist on the API side?")
-
-            if var remotePassword = remotePassword {
-                // We need to decrypt passwords as both, even equal, will give different encrypted strings
-                let decryptedPassword = try EncryptionManager.shared.decryptString(remotePassword.password) ?? "1"
-                remotePassword.password = decryptedPassword
-                newPasswordReEncrypted.password = try EncryptionManager.shared.decryptString(newPasswordReEncrypted.password) ?? "2"
-                XCTAssertEqual(newPasswordReEncrypted, remotePassword)
-            }
-        } catch {
-            XCTFail(error.localizedDescription)
-        }
-        stopNetworkTests()
-    }
-
     func testSavingPasswords() {
         PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
         PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
@@ -222,9 +187,65 @@ class PasswordsDBTests: XCTestCase {
         cleanupPasswordsAfterTest()
     }
 
-    func testDelete() {
-        beforeNetworkTests()
+    private func cleanupPasswordsAfterTest() {
+        PasswordManager.shared.deleteAll(includedRemote: false)
+    }
+}
 
+class PasswordsDBWithNetworkTests: XCTestCase {
+    static let host = URL(string: "http://www.github.com/signin")!
+    static let subdomain1 = URL(string: "http://subdomain.github.com/signin")!
+    static let username = "beamdev@beam.co"
+    static let password = "BeamRocksss"
+    let beamHelper = BeamTestsHelper()
+    let beamObjectHelper = BeamObjectTestsHelper()
+
+    override func setUp() {
+        super.setUp()
+
+        BeamTestsHelper.logout()
+        PasswordManager.shared.deleteAll(includedRemote: false)
+        Persistence.Encryption.localPrivateKey = Configuration.testPrivateKey
+        beforeNetworkTests()
+    }
+
+    override func tearDown() async throws {
+        await stopNetworkTests()
+    }
+
+    func testSavingPasswordOnBeamObjects() async {
+        let expectation = self.expectation(description: "save password")
+        let newPassword = PasswordManager.shared.save(hostname: Self.host.minimizedHost!,
+                                                      username: Self.username,
+                                                      password: Self.password,
+                                                      uuid: UUID(uuidString: "20D1B800-4436-4D25-8919-E23EF58FA13A")) { _ in
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+
+        guard let newPasswordUnwrapped = newPassword else {
+            XCTFail("Password wasn't saved")
+            return
+        }
+
+        do {
+            var newPasswordReEncrypted = try PasswordEncryptionManager.reEncryptBeforeSend(newPasswordUnwrapped)
+            let remotePassword: RemotePasswordRecord? = try await beamObjectHelper.fetchOnAPI(newPasswordReEncrypted)
+            XCTAssertNotNil(remotePassword, "Object doesn't exist on the API side?")
+
+            if var remotePassword = remotePassword {
+                // We need to decrypt passwords as both, even equal, will give different encrypted strings
+                let decryptedPassword = try EncryptionManager.shared.decryptString(remotePassword.password) ?? "1"
+                remotePassword.password = decryptedPassword
+                newPasswordReEncrypted.password = try EncryptionManager.shared.decryptString(newPasswordReEncrypted.password) ?? "2"
+                XCTAssertEqual(newPasswordReEncrypted, remotePassword)
+            }
+        } catch {
+            XCTFail(error.localizedDescription)
+        }
+    }
+
+   func testDelete() {
         var expectation = self.expectation(description: "save password")
         PasswordManager.shared.save(hostname: Self.host.minimizedHost!,
                                     username: Self.username,
@@ -244,8 +265,7 @@ class PasswordsDBTests: XCTestCase {
         let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, options: .exact)
         XCTAssertEqual(entries.count, 0)
 
-        stopNetworkTests()
-        cleanupPasswordsAfterTest()
+       PasswordManager.shared.deleteAll(includedRemote: false)
     }
 
     private func beforeNetworkTests() {
@@ -262,14 +282,11 @@ class PasswordsDBTests: XCTestCase {
         BeamTestsHelper.login()
     }
 
-    private func stopNetworkTests() {
-        BeamObjectTestsHelper().deleteAll()
+    @MainActor
+    private func stopNetworkTests() async {
+        await BeamObjectTestsHelper().deleteAll()
         Configuration.reset()
         beamHelper.endNetworkRecording()
         BeamDate.reset()
-    }
-
-    private func cleanupPasswordsAfterTest() {
-        PasswordManager.shared.deleteAll(includedRemote: false)
     }
 }

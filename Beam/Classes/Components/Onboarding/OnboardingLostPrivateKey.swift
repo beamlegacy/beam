@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import BeamCore
 
 struct OnboardingLostPrivateKey: View {
     var finish: OnboardingView.StepFinishCallback
@@ -37,9 +38,12 @@ struct OnboardingLostPrivateKey: View {
                 UserAlert.showMessage(message: "Erase all data", informativeText: "This operation cannot be undone.", buttonTitle: "Erase all data", secondaryButtonTitle: "Cancel") {
                     UserAlert.showMessage(message: "Are you sure you want to erase all your beam data?", informativeText: "This operation cannot be undone.", buttonTitle: "Yes, Erase All Data", secondaryButtonTitle: "Cancel") {
                         // Delete All Local Content && Remote data
-                        _ = try? BeamObjectManager().deleteAll(nil) { _ in
-                            DispatchQueue.main.async {
+                        Task { @MainActor in
+                            do {
+                                try await BeamObjectManager().deleteAll(nil)
                                 AppDelegate.main.deleteAllLocalData()
+                            } catch {
+                                Logger.shared.logError("Cannot deleted data: \(error)", category: .database)
                             }
                         }
                     }
