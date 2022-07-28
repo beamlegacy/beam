@@ -7,7 +7,6 @@
 
 import SwiftUI
 import AutoUpdate
-import Parma
 import Combine
 
 struct SmallUpdateIndicatorView: View {
@@ -26,6 +25,8 @@ struct SmallUpdateIndicatorView: View {
 
     var body: some View {
         Group {
+            let message = versionChecker.state.informativeMessage
+
             switch versionChecker.state {
             case .updateAvailable(let release):
                 ButtonLabel("Update available", icon: "status-publish", customStyle: buttonLabelStyle) {
@@ -59,7 +60,7 @@ struct SmallUpdateIndicatorView: View {
                     opacityTimer.upstream.connect().cancel()
                 })
             case .downloading(progress: _):
-                ButtonLabel("Downloading update…", lottie: "status-update_restart", customStyle: buttonLabelLottieStyle)
+                ButtonLabel(message, lottie: "status-update_restart", customStyle: buttonLabelLottieStyle)
             case .downloaded(let downloadedRelease):
                 ButtonLabel("Update now", icon: "status-publish", customStyle: buttonLabelStyle) {
                     showReleaseNoteWindow(with: downloadedRelease.appRelease)
@@ -68,7 +69,7 @@ struct SmallUpdateIndicatorView: View {
                     opacity = 1
                 }
             case .installing:
-                ButtonLabel("Installing update…", lottie: "status-update_restart", customStyle: buttonLabelLottieStyle)
+                ButtonLabel(message, lottie: "status-update_restart", customStyle: buttonLabelLottieStyle)
             case .updateInstalled:
                 ButtonLabel(updateInstalledMessage(timerExpired: timerExpired),
                             lottie: "status-update_restart",
@@ -139,8 +140,7 @@ struct SmallUpdateIndicatorView: View {
                                                          dateColor: BeamColor.AlphaGray.swiftUI, versionNameFont: BeamFont.medium(size: 13).swiftUI,
                                                          versionNameColor: BeamColor.Niobium.swiftUI,
                                                          backgroundColor: BeamColor.Generic.secondaryBackground.swiftUI, cellHoverColor: BeamColor.Nero.swiftUI,
-                                                         separatorView: AnyView(PopupSeparator()),
-                                                         parmaRenderer: BeamRender())
+                                                         separatorView: AnyView(PopupSeparator()))
 
         return style
     }
@@ -150,56 +150,11 @@ struct SmallUpdateIndicatorView: View {
     }
 
     private struct ButtonFramePreferenceKey: FramePreferenceKey {}
-
 }
 
 struct SmallUpdateIndicatorView_Previews: PreviewProvider {
     static var previews: some View {
         let checker = VersionChecker(mockedReleases: AppRelease.mockedReleases())
         SmallUpdateIndicatorView(versionChecker: checker)
-    }
-}
-
-struct BeamRender: ParmaRenderable {
-
-    func paragraph(text: String) -> Text {
-        Text(text)
-            .font(BeamFont.regular(size: 12).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-    }
-
-    func heading(level: HeadingLevel?, textView: Text) -> Text {
-        textView
-            .font(BeamFont.medium(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-    }
-
-    func listItem(attributes: ListAttributes, index: [Int], view: AnyView) -> AnyView {
-        let delimiter: String
-        switch attributes.delimiter {
-        case .period:
-            delimiter = "."
-        case .parenthesis:
-            delimiter = ")"
-        }
-
-        let separator: String
-        switch attributes.type {
-        case .bullet:
-            separator = index.count % 2 == 1 ? "•" : "◦"
-        case .ordered:
-            separator = index
-                .map({ String($0) })
-                .joined(separator: ".")
-                .appending(delimiter)
-        }
-
-        return AnyView(
-            HStack(alignment: .top, spacing: 4) {
-                Text(separator)
-                    .foregroundColor(BeamColor.AlphaGray.swiftUI)
-                view
-            }
-        )
     }
 }
