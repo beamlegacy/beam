@@ -85,7 +85,7 @@ class CaptureCopyShareTests: BaseTest {
             step ("Then \(windowTitle) window is opened using Share option") {
                 self.triggerShareOption(elementToAdd: textElementToAdd, title: windowTitle)
                 _ = webView.waitForWebViewToLoad()
-                waitForIntValueEqual(timeout: BaseTest.maximumWaitTimeout, expectedNumber: 2, query: webView.getNumberOfWindows())
+                waitForIntValueEqual(timeout: BaseTest.maximumWaitTimeout, expectedNumber: 2, query: getNumberOfWindows())
                 XCTAssertTrue(
                     pnsView.isWindowOpenedWithContaining(title: windowTitle) ||
                     pnsView.isWindowOpenedWithContaining(title: windowTitle, isLowercased: true)

@@ -12,7 +12,6 @@ class CookieBannerBlockerTests: BaseTest {
     
     let privacyWindow = PrivacyPreferencesTestView()
     let url = MockHTTPWebPages().getMockPageUrl(.cookieBannerAdBlock)
-    let app = XCUIApplication().windows["AdBlock"].webViews["AdBlock"]
     let cookieBannerElements = [
         "THIS WEBSITE USES COOKIES",
         "We use cookies to personalise content and ads, to provide social media features and to analyse our traffic.",
@@ -30,7 +29,7 @@ class CookieBannerBlockerTests: BaseTest {
     
     private func verifyCookieBannerDisplayed(_ status: Bool){
         for cookieBannerElement in cookieBannerElements {
-            XCTAssertEqual(app.staticTexts[cookieBannerElement].exists, status)
+            XCTAssertEqual(app.windows["AdBlock"].webViews["AdBlock"].staticTexts[cookieBannerElement].exists, status)
         }
     }
     

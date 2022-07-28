@@ -35,6 +35,7 @@ class BaseTest: XCTestCase {
     let mockPage = MockHTTPWebPages()
     let passwordManagerHelper = PasswordManagerHelper()
     var webView = WebTestView()
+    var app = XCUIApplication()
     
     var deletePK = false
     var deleteRemoteAccount = false
@@ -210,5 +211,13 @@ class BaseTest: XCTestCase {
     
     func getRandomPassword() -> String {
         Faker(locale: "en-US").internet.password(minimumLength: 5, maximumLength: 17)
+    }
+    
+    func getNumberOfWindows() -> Int {
+        return self.app.windows.count
+    }
+    
+    func getNumberOfTabInWindowIndex(index: Int) -> Int {
+        return app.windows.element(boundBy: index).groups.matching(WebTestView().getAnyTabPredicate()).count
     }
 }
