@@ -165,6 +165,10 @@ class WebTestView: BaseView {
     func getAnyTab() -> XCUIElement {
         app.groups.matching(anyTabPredicate).firstMatch
     }
+    
+    func getAnyTabPredicate() -> NSPredicate {
+        return anyTabPredicate
+    }
 
     private let tabUnpinnedPredicate = NSPredicate(format: """
         identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPrefix.accessibilityIdentifier)' \
@@ -197,10 +201,6 @@ class WebTestView: BaseView {
             }
             return app.groups.matching(anyTabPredicate)
         }
-    }
-
-    func getNumberOfWindows() -> Int {
-        return self.app.windows.count
     }
     
     @discardableResult

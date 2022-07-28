@@ -29,8 +29,8 @@ class BrowserOpenModalTests: BaseTest {
 
         step("THEN I see two windows"){
             // wait for window to open
-            waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: webView.getNumberOfWindows())
-            XCTAssertEqual(webView.getNumberOfWindows(), 2)
+            waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: getNumberOfWindows())
+            XCTAssertEqual(getNumberOfWindows(), 2)
         }
 
         step("Given I tap on the open tab button in the new window") {
@@ -41,7 +41,7 @@ class BrowserOpenModalTests: BaseTest {
             // assert the minimal webview has no tabs
             // main window has 2 tabs
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
-            XCTAssertEqual(webView.getNumberOfWindows(), 2)
+            XCTAssertEqual(getNumberOfWindows(), 2)
         }
     }
 
@@ -56,8 +56,8 @@ class BrowserOpenModalTests: BaseTest {
 
         step("THEN I see two windows"){
             // wait for window to open
-            waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: webView.getNumberOfWindows())
-            XCTAssertEqual(webView.getNumberOfWindows(), 2)
+            waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: getNumberOfWindows())
+            XCTAssertEqual(getNumberOfWindows(), 2)
         }
 
         step("Given I tap on the open tab button in the new window") {
@@ -68,7 +68,7 @@ class BrowserOpenModalTests: BaseTest {
             // assert the minimal webview has no tabs
             // main window has 2 tabs
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
-            XCTAssertEqual(webView.getNumberOfWindows(), 2)
+            XCTAssertEqual(getNumberOfWindows(), 2)
         }
     }
 

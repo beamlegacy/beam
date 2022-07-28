@@ -15,8 +15,6 @@ class RightClickLinkMenuTests: BaseTest {
     let rightClickMenuTestView = RightClickMenuTestView()
     let downloadsView = DownloadTestView()
     let omniboxTestView = OmniBoxTestView()
-
-    var app = XCUIApplication()
     
     private func verifyMenuForLink () {
         //wait for menu to be displayed - inspect element should always be displayed
@@ -69,7 +67,7 @@ class RightClickLinkMenuTests: BaseTest {
         }
         
         step("Then link is correctly opened in a new window") {
-            XCTAssertEqual(webView.getNumberOfWindows(), 2)
+            XCTAssertEqual(getNumberOfWindows(), 2)
         }
     }
     
