@@ -40,10 +40,17 @@ struct EditorTabGroupView: View {
                         ButtonLabel(icon: "tabs-group_open", customStyle: arrowButtonStyle) {
                             openAllTabs()
                         }
+                        .accessibilityElement()
+                        .accessibilityLabel("Open tab group")
+                        .accessibilityIdentifier("open-tabGroup")
+                        .accessibilityAction {
+                            openAllTabs()
+                        }
                         .blendModeLightMultiplyDarkScreen()
                         .onHover {
                             isHoverArrow = $0
                         }
+
                     }
                 }
                 HStack(spacing: 0) {
@@ -81,6 +88,10 @@ struct EditorTabGroupView: View {
         }
         .background(background)
         .frame(minWidth: 100, maxWidth: 200, idealHeight: Self.height)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("\(tabGroup.title ?? "Unnamed") tab group")
+        .accessibilityValue("Tab group with \(tabGroup.pages.count)")
+        .accessibility(identifier: "tab-group-\(tabGroup.title ?? "unnamed")-with-\(tabGroup.pages.count)")
     }
 
     private var allowAnimation: Bool {
