@@ -147,8 +147,14 @@ class ContactsManager {
         do {
             try contactsDB?.deleteAll()
             if AuthenticationManager.shared.isAuthenticated && includedRemote {
-                try self.deleteAllFromBeamObjectAPI { result in
-                    networkCompletion?(result)
+                Task {
+                    do {
+                        try await self.deleteAllFromBeamObjectAPI()
+                        networkCompletion?(.success(true))
+                    } catch {
+                        Logger.shared.logError("Error while deleting all contacts: \(error)", category: .contactsDB)
+                        networkCompletion?(.success(false))
+                    }
                 }
             } else {
                 networkCompletion?(.success(false))

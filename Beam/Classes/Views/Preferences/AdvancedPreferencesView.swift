@@ -176,7 +176,12 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                         self.loading = true
                         Persistence.Sync.BeamObjects.last_received_at = nil
                         Persistence.Sync.BeamObjects.last_updated_at = nil
-                        AppDelegate.main.syncDataWithBeamObject(force: true) { _ in
+                        Task { @MainActor in
+                            do {
+                                _ = try await AppDelegate.main.syncDataWithBeamObject(force: true)
+                            } catch {
+                                Logger.shared.logError("Error while syncing data: \(error)", category: .document)
+                            }
                             self.loading = false
                         }
                     }, label: {
@@ -380,6 +385,9 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
 
                 Preferences.Section(title: "Encryption keys", bottomDivider: true) {
                     VStack(alignment: .leading) {
+                        Button("Delete all private keys") {
+                            deleteAllPrivateKeys()
+                        }.foregroundColor(Color.red)
                         if AuthenticationManager.shared.isAuthenticated {
                             if privateKeys.isEmpty {
                                 Button("Migrate old private key to current account") {
@@ -415,9 +423,6 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                                     }.frame(width: 450)
                                 }
 
-                                    Button("Delete all private keys") {
-                                        deleteAllPrivateKeys()
-                                    }.foregroundColor(Color.red)
                                 }
                             }
                         } else {

@@ -277,12 +277,6 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
-        if Thread.isMainThread, Configuration.env != .test {
-            Logger.shared.logError("Please don't use saveOnBeamObjectAPI in the main thread. Create your own DispatchQueue instead.",
-                                   category: .beamObjectNetwork)
-            assert(false)
-        }
-
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
@@ -416,5 +410,9 @@ extension BeamObjectManagerDelegate {
         let newObjectsSaved = try await self.saveOnBeamObjectsAPI(newObjects)
         try self.saveObjectsAfterConflict(newObjectsSaved)
         return goodObjects + newObjectsSaved
+    }
+
+    internal func addChangedObject(_ object: BeamObjectType) {
+        changedObjects[object.beamObjectId] = object
     }
 }

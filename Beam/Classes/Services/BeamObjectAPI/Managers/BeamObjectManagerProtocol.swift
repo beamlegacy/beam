@@ -8,8 +8,6 @@ protocol BeamObjectManagerDelegateProtocol {
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
     // it will call this method
-    func saveAllOnBeamObjectApi(force: Bool, _ completion: @escaping ((Swift.Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest?
-
     func saveAllOnBeamObjectApi(force: Bool, progress: ((Float) async -> Void)?) async throws -> (Int, Date?)
 }
 
