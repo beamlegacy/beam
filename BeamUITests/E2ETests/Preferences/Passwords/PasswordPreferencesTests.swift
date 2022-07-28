@@ -20,11 +20,13 @@ class PasswordPreferencesTests: BaseTest {
     let usernameExample = "quentin"
     let passwordExample = "quentin"
     
-    func setup() {
+    func setup(isPasswordProtectionDisabled: Bool = true) {
         step ("GIVEN I open password preferences"){
             launchApp()
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
-            uiMenu.disablePasswordAndCardsProtection()
+            if isPasswordProtectionDisabled {
+                uiMenu.disablePasswordAndCardsProtection()
+            }
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
         }
     }
@@ -42,6 +44,18 @@ class PasswordPreferencesTests: BaseTest {
         passwordPreferencesView.getPasswordFieldToFill(.password).clickClearAndType(passwordValue, true)
         passwordPreferencesView.clickAddPassword()
         waitForDoesntExist(passwordPreferencesView.getPasswordFieldToFill(.site))
+    }
+    
+    func testPasswordProtectionLock() {
+        
+        setup(isPasswordProtectionDisabled: false)
+        
+        step ("THEN I see the view is locked"){
+            XCTAssertTrue(passwordPreferencesView.staticText(PasswordPreferencesViewLocators.StaticTexts.passwordProtectionTitle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(passwordPreferencesView.app.windows.staticTexts.matching(NSPredicate(format: "value BEGINSWITH  '\(PasswordPreferencesViewLocators.StaticTexts.passwordProtectionDescription.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(passwordPreferencesView.button(PasswordPreferencesViewLocators.Buttons.unlockButton.accessibilityIdentifier).isEnabled)
+            XCTAssertFalse(passwordPreferencesView.checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillPasswords.accessibilityIdentifier).exists)
+        }
     }
     
     func testAddPasswordItem() throws {

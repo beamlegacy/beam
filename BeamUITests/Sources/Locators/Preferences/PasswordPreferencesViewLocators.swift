@@ -21,6 +21,7 @@ enum PasswordPreferencesViewLocators {
         case editButton = "Edit..."
         case addCreditCardButton = "addCreditCard"
         case removeCreditCardButton = "removeCreditCard"
+        case unlockButton = "Unlock"
     }
 
     enum Pickers: String, CaseIterable, UIElement {
@@ -38,6 +39,8 @@ enum PasswordPreferencesViewLocators {
     
     enum StaticTexts: String, CaseIterable, UIElement {
         case siteError = "Website URL is invalid"
+        case passwordProtectionTitle = "Passwords Are Locked"
+        case passwordProtectionDescription = "Click the Unlock button to Touch ID or enter the password for the user "
     }
     
     enum Other: String, CaseIterable, UIElement {
