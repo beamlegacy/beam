@@ -524,7 +524,7 @@ extension BeamData {
     func checkForUpdate() {
         Task {
             let checkResult = await versionChecker.checkForUpdates()
-            await MainActor.run {
+            DispatchQueue.main.async {
                 self.showUpdateAlert(onStartUp: false, availableRelease: checkResult)
             }
         }
@@ -533,13 +533,22 @@ extension BeamData {
     private func showUpdateAlert(onStartUp: Bool, availableRelease: AppRelease?) {
         if onStartUp && availableRelease == nil { return }
 
+        let state = versionChecker.state
+        let appName = Information.appName ?? "beam"
+
         if let release = availableRelease {
             UpdatePanel.showReleaseNoteWindow(with: release, versionChecker: versionChecker)
-        } else {
-            let appName = Information.appName ?? "beam"
-
+        } else if state == .noUpdate {
             let updateAlertMessage = "You’re up-to-date!"
             let updateAlertInformativeText = "You are already using the latest version of \(appName)."
+            let updateAlertButtonTitle = "OK"
+
+            UserAlert.showMessage(message: updateAlertMessage,
+                                  informativeText: updateAlertInformativeText,
+                                  buttonTitle: updateAlertButtonTitle) { }
+        } else {
+            let updateAlertMessage = "Update operation in progress"
+            let updateAlertInformativeText = state.informativeMessage
             let updateAlertButtonTitle = "OK"
 
             UserAlert.showMessage(message: updateAlertMessage,
