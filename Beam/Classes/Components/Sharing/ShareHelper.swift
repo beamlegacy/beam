@@ -24,12 +24,25 @@ class ShareHelper {
         self.pasteboard = pasteboard
     }
 
-    func shareContent(_ html: String, originURL: URL?, service: ShareService) async {
-        guard let content = await getShareableContent(from: html) else { return }
-        if service == .copy {
-            await setContentToPasteboard(content)
-        } else if let url = service.buildURL(with: content.text, url: content.url ?? originURL) {
-            await handleURL(url)
+    func shareContent(_ html: String, originURL: URL, service: ShareService) async {
+        switch service {
+        case .copy:
+            if html.isEmpty {
+                await setContentToPasteboard(ReadShareableContent(text: originURL.absoluteString))
+            } else if let content = await getShareableContent(from: html) {
+                await setContentToPasteboard(content)
+            } else {
+                Logger.shared.logError("Unable to get any content to share", category: .pointAndShoot)
+            }
+        default:
+            if html.isEmpty, let url = service.buildURL(with: nil, url: originURL) {
+                await handleURL(url)
+            } else if let content = await getShareableContent(from: html),
+                      let url = service.buildURL(with: content.text, url: content.url ?? originURL) {
+                await handleURL(url)
+            } else {
+                Logger.shared.logError("Unable to get any content to share", category: .pointAndShoot)
+            }
         }
     }
 
