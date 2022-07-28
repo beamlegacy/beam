@@ -238,8 +238,14 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         do {
             try db.clearNoteFrecencies()
             if AuthenticationManager.shared.isAuthenticated && includedRemote {
-                try self.deleteAllFromBeamObjectAPI { result in
-                    networkCompletion?(result)
+                Task {
+                    do {
+                        try await self.deleteAllFromBeamObjectAPI()
+                        networkCompletion?(.success(true))
+                    } catch {
+                        Logger.shared.logError("Error while deleting all contacts: \(error)", category: .contactsDB)
+                        networkCompletion?(.success(false))
+                    }
                 }
             } else {
                 networkCompletion?(.success(false))
@@ -269,7 +275,7 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
         )
         return Array(deduplicatedDict.values)
     }
-    func remoteSoftDelete(noteId: UUID) {
+    func remoteSoftDelete(noteId: UUID, completionHandler: (() -> Void)? = nil) {
         guard let db = db else { return }
         softDeleteCompleted = false
         let frecencies = db.fetchNoteFrecencies(noteId: noteId)
@@ -289,9 +295,11 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
             try db.save(noteFrecencies: softDeleted)
             try saveAllOnNetwork(syncedOnceNoteFrecencies) { _ in
                 self.softDeleteCompleted = true
+                completionHandler?()
             }
         } catch {
             Logger.shared.logError("Couldn't soft delete \(noteId) note frecencies \(error)", category: .frecencyNetwork)
+            completionHandler?()
         }
     }
 

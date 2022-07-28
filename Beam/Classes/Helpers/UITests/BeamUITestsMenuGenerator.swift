@@ -383,9 +383,12 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     }
 
     private func deleteAllRemoteObjects() {
-        _ = try? BeamObjectManager().deleteAll(nil) { _ in
-            DispatchQueue.main.async {
+        Task { @MainActor in
+            do {
+                try await BeamObjectManager().deleteAll(nil)
                 AppDelegate.main.deleteAllLocalData()
+            } catch {
+                Logger.shared.logError("Cannot deleted data: \(error)", category: .database)
             }
         }
     }

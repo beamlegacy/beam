@@ -382,28 +382,6 @@ class BeamObjectManager {
         return remoteObjects
     }
 
-    internal func fetchObject<T: BeamObjectProtocol>(_ object: T) throws -> T {
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: Result<T, Error>!
-
-        try fetchObject(object) { fetchObjectResult in
-            result = fetchObjectResult
-            semaphore.signal()
-        }
-
-        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(30))
-        if case .timedOut = semaphoreResult {
-            throw BeamObjectManagerDelegateError.runtimeError("Couldn't fetch object, timedout")
-        }
-
-        switch result {
-        case .failure(let error): throw error
-        case .success(let object): return object
-        case .none:
-            throw BeamObjectManagerDelegateError.runtimeError("Couldn't fetch object, got none!")
-        }
-    }
-
     internal func manageConflict<T: BeamObjectProtocol>(_ object: T,
                                                         _ remoteObject: T) -> T {
         var result = object
@@ -430,3 +408,13 @@ class BeamObjectManager {
         return result
     }
 }
+
+// MARK: - BeamObjectProtocol
+func updatedObjectsOnly(_ beamObjects: [BeamObject]) -> [BeamObject] {
+    let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjects)
+
+    return beamObjects.filter {
+        checksums[$0] != $0.dataChecksum || checksums[$0] == nil
+    }
+}
+
