@@ -68,7 +68,7 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         XCTAssertEqual(frecencyNoteRecords.count, 2)
     }
 
-    func testFirstLogin() throws {
+    func testFirstLogin() async throws {
         guard let noteLinksAndRefManager = BeamData.shared.currentDatabase?.noteLinksAndRefsManager else {
             XCTFail("Cannot get noteLinksAndRefsManager")
             return
@@ -105,10 +105,10 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         // 2 journals from freezed date and 2 notes = 5
         XCTAssertEqual(allDocuments.count, 4)
 
-        stopNetworkTests()
+        await stopNetworkTests()
     }
 
-    func testLoginAfterSignupLater() throws {
+    func testLoginAfterSignupLater() async throws {
         try setupInitialState()
 
         // we have the daily note
@@ -169,10 +169,10 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         // 4 docs, 2 frecencies, 1 private key, 4 files, 1 database = 12
 //        XCTAssertEqual(fetchAllRemoteObjects().count, 12)
 
-        stopNetworkTests()
+        await stopNetworkTests()
     }
 
-    func testSynchronisationWithExistingData() throws {
+    func testSynchronisationWithExistingData() async throws {
         beforeNetworkTests()
 
         XCTAssertEqual(fetchAllRemoteObjects().count, 0)
@@ -248,7 +248,7 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
 //
 //        XCTAssertEqual(fetchAllRemoteObjects().count, 12)
 
-        stopNetworkTests()
+        await stopNetworkTests()
     }
 
     private func logout() {
@@ -271,8 +271,8 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
     }
 
-    private func stopNetworkTests() {
-        BeamObjectTestsHelper().deleteAll()
+    private func stopNetworkTests() async {
+        await BeamObjectTestsHelper().deleteAll()
 //        beamHelper.endNetworkRecording()
         BeamDate.reset()
         BeamURLSession.shouldNotBeVinyled = false

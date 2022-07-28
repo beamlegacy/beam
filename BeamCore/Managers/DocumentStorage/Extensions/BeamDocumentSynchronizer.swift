@@ -453,27 +453,23 @@ extension BeamDocumentSynchronizer {
     }
 
     fileprivate func reloadAndSendToServer(_ document: BeamDocument) {
-        do {
-            var updatedDocument: BeamDocument!
-            if document.deletedAt != nil {
-                updatedDocument = document
-            } else {
-                guard let reloadedDocument = try document.collection?.fetchWithId(document.id) else {
-                    Logger.shared.logError("Failed to reload document \(document)", category: .sync)
-                    return
+        Task {
+            do {
+                var updatedDocument: BeamDocument!
+                if document.deletedAt != nil {
+                    updatedDocument = document
+                } else {
+                    guard let reloadedDocument = try document.collection?.fetchWithId(document.id) else {
+                        Logger.shared.logError("Failed to reload document \(document)", category: .sync)
+                        return
+                    }
+                    updatedDocument = reloadedDocument
                 }
-                updatedDocument = reloadedDocument
+                try await saveOnBeamObjectAPI(updatedDocument)
+                Logger.shared.logInfo("\(document.id) saved on server", category: .sync)
+            } catch {
+                Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
             }
-            try saveOnBeamObjectAPI(updatedDocument) { result in
-                switch result {
-                case .success:
-                    Logger.shared.logInfo("\(document.id) saved on server", category: .sync)
-                case .failure(let error):
-                    Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
-                }
-            }
-        } catch {
-            Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
         }
     }
 }

@@ -68,9 +68,9 @@
         "BeamLinkDBTests\/testMoveFrecencyToLinkDB()",
         "BrowserImportManagerTest\/testSpeed()",
         "BrowsingTreeTriggerTests",
+        "DailyUrlStorageTest\/testGetRepeatingUrlsSpeed()",
         "DocumentManagerReceiveObjectTests",
         "OLD_BeamNote_DocumentManagerTests",
-        "DailyUrlStorageTest\/testGetRepeatingUrlsSpeed()",
         "OmniboxAnalyticsTests"
       ],
       "target" : {

@@ -22,4 +22,18 @@ extension AppDelegate {
             completionHandler?(.success(true))
         }
     }
+
+    @MainActor
+    func getUserInfosAsync() async throws -> Bool {
+        let uiTestsAreRunning = ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument)
+        let testsAreRunning = Configuration.env == .test && !uiTestsAreRunning
+
+        guard !testsAreRunning,
+              AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+                  return false
+              }
+        try await BeamData.shared.currentAccount?.getUserInfosAsync()
+        return true
+    }
 }

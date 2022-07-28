@@ -262,20 +262,14 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
 
     func remoteDeleteAll(_ completion: ((Result<Bool, Error>) -> Void)? = nil) {
         Logger.shared.logInfo("Deleting browsing trees from API", category: .browsingTreeNetwork)
-        do {
-            try BrowsingTreeStoreManager.shared.deleteAllFromBeamObjectAPI { result in
-                switch result {
-                case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .browsingTreeNetwork)
-                    completion?(.failure(error))
-                case .success:
-                    Logger.shared.logInfo("Succesfully deleted browsing trees from API", category: .browsingTreeNetwork)
-                    completion?(.success(true))
-                }
+        Task {
+            do {
+                try await BrowsingTreeStoreManager.shared.deleteAllFromBeamObjectAPI()
+                completion?(.success(true))
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .database)
+                completion?(.failure(error))
             }
-        } catch {
-            Logger.shared.logError(error.localizedDescription, category: .database)
-            completion?(.failure(error))
         }
     }
 }
@@ -392,7 +386,7 @@ extension BrowsingTreeStoreManager {
         //local cleanup
         do {
             try delete(ids: legacyObjects.compactMap { $0.id })
-            Logger.shared.logInfo("Succesfully locally deleted \(legacyObjects.count) legacy tree(s) ",
+            Logger.shared.logInfo("Successfully locally deleted \(legacyObjects.count) legacy tree(s) ",
                                   category: .browsingTreeNetwork)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .browsingTreeNetwork)
@@ -400,20 +394,15 @@ extension BrowsingTreeStoreManager {
             return
         }
         //remote cleanup
-        do {
-            try BrowsingTreeStoreManager.shared.deleteFromBeamObjectAPI(objects: legacyObjects) { result in
-                switch result {
-                case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .browsingTreeNetwork)
-                    completion?(.failure(error))
-                case .success:
-                    Logger.shared.logInfo("Succesfully deleted \(legacyObjects.count) legacy tree(s) from API", category: .browsingTreeNetwork)
-                    completion?(.success(true))
-                }
+        Task {
+            do {
+                try await BrowsingTreeStoreManager.shared.deleteFromBeamObjectAPI(objects: legacyObjects)
+                Logger.shared.logInfo("Successfully deleted \(legacyObjects.count) legacy tree(s) from API", category: .browsingTreeNetwork)
+                completion?(.success(true))
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .browsingTreeNetwork)
+                completion?(.failure(error))
             }
-        } catch {
-            Logger.shared.logError(error.localizedDescription, category: .browsingTreeNetwork)
-            completion?(.failure(error))
         }
     }
 }

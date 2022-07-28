@@ -66,28 +66,23 @@ class PrivateKeySignatureManager: BeamObjectManagerDelegate {
         case none
     }
 
-    func distantKeyStatus() throws -> DistantKeyStatus {
+    func distantKeyStatus() async throws -> DistantKeyStatus {
         var status = DistantKeyStatus.none
-        let semaphore = DispatchSemaphore(value: 0)
-        try self.fetchAllFromBeamObjectAPI(raisePrivateKeyError: true) { result in
-            switch result {
-            case .failure(let error):
-                switch error {
-                case let BeamObjectRequest.BeamObjectRequestError.privateKeyError(validObjects: _, invalidObjects: invalidObjects):
-                    assert(!invalidObjects.isEmpty)
-                    assert(invalidObjects.first?.beamObjectType == BeamObjectObjectType.privateKeySignature.rawValue)
-                default:
-                    break
-                }
-
-                Logger.shared.logError("Error fetching distant key from API: \(error)", category: .privateKeySignature)
-                status = .invalid
-            case .success(let signatures):
-                status = signatures.isEmpty ? .none : .valid
+        do {
+            let signatures = try await self.fetchAllFromBeamObjectAPI(raisePrivateKeyError: true)
+            status = signatures.isEmpty ? .none : .valid
+        } catch {
+            switch error {
+            case let BeamObjectRequest.BeamObjectRequestError.privateKeyError(validObjects: _, invalidObjects: invalidObjects):
+                assert(!invalidObjects.isEmpty)
+                assert(invalidObjects.first?.beamObjectType == BeamObjectObjectType.privateKeySignature.rawValue)
+            default:
+                break
             }
-            semaphore.signal()
+
+            Logger.shared.logError("Error fetching distant key from API: \(error)", category: .privateKeySignature)
+            status = .invalid
         }
-        semaphore.wait()
         return status
     }
 
@@ -114,16 +109,8 @@ class PrivateKeySignatureManager: BeamObjectManagerDelegate {
         return [privateKeySignature].filter { $0.updatedAt >= updatedSince }
     }
 
-    func saveOnNetwork(_ signature: PrivateKeySignature, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [weak self] in
-            do {
-                try await self?.saveOnBeamObjectAPI(signature, force: true)
-                Logger.shared.logDebug("Saved signature on the BeamObject API", category: .privateKeySignature)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the signature on the BeamObject API", category: .privateKeySignature)
-                networkCompletion?(.failure(error))
-            }
-        }
+    func saveOnNetwork(_ signature: PrivateKeySignature) async throws {
+        try await saveOnBeamObjectAPI(signature, force: true)
+        Logger.shared.logDebug("Saved signature on the BeamObject API", category: .privateKeySignature)
     }
 }
