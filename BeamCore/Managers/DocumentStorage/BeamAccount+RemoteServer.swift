@@ -312,9 +312,9 @@ extension BeamAccount {
                 repeat {
                     Logger.shared.logInfo("Ask the user for a valid private key for this account", category: .privateKeySignature)
                     let alert = NSAlert()
-                    alert.informativeText = "Beam needs your private key to connect to this account."
-                    alert.addButton(withTitle: "Disconnect")
-                    alert.addButton(withTitle: "Use encryption key")
+                    alert.messageText = loc("Beam needs your private key to connect to this account.", comment: "Alert message")
+                    alert.addButton(withTitle: loc("Use Encryption Key", comment: "Alert button"))
+                    alert.addButton(withTitle: loc("Disconnect", comment: "Alert button"))
 
                     // Add an input NSTextField for the prompt
                     let inputFrame = NSRect(
@@ -324,15 +324,18 @@ extension BeamAccount {
                         height: 24
                     )
 
-                    let textField = NSTextField(frame: inputFrame)
-                    textField.placeholderString = ("Private key")
-                    textField.stringValue = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
+                    let keyString = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
+
+                    let textField = NSTextField(string: keyString)
+                    textField.frame = inputFrame
+                    textField.placeholderString = loc("Private Key", comment: "Alert text field placeholder")
+
                     alert.accessoryView = textField
 
                     // Display the NSAlert
                     let choice = alert.runModal()
                     switch choice {
-                    case .alertSecondButtonReturn:
+                    case .alertFirstButtonReturn:
                         // Use the private key given by the user:
                         do {
                             var pk = textField.stringValue
