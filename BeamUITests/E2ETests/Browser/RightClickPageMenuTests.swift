@@ -9,7 +9,6 @@ import Foundation
 import XCTest
 
 class RightClickPageMenuTests: BaseTest {
-    var app = XCUIApplication()
     let rightClickMenuTestView = RightClickMenuTestView()
     let pageToRightClickOn = XCUIApplication().windows.webViews.firstMatch
     let linkToOpen = MockHTTPWebPages().getMockPageUrl(.ambiguousShortForm).dropLast()
