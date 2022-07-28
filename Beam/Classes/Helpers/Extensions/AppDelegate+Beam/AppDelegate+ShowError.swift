@@ -6,6 +6,8 @@ extension AppDelegate {
     }
 
     static func showMessage(_ message: String) {
-        UserAlert.showMessage(message: message)
+        DispatchQueue.main.async {
+            UserAlert.showMessage(message: message)
+        }
     }
 }
