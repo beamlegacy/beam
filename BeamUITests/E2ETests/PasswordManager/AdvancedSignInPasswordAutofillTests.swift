@@ -315,4 +315,25 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
             XCTAssertEqual(mockPage.getResultValue(label: "password"), passwordEscape)
         }
     }
+
+    func testPasswordMenuIsDismissedWhenNavigatingBack() {
+        step("Given I navigate to \(mockPage.getMockPageUrl(.shortcutsUrl))") {
+            mockPage.openMockPage(.shortcutsUrl)
+        }
+        step("And I navigate to Sign In page") {
+            mockPage.getLinkElement("Sign In", inView: "Shortcuts").clickOnExistence()
+        }
+        step("When I click on Username field") {
+            mockPage.getUsernameFieldElement(title: "Username: ").clickOnExistence()
+        }
+        step("Then password manager is displayed") {
+            XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: loginUsername))
+        }
+        step("When I navigate back") {
+            _ = webView.browseHistoryBackButtonClick()
+        }
+        step("Then password manager is not displayed") {
+            XCTAssertFalse(passwordManagerHelper.doesAutofillPopupExist(autofillText: loginUsername))
+        }
+    }
 }

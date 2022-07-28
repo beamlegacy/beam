@@ -1,0 +1,16 @@
+<html>
+
+<head>
+<title>Shortcuts</title>
+
+<body>
+<h1>Shortcuts</h1>
+
+<ul>
+<li><a href="http://signin.form.lvh.me:{{ params.port }}">Sign In</a></li>
+<li><a href="http://lvh.me:{{ params.port }}">Back to Root</a></li>
+</ul>
+
+</body>
+
+</html>

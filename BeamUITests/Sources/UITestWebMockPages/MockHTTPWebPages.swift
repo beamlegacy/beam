@@ -66,6 +66,7 @@ class MockHTTPWebPages: BaseView {
     enum MockPageLink: CaseIterable {
         case mainView
         case mockBaseUrl
+        case shortcutsUrl
 
         case ambiguousShortForm
         case signupShortForm
@@ -140,10 +141,11 @@ class MockHTTPWebPages: BaseView {
             switch self {
             case .mainView: return "http://localhost:\(port)/"
             case .mockBaseUrl: return "http://form.lvh.me:\(port)/"
+            case .shortcutsUrl: return "http://orm.lvh.me:\(port)/redirection/shortcuts"
 
             case .ambiguousShortForm: return "http://ambiguous.form.lvh.me:\(port)/"
             case .signupShortForm: return "http://signup.form.lvh.me:\(port)/"
-            case .signinShortForm: return "http://signin.form.lvh.me:\(port)/"
+            case .signinShortForm: return "http://signin.form.lvh.me:\(port)"
             case .paymentBookingShortForm: return "http://payment-booking.form.lvh.me:\(port)/"
             case .paymentNetflixShortForm: return "http://payment-netflix.form.lvh.me:\(port)/"
 

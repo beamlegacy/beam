@@ -523,6 +523,7 @@ import UniformTypeIdentifiers
 
     fileprivate func tabWillLeaveCurrentPage() {
         mediaPlayerController = .init(page: self)
+        webAutofillController?.dismiss()
         pointAndShoot?.leavePage()
         mouseHoveringLocation = .none
         cancelSearch()
@@ -612,6 +613,7 @@ import UniformTypeIdentifiers
     }
 
     func switchToBackground() {
+        webAutofillController?.dismiss()
         browsingTree.switchToBackground()
     }
 
