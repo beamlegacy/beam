@@ -69,7 +69,7 @@
         "AllNotesPublishProfileTests",
         "AllNotesSortingTests",
         "AllNotesViewTests",
-        "AllNotesViewTests\/testAllNotesURLCounter()",
+        "AllNotesViewTests\/testAllNotesLinksCounter()",
         "AllNotesViewTests\/testAllNotesUpdatedDateView()",
         "AllNotesViewTests\/testAllNotesWordsCounter()",
         "AllNotesViewTests\/testCardRenamingApplyingInAllNotes()",
