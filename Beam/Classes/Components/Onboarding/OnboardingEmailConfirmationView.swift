@@ -121,7 +121,6 @@ struct OnboardingEmailConfirmationView: View {
         errorState = nil
         loadingState = .signinin
         updateActions()
-        var loadingStartTime = BeamDate.now
         BeamData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: false) { result in
             DispatchQueue.main.async {
                 updateActions()
@@ -137,7 +136,7 @@ struct OnboardingEmailConfirmationView: View {
                 case .success:
                     Logger.shared.logInfo("Sign in after email confirmation succeeded", category: .network)
                     loadingState = .gettingInfos
-                    loadingStartTime = BeamDate.now
+                    let loadingStartTime = BeamDate.now
 
                     onboardingManager.checkForPrivateKey { nextStep in
                         guard nextStep != nil else {

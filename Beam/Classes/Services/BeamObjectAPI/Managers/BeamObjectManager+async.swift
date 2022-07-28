@@ -40,12 +40,12 @@ extension BeamObjectManager {
 
             // swiftlint:disable:next date_init
             let localTimer = Date()
-            Logger.shared.logDebug("syncAllFromAPI: calling asyncSaveAllToAPI",
+            Logger.shared.logDebug("syncAllFromAPI: calling saveAllToAPI",
                                    category: .sync)
             Self.synchronizationStatusUpdated(.uploading(0))
-            let objectsCount = try await self.asyncSaveAllToAPI(force: force)
+            let objectsCount = try await self.saveAllToAPI(force: force)
             Self.synchronizationStatusUpdated(.uploading(100))
-            Logger.shared.logDebug("syncAllFromAPI: Called asyncSaveAllToAPI, saved \(objectsCount) objects",
+            Logger.shared.logDebug("syncAllFromAPI: Called saveAllToAPI, saved \(objectsCount) objects",
                                    category: .sync,
                                    localTimer: localTimer)
 
@@ -58,7 +58,7 @@ extension BeamObjectManager {
 
     @discardableResult
     // swiftlint:disable:next function_body_length
-    func asyncSaveAllToAPI(force: Bool = false) async throws -> Int {
+    func saveAllToAPI(force: Bool = false) async throws -> Int {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }

@@ -272,11 +272,4 @@ class BeamLinkDBTests: XCTestCase {
         Configuration.beamObjectOnRest = false
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
     }
-
-    private func stopNetworkTests() {
-        BeamObjectTestsHelper().deleteAll()
-        Configuration.reset()
-        beamHelper.endNetworkRecording()
-        BeamDate.reset()
-    }
 }

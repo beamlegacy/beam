@@ -61,7 +61,12 @@ struct BetaPreferencesView: View, BeamDocumentSource {
                     self.loading = true
                     Persistence.Sync.BeamObjects.last_received_at = nil
                     Persistence.Sync.BeamObjects.last_updated_at = nil
-                    AppDelegate.main.syncDataWithBeamObject(force: true) { _ in
+                    Task { @MainActor in
+                        do {
+                            _ = try await AppDelegate.main.syncDataWithBeamObject(force: true)
+                        } catch {
+                            Logger.shared.logError("Error while syncing data: \(error)", category: .document)
+                        }
                         self.loading = false
                     }
                 }, label: {
