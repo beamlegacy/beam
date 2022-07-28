@@ -58,8 +58,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @Published public private(set) var isNetworkReachable: Bool = false
 
     private var synchronizationTask: Task<Void, Error>?
-    private let synchronizationTaskQueue = DispatchQueue(label: "SyncTask")
-    private var synchronizationSemaphore = DispatchSemaphore(value: 0)
     private var synchronizationSubject = PassthroughSubject<Bool, Never>()
     private(set) var isSynchronizationRunning = false
 
@@ -194,19 +192,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.isNetworkReachable = false
             case .reachable:
                 self?.isNetworkReachable = true
-                self?.checkPrivateKey()
-                self?.window?.state.reloadOfflineTabs()
+                Task { [weak self] in
+                    await self?.checkPrivateKey()
+                    await self?.window?.state.reloadOfflineTabs()
+                }
             }
         }.store(in: &cancellableScope)
     }
 
     // MARK: - Private Key Check
-    func checkPrivateKey() {
+    func checkPrivateKey() async {
         if let account = data.currentAccount {
-            if account.checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
-                beamObjectManager.liveSync { _ in
-                    self.syncDataWithBeamObject()
-                    self.data.updateNoteCount()
+            if await account.checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
+                beamObjectManager.liveSync { (_, _) in
+                    Task { @MainActor in
+                        do {
+                            _ = try await self.syncDataWithBeamObject()
+                        } catch {
+                            Logger.shared.logError("Error while syncing data: \(error)", category: .document)
+                        }
+                        self.data.updateNoteCount()
+                    }
                 }
             } else {
                 account.logoutIfNeeded()
@@ -220,35 +226,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // MARK: - Database
+    @MainActor
     func syncDataWithBeamObject(force: Bool = false,
-                                showAlert: Bool = true,
-                                _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+                                showAlert: Bool = true) async throws -> Bool {
         guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
-            completionHandler?(.success(false))
-            return
+            return false
         }
 
-        synchronizationTaskQueue.sync {
-            guard isSynchronizationRunning == false else {
-                Logger.shared.logDebug("syncTask already running", category: .beamObjectNetwork)
-                completionHandler?(.success(false))
-                return
-            }
-            isSynchronizationRunning = true
-            synchronizationIsRunningDidUpdate()
-
-            synchronizationSemaphore = DispatchSemaphore(value: 0)
-            synchronizationTask = launchSynchronizationTask(force, showAlert, completionHandler)
+        guard isSynchronizationRunning == false else {
+            Logger.shared.logDebug("syncTask already running", category: .beamObjectNetwork)
+            return false
         }
+        isSynchronizationRunning = true
+        synchronizationIsRunningDidUpdate()
+
+        synchronizationTask = launchSynchronizationTask(force, showAlert)
+
+        return true
     }
 
-    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool, _ completionHandler: ((Result<Bool, Error>) -> Void)?) -> Task<Void, Error> {
+    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool) -> Task<Void, Error> {
         Task {
             defer {
                 self.synchronizationTaskDidStop()
-                self.synchronizationSemaphore.signal()
             }
 
             // swiftlint:disable:next date_init
@@ -267,24 +269,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
                                       category: .sync,
                                       localTimer: localTimer)
-                completionHandler?(.failure(error))
                 return
             }
 
             Logger.shared.logInfo("syncAllFromAPI called",
                                   category: .sync,
                                   localTimer: localTimer)
-            completionHandler?(.success(true))
         }
     }
 
     public func stopSynchronization() {
         if let task = synchronizationTask {
             task.cancel()
-            let semaphoreResult = synchronizationSemaphore.wait(timeout: DispatchTime.now() + .seconds(30))
-            if case .timedOut = semaphoreResult {
-                Logger.shared.logError("Couldn't cancel synchronization task, timedout", category: .beamObjectNetwork)
-            }
         }
     }
 
@@ -715,12 +711,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         //because it will set its RunLoop in the modalPanel mode and that will make dispatch to main queue fail
         //More explanations here: https://www.thecave.com/2015/08/10/dispatch-async-to-main-queue-doesnt-work-with-modal-window-on-mac-os-x
         fullSyncOnQuitStatus = .ongoing
-        syncDataWithBeamObject(force: false, showAlert: false) { _ in
+        Task { @MainActor in
+            _ = try await syncDataWithBeamObject(force: false, showAlert: false)
             Logger.shared.logDebug("Full sync finished. Asking again to quit, without full sync")
-            DispatchQueue.main.async {
-                self.fullSyncOnQuitStatus = .done
-                NSApp.terminate(nil)
-            }
+            self.fullSyncOnQuitStatus = .done
+            NSApp.terminate(nil)
         }
 
         //We cancel the quit for now. Will ask again after full sync is over

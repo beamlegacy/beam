@@ -34,24 +34,18 @@ class ZZZTests: QuickSpec {
         }
 
         describe("BeamObjects") {
-            it("does not leave any beam objects on the API after test calls") {
+            asyncIt("does not leave any beam objects on the API after test calls") {
                 let beamRequest = BeamObjectRequest()
 
-                waitUntil(timeout: .seconds(10)) { done in
-                    _ = try? beamRequest.fetchAll { result in
-                        switch result {
-                        case .failure(let error):
-                            fail(error.localizedDescription)
-                        case .success(let beamObjects):
-                            expect(beamObjects).to(haveCount(0))
-                            if !beamObjects.isEmpty {
-                                fail("Left BeamObjects on the API: \(beamObjects.map { $0.beamObjectType }.joined(separator: ", ")). Please use BeamObjectTestsHelper().delete(objectID) or BeamObjectTestsHelper().deleteAll() after your tests")
-                                dump(beamObjects)
-                            }
-                        }
-
-                        done()
+                do {
+                    let beamObjects = try await beamRequest.fetchAll()
+                    expect(beamObjects).to(haveCount(0))
+                    if !beamObjects.isEmpty {
+                        fail("Left BeamObjects on the API: \(beamObjects.map { $0.beamObjectType }.joined(separator: ", ")). Please use BeamObjectTestsHelper().delete(objectID) or BeamObjectTestsHelper().deleteAll() after your tests")
+                        dump(beamObjects)
                     }
+                } catch {
+                    fail(error.localizedDescription)
                 }
             }
         }

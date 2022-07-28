@@ -137,19 +137,16 @@ struct FileDetail: View {
     }
 
     private func refresh() {
-        let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
-            refreshing = true
-        }
-
-        do {
-            try fileManager.refresh(file) { _ in
-                DispatchQueue.main.async {
-                    timer.invalidate()
+        refreshing = true
+        Task {
+            do {
+                defer {
                     refreshing = false
                 }
+                try await fileManager.refresh(file)
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
             }
-        } catch {
-            Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
         }
     }
 
@@ -160,10 +157,10 @@ struct FileDetail: View {
             try BeamFileDBManager.shared?.remove(uid: file.uid)
 
             if remoteDelete {
-                try fileManager.deleteFromBeamObjectAPI(object: file) { result in
-                    switch result {
-                    case .success: break
-                    case .failure(let error):
+                Task {
+                    do {
+                        try await fileManager.deleteFromBeamObjectAPI(object: file)
+                    } catch {
                         Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
                     }
                 }
@@ -174,20 +171,16 @@ struct FileDetail: View {
     }
 
     private func softDelete() {
-        file.deletedAt = BeamDate.now
-        file.updatedAt = BeamDate.now
+        Task {
+            file.deletedAt = BeamDate.now
+            file.updatedAt = BeamDate.now
 
-        do {
-            try BeamFileDBManager.shared?.insert(files: [file])
-            try fileManager.saveOnBeamObjectAPI(file) { result in
-                switch result {
-                case .success: break
-                case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
-                }
+            do {
+                try BeamFileDBManager.shared?.insert(files: [file])
+                try await fileManager.saveOnBeamObjectAPI(file)
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
             }
-        } catch {
-            Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
         }
     }
 
@@ -209,24 +202,14 @@ struct FileDetail: View {
 
     private var SaveButton: some View {
         Button(action: {
-            let backgroundQueue = DispatchQueue(label: "FileDetail BeamObjectManager backgroundQueue", qos: .userInitiated)
-
-            backgroundQueue.async {
+            saving = true
+            Task {
                 do {
-                    saving = true
-
-                    try fileManager.saveOnBeamObjectAPI(file, force: true) { result in
-                        saving = false
-
-                        switch result {
-                        case .success: break
-                        case .failure(let error):
-                            Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
-                        }
-                    }
+                    try await fileManager.saveOnBeamObjectAPI(file, force: true)
                 } catch {
                     Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
                 }
+                saving = false
             }
         }, label: {
             Text("Save").frame(minWidth: 100)

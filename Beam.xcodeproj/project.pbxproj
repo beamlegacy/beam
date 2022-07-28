@@ -54,6 +54,7 @@
 		0521EB24282BFC9800A922CE /* delete_account.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0521EB23282BFC9800A922CE /* delete_account.graphql */; };
 		0524FFF2286EC11600B0BEF8 /* BeamAccount+SynchronisationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0524FFF1286EC11600B0BEF8 /* BeamAccount+SynchronisationTest.swift */; };
 		054F14A02864665E0069B159 /* BeamAccount+Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 054F149F2864665E0069B159 /* BeamAccount+Merge.swift */; };
+		0553079D28902A0A0037BECE /* NSAlert+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0553079C28902A0A0037BECE /* NSAlert+async.swift */; };
 		055A96B1284DD6DB008982A2 /* BeamAccount+RemoteServer+DeleteAccountTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 055A96B0284DD6DB008982A2 /* BeamAccount+RemoteServer+DeleteAccountTest.swift */; };
 		0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0564B1B127D20BAE00B74BBD /* update_password.graphql */; };
 		0564F51327E8BC6600F969CA /* JJLISO8601DateFormatter in Frameworks */ = {isa = PBXBuildFile; productRef = 0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */; };
@@ -356,10 +357,8 @@
 		520088B82613265900AED835 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088B72613265900AED835 /* Database.swift */; };
 		520088BC2613266600AED835 /* Database+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088BB2613266600AED835 /* Database+CoreDataProperties.swift */; };
 		52019A5626DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */; };
-		52019A6326DE2CC9005E8278 /* BeamObjectManager+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */; };
 		52019A6526DE2ECD005E8278 /* BeamObjectManager+Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6426DE2ECD005E8278 /* BeamObjectManager+Tests.swift */; };
 		52019A6726DE2F65005E8278 /* BeamObjectManager+Websockets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A6626DE2F65005E8278 /* BeamObjectManager+Websockets.swift */; };
-		52019A7926DE49C3005E8278 /* BeamObjectManagerProtocol+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52019A7826DE49C2005E8278 /* BeamObjectManagerProtocol+Foundation.swift */; };
 		520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 520BC40026D7B02200A82966 /* subscription_beam_objects_updated.graphql */; };
 		520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 520BC40D26D7B05F00A82966 /* subscription_beam_object_updated.graphql */; };
 		521351D027737303001922FD /* Array+Chunked.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521351CF27737303001922FD /* Array+Chunked.swift */; };
@@ -391,7 +390,7 @@
 		5232182227CE340800B753EF /* APIRequest+REST+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5232182127CE340800B753EF /* APIRequest+REST+Foundation.swift */; };
 		5232182B27CE4E5600B753EF /* BeamObjectRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5232182A27CE4E5600B753EF /* BeamObjectRequestTests.swift */; };
 		523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523416A12629D465001F306F /* BeamCoreDataObject.swift */; };
-		5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5E826F89AE700B08F69 /* UserSessionRequest+Foundation.swift */; };
+		5241E5E926F89AE700B08F69 /* UserSessionRequest+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5E826F89AE700B08F69 /* UserSessionRequest+async.swift */; };
 		5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5241E5F326F89C5000B08F69 /* refresh_token.graphql */; };
 		5242279A275524C900457345 /* BeamObjectChecksum+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52422799275524C900457345 /* BeamObjectChecksum+CoreData.swift */; };
 		524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */; };
@@ -1118,7 +1117,7 @@
 		A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */; };
 		A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */ = {isa = PBXBuildFile; fileRef = A54A452927677F9A00B9AE1B /* set_username.graphql */; };
-		A54A45312767970E00B9AE1B /* UserInfoRequest+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A45302767970E00B9AE1B /* UserInfoRequest+Foundation.swift */; };
+		A54A45312767970E00B9AE1B /* UserInfoRequest+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A45302767970E00B9AE1B /* UserInfoRequest+async.swift */; };
 		A54A45372767983900B9AE1B /* UserInfoRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A45362767983900B9AE1B /* UserInfoRequestTests.swift */; };
 		A54A45422768A72400B9AE1B /* ImportsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A45412768A72400B9AE1B /* ImportsManager.swift */; };
 		A54E75F3283BC657002B9254 /* TabGroupingColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54E75F2283BC657002B9254 /* TabGroupingColor.swift */; };
@@ -1701,6 +1700,7 @@
 		0521EB23282BFC9800A922CE /* delete_account.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_account.graphql; sourceTree = "<group>"; };
 		0524FFF1286EC11600B0BEF8 /* BeamAccount+SynchronisationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamAccount+SynchronisationTest.swift"; sourceTree = "<group>"; };
 		054F149F2864665E0069B159 /* BeamAccount+Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamAccount+Merge.swift"; sourceTree = "<group>"; };
+		0553079C28902A0A0037BECE /* NSAlert+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAlert+async.swift"; sourceTree = "<group>"; };
 		055A96B0284DD6DB008982A2 /* BeamAccount+RemoteServer+DeleteAccountTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BeamAccount+RemoteServer+DeleteAccountTest.swift"; sourceTree = "<group>"; };
 		0564B1B127D20BAE00B74BBD /* update_password.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_password.graphql; sourceTree = "<group>"; };
 		056F9BD327F3701600302709 /* paginated_beam_objects_with_import_error.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_with_import_error.graphql; sourceTree = "<group>"; };
@@ -2009,10 +2009,8 @@
 		520088B72613265900AED835 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		520088BB2613266600AED835 /* Database+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectRequest+Foundation.swift"; sourceTree = "<group>"; };
-		52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManager+Foundation.swift"; sourceTree = "<group>"; };
 		52019A6426DE2ECD005E8278 /* BeamObjectManager+Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManager+Tests.swift"; sourceTree = "<group>"; };
 		52019A6626DE2F65005E8278 /* BeamObjectManager+Websockets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManager+Websockets.swift"; sourceTree = "<group>"; };
-		52019A7826DE49C2005E8278 /* BeamObjectManagerProtocol+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManagerProtocol+Foundation.swift"; sourceTree = "<group>"; };
 		520BC40026D7B02200A82966 /* subscription_beam_objects_updated.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_beam_objects_updated.graphql; sourceTree = "<group>"; };
 		520BC40D26D7B05F00A82966 /* subscription_beam_object_updated.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = subscription_beam_object_updated.graphql; sourceTree = "<group>"; };
 		521351CF27737303001922FD /* Array+Chunked.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Chunked.swift"; sourceTree = "<group>"; };
@@ -2047,7 +2045,7 @@
 		523416A12629D465001F306F /* BeamCoreDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCoreDataObject.swift; sourceTree = "<group>"; };
 		523FF66025C31D8800B4BD6E /* Data+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+String.swift"; sourceTree = "<group>"; };
 		523FF67825C31D9D00B4BD6E /* String+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Data.swift"; sourceTree = "<group>"; };
-		5241E5E826F89AE700B08F69 /* UserSessionRequest+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserSessionRequest+Foundation.swift"; sourceTree = "<group>"; };
+		5241E5E826F89AE700B08F69 /* UserSessionRequest+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserSessionRequest+async.swift"; sourceTree = "<group>"; };
 		5241E5F326F89C5000B08F69 /* refresh_token.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = refresh_token.graphql; sourceTree = "<group>"; };
 		524227932755217B00457345 /* Beam9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam9.xcdatamodel; sourceTree = "<group>"; };
 		52422799275524C900457345 /* BeamObjectChecksum+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectChecksum+CoreData.swift"; sourceTree = "<group>"; };
@@ -3060,7 +3058,7 @@
 		A545D30525F7D93B00E68F94 /* MathsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathsTests.swift; sourceTree = "<group>"; };
 		A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowBottomToolBar.swift; sourceTree = "<group>"; };
 		A54A452927677F9A00B9AE1B /* set_username.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = set_username.graphql; sourceTree = "<group>"; };
-		A54A45302767970E00B9AE1B /* UserInfoRequest+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserInfoRequest+Foundation.swift"; sourceTree = "<group>"; };
+		A54A45302767970E00B9AE1B /* UserInfoRequest+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserInfoRequest+async.swift"; sourceTree = "<group>"; };
 		A54A45362767983900B9AE1B /* UserInfoRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoRequestTests.swift; sourceTree = "<group>"; };
 		A54A45412768A72400B9AE1B /* ImportsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportsManager.swift; sourceTree = "<group>"; };
 		A54E75F2283BC657002B9254 /* TabGroupingColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingColor.swift; sourceTree = "<group>"; };
@@ -4108,9 +4106,9 @@
 				418171622581107C00317ED8 /* APIResponse.swift */,
 				52F4E4AD264182E00067B017 /* IdentityRequest.swift */,
 				418171632581107C00317ED8 /* UserSessionRequest.swift */,
-				5241E5E826F89AE700B08F69 /* UserSessionRequest+Foundation.swift */,
+				5241E5E826F89AE700B08F69 /* UserSessionRequest+async.swift */,
 				3303E0FB26FA221400E175AC /* UserInfoRequest.swift */,
-				A54A45302767970E00B9AE1B /* UserInfoRequest+Foundation.swift */,
+				A54A45302767970E00B9AE1B /* UserInfoRequest+async.swift */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -4348,6 +4346,7 @@
 				66D77CA028351612004D03E9 /* NSMenu+Beam.swift */,
 				6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */,
 				6635D99E2853E8AD00F4B775 /* Result+Beam.swift */,
+				0553079C28902A0A0037BECE /* NSAlert+async.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -4769,13 +4768,11 @@
 			isa = PBXGroup;
 			children = (
 				5224CD8B26860C0900D4179E /* BeamObjectManager.swift */,
-				52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */,
 				05ED7D30281AD39A00F5316A /* BeamObjectManager+async.swift */,
 				52019A6426DE2ECD005E8278 /* BeamObjectManager+Tests.swift */,
 				52019A6626DE2F65005E8278 /* BeamObjectManager+Websockets.swift */,
 				522BC3F426A872740018B51E /* BeamObjectManagerError.swift */,
 				522BC3E726A8724B0018B51E /* BeamObjectManagerProtocol.swift */,
-				52019A7826DE49C2005E8278 /* BeamObjectManagerProtocol+Foundation.swift */,
 				05EE43AD281BCC440032292D /* BeamObjectManagerProtocol+async.swift */,
 				523060A727426D1400A03844 /* BeamObjectManagerCall.swift */,
 				BF2388592876D5F800955F74 /* S3Transfer.swift */,
@@ -8957,6 +8954,7 @@
 				A5B71852274B92E70010FE8E /* Omnibox.swift in Sources */,
 				A52393AA26541A18008D4C85 /* ModeView.swift in Sources */,
 				A552DF2925F0E22B00570C85 /* DestinationNotePickerBackground.swift in Sources */,
+				0553079D28902A0A0037BECE /* NSAlert+async.swift in Sources */,
 				37F5DC1327F29A02003D91DC /* EmbedLoadingImageView.swift in Sources */,
 				A0A84FF1263835D3008F0326 /* PasswordsTableView.swift in Sources */,
 				417628A525B05DFB0082FFDF /* NSBezierPath+CGPath.swift in Sources */,
@@ -9097,7 +9095,6 @@
 				337F31B928358770002854BC /* SidebarFooterView.swift in Sources */,
 				37520B0927EAA40000A1C20B /* MediaContentGeometryDescription.swift in Sources */,
 				524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */,
-				52019A6326DE2CC9005E8278 /* BeamObjectManager+Foundation.swift in Sources */,
 				8A34EAE327C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift in Sources */,
 				75F5909226F3972F001D5D19 /* ErrorPageView.swift in Sources */,
 				33353EE026F374B400063078 /* SectionFeaturesView.swift in Sources */,
@@ -9130,7 +9127,7 @@
 				37DB5A0B27BB514400534760 /* EmbedAnimator.swift in Sources */,
 				3312203428097382006A5EA1 /* UpdatePanel.swift in Sources */,
 				3318B42A28528101002ACA34 /* EditorTabGroupView.swift in Sources */,
-				5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */,
+				5241E5E926F89AE700B08F69 /* UserSessionRequest+async.swift in Sources */,
 				A0CB5AEA268B231400D1EF02 /* NotesPreferencesView.swift in Sources */,
 				873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */,
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
@@ -9288,7 +9285,7 @@
 				418171F02581107C00317ED8 /* APIResponse.swift in Sources */,
 				418172262581107C00317ED8 /* NSRange+Beam.swift in Sources */,
 				A5F1DC30280EF6B0006C7FB8 /* TabsExternalDraggingSource.swift in Sources */,
-				A54A45312767970E00B9AE1B /* UserInfoRequest+Foundation.swift in Sources */,
+				A54A45312767970E00B9AE1B /* UserInfoRequest+async.swift in Sources */,
 				96EBCE0A262A01160014D923 /* ExportAllBrowsingSessions.swift in Sources */,
 				87CF1CB828211DE800FB0530 /* OtherCreditCardsModal.swift in Sources */,
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
@@ -9669,7 +9666,6 @@
 				334559B02800729200B4BF57 /* OmniboxIncognitoExplanation.swift in Sources */,
 				3355997626CBE0AE00F52C23 /* SearchViewModel.swift in Sources */,
 				BAA67DDD4452566DFF99171E /* WebAutofillController.swift in Sources */,
-				52019A7926DE49C3005E8278 /* BeamObjectManagerProtocol+Foundation.swift in Sources */,
 				A52596EB273EB8FB004B27E4 /* OnboardingManager.swift in Sources */,
 				960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */,
 				37DB5A0F27BB514400534760 /* EmbedLoadingView.swift in Sources */,

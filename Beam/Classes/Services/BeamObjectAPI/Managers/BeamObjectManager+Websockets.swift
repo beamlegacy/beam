@@ -3,30 +3,30 @@ import BeamCore
 
 extension BeamObjectManager {
     // swiftlint:disable function_body_length
-    /// `handler` might be called multiple times in case of reconnection
-    func liveSync(_ handler: @escaping (Bool) -> Void) {
+    /// `handler` might be called multiple times in case of reconnection, first arg is true if the handler has never been called before
+    func liveSync(_ firstCall: Bool = true, _ handler: @escaping (Bool, Bool) -> Void) {
         guard Configuration.env != .test else {
             Logger.shared.logDebug("websocket is disabled during tests", category: .webSocket)
-            handler(false)
+            handler(firstCall, false)
             return
         }
 
         guard AuthenticationManager.shared.isAuthenticated else {
             Logger.shared.logDebug("websocket is disabled because the user isn't authenticated", category: .webSocket)
-            handler(false)
+            handler(firstCall, false)
             return
         }
 
         guard Configuration.websocketEnabled else {
             Logger.shared.logDebug("settings disabled websocket", category: .webSocket)
-            handler(false)
+            handler(firstCall, false)
             return
         }
 
         webSocketRequest = APIWebSocketRequest()
 
         guard let webSocketRequest = webSocketRequest else {
-            handler(false)
+            handler(firstCall, false)
             return
         }
 
@@ -49,7 +49,7 @@ extension BeamObjectManager {
                 }
 
                 DispatchQueue.main.async {
-                    handler(true)
+                    handler(firstCall, true)
                 }
             }, onDisconnect: {
                 webSocketRequest.disconnectHandler = nil
@@ -68,11 +68,11 @@ extension BeamObjectManager {
                 Logger.shared.logWarning("Websocket disconnected, sleeping \(self.websocketRetryDelay)sec then retrying",
                                          category: .beamObjectNetwork)
                 DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .seconds(self.websocketRetryDelay))) { [weak self] in
-                    self?.liveSync(handler)
+                    self?.liveSync(false, handler)
                 }
             })
         } catch {
-            handler(false)
+            handler(firstCall, false)
             Logger.shared.logError("Catched error: \(error.localizedDescription)", category: .webSocket)
         }
     }
