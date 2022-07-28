@@ -168,6 +168,7 @@
         "TabGroupCloseTests",
         "TabGroupNameTests",
         "TabGroupNewTabTests",
+        "TabGroupOpenNewWindowTests",
         "TabGroupUngroupTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",

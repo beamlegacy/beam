@@ -15,8 +15,6 @@ class InsideAdsBlockerTests: BaseTest {
     let adLinkText = "Featured Deals made easy all year long. Free shipping. Best prices. Get your thing Get your thing"
     let view = "AdBlock"
 
-    var app = XCUIApplication()
-
     override func setUpWithError() throws {
         app = launchApp().app
         uiMenu.destroyDB()

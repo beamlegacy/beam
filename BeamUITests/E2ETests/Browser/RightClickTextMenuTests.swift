@@ -9,7 +9,6 @@ import Foundation
 import XCTest
 
 class RightClickTextMenuTests: BaseTest {
-    var app = XCUIApplication()
     let rightClickMenuTestView = RightClickMenuTestView()
     let omniboxTestView = OmniBoxTestView()
     

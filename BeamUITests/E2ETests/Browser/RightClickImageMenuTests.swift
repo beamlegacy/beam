@@ -16,7 +16,6 @@ class RightClickImageMenuTests: BaseTest {
     let rightClickMenuTestView = RightClickMenuTestView()
     let omniboxTestView = OmniBoxTestView()
     
-    var app = XCUIApplication()
     private var helper: BeamUITestsHelper!
 
     override func setUp() {
@@ -84,7 +83,7 @@ class RightClickImageMenuTests: BaseTest {
         }
         
         step("Then image is correctly opened in a new window") {
-            XCTAssertEqual(webView.getNumberOfWindows(), 2)
+            XCTAssertEqual(getNumberOfWindows(), 2)
         }
     }
     
