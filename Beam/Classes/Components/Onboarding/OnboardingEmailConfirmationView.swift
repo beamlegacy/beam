@@ -143,9 +143,11 @@ struct OnboardingEmailConfirmationView: View {
                             handleSyncCompletion(startTime: loadingStartTime)
                             return
                         }
-                        // This is a failsafe but we should never end-up in such a case
-                        UserAlert.showMessage(message: "Private Key Error", informativeText: "The private key was unable to be created.", buttonTitle: "Restart Beam") {
-                            NSApp.relaunch()
+                        DispatchQueue.main.async {
+                            // This is a failsafe but we should never end-up in such a case
+                            UserAlert.showMessage(message: "Private Key Error", informativeText: "The private key was unable to be created.", buttonTitle: "Restart Beam") {
+                                NSApp.relaunch()
+                            }
                         }
                     }
                 }
