@@ -35,6 +35,8 @@ struct EditorTabGroupsContainerView: View {
                                        hoveredGroupColor: $hoveredTabGroupColor)
                 }.zIndex(0)
             }
+            .accessibilityValue( "Tab Groups container with \(tabGroups.count)")
+            .accessibility(identifier: "TabGroupsContainerView")
             .overlay(previewOverlay(for: hoveredTab, localProxy: proxy.frame(in: .global)), alignment: .top)
         }
     }
