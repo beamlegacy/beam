@@ -23,7 +23,7 @@
 <body onload="updateDisplayedURL()">
 <h1>Navigatable Page</h1>
 
-<p>Current url: <span id="current""></span></p>
+<p>Current url: <span id="current"></span></p>
 
 <ul>
 <li><a href="http://lvh.me:{{ params.port }}">Back to Root</a></li>
