@@ -493,6 +493,7 @@
 		6635D9852853E73A00F4B775 /* ContextMenu_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 6635D9612853E73A00F4B775 /* ContextMenu_prod.js */; };
 		6635D99F2853E8AD00F4B775 /* NSWorkspace+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */; };
 		6635D9A02853E8AD00F4B775 /* Result+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99E2853E8AD00F4B775 /* Result+Beam.swift */; };
+		6650C7C22892C22700F3757B /* UniformTypeIdentifiers+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6650C7BC2892C22700F3757B /* UniformTypeIdentifiers+Beam.swift */; };
 		66A815C22876D1A3005A8499 /* ContentViewMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */; };
 		66D77CA128351612004D03E9 /* NSMenu+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D77CA028351612004D03E9 /* NSMenu+Beam.swift */; };
 		66E618E928635B5100D06A15 /* WebKitManualDownloadProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */; };
@@ -2172,6 +2173,7 @@
 		6635D97D2853E73A00F4B775 /* ContextMenu.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = ContextMenu.css; sourceTree = "<group>"; };
 		6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSWorkspace+Beam.swift"; sourceTree = "<group>"; };
 		6635D99E2853E8AD00F4B775 /* Result+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Result+Beam.swift"; sourceTree = "<group>"; };
+		6650C7BC2892C22700F3757B /* UniformTypeIdentifiers+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UniformTypeIdentifiers+Beam.swift"; sourceTree = "<group>"; };
 		66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewMenuItem.swift; sourceTree = "<group>"; };
 		66D77CA028351612004D03E9 /* NSMenu+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMenu+Beam.swift"; sourceTree = "<group>"; };
 		66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebKitManualDownloadProxy.swift; sourceTree = "<group>"; };
@@ -4349,6 +4351,7 @@
 				6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */,
 				6635D99E2853E8AD00F4B775 /* Result+Beam.swift */,
 				0553079C28902A0A0037BECE /* NSAlert+async.swift */,
+				6650C7BC2892C22700F3757B /* UniformTypeIdentifiers+Beam.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -9493,6 +9496,7 @@
 				52B9A370264546570063AEEF /* MinimalistWebViewWindow.swift in Sources */,
 				8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */,
 				418172072581107C00317ED8 /* Document.swift in Sources */,
+				6650C7C22892C22700F3757B /* UniformTypeIdentifiers+Beam.swift in Sources */,
 				33551D3E27FE2B0E00598164 /* CookiesManager.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */,
 				A51C4C262771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift in Sources */,
