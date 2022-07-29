@@ -67,11 +67,9 @@
         "BeamAccountSynchronisationTest",
         "BeamLinkDBTests\/testMoveFrecencyToLinkDB()",
         "BrowserImportManagerTest\/testSpeed()",
-        "BrowsingTreeTriggerTests",
         "DailyUrlStorageTest\/testGetRepeatingUrlsSpeed()",
         "DocumentManagerReceiveObjectTests",
-        "OLD_BeamNote_DocumentManagerTests",
-        "OmniboxAnalyticsTests"
+        "OLD_BeamNote_DocumentManagerTests"
       ],
       "target" : {
         "containerPath" : "container:Beam.xcodeproj",

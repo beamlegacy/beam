@@ -15,6 +15,7 @@ class OmniboxAnalyticsTests: XCTestCase {
     var analyticsBackend: InMemoryAnalyticsBackend!
 
     override func setUpWithError() throws {
+        AppDelegate.main.deleteAllLocalData()
         BeamObjectManager.disableSendingObjects = true
         state = BeamState()
         state.data = BeamData()
@@ -25,7 +26,7 @@ class OmniboxAnalyticsTests: XCTestCase {
     override func tearDownWithError() throws {
         analyticsBackend.events = []
         state.data.analyticsCollector.removeBackend(type: .inMemory)
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
+        AppDelegate.main.deleteAllLocalData()
     }
 
     func testAbortedQuery() throws {
