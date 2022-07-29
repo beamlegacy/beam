@@ -220,7 +220,6 @@ extension BeamTextEdit {
     }
 
     private func paste(beamTextHolder: BeamTextHolder, fromRawPaste: Bool = false) {
-
         let bText = beamTextHolder.bText.resolvedNotesNames() ?? beamTextHolder.bText
         if fromRawPaste {
             rootNode?.insertText(string: beamTextHolder.bText.text, replacementRange: nil)
@@ -446,12 +445,9 @@ extension BeamTextEdit {
 extension BeamTextEdit: NSMenuItemValidation {
     public func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         guard menuItem.action == #selector(Self.pasteAsPlainText(_:)) else { return true }
-        guard let objects = NSPasteboard.general.readObjects(forClasses: supportedPasteAsPlainTextObjects), !objects.isEmpty else {
+        guard let objects = NSPasteboard.general.readObjects(forClasses: supportedPasteAsPlainTextObjects) else {
             return false
         }
-        if let attrString = objects.first as? NSAttributedString, attrString.containsAttachments {
-            return false
-        }
-        return true
+        return !objects.isEmpty
     }
 }
