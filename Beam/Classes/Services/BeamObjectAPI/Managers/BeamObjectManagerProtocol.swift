@@ -62,11 +62,13 @@ extension BeamObjectManagerDelegate {
         // Note: we want to be able to "force" a certain type during tests
         #if DEBUG
         if EnvironmentVariables.env == "test" {
-            return BeamObjectManager.uploadTypeForTests
+            if let uploadTypeForTests = BeamObjectManager.uploadTypeForTests {
+                return uploadTypeForTests
+            }
         }
         #endif
 
-        return .multipartUpload
+        return Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
 
     func registerOnBeamObjectManager() {
