@@ -64,6 +64,7 @@
 		057E9FCA28408C8800FEF477 /* RestAPIserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 057E9FC928408C8800FEF477 /* RestAPIserverTests.swift */; };
 		05874022287F0D93007DBA40 /* BeamAccount+InitialStateTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0587401C287F0D93007DBA40 /* BeamAccount+InitialStateTest.swift */; };
 		05A3D59E27DF970A004CC7F1 /* account_exists.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05A3D59D27DF970A004CC7F1 /* account_exists.graphql */; };
+		05BB73332893CD6F008C12E8 /* BeamObjectManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BB73322893CD6F008C12E8 /* BeamObjectManagerTests.swift */; };
 		05BE537127F2F9AD00399DA7 /* paginated_beam_objects_with_import_missing.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05BE536527F2D4F500399DA7 /* paginated_beam_objects_with_import_missing.graphql */; };
 		05C105C527EDE5FA007226CA /* paginated_beam_objects_data_url.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05C105C427EDE5FA007226CA /* paginated_beam_objects_data_url.graphql */; };
 		05C105C727EDEFC9007226CA /* paginated_beam_object_checksums.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05C105C627EDEFC9007226CA /* paginated_beam_object_checksums.graphql */; };
@@ -1711,6 +1712,7 @@
 		057E9FC928408C8800FEF477 /* RestAPIserverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestAPIserverTests.swift; sourceTree = "<group>"; };
 		0587401C287F0D93007DBA40 /* BeamAccount+InitialStateTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamAccount+InitialStateTest.swift"; sourceTree = "<group>"; };
 		05A3D59D27DF970A004CC7F1 /* account_exists.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = account_exists.graphql; sourceTree = "<group>"; };
+		05BB73322893CD6F008C12E8 /* BeamObjectManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManagerTests.swift; sourceTree = "<group>"; };
 		05BE536527F2D4F500399DA7 /* paginated_beam_objects_with_import_missing.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_with_import_missing.graphql; sourceTree = "<group>"; };
 		05C105C427EDE5FA007226CA /* paginated_beam_objects_data_url.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_data_url.graphql; sourceTree = "<group>"; };
 		05C105C627EDEFC9007226CA /* paginated_beam_object_checksums.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_object_checksums.graphql; sourceTree = "<group>"; };
@@ -4905,6 +4907,7 @@
 				963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */,
 				DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */,
 				4E9F4C8226F8C75D00420DED /* ClusteringManagerTests.swift */,
+				05BB73322893CD6F008C12E8 /* BeamObjectManagerTests.swift */,
 				527524E026A1909200C2F385 /* BeamObjectManagerNetworkTests.swift */,
 				52A7DE2726AECFAC003E770E /* MyRemoteObject.swift */,
 				52A7DE3126AECFC6003E770E /* MyRemoteObjectManager.swift */,
@@ -9857,6 +9860,7 @@
 				8AD2632326F485190074D673 /* HtmlVisitorTests.swift in Sources */,
 				A5EA892826A9C08100AB5A16 /* CalendarPickerViewModelTests.swift in Sources */,
 				96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */,
+				05BB73332893CD6F008C12E8 /* BeamObjectManagerTests.swift in Sources */,
 				877888DB269C977C00D703F0 /* PasswordImporterTest.swift in Sources */,
 				055A96B1284DD6DB008982A2 /* BeamAccount+RemoteServer+DeleteAccountTest.swift in Sources */,
 				37B85B9127A2C83B003871F9 /* DownloadArtifactTests.swift in Sources */,
