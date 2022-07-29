@@ -101,10 +101,10 @@ struct Configuration {
             }
         }
     }
-    // FIXME: https://linear.app/beamapp/issue/BE-4918/directuploadniodefault-default-value-should-not-differ-for-test
-    static private(set) var directUploadNIODefault = false || Configuration.env == .test // Configuration.branchType == .develop
-    // Warning: this is upload AND download as of now
+
+    static private(set) var directUploadNIODefault =  Configuration.branchType == .develop
     static private var directUploadNIOKey = "directUploadNIO"
+    // This is UPLOAD AND DOWNLOAD
     static var directUploadNIO: Bool {
         get {
             if UserDefaults.standard.object(forKey: directUploadNIOKey) != nil {
@@ -119,9 +119,8 @@ struct Configuration {
             }
         }
     }
-    // FIXME: https://linear.app/beamapp/issue/BE-4918/directuploadniodefault-default-value-should-not-differ-for-test
-    static private(set) var directUploadAllObjectsDefault = false || Configuration.env == .test // Configuration.branchType == .develop
 
+    static private(set) var directUploadAllObjectsDefault = Configuration.branchType == .develop
     static private var directUploadAllObjectsKey = "directUploadAllObjects"
     static var directUploadAllObjects: Bool {
         get {
