@@ -578,6 +578,7 @@ extension TabsListView {
 
     private func onFileDrop(at index: Int, url: URL) {
         guard index < sections.allItems.count, let tab = sections.allItems[index].tab else { return }
+        guard BeamUniformTypeIdentifiers.supportsNavigation(toLocalFileURL: url) else { return }
         tab.state?.navigateTab(tab, toURLRequest: .init(url: url))
     }
 
