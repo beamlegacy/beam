@@ -66,7 +66,7 @@ class BeamObjectManager {
     static var managerOrder: [BeamObjectObjectType] = []
     static var managerInstances: [BeamObjectObjectType: BeamObjectManagerDelegateProtocol] = [:]
     static var translators: [BeamObjectObjectType: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
-    static var uploadTypeForTests: BeamObjectRequestUploadType = .multipartUpload
+    static var uploadTypeForTests: BeamObjectRequestUploadType?
     internal static var disableSendingObjects = true
     internal static var fullSyncRunning = ManagedAtomic<Bool>(false)
 
