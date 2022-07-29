@@ -12,19 +12,6 @@ import Nimble
 
 class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-
-        BeamObjectManager.disableSendingObjects = true
-        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
-    }
-
-    override func tearDownWithError() throws {
-        try super.tearDownWithError()
-        
-        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
-    }
-
     func testNavigation() throws {
         let url0 = "http://localhost:\(Configuration.MockHttpServer.port)/"
 
