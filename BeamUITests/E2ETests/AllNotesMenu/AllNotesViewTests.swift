@@ -114,7 +114,7 @@ class AllNotesViewTests: BaseTest {
         }
         
         step ("THEN URL icon appears for the first note") {
-            XCTAssertTrue(allNotesView.getURLiconElementFor(rowIndex: rowIndex).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(allNotesView.getURLiconElementFor(rowIndex: rowIndex).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
         }
         
         step ("THEN Link copied icon appears on the icon click") {
