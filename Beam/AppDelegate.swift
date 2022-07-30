@@ -228,26 +228,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Database
     @MainActor
     func syncDataWithBeamObject(force: Bool = false,
-                                showAlert: Bool = true) async throws -> Bool {
+                                showAlert: Bool = true,
+                                _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) async throws -> Bool {
         guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
+            completionHandler?(.success(false))
             return false
         }
 
         guard isSynchronizationRunning == false else {
             Logger.shared.logDebug("syncTask already running", category: .beamObjectNetwork)
+            completionHandler?(.success(false))
             return false
         }
         isSynchronizationRunning = true
         synchronizationIsRunningDidUpdate()
 
-        synchronizationTask = launchSynchronizationTask(force, showAlert)
+        synchronizationTask = launchSynchronizationTask(force, showAlert, completionHandler)
 
         return true
     }
 
-    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool) -> Task<Void, Error> {
+    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool, _ completionHandler: ((Result<Bool, Error>) -> Void)?) -> Task<Void, Error> {
         Task {
             defer {
                 self.synchronizationTaskDidStop()
@@ -256,6 +259,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // swiftlint:disable:next date_init
             let localTimer = Date()
             guard let currentAccount = data.currentAccount else {
+                completionHandler?(.success(false))
                 return
             }
             let initialDBs = Set(currentAccount.allDatabases)
@@ -269,12 +273,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
                                       category: .sync,
                                       localTimer: localTimer)
+                completionHandler?(.failure(error))
                 return
             }
 
             Logger.shared.logInfo("syncAllFromAPI called",
                                   category: .sync,
                                   localTimer: localTimer)
+            completionHandler?(.success(true))
         }
     }
 
