@@ -410,14 +410,19 @@ extension BeamAccount {
                     Task { @MainActor in
                         do {
                             _ = try await AppDelegate.main.getUserInfosAsync()
-                            _ = try await AppDelegate.main.syncDataWithBeamObject()
                         } catch {
-                            Logger.shared.logInfo("Could not get info or launch syncData: \(error)", category: .accountManager)
-                            return
+                            Logger.shared.logInfo("Could not get user information: \(error)", category: .accountManager)
                         }
 
-                        guard firstCall == true else { return }
-                        syncCompletion?(.success(true))
+                        do {
+                            _ = try await AppDelegate.main.syncDataWithBeamObject { _ in
+                                guard firstCall == true else { return }
+                                syncCompletion?(.success(true))
+                            }
+                        } catch {
+                            Logger.shared.logInfo("Could not launch sync data: \(error)", category: .accountManager)
+                            syncCompletion?(.failure(error))
+                        }
                     }
                 }
             } else {
