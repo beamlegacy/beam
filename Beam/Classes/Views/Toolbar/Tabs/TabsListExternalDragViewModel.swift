@@ -89,6 +89,7 @@ class TabsListExternalDragViewModel: ObservableObject {
 
 extension TabsListExternalDragViewModel: TabExternalDraggingSourceDelegate {
     func tabExternalDragSessionEnded() {
+        isDroppingAnExternalTab = false
         isDraggingTabOutside = false
     }
 }
