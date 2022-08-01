@@ -14,6 +14,7 @@ enum TabGroupMenuViewLocators {
         case tabGroupCapsuleName = "TabGroupNameStaticText"
         case tabGroupColor = "TabGroupColorPicker"
         case tabGroupNewTab = "New Tab in Group"
+        case tabGroupCapture = "Capture Group to a Note…"
         case tabGroupMoveNewWindow = "Move Group in New Window"
         case tabGroupCollapse = "Collapse Group"
         case tabGroupExpand = "Expand Group"
