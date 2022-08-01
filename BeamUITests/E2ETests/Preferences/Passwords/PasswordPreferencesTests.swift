@@ -278,6 +278,7 @@ class PasswordPreferencesTests: BaseTest {
     }
     
     func testAutofillUsernameAndPasswords() throws {
+        try XCTSkipIf(true, "Skipped due to BE-4951")
         // Test deactivated on Test Plan because we don't have an easy way to restore preferences settings after this test
         // Especially in case of failure at the middle of the test
         
