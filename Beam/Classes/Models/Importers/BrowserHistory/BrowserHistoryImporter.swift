@@ -42,7 +42,7 @@ extension BrowserHistoryImporter {
         guard let provider = try historyDatabaseURL() else {
             throw BrowserHistoryImporterError.noDatabaseURL
         }
-        DispatchQueue.global().async {
+        DispatchQueue.database.async {
             do {
                 try withExtendedLifetime(provider) {
                     try importHistory(from: provider.wrappedURL, startDate: startDate, importCountCallback: importCountCallback)

@@ -19,7 +19,7 @@ public class SuggestedNoteSourceUpdater {
     var oldAllSources = UpdateSources()
     // TODO: When uploading active sources from database, make sure to initialise  the updater with it
     private var sessionId: UUID
-    private let myQueue = DispatchQueue(label: "sourceSuggestionQueue")
+    private let myQueue = DispatchQueue(label: "sourceSuggestionQueue", target: .database)
     let frecencyFetcher = GRDBUrlFrecencyStorage()
     let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
 

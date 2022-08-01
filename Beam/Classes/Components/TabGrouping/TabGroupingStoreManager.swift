@@ -11,6 +11,7 @@ import GRDB
 
 class TabGroupingStoreManager: GRDBHandler, BeamManager {
     var changedObjects: [UUID: TabGroupBeamObject] = [:]
+    let objectQueue = BeamObjectQueue<TabGroupBeamObject>()
 
     static var id = UUID()
     static var name = "TabGroupingStoreManager"
@@ -175,7 +176,6 @@ extension TabGroupingStoreManager: BeamObjectManagerDelegate {
     static var uploadType: BeamObjectRequestUploadType {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
-    internal static var backgroundQueue = DispatchQueue(label: "TabGroupingStoreManager BeamObjectManager backgroundQueue", qos: .userInitiated)
     func willSaveAllOnBeamObjectApi() {}
 
     func manageConflict(_ object: TabGroupBeamObject, _ remoteObject: TabGroupBeamObject) throws -> TabGroupBeamObject {

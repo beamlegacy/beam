@@ -15,7 +15,7 @@ import BeamCore
  */
 class WebIndexingController {
 
-    private var indexingQueue = DispatchQueue(label: "WebIndexing", qos: .userInitiated)
+    private let indexingQueue = DispatchQueue(label: "WebIndexing", target: .userInitiated)
     private var clusteringManager: ClusteringManagerProtocol
     private weak var previousTabBrowsingTree: BrowsingTree?
     private let signpost = SignPost("WebIndexingController")
