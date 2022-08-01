@@ -2972,6 +2972,7 @@
 		A3D2BB2D2812F1BD00CCCE40 /* BeamUITests-Thread7.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread7.xctestplan"; sourceTree = "<group>"; };
 		A3D421312837B0F0002DB9A4 /* UITests-SVG.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "UITests-SVG.html"; sourceTree = "<group>"; };
 		A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewTests.swift; sourceTree = "<group>"; };
+		A3DC379F2895AB6300DA3C7C /* BeamUITests-Thread8.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread8.xctestplan"; sourceTree = "<group>"; };
 		A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupTestView.swift; sourceTree = "<group>"; };
 		A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupViewLocators.swift; sourceTree = "<group>"; };
 		A3E7B4BA27AC1A0C0074C9BB /* MockHTTPWebPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockHTTPWebPages.swift; sourceTree = "<group>"; };
@@ -7917,6 +7918,7 @@
 				D7472EAA27E0940300F629EF /* BeamUITests-Thread5.xctestplan */,
 				D77A5153280FC3110045F603 /* BeamUITests-Thread6.xctestplan */,
 				A3D2BB2D2812F1BD00CCCE40 /* BeamUITests-Thread7.xctestplan */,
+				A3DC379F2895AB6300DA3C7C /* BeamUITests-Thread8.xctestplan */,
 			);
 			path = BeamTestPlans;
 			sourceTree = "<group>";
