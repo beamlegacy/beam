@@ -81,6 +81,9 @@
             reference = "container:BeamTestPlans/BeamUITests-Thread7.xctestplan">
          </TestPlanReference>
          <TestPlanReference
+            reference = "container:BeamTestPlans/BeamUITests-Thread8.xctestplan">
+         </TestPlanReference>
+         <TestPlanReference
             reference = "container:BeamTestPlans/Beam All UI Tests.xctestplan">
          </TestPlanReference>
       </TestPlans>

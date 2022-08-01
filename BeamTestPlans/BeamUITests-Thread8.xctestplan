@@ -1,0 +1,97 @@
+{
+  "configurations" : [
+    {
+      "id" : "A699DF3E-CD39-4BA5-A192-58D625748FEF",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "maximumTestExecutionTimeAllowance" : 120,
+    "testRepetitionMode" : "retryOnFailure",
+    "testTimeoutsEnabled" : true,
+    "uiTestingScreenshotsLifetime" : "keepNever",
+    "userAttachmentLifetime" : "keepNever"
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "AccountPreferencesTests",
+        "AdBlockerTests",
+        "AdvancedCreditCardAutocompleteTests",
+        "AdvancedSignInPasswordAutofillTests",
+        "AdvancedSignUpPasswordAutofillTests",
+        "AllNotesDeleteTests",
+        "AllNotesPublishProfileTests",
+        "AllNotesSortingTests",
+        "AllNotesViewTests",
+        "AllowListPreferencesTests",
+        "AppLifecycleTests",
+        "BaseCreditCardTest",
+        "BaseTest",
+        "BlockReferenceTests",
+        "BrowserFancyUrlTests",
+        "BrowserHistoryTests",
+        "BrowserOpenModalTests",
+        "BrowserPinnedTabTests",
+        "BrowserPreferencesTests",
+        "BrowserShortcutsTests",
+        "BrowserStatusBarTests",
+        "BrowserTabViewTests",
+        "BrowserTabsPreferencesTests",
+        "CaptureCopyShareTests",
+        "CookieBannerBlockerTests",
+        "CreditCardAutocompleteTests",
+        "CreditCardSaveTests",
+        "CreditCardsTests",
+        "DailySummaryTests",
+        "DeleteNotesTests",
+        "DownloadsTest",
+        "EditorShortcutsTests",
+        "GeneralPreferencesTests",
+        "GoogleServicesTests",
+        "HelpAndFeedbackTests",
+        "IncognitoModeTests",
+        "InsideAdsBlockerTests",
+        "JavascriptNativeInteractionsTests",
+        "JournalTest",
+        "LinksTests",
+        "LoginTest",
+        "NoteCreationTests",
+        "NoteEditTests",
+        "NoteEditorTests",
+        "NotePinUnpinTests",
+        "NotePublishTests",
+        "NoteViewEmbedsTests",
+        "NoteViewTests",
+        "NotesNavigationHistoryTests",
+        "NotesPreferencesTests",
+        "OmniboxAutocompleteTests",
+        "OmniboxDestinationTests",
+        "OmniboxViewTests",
+        "OnboardingTests",
+        "OneFieldAutofillTests",
+        "PDFFilesBrowserViewTests",
+        "PasswordPreferencesTests",
+        "PnSAddToNoteTests",
+        "ReferencesTests",
+        "ReportBugFeatureTests",
+        "RightClickImageMenuTests",
+        "RightClickLinkMenuTests",
+        "RightClickPageMenuTests",
+        "RightClickTextMenuTests",
+        "SearchOnNoteTests",
+        "SearchOnNoteTests\/testSearchResultsCounter()",
+        "SearchOnNoteTests\/testSearchViewAppearace()"
+      ],
+      "target" : {
+        "containerPath" : "container:Beam.xcodeproj",
+        "identifier" : "965A78472514F149009980D4",
+        "name" : "BeamUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
