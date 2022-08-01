@@ -524,6 +524,7 @@ import Sentry
     }
 
     /// Reloads all tabs which have a `.network` error
+    @MainActor
     func reloadOfflineTabs() {
         for tab in browserTabsManager.tabs where tab.errorPageManager?.error == .network {
             tab.reload()

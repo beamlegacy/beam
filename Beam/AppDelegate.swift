@@ -192,15 +192,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.isNetworkReachable = false
             case .reachable:
                 self?.isNetworkReachable = true
-                Task { [weak self] in
+                Task { @MainActor [weak self] in
                     await self?.checkPrivateKey()
-                    await self?.window?.state.reloadOfflineTabs()
+                    self?.window?.state.reloadOfflineTabs()
                 }
             }
         }.store(in: &cancellableScope)
     }
 
     // MARK: - Private Key Check
+    @MainActor
     func checkPrivateKey() async {
         if let account = data.currentAccount {
             if await account.checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
