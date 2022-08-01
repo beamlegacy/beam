@@ -293,6 +293,6 @@ class NoteTableViewItem: IconButtonTableViewItem {
 
     override func isEqual(_ object: Any?) -> Bool {
         guard let otherNote = object as? NoteTableViewItem else { return false }
-        return note?.id == otherNote.note?.id
+        return note?.id == otherNote.note?.id && updatedAt == otherNote.updatedAt
     }
 }

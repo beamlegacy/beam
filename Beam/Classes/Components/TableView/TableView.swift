@@ -544,8 +544,11 @@ extension TableViewCoordinator: NSTableViewDelegate {
     }
 
     private func setupIconButtonCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> BeamTableCellIconButtonView? {
-        let identifier = NSUserInterfaceItemIdentifier(rawValue: column.key)
+        let item = sortedData[row] as? IconButtonTableViewItem
 
+        guard let iconName = item?.iconName, let action = item?.buttonAction else { return nil }
+
+        let identifier = NSUserInterfaceItemIdentifier(rawValue: column.key)
         let iconButtonViewCell: BeamTableCellIconButtonView
 
         if let cell = tableView.makeView(withIdentifier: identifier, owner: nil) as? BeamTableCellIconButtonView {
@@ -555,10 +558,6 @@ extension TableViewCoordinator: NSTableViewDelegate {
             iconButtonViewCell.identifier = identifier
             iconButtonViewCell.iconButton.contentTintColor = BeamColor.AlphaGray.nsColor
         }
-
-        let item = sortedData[row] as? IconButtonTableViewItem
-
-        guard let iconName = item?.iconName, let action = item?.buttonAction else { return nil }
 
         let iconImage = NSImage(named: iconName)?.fill(color: BeamColor.AlphaGray.nsColor)
         iconImage?.isTemplate = false
