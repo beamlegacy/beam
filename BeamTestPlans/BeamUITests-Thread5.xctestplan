@@ -150,6 +150,7 @@
         "SlashMenuTests",
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SyncTests",
+        "TabGroupCaptureToANote",
         "TabGroupCloseTests",
         "TabGroupDragTabTests",
         "TabGroupNameTests",
