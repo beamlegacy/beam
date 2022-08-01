@@ -49,16 +49,16 @@ internal class FeatureFlagsService {
             return updateURL
     }()
 
-    private let queue = DispatchQueue(label: "FeatureFlagsService-atomic", attributes: .concurrent)
+    private let lock = NSLock()
     var internalValues: FeatureFlagsValues
     // atomic wrapper for internalValues
     // If speed becomes an issue, try using a wraped lock as explained here https://developer.apple.com/videos/play/wwdc2016/720/?time=997
     var values: FeatureFlagsValues {
         get {
-            return queue.sync { internalValues }
+            return lock { internalValues }
         }
         set(newValues) {
-            queue.async(flags: .barrier) {[weak self] in self?.internalValues = newValues }
+            lock { internalValues = newValues }
         }
     }
 

@@ -49,8 +49,6 @@ class APIRequest: NSObject {
     static var callsCount = 0
     static var uploadedBytes: Int64 = 0
     static var downloadedBytes: Int64 = 0
-    // Using `userInteractive` for instant
-    let backgroundQueue = DispatchQueue(label: "APIRequest backgroundQueue", qos: .userInteractive)
     var dataTask: Foundation.URLSessionDataTask?
     var cancelRequest: Bool = false
 
@@ -245,9 +243,7 @@ class APIRequest: NSObject {
         let callsCount = Self.callsCount
 
         guard let dataTask = self.dataTask else {
-            self.backgroundQueue.async {
-                completionHandler(.failure(APIRequestError.parserError))
-            }
+            completionHandler(.failure(APIRequestError.parserError))
             return
         }
 
@@ -276,9 +272,7 @@ class APIRequest: NSObject {
              */
 
             self.logCancelledRequest(filename, localTimer)
-            self.backgroundQueue.async {
-                completionHandler(.failure(error))
-            }
+            completionHandler(.failure(error))
             return
         }
 
@@ -291,9 +285,7 @@ class APIRequest: NSObject {
                         authenticatedCall ?? self.authenticatedAPICall)
 
         if let error = error {
-            self.backgroundQueue.async {
-                completionHandler(.failure(error))
-            }
+            completionHandler(.failure(error))
             self.handleNetworkError(error)
             return
         }
@@ -312,15 +304,11 @@ class APIRequest: NSObject {
                                          localTimer: localTimer)
             }
 
-            self.backgroundQueue.async {
-                completionHandler(.success(value))
-            }
+            completionHandler(.success(value))
         } catch {
             Logger.shared.logError("Can't parse into \(T.self): \(data?.asString ?? "-")", category: .network)
             Logger.shared.logError(error.localizedDescription, category: .network)
-            self.backgroundQueue.async {
-                completionHandler(.failure(error))
-            }
+            completionHandler(.failure(error))
         }
     }
 

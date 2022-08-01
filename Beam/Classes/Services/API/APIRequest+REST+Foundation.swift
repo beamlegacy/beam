@@ -42,9 +42,9 @@ extension APIRequest {
                                              authenticatedCall: authenticatedCall)
         let filename = "rest call: \(Configuration.restApiHostname)\(path)"
         #if DEBUG
-        Self.networkCallFilesSemaphore.wait()
-        Self.networkCallFiles.append(filename)
-        Self.networkCallFilesSemaphore.signal()
+        Self.networkCallFilesLock {
+            Self.networkCallFiles.append(filename)
+        }
 
         if !Self.expectedCallFiles.isEmpty, !Self.expectedCallFiles.starts(with: Self.networkCallFiles) {
             Logger.shared.logDebug("Expected network calls: \(Self.expectedCallFiles)", category: .network)

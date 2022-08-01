@@ -476,7 +476,7 @@ public class BeamNote: BeamElement {
         return true
     }
 
-    public static var indexingQueue: OperationQueue = {
+    public static let indexingQueue: OperationQueue = {
         let queue = OperationQueue()
         queue.name = "BeamNoteIndexing"
         queue.maxConcurrentOperationCount = 8

@@ -14,9 +14,10 @@ protocol BeamObjectManagerDelegateProtocol {
 protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
     associatedtype BeamObjectType: BeamObjectProtocol
     static var uploadType: BeamObjectRequestUploadType { get }
-    static var backgroundQueue: DispatchQueue { get }
 
     var changedObjects: [UUID: BeamObjectType] { get set }
+
+    var objectQueue: BeamObjectQueue<BeamObjectType> { get }
 
     func registerOnBeamObjectManager()
 

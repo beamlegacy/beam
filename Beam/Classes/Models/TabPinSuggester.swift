@@ -111,7 +111,7 @@ class TabPinSuggester {
     private func refreshEligibleDomainPaths() {
         guard BeamDate.now.timeIntervalSince(lastCandidateRefreshDate) >  parameters.candidateRefreshMinInterval,
              !refreshing else { return }
-        DispatchQueue.global().async { [self] in
+        DispatchQueue.database.async { [self] in
             refreshing = true
             defer { refreshing = false }
             self.eligibleDomainPaths = storage.getPinTabSuggestionCandidates(

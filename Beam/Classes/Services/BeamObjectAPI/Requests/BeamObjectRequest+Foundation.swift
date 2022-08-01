@@ -30,9 +30,9 @@ extension BeamObjectRequest {
         let task = session.dataTask(with: request) { (data, response, error) -> Void in
             #if DEBUG
             // This is not an API call on our servers but since it's tightly coupled, I still store analytics there
-            APIRequest.networkCallFilesSemaphore.wait()
-            APIRequest.networkCallFiles.append("direct_download")
-            APIRequest.networkCallFilesSemaphore.signal()
+            APIRequest.networkCallFilesLock {
+                APIRequest.networkCallFiles.append("direct_download")
+            }
             #endif
 
             APIRequest.callsCount += 1
@@ -81,9 +81,9 @@ extension BeamObjectRequest {
         let task = session.dataTask(with: request) { (responseData, response, error) -> Void in
             #if DEBUG
             // This is not an API call on our servers but since it's tightly coupled, I still store analytics there
-            APIRequest.networkCallFilesSemaphore.wait()
-            APIRequest.networkCallFiles.append("direct_upload")
-            APIRequest.networkCallFilesSemaphore.signal()
+            APIRequest.networkCallFilesLock {
+                APIRequest.networkCallFiles.append("direct_upload")
+            }
             #endif
 
             APIRequest.callsCount += 1
