@@ -290,12 +290,6 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
         guard let window = AppDelegate.main.window,
               let buttonFrame = buttonFrameInGlobalCoordinates?.swiftUISafeTopLeftGlobalFrame(in: window) else { return }
 
-        var notes: [BeamNote] = []
-        for item in currentNotesList {
-            guard let note = item.note ?? item.getNote() else { continue }
-            notes.append(note)
-        }
-
         let menu = AllNotesPageFiltersContextualMenu(viewModel: model)
         menu.presentMenu(at: CGPoint(x: buttonFrame.origin.x, y: buttonFrame.maxY + 6))
     }
