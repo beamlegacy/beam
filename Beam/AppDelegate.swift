@@ -116,7 +116,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if deleteAllLocalDataAtStartup {
             self.deleteAllLocalData()
         }
-        DispatchQueue.global().async {
+        DispatchQueue.database.async {
             BrowsingTreeStoreManager.shared.softDelete(olderThan: 60, maxRows: 20_000)
             GRDBDailyUrlScoreStore(daysToKeep: Configuration.DailyUrlStats.daysToKeep).cleanup()
             NoteScorer.shared.cleanup()
@@ -253,7 +253,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool, _ completionHandler: ((Result<Bool, Error>) -> Void)?) -> Task<Void, Error> {
         Task {
             defer {
-                self.synchronizationTaskDidStop()
+                DispatchQueue.main.async {
+                    self.synchronizationTaskDidStop()
+                }
             }
 
             // swiftlint:disable:next date_init
@@ -289,7 +291,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             task.cancel()
         }
     }
-
+    
+    @MainActor
     private func synchronizationTaskDidStop() {
         Logger.shared.logInfo("synchronizationTaskDidStop", category: .beamObjectNetwork)
         synchronizationTask = nil

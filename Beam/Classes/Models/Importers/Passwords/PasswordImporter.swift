@@ -89,7 +89,7 @@ enum PasswordImporter {
     }
 
     static func exportPasswords(toCSV file: URL, completion: ((PasswordExportResult) -> Void)? = nil) throws {
-        let serialQueue = DispatchQueue(label: "exportPasswordsQueue")
+        let serialQueue = DispatchQueue(label: "exportPasswordsQueue", target: .userInitiated)
 
         serialQueue.async {
             let allEntries = PasswordManager.shared.fetchAll()

@@ -135,6 +135,7 @@ class NoteFrecencyApiSaveLimiter {
 
 public class GRDBNoteFrecencyStorage: FrecencyStorage {
     var changedObjects: [UUID: FrecencyNoteRecord] = [:]
+    let objectQueue = BeamObjectQueue<FrecencyNoteRecord>()
 
     let providedDb: BeamNoteLinksAndRefsManager?
     var db: BeamNoteLinksAndRefsManager? {
@@ -263,7 +264,6 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
     static var uploadType: BeamObjectRequestUploadType {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
-    internal static var backgroundQueue = DispatchQueue(label: "NoteFrecency BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     private func deduplicated(records: [FrecencyNoteRecord]) -> [FrecencyNoteRecord] {
         let keyValues = records.map { ($0.uniqueKey, $0) }

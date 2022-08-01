@@ -86,8 +86,6 @@ class BeamObjectManager {
     var webSocketRequest: APIWebSocketRequest?
     internal var websocketRetryDelay = 0
 
-    let backgroundQueue = DispatchQueue(label: "BeamObjectManager backgroundQueue", qos: .userInitiated)
-
     static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
         managerInstances[object.beamObjectType] = manager
 

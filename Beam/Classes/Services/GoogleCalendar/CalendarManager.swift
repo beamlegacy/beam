@@ -54,7 +54,7 @@ extension CalendarService {
 
 class CalendarManager: ObservableObject {
 
-    let calendarQueue = DispatchQueue(label: "calendarQueue")
+    let calendarQueue = DispatchQueue(label: "calendarQueue", target: .database)
     @Published var connectedSources: [CalendarService] = []
     @Published var meetingsForNote = [BeamNote.ID: [Meeting]]()
     @Published var updated: Bool = false
