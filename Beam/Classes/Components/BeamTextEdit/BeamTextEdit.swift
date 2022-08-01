@@ -142,7 +142,7 @@ public extension CALayer {
                 DispatchQueue.main.async {
                     self.preloadedLinksAndRefs = notes
                     let root = initRootNode()
-                    DispatchQueue.global(qos: .userInteractive).async {
+                    DispatchQueue.userInteractive.async {
                         root.setLayout(rect)
                         DispatchQueue.main.async {
                             initLayout(root)

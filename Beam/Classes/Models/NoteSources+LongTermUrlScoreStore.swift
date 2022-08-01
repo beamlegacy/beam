@@ -12,7 +12,7 @@ extension NoteSources {
     func refreshScores(scoreStore: LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared,
                        completion: @escaping () -> Void) {
         let urlIds = self.urlIds
-        DispatchQueue.global().async {
+        DispatchQueue.database.async {
             let scores = scoreStore.getMany(urlIds: urlIds).values
             DispatchQueue.main.async {
                 for score in scores {

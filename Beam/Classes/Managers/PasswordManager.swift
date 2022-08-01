@@ -5,6 +5,7 @@ import CryptoKit
 
 final class PasswordManager {
     var changedObjects: [UUID: RemotePasswordRecord] = [:]
+    let objectQueue = BeamObjectQueue<RemotePasswordRecord>()
 
     enum Error: Swift.Error {
         case databaseError(errorMsg: String)
@@ -327,7 +328,6 @@ extension PasswordManager: BeamObjectManagerDelegate {
     static var uploadType: BeamObjectRequestUploadType {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
-    internal static var backgroundQueue = DispatchQueue(label: "PasswordManager BeamObjectManager backgroundQueue", qos: .userInitiated)
     func willSaveAllOnBeamObjectApi() {}
 
     func saveObjectsAfterConflict(_ passwords: [RemotePasswordRecord]) throws {

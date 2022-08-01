@@ -292,7 +292,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                         }
                     }
                     Button(action: {
-                        DispatchQueue.global(qos: .userInteractive).async {
+                        DispatchQueue.userInitiated.async {
                             do {
                                 try BeamData.shared.currentAccount?.deleteEmptyDatabases()
                                 AppDelegate.showMessage("Empty databases deleted")
@@ -371,7 +371,7 @@ struct AdvancedPreferencesView: View, BeamDocumentSource {
                     })
                     Button(action: {
                         self.loading = true
-                        DispatchQueue.global().async {
+                        DispatchQueue.database.async {
                             BrowsingTreeStoreManager.shared.legacyCleanup { _ in
                                 self.loading = false
                             }

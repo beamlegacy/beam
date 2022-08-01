@@ -150,6 +150,7 @@ protocol BrowsingTreeStoreProtocol {
 
 class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     var changedObjects: [UUID : BrowsingTreeRecord] = [:]
+    let objectQueue = BeamObjectQueue<BrowsingTreeRecord>()
     let providedDb: BrowsingTreeDBManager?
     var db: BrowsingTreeDBManager? {
         let currentDb = providedDb ?? BeamData.shared.browsingTreeDBManager
@@ -181,7 +182,7 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
         }
     }
     func save(browsingTree: BrowsingTree, appSessionId: UUID? = nil, completion:  @escaping () -> Void) {
-        DispatchQueue.global().async { [weak self] in
+        DispatchQueue.database.async { [weak self] in
             do {
                 try self?.save(browsingTree: browsingTree, appSessionId: appSessionId)
                 completion()
@@ -282,7 +283,6 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     static var uploadType: BeamObjectRequestUploadType {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
-    internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "BrowsingTreeStoreManager BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     func willSaveAllOnBeamObjectApi() {}
 
@@ -297,7 +297,7 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
         }
         try save(browsingTreeRecords: flattenedRecordsWithDbStatus)
         let recordsToProcess = flattenedRecordsWithDbStatus.filter { $0.processingStatus == .toDo }
-        Self.backgroundQueue.async {
+        DispatchQueue.database.async {
             for record in recordsToProcess {
                 guard let db = self.db else { return }
                 if let flattenedTree = record.flattenedData,

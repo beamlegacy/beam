@@ -180,7 +180,7 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
         Future { promise in
             var metadatas = [UUID: NoteListMetadata]()
             var fetchedNotes = [UUID: BeamNote]()
-            DispatchQueue.global(qos: .userInteractive).async {
+            DispatchQueue.userInteractive.async {
                 notesItems.forEach { item in
                     guard let note = item.note ?? item.getNote() else { return }
                     guard item.links != note.links.count || item.note == nil || item.links < 0 else { return }

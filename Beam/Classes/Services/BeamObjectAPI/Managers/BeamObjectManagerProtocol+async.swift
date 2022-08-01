@@ -72,93 +72,55 @@ extension BeamObjectManagerDelegate {
     @discardableResult
     // swiftlint:disable:next function_body_length
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
-                              force: Bool = false,
-                              deep: Int = 0) async throws -> [BeamObjectType] {
+                              force: Bool = false) async throws -> [BeamObjectType] {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
-        }
-
-        guard deep < 3 else {
-            throw BeamObjectManagerDelegateError.nestedTooDeep
-        }
-
-        if Thread.isMainThread, Configuration.env != .test {
-            Logger.shared.logError("Please don't use saveOnBeamObjectsAPI in the main thread. Create your own DispatchQueue instead.",
-                                   category: .beamObjectNetwork)
-            assert(false)
         }
 
         let beamObjectTypes = Set(objects.map { type(of: $0).beamObjectType.rawValue }).joined(separator: ", ")
         Logger.shared.logDebug("saveOnBeamObjectsAPI called with \(objects.count) objects of type \(beamObjectTypes)",
                                category: .beamObjectNetwork)
 
+        return try await objectQueue.addOperation(for: objects) { objects in
+            return try await self._saveOnBeamObjectsAPI(objects, force: force, deep: 0)
+        }
+    }
+
+    private func _saveOnBeamObjectsAPI(_ objects: [BeamObjectType], force: Bool, deep: Int) async throws -> [BeamObjectType] {
+        guard deep < 3 else {
+            throw BeamObjectManagerDelegateError.nestedTooDeep
+        }
+
         let objectManager = BeamObjectManager()
         objectManager.conflictPolicyForSave = Self.conflictPolicy
 
-        let uuids = objects.map { $0.beamObjectId }
-        let semaphores = BeamObjectManagerCall.objectsSemaphores(uuids: uuids)
-        semaphores.forEach {
-            let semaResult = $0.wait(timeout: DispatchTime.now() + .seconds(600))
-
-            if case .timedOut = semaResult {
-                Logger.shared.logError("network semaphore expired", category: .beamObjectNetwork)
-            }
-        }
-
         do {
-            let remoteObjects = try await objectManager.saveToAPI(objects, force: force, requestUploadType: Self.uploadType)
-            return self.saveOnBeamObjectsAPISuccess(uuids: uuids,
-                                                    remoteObjects: remoteObjects,
-                                                    semaphores: semaphores)
+            return try await objectManager.saveToAPI(objects,
+                                                     force: force,
+                                                     requestUploadType: Self.uploadType)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
             return try await saveOnBeamObjectsAPIError(objects: objects,
-                                             uuids: uuids,
-                                             semaphores: semaphores,
-                                             deep: deep,
-                                             error: error)
+                                                       deep: deep,
+                                                       error: error)
         }
     }
 
-    internal func saveOnBeamObjectsAPISuccess(uuids: [UUID],
-                                              remoteObjects: [BeamObjectType],
-                                              semaphores: [DispatchSemaphore]) -> [BeamObjectType] {
-
-        BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
-        semaphores.forEach { $0.signal() }
-
-        return remoteObjects
-    }
-
     internal func saveOnBeamObjectsAPIError(objects: [BeamObjectType],
-                                            uuids: [UUID],
-                                            semaphores: [DispatchSemaphore],
                                             deep: Int,
                                             error: Error) async throws -> [BeamObjectType] {
         Logger.shared.logError("Could not save all \(objects.count) \(BeamObjectType.beamObjectType) objects: \(error.localizedDescription)",
                                category: .beamObjectNetwork)
 
         if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
-            BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
-            semaphores.forEach { $0.signal() }
-
             return try await self.manageInvalidChecksum(error, deep)
         }
 
         // We don't manage anything else than `BeamObjectManagerError.multipleErrors`
         guard case BeamObjectManagerError.multipleErrors(let errors) = error else {
-            BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
-            semaphores.forEach { $0.signal() }
-
             throw error
         }
-
-        let results = try await self.manageMultipleErrors(objects, errors)
-
-        BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
-        semaphores.forEach { $0.signal() }
-
-        return results
+        return try await self.manageMultipleErrors(objects, errors)
     }
 
     @discardableResult
@@ -216,48 +178,39 @@ extension BeamObjectManagerDelegate {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
+        
+        return try await objectQueue.addOperation(for: [object]) { _ in
+            let objectManager = BeamObjectManager()
 
-        let objectManager = BeamObjectManager()
-
-        let semaphore = BeamObjectManagerCall.objectSemaphore(uuid: object.beamObjectId)
-        semaphore.wait()
-
-        guard !forced else {
-            do {
-                defer {
-                    BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
-                    semaphore.signal()
+            guard !forced else {
+                do {
+                    let remoteObject = try await objectManager.fetchObject(object)
+                    return [remoteObject]
+                } catch {
+                    if case APIRequestError.notFound = error {
+                        return []
+                    }
+                    throw error
                 }
+            }
+
+            do {
+                let remoteChecksum = try await objectManager.fetchObjectChecksum(object)
+                let beamObject = try BeamObject(object)
+
+                guard let remoteChecksum = remoteChecksum, remoteChecksum != beamObject.dataChecksum else {
+                    return []
+                }
+
                 let remoteObject = try await objectManager.fetchObject(object)
-                return remoteObject
+                return [remoteObject]
             } catch {
                 if case APIRequestError.notFound = error {
-                    return nil
+                    return []
                 }
                 throw error
             }
-        }
-
-        do {
-            defer {
-                BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
-                semaphore.signal()
-            }
-            let remoteChecksum = try await objectManager.fetchObjectChecksum(object)
-            let beamObject = try BeamObject(object)
-
-            guard let remoteChecksum = remoteChecksum, remoteChecksum != beamObject.dataChecksum else {
-                return nil
-            }
-
-            let remoteObject = try await objectManager.fetchObject(object)
-            return remoteObject
-        } catch {
-            if case APIRequestError.notFound = error {
-                return nil
-            }
-            throw error
-        }
+        }.first
     }
 
     @discardableResult
@@ -277,63 +230,32 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
-        let objectManager = BeamObjectManager()
-        objectManager.conflictPolicyForSave = Self.conflictPolicy
-
         Logger.shared.logDebug("saveOnBeamObjectAPI called. Object \(object.beamObjectId), type: \(type(of: object).beamObjectType)",
                                category: .beamObjectNetwork)
 
-        let fullSyncRunning = BeamObjectManager.fullSyncRunning.load(ordering: .relaxed) == true
+        let fullSyncRunning = BeamObjectManager.fullSyncRunning.load(ordering: .acquiring)
         if fullSyncRunning {
             addChangedObject(object)
             return
         }
 
-        let semaphore = BeamObjectManagerCall.objectSemaphore(uuid: object.beamObjectId)
-        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
-
-        if case .timedOut = semaResult {
-            Logger.shared.logError("network semaphore expired for Object \(object.beamObjectId), type: \(type(of: object).beamObjectType)",
-                                   category: .beamObjectNetwork)
-        }
-
-        do {
-            let remoteObject = try await objectManager.saveToAPI(object, force: force, requestUploadType: Self.uploadType)
-            _ = self.saveOnBeamObjectAPISuccess(object: object,
-                                                remoteObject: remoteObject,
-                                                semaphore: semaphore)
-        } catch {
-            Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
-            _ = try await self.saveOnBeamObjectAPIError(object: object,
-                                                        semaphore: semaphore,
-                                                        error: error)
+        try await objectQueue.addOperation(for: [object]) { _ in
+            do {
+                let objectManager = BeamObjectManager()
+                objectManager.conflictPolicyForSave = Self.conflictPolicy
+                _ = try await objectManager.saveToAPI(object, force: force, requestUploadType: Self.uploadType)
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                _ = try await self.saveOnBeamObjectAPIError(object: object, error: error)
+            }
+            return []
         }
     }
 
-    internal func saveOnBeamObjectAPISuccess(object: BeamObjectType,
-                                             remoteObject: BeamObjectType,
-                                             semaphore: DispatchSemaphore) -> BeamObjectType {
-
-        BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
-        semaphore.signal()
-
-        return remoteObject
-    }
-
-    internal func saveOnBeamObjectAPIError(object: BeamObjectType,
-                                           semaphore: DispatchSemaphore,
-                                           error: Error) async throws -> BeamObjectType {
+    internal func saveOnBeamObjectAPIError(object: BeamObjectType, error: Error) async throws -> BeamObjectType {
         guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error else {
-            BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
-            semaphore.signal()
-
             throw error
         }
-
-        // When dealing with invalid checksum, we will retry the `saveOnBeamObjectAPI` so semaphore must be unlocked
-        // first
-        BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
-        semaphore.signal()
 
         let objects = try await self.manageInvalidChecksum(error, 0)
         guard let newObject = objects.first, objects.count == 1 else {
@@ -367,7 +289,7 @@ extension BeamObjectManagerDelegate {
             }
         }
 
-        let savedRemoteObjects = try await self.saveOnBeamObjectsAPI(mergedObjects, force: true, deep: deep + 1)
+        let savedRemoteObjects = try await self._saveOnBeamObjectsAPI(mergedObjects, force: true, deep: deep + 1)
         var allObjects: [BeamObjectType] = []
         allObjects.append(contentsOf: goodObjects)
         allObjects.append(contentsOf: savedRemoteObjects)

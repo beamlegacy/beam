@@ -12,6 +12,7 @@ import Accelerate
 
 class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
     var changedObjects: [UUID: BeamDocument] = [:]
+    let objectQueue = BeamObjectQueue<BeamDocument>()
 
     static var beamObjectType = BeamObjectObjectType.document
     static var sourceId: String { "\(Self.self)" }
@@ -19,8 +20,8 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
     weak public private(set) var account: BeamAccount?
 
     public private(set) static var conflictPolicy = BeamObjectConflictResolution.fetchRemoteAndError
-    public private(set) static var backgroundQueue = DispatchQueue.global(qos: .default)
-    private var documentsQueue: DispatchQueue = DispatchQueue(label: "BeamDocumentSynchronizer documentsQueue", qos: .userInitiated)
+    private let documentsQueue = DispatchQueue(label: "BeamDocumentSynchronizer documentsQueue",
+                                               target: .userInitiated)
 
     private var scope = Set<AnyCancellable>()
 

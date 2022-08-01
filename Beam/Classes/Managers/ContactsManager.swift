@@ -21,6 +21,8 @@ struct Email: Codable, Hashable {
 
 class ContactsManager {
     var changedObjects: [UUID: ContactRecord] = [:]
+    let objectQueue = BeamObjectQueue<ContactRecord>()
+    
     static let shared = ContactsManager()
     private var contactsDB: ContactsDB? { BeamData.shared.contactsDB }
 
@@ -174,7 +176,6 @@ extension ContactsManager: BeamObjectManagerDelegate {
     static var uploadType: BeamObjectRequestUploadType {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
-    internal static var backgroundQueue = DispatchQueue(label: "ContactsManager BeamObjectManager backgroundQueue", qos: .userInitiated)
     func willSaveAllOnBeamObjectApi() {}
 
     func saveObjectsAfterConflict(_ contacts: [ContactRecord]) throws {

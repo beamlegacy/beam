@@ -11,13 +11,13 @@ import Combine
 
 class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
     var changedObjects: [UUID: BeamDatabase] = [:]
+    let objectQueue = BeamObjectQueue<BeamDatabase>()
 
     static var beamObjectType = BeamObjectObjectType.database
     public static var sourceId: String { "\(Self.self)" }
     weak public private(set) var account: BeamAccount?
 
     public private(set) static var conflictPolicy = BeamObjectConflictResolution.fetchRemoteAndError
-    public private(set) static var backgroundQueue = DispatchQueue.global(qos: .default)
 
     private var scope = Set<AnyCancellable>()
 
