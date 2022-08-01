@@ -163,7 +163,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         let text = element.text.text
         let links = element.internalLinksInSelf
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.userInitiated.async {
             do {
                 try self.write { db in
                     try BeamElementRecord.filter(BeamElementRecord.Columns.noteId == noteId.uuidString && BeamElementRecord.Columns.uid == element.id.uuidString).deleteAll(db)

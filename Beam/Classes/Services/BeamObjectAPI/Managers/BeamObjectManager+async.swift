@@ -10,19 +10,16 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        guard Self.fullSyncRunning.load(ordering: .relaxed) == false else {
+        guard Self.fullSyncRunning.compareExchange(expected: false, desired: true, ordering: .acquiring).exchanged else {
             throw BeamObjectManagerError.fullSyncAlreadyRunning
         }
-
-        assert(Self.fullSyncRunning.load(ordering: .relaxed) == false)
 
         do {
             defer {
                 Self.disableSendingObjects = false
-                Self.fullSyncRunning.store(false, ordering: .relaxed)
+                Self.fullSyncRunning.store(false, ordering: .releasing)
             }
 
-            Self.fullSyncRunning.store(true, ordering: .relaxed)
             Self.disableSendingObjects = true
 
             Self.synchronizationStatusUpdated(.downloading(0))

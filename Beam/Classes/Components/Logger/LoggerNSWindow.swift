@@ -2,21 +2,17 @@ import Foundation
 
 class LoggerNSWindow: NSWindow {
     static private var _instances = 0
-    static private var instancesSema = DispatchSemaphore(value: 1)
+    static private let lock = NSLock()
 
     static var instances: Int {
         get {
-            instancesSema.wait()
-            defer { instancesSema.signal() }
-
-            return _instances
+            lock { _instances }
         }
 
         set {
-            instancesSema.wait()
-            defer { instancesSema.signal() }
-
-            _instances = newValue
+            lock {
+                _instances = newValue
+            }
         }
     }
 

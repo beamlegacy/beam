@@ -103,7 +103,7 @@ class CoreDataManager {
 
         if migrator.requiresMigration(at: storeURL, toVersion: CoreDataMigrationVersion.current) {
             Logger.shared.logDebug("Coredata migrations needed", category: .coredata)
-            DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.userInitiated.async {
                 self.migrator.migrateStore(at: storeURL, toVersion: CoreDataMigrationVersion.current)
 
                 completion()

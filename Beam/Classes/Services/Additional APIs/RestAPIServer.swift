@@ -187,7 +187,7 @@ class RestAPIServer {
     static let multipartBoundary = "WebAppBoundary"
 
     func request<T: Decodable>(serverRequest: Request, completion: @escaping (Result<T, Swift.Error>) -> Void) {
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.userInitiated.async {
             let urlRequest: URLRequest
             do {
                 urlRequest = try self.createUrlRequest(request: serverRequest)

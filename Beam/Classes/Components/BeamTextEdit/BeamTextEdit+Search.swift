@@ -80,7 +80,7 @@ extension BeamTextEdit {
     }
 
     private func performSearchAndUpdateUI(with search: String) {
-        DispatchQueue.global(qos: .userInteractive).async {
+        DispatchQueue.userInitiated.async {
             guard let vm = self.searchViewModel, let results = self.rootNode?.allElementsContaining(someText: search) else { return }
 
             let nodeWithResults = Set(results.map({ $0.element }))

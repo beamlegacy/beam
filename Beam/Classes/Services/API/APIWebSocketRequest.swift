@@ -55,9 +55,9 @@ class APIWebSocketRequest: APIRequest {
     var disconnectHandler: (() -> Void)?
 
     private var subscribeHandlers: [UUID: ((Swift.Result<UUID, Error>) -> Void)] = [:]
-    private var subscribeHandlersQueue = DispatchQueue(label: "APIWebSocketRequest_subscribeHandlers")
+    private var subscribeHandlersLock = NSLock()
 
-    private var queryCommandHandlersQueue = DispatchQueue(label: "APIWebSocketRequest_queryCommandHandlers")
+    private var queryCommandHandlersLock = NSLock()
     private var queryCommandHandlers: [UUID: ((Swift.Result<String, Error>) -> Void)] = [:]
     private static var webSocketUploadedBytes: Int64 = 0
     private static var webSocketDownloadedBytes: Int64 = 0
@@ -177,11 +177,11 @@ class APIWebSocketRequest: APIRequest {
     }
 
     private func reset() {
-        queryCommandHandlersQueue.async {
+        queryCommandHandlersLock {
             self.queryCommandHandlers = [:]
         }
 
-        subscribeHandlersQueue.async {
+        subscribeHandlersLock {
             self.subscribeHandlers = [:]
         }
         connectHandler = nil
@@ -337,7 +337,7 @@ class APIWebSocketRequest: APIRequest {
         }
 
         var completionHandler: ((Swift.Result<String, Error>) -> Void)?
-        queryCommandHandlersQueue.sync {
+        queryCommandHandlersLock {
             completionHandler = queryCommandHandlers[channelId]
         }
         guard let completionHandler = completionHandler else {
@@ -364,7 +364,7 @@ class APIWebSocketRequest: APIRequest {
         channelIds.append(channelId)
 
         var completionHandler: ((Swift.Result<UUID, Error>) -> Void)?
-        subscribeHandlersQueue.sync {
+        subscribeHandlersLock {
             completionHandler = subscribeHandlers[channelId]
             subscribeHandlers.removeValue(forKey: channelId)
         }
@@ -494,7 +494,7 @@ class APIWebSocketRequest: APIRequest {
                 // TODO: reconnect?
             }
 
-            self?.subscribeHandlersQueue.async {
+            self?.subscribeHandlersLock {
                 self?.subscribeHandlers[channelId] = completionHandler
             }
         }
@@ -512,7 +512,7 @@ class APIWebSocketRequest: APIRequest {
 
         let commandString = command(channelId, .unsubscribe)
 
-        _ = queryCommandHandlersQueue.sync {
+        _ = queryCommandHandlersLock {
             queryCommandHandlers.removeValue(forKey: channelId)
         }
 

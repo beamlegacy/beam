@@ -11,6 +11,7 @@ import Combine
 // Minimal manager
 class MyRemoteObjectManager {
     var changedObjects: [UUID: MyRemoteObject] = [:]
+    let objectQueue = BeamObjectQueue<MyRemoteObject>()
     static var receivedMyRemoteObjects: [MyRemoteObject] = []
     static var store: [UUID: MyRemoteObject] = [:]
 }
@@ -19,7 +20,6 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() { }
 
     static var conflictPolicy: BeamObjectConflictResolution = .replace
-    internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "MyRemoteObjectManager BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     func receivedObjects(_ objects: [MyRemoteObject]) throws {
         for object in objects {

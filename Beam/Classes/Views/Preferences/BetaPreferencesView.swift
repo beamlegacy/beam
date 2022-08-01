@@ -92,7 +92,7 @@ struct BetaPreferencesView: View, BeamDocumentSource {
                 VStack(alignment: .leading) {
                     DatabasePicker
                     Button(action: {
-                        DispatchQueue.global(qos: .userInteractive).async {
+                        DispatchQueue.userInitiated.async {
                             do {
                                 try BeamData.shared.currentAccount?.deleteEmptyDatabases()
                                 AppDelegate.showMessage("Empty databases deleted")

@@ -4,17 +4,17 @@ import os
 
 class LoggerRecorder {
     public static var shared = LoggerRecorder()
-    private var sema = DispatchSemaphore(value: 1)
+    private let lock = NSLock()
 
     public func reset() {
-        sema.wait()
-        defer { sema.signal() }
-        Logger.shared.callback = nil
+        lock {
+            Logger.shared.callback = nil
+        }
     }
 
     public func attach() {
-        sema.wait()
-        defer { sema.signal() }
+        lock.lock()
+        defer { lock.unlock() }
 
         Logger.shared.callback = { (message, level, category, thread, duration) in
             CoreDataManager.shared.persistentContainer.performBackgroundTask { context in

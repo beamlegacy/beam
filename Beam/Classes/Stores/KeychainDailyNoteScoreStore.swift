@@ -25,7 +25,7 @@ class KeychainDailyNoteScoreStore: InMemoryDailyNoteScoreStore {
     override init() {
         super.init()
         let decoder = JSONDecoder()
-        Self.backgroundQueue.sync {
+        lock {
             if let scoreData = Persistence.NoteScores.daily {
                 scores = (try? decoder.decode(DailyNoteScores.self, from: scoreData)) ?? DailyNoteScores()
             }
@@ -40,7 +40,7 @@ class KeychainDailyNoteScoreStore: InMemoryDailyNoteScoreStore {
 
     func save() {
         let encoder = JSONEncoder()
-        Self.backgroundQueue.sync {
+        lock {
             if let scoreData = try? encoder.encode(scores) {
                 Persistence.NoteScores.daily = scoreData
             }
