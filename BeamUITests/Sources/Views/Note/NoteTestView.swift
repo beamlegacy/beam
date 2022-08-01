@@ -470,4 +470,30 @@ class NoteTestView: TextEditorContextTestView {
     func getNumberOfVisibleBullets() -> Int {
         return isBulletVisible() ? app.buttons.matching(identifier: NoteViewLocators.Buttons.bullet.accessibilityIdentifier).count : 0
     }
+    
+    private let anyTabGroupPredicate = NSPredicate(format: "identifier BEGINSWITH '\(NoteViewLocators.Groups.tabGroupPrefix.accessibilityIdentifier)'")
+    
+    func getTabGroupElementIndex(index: Int) -> XCUIElement {
+        return app.windows.groups.matching(anyTabGroupPredicate).element(boundBy: index)
+    }
+    
+    func getTabGroupCount() -> Int {
+        return app.windows.groups.matching(anyTabGroupPredicate).count
+    }
+    
+    func isTabGroupDisplay(index: Int) -> Bool {
+        return getTabGroupElementIndex(index: index).waitForExistence(timeout: minimumWaitTimeout)
+    }
+    
+    func getTabGroupElementName(index: Int) -> String {
+        return getTabGroupElementIndex(index: index).label
+    }
+    
+    func openTabGroup(index: Int) {
+        if BaseTest().isBigSurOS(){
+            getTabGroupElementIndex(index: index).children(matching: .other).firstMatch.clickInTheMiddle()
+        } else {
+            getTabGroupElementIndex(index: index).children(matching: .button).firstMatch.clickInTheMiddle()
+        }
+    }
 }

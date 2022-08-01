@@ -1383,6 +1383,7 @@
 		CE304C3B27DB5501005AE274 /* URLSession+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C3A27DB5501005AE274 /* URLSession+async.swift */; };
 		CE304C3D27DB566D005AE274 /* String+base64url.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C3C27DB566D005AE274 /* String+base64url.swift */; };
 		D70E2C23288FD55400622D7F /* TabGroupOpenNewWindowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70E2C22288FD55400622D7F /* TabGroupOpenNewWindowTests.swift */; };
+		D70E2C312892C67000622D7F /* TabGroupCaptureToANote.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70E2C302892C67000622D7F /* TabGroupCaptureToANote.swift */; };
 		D71D747B282ABE2700D8D6F5 /* PrivacyPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D747A282ABE2700D8D6F5 /* PrivacyPreferencesTestView.swift */; };
 		D71D7482282ABE8A00D8D6F5 /* PrivacyAllowListPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D7481282ABE8A00D8D6F5 /* PrivacyAllowListPreferencesViewLocators.swift */; };
 		D71D7484282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D7483282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift */; };
@@ -3329,6 +3330,7 @@
 		CE304C3A27DB5501005AE274 /* URLSession+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSession+async.swift"; sourceTree = "<group>"; };
 		CE304C3C27DB566D005AE274 /* String+base64url.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+base64url.swift"; sourceTree = "<group>"; };
 		D70E2C22288FD55400622D7F /* TabGroupOpenNewWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupOpenNewWindowTests.swift; sourceTree = "<group>"; };
+		D70E2C302892C67000622D7F /* TabGroupCaptureToANote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupCaptureToANote.swift; sourceTree = "<group>"; };
 		D71D747A282ABE2700D8D6F5 /* PrivacyPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPreferencesTestView.swift; sourceTree = "<group>"; };
 		D71D7481282ABE8A00D8D6F5 /* PrivacyAllowListPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyAllowListPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		D71D7483282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPreferencesViewLocators.swift; sourceTree = "<group>"; };
@@ -8078,6 +8080,7 @@
 				D7251BBF288ED32200CD5D64 /* TabGroupUngroupTests.swift */,
 				D7251BC1288ED72800CD5D64 /* TabGroupDragTabTests.swift */,
 				D70E2C22288FD55400622D7F /* TabGroupOpenNewWindowTests.swift */,
+				D70E2C302892C67000622D7F /* TabGroupCaptureToANote.swift */,
 			);
 			path = TabGrouping;
 			sourceTree = "<group>";
@@ -10119,6 +10122,7 @@
 				B5BA078D26B0027A00D31FED /* NoteEditTests.swift in Sources */,
 				A3B6C9722861F15600E7F78C /* AccountPreferencesTests.swift in Sources */,
 				B5BA078626AF3B4400D31FED /* NoteViewLocators.swift in Sources */,
+				D70E2C312892C67000622D7F /* TabGroupCaptureToANote.swift in Sources */,
 				A39F7259284F92970085DDCA /* AllNotesPublishProfileTests.swift in Sources */,
 				B5D2A1872805EAA600C833B9 /* OnboardingPrivateKeyTestView.swift in Sources */,
 				D77A5A7A28770F0D00652727 /* RightClickMenuTestView.swift in Sources */,
