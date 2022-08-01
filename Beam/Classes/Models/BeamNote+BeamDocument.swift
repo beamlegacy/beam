@@ -638,7 +638,7 @@ public extension BeamNote {
     static func loadNotes(_ ids: [UUID], _ completion: @escaping ([BeamNote]) -> Void) {
         let sign = Self.signPost.createId()
         sign.begin(Signs.loadNotes)
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.userInitiated.async {
             completion(ids.compactMap { BeamNote.fetch(id: $0, keepInMemory: true, decodeChildren: true) })
             sign.end(Signs.loadNotes)
         }

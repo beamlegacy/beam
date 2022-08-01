@@ -389,7 +389,7 @@ public class TextRoot: ElementNode {
     }
 
     private func updateDailySummary() {
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.userInitiated.async {
             if let dailySummaryElement = SummaryEngine.getDailySummary() {
                 DispatchQueue.mainSync {
                     if self.dailySummaryNode?.text.text != dailySummaryElement.text.text {
@@ -401,7 +401,7 @@ public class TextRoot: ElementNode {
     }
 
     private func updateContinueToSummary() {
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.userInitiated.async {
             if let continueToSummaryElement = SummaryEngine.getContinueToSummary() {
                 DispatchQueue.mainSync {
                     if self.continueToSummaryNode?.text.text != continueToSummaryElement.text.text {

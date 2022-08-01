@@ -120,12 +120,13 @@ struct LinkWithFrecency: FetchableRecord {
 
 public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
     var changedObjects: [UUID : Link] = [:]
+    let objectQueue = BeamObjectQueue<Link>()
+    
     static let tableName = "link"
     static var shared = BeamLinkDB()
     static var uploadType: BeamObjectRequestUploadType {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
-    internal static var backgroundQueue = DispatchQueue(label: "Links BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     private var overridenManager: UrlHistoryManager?
     private var manager: UrlHistoryManager? {

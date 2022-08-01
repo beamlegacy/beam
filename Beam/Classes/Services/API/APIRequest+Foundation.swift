@@ -18,9 +18,9 @@ extension APIRequest {
         let filename = bodyParamsRequest.fileName ?? "no filename"
 
         #if DEBUG
-        Self.networkCallFilesSemaphore.wait()
-        Self.networkCallFiles.append(filename)
-        Self.networkCallFilesSemaphore.signal()
+        Self.networkCallFilesLock {
+            Self.networkCallFiles.append(filename)
+        }
 
         if !Self.expectedCallFiles.isEmpty, !Self.expectedCallFiles.starts(with: Self.networkCallFiles) {
             Logger.shared.logDebug("Expected network calls: \(Self.expectedCallFiles)", category: .network)
@@ -63,13 +63,13 @@ extension APIRequest {
 
     static var networkCallFiles: [String] = []
     static var expectedCallFiles: [String] = []
-    static var networkCallFilesSemaphore = DispatchSemaphore(value: 1)
+    static let networkCallFilesLock = NSLock()
 
     static public func clearNetworkCallsFiles() {
-        Self.networkCallFilesSemaphore.wait()
-        Self.networkCallFiles = []
-        Self.expectedCallFiles = []
-        Self.networkCallFilesSemaphore.signal()
+        Self.networkCallFilesLock {
+            Self.networkCallFiles = []
+            Self.expectedCallFiles = []
+        }
     }
 
     // swiftlint:disable:next function_parameter_count

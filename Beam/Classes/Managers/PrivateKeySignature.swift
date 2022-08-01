@@ -51,13 +51,14 @@ extension PrivateKeySignature: BeamObjectProtocol {
 
 class PrivateKeySignatureManager: BeamObjectManagerDelegate {
     var changedObjects: [UUID: PrivateKeySignature] = [:]
+    let objectQueue = BeamObjectQueue<PrivateKeySignature>()
+    
     static var shared = PrivateKeySignatureManager()
 
     internal static var conflictPolicy: BeamObjectConflictResolution = .replace
     static var uploadType: BeamObjectRequestUploadType {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
-    internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "PrivateKeySignatureManager BeamObjectManager backgroundQueue", qos: .userInitiated)
     var privateKeySignature: PrivateKeySignature { PrivateKeySignature() }
 
     enum DistantKeyStatus {

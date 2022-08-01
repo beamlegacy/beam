@@ -372,7 +372,7 @@ public class TextNode: ElementNode {
 
             if inInitialLayout, !textFrame.isComplete {
                 // if we deliberately made the choice to compute a smaller height of text for performances reasons, we must start again with the full height when possible:
-                DispatchQueue.global(qos: .userInteractive).async { [self, attributedString] in
+                DispatchQueue.userInteractive.async { [self, attributedString] in
                     let (textFrame, _) = self.buildTextFrames(position: position, width: width, height: nil, attributedString: attributedString)
                     DispatchQueue.main.async {
                         self.textFrame = textFrame

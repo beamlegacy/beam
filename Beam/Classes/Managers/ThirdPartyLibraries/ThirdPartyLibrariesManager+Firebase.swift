@@ -64,7 +64,7 @@ extension ThirdPartyLibrariesManager {
             Logger.shared.logDebug("Firebase Analytics not enabled", category: .tracking)
             return
         }
-        DispatchQueue.global(qos: .utility).async { [weak self] in
+        DispatchQueue.utility.async { [weak self] in
             guard let filePath = self?.getFirebaseConfigFilePath(),
                   let fileopts = FirebaseOptions(contentsOfFile: filePath) else {
                     assert(false, "Firebase config file couldn't load")

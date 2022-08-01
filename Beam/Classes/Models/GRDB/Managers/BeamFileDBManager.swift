@@ -170,6 +170,7 @@ protocol BeamFileStorage {
 
 class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoImportDisabler {
     var changedObjects: [UUID: BeamFileRecord] = [:]
+    let objectQueue = BeamObjectQueue<BeamFileRecord>()
     static var id = UUID()
     static var name = "BeamFileDBManager"
 
@@ -470,7 +471,6 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     static var uploadType: BeamObjectRequestUploadType {
         .directUpload
     }
-    internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "BeamFileDBManager BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     func willSaveAllOnBeamObjectApi() {}
 
