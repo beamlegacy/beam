@@ -89,4 +89,18 @@ class TabGroupMenuView: BaseView {
         clickTabGroupMenu(.tabGroupExpand)
     }
     
+    func closeFirstTabGroup() {
+        openFirstTabGroupMenu()
+        waitForMenuToBeDisplayed()
+        clickTabGroupMenu(.tabGroupCloseGroup)
+    }
+    
+    func captureFirstTabGroup() {
+        openFirstTabGroupMenu()
+        waitForMenuToBeDisplayed()
+        clickTabGroupMenu(.tabGroupCapture)
+        typeKeyboardKey(.enter)
+        typeKeyboardKey(.escape)
+    }
+    
 }

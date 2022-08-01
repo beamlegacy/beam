@@ -11,6 +11,7 @@ enum NoteViewLocators {
     
     enum Groups: String, CaseIterable, UIElement {
         case contextMenu = "ContextMenu"
+        case tabGroupPrefix = "tab-group-"
     }
     
     enum ScrollViews: String, CaseIterable, UIElement {
