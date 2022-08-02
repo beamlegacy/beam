@@ -16,8 +16,12 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
     @EnvironmentObject var windowInfo: BeamWindowInfo
     @Environment(\.undoManager) var undoManager
 
+    private var listType: ListType {
+        return state.allNotesListType
+    }
+
     private var currentNotesList: [NoteTableViewItem] {
-        return model.getCurrentNotesList(for: model.listType)
+        return model.getCurrentNotesList(for: listType)
     }
 
     @StateObject private var model = AllNotesPageViewModel()
@@ -69,7 +73,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
     ]
 
     private var cardsFilters: some View {
-        switch self.model.listType {
+        switch listType {
         case .allNotes:
             return Text("All (\(model.getCurrentNotesList(for: .allNotes).count))")
         case .privateNotes:
@@ -93,11 +97,11 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             return loc("Publishing '\(publishingNoteTitle)'...")
         }
 
-        if model.listType == .publicNotes {
+        if listType == .publicNotes {
             return model.publicNotesItems.count == 0 ? loc("You haven’t published any note yet. Start today!") : loc("New Published Note")
         }
 
-        if model.listType == .onProfileNotes {
+        if listType == .onProfileNotes {
             return model.onProfileNotesItems.count == 0 ? loc("You haven’t published any note to your profile yet. Start today!") : loc("New Published on Profile Note")
         }
 
@@ -193,7 +197,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                       creationRowTitle: creationRowPlaceholder,
                       isCreationRowLoading: model.publishingNoteTitle != nil,
                       shouldReloadData: $model.shouldReloadData,
-                      sortDescriptor: model.sortDescriptor) { (newText, row) in
+                      sortDescriptor: $state.allNotesSortDescriptor) { (newText, row) in
                 onEditingText(self, newText, row: row, in: currentNotesList)
             } onSelectionChanged: { (selectedIndexes) in
                 Logger.shared.logDebug("selected: \(selectedIndexes.map { $0 })")
@@ -241,8 +245,12 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
         .frame(minWidth: 616, maxWidth: 900)
         .padding(.horizontal, compactWindowWidth ? 92 : 204)
         .id(model.id)
+        .onChange(of: state.showDailyNotes) { newValue in
+            model.setShowDailyNotes(newValue)
+        }
         .onAppear {
             model.data = data
+            model.setShowDailyNotes(state.showDailyNotes)
             model.refreshAllNotes()
         }
         .onDisappear {
@@ -290,7 +298,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
         guard let window = AppDelegate.main.window,
               let buttonFrame = buttonFrameInGlobalCoordinates?.swiftUISafeTopLeftGlobalFrame(in: window) else { return }
 
-        let menu = AllNotesPageFiltersContextualMenu(viewModel: model)
+        let menu = AllNotesPageFiltersContextualMenu(viewModel: model, state: state)
         menu.presentMenu(at: CGPoint(x: buttonFrame.origin.x, y: buttonFrame.maxY + 6))
     }
 
@@ -300,8 +308,8 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
         }
         if row >= notesList.count {
             guard let newNote = try? state.fetchOrCreateNoteForQuery(title) else { return }
-            let isPublic = model.listType == .publicNotes
-            let publishOnProfile = model.listType == .onProfileNotes
+            let isPublic = listType == .publicNotes
+            let publishOnProfile = listType == .onProfileNotes
 
             //If we create a public note, publish it right after creation, else just save it
             if isPublic || publishOnProfile {
@@ -315,7 +323,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                             // Saving the private note at least and showing it to user.
                             newNote.publicationStatus = .unpublished
                             _ = newNote.save(source)
-                            model.listType = .privateNotes
+                            state.allNotesListType = .privateNotes
                         case .success:
                             model.refreshAllNotes()
                         }

@@ -9,15 +9,7 @@ import SwiftUI
 import Combine
 import BeamCore
 
-class AllNotesPageViewModel: ObservableObject, Identifiable {
-
-    private struct PersistedState {
-        var sortDescriptor: NSSortDescriptor?
-        var listType: ListType?
-        var showDailyNotes: Bool?
-    }
-    static private var persistedState = PersistedState()
-
+final class AllNotesPageViewModel: ObservableObject, Identifiable {
     var data: BeamData?
     @Published private var allNotes = [BeamDocument]() {
         didSet {
@@ -34,24 +26,8 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
     @Published var onProfileNotesItems = [NoteTableViewItem]()
     @Published var shouldReloadData: Bool? = false
     @Published var publishingNoteTitle: String?
-    @Published var showDailyNotes: Bool {
-        didSet {
-            updateNoteItemsFromAllNotes()
-            Self.persistedState.showDailyNotes = showDailyNotes
-        }
-    }
 
-    enum ListType {
-        case allNotes
-        case privateNotes
-        case publicNotes
-        case onProfileNotes
-    }
-    @Published var listType: ListType {
-        didSet {
-            Self.persistedState.listType = listType
-        }
-    }
+    private var showDailyNotes = true
 
     private var databaseObservers = Set<AnyCancellable>()
     private var metadataFetchers = Set<AnyCancellable>()
@@ -59,18 +35,8 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
     private var notesMetadataCache: NoteListMetadataCache {
         NoteListMetadataCache.shared
     }
-    var sortDescriptor: Binding<NSSortDescriptor?> {
-        .init {
-            Self.persistedState.sortDescriptor
-        } set: {
-            Self.persistedState.sortDescriptor = $0
-        }
-    }
 
     init() {
-        listType = Self.persistedState.listType ?? .allNotes
-        showDailyNotes = Self.persistedState.showDailyNotes ?? true
-
         BeamDocumentCollection.documentSaved
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -115,6 +81,11 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
         default:
             return allNotesItems
         }
+    }
+
+    func setShowDailyNotes(_ show: Bool) {
+        showDailyNotes = show
+        updateNoteItemsFromAllNotes()
     }
 
     /// We're hiding empty journal notes; except for today's
