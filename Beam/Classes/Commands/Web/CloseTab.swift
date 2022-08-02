@@ -66,7 +66,6 @@ class CloseTab: WebCommand {
         if !appIsClosing {
             tab.tabWillClose()
         }
-        tab.cancelObservers()
 
         tabData = encode(tab: tab)
 
