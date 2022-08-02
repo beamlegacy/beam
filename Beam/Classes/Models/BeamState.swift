@@ -16,6 +16,10 @@ import Sentry
 @objc public class BeamState: NSObject, ObservableObject, Codable, BeamDocumentSource {
     var data: BeamData
 
+    @Published var allNotesSortDescriptor: NSSortDescriptor?
+    @Published var allNotesListType: ListType = .allNotes
+    @Published var showDailyNotes = true
+
     public static var sourceId: String { "\(Self.self)" }
 
     let isIncognito: Bool
@@ -743,6 +747,9 @@ import Sentry
         case tabGroups
         case tabGroupIDs
         case backForwardList
+        case allNotesMode
+        case allNotesSortDescriptor
+        case showDailyNotes
     }
 
     required public init(from decoder: Decoder) throws {
@@ -751,6 +758,20 @@ import Sentry
         super.init()
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        if let descriptor = try? container.decode(SortDescriptor.self, forKey: .allNotesSortDescriptor) {
+            let sortSelector: Selector? = descriptor.caseInsensitiveCompare ? #selector(NSString.caseInsensitiveCompare) : nil
+            let sortDescriptor = NSSortDescriptor(key: descriptor.key,
+                                                  ascending: descriptor.ascending,
+                                                  selector: sortSelector)
+            allNotesSortDescriptor = sortDescriptor
+        }
+        if let mode = try? container.decode(ListType.self, forKey: .allNotesMode) {
+            allNotesListType = mode
+        }
+        if let showJournal = try? container.decode(Bool.self, forKey: .showDailyNotes) {
+            showDailyNotes = showJournal
+        }
 
         if let currentNoteTitle = try? container.decode(String.self, forKey: .currentNote) {
             currentNote = BeamNote.fetch(title: currentNoteTitle)
@@ -796,6 +817,15 @@ import Sentry
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+
+        if let sortDescriptor = allNotesSortDescriptor, let key = sortDescriptor.key {
+            let descriptor = SortDescriptor(key: key,
+                                            ascending: sortDescriptor.ascending,
+                                            caseInsensitiveCompare: sortDescriptor.selector == #selector(NSString.caseInsensitiveCompare))
+            try container.encode(descriptor, forKey: .allNotesSortDescriptor)
+        }
+        try container.encode(allNotesListType, forKey: .allNotesMode)
+        try container.encode(showDailyNotes, forKey: .showDailyNotes)
 
         if let note = currentNote {
             try container.encode(note.title, forKey: .currentNote)
@@ -1079,4 +1109,17 @@ extension BeamState {
         }
         notesFocusedStates.saveNoteFocusedState(noteId: note.id, focusedElement: focusedElement, cursorPosition: cursorPosition)
     }
+}
+
+enum ListType: String, Codable {
+    case allNotes
+    case privateNotes
+    case publicNotes
+    case onProfileNotes
+}
+
+private struct SortDescriptor: Codable {
+    let key: String
+    let ascending: Bool
+    let caseInsensitiveCompare: Bool
 }
