@@ -634,6 +634,7 @@ import UniformTypeIdentifiers
     }
 
     func appWillClose() {
+        cancelObservers()
         webAutofillController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeApp()
