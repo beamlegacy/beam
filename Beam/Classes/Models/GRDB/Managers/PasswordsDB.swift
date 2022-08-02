@@ -150,7 +150,7 @@ extension LocalPasswordRecord: MutablePersistableRecord {
 class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisabler {
     static var id = UUID()
     static var name = "PasswordDBManager"
-    var holder: BeamManagerOwner?
+    weak var holder: BeamManagerOwner?
     var grdbStore: GRDBStore
 
     override var tableNames: [String] { [PasswordsDB.tableName] }
