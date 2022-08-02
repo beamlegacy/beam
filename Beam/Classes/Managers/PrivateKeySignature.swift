@@ -78,7 +78,7 @@ class PrivateKeySignatureManager: BeamObjectManagerDelegate {
                 assert(!invalidObjects.isEmpty)
                 assert(invalidObjects.first?.beamObjectType == BeamObjectObjectType.privateKeySignature.rawValue)
             default:
-                break
+                throw error
             }
 
             Logger.shared.logError("Error fetching distant key from API: \(error)", category: .privateKeySignature)
