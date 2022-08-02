@@ -120,16 +120,20 @@ struct AppearanceView: View {
                         .if(beamAppearence == beamAppearenceDefault) {
                             $0.overlay(
                                 RoundedRectangle(cornerRadius: 7)
-                                    .stroke(Color.blue, lineWidth: 4)
+                                    .stroke(accentColor, lineWidth: 4)
                             )
                         }
                     Text(beamAppearenceName)
                         .font(BeamFont.medium(size: 10).swiftUI)
                         .foregroundColor(beamAppearence == beamAppearenceDefault ?
-                                            BeamColor.Bluetiful.swiftUI : BeamColor.Generic.subtitle.swiftUI)
+                                             accentColor : BeamColor.Generic.subtitle.swiftUI)
                 }
             }).buttonStyle(PlainButtonStyle())
         }
+    }
+
+    private var accentColor: Color {
+        return Color(NSColor.controlAccentColor)
     }
 
     private func set(beamAppearance: BeamAppearance) {
