@@ -750,7 +750,6 @@
 		9634DD79264AA1A10065383E /* TextFrameLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD78264AA1A10065383E /* TextFrameLayer.swift */; };
 		9634DD8F264AF7940065383E /* TextLineLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD8E264AF7940065383E /* TextLineLayer.swift */; };
 		9634DD91264B203E0065383E /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD90264B203E0065383E /* ShapeLayer.swift */; };
-		9635C96D276945CD00015575 /* OldJournalStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635C96C276945CD00015575 /* OldJournalStackView.swift */; };
 		9635C97427696C5700015575 /* DebugHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635C97327696C5700015575 /* DebugHelpers.swift */; };
 		9635C980276AABB300015575 /* SignPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635C97F276AABB300015575 /* SignPost.swift */; };
 		9639AA75276906820006C724 /* EnvironmentVariables_generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */; };
@@ -2698,7 +2697,6 @@
 		9634DD78264AA1A10065383E /* TextFrameLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFrameLayer.swift; sourceTree = "<group>"; };
 		9634DD8E264AF7940065383E /* TextLineLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLineLayer.swift; sourceTree = "<group>"; };
 		9634DD90264B203E0065383E /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
-		9635C96C276945CD00015575 /* OldJournalStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OldJournalStackView.swift; sourceTree = "<group>"; };
 		9635C97327696C5700015575 /* DebugHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugHelpers.swift; sourceTree = "<group>"; };
 		9635C97F276AABB300015575 /* SignPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignPost.swift; sourceTree = "<group>"; };
 		9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentVariables_generated.swift; sourceTree = "<group>"; };
@@ -4694,7 +4692,6 @@
 			children = (
 				A0D06CDA260A2D2700264926 /* JournalScrollView.swift */,
 				A0E7D98626139FCA00D70676 /* JournalStackView.swift */,
-				9635C96C276945CD00015575 /* OldJournalStackView.swift */,
 			);
 			path = Journal;
 			sourceTree = "<group>";
@@ -9312,7 +9309,6 @@
 				6635D9842853E73A00F4B775 /* ContextMenuMessageHandler.swift in Sources */,
 				A504430F281C36A900C91204 /* View+Snapshot.swift in Sources */,
 				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
-				9635C96D276945CD00015575 /* OldJournalStackView.swift in Sources */,
 				5298EAFD26272CCC0033862C /* CoreDataMigrator.swift in Sources */,
 				8AA2BC59270339DD00B99B71 /* ScrollCaptureView.swift in Sources */,
 				4181721E2581107C00317ED8 /* OSLog+Beam.swift in Sources */,
