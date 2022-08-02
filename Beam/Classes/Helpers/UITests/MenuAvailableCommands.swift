@@ -24,6 +24,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case disableBrowsingSessionCollection = "BrowsingSession Collect: Disable"
     case enableCreateJournalOnce = "Create Journal once per window: Enable"
     case disableCreateJournalOnce = "Create Journal once per window: Disable"
+    case resetUserPreferences = "Reset User Preferences"
 
     case separatorA
 
@@ -117,7 +118,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
         case .resetAPIEndpoints, .setAPIEndpointsToStaging, .deleteRemoteAccount:
             return .remoteServer
         case .separatorInPreferencesA, .startBeamOnDefault, .startBeamOnTabs, .enableCreateJournalOnce, .disableCreateJournalOnce,
-                .enableBrowsingSessionCollection, .disableBrowsingSessionCollection:
+                .enableBrowsingSessionCollection, .disableBrowsingSessionCollection, .resetUserPreferences:
             return .preferences
         case .signInWithTestAccount, .signUpWithRandomTestAccount, .logout:
             return .account

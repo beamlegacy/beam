@@ -102,10 +102,8 @@ class OmniBoxTestView: BaseView {
     }
     
     func waitForAutocompleteResultsLoad(timeout: TimeInterval, expectedNumber: Int) -> Bool {
-        let now = NSTimeIntervalSince1970
-        while getAutocompleteResults().count != expectedNumber && NSTimeIntervalSince1970 < now + timeout {
-            usleep(1000)
-        }
+        // wait for first result to be displayed
+        _ = getAutocompleteResults().firstMatch.waitForExistence(timeout: timeout)
         return getAutocompleteResults().count == expectedNumber
     }
     
