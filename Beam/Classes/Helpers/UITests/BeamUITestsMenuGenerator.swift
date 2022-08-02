@@ -77,6 +77,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         case .populatePasswordsDB: populatePasswordsDB()
         case .populateCreditCardsDB: populateCreditCardsDB()
         case .disablePasswordProtect: disablePasswordProtection()
+        case .resetUserPreferences: resetUserPreferences()
         default: break
         }
     }
@@ -132,6 +133,8 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     private func destroyDatabase() {
         clearPasswordsDatabase()
         clearCreditCardsDatabase()
+        // Restore User Preferences
+        BeamUserDefaultsManager.clear()
 
         try? BeamData.shared.currentDocumentCollection?.delete(self, filters: [])
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
@@ -418,6 +421,11 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
                 Logger.shared.logDebug("Account deleted", category: .accountManager)
             }
         }
+    }
+
+    private func resetUserPreferences() {
+        BeamUserDefaultsManager.clear()
+        StandardStorable<Any>.clear()
     }
 
     private func createFakeDailySummary() {
