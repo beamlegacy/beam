@@ -120,6 +120,14 @@ extension BrowserTab: WebPage {
     }
 
     func tabWillClose() {
+        cancelObservers()
+
+        // Keep the web view alive until after the beforeunload event is processed.
+        let webView = self.webView
+        webView.evaluateJavaScript(#"window.dispatchEvent(new Event("beforeunload"))"#) { result, error in
+            _ = webView
+        }
+        
         isFromNoteSearch = false
         webAutofillController?.dismiss()
         authenticationViewModel?.cancel()
