@@ -287,4 +287,10 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.createTabGroupNamed.rawValue)
         return self
     }
+    
+    @discardableResult
+    func resetUserPreferences() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.resetUserPreferences.rawValue)
+        return self
+    }
 }
