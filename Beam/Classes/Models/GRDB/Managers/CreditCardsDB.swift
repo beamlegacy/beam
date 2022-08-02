@@ -147,7 +147,7 @@ extension CreditCardRecord {
 
 class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImportDisabler {
     static var name = "CreditCardsDB"
-    var holder: BeamManagerOwner?
+    weak var holder: BeamManagerOwner?
     override var tableNames: [String] { [CreditCardsDB.tableName] }
 
     static let id = UUID()
