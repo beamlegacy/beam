@@ -12,6 +12,7 @@ import BeamCore
 public protocol BeamManager: AnyObject {
     static var id: UUID { get }
     static var name: String { get }
+    /// The holder must be weak to prevent a retain cycle!
     var holder: BeamManagerOwner? { get }
 
     static func load(_ holder: BeamManagerOwner, store: GRDBStore) throws -> Self
