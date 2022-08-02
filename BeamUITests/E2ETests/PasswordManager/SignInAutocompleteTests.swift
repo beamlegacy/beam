@@ -106,7 +106,9 @@ class SignInAutocompleteTests: BaseTest {
         }
     }
 
-    func testOtherPasswordsAppearanceRemovalFill() {
+    func testOtherPasswordsAppearanceRemovalFill() throws {
+        try XCTSkipIf(isBigSurOS(), "Reactivate once BE-5032 is fixed")
+
         let login = "qa@beamapp.co"
         launchApp()
         
