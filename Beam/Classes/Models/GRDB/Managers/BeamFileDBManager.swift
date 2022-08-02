@@ -177,7 +177,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
     static let fileSaved = PassthroughSubject<BeamFileRecord, Never>()
     static let fileDeleted = PassthroughSubject<UUID, Never>()
 
-    var holder: BeamManagerOwner?
+    weak var holder: BeamManagerOwner?
 
     override var tableNames: [String] { [BeamFileRecord.tableName, BeamFileRefRecord.tableName] }
 
