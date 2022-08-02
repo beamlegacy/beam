@@ -203,7 +203,8 @@ class BrowserTabsManager: ObservableObject {
             var groupForTabs: TabGroup?
             if let group = portion.group {
                 let tabsCountInThatGroup = alreadyAddedGroups[group.id] ?? group.pageIds.count
-                if group.shouldBePersisted || group.isLocked || tabsCountInThatGroup > 1 {
+                let isForced = tabGroupingManager.forcedTabsGroup.contains { $0.value.inGroup == group }
+                if group.shouldBePersisted || group.isLocked || tabsCountInThatGroup > 1 || isForced {
                     groupForTabs = group
                     if portion.displayGroupCapsule {
                         let item = TabsListItem(group: group, count: tabsCountInThatGroup)
