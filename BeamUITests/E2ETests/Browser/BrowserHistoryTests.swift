@@ -28,17 +28,22 @@ class BrowserHistoryTests: BaseTest {
         webView.button("Continue").tapInTheMiddle()
     }
     
-    func testBrowserHistoryNavigation() {
-        
-        let url1 = mockPage.getMockPageUrl(.mainView)
-        let url2 = mockPage.getMockPageUrl(.ambiguousShortForm)
-        let url3 = url2 + "view"
+    private func openMultipleWebPagesInSameTab() {
         
         step("GIVEN I open multiple web pages in the same tab"){
             mockPage.openMockPage(.mainView)
             self.openPageByLinkClick()
             self.openPageByContinueButtonClick()
         }
+    }
+    
+    func testBrowserHistoryNavigation() {
+        
+        let url1 = mockPage.getMockPageUrl(.mainView)
+        let url2 = mockPage.getMockPageUrl(.ambiguousShortForm)
+        let url3 = url2 + "view"
+        
+        openMultipleWebPagesInSameTab()
         
         step("THEN forward button is disabled and \(url2) is opened on browser history back button click"){
             XCTAssertFalse(webView.button(WebViewLocators.Buttons.goForwardButton.accessibilityIdentifier).exists)
@@ -89,6 +94,21 @@ class BrowserHistoryTests: BaseTest {
             XCTAssertTrue(webView.activateAndWaitForSearchFieldToEqual(url3))
         }
         
+    }
+    
+    func testCMDClickOnNavigationArrowOpensNewTab() {
+        
+        openMultipleWebPagesInSameTab()
+        
+        step("WHEN I CMD click on navigation arrow") {
+            webView.button(WebViewLocators.Buttons.goBackButton.accessibilityIdentifier).clickPressingKeyboardKey(.command)
+        }
+        
+        step("THEN new tab is opened on correct web page") {
+            webView.waitForWebViewToLoad()
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 1), "Sign In")
+        }
     }
     
 }

@@ -109,6 +109,14 @@ extension XCUIElement: WaitHelper {
         }
         return self
     }
+    
+    @discardableResult
+    func clickPressingKeyboardKey(_ key: KeyModifierFlags) -> XCUIElement {
+        XCUIElement.perform(withKeyModifiers: key) {
+            self.tapInTheMiddle()
+        }
+        return self
+    }
 
     @discardableResult
     public func clickIfExists() -> XCUIElement {
