@@ -292,7 +292,13 @@ class WebTestView: BaseView {
         menuItem(menuAction.accessibilityIdentifier).tapInTheMiddle()
     }
     
+    @discardableResult
     func isTabMenuOptionDisplayed(_ menuAction: WebViewLocators.MenuItem) -> Bool{
         return menuItem(menuAction.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+    }
+    
+    func isTabMenuOptionEnabled(_ menuAction: WebViewLocators.MenuItem) -> Bool{
+        isTabMenuOptionDisplayed(menuAction)
+        return menuItem(menuAction.accessibilityIdentifier).isEnabled
     }
 }
