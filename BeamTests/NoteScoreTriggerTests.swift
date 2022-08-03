@@ -58,6 +58,7 @@ class NoteScoreTriggerTests: XCTestCase {
 
         init(webView: BeamWebView) {
             self.webView = webView
+            self.webPositions = WebPositions(webFrames: webFrames)
         }
 
         var downloadManager: DownloadManager?
@@ -77,8 +78,8 @@ class NoteScoreTriggerTests: XCTestCase {
         var url: URL?
         var requestedURL: URL?
 
-        var webFrames: WebFrames?
-        var webPositions: WebPositions?
+        var webFrames = WebFrames()
+        var webPositions: WebPositions
         var pointAndShoot: PointAndShoot?
         var browsingScorer: BrowsingScorer?
         var webViewNavigationHandler: WebViewNavigationHandler?

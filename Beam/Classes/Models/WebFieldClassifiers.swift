@@ -16,7 +16,8 @@ final class WebFieldClassifiers {
 
     init(webFrames: WebFrames) {
         classifier = WebFieldClassifier()
-        webFrames.removedFrames.sink { href in
+        webFrames.removedFrames.sink { [weak self] href in
+            guard let self = self else { return }
             Logger.shared.logDebug("Removing classifier for frame \(href)", category: .webAutofillInternal)
             self.classifierResultsByFrame[href] = nil
         }
