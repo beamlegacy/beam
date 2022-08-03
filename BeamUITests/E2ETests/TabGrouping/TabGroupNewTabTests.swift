@@ -23,14 +23,14 @@ class TabGroupNewTabTests: BaseTest {
     func testTabGroupNewTab() throws {
         
         step("When I add a tab to the group") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupNewTab)
         }
         
         step("Then Tab Group contains one more tab") {
             XCTAssertEqual(webView.getNumberOfTabs(), 5)
-            tabGroupMenu.collapseFirstTabGroup()
+            tabGroupMenu.collapseTabGroup(index: 0)
             XCTAssertEqual(tabGroupMenu.getTabGroupName(), "5")
             XCTAssertEqual(webView.getNumberOfTabs(), 0)
         }
@@ -39,7 +39,7 @@ class TabGroupNewTabTests: BaseTest {
     func testTabGroupNewTabWhenCollapsed() throws {
         
         step("When I collapse tab group") {
-            tabGroupMenu.collapseFirstTabGroup()
+            tabGroupMenu.collapseTabGroup(index: 0)
         }
         
         step("Then Tab Group name contains the number of tabs") {
@@ -47,7 +47,7 @@ class TabGroupNewTabTests: BaseTest {
         }
         
         step("When I add a tab to the group") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupNewTab)
         }
@@ -55,7 +55,7 @@ class TabGroupNewTabTests: BaseTest {
         step("Then Tab Group contains one more tab") {
             XCTAssertEqual(webView.getNumberOfTabs(), 1)
             XCTAssertEqual(tabGroupMenu.getTabGroupName(), "5")
-            tabGroupMenu.expandFirstTabGroup()
+            tabGroupMenu.expandTabGroup(index: 0)
             XCTAssertEqual(webView.getNumberOfTabs(), 5)
         }
     }

@@ -45,6 +45,9 @@ enum WebViewLocators {
         case pinTab = "Pin Tab"
         case unpinTab = "Unpin Tab"
         case closeTab = "Close Tab"
+        case createTabGroup = "Create Tab Group"
+        case addToGroup = "Add to Group"
+        case ungroup = "Ungroup"
     }
     
 }

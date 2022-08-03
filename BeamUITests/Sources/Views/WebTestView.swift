@@ -291,5 +291,8 @@ class WebTestView: BaseView {
     func selectTabMenuItem(_ menuAction: WebViewLocators.MenuItem) {
         menuItem(menuAction.accessibilityIdentifier).tapInTheMiddle()
     }
-
+    
+    func isTabMenuOptionDisplayed(_ menuAction: WebViewLocators.MenuItem) -> Bool{
+        return menuItem(menuAction.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+    }
 }
