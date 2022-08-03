@@ -88,19 +88,21 @@ private let tabPinSuggestionParameters = TabPinSuggestionParameters(
 class TabPinSuggester {
     let storage: DomainPath0TreeStatsStorageProtocol
     let tabPinMemory: TabPinSuggestionMemory
-    private var eligibleDomainPaths: [ScoredDomainPath0] = []
+    private var eligibleDomainPaths: [ScoredDomainPath0]
     private var lastCandidateRefreshDate: Date = Date.distantPast
     private let parameters: TabPinSuggestionParameters
     private var refreshing = false
 
     init(storage: DomainPath0TreeStatsStorageProtocol,
          suggestionMemory: TabPinSuggestionMemory = TabPinSuggestionMemory(),
-         parameters: TabPinSuggestionParameters = tabPinSuggestionParameters
+         parameters: TabPinSuggestionParameters = tabPinSuggestionParameters,
+         providedEligibleDomainPaths: [ScoredDomainPath0]? = nil
     ) {
         self.storage = storage
         self.parameters = parameters
         self.tabPinMemory = suggestionMemory
         storage.cleanUp(olderThan: 60, maxRows: 50 * 1000)
+        self.eligibleDomainPaths = providedEligibleDomainPaths ?? []
         refreshEligibleDomainPaths()
     }
 
