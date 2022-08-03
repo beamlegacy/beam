@@ -86,6 +86,7 @@
         "RightClickImageMenuTests",
         "RightClickLinkMenuTests",
         "RightClickPageMenuTests",
+        "RightClickTabMenuTests",
         "RightClickTextMenuTests",
         "SearchOnNoteTests",
         "SearchOnNoteTests\/testSearchResultsCounter()",

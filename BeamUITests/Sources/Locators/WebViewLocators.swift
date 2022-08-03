@@ -48,6 +48,8 @@ enum WebViewLocators {
         case createTabGroup = "Create Tab Group"
         case addToGroup = "Add to Group"
         case ungroup = "Ungroup"
+        case closeTabsToTheRight = "Close Tabs to the Right"
+        case closeOtherTabs = "Close Other Tabs"
     }
     
 }
