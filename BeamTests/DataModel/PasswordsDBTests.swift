@@ -130,6 +130,7 @@ class PasswordsDBTests: XCTestCase {
         PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
         let entries = PasswordManager.shared.entries(for: Self.subdomain1.minimizedHost!, options: .fuzzy)
+            .sorted { $0.minimizedHost > $1.minimizedHost }
         XCTAssertEqual(entries.count, 2)
         XCTAssertEqual(entries.first?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(entries.first?.username, Self.username)
@@ -143,6 +144,7 @@ class PasswordsDBTests: XCTestCase {
         PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
         let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, options: .fuzzy)
+            .sorted { $0.minimizedHost > $1.minimizedHost }
         XCTAssertEqual(entries.count, 2)
         XCTAssertEqual(entries.first?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(entries.first?.username, Self.username)
