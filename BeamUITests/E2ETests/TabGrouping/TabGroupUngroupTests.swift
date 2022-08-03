@@ -23,21 +23,21 @@ class TabGroupUngroupTests: BaseTest {
     func testTabGroupUngroup() throws {
         
         step("When I ungroup tabs") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupUngroup)
         }
         
         step("Then tabs are ungrouped") {
             XCTAssertEqual(webView.getNumberOfTabs(), 4)
-            XCTAssertTrue(tabGroupMenu.doesTabGroupExist())
+            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
         }
     }
     
     func testTabGroupUngroupWhenCollapsed() throws {
         
         step("When I collapse tab group") {
-            tabGroupMenu.collapseFirstTabGroup()
+            tabGroupMenu.collapseTabGroup(index: 0)
         }
         
         step("Then group is collapsed") {
@@ -45,14 +45,14 @@ class TabGroupUngroupTests: BaseTest {
         }
         
         step("And I ungroup tabs") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupUngroup)
         }
         
         step("Then tabs are ungrouped") {
             XCTAssertEqual(webView.getNumberOfTabs(), 4)
-            XCTAssertTrue(tabGroupMenu.doesTabGroupExist())
+            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
         }
     }
 }
