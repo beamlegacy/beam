@@ -159,11 +159,11 @@ class PointAndShootSelectTest: PointAndShootTest {
 
         self.pns.collectedGroups = [group]
         // create a new set of targets
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
         positions.framesInfo[group.href] = WebFrames.FrameInfo(
             href: group.href,
             parentHref: group.href,

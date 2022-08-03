@@ -179,16 +179,9 @@ import UniformTypeIdentifiers
     var pointAndShootEnabled: Bool {
         contentType == .web && state?.omniboxInfo.isFocused != true && state?.associatedWindow?.isKeyWindow == true
     }
-    lazy var webFrames: WebFrames? = {
-        let webFrames = WebFrames()
-        return webFrames
-    }()
-    lazy var webPositions: WebPositions? = {
-        guard let webFrames = webFrames else { return nil }
-        let webPositions = WebPositions(webFrames: webFrames)
-        webPositions.delegate = self
-        return webPositions
-    }()
+    var webFrames = WebFrames()
+    var webPositions: WebPositions
+
     var numberOfLinksOpenedInANewTab: Int = 0
     // End WebPage Properties
 
@@ -232,8 +225,9 @@ import UniformTypeIdentifiers
         }
         browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin, isIncognito: state.isIncognito)
         noteController = WebNoteController(note: note, rootElement: rootElement)
-
+        webPositions = WebPositions(webFrames: webFrames)
         super.init()
+        webPositions.delegate = self
 
         if webView == nil {
             self.webView.wantsLayer = true
@@ -267,8 +261,9 @@ import UniformTypeIdentifiers
 
         browsingTree = Self.newBrowsingTree(origin: .pinnedTab(url: url), isIncognito: false)
         noteController = WebNoteController(note: nil, rootElement: nil)
-
+        webPositions = WebPositions(webFrames: webFrames)
         super.init()
+        webPositions.delegate = self
         browsingTree.isPinned = true
         updateFavIcon(fromWebView: false)
     }
@@ -329,9 +324,9 @@ import UniformTypeIdentifiers
         let beamWebView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
         webView = beamWebView
         contentView = NSViewContainerView(contentView: beamWebView)
-
+        webPositions = WebPositions(webFrames: webFrames)
         super.init()
-
+        webPositions.delegate = self
         updateFavIcon(fromWebView: false)
     }
 

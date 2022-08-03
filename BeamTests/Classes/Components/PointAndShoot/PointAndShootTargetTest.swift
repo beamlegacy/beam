@@ -30,11 +30,11 @@ class PointAndShootTargetTest: PointAndShootTest {
 
     override func setUpWithError() throws {
         initTestBed()
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
         // Register window to framesInfo
         positions.framesInfo[windowHref] = WebFrames.FrameInfo(
             href: windowHref,
@@ -56,11 +56,11 @@ class PointAndShootTargetTest: PointAndShootTest {
 
     /// When only the window frame is registered, translating the target shouldn't change the target.
     func testtranslateAndScaleTarget_noiFrames() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
 
         let translatedTarget = self.pns.translateAndScaleTargetIfNeeded(target, windowHref)
 
@@ -76,11 +76,11 @@ class PointAndShootTargetTest: PointAndShootTest {
     }
 
     func testtranslateAndScaleTarget_noiFrames_scroll() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
 
         // set scroll positions
         let scrollDelta: CGFloat = 33
@@ -108,11 +108,11 @@ class PointAndShootTargetTest: PointAndShootTest {
     }
 
     func testtranslateAndScaleTarget_singleiFrame_scroll_window() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
         // set scroll positions
         let scrollDeltaWindow: CGFloat = 87
         positions.setFrameInfoScroll(href: windowHref, scrollX: 0, scrollY: scrollDeltaWindow)
@@ -155,11 +155,11 @@ class PointAndShootTargetTest: PointAndShootTest {
     }
 
     func testtranslateAndScaleTarget_singleiFrame_scroll_iframe() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
         // Register Frame to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
         // set scroll positions
@@ -207,11 +207,11 @@ class PointAndShootTargetTest: PointAndShootTest {
     }
 
     func testtranslateAndScaleTarget_singleiFrame_scroll_both() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
         // Register Frame to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
         // set scroll positions
@@ -263,11 +263,11 @@ class PointAndShootTargetTest: PointAndShootTest {
     }
 
     func testtranslateAndScaleTarget_singleiFrame() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
         // Register Frame to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
         // We should have 2 frames nested like so:
@@ -292,11 +292,11 @@ class PointAndShootTargetTest: PointAndShootTest {
     }
 
     func testtranslateAndScaleTarget_singleiFramesNested() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
         // Register Frames to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
         positions.framesInfo[iFrame2.href] = iFrame2
@@ -325,11 +325,11 @@ class PointAndShootTargetTest: PointAndShootTest {
     }
 
     func testtranslateAndScaleTarget_iFramesNested_withSiblings() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("expected test page")
                   return
               }
+        let positions = page.webPositions
         // Register Frames to framesInfo
         positions.framesInfo[iFrameA.href] = iFrameA
         positions.framesInfo[iFrameB.href] = iFrameB

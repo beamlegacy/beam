@@ -67,13 +67,7 @@ extension PointAndShoot {
         guard isDifferentUrl || scale != 1 else {
             return nil
         }
-        let offset: CGPoint
-        if let webPositions = page.webPositions {
-            offset = webPositions.viewportPosition(href: href)
-        } else {
-            Logger.shared.logError("webPositions is required to scale target correctly", category: .pointAndShoot)
-            offset = .zero
-        }
+        let offset: CGPoint = page.webPositions.viewportPosition(href: href)
         return targets.map({ target in
             translateAndScaleTarget(target, xDelta: offset.x, yDelta: offset.y, scale: scale, isDifferentUrl: isDifferentUrl)
         })
