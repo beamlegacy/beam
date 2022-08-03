@@ -25,7 +25,7 @@ class TabGroupNameTests: BaseTest {
     func testTabGroupName() throws {
 
         step("When I open Tab Group Menu") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
         }
         
         step("Then Tab Group Menu is displayed") {
@@ -41,7 +41,7 @@ class TabGroupNameTests: BaseTest {
         }
         
         step("When I delete tab group name") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.deleteTabGroupName()
         }
@@ -54,7 +54,7 @@ class TabGroupNameTests: BaseTest {
     func testTabGroupNameCollapsed() throws {
 
         step("When I collapse tab group") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCollapse)
         }
@@ -64,7 +64,7 @@ class TabGroupNameTests: BaseTest {
         }
         
         step("When I set a tab group name") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: tabGroupName)
         }
@@ -74,7 +74,7 @@ class TabGroupNameTests: BaseTest {
         }
         
         step("When I delete tab group name") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.deleteTabGroupName()
         }
@@ -87,7 +87,7 @@ class TabGroupNameTests: BaseTest {
     func testTabGroupNameSpecialChar() throws {
 
         step("When I set a tab group name with special chars") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: tabGroupNameSpecialChars)
 
@@ -104,15 +104,15 @@ class TabGroupNameTests: BaseTest {
         }
 
         step("Then the tab group is restored") {
-            XCTAssertTrue(tabGroupMenu.getFirstTabGroup().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(tabGroupMenu.getTabGroupElementIndex(index: 0).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
         step("When I collapse tab group, set a tab group name and restart the app") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCollapse)
 
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
             tabGroupMenu.waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: tabGroupName)
 

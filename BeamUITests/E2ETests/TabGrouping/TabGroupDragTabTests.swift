@@ -27,7 +27,7 @@ class TabGroupDragTabTests: BaseTest {
         }
         
         step("Then tabs are ungrouped") {
-            tabGroupMenu.collapseFirstTabGroup()
+            tabGroupMenu.collapseTabGroup(index: 0)
             XCTAssertEqual(webView.getNumberOfTabs(), 1)
             XCTAssertEqual(tabGroupMenu.getTabGroupName(), "3")
         }
@@ -40,10 +40,10 @@ class TabGroupDragTabTests: BaseTest {
         }
         
         step("Then tab is outside of the group") {
-            tabGroupMenu.collapseFirstTabGroup()
+            tabGroupMenu.collapseTabGroup(index: 0)
             XCTAssertEqual(webView.getNumberOfTabs(), 1)
             XCTAssertEqual(tabGroupMenu.getTabGroupName(), "4")
-            tabGroupMenu.expandFirstTabGroup()
+            tabGroupMenu.expandTabGroup(index: 0)
         }
         
         step("When I drag new tab inside of the group") {
@@ -51,7 +51,7 @@ class TabGroupDragTabTests: BaseTest {
         }
         
         step("Then tab is inside the group") {
-            tabGroupMenu.collapseFirstTabGroup()
+            tabGroupMenu.collapseTabGroup(index: 0)
             XCTAssertEqual(webView.getNumberOfTabs(), 0)
             XCTAssertEqual(tabGroupMenu.getTabGroupName(), "5")
         }
