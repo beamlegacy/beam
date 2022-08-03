@@ -458,16 +458,20 @@ extension BrowserTabsManager {
                 Logger.shared.logError("Suggested new current tab is not visible", category: .web)
             }
         } else {
-            switch tab.browsingTreeOrigin {
-            case .browsingNode(_, _, _, let rootId):
-                // If user cmd+click from a tab we want to go back to this tab
-                newCurrentTab = visibleTabs.first(where: { !$0.isPinned && $0.browsingTree.rootId == rootId })
-            case .searchBar(_, referringRootId: let referringRootId):
-                // If user cmd+T from a current tab we want to comeback to that origin tab
-                newCurrentTab = visibleTabs.first(where: { !$0.isPinned && $0.browsingTree.rootId == referringRootId })
-            default:
-                if let nextTabIdFromNeighborhood = nextTabIdFromNeighborhood {
-                    newCurrentTab = visibleTabs.first(where: { $0.id == nextTabIdFromNeighborhood })
+
+            // If the tab is in a group, stay in the group if possible:
+            if let nextTabIdFromNeighborhood = nextTabIdFromNeighborhood {
+                newCurrentTab = visibleTabs.first(where: { $0.id == nextTabIdFromNeighborhood })
+            } else {
+                switch tab.browsingTreeOrigin {
+                case .browsingNode(_, _, _, let rootId):
+                    // If user cmd+click from a tab we want to go back to this tab
+                    newCurrentTab = visibleTabs.first(where: { !$0.isPinned && $0.browsingTree.rootId == rootId })
+                case .searchBar(_, referringRootId: let referringRootId):
+                    // If user cmd+T from a current tab we want to comeback to that origin tab
+                    newCurrentTab = visibleTabs.first(where: { !$0.isPinned && $0.browsingTree.rootId == referringRootId })
+                default:
+                    break
                 }
             }
         }
@@ -510,28 +514,27 @@ extension BrowserTabsManager {
             tabsNeighborhoods[firstTabId] = neighborhood
             return firstTabId
         } else {
-            guard let index = tabsNeighborhoods[neighborhoodKey]?.firstIndex(of: tabId),
-                  let tabNeighborhood = tabsNeighborhoods[neighborhoodKey] else { return nil }
+            guard var tabNeighborhood = tabsNeighborhoods[neighborhoodKey],
+                  let index = tabNeighborhood.firstIndex(of: tabId)
+            else { return nil }
+            tabNeighborhood.removeAll(where: {$0 == tabId})
             let nextTabToGo = nextTabToGo(from: index, in: tabNeighborhood)
 
-            tabsNeighborhoods[neighborhoodKey]?.removeAll(where: {$0 == tabId})
-            if let neighborhood = tabsNeighborhoods[neighborhoodKey], neighborhood.isEmpty {
+            if tabNeighborhood.isEmpty {
                 tabsNeighborhoods.removeValue(forKey: neighborhoodKey)
+            } else {
+                tabsNeighborhoods[neighborhoodKey] = tabNeighborhood
             }
+
             return nextTabToGo ?? neighborhoodKey
         }
     }
 
     private func nextTabToGo(from index: Int, in neighborhood: [BrowserTab.TabID]) -> BrowserTab.TabID? {
-        let afterIdx = neighborhood.index(after: index)
-        let beforeIdx = neighborhood.index(before: index)
-        if afterIdx < neighborhood.count {
-            return neighborhood[afterIdx]
-        } else if beforeIdx < neighborhood.count && beforeIdx >= 0 {
-            return neighborhood[beforeIdx]
-        } else {
-            return nil
-        }
+        let afterIdx = min(neighborhood.count - 1, index)
+        guard afterIdx >= 0 else { return nil }
+        return neighborhood[afterIdx]
+
     }
 
 }
