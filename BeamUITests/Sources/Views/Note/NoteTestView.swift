@@ -481,7 +481,7 @@ class NoteTestView: TextEditorContextTestView {
         return app.windows.groups.matching(anyTabGroupPredicate).count
     }
     
-    func isTabGroupDisplay(index: Int) -> Bool {
+    func isTabGroupDisplayed(index: Int) -> Bool {
         return getTabGroupElementIndex(index: index).waitForExistence(timeout: minimumWaitTimeout)
     }
     

@@ -12,9 +12,12 @@ class TabGroupMenuView: BaseView {
     
     private let anyTabGroupPredicate = NSPredicate(format: "identifier BEGINSWITH '\(TabGroupMenuViewLocators.TabGroups.tabGroupPrefix.accessibilityIdentifier)'")
     
-    @discardableResult
-    func getFirstTabGroup() -> XCUIElement {
-        app.windows.groups.matching(anyTabGroupPredicate).firstMatch
+    func getTabGroupElementIndex(index: Int) -> XCUIElement {
+        return app.windows.groups.matching(anyTabGroupPredicate).element(boundBy: index)
+    }
+    
+    func getTabGroupCount() -> Int {
+        return app.windows.groups.matching(anyTabGroupPredicate).count
     }
     
     @discardableResult
@@ -22,14 +25,13 @@ class TabGroupMenuView: BaseView {
         app.windows.groups.matching(NSPredicate(format: "identifier BEGINSWITH '\(TabGroupMenuViewLocators.TabGroups.tabGroupPrefix.accessibilityIdentifier)Group(" + tabGroupName + ")'")).firstMatch
     }
     
-    @discardableResult
-    func doesTabGroupExist() -> Bool {
-        return waitForDoesntExist(app.windows.groups.matching(anyTabGroupPredicate).firstMatch)
+    func isTabGroupDisplayed(index: Int) -> Bool {
+        return getTabGroupElementIndex(index: index).waitForExistence(timeout: minimumWaitTimeout)
     }
     
     @discardableResult
-    func openFirstTabGroupMenu() -> TabGroupMenuView {
-        getFirstTabGroup().rightClickInTheMiddle()
+    func openTabGroupMenu(index: Int) -> TabGroupMenuView {
+        getTabGroupElementIndex(index: index).rightClickInTheMiddle()
         return self
     }
     
@@ -47,6 +49,11 @@ class TabGroupMenuView: BaseView {
     @discardableResult
     func waitForTabGroupNameToBeDisplayed(tabGroupName: String) -> Bool {
         return getTabGroupWithName(tabGroupName: tabGroupName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+    }
+    
+    @discardableResult
+    func waitForTabGroupToBeDisplayed(index: Int) -> Bool {
+        return getTabGroupElementIndex(index: index).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
     @discardableResult
@@ -77,26 +84,32 @@ class TabGroupMenuView: BaseView {
         menuItem(item.accessibilityIdentifier).clickOnExistence()
     }
     
-    func collapseFirstTabGroup() {
-        openFirstTabGroupMenu()
+    @discardableResult
+    func clickTabGroupCapsule(index: Int) -> TabGroupMenuView {
+        getTabGroupElementIndex(index: index).clickInTheMiddle()
+        return self
+    }
+    
+    func collapseTabGroup(index: Int) {
+        openTabGroupMenu(index: index)
         waitForMenuToBeDisplayed()
         clickTabGroupMenu(.tabGroupCollapse)
     }
     
-    func expandFirstTabGroup() {
-        openFirstTabGroupMenu()
+    func expandTabGroup(index: Int) {
+        openTabGroupMenu(index: index)
         waitForMenuToBeDisplayed()
         clickTabGroupMenu(.tabGroupExpand)
     }
     
-    func closeFirstTabGroup() {
-        openFirstTabGroupMenu()
+    func closeTabGroup(index: Int) {
+        openTabGroupMenu(index: index)
         waitForMenuToBeDisplayed()
         clickTabGroupMenu(.tabGroupCloseGroup)
     }
     
-    func captureFirstTabGroup() {
-        openFirstTabGroupMenu()
+    func captureTabGroup(index: Int) {
+        openTabGroupMenu(index: index)
         waitForMenuToBeDisplayed()
         clickTabGroupMenu(.tabGroupCapture)
         typeKeyboardKey(.enter)
