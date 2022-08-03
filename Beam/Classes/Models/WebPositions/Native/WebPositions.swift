@@ -30,8 +30,8 @@ class WebPositions: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init(webFrames: WebFrames) {
-        webFrames.$framesInfo.sink { framesInfo in
-            self.framesInfo = framesInfo
+        webFrames.$framesInfo.sink { [weak self] framesInfo in
+            self?.framesInfo = framesInfo
         }
         .store(in: &cancellables)
     }

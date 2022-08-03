@@ -598,7 +598,6 @@
 		87F47CC92669415800D01960 /* WebFieldClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F47CC82669415800D01960 /* WebFieldClassifier.swift */; };
 		87FCAE9127E474AA001D8D18 /* SandboxEscapeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FCAE9027E474AA001D8D18 /* SandboxEscapeTests.swift */; };
 		8A0DFAC127551E950044515B /* EmbedNodeMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0DFAC027551E950044515B /* EmbedNodeMessageHandler.swift */; };
-		8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = 8A0DFAD4275664090044515B /* FaviconFinder */; };
 		8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A141559267393E2005F2464 /* WebPositionsTest.swift */; };
 		8A14E32927F6468600DDCCE3 /* GeolocationMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A14E31427F645C700DDCCE3 /* GeolocationMessageHandler.swift */; };
 		8A14E32A27F6468600DDCCE3 /* Geolocation_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A14E32827F6466400DDCCE3 /* Geolocation_prod.js */; };
@@ -625,6 +624,7 @@
 		8A7601472860D03B00FB9265 /* SafariRemoteNotification.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A7601412860D03B00FB9265 /* SafariRemoteNotification.js */; };
 		8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */; };
 		8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */; };
+		8A7AA042289960A700B271E2 /* FaviconFinder in Frameworks */ = {isa = PBXBuildFile; productRef = 8A7AA041289960A700B271E2 /* FaviconFinder */; };
 		8A7C80F526F9E04000D3BA72 /* DestinationNoteAutocompleteListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C80F426F9E04000D3BA72 /* DestinationNoteAutocompleteListTests.swift */; };
 		8A7C8C1926B8137F00471A5B /* PointAndShootTargetsPathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C8C1826B8137F00471A5B /* PointAndShootTargetsPathTests.swift */; };
 		8A7D1ECB27D0EE4F008549A5 /* SocialTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7D1ECA27D0EE4F008549A5 /* SocialTitle.swift */; };
@@ -3492,10 +3492,10 @@
 				3315DC922667859A002A47CF /* Fakery in Frameworks */,
 				96319D242616232700D1CF31 /* BeamCore.framework in Frameworks */,
 				3315DC912667859A002A47CF /* Preferences in Frameworks */,
+				8A7AA042289960A700B271E2 /* FaviconFinder in Frameworks */,
 				3315DC952667859A002A47CF /* GRDB in Frameworks */,
 				52466B22270DA966002D1716 /* Clustering in Frameworks */,
 				A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
-				8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */,
 				33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */,
 				BFEA487D286A1519007A73BD /* AsyncHTTPClient in Frameworks */,
 				878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */,
@@ -8275,11 +8275,11 @@
 				33F64F1127283201004EB0CD /* Macaw */,
 				873528C027354295005E7CBC /* INI */,
 				33B2FF2C274C3F8500518F12 /* Lottie */,
-				8A0DFAD4275664090044515B /* FaviconFinder */,
 				878417BD276FB1FB005EB5B0 /* MockHttpServer */,
 				A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */,
 				0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */,
 				BFEA487C286A1519007A73BD /* AsyncHTTPClient */,
+				8A7AA041289960A700B271E2 /* FaviconFinder */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -8420,10 +8420,10 @@
 				873528BF27354295005E7CBC /* XCRemoteSwiftPackageReference "ini" */,
 				9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */,
 				33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */,
-				8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 				A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				0564F51127E8BC6600F969CA /* XCRemoteSwiftPackageReference "JJLISO8601DateFormatter" */,
 				BFEA487B286A1519007A73BD /* XCRemoteSwiftPackageReference "async-http-client" */,
+				8A7AA040289960A700B271E2 /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -12319,12 +12319,12 @@
 				minimumVersion = 1.0.0;
 			};
 		};
-		8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
+		8A7AA040289960A700B271E2 /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/will-lumley/FaviconFinder.git";
+			repositoryURL = "https://github.com/StefKors/FaviconFinder.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.0.0;
+				branch = "stef/fix-retain-cycle";
+				kind = branch;
 			};
 		};
 		9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
@@ -12465,9 +12465,9 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = MockHttpServer;
 		};
-		8A0DFAD4275664090044515B /* FaviconFinder */ = {
+		8A7AA041289960A700B271E2 /* FaviconFinder */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */;
+			package = 8A7AA040289960A700B271E2 /* XCRemoteSwiftPackageReference "FaviconFinder" */;
 			productName = FaviconFinder;
 		};
 		9624A65627431B4200B8D012 /* Atomics */ = {

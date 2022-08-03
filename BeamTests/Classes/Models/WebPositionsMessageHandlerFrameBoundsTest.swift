@@ -57,11 +57,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     fileprivate func helperRegisterWindowFrameInfo() {
         // Register window frame
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
                   return
               }
+        let positions = page.webPositions
 
         // Init window size and position
         let windowFrame = NSRect(x: 0, y: 0, width: 1000, height: 1000)
@@ -78,11 +78,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
     }
 
     func testOnMessage_frameBounds_windowFrame() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
                   return
               }
+        let positions = page.webPositions
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send bounds of windowFrame
         self.webPositionsMessageHandler.onMessage(
@@ -120,11 +120,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_iFrame() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
                   return
               }
+        let positions = page.webPositions
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -218,11 +218,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_iFrame_reverse_order() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
                   return
               }
+        let positions = page.webPositions
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -321,11 +321,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_onLoad_frameBounds_sequence() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
                   return
               }
+        let positions = page.webPositions
 
         // This test simulates the full sequence of loading a page
         // Order of events:
@@ -469,11 +469,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
                   return
               }
+        let positions = page.webPositions
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -615,11 +615,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes_reverse_order() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
                   return
               }
+        let positions = page.webPositions
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -757,11 +757,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
     }
 
     func testOnMessage_frameBounds_windowFrame_Scroll() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
                   return
               }
+        let positions = page.webPositions
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:
@@ -814,11 +814,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes_Scroll() throws {
-        guard let page = self.testPage,
-              let positions = page.webPositions else {
+        guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
                   return
               }
+        let positions = page.webPositions
 
         // Each frame on the page will send a "frameBounds" event
         // A page containing a single iFrame:

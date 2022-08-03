@@ -18,6 +18,7 @@ class WebPageBaseImpl: WebPage {
 
     init(webView: BeamWebView) {
         self.webView = webView
+        self.webPositions = WebPositions(webFrames: webFrames)
     }
 
     var downloadManager: DownloadManager?
@@ -37,8 +38,8 @@ class WebPageBaseImpl: WebPage {
     var responseStatusCode: Int = 200
 
     var pointAndShoot: PointAndShoot?
-    var webFrames: WebFrames?
-    var webPositions: WebPositions?
+    var webFrames = WebFrames()
+    var webPositions: WebPositions
     var webViewNavigationHandler: WebViewNavigationHandler?
     var errorPageManager: ErrorPageManager?
     var browsingScorer: BrowsingScorer?

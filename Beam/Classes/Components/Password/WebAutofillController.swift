@@ -243,7 +243,7 @@ class WebAutofillController: NSObject, WebPageRelated {
             disabledForSubmit = false
             return
         }
-        if let frameInfo = frameInfo, let href = frameInfo.request.url?.absoluteString, page?.webFrames?.isConnectedToMain(href: href) == false {
+        if let frameInfo = frameInfo, let href = frameInfo.request.url?.absoluteString, page?.webFrames.isConnectedToMain(href: href) == false {
             Logger.shared.logWarning("Disconnected frame for \(href)", category: .passwordManager)
             page?.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: nil)
             page?.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: frameInfo)

@@ -37,9 +37,6 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         do {
-            guard let webFrames = webPage.webFrames, let webPositions = webPage.webPositions else {
-                throw WebPositionsError("webPositions is required")
-            }
             guard let messageKey = WebPositionsMessages(rawValue: messageName) else {
                 Logger.shared.logError("Unsupported message '\(messageName)' for WebPostions message handler", category: .web)
                 return
@@ -58,7 +55,7 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
                           return
                       }
 
-                webPositions.setFrameInfoScroll(href: href, scrollX: x, scrollY: y)
+                webPage.webPositions.setFrameInfoScroll(href: href, scrollX: x, scrollY: y)
 
             case .WebPositions_resize:
                 guard let width = dict["width"] as? CGFloat,
@@ -68,10 +65,16 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
                           return
                       }
 
-                webPositions.setFrameInfoResize(href: href, width: width, height: height)
+                webPage.webPositions.setFrameInfoResize(href: href, width: width, height: height)
 
             case .WebPositions_frameBounds:
-                onFramesInfoMessage(dict: dict, frames: webFrames, positions: webPositions, href: href, isMain: frameInfo?.isMainFrame ?? false)
+                onFramesInfoMessage(
+                    dict: dict,
+                    frames: webPage.webFrames,
+                    positions: webPage.webPositions,
+                    href: href,
+                    isMain: frameInfo?.isMainFrame ?? false
+                )
             }
 
         } catch {
