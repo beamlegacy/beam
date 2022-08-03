@@ -307,9 +307,23 @@ extension BrowserTabsManager {
         currentTab = visibleTabs[index]
     }
 
+    /// selects the tab at the visual index in the list of visible tabs.
+    func setCurrentTab(atAbsoluteIndex absoluteIndex: Int) {
+        guard absoluteIndex < visibleTabs.count else {
+            if !visibleTabs.isEmpty {
+                setCurrentTab(visibleTabs.last)
+            }
+            return
+        }
+        let tab = visibleTabs[absoluteIndex]
+        setCurrentTab(tab)
+    }
+
+    /// selects the tab at the index in the list of all tabs (including hidden tabs)
     func setCurrentTab(at index: Int) {
         var index = index
         guard tabs.count > 0, var tab = index < tabs.count ? tabs[index] : tabs.last else {
+            Logger.shared.logError("Couldn't select a tab at index \(index)", category: .web)
             currentTab = nil
             return
         }
@@ -325,6 +339,13 @@ extension BrowserTabsManager {
     }
 
     func setCurrentTab(_ tab: BrowserTab?) {
+        if let tab = tab, !visibleTabs.contains(tab) {
+            // tab is not in the visible ones, we need to select another one.
+            Logger.shared.logError("Couldn't select tab '\(tab.title)'. It might be hidden.", category: .web)
+            let index = tabs.firstIndex(of: tab) ?? 0
+            setCurrentTab(at: index)
+            return
+        }
         currentTab = tab
     }
 
@@ -426,32 +447,33 @@ extension BrowserTabsManager {
         let nextTabIdFromNeighborhood = removeFromTabNeighborhood(tabId: tabId)
         let nextTabIndex = min(index, tabs.count - 1)
 
-        if currentTab?.id == tabId {
-            var newCurrentTab: BrowserTab?
+        guard currentTab?.id == tabId else { return }
+        var newCurrentTab: BrowserTab?
 
-            if let suggestedNextCurrentTab = suggestedNextCurrentTab {
+        if let suggestedNextCurrentTab = suggestedNextCurrentTab {
+            if visibleTabs.contains(suggestedNextCurrentTab) {
                 newCurrentTab = suggestedNextCurrentTab
             } else {
-                var browsingTreeParentTab: BrowserTab?
-                switch tab.browsingTreeOrigin {
-                case .browsingNode(_, _, _, let rootId):
-                    // If user cmd+click from a tab we want to go back to this tab
-                    browsingTreeParentTab = tabs.first(where: {$0.browsingTree.rootId == rootId})
-                case .searchBar(_, referringRootId: let referringRootId):
-                    // If user cmd+T from a current tab we want to comeback to that origin tab
-                    browsingTreeParentTab = tabs.first(where: {$0.browsingTree.rootId == referringRootId})
-                default: break
-                }
-
-                if let browsingTreeParentTab = browsingTreeParentTab, !browsingTreeParentTab.isPinned {
-                    newCurrentTab = browsingTreeParentTab
-                } else if let nextTabIdFromNeighborhood = nextTabIdFromNeighborhood {
-                    newCurrentTab = tabs.first(where: {$0.id == nextTabIdFromNeighborhood})
-                } else if nextTabIndex >= 0 {
-                    newCurrentTab = tabs[nextTabIndex]
+                Logger.shared.logError("Suggested new current tab is not visible", category: .web)
+            }
+        } else {
+            switch tab.browsingTreeOrigin {
+            case .browsingNode(_, _, _, let rootId):
+                // If user cmd+click from a tab we want to go back to this tab
+                newCurrentTab = visibleTabs.first(where: { !$0.isPinned && $0.browsingTree.rootId == rootId })
+            case .searchBar(_, referringRootId: let referringRootId):
+                // If user cmd+T from a current tab we want to comeback to that origin tab
+                newCurrentTab = visibleTabs.first(where: { !$0.isPinned && $0.browsingTree.rootId == referringRootId })
+            default:
+                if let nextTabIdFromNeighborhood = nextTabIdFromNeighborhood {
+                    newCurrentTab = visibleTabs.first(where: { $0.id == nextTabIdFromNeighborhood })
                 }
             }
+        }
+        if let newCurrentTab = newCurrentTab {
             setCurrentTab(newCurrentTab)
+        } else {
+            setCurrentTab(at: nextTabIndex)
         }
     }
 }
