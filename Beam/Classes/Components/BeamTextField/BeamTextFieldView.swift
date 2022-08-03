@@ -130,15 +130,14 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
         textField?.lineBreakMode = .byTruncatingTail
         textField?.cell?.truncatesLastVisibleLine = true
         if flagsMonitor == nil {
-            flagsMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: commandKey(evt:))
+            flagsMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: { [weak self] event in
+                if let isResponder = self?.isFirstResponder,
+                   isResponder {
+                    _ = self?.parent?.onPerformKeyEquivalent(event)
+                }
+                return event
+            })
         }
-    }
-
-    private func commandKey(evt: NSEvent) -> NSEvent {
-        if isFirstResponder {
-            _ = parent?.onPerformKeyEquivalent(evt)
-        }
-        return evt
     }
 
     func setText(_ text: String, font: NSFont?, icon: NSImage? = nil, skipGuards: Bool = false) {

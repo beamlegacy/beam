@@ -129,11 +129,11 @@
       },
       {
         "package": "FaviconFinder",
-        "repositoryURL": "https://github.com/will-lumley/FaviconFinder.git",
+        "repositoryURL": "https://github.com/StefKors/FaviconFinder.git",
         "state": {
-          "branch": null,
-          "revision": "1f74844f77f79b95c0bb0130b3a87d4f340e6d3a",
-          "version": "3.3.0"
+          "branch": "stef/fix-retain-cycle",
+          "revision": "42332f338f1681b656b402822e8db5f6346720a1",
+          "version": null
         }
       },
       {
