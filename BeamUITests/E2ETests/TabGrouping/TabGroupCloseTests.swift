@@ -24,7 +24,7 @@ class TabGroupCloseTests: BaseTest {
     func testTabGroupClose() throws {
 
         step("When I open Tab Group Menu") {
-            tabGroupMenu.openFirstTabGroupMenu()
+            tabGroupMenu.openTabGroupMenu(index: 0)
         }
         
         step("Then Tab Group Menu is displayed") {
