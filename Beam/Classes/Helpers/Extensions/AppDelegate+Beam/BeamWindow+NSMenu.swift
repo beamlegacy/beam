@@ -236,7 +236,7 @@ extension BeamWindow {
         case KeyCode.one.rawValue, KeyCode.two.rawValue, KeyCode.three.rawValue, KeyCode.four.rawValue, KeyCode.five.rawValue, KeyCode.six.rawValue, KeyCode.seven.rawValue, KeyCode.eight.rawValue:
             if command {
                 if state.mode == .web && keyValue <= state.browserTabsManager.tabs.count {
-                    state.browserTabsManager.setCurrentTab(at: keyValue - 1)
+                    state.browserTabsManager.setCurrentTab(atAbsoluteIndex: keyValue - 1)
                 } else if state.mode != .web {
                     let recents = state.recentsManager.recentNotes
                     if keyValue <= recents.count {
