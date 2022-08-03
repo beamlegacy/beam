@@ -21,8 +21,8 @@ class TestWebPage: WebPage {
     var url: URL? = URL(string: urlStr)
     var score: Float = 0
     var pointAndShoot: PointAndShoot?
-    var webFrames: WebFrames?
-    var webPositions: WebPositions?
+    var webFrames = WebFrames()
+    var webPositions: WebPositions
     var browsingScorer: BrowsingScorer?
     var storage: BeamFileStorage?
     var webAutofillController: WebAutofillController?
@@ -65,8 +65,6 @@ class TestWebPage: WebPage {
         self.downloadManager = downloadManager
         self.webViewNavigationHandler = navigationHandler
         self.webView = BeamWebView()
-        let webFrames = WebFrames()
-        self.webFrames = webFrames
         self.webPositions = WebPositions(webFrames: webFrames)
         contentDescription = WebContentDescription(webView: webView)
     }
