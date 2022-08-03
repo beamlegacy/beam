@@ -36,7 +36,7 @@ final class WebFieldLocator {
         self.elementId = elementId
         self.frameInfo = frameInfo
         if let frameURL = frameInfo?.request.url?.absoluteString {
-            parentFrames = page?.webFrames?.framesInPath(href: frameURL) ?? [:]
+            parentFrames = page?.webFrames.framesInPath(href: frameURL) ?? [:]
         } else {
             parentFrames = [:]
         }
