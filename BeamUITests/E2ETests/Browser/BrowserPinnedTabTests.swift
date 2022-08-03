@@ -13,6 +13,7 @@ class BrowserPinnedTabTests: BaseTest {
     let newTabToOpen = "google.com"
     
     override func setUp() {
+        
         step("Given I open a web page"){
             launchApp()
             uiMenu.loadUITestPage1()
@@ -20,7 +21,6 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testPinTab() throws {
-        try XCTSkipIf(isBigSurOS(), "No accessibility to tab to right click on it")
         
         step("When I pin the tab"){
             webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
@@ -52,7 +52,7 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testUnpinTab() throws {
-        try XCTSkipIf(isBigSurOS(), "No accessibility to tab to right click on it")
+        
         step("When I pin the tab"){
             webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
         }
@@ -73,7 +73,7 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testPinMultipleTabs() throws {
-        try XCTSkipIf(isBigSurOS(), "No accessibility to tab to right click on it")
+        
         step("And I open a second tab"){
             uiMenu.loadUITestPage2()
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 0)
@@ -101,8 +101,7 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testPinnedTabAfterRestart() throws {
-        try XCTSkipIf(isBigSurOS(), "No accessibility to tab to right click on it")
-        
+
         step("When I pin the tab"){
             webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
         }
@@ -123,7 +122,7 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testOpenLinkFromPinnedTab() throws {
-        try XCTSkipIf(isBigSurOS(), "No accessibility to tab to right click on it")
+
         let linkToOpen = "released his perhaps still-in-progress album"
         let uiTestPage1Title = "Point And Shoot Test Fixture Ultralight Beam"
 
@@ -144,7 +143,6 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testRestorePinnedTab() throws {
-        try XCTSkipIf(isBigSurOS(), "No accessibility to tab to right click on it")
 
         step("When I pin the tab"){
             webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)

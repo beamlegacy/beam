@@ -1012,6 +1012,7 @@
 		A35DE6882847808100C697D9 /* BaseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35DE6872847808100C697D9 /* BaseRow.swift */; };
 		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
 		A36F2A342864A0F500B0F971 /* BrowserTabsPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A36F2A332864A0F500B0F971 /* BrowserTabsPreferencesTests.swift */; };
+		A37E9DEB289A880E0088992A /* RightClickTabMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A37E9DE5289A880E0088992A /* RightClickTabMenuTests.swift */; };
 		A388B449280D7547008D2247 /* CaptureCopyShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */; };
 		A388B452280DE43F008D2247 /* PDFFilesBrowserViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */; };
 		A38D1A25284A10DC007EBB25 /* RowCreditCardsTestTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38D1A24284A10DC007EBB25 /* RowCreditCardsTestTable.swift */; };
@@ -2956,6 +2957,7 @@
 		A35DE6872847808100C697D9 /* BaseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseRow.swift; sourceTree = "<group>"; };
 		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
 		A36F2A332864A0F500B0F971 /* BrowserTabsPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabsPreferencesTests.swift; sourceTree = "<group>"; };
+		A37E9DE5289A880E0088992A /* RightClickTabMenuTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RightClickTabMenuTests.swift; sourceTree = "<group>"; };
 		A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureCopyShareTests.swift; sourceTree = "<group>"; };
 		A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFFilesBrowserViewTests.swift; sourceTree = "<group>"; };
 		A38D1A24284A10DC007EBB25 /* RowCreditCardsTestTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowCreditCardsTestTable.swift; sourceTree = "<group>"; };
@@ -7026,6 +7028,18 @@
 			path = General;
 			sourceTree = "<group>";
 		};
+		A37E9DEC289A882A0088992A /* RightClickMenuTests */ = {
+			isa = PBXGroup;
+			children = (
+				D7F5BF0428756231008FE546 /* RightClickImageMenuTests.swift */,
+				D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */,
+				D77A5A902878688500652727 /* RightClickTextMenuTests.swift */,
+				D77A5A9B287C55C800652727 /* RightClickPageMenuTests.swift */,
+				A37E9DE5289A880E0088992A /* RightClickTabMenuTests.swift */,
+			);
+			path = RightClickMenuTests;
+			sourceTree = "<group>";
+		};
 		A38D1A1E284A10A1007EBB25 /* TableRows */ = {
 			isa = PBXGroup;
 			children = (
@@ -7549,6 +7563,7 @@
 		B54D934526CA69DD006BBDEE /* Browser */ = {
 			isa = PBXGroup;
 			children = (
+				A37E9DEC289A882A0088992A /* RightClickMenuTests */,
 				B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */,
 				375D83CA278D6AE70064C246 /* BrowserStatusBarTests.swift */,
 				D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */,
@@ -7556,10 +7571,6 @@
 				A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */,
 				A310949A281D9F7C003B96D1 /* BrowserHistoryTests.swift */,
 				D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */,
-				D7F5BF0428756231008FE546 /* RightClickImageMenuTests.swift */,
-				D77A5A8328780F2100652727 /* RightClickLinkMenuTests.swift */,
-				D77A5A902878688500652727 /* RightClickTextMenuTests.swift */,
-				D77A5A9B287C55C800652727 /* RightClickPageMenuTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -9974,6 +9985,7 @@
 				A3D2898B280864DD00FA0D3A /* OnboardingLostPKTestView.swift in Sources */,
 				D7858BCF283BC4E000D0336A /* AutoFillCCViewLocators.swift in Sources */,
 				B575361126C0F0EF0053CE2D /* JavascriptNativeInteractionsTests.swift in Sources */,
+				A37E9DEB289A880E0088992A /* RightClickTabMenuTests.swift in Sources */,
 				D7858BD3283CBC5A00D0336A /* BaseCreditCardTest.swift in Sources */,
 				B5625CB6271480490074A080 /* BrowserShortcutsTests.swift in Sources */,
 				A3B6C97D2862FC0000E7F78C /* BrowserPreferencesTests.swift in Sources */,
