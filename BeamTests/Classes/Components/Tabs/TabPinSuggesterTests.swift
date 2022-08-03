@@ -64,7 +64,15 @@ class TabPinSuggesterTests: XCTestCase {
     }
 
     func testSuggester() {
+
         class FakeDomainPath0Storage: DomainPath0TreeStatsStorageProtocol {
+            static let suggestionCandidates = [
+                ScoredDomainPath0(domainPath0: "https://abc.com/path", score: 1),
+                ScoredDomainPath0(domainPath0: "https://def.fr/path", score: 1),
+                ScoredDomainPath0(domainPath0: "https://www.google.com/search", score: 0.5)
+
+            ]
+
             init(minReadDay: Date) {
                 self.domainPath0MinReadDay = minReadDay
             }
@@ -75,12 +83,7 @@ class TabPinSuggesterTests: XCTestCase {
             func update(treeId: UUID, lifeTime: Double) {}
             func cleanUp(olderThan days: Int, maxRows: Int) {}
             func getPinTabSuggestionCandidates(minDayCount: Int, minTabReadingTimeShare: Float, minAverageTabLifetime: Float, dayRange: Int, maxRows: Int) -> [ScoredDomainPath0] {
-                return [
-                    ScoredDomainPath0(domainPath0: "https://abc.com/path", score: 1),
-                    ScoredDomainPath0(domainPath0: "https://def.fr/path", score: 1),
-                    ScoredDomainPath0(domainPath0: "https://www.google.com/search", score: 0.5)
-
-                ]
+                return Self.suggestionCandidates
             }
         }
         let testParameters = TabPinSuggestionParameters(
@@ -96,7 +99,8 @@ class TabPinSuggesterTests: XCTestCase {
         let suggester = TabPinSuggester(
             storage: FakeDomainPath0Storage(minReadDay: BeamDate.now),
             suggestionMemory: suggestionMemory,
-            parameters: testParameters
+            parameters: testParameters,
+            providedEligibleDomainPaths: FakeDomainPath0Storage.suggestionCandidates
         )
         XCTAssertFalse(suggester.isEligible(url: URL(string: "https://abc.com/path/page.html")!))
         BeamDate.travel(Double(15 * 24 * 60 * 60))
