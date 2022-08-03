@@ -159,6 +159,7 @@
         "RightClickImageMenuTests",
         "RightClickLinkMenuTests",
         "RightClickPageMenuTests",
+        "RightClickTabMenuTests",
         "RightClickTextMenuTests",
         "SearchOnNoteTests",
         "SearchOnPDFTests",
