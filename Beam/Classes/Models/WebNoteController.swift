@@ -267,9 +267,10 @@ extension WebNoteController {
               let first = elements.first,
               elements.count == 1 else { return true }
 
-        // A single Image should be inserted without source bullet
+        // A single Image should be inserted without source bullet only when root element is already the same as the pageURl
+        let rootElementIsSourceURL = rootElement.outLinks.contains(pageUrl.absoluteString)
         if first.kind.isMedia {
-            return false
+            return rootElementIsSourceURL
         }
 
         // insert link that could be embed without SocialTitle
