@@ -10,11 +10,14 @@ import Foundation
 extension BeamWindow {
 
     @IBAction func performFindPanelAction(_ sender: Any?) {
+        let pboard = NSPasteboard(name: .find)
+        let terms = pboard.string(forType: .string) ?? ""
+        
         switch state.mode {
         case .web:
-            state.browserTabsManager.currentTab?.searchInContent(fromSelection: true)
+            state.browserTabsManager.currentTab?.searchInContent(terms: terms, fromSelection: false)
         case .note:
-            state.currentEditor?.searchInNote(fromSelection: true)
+            state.currentEditor?.searchInNote(terms: terms, fromSelection: false)
         default:
             break
         }

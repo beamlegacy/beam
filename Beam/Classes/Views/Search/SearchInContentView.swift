@@ -21,7 +21,7 @@ struct SearchInContentView: View {
     var body: some View {
         FloatingToolbar(contentWidth: 320) {
             Group {
-                BeamTextField(text: $viewModel.searchTerms, isEditing: $viewModel.isEditing, placeholder: title, font: searchFieldFont, textColor: searchFieldTextColor, placeholderColor: BeamColor.AlphaGray.nsColor, onCommit: viewModel.onCommit, onEscape: viewModel.close)
+                BeamTextField(text: $viewModel.searchTerms, isEditing: $viewModel.isEditing, selectAll: $viewModel.selectAll, placeholder: title, font: searchFieldFont, textColor: searchFieldTextColor, placeholderColor: BeamColor.AlphaGray.nsColor, onCommit: viewModel.onCommit, onEscape: viewModel.close)
                 if !viewModel.searchTerms.isEmpty && !viewModel.typing {
                     Text(results)
                         .font(resultsTextFont)
@@ -39,6 +39,9 @@ struct SearchInContentView: View {
                     viewModel.close()
                 }
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            viewModel.updateSearchTermsFromPasteboard()
         }
         .accessibilityIdentifier("search-field")
     }
