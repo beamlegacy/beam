@@ -444,6 +444,12 @@ extension BeamData {
         }
     }
 
+    func refreshEvents(of note: BeamNote) {
+        guard note.type.isJournal,
+              let futureDate = note.type.journalDate else { return }
+        loadEvents(for: note.id, for: futureDate)
+    }
+
     private func loadEvents(for noteUuid: UUID, for journalDate: Date) {
         if calendarManager.hasConnectedSource() {
             self.calendarManager.requestMeetings(for: journalDate, onlyToday: true) { meetings in
