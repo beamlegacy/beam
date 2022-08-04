@@ -232,17 +232,21 @@ public extension CALayer {
         l.delegate = self
         self.wantsLayer = true
 
-        timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
-            let now = CFAbsoluteTimeGetCurrent()
-            if self.blinkTime <= now && self.hasFocus {
-                self.blinkPhase.toggle()
-                self.blinkTime = now + (self.blinkPhase ? self.onBlinkTime : self.offBlinkTime)
+        timer.setEventHandler { [unowned self] in
+            if hasFocus {
+                blinkPhase.toggle()
                 if let focused = focusedWidget as? ElementNode {
                     focused.updateCursor()
                 }
+                if blinkPhase {
+                    timer.schedule(deadline: .now()+onBlinkTime, leeway: .milliseconds(Int(onBlinkTime*100)))
+                } else {
+                    timer.schedule(deadline: .now()+offBlinkTime, leeway: .milliseconds(Int(offBlinkTime*100)))
+                }
             }
         }
-        RunLoop.main.add(timer, forMode: .default)
+        timer.schedule(deadline: .now()+onBlinkTime, leeway: .milliseconds(Int(onBlinkTime*100)))
+        timer.activate()
 
         initBlinking()
         unpreparedRoot = root
@@ -310,7 +314,7 @@ public extension CALayer {
     }
 
     deinit {
-        timer.invalidate()
+        timer.cancel()
     }
 
     required init?(coder: NSCoder) {
@@ -335,7 +339,7 @@ public extension CALayer {
         rootNode?.updateColorsIfNeeded()
     }
 
-    var timer: Timer!
+    let timer = DispatchSource.makeTimerSource(queue: .main)
 
     var minimumWidth: CGFloat = 300 {
         didSet {
@@ -1207,7 +1211,7 @@ public extension CALayer {
 
     func reBlink() {
         blinkPhase = true
-        blinkTime = CFAbsoluteTimeGetCurrent() + onBlinkTime
+        timer.schedule(deadline: .now()+onBlinkTime, leeway: .milliseconds(Int(onBlinkTime*100)))
         focusedWidget?.invalidate()
     }
 
@@ -1455,7 +1459,6 @@ public extension CALayer {
 
     var onBlinkTime: Double = 0.7
     var offBlinkTime: Double = 0.5
-    var blinkTime: Double = CFAbsoluteTimeGetCurrent()
     var blinkPhase = true
 
     public override var isFlipped: Bool { true }
