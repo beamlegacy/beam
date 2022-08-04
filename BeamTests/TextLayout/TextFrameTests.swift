@@ -89,9 +89,9 @@ class TextFrameTests: XCTestCase {
         checkCaret(2, 2, 1, .leading, true, "1", "1")
         checkCaret(3, 3, 1, .trailing, true, "12", "12")
         checkCaret(4, 4, 2, .leading, false, "12", "12")
-        checkCaret(5, 5, 2, .trailing, false, "12 ", "12")
-        checkCaret(6, 6, 2, .leading, true, "12 ", "12")
-        checkCaret(7, 7, 2, .trailing, true, "12 3", "123")
+        checkCaret(5, 5, 2, .trailing, false, "12\u{fffc}", "12")
+        checkCaret(6, 6, 2, .leading, true, "12\u{fffc}", "12")
+        checkCaret(7, 7, 2, .trailing, true, "12\u{fffc}3", "123")
 
         // Now test cursor movements:
         cursor = 0
@@ -115,10 +115,10 @@ class TextFrameTests: XCTestCase {
         //////////////////////////////////////////////////////
         // Now go back:
         //////////////////////////////////////////////////////
-        checkCaret(cursor, 7, 2, .trailing, true, "12 3", "123")
+        checkCaret(cursor, 7, 2, .trailing, true, "12\u{fffc}3", "123")
 
         cursor = previousCaret(for: cursor, in: carets)
-        checkCaret(cursor, 6, 2, .leading, true, "12 ", "12")
+        checkCaret(cursor, 6, 2, .leading, true, "12\u{fffc}", "12")
 
         cursor = previousCaret(for: cursor, in: carets)
         checkCaret(cursor, 4, 2, .leading, false, "12", "12")
@@ -163,8 +163,8 @@ class TextFrameTests: XCTestCase {
 
         expect(textFrame.frame.origin) == position
         expect(textFrame.frame.width) <= 30
-        expect(textFrame.frame.height).to(beCloseTo(30, within: 0.1))
-        expect(textFrame.lines.count) == 2
+        expect(textFrame.frame.height).to(beCloseTo(45, within: 0.1))
+        expect(textFrame.lines.count) == 3
 
         expect(textFrame.carets.count) == actualString.count * 2 + 2 // * 2 because two edges per character, + 2 because the link add the virtual image character
 
@@ -187,11 +187,11 @@ class TextFrameTests: XCTestCase {
         checkCaret(4, 4, 2, .leading, true, "1 ", "1 ")
         checkCaret(5, 5, 2, .trailing, true, "1 2", "1 2")
         checkCaret(6, 6, 3, .leading, false, "1 2", "1 2")
-        checkCaret(7, 7, 3, .trailing, false, "1 2 ", "1 2")
-        checkCaret(8, 8, 3, .leading, true, "1 2 ", "1 2")
-        checkCaret(9, 9, 3, .trailing, true, "1 2  ", "1 2 ")
-        checkCaret(10, 10, 4, .leading, true, "1 2  ", "1 2 ")
-        checkCaret(11, 11, 4, .trailing, true, "1 2  3", "1 2 3")
+        checkCaret(7, 7, 3, .trailing, false, "1 2\u{fffc}", "1 2")
+        checkCaret(8, 8, 3, .leading, true, "1 2\u{fffc}", "1 2")
+        checkCaret(9, 9, 3, .trailing, true, "1 2\u{fffc} ", "1 2 ")
+        checkCaret(10, 10, 4, .leading, true, "1 2\u{fffc} ", "1 2 ")
+        checkCaret(11, 11, 4, .trailing, true, "1 2\u{fffc} 3", "1 2 3")
 
         expect(self.cursor) == 0
 
@@ -200,6 +200,9 @@ class TextFrameTests: XCTestCase {
 
         cursor = nextCaret(for: cursor, in: carets)
         expect(self.cursor) == 4
+
+        cursor = nextCaret(for: cursor, in: carets)
+        expect(self.cursor) == 5
 
         cursor = nextCaret(for: cursor, in: carets)
         expect(self.cursor) == 6
@@ -212,9 +215,6 @@ class TextFrameTests: XCTestCase {
 
         cursor = nextCaret(for: cursor, in: carets)
         expect(self.cursor) == 10
-
-        cursor = nextCaret(for: cursor, in: carets)
-        expect(self.cursor) == 11
 
         cursor = nextCaret(for: cursor, in: carets)
         expect(self.cursor) == 11
@@ -237,13 +237,13 @@ class TextFrameTests: XCTestCase {
         expect(self.cursor) == 6
 
         cursor = previousCaret(for: cursor, in: carets)
+        expect(self.cursor) == 5
+
+        cursor = previousCaret(for: cursor, in: carets)
         expect(self.cursor) == 4
 
         cursor = previousCaret(for: cursor, in: carets)
         expect(self.cursor) == 2
-
-        cursor = previousCaret(for: cursor, in: carets)
-        expect(self.cursor) == 0
 
         cursor = previousCaret(for: cursor, in: carets)
         expect(self.cursor) == 0
@@ -298,11 +298,11 @@ class TextFrameTests: XCTestCase {
         checkCaret(2, 2, 1, .leading, true, "1", "1")
         checkCaret(3, 3, 1, .trailing, true, "12", "12")
         checkCaret(4, 4, 2, .leading, false, "12", "12")
-        checkCaret(5, 5, 2, .trailing, false, "12 ", "12")
-        checkCaret(6, 6, 2, .leading, true, "12 ", "12")
-        checkCaret(7, 7, 2, .trailing, true, "12  ", "12 ")
-        checkCaret(8, 8, 3, .leading, true, "12  ", "12 ")
-        checkCaret(9, 9, 3, .trailing, true, "12  3", "12 3")
+        checkCaret(5, 5, 2, .trailing, false, "12\u{fffc}", "12")
+        checkCaret(6, 6, 2, .leading, true, "12\u{fffc}", "12")
+        checkCaret(7, 7, 2, .trailing, true, "12\u{fffc} ", "12 ")
+        checkCaret(8, 8, 3, .leading, true, "12\u{fffc} ", "12 ")
+        checkCaret(9, 9, 3, .trailing, true, "12\u{fffc} 3", "12 3")
 
         // Now test cursor movements:
         cursor = 0
@@ -326,13 +326,13 @@ class TextFrameTests: XCTestCase {
         //////////////////////////////////////////////////////
         // Now go back:
         //////////////////////////////////////////////////////
-        checkCaret(cursor, 9, 3, .trailing, true, "12  3", "12 3")
+        checkCaret(cursor, 9, 3, .trailing, true, "12\u{fffc} 3", "12 3")
 
         cursor = previousCaret(for: cursor, in: carets)
-        checkCaret(cursor, 8, 3, .leading, true, "12  ", "12 ")
+        checkCaret(cursor, 8, 3, .leading, true, "12\u{fffc} ", "12 ")
 
         cursor = previousCaret(for: cursor, in: carets)
-        checkCaret(cursor, 6, 2, .leading, true, "12 ", "12")
+        checkCaret(cursor, 6, 2, .leading, true, "12\u{fffc}", "12")
 
         cursor = previousCaret(for: cursor, in: carets)
         checkCaret(cursor, 4, 2, .leading, false, "12", "12")
