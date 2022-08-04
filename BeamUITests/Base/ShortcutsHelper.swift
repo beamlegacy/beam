@@ -91,7 +91,7 @@ class ShortcutsHelper {
         case selectOnRight
         case moveBulletDown
         case moveBulletUp
-        case incognitoModeOn
+        case newIncognitoWindow
         case showOmnibox
         case removeLastWord
         case removeEntireLine
@@ -151,7 +151,7 @@ class ShortcutsHelper {
         case .beginOfNote: invokeCMDKey(.upArrow)
         case .moveBulletDown: invokeCntrlOptionCmdFunctionKey(.downArrow)
         case .moveBulletUp: invokeCntrlOptionCmdFunctionKey(.upArrow)
-        case .incognitoModeOn: invokeCMDShiftKey("n")
+        case .newIncognitoWindow: invokeCMDShiftKey("n")
         case .showOmnibox: invokeCMDKey("k")
         case .removeLastWord: invokeOptionKey(.delete)
         case .removeEntireLine: invokeCMDKey(.delete)
