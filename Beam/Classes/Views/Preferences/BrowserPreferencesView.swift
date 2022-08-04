@@ -6,12 +6,7 @@
 //
 
 import SwiftUI
-import Preferences
 import Combine
-
-let BrowserPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .browser, title: "Browser", imageName: "preferences-browser") {
-    BrowserPreferencesView(viewModel: BrowserPreferencesViewModel())
-}
 
 class BrowserPreferencesViewModel: ObservableObject {
     @ObservedObject var onboardingManager: OnboardingManager = OnboardingManager(onlyImport: true)
@@ -22,86 +17,78 @@ class BrowserPreferencesViewModel: ObservableObject {
 struct BrowserPreferencesView: View {
     @ObservedObject var viewModel: BrowserPreferencesViewModel
 
-    private let contentWidth: Double = PreferencesManager.contentWidth
-
     var body: some View {
-        Preferences.Container(contentWidth: contentWidth) {
-            return getBrowserViewSections()
+        Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+            ForEach(0..<getSettingsRows().count, id: \.self) { index in
+                getSettingsRows()[index]
+            }
         }
-        .font(BeamFont.regular(size: 13).swiftUI)
-        .foregroundColor(BeamColor.Generic.text.swiftUI)
     }
 
-    // MARK: - Preferences Sections
-    private func getBrowserViewSections() -> [Preferences.Section] {
-        var sections: [Preferences.Section] = [searchEngineSection,
-                                               importBrowserDataSection,
-                                               downloadSection, tabsSection,
-                                               soundsSection, clearCachesSection]
+    private func getSettingsRows() -> [Settings.Row] {
+        var rows = [searchEngineRow, importBrowserDataRow, downloadsRow, tabsRow, soundsRow, clearCachesRow]
+
         if !BeamData.isDefaultBrowser {
-            sections.insert(defaultBrowserSection, at: 0)
+            rows.insert(defaultBrowserRow, at: 0)
         }
-        return sections
+        return rows
     }
 
-    private var defaultBrowserSection: Preferences.Section {
-        Preferences.Section(verticalAlignment: .top) {
+    private var defaultBrowserRow: Settings.Row {
+        Settings.Row {
             Text("Default Browser:")
-                .frame(width: 250, alignment: .trailing)
         } content: {
             DefaultBrowserSection()
         }
     }
 
-    private var searchEngineSection: Preferences.Section {
-        Preferences.Section(bottomDivider: true) {
+    private var searchEngineRow: Settings.Row {
+        Settings.Row(hasDivider: true) {
             Text("Search Engine:")
-                .frame(width: 250, alignment: .trailing)
         } content: {
             SearchEngineSection()
         }
     }
 
-    private var importBrowserDataSection: Preferences.Section {
-        Preferences.Section(bottomDivider: true, verticalAlignment: .top) {
+    private var importBrowserDataRow: Settings.Row {
+        Settings.Row(hasDivider: true) {
             Text("Import Browser Data:")
         } content: {
             BookmarksSection(viewModel: viewModel)
         }
     }
 
-    private var downloadSection: Preferences.Section {
-        Preferences.Section(bottomDivider: true) {
+    private var downloadsRow: Settings.Row {
+        Settings.Row(hasDivider: true) {
             Text("Downloads:")
         } content: {
             DownloadSection()
         }
     }
 
-    private var tabsSection: Preferences.Section {
-        Preferences.Section(bottomDivider: true) {
+    private var tabsRow: Settings.Row {
+        Settings.Row(hasDivider: true) {
             Text("Tabs:")
         } content: {
             TabsSection()
         }
     }
 
-    private var soundsSection: Preferences.Section {
-        Preferences.Section(bottomDivider: true) {
+    private var soundsRow: Settings.Row {
+        Settings.Row(hasDivider: true) {
             Text("Sounds:")
         } content: {
             SoundsSection()
         }
     }
 
-    private var clearCachesSection: Preferences.Section {
-        Preferences.Section(verticalAlignment: .top) {
+    private var clearCachesRow: Settings.Row {
+        Settings.Row {
             Text("Clear Caches:")
         } content: {
             ClearCachesSection()
         }
     }
-
 }
 
 struct BrowserPreferencesView_Previews: PreviewProvider {
@@ -185,9 +172,7 @@ struct BookmarksSection: View {
                 Text("Import...")
                     .font(BeamFont.regular(size: 13).swiftUI)
             }.frame(width: 99, height: 20, alignment: .leading)
-            Text("Import your passwords and history from other browsers")
-                .font(BeamFont.regular(size: 11).swiftUI)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
+            Settings.SubtitleLabel("Import your passwords and history from other browsers.")
                 .lineLimit(nil)
                 .multilineTextAlignment(.leading)
         }

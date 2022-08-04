@@ -20,7 +20,10 @@ struct PasswordsTableView: View {
     ]
 
     var body: some View {
-        TableView(hasVerticalScroller: true, hasSeparator: false, items: passwordEntries,
+        TableView(hasVerticalScroller: true, hasSeparator: false,
+                  headerTitleColor: BeamColor.Corduroy.nsColor,
+                  headerBackgroundColor: BeamColor.Generic.tableViewBackground.nsColor,
+                  items: passwordEntries,
                   columns: Self.passwordColumns, creationRowTitle: nil) { (_, _) in
         } onSelectionChanged: { idx in
             onSelectionChanged(idx)

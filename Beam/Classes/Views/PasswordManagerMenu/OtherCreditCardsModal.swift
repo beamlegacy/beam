@@ -33,8 +33,8 @@ struct OtherCreditCardsModal: View {
                 onFill(selectedEntry)
             }
             .frame(width: 528, height: 240, alignment: .center)
-                .border(BeamColor.Mercury.swiftUI, width: 1)
-                .background(BeamColor.Generic.background.swiftUI)
+            .border(BeamColor.Generic.tableViewStroke.swiftUI, width: 1)
+            .background(BeamColor.Generic.tableViewBackground.swiftUI)
 
             Spacer()
             HStack {
