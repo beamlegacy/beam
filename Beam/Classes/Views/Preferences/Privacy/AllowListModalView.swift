@@ -9,10 +9,9 @@ import SwiftUI
 import BeamCore
 
 struct AllowListModalView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.presentationMode) private var presentationMode
 
-    @ObservedObject var viewModel: AllowListViewModel
-
+    @State var viewModel = AllowListViewModel()
     @State private var searchString: String = ""
     @State private var selectedItems = [AllowListViewItem]()
     @State private var stepperTest: Double = 0.0
@@ -29,8 +28,8 @@ struct AllowListModalView: View {
                     .frame(width: 217)
             }
             AllowListTableView(viewModel: viewModel, searchStr: searchString, selectedItems: $selectedItems, creationRowTitle: $creationRowTitle)
-                .border(BeamColor.Mercury.swiftUI, width: 1)
-                .background(BeamColor.Generic.background.swiftUI)
+                .border(BeamColor.Generic.tableViewStroke.swiftUI, width: 1)
+                .background(BeamColor.Generic.tableViewBackground.swiftUI)
                 .onAppear {
                     viewModel.refreshAllAllowListItems()
                 }
@@ -51,6 +50,7 @@ struct AllowListModalView: View {
                         .renderingMode(.template)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 }.buttonStyle(BorderedButtonStyle())
+                    .disabled(selectedItems.isEmpty)
                 Spacer()
                 Button(action: {
                     dismiss()
@@ -88,7 +88,6 @@ struct AllowListModalView: View {
 
 struct AllowListModalView_Previews: PreviewProvider {
     static var previews: some View {
-        AllowListModalView(viewModel: AllowListViewModel()).frame(width: 568, height: 422, alignment: .center
-        )
+        AllowListModalView().frame(width: 568, height: 422, alignment: .center)
     }
 }

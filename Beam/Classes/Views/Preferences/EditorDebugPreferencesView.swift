@@ -8,16 +8,8 @@
 
 import Foundation
 import SwiftUI
-import Preferences
-
-var EditorDebugPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .editorDebug, title: "Editor UI Debug", imageName: "preferences-editor-debug") {
-    EditorDebugPreferencesView()
-        .environment(\.managedObjectContext, CoreDataManager.shared.mainContext)
-}
 
 struct EditorDebugPreferencesView: View {
-    private let contentWidth: Double = PreferencesManager.contentWidth
-
     @State var editorIsCentered = PreferencesManager.editorIsCentered
     @State var editorHeaderTopPadding = PreferencesManager.editorHeaderTopPadding
     @State var editorLeadingPercentage = PreferencesManager.editorLeadingPercentage
@@ -41,16 +33,15 @@ struct EditorDebugPreferencesView: View {
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
-            Preferences.Container(contentWidth: contentWidth) {
-                Preferences.Section(bottomDivider: true) {
-                    Text("").labelsHidden()
+            Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+                Settings.Row(hasDivider: true) {
                 } content: {
                     Text("Restart Beam App to properly refresh the UI")
                         .font(BeamFont.regular(size: 14).swiftUI)
                         .foregroundColor(BeamColor.Corduroy.swiftUI)
                 }
 
-                Preferences.Section(bottomDivider: true) {
+                Settings.Row(hasDivider: true) {
                     VStack(alignment: .center) {
                         Text("Appearance Editor:")
                             .font(BeamFont.regular(size: 13).swiftUI)
@@ -69,7 +60,7 @@ struct EditorDebugPreferencesView: View {
                                      editorToobarOverlayOpacity: $editorToolbarOverlayOpacity,
                                      formatter: formatter())
                 }
-                Preferences.Section(bottomDivider: true) {
+                Settings.Row(hasDivider: true) {
                     VStack(alignment: .center) {
                         Text("Appearance Font in Editor:")
                             .font(BeamFont.regular(size: 13).swiftUI)
@@ -87,7 +78,7 @@ struct EditorDebugPreferencesView: View {
                                          editorLineHeightHeading: $editorLineHeightHeading,
                                          formatter: formatter())
                 }
-                Preferences.Section {
+                Settings.Row {
                     VStack(alignment: .center) {
                         Text("Reset:")
                             .font(BeamFont.regular(size: 13).swiftUI)

@@ -21,7 +21,7 @@ enum GeneralPreferencesViewLocators {
     }
     
     enum StaticTexts: String, CaseIterable, UIElement {
-        case startBeamlabel = "Always start on the web if there are pinned \nor opened tabs"
+        case startBeamlabel = "Always start on the web if there are pinned \nor opened tabs."
         case appearanceLabel = "Appearance:"
         case accessibilityLabel = "Accessibility:"
         case highlightCheckboxDescription = "Option-Tab to highlights each item."

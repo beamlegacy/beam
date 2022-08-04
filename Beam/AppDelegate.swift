@@ -10,7 +10,6 @@ import Cocoa
 import SwiftUI
 import Combine
 import Sentry
-import Preferences
 import BeamCore
 import UUIDKit
 
@@ -164,21 +163,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let tenMinutes: TimeInterval = 60*10
             FeatureFlags.startUpdate(refreshInterval: tenMinutes)
         }
-    }
-
-    // Work around to fix odd animation in Preferences Panes
-    // https://github.com/sindresorhus/Preferences/issues/60
-    // I don't like this but couldn't find anything else to fix this issue
-    // It means that a full rewrite of the Preferences without the Preferences SPM is needed
-    // As soon as the target is 11.0
-    // https://developer.apple.com/documentation/swiftui/settings
-    var openedPrefPanelOnce: Bool = false
-    private func fixFirstTimeLaunchOddAnimationByImplicitlyShowIt() {
-        Preferences.PaneIdentifier.allBeamPreferences.forEach {
-            preferencesWindowController.show(preferencePane: $0)
-        }
-        preferencesWindowController.close()
-        openedPrefPanelOnce = true
     }
 
     // MARK: - Network Monitor
@@ -772,51 +756,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // MARK: - Preferences
-    lazy var preferences: [PreferencePane] = [
-        GeneralPreferencesViewController,
-        BrowserPreferencesViewController,
-        NotesPreferencesViewController,
-        PrivacyPreferencesViewController,
-        PasswordsPreferencesViewController,
-        AccountsPreferenceViewController,
-        AboutPreferencesViewController,
-        BetaPreferencesViewController
-    ]
-
-    lazy var debugPreferences: [PreferencePane] = [
-        GeneralPreferencesViewController,
-        BrowserPreferencesViewController,
-        NotesPreferencesViewController,
-        PrivacyPreferencesViewController,
-        PasswordsPreferencesViewController,
-        AccountsPreferenceViewController,
-        AboutPreferencesViewController,
-        BetaPreferencesViewController,
-        AdvancedPreferencesViewController,
-        EditorDebugPreferencesViewController
-    ]
-
-    lazy var preferencesWindowController = PreferencesWindowController(
-        preferencePanes: Configuration.branchType == .beta || Configuration.branchType == .publicRelease ? preferences : debugPreferences,
-        style: .toolbarItems,
-        animated: true,
-        hidesToolbarForSingleItem: true
-    )
+    lazy var settingsWindowController = SettingsWindowController(settingsTab: SettingTab.userSettings)
+    lazy var privateSettingsWindowController = SettingsWindowController(settingsTab: SettingTab.privateSettings)
 
     @IBAction private func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
         guard !data.onboardingManager.needsToDisplayOnboard else { return }
-        if !openedPrefPanelOnce {
-            fixFirstTimeLaunchOddAnimationByImplicitlyShowIt()
-        }
-        preferencesWindowController.show()
+        settingsWindowController.show()
     }
 
-    func openPreferencesWindow(to prefPane: Preferences.PaneIdentifier) {
-        preferencesWindowController.show(preferencePane: prefPane)
+    func openPreferencesWindow(to tab: SettingTab) {
+        settingsWindowController.show(tab: tab)
     }
 
     func closePreferencesWindow() {
-        preferencesWindowController.close()
+        settingsWindowController.close()
+    }
+
+    @IBAction private func advancedPreferencesMenuItemActionHandler(_ sender: NSMenuItem) {
+        guard !data.onboardingManager.needsToDisplayOnboard else { return }
+        privateSettingsWindowController.show()
     }
 
     func applicationWillHide(_ notification: Notification) {

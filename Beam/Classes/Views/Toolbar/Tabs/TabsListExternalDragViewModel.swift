@@ -51,8 +51,10 @@ class TabsListExternalDragViewModel: ObservableObject {
             state?.associatedWindow?.orderOut(self)
         }
 
-        let performer = NSHapticFeedbackManager.defaultPerformer
-        performer.perform(.alignment, performanceTime: .default)
+        if PreferencesManager.isHapticFeedbackOn {
+            let performer = NSHapticFeedbackManager.defaultPerformer
+            performer.perform(.alignment, performanceTime: .default)
+        }
 
         if let dragSource = data?.currentDraggingSession?.draggingSource as? TabExternalDraggingSource,
             let dragItem = data?.currentDraggingSession?.draggingItem {

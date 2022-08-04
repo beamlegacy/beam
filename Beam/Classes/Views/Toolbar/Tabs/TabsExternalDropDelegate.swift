@@ -33,8 +33,10 @@ class TabsExternalDropDelegate: DropDelegate {
     }
 
     private func triggerHapticFeedback() {
-        let performer = NSHapticFeedbackManager.defaultPerformer
-        performer.perform(.alignment, performanceTime: .default)
+        if PreferencesManager.isHapticFeedbackOn {
+            let performer = NSHapticFeedbackManager.defaultPerformer
+            performer.perform(.alignment, performanceTime: .default)
+        }
     }
 
     func dropEntered(info: DropInfo) {

@@ -65,6 +65,7 @@ private extension PreferencesManager {
     static let fontMinKey = "fontMin"
     static let fontSizeIndexKey = "fontSizeIndex"
     static let tabToHighlightKey = "tabToHighlight"
+    static let isHapticFeedbackOnKey = "isHapticFeedbackOn"
     static let autoUpdateKey = "autoUpdate"
     static let dataBackupOnUpdate = "dataBackupOnUpdate"
     static let defaultWindowModeKey = "defaultWindowMode"
@@ -76,6 +77,7 @@ private extension PreferencesManager {
     static let isFontMinOnPreferenceDefault = false
     static let fontSizeIndexPreferenceDefault = 5
     static let isTabToHighlightOnDefault = false
+    static let isHapticFeedbackOnDefault = true
     static let isAutoUpdateOnDefault = true
     static let isDataBackupOnUpdateOnDefault = true
     static let defaultWindowModeDefault = PreferencesDefaultWindowMode.journal
@@ -93,6 +95,9 @@ extension PreferencesManager {
 
     @UserDefault(key: tabToHighlightKey, defaultValue: isTabToHighlightOnDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
     static var isTabToHighlightOn: Bool
+
+    @UserDefault(key: isHapticFeedbackOnKey, defaultValue: isHapticFeedbackOnDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
+    static var isHapticFeedbackOn: Bool
 
     @UserDefault(key: autoUpdateKey, defaultValue: isAutoUpdateOnDefault, suiteName: BeamUserDefaults.generalPreferences.suiteName)
     static var isAutoUpdateOn: Bool
