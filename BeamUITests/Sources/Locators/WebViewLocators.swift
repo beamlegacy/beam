@@ -53,6 +53,7 @@ enum WebViewLocators {
         case muteTab = "Mute Tab"
         case copyAddress = "Copy Address"
         case pasteAndGo = "Paste and Go"
+        case duplicateTab = "Duplicate Tab"
     }
     
 }
