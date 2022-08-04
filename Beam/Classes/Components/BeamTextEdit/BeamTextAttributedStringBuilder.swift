@@ -258,8 +258,10 @@ struct BeamTextAttributedStringBuilder {
 
         let delegate = CTRunDelegateCreate(&callbacks, extentBuffer)
 
+        // We use the unicode U+FFCC object replacement character as recommended by the documentation
+        // of `kCTRunDelegateAttributeName`.
         let attrDictionaryDelegate = [(kCTRunDelegateAttributeName as NSAttributedString.Key): (delegate as Any)]
-        let glyph = NSMutableAttributedString(string: " ", attributes: attrDictionaryDelegate)
+        let glyph = NSMutableAttributedString(string: "\u{fffc}", attributes: attrDictionaryDelegate)
         ctRuns[id] = glyph
 
         let fakeGlyph = NSMutableAttributedString(attributedString: glyph)
