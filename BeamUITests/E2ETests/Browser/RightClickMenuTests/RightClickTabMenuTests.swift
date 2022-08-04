@@ -22,7 +22,7 @@ class RightClickTabMenuTests: BaseTest {
         }
     }
     
-    func testCloseTabsToTheRight() throws {
+    func testCloseTabsToTheRight() {
         
         openThreeTabsAndSwitchToWebView()
         
@@ -43,7 +43,7 @@ class RightClickTabMenuTests: BaseTest {
         }
     }
     
-    func testCloseOtherTabs() throws {
+    func testCloseOtherTabs() {
         
         openThreeTabsAndSwitchToWebView()
         
@@ -57,6 +57,45 @@ class RightClickTabMenuTests: BaseTest {
         
         step("THEN Close Other Tabs is disabled for remained tab") {
             XCTAssertFalse(webView.openTabMenu(tabIndex: 0).isTabMenuOptionEnabled(.closeOtherTabs))
+        }
+    }
+    
+    func testMuteTab() {
+        
+        step("GIVEN I open a web page where no sounds are playing"){
+            launchApp().waitForJournalViewToLoad()
+            uiMenu.loadUITestPage1()
+            XCTAssertTrue(webView.waitForWebViewToLoad())
+        }
+        
+        step("THEN I see Mute tab option is disabled") {
+            XCTAssertFalse(webView.openTabMenu(tabIndex: 0).isTabMenuOptionEnabled(.muteTab))
+        }
+        
+        //assertion to make sure mute tab is enabled is blocked by https://linear.app/beamapp/issue/BE-5056/tab-with-sound-playing-is-not-recognized-as-it-plays-any-sound
+        
+    }
+    
+    func testCopyAddressPasteAndGo() {
+        
+        step("GIVEN I open 2 different web pages"){
+            launchApp().waitForJournalViewToLoad()
+            uiMenu.loadUITestPage1()
+            uiMenu.loadUITestPage2()
+            XCTAssertTrue(webView.waitForWebViewToLoad())
+        }
+        
+        step("WHEN I copy address of the first tab"){
+            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.copyAddress)
+        }
+        
+        step("WHEN I paste and go copied URL"){
+            webView.openTabMenu(tabIndex: 1).selectTabMenuItem(.pasteAndGo)
+        }
+        
+        step("THEN refreshed tab 2 is the same as tab 1"){
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), webView.getBrowserTabTitleValueByIndex(index: 1))
         }
     }
     
