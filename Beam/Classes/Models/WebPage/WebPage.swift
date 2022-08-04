@@ -149,51 +149,74 @@ extension WebPage {
 
 extension WebPage {
 
-    func searchInContent(fromSelection: Bool = false) {
-        guard self.searchViewModel == nil else {
-            self.searchViewModel?.isEditing = true
-            return
-        }
+    func searchInContent(terms: String = "", fromSelection: Bool = false) {
 
         switch contentType {
         case .web:
-            searchViewModel = SearchViewModel(context: .web) { [weak self] search in
-                self?.find(search, using: "find")
-            } onLocationIndicatorTap: { [weak self] position in
-                self?.executeJS("window.scrollTo(0, \(position));", objectName: nil)
-            } next: { [weak self] search in
-                self?.find(search, using: "findNext")
-            } previous: { [weak self] search in
-                self?.find(search, using: "findPrevious")
-            } done: { [weak self] in
-                self?.executeJS("findDone()", objectName: "SearchWebPage")
-                self?.searchViewModel = nil
+            if let searchViewModel = searchViewModel {
+                if !fromSelection {
+                    searchViewModel.searchTerms = terms
+                    searchViewModel.isEditing = true
+                }
+            } else {
+                searchViewModel = SearchViewModel(context: .web, terms: terms) { [weak self] search in
+                    let pboard = NSPasteboard(name: .find)
+                    pboard.clearContents()
+                    pboard.setString(search, forType: .string)
+                    self?.find(search, using: "find")
+                } onLocationIndicatorTap: { [weak self] position in
+                    self?.executeJS("window.scrollTo(0, \(position));", objectName: nil)
+                } next: { [weak self] search in
+                    self?.find(search, using: "findNext")
+                } previous: { [weak self] search in
+                    self?.find(search, using: "findPrevious")
+                } done: { [weak self] in
+                    self?.executeJS("findDone()", objectName: "SearchWebPage")
+                    self?.searchViewModel = nil
+                }
             }
 
             if fromSelection {
                 self.executeJS("getSelection()", objectName: "SearchWebPage")
+            } else {
+                searchViewModel?.selectAll = true
             }
 
         case .pdf:
-            searchViewModel = SearchViewModel(
-                context: .web,
-                onLocationIndicatorTap: { _ in },
-                next: { [weak self] _ in
-                    self?.searchViewModel?.currentOccurence += 1
-                },
-                previous: { [weak self] _ in
-                    self?.searchViewModel?.currentOccurence -= 1
-                },
-                done: { [weak self] in
-                    self?.searchViewModel?.searchTerms = ""
-                    self?.searchViewModel = nil
+            if let searchViewModel = searchViewModel {
+                if !fromSelection {
+                    searchViewModel.searchTerms = terms
+                    searchViewModel.isEditing = true
                 }
-            )
+            } else {
+                searchViewModel = SearchViewModel(
+                    context: .web,
+                    terms: terms,
+                    onChange: { search in
+                        let pboard = NSPasteboard(name: .find)
+                        pboard.clearContents()
+                        pboard.setString(search, forType: .string)
+                    },
+                    onLocationIndicatorTap: { _ in },
+                    next: { [weak self] _ in
+                        self?.searchViewModel?.currentOccurence += 1
+                    },
+                    previous: { [weak self] _ in
+                        self?.searchViewModel?.currentOccurence -= 1
+                    },
+                    done: { [weak self] in
+                        self?.searchViewModel?.searchTerms = ""
+                        self?.searchViewModel = nil
+                    }
+                )
+            }
 
             if fromSelection,
                let pdfContentDescription = contentDescription as? PDFContentDescription,
                let selection = pdfContentDescription.contentState.currentSelection {
                 searchViewModel?.searchTerms = selection
+            } else {
+                searchViewModel?.selectAll = true
             }
         }
     }
