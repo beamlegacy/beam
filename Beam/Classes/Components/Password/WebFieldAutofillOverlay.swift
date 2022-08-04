@@ -39,6 +39,17 @@ final class WebFieldAutofillOverlay {
                 viewModel.close()
             }
         }
+
+        var isPresentingModalDialog: Bool {
+            switch self {
+            case .none:
+                return false
+            case .password(let viewModel):
+                return viewModel.isPresentingModalDialog
+            case .creditCard(let viewModel):
+                return viewModel.isPresentingModalDialog
+            }
+        }
     }
 
     private(set) var frameInfo: WKFrameInfo? // used in menu delegate, needs to be kept around
@@ -83,6 +94,10 @@ final class WebFieldAutofillOverlay {
 
     var hasVisibleInterface: Bool {
         buttonPopover?.window != nil && menuPopover?.window != nil
+    }
+
+    var isPresentingModalDialog: Bool {
+        menuViewModel.isPresentingModalDialog
     }
 
     func dismiss() {
