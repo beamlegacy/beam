@@ -137,6 +137,10 @@ class PasswordManagerMenuViewModel: ObservableObject {
         closeOtherPasswordsDialog()
     }
 
+    var isPresentingModalDialog: Bool {
+        otherPasswordsDialog != nil
+    }
+
     private func closeOtherPasswordsDialog() {
         otherPasswordsDialog?.close()
         otherPasswordsDialog = nil

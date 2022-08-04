@@ -352,7 +352,7 @@ class WebAutofillController: NSObject, WebPageRelated {
     }
 
     private func clearInputFocus() {
-        guard let overlay = currentOverlay else { return }
+        guard let overlay = currentOverlay, !overlay.isPresentingModalDialog else { return }
         previouslyFocusedElementId = overlay.elementId
         overlay.dismiss()
         lastFocusOutTimestamp = BeamDate.now
