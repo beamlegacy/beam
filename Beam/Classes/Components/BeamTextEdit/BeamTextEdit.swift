@@ -486,7 +486,7 @@ public extension CALayer {
             let x = (frame.width - textNodeWidth) / 2
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         } else {
-            let x = (frame.width - textNodeWidth) * (leadingPercentage / 100) + 20
+            let x = (frame.width - textNodeWidth) * (leadingPercentage / 100)
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         }
         return rect
