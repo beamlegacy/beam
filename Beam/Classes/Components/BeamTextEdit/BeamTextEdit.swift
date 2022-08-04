@@ -1980,7 +1980,7 @@ public extension CALayer {
     }
 
     private func performHapticFeedback(for dragResult: DragResult) {
-        guard dragResult != previousDragResult else { return }
+        guard dragResult != previousDragResult, PreferencesManager.isHapticFeedbackOn else { return }
         let performer = NSHapticFeedbackManager.defaultPerformer
         if let previousDragResult = previousDragResult, previousDragResult.onlyDiffersByIndentation(from: dragResult) {
             performer.perform(.levelChange, performanceTime: .drawCompleted)

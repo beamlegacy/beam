@@ -18,7 +18,7 @@ enum BrowserPreferencesViewLocators {
     }
 
     enum StaticTexts: String, CaseIterable, UIElement {
-        case importPasswordlabel = "Import your passwords and history from other browsers"
+        case importPasswordlabel = "Import your passwords and history from other browsers."
     }
     
     enum MenuItemsDownload: String, CaseIterable, UIElement {

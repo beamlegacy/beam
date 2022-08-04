@@ -6,31 +6,14 @@
 //
 
 import SwiftUI
-import Preferences
-
-let NotesPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .notes, title: "Notes", imageName: "preferences-cards") {
-    NotesPreferencesView()
-}
 
 struct NotesPreferencesView: View {
-    private let contentWidth: Double = PreferencesManager.contentWidth
     @State private var alwaysShowBullets = PreferencesManager.alwaysShowBullets
 
     var body: some View {
-        Preferences.Container(contentWidth: contentWidth) {
-//            Preferences.Section {
-//                Text("Spelling & Grammar:")
-//                    .font(BeamFont.regular(size: 13).swiftUI)
-//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-//                    .frame(width: 250, alignment: .trailing)
-//            } content: {
-//                SpellingGrammarSection()
-//            }
-            Preferences.Section {
+        Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+            Settings.Row {
                 Text("Indentation:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
             } content: {
                 Toggle(isOn: $alwaysShowBullets) {
                     Text("Always show bullets")
@@ -41,13 +24,6 @@ struct NotesPreferencesView: View {
                         PreferencesManager.alwaysShowBullets = $0
                     })
             }
-//            Preferences.Section {
-//                Text("Embed Content:")
-//                    .font(BeamFont.regular(size: 13).swiftUI)
-//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-//            } content: {
-//                PreferencesEmbedContentSection()
-//            }
         }
     }
 }

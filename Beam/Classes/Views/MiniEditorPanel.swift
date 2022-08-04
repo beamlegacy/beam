@@ -99,7 +99,9 @@ class MiniEditorPanel: NSPanel {
 
     func unDock() {
         parent?.removeChildWindow(self)
-        NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+        if PreferencesManager.isHapticFeedbackOn {
+            NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
+        }
         self.styleMask.insert(.resizable)
     }
 
@@ -154,7 +156,7 @@ extension MiniEditorPanel: NSWindowDelegate {
     }
 
     func windowDidMove(_ notification: Notification) {
-        if isCloseToMainWindow() && isMouseDown {
+        if isCloseToMainWindow() && isMouseDown && PreferencesManager.isHapticFeedbackOn {
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
         }
 

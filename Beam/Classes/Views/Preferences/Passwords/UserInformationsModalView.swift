@@ -40,8 +40,8 @@ struct UserInformationsModalView: View {
                     }
                 })
                 .frame(width: 398, height: 242, alignment: .center)
-                .border(BeamColor.Mercury.swiftUI, width: 1)
-                .background(BeamColor.Generic.background.swiftUI)
+                .border(BeamColor.Generic.tableViewStroke.swiftUI, width: 1)
+                .background(BeamColor.Generic.tableViewBackground.swiftUI)
                 HStack {
                     Button {
                         self.showingUserInformationsAdd.toggle()

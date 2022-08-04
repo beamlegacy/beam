@@ -7,14 +7,8 @@
 
 import Foundation
 import SwiftUI
-import Preferences
 import BeamCore
 import Combine
-
-let BetaPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .beta, title: "Beta", imageName: "preferences-developer") {
-    BetaPreferencesView(viewModel: BetaPreferencesViewModel())
-        .environment(\.managedObjectContext, CoreDataManager.shared.mainContext)
-}
 
 class BetaPreferencesViewModel: ObservableObject {
     @Published var isSynchronizationRunning = AppDelegate.main.isSynchronizationRunning
@@ -55,75 +49,86 @@ struct BetaPreferencesView: View, BeamDocumentSource {
     @ObservedObject var viewModel: BetaPreferencesViewModel
 
     var body: some View {
-        Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(title: "Synchronize:", bottomDivider: false, verticalAlignment: .top) {
-                Button(action: {
-                    self.loading = true
-                    Persistence.Sync.BeamObjects.last_received_at = nil
-                    Persistence.Sync.BeamObjects.last_updated_at = nil
-                    Task { @MainActor in
-                        do {
-                            _ = try await AppDelegate.main.syncDataWithBeamObject(force: true)
-                        } catch {
-                            Logger.shared.logError("Error while syncing data: \(error)", category: .document)
-                        }
-                        self.loading = false
-                    }
-                }, label: {
-                    Text("Force full synchronization")
-                        .frame(maxWidth: 180)
-                })
-                .disabled(loading)
-
-                Button(action: {
-                    AppDelegate.main.stopSynchronization()
-                }, label: {
-                    Text("Stop synchronization")
-                        .frame(maxWidth: 180)
-                })
-                .disabled(!viewModel.isloggedIn || !viewModel.isSynchronizationRunning)
+        Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+            Settings.Row {
+                Text("Synchronize:")
+            } content: {
+                synchronizationContent
             }
-
-            Preferences.Section(title: "Status:", bottomDivider: true, verticalAlignment: .top) {
+            Settings.Row(hasDivider: true) {
+                Text("Status:")
+            } content: {
                 Text(viewModel.synchronizationStatus.description)
             }
-
-            Preferences.Section(title: "Database:", bottomDivider: true) {
-                VStack(alignment: .leading) {
-                    DatabasePicker
-                    Button(action: {
-                        DispatchQueue.userInitiated.async {
-                            do {
-                                try BeamData.shared.currentAccount?.deleteEmptyDatabases()
-                                AppDelegate.showMessage("Empty databases deleted")
-                            } catch {
-                                DispatchQueue.main.async {
-                                    AppDelegate.showError(error)
-                                }
-                            }
-                        }
-                    }, label: {
-                        Text("Delete empty databases")
-                            .frame(maxWidth: 180)
-                    })
-                }
+            Settings.Row(hasDivider: true) {
+                Text("Database:")
+            } content: {
+                databaseContent
             }
-
-            Preferences.Section(bottomDivider: true) {
+            Settings.Row(hasDivider: true) {
                 Text("Debug UI:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
             } content: {
                 DebugSectionCheckbox
                 OmniboxScoreSectionCheckbox
             }
-
-            Preferences.Section(title: "Notes:", verticalAlignment: .top) {
+            Settings.Row {
+                Text("Notes:")
+            } content: {
                 ReindexNotesContents
                 RebuildNotesContents
                 ValidateNotesContents
             }
+        }
+    }
+
+    private var synchronizationContent: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                self.loading = true
+                Persistence.Sync.BeamObjects.last_received_at = nil
+                Persistence.Sync.BeamObjects.last_updated_at = nil
+                Task { @MainActor in
+                    do {
+                        _ = try await AppDelegate.main.syncDataWithBeamObject(force: true)
+                    } catch {
+                        Logger.shared.logError("Error while syncing data: \(error)", category: .document)
+                    }
+                    self.loading = false
+                }
+            }, label: {
+                Text("Force full synchronization")
+                    .frame(maxWidth: 180)
+            })
+            .disabled(loading)
+
+            Button(action: {
+                AppDelegate.main.stopSynchronization()
+            }, label: {
+                Text("Stop synchronization")
+                    .frame(maxWidth: 180)
+            })
+            .disabled(!viewModel.isloggedIn || !viewModel.isSynchronizationRunning)
+        }
+    }
+
+    private var databaseContent: some View {
+        VStack(alignment: .leading) {
+            DatabasePicker
+            Button(action: {
+                DispatchQueue.global(qos: .userInteractive).async {
+                    do {
+                        try BeamData.shared.currentAccount?.deleteEmptyDatabases()
+                        AppDelegate.showMessage("Empty databases deleted")
+                    } catch {
+                        DispatchQueue.main.async {
+                            AppDelegate.showError(error)
+                        }
+                    }
+                }
+            }, label: {
+                Text("Delete empty databases")
+                    .frame(maxWidth: 180)
+            })
         }
     }
 
@@ -133,7 +138,7 @@ struct BetaPreferencesView: View, BeamDocumentSource {
                 Text($0.title).tag($0)
             }
         }.labelsHidden()
-        .frame(maxWidth: 200)
+            .frame(maxWidth: 200)
     }
 
     private func dbChange(_ database: BeamDatabase?) {

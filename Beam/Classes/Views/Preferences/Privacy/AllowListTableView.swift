@@ -23,6 +23,8 @@ struct AllowListTableView: View {
 
     var body: some View {
         TableView(hasSeparator: false,
+                  headerTitleColor: BeamColor.Corduroy.nsColor,
+                  headerBackgroundColor: BeamColor.Generic.tableViewBackground.nsColor,
                   items: searchStr.isEmpty ? viewModel.allowListItems : filterAllowListItemsBy(searchStr: searchStr),
                   columns: allowListColumns,
                   creationRowTitle: creationRowTitle) { title, index in

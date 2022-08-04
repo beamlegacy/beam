@@ -6,48 +6,23 @@
 //
 
 import SwiftUI
-import Preferences
-
-let GeneralPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .general, title: "General", imageName: "preferences-general-on") {
-    GeneralPreferencesView()
-}
 
 struct GeneralPreferencesView: View {
-    private let contentWidth: Double = PreferencesManager.contentWidth
-
     var body: some View {
-        Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(bottomDivider: false) {
+        Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+            Settings.Row(hasDivider: true) {
                 VStack(alignment: .center) {
                     Text("Appearance:")
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                }.frame(width: 250, height: 70, alignment: .trailing)
+                }.frame(height: 70)
             } content: {
                 AppearanceSection()
-            }
-
-            Preferences.Section(bottomDivider: true) {
-                Text("").labelsHidden()
-            } content: {
                 NewWindowLaunchOption()
             }
-
-            Preferences.Section(bottomDivider: true) {
+            Settings.Row {
                 Text("Accessibility:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
             } content: {
                 AccessibilitySection()
             }
-//            Preferences.Section {
-//                Text("Updates:")
-//                    .font(BeamFont.regular(size: 13).swiftUI)
-//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-//            } content: {
-//                UpdatesSection()
-//            }
-
         }
     }
 }
@@ -75,10 +50,7 @@ private struct NewWindowLaunchOption: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-            Text("Always start on the web if there are pinned \nor opened tabs")
-                .font(BeamFont.regular(size: 11).swiftUI)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
-                .frame(minHeight: 30)
+            Settings.SubtitleLabel("Always start on the web if there are pinned \nor opened tabs.")
                 .lineLimit(nil)
                 .multilineTextAlignment(.leading)
                 .padding(.leading, 18)
@@ -146,6 +118,7 @@ struct AccessibilitySection: View {
 //    @State private var isPickerEnabled: Bool = PreferencesManager.isFontMinOnPreference
 //    @State private var fontSizeIndex = PreferencesManager.fontSizeIndexPreference
     @State private var isTabToHighlightOn = PreferencesManager.isTabToHighlightOn
+    @State private var isHapticFeedbackOn = PreferencesManager.isHapticFeedbackOn
 
     var body: some View {
 //        HStack {
@@ -166,22 +139,27 @@ struct AccessibilitySection: View {
 //            }
 //        }
 
-        Toggle(isOn: $isTabToHighlightOn) {
-            Text("Press Tab to highlight each item on a web page")
-        }.toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onChange(of: isTabToHighlightOn, perform: {
-                PreferencesManager.isTabToHighlightOn = $0
-            })
-
-        VStack {
-            Text("Option-Tab to highlights each item.")
-                .font(BeamFont.regular(size: 11).swiftUI)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
+        VStack(alignment: .leading) {
+            Toggle(isOn: $isTabToHighlightOn) {
+                Text("Press Tab to highlight each item on a web page")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onChange(of: isTabToHighlightOn, perform: {
+                    PreferencesManager.isTabToHighlightOn = $0
+                })
+            Settings.SubtitleLabel("Option-Tab to highlights each item.")
                 .padding(.leading, 18)
                 .lineLimit(nil)
                 .multilineTextAlignment(.leading)
+            Toggle(isOn: $isHapticFeedbackOn) {
+                Text("Force Click and haptic feedback")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onChange(of: isHapticFeedbackOn, perform: {
+                    PreferencesManager.isHapticFeedbackOn = $0
+                })
         }
     }
 }

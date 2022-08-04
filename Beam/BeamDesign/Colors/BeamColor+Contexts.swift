@@ -11,6 +11,9 @@ extension BeamColor {
 
     enum Generic {
         static let background = BeamColor.Custom(named: "WindowBackgroundColor")
+        static let tableViewBackground = BeamColor.Custom(named: "macOSTableViewBackground")
+        static let tableViewStroke = BeamColor.Custom(named: "macOSTableViewStroke")
+
         /// -> light: Generic.background / dark: Mercury
         static let secondaryBackground = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
         /// -> Niobium
