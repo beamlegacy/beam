@@ -392,6 +392,10 @@ import Sentry
         browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: setCurrent, withURLRequest: request)
         if setCurrent {
             mode = .web
+        } else if tab.contentView.window == nil {
+            let size = associatedWindow?.contentView?.bounds.size ?? CGSize(width: 1000, height: 1000)
+            tab.contentView.frame = .init(origin: .zero, size: size)
+            tab.contentView.layoutSubtreeIfNeeded()
         }
         return tab
     }
