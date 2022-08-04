@@ -443,6 +443,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @discardableResult
     func storeAllWindowsFromCurrentSession() -> Bool {
+        let windows = self.windows.filter { !$0.state.isIncognito }
+
         guard !windows.isEmpty else {
             return false
         }
