@@ -99,6 +99,7 @@ struct NoteView: View {
             headerViewModel.note = newNote
             tabGroups = newNote.tabGroups
             headerViewModel.setTabGroups(with: newNote.tabGroups)
+            state.data.refreshEvents(of: newNote)
         }
         .onReceive(note.changed.debounce(for: .seconds(10), scheduler: RunLoop.main)) { changed in
             let (_, change) = changed
