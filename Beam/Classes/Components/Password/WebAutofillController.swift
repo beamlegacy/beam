@@ -701,6 +701,7 @@ extension WebAutofillController: PasswordManagerMenuDelegate {
     }
 
     private func togglePasswordField(visibility: Bool) {
+        guard !passwordFieldIds.isEmpty else { return }
         let passwordParams = passwordFieldIds.map { id in
             WebFieldAutofill(id: id, value: nil, background: nil)
         }

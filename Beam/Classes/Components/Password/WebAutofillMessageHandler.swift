@@ -30,13 +30,18 @@ class WebAutofillMessageHandler: SimpleBeamMessageHandler {
         switch messageKey {
 
         case .PasswordManager_loaded:
-            Logger.shared.logDebug("JavaScript loaded for frame \(messageBody as? String ?? "<no url>")", category: .webAutofillInternal)
+            guard let dict = messageBody as? [String: Any],
+                  let frameURL = dict["url"] as? String else {
+                Logger.shared.logError("Ignoring loaded message as body is not a String", category: .web)
+                return
+            }
+            Logger.shared.logDebug("JavaScript loaded for frame \(frameURL)", category: .webAutofillInternal)
             autofillController.requestInputFields(frameInfo: frameInfo)
 
         case .PasswordManager_textInputFields:
             guard let dict = messageBody as? [String: Any],
                 let jsonString = dict["textFieldsString"] as? String else {
-                Logger.shared.logError("Ignoring message as body is not a String", category: .web)
+                Logger.shared.logError("Ignoring textInputFields message as body is not a String", category: .web)
                 return
             }
             autofillController.updateInputFields(with: jsonString, frameInfo: frameInfo)
@@ -62,7 +67,7 @@ class WebAutofillMessageHandler: SimpleBeamMessageHandler {
         case .PasswordManager_formSubmit:
             guard let dict = messageBody as? [String: Any],
                   let elementId = dict["id"] as? String else {
-                Logger.shared.logError("Ignoring message as body is not a String", category: .web)
+                Logger.shared.logError("Ignoring textInputFocusOut message as body is not a String", category: .web)
                 return
             }
             autofillController.handleWebFormSubmit(with: elementId, frameInfo: frameInfo)
