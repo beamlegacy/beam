@@ -50,6 +50,9 @@ enum WebViewLocators {
         case ungroup = "Ungroup"
         case closeTabsToTheRight = "Close Tabs to the Right"
         case closeOtherTabs = "Close Other Tabs"
+        case muteTab = "Mute Tab"
+        case copyAddress = "Copy Address"
+        case pasteAndGo = "Paste and Go"
     }
     
 }
