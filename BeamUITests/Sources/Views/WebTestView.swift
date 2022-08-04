@@ -273,6 +273,7 @@ class WebTestView: BaseView {
         return WebTestView()
     }
     
+    @discardableResult
     func browseHistoryBackButtonClick() -> WebTestView {
         button(WebViewLocators.Buttons.goBackButton.accessibilityIdentifier).tapInTheMiddle()
         return WebTestView()

@@ -12,13 +12,8 @@ class BrowserHistoryTests: BaseTest {
     
     let omnibox = OmniBoxTestView()
     let linkToOpen = MockHTTPWebPages().getMockPageUrl(.ambiguousShortForm).dropLast()
-    
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-    }
+    let url1 = MockHTTPWebPages().getMockPageUrl(.mainView)
+    let url2 = MockHTTPWebPages().getMockPageUrl(.ambiguousShortForm)
     
     private func openPageByLinkClick() {
         webView.staticText(String(linkToOpen)).tapInTheMiddle()
@@ -26,6 +21,14 @@ class BrowserHistoryTests: BaseTest {
     
     private func openPageByContinueButtonClick() {
         webView.button("Continue").tapInTheMiddle()
+    }
+    
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        launchApp()
+        uiMenu
+            .destroyDB()
+            .startMockHTTPServer()
     }
     
     private func openMultipleWebPagesInSameTab() {
@@ -39,11 +42,8 @@ class BrowserHistoryTests: BaseTest {
     
     func testBrowserHistoryNavigation() {
         
-        let url1 = mockPage.getMockPageUrl(.mainView)
-        let url2 = mockPage.getMockPageUrl(.ambiguousShortForm)
-        let url3 = url2 + "view"
-        
         openMultipleWebPagesInSameTab()
+        let url3 = url2 + "view"
         
         step("THEN forward button is disabled and \(url2) is opened on browser history back button click"){
             XCTAssertFalse(webView.button(WebViewLocators.Buttons.goForwardButton.accessibilityIdentifier).exists)
@@ -110,5 +110,22 @@ class BrowserHistoryTests: BaseTest {
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 1), "Sign In")
         }
     }
+    
+    
+    func testDuplicatingTabDuplicatesHistory() {
+        
+        openMultipleWebPagesInSameTab()
+        
+        step("WHEN I duplicate a tab") {
+            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.duplicateTab)
+        }
+        
+        step("THEN it's history is also duplicated") {
+            webView.waitForWebViewToLoad()
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertTrue(webView.button(WebViewLocators.Buttons.goBackButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+    }
+    
     
 }
