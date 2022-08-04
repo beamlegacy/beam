@@ -119,6 +119,8 @@ struct CreditCardsTableView: View {
         TableView(customRowHeight: 48, hasVerticalScroller: true, hasSeparator: true, hasHeader: false, allowsMultipleSelection: true,
                   items: allCreditCards, columns: Self.creditCardsColumns, creationRowTitle: nil, onSelectionChanged: onSelectionChanged, onDoubleTap: onDoubleTap)
         .frame(width: 526)
+        .border(BeamColor.Generic.tableViewStroke.swiftUI, width: 1)
+        .background(BeamColor.Generic.tableViewBackground.swiftUI)
     }
 }
 

@@ -40,6 +40,7 @@ struct PasswordEditView: View {
                             })
                                 .foregroundColor(BeamColor.Generic.text.swiftUI)
                                 .frame(width: 286, height: 19, alignment: .center)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
                         }
                         .disabled(editType == PasswordEditType.update)
                         if urlIsNotValid {
@@ -56,6 +57,7 @@ struct PasswordEditView: View {
                         TextField("", text: $username)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                             .frame(width: 286, height: 19, alignment: .center)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
                     .padding(.bottom, 10)
                     HStack {
@@ -65,6 +67,7 @@ struct PasswordEditView: View {
                         TextField("", text: $newPassword)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                             .frame(width: 286, height: 19, alignment: .center)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
                     }
                     .padding(.bottom, 12)
                     HStack {

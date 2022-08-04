@@ -51,8 +51,8 @@ struct OtherPasswordModal: View {
                 }
             }
             .frame(width: 528, height: 240, alignment: .center)
-            .border(BeamColor.Mercury.swiftUI, width: 1)
-            .background(BeamColor.Generic.background.swiftUI)
+            .border(BeamColor.Generic.tableViewStroke.swiftUI, width: 1)
+            .background(BeamColor.Generic.tableViewBackground.swiftUI)
             .sheet(item: $editedPassword) {
                 PasswordEditView(entry: $0.entry, password: $0.password, editType: .update)
                     .frame(width: 400, height: 179, alignment: .center)

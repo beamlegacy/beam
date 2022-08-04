@@ -7,15 +7,9 @@
 // swiftlint:disable file_length
 
 import SwiftUI
-import Preferences
 import BeamCore
 
-let PasswordsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .passwords, title: "Passwords", imageName: "preferences-passwords") {
-    PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(), creditCardsViewModel: CreditCardListViewModel())
-}
-
 struct PasswordsPreferencesView: View {
-    private let contentWidth: Double = PreferencesManager.contentWidth
     var passwordsViewModel: PasswordListViewModel
     var creditCardsViewModel: CreditCardListViewModel
 
@@ -35,9 +29,8 @@ struct PasswordsPreferencesView: View {
     }
 
     var body: some View {
-        Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(bottomDivider: isUnlocked) {
-                Text("").labelsHidden()
+        Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+            Settings.Row(hasDivider: isUnlocked) {
             } content: {
                 let isUnlocked = isUnlocked
                 VStack {
@@ -49,19 +42,18 @@ struct PasswordsPreferencesView: View {
                         }
                 }
                 .onChange(of: controlActiveState) { newState in
-                    guard newState == .inactive && AppDelegate.main.preferencesWindowController.window?.isVisible == false else { return }
+                    guard newState == .inactive && AppDelegate.main.settingsWindowController.window?.isVisible == false else { return }
                     lock()
                 }
                 .onAppear {
-                    guard !self.isUnlocked && AppDelegate.main.openedPrefPanelOnce else { return }
+                    guard !self.isUnlocked else { return }
                     checkAuthentication()
                 }
                 .onDisappear {
                     lock()
                 }
             }
-            Preferences.Section {
-                Text("").labelsHidden()
+            Settings.Row {
             } content: {
                 Webforms(creditCardsViewModel: creditCardsViewModel)
                     .opacity(isUnlocked ? 1 : 0)
@@ -159,7 +151,7 @@ struct Passwords: View {
             Spacer()
             BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor)
                 .frame(width: 220, height: 21, alignment: .center)
-                .foregroundColor(BeamColor.Generic.background.swiftUI)
+                .foregroundColor(BeamColor.Generic.tableViewBackground.swiftUI)
                 .onChange(of: searchString) { searchString in
                     passwordsViewModel.searchString = searchString
                 }
@@ -168,7 +160,6 @@ struct Passwords: View {
 
     private var passwordTableView: some View {
         HStack {
-            Spacer()
             PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems) { idx in
                 passwordsViewModel.updateSelection(idx)
             } onDoubleTap: { row in
@@ -181,9 +172,8 @@ struct Passwords: View {
                 }
             }
             .frame(width: 682, height: 240, alignment: .center)
-            .border(BeamColor.Mercury.swiftUI, width: 1)
-            .background(BeamColor.Generic.background.swiftUI)
-            Spacer()
+            .border(BeamColor.Generic.tableViewStroke.swiftUI, width: 1)
+            .background(BeamColor.Generic.tableViewBackground.swiftUI)
         }
     }
 
@@ -209,7 +199,6 @@ struct Passwords: View {
                     .disabled(passwordsViewModel.selectedEntries.count == 0)
             }
             .fixedSize()
-
             Button {
                 if let entry = passwordsViewModel.selectedEntries.first {
                     do {
@@ -284,7 +273,7 @@ struct Passwords: View {
         alert.addButton(withTitle: "Remove")
         alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .warning
-        guard let window = PasswordsPreferencesViewController.view.window else { return }
+        guard let window = AppDelegate.main.settingsWindowController.window else { return }
         alert.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else { return }
             for entry in passwordsViewModel.selectedEntries {
