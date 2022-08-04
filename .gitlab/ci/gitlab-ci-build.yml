@@ -29,7 +29,7 @@ swift lint:
     - macos-mono
 
 build:macos:
-  timeout: 10 minutes
+  timeout: 15 minutes
   dependencies: []
   stage: build
   artifacts:
