@@ -8,14 +8,26 @@
 import Foundation
 import BeamCore
 
-public extension BeamNote {
-    var shouldAppearInJournal: Bool {
-        return isTodaysNote || !isEntireNoteEmpty() || !fastLinksAndReferences.isEmpty
-    }
+public protocol Linkable {
+    var title: String { get }
+    var id: UUID { get }
+    var mentionsCount: Int { get }
+    var isReferencedOrLinked: Bool { get }
+    var linksAndReferences: [BeamNoteReference] { get }
+    var fastLinksAndReferences: [BeamNoteReference] { get }
+    var links: [BeamNoteReference] { get }
+    var references: [BeamNoteReference] { get }
+    var fastReferences: [BeamNoteReference] { get }
+    func linksAndReferences(fast: Bool) -> [BeamNoteReference]
+}
 
+public extension Linkable {
     var mentionsCount: Int {
         Set<BeamNoteReference>(linksAndReferences(fast: true)).count
     }
+
+    var isReferencedOrLinked: Bool { mentionsCount != 0 }
+
     var linksAndReferences: [BeamNoteReference] {
         links + references
     }
@@ -58,6 +70,15 @@ public extension BeamNote {
             return noteRef
         }
     }
+}
+
+extension BeamNote: Linkable {
+    public var shouldAppearInJournal: Bool {
+        return isTodaysNote || !isEntireNoteEmpty() || !fastLinksAndReferences.isEmpty
+    }
+}
+
+extension BeamDocument: Linkable {
 }
 
 public extension BeamElement {
@@ -117,3 +138,4 @@ public extension BeamNoteReference {
         note?.findElement(elementID)
     }
 }
+
