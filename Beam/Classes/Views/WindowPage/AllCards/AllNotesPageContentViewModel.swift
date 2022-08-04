@@ -93,7 +93,7 @@ final class AllNotesPageViewModel: ObservableObject, Identifiable {
         if doc.title == publishingNoteTitle {
             return false
         }
-        return doc.documentType != .journal || !doc.isEmpty || doc.journalDate == BeamNoteType.intFrom(journalDate: BeamDate.now)
+        return doc.documentType != .journal || !doc.isEmpty || doc.journalDate >= BeamNoteType.intFrom(journalDate: BeamDate.now) || doc.isReferencedOrLinked
     }
 
     private func updateNoteItemsFromAllNotes() {
