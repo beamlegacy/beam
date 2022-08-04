@@ -6,25 +6,16 @@
 //
 
 import SwiftUI
-import Preferences
-
-let AboutPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .about, title: "About", imageName: "preferences-about") {
-    AboutPreferencesView()
-}
 
 struct AboutPreferencesView: View {
     private let contentWidth: Double = PreferencesManager.contentWidth
 
     var body: some View {
-        Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(bottomDivider: true) {
-                Text("").labelsHidden()
-            } content: {
+        Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+            Settings.Row(hasDivider: true) {} content: {
                 BeamAboutSection()
             }
-            Preferences.Section {
-                Text("").labelsHidden()
-            } content: {
+            Settings.Row {} content: {
                 BeamSocialSection()
             }
         }.frame(height: 322, alignment: .center)
@@ -41,23 +32,35 @@ struct BeamAboutSection: View {
     @Environment(\.openURL) var openURL
 
     private var TermsAndConditionsButton: some View {
-        Button {
+        ButtonLabel(customView: { hovered, _ in
+            AnyView(
+                HStack(spacing: 0) {
+                    Text("Terms of Service")
+                        .font(BeamFont.regular(size: 12).swiftUI)
+                        .underline()
+                    Text("↗")
+                        .font(BeamFont.regular(size: 11).swiftUI)
+                }.foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI)
+            )
+        }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
             PreferencesManager.openLink(url: URL(string: Configuration.beamTermsConditionsLink))
-        } label: {
-            (Text("Terms of Service") + Text(Image("editor-url").renderingMode(.template)))
-                .underline()
-                .font(BeamFont.regular(size: 12).swiftUI)
-        }.buttonStyle(PlainButtonStyle())
+        })
     }
 
     private var PrivacyPolicyButton: some View {
-        Button {
+        ButtonLabel(customView: { hovered, _ in
+            AnyView(
+                HStack(spacing: 0) {
+                    Text("Privacy Policy")
+                        .font(BeamFont.regular(size: 12).swiftUI)
+                        .underline()
+                    Text("↗")
+                        .font(BeamFont.regular(size: 11).swiftUI)
+                }.foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI)
+            )
+        }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
             PreferencesManager.openLink(url: URL(string: Configuration.beamPrivacyPolicyLink))
-        } label: {
-            (Text("Privacy Policy") + Text(Image("editor-url").renderingMode(.template)))
-                .underline()
-                .font(BeamFont.regular(size: 12).swiftUI)
-        }.buttonStyle(PlainButtonStyle())
+        })
     }
 
     var body: some View {
@@ -132,16 +135,14 @@ struct BeamAboutSection: View {
 
 struct BeamSocialSection: View {
     var body: some View {
-        VStack {
-            HStack {
+        VStack(alignment: .center) {
+            HStack(alignment: .top) {
                 Spacer(minLength: 172)
                 VStack(alignment: .leading) {
-                    Text("Follow Beam on Twitter")
+                    Text("Follow beam on Twitter")
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    Text("Get the latest tips and tricks for Beam")
-                        .font(BeamFont.regular(size: 11).swiftUI)
-                        .foregroundColor(BeamColor.Corduroy.swiftUI)
+                    Settings.SubtitleLabel("Get the latest tips and tricks for beam.")
                 }
                 Spacer()
                 Button {

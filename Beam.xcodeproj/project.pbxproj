@@ -106,7 +106,6 @@
 		330D3824265FC6B200A2536B /* DownloadCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D3823265FC6B200A2536B /* DownloadCell.swift */; };
 		3312203428097382006A5EA1 /* UpdatePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3312203328097382006A5EA1 /* UpdatePanel.swift */; };
 		331220362809BFEB006A5EA1 /* SimpleHostingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331220352809BFEB006A5EA1 /* SimpleHostingWindow.swift */; };
-		3315DC912667859A002A47CF /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
 		3315DC922667859A002A47CF /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB72325B9AAA200959146 /* Fakery */; };
 		3315DC952667859A002A47CF /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 964FE5E02625D8AA00966E03 /* GRDB */; };
 		3315DC962667859A002A47CF /* OAuthSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 52CA277B26401D7000146A00 /* OAuthSwift */; };
@@ -394,7 +393,6 @@
 		5241E5E926F89AE700B08F69 /* UserSessionRequest+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5E826F89AE700B08F69 /* UserSessionRequest+async.swift */; };
 		5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 5241E5F326F89C5000B08F69 /* refresh_token.graphql */; };
 		5242279A275524C900457345 /* BeamObjectChecksum+CoreData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52422799275524C900457345 /* BeamObjectChecksum+CoreData.swift */; };
-		524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */; };
 		524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299E225A480A300F4DBF5 /* AccountsView.swift */; };
 		524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */; };
 		52466B22270DA966002D1716 /* Clustering in Frameworks */ = {isa = PBXBuildFile; productRef = 52466B21270DA966002D1716 /* Clustering */; };
@@ -876,6 +874,7 @@
 		A01EB6BC2840DE430032962D /* NoteMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01EB6BB2840DE430032962D /* NoteMetadata.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
 		A02E837127AEDE6500CEF688 /* OnboardingLostPrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02E837027AEDE6500CEF688 /* OnboardingLostPrivateKey.swift */; };
+		A0316B7B2891DF11009F8697 /* CalendarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0316B7A2891DF11009F8697 /* CalendarContentView.swift */; };
 		A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A032BD32261F4677009A3576 /* ShortcutLayer.swift */; };
 		A0379C43266E6C5B00D75D6B /* AllowListTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0379C42266E6C5B00D75D6B /* AllowListTableView.swift */; };
 		A039B14D26960F21008A2E0B /* UserInformationsModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */; };
@@ -922,7 +921,6 @@
 		A07B03F1279AF1D200D14C45 /* Inter-SemiBoldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A07B03ED279AF1D100D14C45 /* Inter-SemiBoldItalic.otf */; };
 		A07C013D2705ED2700D91750 /* GoogleCalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07C013C2705ED2700D91750 /* GoogleCalendarService.swift */; };
 		A07E94BC276A1B470094117C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07E94B4276A02070094117C /* main.swift */; };
-		A07F2436269C8529008918B0 /* PreferencePaneBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2435269C8529008918B0 /* PreferencePaneBuilder.swift */; };
 		A07F2438269D8B0D008918B0 /* UserDefaultStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2437269D8B0D008918B0 /* UserDefaultStorable.swift */; };
 		A07F243A269D9624008918B0 /* PreferencesManager+Privacy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */; };
 		A07FFBCD282D66BF00AFCB02 /* NSWindow+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07FFBCC282D66BF00AFCB02 /* NSWindow+Beam.swift */; };
@@ -934,6 +932,7 @@
 		A09FBA612705AD44009E44F7 /* CheckboxButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09FBA602705AD44009E44F7 /* CheckboxButtonStyle.swift */; };
 		A0A026772696614E00B94227 /* UserInformationsEditModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */; };
 		A0A0FED1268F05CC0080EAEF /* PreferencesManager+Passwords.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */; };
+		A0A32CDC288E9B1000E3BCC5 /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A32CD6288E9B0F00E3BCC5 /* SettingsWindowController.swift */; };
 		A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */; };
 		A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A4301526655993003A3C08 /* ClusteringManager.swift */; };
 		A0A84FB72636FA99008F0326 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
@@ -951,6 +950,9 @@
 		A0A88EB227AD44DE00BA3329 /* OnboardingSetupPrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A88EB127AD44DE00BA3329 /* OnboardingSetupPrivateKey.swift */; };
 		A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */; };
 		A0AEC25027022ADA00BEE4F3 /* PasswordEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0AEC24F27022ADA00BEE4F3 /* PasswordEditView.swift */; };
+		A0B068132892027C0059DBBD /* SettingTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B068122892027C0059DBBD /* SettingTab.swift */; };
+		A0B0681A2892029C0059DBBD /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B068192892029C0059DBBD /* SettingsController.swift */; };
+		A0B0681C289202D50059DBBD /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B0681B289202D50059DBBD /* Settings.swift */; };
 		A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */; };
 		A0C04B8B27553C51003FC63A /* BeamUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C04B8A27553C51003FC63A /* BeamUserDefaults.swift */; };
 		A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */; };
@@ -973,6 +975,13 @@
 		A0CB7E54268E66CD00D15AFD /* View+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB7E53268E66CD00D15AFD /* View+Beam.swift */; };
 		A0CB7E5D268E733400D15AFD /* PreferencesManager+Browser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB7E5C268E733400D15AFD /* PreferencesManager+Browser.swift */; };
 		A0CB7E5F268E7E9200D15AFD /* PreferencesManager+Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CB7E5E268E7E9200D15AFD /* PreferencesManager+Cards.swift */; };
+		A0CC0AF4289295EE00DD6B4D /* AdvancedPreferencesGeneral.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CC0AF3289295EE00DD6B4D /* AdvancedPreferencesGeneral.swift */; };
+		A0CC0AF62892964600DD6B4D /* AdvancedPreferencesNetwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CC0AF52892964600DD6B4D /* AdvancedPreferencesNetwork.swift */; };
+		A0CC0AF82892CDC200DD6B4D /* AdvancedPreferencesDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CC0AF72892CDC200DD6B4D /* AdvancedPreferencesDatabase.swift */; };
+		A0CC0AFA2892D05100DD6B4D /* AdvancedPreferencesAutoUpdate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CC0AF92892D05100DD6B4D /* AdvancedPreferencesAutoUpdate.swift */; };
+		A0CC0AFC2892D8F700DD6B4D /* AdvancedPreferencesPrivateKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CC0AFB2892D8F700DD6B4D /* AdvancedPreferencesPrivateKeys.swift */; };
+		A0CC0AFE2892F0D300DD6B4D /* AdvancedPreferencesJournalAndNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CC0AFD2892F0D300DD6B4D /* AdvancedPreferencesJournalAndNotes.swift */; };
+		A0CC0B002893D21A00DD6B4D /* AdvancedPreferencesMisc.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0CC0AFF2893D21A00DD6B4D /* AdvancedPreferencesMisc.swift */; };
 		A0D0403C2719E16E00C0B71C /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D0403B2719E16E00C0B71C /* CalendarView.swift */; };
 		A0D06CDB260A2D2700264926 /* JournalScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D06CDA260A2D2700264926 /* JournalScrollView.swift */; };
 		A0D1731425E4FC2D00FDE73C /* ReplaceText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0D1731325E4FC2D00FDE73C /* ReplaceText.swift */; };
@@ -2057,7 +2066,6 @@
 		524227932755217B00457345 /* Beam9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam9.xcdatamodel; sourceTree = "<group>"; };
 		52422799275524C900457345 /* BeamObjectChecksum+CoreData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectChecksum+CoreData.swift"; sourceTree = "<group>"; };
 		5242684C25ED408500DB1D05 /* String+Split.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Split.swift"; sourceTree = "<group>"; };
-		524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Preferences.swift"; sourceTree = "<group>"; };
 		524299E225A480A300F4DBF5 /* AccountsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesView.swift; sourceTree = "<group>"; };
 		524A57EA2770FDE300DF8324 /* String+CamelCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+CamelCase.swift"; sourceTree = "<group>"; };
@@ -2826,6 +2834,7 @@
 		A01EB6BB2840DE430032962D /* NoteMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMetadata.swift; sourceTree = "<group>"; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
 		A02E837027AEDE6500CEF688 /* OnboardingLostPrivateKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPrivateKey.swift; sourceTree = "<group>"; };
+		A0316B7A2891DF11009F8697 /* CalendarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarContentView.swift; sourceTree = "<group>"; };
 		A032BD32261F4677009A3576 /* ShortcutLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutLayer.swift; sourceTree = "<group>"; };
 		A0379C42266E6C5B00D75D6B /* AllowListTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowListTableView.swift; sourceTree = "<group>"; };
 		A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInformationsModalView.swift; sourceTree = "<group>"; };
@@ -2873,7 +2882,6 @@
 		A07C013C2705ED2700D91750 /* GoogleCalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendarService.swift; sourceTree = "<group>"; };
 		A07E94A7276A01D70094117C /* BeamHelper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BeamHelper; sourceTree = BUILT_PRODUCTS_DIR; };
 		A07E94B4276A02070094117C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		A07F2435269C8529008918B0 /* PreferencePaneBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencePaneBuilder.swift; sourceTree = "<group>"; };
 		A07F2437269D8B0D008918B0 /* UserDefaultStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultStorable.swift; sourceTree = "<group>"; };
 		A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Privacy.swift"; sourceTree = "<group>"; };
 		A07FFBCC282D66BF00AFCB02 /* NSWindow+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSWindow+Beam.swift"; sourceTree = "<group>"; };
@@ -2885,6 +2893,7 @@
 		A09FBA602705AD44009E44F7 /* CheckboxButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxButtonStyle.swift; sourceTree = "<group>"; };
 		A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInformationsEditModalView.swift; sourceTree = "<group>"; };
 		A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Passwords.swift"; sourceTree = "<group>"; };
+		A0A32CD6288E9B0F00E3BCC5 /* SettingsWindowController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
 		A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamStepperButton.swift; sourceTree = "<group>"; };
 		A0A4301526655993003A3C08 /* ClusteringManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringManager.swift; sourceTree = "<group>"; };
 		A0A84FE026371A4B008F0326 /* WebFieldAutofillActionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillActionCell.swift; sourceTree = "<group>"; };
@@ -2893,6 +2902,9 @@
 		A0A88EB127AD44DE00BA3329 /* OnboardingSetupPrivateKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSetupPrivateKey.swift; sourceTree = "<group>"; };
 		A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseHandler.swift; sourceTree = "<group>"; };
 		A0AEC24F27022ADA00BEE4F3 /* PasswordEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordEditView.swift; sourceTree = "<group>"; };
+		A0B068122892027C0059DBBD /* SettingTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingTab.swift; sourceTree = "<group>"; };
+		A0B068192892029C0059DBBD /* SettingsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
+		A0B0681B289202D50059DBBD /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beam5ToBeam6MigrationPolicy.swift; sourceTree = "<group>"; };
 		A0B8C45A26D556A900130FC7 /* Beam6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam6.xcdatamodel; sourceTree = "<group>"; };
 		A0C04B8127552163003FC63A /* Beam8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam8.xcdatamodel; sourceTree = "<group>"; };
@@ -2917,6 +2929,13 @@
 		A0CB7E53268E66CD00D15AFD /* View+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Beam.swift"; sourceTree = "<group>"; };
 		A0CB7E5C268E733400D15AFD /* PreferencesManager+Browser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Browser.swift"; sourceTree = "<group>"; };
 		A0CB7E5E268E7E9200D15AFD /* PreferencesManager+Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Cards.swift"; sourceTree = "<group>"; };
+		A0CC0AF3289295EE00DD6B4D /* AdvancedPreferencesGeneral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesGeneral.swift; sourceTree = "<group>"; };
+		A0CC0AF52892964600DD6B4D /* AdvancedPreferencesNetwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesNetwork.swift; sourceTree = "<group>"; };
+		A0CC0AF72892CDC200DD6B4D /* AdvancedPreferencesDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesDatabase.swift; sourceTree = "<group>"; };
+		A0CC0AF92892D05100DD6B4D /* AdvancedPreferencesAutoUpdate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesAutoUpdate.swift; sourceTree = "<group>"; };
+		A0CC0AFB2892D8F700DD6B4D /* AdvancedPreferencesPrivateKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesPrivateKeys.swift; sourceTree = "<group>"; };
+		A0CC0AFD2892F0D300DD6B4D /* AdvancedPreferencesJournalAndNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesJournalAndNotes.swift; sourceTree = "<group>"; };
+		A0CC0AFF2893D21A00DD6B4D /* AdvancedPreferencesMisc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesMisc.swift; sourceTree = "<group>"; };
 		A0CFFA4826D9304F004FC8C1 /* JournalDateConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalDateConverter.swift; sourceTree = "<group>"; };
 		A0D0403B2719E16E00C0B71C /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		A0D06CDA260A2D2700264926 /* JournalScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalScrollView.swift; sourceTree = "<group>"; };
@@ -3493,7 +3512,6 @@
 				A0A84FB72636FA99008F0326 /* JWTDecode in Frameworks */,
 				3315DC922667859A002A47CF /* Fakery in Frameworks */,
 				96319D242616232700D1CF31 /* BeamCore.framework in Frameworks */,
-				3315DC912667859A002A47CF /* Preferences in Frameworks */,
 				8A7AA042289960A700B271E2 /* FaviconFinder in Frameworks */,
 				3315DC952667859A002A47CF /* GRDB in Frameworks */,
 				52466B22270DA966002D1716 /* Clustering in Frameworks */,
@@ -4545,7 +4563,6 @@
 			children = (
 				52DB02632716D07900F3881D /* AppDelegate+Log.swift */,
 				41817277258110D100317ED8 /* AppDelegate+Data.swift */,
-				524299C625A47D2600F4DBF5 /* AppDelegate+Preferences.swift */,
 				52842D452715B2610099602C /* AppDelegate+File.swift */,
 				4181727A258110D100317ED8 /* AppDelegate+URL.swift */,
 				A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */,
@@ -4848,17 +4865,21 @@
 		524299CC25A47EA900F4DBF5 /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
-				A07F2435269C8529008918B0 /* PreferencePaneBuilder.swift */,
+				A0B0681B289202D50059DBBD /* Settings.swift */,
+				A0B068122892027C0059DBBD /* SettingTab.swift */,
+				A0B068192892029C0059DBBD /* SettingsController.swift */,
+				A0A32CD6288E9B0F00E3BCC5 /* SettingsWindowController.swift */,
 				A0CB5ADD268B1FF500D1EF02 /* GeneralPreferencesView.swift */,
 				A0CB5AE7268B20C200D1EF02 /* BrowserPreferencesView.swift */,
 				A0CB5AE9268B231400D1EF02 /* NotesPreferencesView.swift */,
 				A0CB5AE6268B206600D1EF02 /* Privacy */,
 				A0AEC24927022A9C00BEE4F3 /* Passwords */,
 				524299E225A480A300F4DBF5 /* AccountsView.swift */,
+				A0316B7A2891DF11009F8697 /* CalendarContentView.swift */,
 				A0877A3626FDD8400081C7D8 /* ChangeCredentialsView.swift */,
 				A0CB5AED268B244800D1EF02 /* AboutPreferencesView.swift */,
 				A0ECC8892788B95100E72E61 /* BetaPreferencesView.swift */,
-				524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */,
+				A0CC0AED289295C500DD6B4D /* AdvancedPreferences */,
 				A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */,
 				5298268B2641A37500E9448C /* GithubButton.swift */,
 				52B9A399264566D60063AEEF /* OauthButton.swift */,
@@ -6977,6 +6998,21 @@
 			path = Privacy;
 			sourceTree = "<group>";
 		};
+		A0CC0AED289295C500DD6B4D /* AdvancedPreferences */ = {
+			isa = PBXGroup;
+			children = (
+				524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */,
+				A0CC0AF3289295EE00DD6B4D /* AdvancedPreferencesGeneral.swift */,
+				A0CC0AF52892964600DD6B4D /* AdvancedPreferencesNetwork.swift */,
+				A0CC0AF72892CDC200DD6B4D /* AdvancedPreferencesDatabase.swift */,
+				A0CC0AF92892D05100DD6B4D /* AdvancedPreferencesAutoUpdate.swift */,
+				A0CC0AFB2892D8F700DD6B4D /* AdvancedPreferencesPrivateKeys.swift */,
+				A0CC0AFD2892F0D300DD6B4D /* AdvancedPreferencesJournalAndNotes.swift */,
+				A0CC0AFF2893D21A00DD6B4D /* AdvancedPreferencesMisc.swift */,
+			);
+			path = AdvancedPreferences;
+			sourceTree = "<group>";
+		};
 		A0D040352719E0F300C0B71C /* Calendar */ = {
 			isa = PBXGroup;
 			children = (
@@ -8273,7 +8309,6 @@
 			name = Beam;
 			packageProductDependencies = (
 				9631C746251CE997009B40C4 /* SwiftSoup */,
-				524299AE25A47CA500F4DBF5 /* Preferences */,
 				527FB71E25B9A9B600959146 /* JWTDecode */,
 				527FB72325B9AAA200959146 /* Fakery */,
 				524CF6D225F276D1007312F0 /* KeychainAccess */,
@@ -8411,7 +8446,6 @@
 			mainGroup = 965A781C2514F147009980D4;
 			packageReferences = (
 				9631C745251CE997009B40C4 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
-				524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */,
 				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
 				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */,
@@ -9258,6 +9292,7 @@
 				418172282581107C00317ED8 /* Range+Beam.swift in Sources */,
 				52842D552715CFDF0099602C /* FileDetail.swift in Sources */,
 				968948A32840DF2500F97AAD /* BeamAccount.swift in Sources */,
+				A0CC0AF62892964600DD6B4D /* AdvancedPreferencesNetwork.swift in Sources */,
 				8AEF7FA127A2FBBD00D3E266 /* BeamWindowInfo.swift in Sources */,
 				A0CB7E5D268E733400D15AFD /* PreferencesManager+Browser.swift in Sources */,
 				A52B5022271DCB950078670C /* TabsDragModel.swift in Sources */,
@@ -9306,6 +9341,7 @@
 				4181724E2581107C00317ED8 /* TabStats.swift in Sources */,
 				4181724F2581107C00317ED8 /* WebView.swift in Sources */,
 				33D0D90B2732BFAB00D6C924 /* FullPageCollectAnimator.swift in Sources */,
+				A0B068132892027C0059DBBD /* SettingTab.swift in Sources */,
 				A5208E05261F2156006193AF /* AllNotesPageContextualMenu.swift in Sources */,
 				A5C9F005261353420096380F /* WindowPage.swift in Sources */,
 				96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */,
@@ -9362,6 +9398,7 @@
 				96120D0E260C917600592546 /* TextLine.swift in Sources */,
 				375D83B6278D63260064C246 /* MouseHoveringLocation.swift in Sources */,
 				0DC6E2CF269DE73B00BD2E2A /* AppDelegate+TopDomain.swift in Sources */,
+				A0A32CDC288E9B1000E3BCC5 /* SettingsWindowController.swift in Sources */,
 				A5428C9128339E0F00309441 /* TabClusteringNameColorPickerView.swift in Sources */,
 				522D48A42719D1D90038DB81 /* LoggerWindowController.swift in Sources */,
 				A5946806265CE5ED0044A892 /* DocumentCommand.swift in Sources */,
@@ -9411,6 +9448,7 @@
 				6E542C51288A8AE100DA78EA /* GIFAnimatedLayer.swift in Sources */,
 				A5D8859E274EA78800F37859 /* ToolbarButton.swift in Sources */,
 				A05ADF6C264D8C34002DF91A /* OverlayViewCenter.swift in Sources */,
+				A0CC0AF82892CDC200DD6B4D /* AdvancedPreferencesDatabase.swift in Sources */,
 				A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */,
 				418171ED2581107C00317ED8 /* Session.swift in Sources */,
 				A5C9F00A261364F50096380F /* WindowPageView.swift in Sources */,
@@ -9474,6 +9512,7 @@
 				A5C2023B2761FDA2008BB2FB /* TabFaviconView.swift in Sources */,
 				0325629126051D3B006513E4 /* RBDigest.m in Sources */,
 				962AC886279017FD001B7142 /* OmniboxContentDebuggerWindow.swift in Sources */,
+				A0CC0B002893D21A00DD6B4D /* AdvancedPreferencesMisc.swift in Sources */,
 				37C413192785529300954FD7 /* MockSearchEngine.swift in Sources */,
 				75A1E5BA271D98F1000824B1 /* ExternalDeeplinkHandler.swift in Sources */,
 				A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */,
@@ -9566,6 +9605,7 @@
 				A00AE82B265EAE9A00156220 /* BeamSearchField.swift in Sources */,
 				A50241D426D8FA6600C93E1E /* GutterItemView.swift in Sources */,
 				96D71CEF27FB2F3E0094F54D /* BeamNoteDocumentWrapper.swift in Sources */,
+				A0B0681A2892029C0059DBBD /* SettingsController.swift in Sources */,
 				418172202581107C00317ED8 /* Information.swift in Sources */,
 				37DB5A1627BB518400534760 /* AnimationHandler.swift in Sources */,
 				4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */,
@@ -9580,13 +9620,13 @@
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
 				A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */,
 				A56696B12614CF7F00B814D2 /* TableView.swift in Sources */,
-				524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */,
 				522969E226669016005067A6 /* APIWebSocketRequest.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
 				A5234030279DEDD80027E339 /* ThirdPartyLibrariesManager+Firebase.swift in Sources */,
 				8AF4F7C4275A66DF0081B6B5 /* SupportedEmbedDomains.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
 				CE304C2F27DB5469005AE274 /* Digest+convert.swift in Sources */,
+				A0B0681C289202D50059DBBD /* Settings.swift in Sources */,
 				A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */,
 				8A34EADC27C7AF750063DAF6 /* TransientWebViewWindow.swift in Sources */,
 				33353EDC26F36B4300063078 /* Shortcut.swift in Sources */,
@@ -9629,6 +9669,7 @@
 				33AA68562833F58A00DB5747 /* SidebarListPageButton.swift in Sources */,
 				37C41325278553AF00954FD7 /* PreferredSearchEngine.swift in Sources */,
 				A5FDFA1C27DA44510066A670 /* FormatterViewBackgroundV2.swift in Sources */,
+				A0CC0AF4289295EE00DD6B4D /* AdvancedPreferencesGeneral.swift in Sources */,
 				5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */,
 				8A4172D626A063FD00F93128 /* NSPoint+Beam.swift in Sources */,
 				96F5355A271DADDD00B719C6 /* BeamLinkDB.swift in Sources */,
@@ -9660,6 +9701,7 @@
 				A52393A826541A06008D4C85 /* ModeViewTransitions.swift in Sources */,
 				5298EAF926272CA90033862C /* CoreDataMigrationStep.swift in Sources */,
 				960A57E6264C851E0061E8D2 /* ProxyImageNode.swift in Sources */,
+				A0CC0AFC2892D8F700DD6B4D /* AdvancedPreferencesPrivateKeys.swift in Sources */,
 				A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */,
 				A0ECC88A2788B95100E72E61 /* BetaPreferencesView.swift in Sources */,
 				337F31C62837E4ED002854BC /* SidebarListNoteButton.swift in Sources */,
@@ -9672,7 +9714,6 @@
 				A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */,
 				A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */,
 				BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */,
-				A07F2436269C8529008918B0 /* PreferencePaneBuilder.swift in Sources */,
 				873528B827342E6A005E7CBC /* SandboxEscape.swift in Sources */,
 				BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */,
 				A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */,
@@ -9704,9 +9745,11 @@
 				BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */,
 				BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */,
 				BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */,
+				A0316B7B2891DF11009F8697 /* CalendarContentView.swift in Sources */,
 				8768566427709413002A8069 /* ChromiumPasswordImporter.swift in Sources */,
 				8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */,
 				5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */,
+				A0CC0AFE2892F0D300DD6B4D /* AdvancedPreferencesJournalAndNotes.swift in Sources */,
 				87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */,
 				BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */,
 				370794D627D7AAF900D2768B /* EmptyContentSchemeHandler.swift in Sources */,
@@ -9757,6 +9800,7 @@
 				A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */,
 				370794D227D7AA0300D2768B /* PDFDocumentView.swift in Sources */,
 				BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */,
+				A0CC0AFA2892D05100DD6B4D /* AdvancedPreferencesAutoUpdate.swift in Sources */,
 				879CA71B281A9A0800D1C395 /* CreditCardAutofillManager.swift in Sources */,
 				A543C6B928573936009C7C13 /* TabGroupingStoreManager.swift in Sources */,
 				A5690E6127F5E2D9007C7845 /* WebIndexingController.swift in Sources */,
@@ -12259,14 +12303,6 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sindresorhus/Preferences";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.5.0;
-			};
-		};
 		52466B20270DA966002D1716 /* XCRemoteSwiftPackageReference "clustering" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
@@ -12437,11 +12473,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
-		};
-		524299AE25A47CA500F4DBF5 /* Preferences */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */;
-			productName = Preferences;
 		};
 		52466B21270DA966002D1716 /* Clustering */ = {
 			isa = XCSwiftPackageProductDependency;

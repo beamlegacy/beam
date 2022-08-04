@@ -54,6 +54,8 @@ struct TableView: NSViewRepresentable {
     var hasVerticalScroller = false
     var hasSeparator = true
     var hasHeader = true
+    var headerTitleColor: NSColor = BeamColor.AlphaGray.nsColor
+    var headerBackgroundColor: NSColor = BeamColor.Generic.background.nsColor
     var allowsMultipleSelection = true
     var items: [TableViewItem] = []
     var columns: [TableViewColumn] = []
@@ -126,10 +128,11 @@ struct TableView: NSViewRepresentable {
         var initialSortDescriptor: NSSortDescriptor?
         columns.enumerated().forEach { (index, column) in
             let tableColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(column.key))
-            let customHeaderCell = TableHeaderCell(textCell: column.title)
+            let customHeaderCell = TableHeaderCell(textCell: column.title,
+                                                   headerTitleColor: self.headerTitleColor,
+                                                   headerBackgroundColor: self.headerBackgroundColor)
             customHeaderCell.drawsTrailingBorder = index < columns.count - 1
             customHeaderCell.font = BeamFont.regular(size: 12).nsFont
-            customHeaderCell.textColor = BeamColor.AlphaGray.nsColor
             tableColumn.headerCell = customHeaderCell
             tableColumn.minWidth = column.width
             tableColumn.width = column.width
@@ -155,7 +158,7 @@ struct TableView: NSViewRepresentable {
                 context.coordinator.selectAllCheckBoxHeaderCell = headerCell
             } else {
                 let attrs = NSAttributedString(string: tableColumn.headerCell.title, attributes: [
-                    NSAttributedString.Key.foregroundColor: BeamColor.Generic.placeholder.nsColor,
+                    NSAttributedString.Key.foregroundColor: self.headerTitleColor,
                     NSAttributedString.Key.font: BeamFont.regular(size: 12).nsFont
                 ])
                 tableColumn.headerCell.attributedStringValue = attrs

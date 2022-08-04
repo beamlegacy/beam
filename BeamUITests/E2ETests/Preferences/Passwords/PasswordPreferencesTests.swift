@@ -52,7 +52,8 @@ class PasswordPreferencesTests: BaseTest {
         
         step ("THEN I see the view is locked"){
             XCTAssertTrue(passwordPreferencesView.staticText(PasswordPreferencesViewLocators.StaticTexts.passwordProtectionTitle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertTrue(passwordPreferencesView.app.windows.staticTexts.matching(NSPredicate(format: "value BEGINSWITH  '\(PasswordPreferencesViewLocators.StaticTexts.passwordProtectionDescription.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            // Increased timeout to match deadline of updateHasTouchID in LockedPasswordsView
+            XCTAssertTrue(passwordPreferencesView.app.windows.staticTexts.matching(NSPredicate(format: "value BEGINSWITH  '\(PasswordPreferencesViewLocators.StaticTexts.passwordProtectionDescription.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: TimeInterval(1)))
             XCTAssertTrue(passwordPreferencesView.button(PasswordPreferencesViewLocators.Buttons.unlockButton.accessibilityIdentifier).isEnabled)
             XCTAssertFalse(passwordPreferencesView.checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillPasswords.accessibilityIdentifier).exists)
         }

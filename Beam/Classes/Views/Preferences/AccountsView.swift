@@ -1,12 +1,7 @@
 import SwiftUI
-import Preferences
 import BeamCore
 import OAuthSwift
 import Combine
-
-let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .accounts, title: "Account", imageName: "preferences-account") {
-    AccountsView(viewModel: AccountsViewModel(calendarManager: BeamData.shared.calendarManager))
-}
 
 class AccountsViewModel: ObservableObject {
     @ObservedObject var calendarManager: CalendarManager
@@ -62,125 +57,51 @@ struct AccountsView: View {
     private let contentWidth: Double = PreferencesManager.contentWidth
     private let checkboxHelper = NSButtonCheckboxHelper()
 
-	var body: some View {
-        Preferences.Container(contentWidth: contentWidth) {
-            return getAccountViewSections()
-        }
-	}
-
-    // MARK: - Preferences Sections
-    private func getAccountViewSections() -> [Preferences.Section] {
-        var sections = [accountSection, spacerSection, calendarSection]
-        if viewModel.isloggedIn && Persistence.Authentication.email != nil {
-            if Configuration.env == .test {
-                sections.append(testAccountSection)
+    var body: some View {
+        Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+            Settings.Row {
+                Text("Account:")
+            } content: {
+                if viewModel.isloggedIn {
+                    accountLoggedInView
+                } else {
+                    accountLoggedOffView
+                }
             }
-            sections.append(contentsOf: [encryptionKeySection, manageAccountSection])
-        }
-        return sections
-    }
-
-    private var accountSection: Preferences.Section {
-        Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
-            Text("Account:")
-                .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(width: 250, alignment: .trailing)
-        } content: {
-            if viewModel.isloggedIn {
-                accountLoggedInView
-            } else {
-                accountLoggedOffView
+            Settings.Row {} content: {
+                Spacer(minLength: 26).frame(maxHeight: 26)
+            }
+            calendarSection
+            if viewModel.isloggedIn && Persistence.Authentication.email != nil {
+                if Configuration.env == .test {
+                    Settings.Row(hasDivider: viewModel.isloggedIn) {
+                        Text("Test account:")
+                    } content: {
+                        TestAccountView
+                    }
+                }
+                Settings.Row(hasDivider: viewModel.isloggedIn) {
+                    Text("Encryption key:")
+                } content: {
+                    EncryptionKeyView
+                    #if DEBUG
+                    RefreshTokenButton
+                    #endif
+                }
+                Settings.Row {
+                    Text("Manage:")
+                } content: {
+                    manageAccountView
+                }
             }
         }
     }
 
-    private var spacerSection: Preferences.Section {
-        Preferences.Section(title: "") {
-            Spacer(minLength: 26).frame(maxHeight: 26)
-        }
-    }
-
-    private var calendarSection: Preferences.Section {
-        Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .top) {
+    private var calendarSection: Settings.Row {
+        Settings.Row(hasDivider: viewModel.isloggedIn) {
             Text("Calendars & Contacts:")
-                .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(width: 250, alignment: .trailing)
         } content: {
-            VStack(alignment: .leading) {
-                if !viewModel.accountsCalendar.isEmpty {
-                    VStack(alignment: .leading) {
-                        VStack(alignment: .leading) {
-                            ForEach(viewModel.accountsCalendar) { account in
-                                calendarAccountView(account: account) {
-                                    viewModel.calendarManager.disconnect(from: account.service, sourceId: account.sourceId)
-                                    viewModel.accountsCalendar.removeAll(where: { $0 === account })
-                                }
-                            }
-                        }.padding(.bottom, 20)
-                    }
-                }
-                Menu("Connect Calendars & Contacts") {
-                    Button("macOS Calendar…") {
-                        connectCalendar(service: .appleCalendar)
-                    }
-                    .disabled(viewModel.calendarManager.isConnected(calendarService: .appleCalendar))
-                    Button("Google Calendar…") {
-                        connectCalendar(service: .googleCalendar)
-                    }
-                }
-                .font(BeamFont.regular(size: 13).swiftUI)
-                .fixedSize()
-                Text("Connect your Calendars & Contacts and easily take meeting notes.")
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.leading)
-            }
-        }
-    }
-
-    private func connectCalendar(service: CalendarServices) {
-        viewModel.calendarManager.requestAccess(from: service) { connected in
-            if connected { viewModel.calendarManager.updated = true }
-        }
-    }
-
-    private var encryptionKeySection: Preferences.Section {
-        Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .firstTextBaseline) {
-            Text("Encryption key:")
-                .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(width: 250, alignment: .trailing)
-        } content: {
-            EncryptionKeyView
-            #if DEBUG
-            RefreshTokenButton
-            #endif
-        }
-    }
-
-    private var testAccountSection: Preferences.Section {
-        Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .firstTextBaseline) {
-            Text("Test account:")
-                .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(width: 250, alignment: .trailing)
-        } content: {
-            TestAccountView
-        }
-    }
-
-    private var manageAccountSection: Preferences.Section {
-        Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
-            Text("Manage:")
-                .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(width: 250, alignment: .trailing)
-        } content: {
-            manageAccountView
+            CalendarContent(viewModel: viewModel)
         }
     }
 
@@ -209,23 +130,11 @@ struct AccountsView: View {
             })
             .padding(.bottom, 6)
             VStack {
-                Text("Sync your notes between device and share them easily")
+                Settings.SubtitleLabel("Sync your notes between device and share them easily.")
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
             }.frame(width: 238, height: 26, alignment: .leading)
-        }
-    }
-
-    @ViewBuilder
-    private func calendarAccountView(account: AccountCalendar, onDisconnect: (() -> Void)?) -> some View {
-        switch account.service {
-        case .googleCalendar:
-            GoogleAccountView(viewModel: viewModel, account: account, onDisconnect: onDisconnect)
-        case .appleCalendar:
-            AppleAccountView(viewModel: viewModel, account: account, onDisconnect: onDisconnect)
         }
     }
 
@@ -249,6 +158,7 @@ struct AccountsView: View {
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
         })
         .disabled(!viewModel.isloggedIn)
+        .frame(alignment: .leading)
     }
 
     private var manageAccountView: some View {
@@ -262,30 +172,28 @@ struct AccountsView: View {
                     .frame(width: 132)
                     .padding(.top, -4)
             })
-            Text("All your notes will be deleted and cannot be recovered.")
-                .font(BeamFont.regular(size: 11).swiftUI)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
+            Settings.SubtitleLabel("All your notes will be deleted and cannot be recovered.")
                 .frame(width: 286, alignment: .leading)
                 .padding(.bottom, 20)
 
-//            Button(action: {
-//                promptDeleteAccountActionAlert()
-//            }, label: {
-//                // TODO: loc
-//                Text("Delete Account...")
-//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-//                    .frame(width: 132)
-//                    .padding(.top, -4)
-//
-//            })
-//            VStack {
-//                Text("Your account, your database and all your notes will be deleted and cannot be recovered.")
-//                    .lineLimit(2)
-//                    .fixedSize(horizontal: false, vertical: true)
-//                    .multilineTextAlignment(.leading)
-//                    .font(BeamFont.regular(size: 11).swiftUI)
-//                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-//            }.frame(width: 286, height: 26, alignment: .leading)
+            //            Button(action: {
+            //                promptDeleteAccountActionAlert()
+            //            }, label: {
+            //                // TODO: loc
+            //                Text("Delete Account...")
+            //                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            //                    .frame(width: 132)
+            //                    .padding(.top, -4)
+            //
+            //            })
+            //            VStack {
+            //                Text("Your account, your database and all your notes will be deleted and cannot be recovered.")
+            //                    .lineLimit(2)
+            //                    .fixedSize(horizontal: false, vertical: true)
+            //                    .multilineTextAlignment(.leading)
+            //                    .font(BeamFont.regular(size: 11).swiftUI)
+            //                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+            //            }.frame(width: 286, height: 26, alignment: .leading)
         }
     }
 
@@ -323,7 +231,7 @@ struct AccountsView: View {
                 }
             }).accessibilityIdentifier("pk-label")
                 .buttonStyle(PlainButtonStyle())
-                .frame(width: 350, height: 16, alignment: .center)
+                .frame(width: 350, height: 16, alignment: .leading)
                 .onHover {
                     encryptionKeyIsHover = $0
                 } .overlay(
@@ -336,12 +244,10 @@ struct AccountsView: View {
                         }
                     })
 
-            Text("Your private key is used to sync your account and decrypt your notes on Beam Web. Click to copy it and paste it on Beam Web.")
+            Settings.SubtitleLabel("Your private key is used to sync your account and decrypt your notes on Beam Web. Click to copy it and paste it on Beam Web.")
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.leading)
-                .font(BeamFont.regular(size: 11).swiftUI)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
                 .frame(width: 354, height: 26, alignment: .leading)
                 .padding(.bottom, 21)
 
@@ -351,10 +257,8 @@ struct AccountsView: View {
                 Text("Save Private Key...")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
-            }.frame(width: 132, height: 20, alignment: .center)
-            Text("Save your private key as a .beamkey file.")
-                .font(BeamFont.regular(size: 11).swiftUI)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
+            }.frame(width: 132, height: 20, alignment: .leading)
+            Settings.SubtitleLabel("Save your private key as a .beamkey file.")
                 .frame(height: 13, alignment: .leading)
         }
     }
@@ -432,7 +336,7 @@ struct AccountsView: View {
         alert.addButton(withTitle: "Sign Out")
         alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .warning
-        guard let window = AccountsPreferenceViewController.view.window else { return }
+        guard let window = AppDelegate.main.settingsWindowController.window else { return }
         alert.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else { return }
             if self.checkboxHelper.isOn {
@@ -465,108 +369,6 @@ struct AccountsView: View {
                               buttonTitle: "Delete",
                               secondaryButtonTitle: "Cancel") {
             // TODO: Implement when endpoint is ready
-        }
-    }
-}
-
-struct GoogleAccountView: View {
-    @ObservedObject var viewModel: AccountsViewModel
-    var account: AccountCalendar
-    var onDisconnect: (() -> Void)?
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            HStack(alignment: .top) {
-                Text(account.name)
-                    .frame(width: 227, alignment: .topLeading)
-                    .padding(.trailing, 12)
-                if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
-                    Button {
-                        onDisconnect?()
-                        viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
-                            if connected { viewModel.calendarManager.updated = true }
-                        }
-                    } label: {
-                        Text("Fix Permissions...")
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
-                            .frame(width: 125)
-                            .padding(.top, -4)
-                    }
-                } else {
-                    Button {
-                        UserAlert.showMessage(message: "Are you sure you want to disconnect your Google account?",
-                                              informativeText: "You’ll need to add it again to sync your Google Calendars and Contacts.",
-                                              buttonTitle: "Disconnect",
-                                              secondaryButtonTitle: "Cancel") {
-                            onDisconnect?()
-                        }
-                    } label: {
-                        Text("Disconnect")
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
-                            .frame(width: 99)
-                            .padding(.top, -4)
-                    }
-                }
-            }.padding(.bottom, -5)
-            if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
-                Text("Fix permissions to sync...")
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Shiraz.swiftUI)
-            } else {
-                Text("\(account.nbrOfCalendar) calendars, 0 contacts synced")
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-            }
-
-        }
-    }
-}
-
-struct AppleAccountView: View {
-    @ObservedObject var viewModel: AccountsViewModel
-    var account: AccountCalendar
-    var onDisconnect: (() -> Void)?
-
-    var body: some View {
-        VStack(alignment: .leading) {
-            HStack(alignment: .top) {
-                Text(account.name)
-                    .frame(width: 227, alignment: .topLeading)
-                    .padding(.trailing, 12)
-                if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
-                    Button {
-                        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars") {
-                            NSWorkspace.shared.open(url)
-                        }
-                    } label: {
-                        Text("Open Preferences...")
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
-                            .padding(.top, -4)
-                    }
-                } else {
-                    Button {
-                        UserAlert.showMessage(message: "Are you sure you want to disconnect your calendar?",
-                                              buttonTitle: "Disconnect",
-                                              secondaryButtonTitle: "Cancel") {
-                            onDisconnect?()
-                        }
-                    } label: {
-                        Text("Disconnect")
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
-                            .frame(width: 99)
-                            .padding(.top, -4)
-                    }
-                }
-            }.padding(.bottom, -5)
-            if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
-                Text("Fix permissions in System Preferences...")
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Shiraz.swiftUI)
-            } else {
-                Text("\(account.nbrOfCalendar) calendars, 0 contacts synced")
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-            }
         }
     }
 }

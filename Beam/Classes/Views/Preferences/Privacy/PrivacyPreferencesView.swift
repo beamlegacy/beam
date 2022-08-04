@@ -6,78 +6,65 @@
 //
 
 import SwiftUI
-import Preferences
-
-let PrivacyPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .privacy, title: "Privacy", imageName: "preferences-privacy") {
-    PrivacyPreferencesView()
-}
 
 struct PrivacyPreferencesView: View {
-    private let contentWidth: Double = PreferencesManager.contentWidth
-
     var body: some View {
-        Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section {
-                Text("Website tracking:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                CrossSiteTrackingSection()
+        Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+            ForEach(0..<getSettingsRows().count, id: \.self) { index in
+                getSettingsRows()[index]
             }
+        }
+    }
 
-            Preferences.Section {
-                Text("Ads:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                AdsSection()
-            }
-            Preferences.Section {
-                Text("Trackers:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                TrackersSection()
-            }
+    private func getSettingsRows() -> [Settings.Row] {
+        [websiteTrackingRow, adsRow, trackersRow, annoyancesRow, updateRulesRow, allowListRow]
+    }
 
-            Preferences.Section {
-                Text("Annoyances:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                AnnoyancesSection()
-            }
+    private var websiteTrackingRow: Settings.Row {
+        Settings.Row {
+            Text("Website tracking:")
+        } content: {
+            CrossSiteTrackingSection()
+        }
+    }
 
-            Preferences.Section {
-                Text("Updates Rules:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                UpdateRulesSection()
-            }
+    private var adsRow: Settings.Row {
+        Settings.Row {
+            Text("Ads:")
+        } content: {
+            AdsSection()
+        }
+    }
 
-            Preferences.Section(verticalAlignment: .top) {
+    private var trackersRow: Settings.Row {
+        Settings.Row {
+            Text("Trackers:")
+        } content: {
+            TrackersSection()
+        }
+    }
+
+    private var annoyancesRow: Settings.Row {
+        Settings.Row {
+            Text("Annoyances:")
+        } content: {
+            AnnoyancesSection()
+        }
+    }
+
+    private var updateRulesRow: Settings.Row {
+        Settings.Row {
+            Text("Updates Rules:")
+        } content: {
+            UpdateRulesSection()
+        }
+    }
+
+    private var allowListRow: Settings.Row {
+        Settings.Row {
             Text("Allow list:")
-                .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(width: 250, alignment: .trailing)
-            } content: {
-                AllowListSection()
-            }
-
-//            Preferences.Section {
-//                Text("Website Data:")
-//                    .font(BeamFont.regular(size: 13).swiftUI)
-//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-//                    .frame(width: 250, alignment: .trailing)
-//            } content: {
-//                WebsiteDataSection()
-//            }
+        } content: {
+            AllowListSection()
         }
     }
 }
@@ -143,9 +130,7 @@ struct TrackersSection: View {
                 }
 
             VStack {
-                Text("Websites which embed social media buttons implicitly track your browser history, even if you don’t have an account.")
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+                Settings.SubtitleLabel("Websites which embed social media buttons implicitly track your browser history, even if you don’t have an account.")
                     .padding(.leading, 22)
                     .lineLimit(nil)
                     .multilineTextAlignment(.leading)
@@ -179,9 +164,7 @@ struct AnnoyancesSection: View {
                 }
 
             VStack {
-                Text("Some websites display banners which impair the site’s functionality in order to force your content to be tracked.")
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+                Settings.SubtitleLabel("Some websites display banners which impair the site’s functionality in order to force your content to be tracked.")
                     .padding(.leading, 18)
                     .lineLimit(nil)
                     .multilineTextAlignment(.leading)
@@ -205,14 +188,11 @@ struct UpdateRulesSection: View {
                 .onChange(of: selectedUpdate) {
                     ContentBlockingManager.shared.radBlockPreferences.synchronizeInterval = $0
                 }
-
                 Button("Update Now") {
                     ContentBlockingManager.shared.synchronize()
                 }
             }
-            Text("Last updated: \(ContentBlockingManager.shared.radBlockPreferences.lastSynchronizationDate)")
-                .font(BeamFont.regular(size: 11).swiftUI)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
+            Settings.SubtitleLabel("Last updated: \(ContentBlockingManager.shared.radBlockPreferences.lastSynchronizationDate).")
         }
     }
 }
@@ -225,8 +205,7 @@ struct AllowListSection: View {
             Button("Manage...") {
                 allowListIsPresented = true
             }.sheet(isPresented: $allowListIsPresented) {
-                let allowListViewModel = AllowListViewModel()
-                AllowListModalView(viewModel: allowListViewModel).frame(width: 568, height: 422, alignment: .center)
+                AllowListModalView().frame(width: 568, height: 422, alignment: .center)
             }
             // TODO
             //                    Text("You can temporarily whitelist a site by holding the reload button in Beam’s navigation bar and selecting “Reload Without Content Blockers”.")

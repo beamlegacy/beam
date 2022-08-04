@@ -27,7 +27,7 @@ struct BeamSearchField: View {
                     .frame(width: proxy.size.width, height: proxy.size.height)
                     .overlay(
                         RoundedRectangle(cornerRadius: 5, style: .continuous)
-                            .stroke(isEditing ? Color.blue.opacity(0.7) : Color.gray.opacity(0.1), lineWidth: isEditing ? 3 : 1.5)
+                            .stroke(isEditing ? Color(NSColor.controlAccentColor).opacity(0.5) : Color.gray.opacity(0.1), lineWidth: isEditing ? 3 : 1.5)
                             .frame(width: proxy.size.width, height: proxy.size.height)
                 )
                 HStack {
