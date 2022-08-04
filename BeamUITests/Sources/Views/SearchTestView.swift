@@ -17,7 +17,7 @@ class SearchTestView: BaseView {
     @discardableResult
     func typeInSearchField(_ searchText: String, _ pressEnter: Bool = false) -> SearchTestView {
         let searchField = self.getSearchFieldElement()
-        searchField.clickOnExistence()
+        _ = searchField.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         searchField.typeText(searchText)
         if pressEnter {
             typeKeyboardKey(.enter)
@@ -49,7 +49,6 @@ class SearchTestView: BaseView {
     @discardableResult
     func activateSearchField(isWebSearch: Bool) -> SearchTestView {
         triggerSearchField()
-        self.getSearchFieldElement().tapInTheMiddle()
         return self
     }
     

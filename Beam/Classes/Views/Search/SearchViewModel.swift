@@ -43,6 +43,7 @@ class SearchViewModel: ObservableObject {
     @Published var typing: Bool
 
     @Published var isEditing: Bool = true
+    @Published var selectAll: Bool = false
 
     var didBecomeFirstResponder: Bool
 
@@ -108,6 +109,12 @@ class SearchViewModel: ObservableObject {
             previous()
         } else {
             next()
+        }
+    }
+
+    func updateSearchTermsFromPasteboard() {
+        if let string = NSPasteboard(name: .find).string(forType: .string) {
+            searchTerms = string
         }
     }
 }

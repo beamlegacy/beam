@@ -47,6 +47,17 @@ final class BeamTextFieldViewFieldEditor: NSTextView {
         let cleanText = text.components(separatedBy: .newlines).joined(separator: " ")
         insertText(cleanText, replacementRange: selectedRange())
     }
+
+    override func performFindPanelAction(_ sender: Any?) {
+        window?.tryToPerform(#selector(performFindPanelAction(_:)), with: nil)
+    }
+
+    override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        if menuItem.action == #selector(performFindPanelAction(_:)) {
+            return true
+        }
+        return super.validateMenuItem(menuItem)
+    }
 }
 
 protocol BeamNSTextFieldProtocol {

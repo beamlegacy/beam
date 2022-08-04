@@ -16,6 +16,10 @@ class SearchOnWebTests: BaseTest {
     func testSearchViewAppearance() {
         
         step("Given I open a test page"){
+            let pboard = NSPasteboard(name: .find)
+            pboard.clearContents()
+            pboard.setString("", forType: .string)
+
             launchApp()
             uiMenu.loadUITestPage2()
         }

@@ -14,6 +14,7 @@ struct BeamTextField: NSViewRepresentable {
 
     @Binding var text: String
     @Binding var isEditing: Bool
+    var selectAll: Binding<Bool> = .constant(false)
 
     var placeholder: String
     var font: NSFont?
@@ -95,8 +96,9 @@ struct BeamTextField: NSViewRepresentable {
 
         if selectedRange == nil {
             // When NSTextField appear as a first responder, it starts with the whole text selected.
+            let selectAll = self.selectAll.wrappedValue
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(20)) {
-                guard let currentRange = view.currentEditor()?.selectedRange, currentRange.length != 0, selectedRange == nil else { return }
+                guard !selectAll, let currentRange = view.currentEditor()?.selectedRange, currentRange.length != 0, selectedRange == nil else { return }
                 view.currentEditor()?.selectedRange = NSRange(location: currentRange.length, length: 0)
             }
         }
@@ -126,6 +128,11 @@ struct BeamTextField: NSViewRepresentable {
         textField.setText(text, font: font, icon: nil, skipGuards: false)
         textField.setPlaceholder(placeholder, font: font, icon: nil)
         textField.shouldUseIntrinsicContentSize = centered
+
+        if selectAll.wrappedValue {
+            updateSelectedRange(view, range: 0..<text.count, in: text)
+            selectAll.wrappedValue = false
+        }
 
         if selectedRange != coordinator.lastSelectedRange {
             if let range = selectedRange {
