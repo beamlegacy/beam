@@ -71,6 +71,14 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
         return scrollView
     }
 
+    public static func dismantleNSView(_ nsView: NSScrollView, coordinator: BTextEditScrollableCoordinator) {
+        // Resign from first responder if needed, without this the BeamTextEdit instance is
+        // kept in memory longer than needed.
+        if nsView.window?.firstResponder === nsView.documentView {
+            nsView.window?.makeFirstResponder(nil)
+        }
+    }
+
     public func updateNSView(_ nsView: NSViewType, context: Context) {
         guard let edit = nsView.documentView as? BeamTextEdit else { return }
 

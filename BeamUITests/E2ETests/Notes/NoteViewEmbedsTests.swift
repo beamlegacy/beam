@@ -42,7 +42,7 @@ class NoteViewEmbedsTests: BaseTest {
         step("Then image node is collapsed"){
             XCTAssertEqual(expandButton!.title, toImageTitle)
             XCTAssertTrue(noteView!.isImageNodeCollapsed(nodeIndex: 0))
-            XCTAssertTrue(noteView!.getImageNodeCollapsedTitle(nodeIndex: 0).hasSuffix("/Build/Products/Variant-NoSanitizers/Test/Beam.app/Contents/Resources/UITests-4.html "))
+            XCTAssertTrue(noteView!.getImageNodeCollapsedTitle(nodeIndex: 0).hasSuffix("/Build/Products/Variant-NoSanitizers/Test/Beam.app/Contents/Resources/UITests-4.html\u{fffc}"))
         }
         
         step("Then element width and height is changed accordingly"){
