@@ -18,17 +18,19 @@ class AppLifecycleTests: BaseTest {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
         }
 
-        step("WHEN I open multiple tabs") {
+        step("WHEN I open multiple tabs and one incognito window") {
             uiMenu.loadUITestPage1()
             uiMenu.loadUITestPage2()
             webView.waitForWebViewToLoad()
+            shortcutHelper.shortcutActionInvoke(action: .newIncognitoWindow)
         }
 
         step("WHEN I restart the app") {
             journalView = restartApp(storeSessionWhenTerminated: false)
         }
 
-        step("THEN I'm on the web view with 2 tabs reopened") {
+        step("THEN I'm on the web view with 2 tabs reopened and the incognito window is not restored") {
+            XCTAssertTrue(app.windows.count == 1)
             XCTAssertTrue(webView.waitForWebViewToLoad())
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
         }
