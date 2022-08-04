@@ -46,15 +46,22 @@ public extension ElementNode {
 
 extension BeamTextEdit {
 
-    func searchInNote(fromSelection: Bool) {
-
+    func searchInNote(terms: String = "", fromSelection: Bool) {
         guard searchViewModel == nil else {
-            searchViewModel?.searchTerms = fromSelection ? self.selectedText : searchViewModel!.searchTerms
-            searchViewModel?.isEditing = true
+            if fromSelection {
+                searchViewModel?.searchTerms = self.selectedText
+            } else {
+                searchViewModel?.searchTerms = terms
+                searchViewModel?.isEditing = true
+                searchViewModel?.selectAll = true
+            }
             return
         }
 
-        let viewModel = SearchViewModel(context: .card) { [weak self] search in
+        let viewModel = SearchViewModel(context: .card, terms: terms) { [weak self] search in
+            let pboard = NSPasteboard(name: .find)
+            pboard.clearContents()
+            pboard.setString(search, forType: .string)
             self?.performSearchAndUpdateUI(with: search)
         } onLocationIndicatorTap: { [weak self] location in
             self?.scroll(NSPoint(x: 0, y: location))
@@ -76,6 +83,8 @@ extension BeamTextEdit {
 
         if fromSelection {
             self.searchViewModel?.searchTerms = self.selectedText
+        } else {
+            searchViewModel?.selectAll = true
         }
     }
 
