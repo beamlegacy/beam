@@ -23,8 +23,33 @@ class TableHeaderCell: NSTableHeaderCell {
     var isHovering = false
 
     private var textSize: CGSize?
+    private var headerTitleColor: NSColor
+    private var headerBackgroundColor: NSColor
 
     var shouldDrawSortIndicator: (ascending: Bool, priority: Int)?
+
+    // Had to go with this trick thanks to Thomas.
+    // Since NSTableHeaderCell are copied but doesn't strongly retain we need to do this to avoid a crash when being deallocated
+    override func copy(with zone: NSZone? = nil) -> Any {
+        // swiftlint:disable:next force_cast
+        let cell = super.copy(with: zone) as! TableHeaderCell
+
+        _ = Unmanaged.passRetained(cell.headerTitleColor)
+        _ = Unmanaged.passRetained(cell.headerBackgroundColor)
+
+        return cell
+    }
+
+    init(textCell: String, headerTitleColor: NSColor = BeamColor.AlphaGray.nsColor, headerBackgroundColor: NSColor = BeamColor.Generic.background.nsColor) {
+        self.headerTitleColor = headerTitleColor
+        self.headerBackgroundColor = headerBackgroundColor
+
+        super.init(textCell: textCell)
+    }
+
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func drawSortIndicator(withFrame cellFrame: NSRect, in controlView: NSView, ascending: Bool, priority: Int) {
         shouldDrawSortIndicator = (ascending, priority)
@@ -37,10 +62,11 @@ class TableHeaderCell: NSTableHeaderCell {
         var textRect = titleRect(forBounds: interiorFrame)
         textRect.size = textSize ?? .zero
         textRect.origin.x += 4
+        textColor = headerTitleColor
         if let indicator = shouldDrawSortIndicator {
-            let imageRect = CGRect(x: textRect.maxX, y: 8, width: 8, height: 8)
+            let imageRect = CGRect(x: textRect.maxX, y: 9, width: 8, height: 8)
             let image = indicator.ascending ? Self.flippedSortedIndicatorImage : Self.sortedIndicatorImage
-            image?.fill(color: BeamColor.AlphaGray.nsColor).draw(in: imageRect)
+            image?.fill(color: headerTitleColor).draw(in: imageRect)
             shouldDrawSortIndicator = nil
         }
     }
@@ -67,7 +93,7 @@ class TableHeaderCell: NSTableHeaderCell {
             tf.font = self.font
             textSize = tf.intrinsicContentSize
         }
-        BeamColor.Generic.background.nsColor.setFill()
+        headerBackgroundColor.setFill()
         NSBezierPath(rect: cellFrame).fill()
         drawBottomBorder(withFrame: cellFrame)
         var interiorFrame = cellFrame.insetBy(dx: 0, dy: 5)

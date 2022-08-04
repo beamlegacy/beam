@@ -88,7 +88,7 @@ class CheckBoxTableHeaderCell: TableHeaderCell {
         }
     }
 
-    override init(textCell: String) {
+    init(textCell: String) {
         checkBoxLayer = BeamCheckboxCALayer()
         checkBoxLayer.isHidden = true
         super.init(textCell: textCell)

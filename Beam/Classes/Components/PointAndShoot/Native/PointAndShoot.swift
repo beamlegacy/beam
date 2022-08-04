@@ -107,8 +107,10 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
 
     let throttledHaptic = throttle(delay: 0.2, action: {
         // bump trackpad haptic
-        let performer = NSHapticFeedbackManager.defaultPerformer
-        performer.perform(.alignment, performanceTime: .default)
+        if PreferencesManager.isHapticFeedbackOn {
+            let performer = NSHapticFeedbackManager.defaultPerformer
+            performer.perform(.alignment, performanceTime: .default)
+        }
     })
 
     /// Set activePointGroup with target. Updating the activePointGroup will update the UI directly.
