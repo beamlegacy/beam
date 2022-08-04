@@ -75,6 +75,10 @@ final class CreditCardsMenuViewModel: ObservableObject {
         closeOtherCreditCardsDialog()
     }
 
+    var isPresentingModalDialog: Bool {
+        otherCreditCardsDialog != nil
+    }
+
     private func closeOtherCreditCardsDialog() {
         otherCreditCardsDialog?.close()
         otherCreditCardsDialog = nil
