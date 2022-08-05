@@ -13,15 +13,17 @@ class SearchOnWebTests: BaseTest {
     let waitForCountValueTimeout = TimeInterval(2)
     let searchView = SearchTestView()
     
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        launchApp()
+        clearPasteboard()
+    }
+    
     func testSearchViewAppearance() {
         
         step("Given I open a test page"){
-            let pboard = NSPasteboard(name: .find)
-            pboard.clearContents()
-            pboard.setString("", forType: .string)
-
-            launchApp()
             uiMenu.loadUITestPage2()
+            webView.waitForWebViewToLoad()
         }
         
         step("Then by default search field is unavailable"){
@@ -62,7 +64,6 @@ class SearchOnWebTests: BaseTest {
     func testSearchResultsCounter() {
         
         step("Given I open a test page"){
-            launchApp()
             uiMenu.loadUITestPage2()
             webView.waitForWebViewToLoad()
         }
@@ -133,8 +134,8 @@ class SearchOnWebTests: BaseTest {
         try XCTSkipIf(true, "WIP. Test is blocked by https://linear.app/beamapp/issue/BE-1849/no-search-results-displayed-for-the-string-longer-than-visible-part-of")
         
         step("Given I open a test page"){
-            launchApp()
             uiMenu.loadUITestPage2()
+            webView.waitForWebViewToLoad()
         }
         
         let textToPaste1 = "Spanish, Italian"
@@ -165,7 +166,7 @@ class SearchOnWebTests: BaseTest {
     }
     
     func testSearchResultsHighlights() {
-        launchApp()
+        
         let firstSearch = "test"
         let additionalWord = "Confirm"
         let secondSearch = firstSearch + " " + additionalWord
@@ -209,7 +210,7 @@ class SearchOnWebTests: BaseTest {
     }
     
     func testSearchKeywordCaseSensitivityAndSearchAfterReopen() {
-        launchApp()
+        
         let firstSearch = "buTTOn"
         let secondSearch = "cLIcK"
         let expectedFirstResult = firstSearch.lowercased()

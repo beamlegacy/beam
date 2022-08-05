@@ -64,6 +64,7 @@ class BaseTest: XCTestCase {
         if deletePK {
             uiMenu.deletePrivateKeys()
         }
+        self.clearPasteboard()
         super.tearDown()
         terminateAppInstance()
     }
@@ -219,5 +220,11 @@ class BaseTest: XCTestCase {
     
     func getNumberOfTabInWindowIndex(index: Int) -> Int {
         return app.windows.element(boundBy: index).groups.matching(WebTestView().getAnyTabPredicate()).count
+    }
+    
+    func clearPasteboard() {
+        let pboard = NSPasteboard(name: .find)
+        pboard.clearContents()
+        pboard.setString("", forType: .string)
     }
 }
