@@ -284,37 +284,39 @@ public class ElementNode: Widget {
     }
 
     func setBottomPaddings(withDefault: CGFloat = 0) {
-        // WARNING
-        // Be extra carefull when changing values
-        //
-        // Padding bottom of Node depending of the nextElement with higher or smaller depth
-        var newPadding: CGFloat = withDefault
+        performLayerChanges {
+            // WARNING
+            // Be extra carefull when changing values
+            //
+            // Padding bottom of Node depending of the nextElement with higher or smaller depth
+            var newPadding: CGFloat = withDefault
 
-        if let nextElement = element.nextElement() {
-            if self.open {
-                if nextElement.depth > depth, parent !== root?.element {
-                    newPadding += nextElement.isHeader ? 2 : 1
-                } else if nextElement.depth < depth {
-                    if nextElement.parent === root?.element {
-                        newPadding += nextElement.isHeader ? 7 : 0
-                    } else {
-                        newPadding += nextElement.isHeader ? 5 : 0
+            if let nextElement = self.element.nextElement() {
+                if self.open {
+                    if nextElement.depth > self.depth, self.parent !== self.root?.element {
+                        newPadding += nextElement.isHeader ? 2 : 1
+                    } else if nextElement.depth < self.depth {
+                        if nextElement.parent === self.root?.element {
+                            newPadding += nextElement.isHeader ? 7 : 0
+                        } else {
+                            newPadding += nextElement.isHeader ? 5 : 0
+                        }
+                    }
+                } else {
+                    if self.isHeader {
+                        newPadding = 4
                     }
                 }
-            } else {
-                if isHeader {
-                    newPadding = 4
-                }
             }
-        }
 
-        if contentsPadding.bottom != newPadding {
-            contentsPadding.bottom = newPadding
-        }
+            if self.contentsPadding.bottom != newPadding {
+                self.contentsPadding.bottom = newPadding
+            }
 
-        for child in children {
-            guard let c = child as? ElementNode else { continue }
-            c.setBottomPaddings()
+            for child in self.children {
+                guard let c = child as? ElementNode else { continue }
+                c.setBottomPaddings()
+            }
         }
     }
 

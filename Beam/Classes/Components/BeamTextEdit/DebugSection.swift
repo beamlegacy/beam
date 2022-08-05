@@ -178,8 +178,8 @@ class DebugSection: Widget {
     override func updateSubLayersLayout() {
         super.updateSubLayersLayout()
 
-        CATransaction.disableAnimations {
-            separatorLayer.frame = CGRect(x: 0, y: textLayer.frame.maxY + 4, width: 560, height: 1)
+        performLayerChanges(true) {
+            self.separatorLayer.frame = CGRect(x: 0, y: self.textLayer.frame.maxY + 4, width: 560, height: 1)
         }
     }
 }
