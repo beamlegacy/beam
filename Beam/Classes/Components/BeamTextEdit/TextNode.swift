@@ -546,12 +546,17 @@ public class TextNode: ElementNode {
     }
 
     // MARK: - Methods TextNode
-    func sourceIndexFor(displayIndex: Int) -> Int {
-        return displayIndex
+
+    func screenIndex(for index: Int) -> Int? {
+        return caretForSourcePosition(index)?.positionOnScreen
     }
 
-    func displayIndexFor(sourceIndex: Int) -> Int {
-        return sourceIndex
+    func screenRange(for range: Range<Int>) -> NSRange? {
+        if let lowerIndex = screenIndex(for: range.lowerBound),
+           let upperIndex = screenIndex(for: range.upperBound) {
+            return NSRange(location: lowerIndex, length: upperIndex-lowerIndex)
+        }
+        return nil
     }
 
     func beginningOfLineFromPosition(_ position: Int) -> Int {
@@ -860,13 +865,10 @@ public class TextNode: ElementNode {
     public func positionAt(point: NSPoint) -> Int {
         guard let textFrame = textFrame else { return 0 }
         guard !textFrame.lines.isEmpty else { return 0 }
-        let line = lineAt(point: point)
+        let lineIndex = lineAt(point: point)
         let lines = textFrame.lines
-        let l = lines[line]
-        let displayIndex = l.stringIndexFor(position: NSPoint(x: point.x - contentsPadding.left, y: point.y - contentsPadding.top))
-        let res = sourceIndexFor(displayIndex: displayIndex)
-
-        return res
+        let line = lines[lineIndex]
+        return line.stringIndexFor(position: NSPoint(x: point.x - contentsPadding.left, y: point.y - contentsPadding.top))
     }
 
     override public func caretIndexAvoidingUneditableRange(_ caretIndex: Int, after: Bool) -> Int? {
@@ -925,24 +927,20 @@ public class TextNode: ElementNode {
     override public func offsetAt(index: Int) -> CGFloat {
         guard let textFrame = emptyTextFrame ?? self.textFrame else { return textPadding.left }
         guard !textFrame.lines.isEmpty else { return textPadding.left }
-        let displayIndex = displayIndexFor(sourceIndex: index)
-        guard let line = lineAt(index: displayIndex) else { return textPadding.left }
+        guard let line = lineAt(index: index) else { return textPadding.left }
         let textLine = textFrame.lines[line]
-        let positionInLine = displayIndex
-        let result = textLine.offsetFor(index: positionInLine)
+        let result = textLine.offsetFor(index: index)
         return CGFloat(result)
     }
 
     public func offsetAndFrameAt(index: Int) -> (CGFloat, NSRect) {
         guard let textFrame = textFrame else { return (offsetAt(index: index), .zero) }
-        let displayIndex = displayIndexFor(sourceIndex: index)
 
         guard !textFrame.lines.isEmpty,
-              let line = lineAt(index: displayIndex) else { return (offsetAt(index: index), .zero) }
+              let line = lineAt(index: index) else { return (offsetAt(index: index), .zero) }
 
         let textLine = textFrame.lines[line]
-        let positionInLine = displayIndex
-        let result = textLine.offsetFor(index: positionInLine)
+        let result = textLine.offsetFor(index: index)
 
         return (CGFloat(result), textLine.frame)
     }
@@ -950,10 +948,9 @@ public class TextNode: ElementNode {
     public func offsetAndFrameAt(caretIndex: Int) -> (CGFloat, NSRect) {
         guard let textFrame = textFrame else { return (offsetAt(caretIndex: caretIndex), .zero) }
         let caret = textFrame.carets[caretIndex]
-        let displayIndex = displayIndexFor(sourceIndex: caret.indexInSource)
 
         guard !textFrame.lines.isEmpty,
-              let line = lineAt(index: displayIndex) else { return (offsetAt(caretIndex: caretIndex), .zero) }
+              let line = lineAt(index: caret.indexInSource) else { return (offsetAt(caretIndex: caretIndex), .zero) }
 
         let textLine = textFrame.lines[line]
 
@@ -1054,24 +1051,22 @@ public class TextNode: ElementNode {
         guard let lines = (emptyTextFrame ?? self.textFrame)?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.last else { return 0 }
-        let displayIndex = line.stringIndexFor(position: NSPoint(x: x - contentsPadding.left, y: 0))
-        if displayIndex == line.range.upperBound {
-            return endOfLineFromPosition(displayIndex)
+        let index = line.stringIndexFor(position: NSPoint(x: x - contentsPadding.left, y: 0))
+        if index == line.range.upperBound {
+            return endOfLineFromPosition(index)
         }
-        let sourceIndex = sourceIndexFor(displayIndex: displayIndex)
-        return sourceIndex
+        return index
     }
 
     override public func indexOnFirstLine(atOffset x: CGFloat) -> Int {
         guard let lines = (emptyTextFrame ?? self.textFrame)?.lines else { return 0 }
         guard !lines.isEmpty else { return 0 }
         guard let line = lines.first else { return 0 }
-        let displayIndex = line.stringIndexFor(position: NSPoint(x: x - contentsPadding.left, y: 0))
-        if displayIndex == line.range.upperBound {
-            return endOfLineFromPosition(displayIndex)
+        let index = line.stringIndexFor(position: NSPoint(x: x - contentsPadding.left, y: 0))
+        if index == line.range.upperBound {
+            return endOfLineFromPosition(index)
         }
-        let sourceIndex = sourceIndexFor(displayIndex: displayIndex)
-        return sourceIndex
+        return index
     }
 
     // MARK: - Links Ranges
