@@ -8,8 +8,7 @@
 import Foundation
 import AVFoundation
 
-class SoundEffectPlayer {
-
+final class SoundEffectPlayer {
     static let shared = SoundEffectPlayer()
 
     private var soundIDs = [SoundEffectPlayer.Sounds: SystemSoundID]()
@@ -49,3 +48,11 @@ extension SoundEffectPlayer {
         }
     }
 }
+
+#if DEBUG
+extension SoundEffectPlayer {
+    func playWebViewDeinitSound() {
+        NSSound(named: "Glass")?.play()
+    }
+}
+#endif
