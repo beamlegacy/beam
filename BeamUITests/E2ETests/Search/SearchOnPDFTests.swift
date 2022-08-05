@@ -15,6 +15,7 @@ class SearchOnPDFTests: BaseTest {
         launchApp()
         uiMenu.destroyDB()
             .startMockHTTPServer()
+        clearPasteboard()
     }
     
     func testSearchViewAppearace() {
