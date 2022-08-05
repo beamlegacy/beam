@@ -199,7 +199,7 @@ class SearchOnNoteTests: BaseTest {
                 NoteTestView().waitForNoteViewToLoad() 
             }
         }
-        
+        self.clearPasteboard()
         return searchView
     }
 }
