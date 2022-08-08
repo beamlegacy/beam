@@ -40,11 +40,9 @@ class TestWebPage: WebPage {
         if let note = testNotes.values.first {
             return note
         } else {
-            // swiftlint:disable:next force_try
             return try! BeamNote(title: "activeNote backup")
         }
     }
-    // swiftlint:disable:next force_try
     var testNotes: [String: BeamCore.BeamNote] = ["Note A": try! BeamNote(title: "Note A")]
     var fileStorage: BeamFileStorage? {
         storage
@@ -78,13 +76,13 @@ class TestWebPage: WebPage {
     }
 
     func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, rect: NSRect) -> WebPage? {
-        events.append("createNewTab \(request.url) \(setCurrent))")
+        events.append("createNewTab \(String(describing: request.url)) \(setCurrent))")
         return TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: webAutofillController, pns: pointAndShoot,
                            fileStorage: storage, downloadManager: downloadManager, navigationHandler: webViewNavigationHandler)
     }
 
     func createNewWindow(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
-        events.append("createNewWindow \(request.url) \(setCurrent))")
+        events.append("createNewWindow \(String(describing: request.url)) \(setCurrent))")
         let webPage = TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: webAutofillController, pns: pointAndShoot,
                                   fileStorage: storage, downloadManager: downloadManager, navigationHandler: webViewNavigationHandler)
 

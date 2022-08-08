@@ -47,7 +47,6 @@ class FakeNoteGenerator {
 
     var randomNormalNote: BeamNote {
         let title = Faker().company.name()
-        // swiftlint:disable:next force_try
         let note = try! BeamNote(title: title)
         note.owner = BeamData.shared.currentDatabase
         note.type = .note

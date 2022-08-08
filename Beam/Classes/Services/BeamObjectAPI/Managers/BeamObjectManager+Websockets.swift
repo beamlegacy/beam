@@ -2,7 +2,6 @@ import Foundation
 import BeamCore
 
 extension BeamObjectManager {
-    // swiftlint:disable function_body_length
     /// `handler` might be called multiple times in case of reconnection, first arg is true if the handler has never been called before
     func liveSync(_ firstCall: Bool = true, _ handler: @escaping (Bool, Bool) -> Void) {
         guard Configuration.env != .test else {

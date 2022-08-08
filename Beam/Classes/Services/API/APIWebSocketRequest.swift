@@ -1,9 +1,6 @@
 import Foundation
 import BeamCore
 
-
-// swiftlint:disable file_length
-
 enum APIWebSocketRequestError: Error {
     case socket_not_connected
 }
@@ -35,8 +32,6 @@ extension APIWebSocketRequestError: LocalizedError {
  }
  */
 
-// swiftlint:disable file_length
-// swiftlint:disable:next type_body_length
 class APIWebSocketRequest: APIRequest {
     // Change API route from https?://api.beamapp.co/ to wss?://api.beamapp.co/cable
     static private var cableRoute: String {
@@ -193,7 +188,6 @@ class APIWebSocketRequest: APIRequest {
     /// - Parameter completionHandler: the document update
     /// - Returns: The channelId used for calling `unsubscribe()`
     @discardableResult
-    // swiftlint:disable cyclomatic_complexity function_body_length
     func connectBeamObjects(_ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) -> UUID? {
         guard connected else {
             Logger.shared.logError("Socket isn't connected", category: .webSocket)
@@ -611,12 +605,10 @@ extension APIWebSocketRequest {
 
     // Used for sending commands to the API
     struct WebSocketCommand: Encodable {
-        // swiftlint:disable:next nesting
         enum CommandType: String, Encodable {
             case subscribe, unsubscribe, message
         }
 
-        // swiftlint:disable:next nesting
         struct CommandData: Encodable {
             let query: String
             let variables: String?
@@ -631,12 +623,10 @@ extension APIWebSocketRequest {
     // When receiving data back from the API, this is a generic data response used
     // to know if we should parse what we received from the API
     struct WebSocketInputReceivedMessage: Decodable {
-        // swiftlint:disable:next nesting
         struct WebSocketResultData: Decodable {
             let data: WebSocketData?
         }
 
-        // swiftlint:disable:next nesting
         struct WebSocketResult: Decodable {
             let result: WebSocketResultData?
             let more: Bool
@@ -648,7 +638,6 @@ extension APIWebSocketRequest {
     // All potential graphql results we get from the API.
     // Subscription names will be included in the response
     struct WebSocketData: Decodable {
-        // swiftlint:disable:next nesting
         struct WebSocketDataBeamObject: Decodable {
             let beamObject: BeamObject?
             let beamObjects: [BeamObject]?
@@ -661,7 +650,6 @@ extension APIWebSocketRequest {
 
     // ActionCable level messages
     struct WebSocketMessage: Decodable {
-        // swiftlint:disable:next nesting
         enum MessageType: String, Decodable {
             case welcome, ping, disconnect, confirm_subscription
         }

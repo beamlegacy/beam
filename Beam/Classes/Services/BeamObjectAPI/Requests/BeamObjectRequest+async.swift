@@ -1,8 +1,6 @@
 import Foundation
 import BeamCore
 
-// swiftlint:disable function_length file_length
-
 extension BeamObjectRequest {
     @discardableResult
     func save(_ beamObject: BeamObject) async throws -> BeamObject {
@@ -464,7 +462,6 @@ extension BeamObjectRequest {
         return userMe.paginatedBeamObjects
     }
 
-    // swiftlint:disable function_body_length cyclomatic_complexity
     private func parseBeamObjects(beamObjects: [BeamObject], raisePrivateKeyError: Bool) async throws -> [BeamObject] {
         /*
          We cover all cases:
@@ -485,7 +482,6 @@ extension BeamObjectRequest {
                     Logger.shared.logDebug("Decrypting \(beamObjects.count) objects", category: .beamObject)
                 }
 
-                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
                     try Task.checkCancellation()
@@ -597,7 +593,6 @@ extension BeamObjectRequest {
                                 beamObjectType: type(of: object).beamObjectType.rawValue)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private func fetchWithFile(filename: String,
                                beamObjectID: UUID,
                                beamObjectType: String) async throws -> BeamObject {

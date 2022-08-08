@@ -4,7 +4,6 @@
 //
 //  Created by Sebastien Metrot on 06/05/2021.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import BeamCore
@@ -187,7 +186,6 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
 
     var grdbStore: GRDBStore
 
-    //swiftlint:disable:next function_body_length
     required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.holder = holder
         self.grdbStore = store
@@ -485,7 +483,6 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try await self?.saveOnBeamObjectsAPI(files)
                 Logger.shared.logDebug("Saved \(files.count) files on the BeamObject API",
@@ -504,7 +501,6 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
 
         Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try await self?.saveOnBeamObjectAPI(file)
                 Logger.shared.logDebug("Saved file \(file.name) on the BeamObject API",

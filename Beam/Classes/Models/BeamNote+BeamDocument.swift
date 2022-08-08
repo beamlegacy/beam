@@ -545,12 +545,10 @@ public extension BeamNote {
             if let note = BeamNote.fetch(id: id) {
                 let str = "validating \(note.title) - [\(note.id)]"
                 all.append(str)
-                //swiftlint:disable:next print
                 print(str)
                 let (success, msgs) = try note.validate()
                 if !success {
                     let str = "\tvalidation failed for note \(note.title) - \(note.id)"
-                    //swiftlint:disable:next print
                     print(str)
                     all.append(str)
                     all.append(contentsOf: msgs)
@@ -570,7 +568,6 @@ public extension BeamNote {
         beamCheckMainThread()
         guard let document = self.document else {
             let str = "\tUnable to be documentStruct for note \(title) - \(id)"
-            //swiftlint:disable:next print
             print(str)
             return (false, ["\tUnable to be documentStruct for note \(title) - \(id)"])
         }
@@ -600,7 +597,6 @@ public extension BeamNote {
         }
 
         validated.append(contentsOf: try validateLinks(fix: false))
-        //swiftlint:disable:next print
         print(validated.joined(separator: "\n"))
         return (true, validated)
     }

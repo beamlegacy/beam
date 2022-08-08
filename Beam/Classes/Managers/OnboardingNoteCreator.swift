@@ -47,7 +47,6 @@ class OnboardingNoteCreator: BeamDocumentSource {
         importNote(Note.yesterday.fileName, forceDate: yesterday)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private func importNote(_ fileName: String, forceDate: Date? = nil) {
         guard let path = Bundle.main.path(forResource: fileName, ofType: "json") else { return }
         let url = URL(fileURLWithPath: path)

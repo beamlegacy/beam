@@ -15,7 +15,6 @@ enum APIRequestMethod {
 
 extension APIRequest {
     @discardableResult
-    //swiftlint:disable:next function_body_length
     func performRestRequest<T: Decodable & Errorable, C: Codable>(path: BeamAPIRestPath,
                                                                   httpMethod: APIRequestMethod = .post,
                                                                   queryParams: [[String: String]]? = nil,
@@ -57,7 +56,6 @@ extension APIRequest {
             fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
         }
 
-        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         #if DEBUG
@@ -80,7 +78,6 @@ extension APIRequest {
         return dataTask!
     }
 
-    // swiftlint:disable function_body_length cyclomatic_complexity
     func makeRestUrlRequest<C: Codable>(path: String,
                                         httpMethod: APIRequestMethod = .get,
                                         queryParams: [[String: String]]? = nil,

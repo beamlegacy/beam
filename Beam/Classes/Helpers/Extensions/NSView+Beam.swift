@@ -47,3 +47,22 @@ public extension NSView {
         ])
     }
 }
+
+
+// Basic code that comes handy to debug system frameworks. DON'T COMMIT THAT CODE ACTIVATED!
+#if DEBUG
+extension NSView {
+    static let classInit: Void = {
+       guard let originalMethod = class_getInstanceMethod(NSView.self, #selector(invalidateIntrinsicContentSize)),
+             let swizzledMethod = class_getInstanceMethod(NSView.self, #selector(swizzled_invalidateIntrinsicContentSize))
+       else { return }
+       //method_exchangeImplementations(originalMethod, swizzledMethod)
+    }()
+
+    @objc func swizzled_invalidateIntrinsicContentSize() {
+        swizzled_invalidateIntrinsicContentSize()
+        print("invalidateIntrinsicContentSize \(self)")
+    }
+}
+// Make sure to call `UIView.classInit` somewhere early, e.g. in the app delegate.
+#endif

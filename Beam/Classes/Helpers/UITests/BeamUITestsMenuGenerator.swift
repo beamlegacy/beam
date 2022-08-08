@@ -8,12 +8,10 @@ struct BeamUITestsMenuGeneratorSource: BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 }
 
-// swiftlint:disable file_length type_body_length
 class BeamUITestsMenuGenerator: BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
     static var beeper: CrossTargetBeeper?
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func executeCommand(_ command: UITestMenuAvailableCommands) {
         switch command {
         case .destroyDB: destroyDatabase()
@@ -275,7 +273,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         })
     }
 
-    // swiftlint:disable:next function_body_length
     private func signUpWithRandomTestAccount() {
         guard !AuthenticationManager.shared.isAuthenticated else {
             showAlert("Already authenticated", "You are already authenticated")
@@ -469,7 +466,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         var notes: [BeamNote] = []
 
         for title in titles {
-            // swiftlint:disable:next force_try
             let note = try! BeamNote(title: title)
             note.type = .note
             note.owner = BeamData.shared.currentDatabase
@@ -498,7 +494,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     var noteCount = 1
     @discardableResult
     private func createNote(open: Bool = false) -> BeamNote {
-        // swiftlint:disable:next force_try
         let note = try! BeamNote(title: "Test\(noteCount)")
         note.type = .note
         note.owner = BeamData.shared.currentDatabase

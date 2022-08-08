@@ -33,7 +33,6 @@ class BeamNoteMergeTests: XCTestCase {
         return try decoder.decode(BeamNote.self, from: data)
     }
 
-    // swiftlint:disable:next large_tuple
     func notesFor(scenario: String) throws -> (ancestor: BeamNote, noteA: BeamNote, noteB: BeamNote, result: BeamNote) {
         return (ancestor: try note("ancestor.json", forScenario: scenario),
                 noteA: try note("noteA.json", forScenario: scenario),

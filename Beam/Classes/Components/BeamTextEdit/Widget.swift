@@ -10,8 +10,6 @@ import Cocoa
 import Combine
 import BeamCore
 
-// swiftlint:disable type_body_length
-// swiftlint:disable file_length
 public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     let layer: CALayer
     let selectionLayer: CALayer
@@ -1392,5 +1390,3 @@ extension Widget {
         }
     }
 }
-// swiftlint:enable type_body_length
-// swiftlint:enable file_length

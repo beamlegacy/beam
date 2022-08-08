@@ -22,7 +22,6 @@ class WebNoteControllerTest: XCTestCase {
     }
 
     var words = WordsFile()
-    // swiftlint:disable:next force_try
     var note = try! BeamNote(title: "Sample note")
 
     override func setUpWithError() throws {

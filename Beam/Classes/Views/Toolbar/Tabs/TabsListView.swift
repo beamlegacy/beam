@@ -4,7 +4,6 @@
 //
 //  Created by Remi Santos on 02/12/2021.
 //
-// swiftlint:disable file_length
 
 import SwiftUI
 import BeamCore
@@ -183,7 +182,6 @@ struct TabsListView: View {
                                                          removal: .animatableOffset(offset: CGSize(width: 0, height: 40)).animation(BeamAnimation.spring(stiffness: 400, damping: 28))
                                                             .combined(with: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.05))))
 
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func renderItem(_ item: TabsListItem, index: Int, selectedIndex: Int, isSingle: Bool,
                             canScroll: Bool, widthProvider: TabsListWidthProvider, centeringAdjustment: CGFloat = 0) -> some View {
         var selected = false
@@ -827,7 +825,6 @@ struct TabsListView_Previews: PreviewProvider {
     static var state = BeamState()
 
     static func tab(_ title: String) -> BrowserTab {
-        // swiftlint:disable:next force_try
         let t = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .today, note: try! BeamNote(title: "note"))
         t.title = title
         return t

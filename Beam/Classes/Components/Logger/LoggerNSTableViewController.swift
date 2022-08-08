@@ -214,7 +214,6 @@ extension LoggerNSTableController: NSTableViewDelegate {
         return max(dataCell.cellSize(forBounds: rect).height + 10.0, tableView.rowHeight)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         guard row < logEntries.count else { return nil }
 

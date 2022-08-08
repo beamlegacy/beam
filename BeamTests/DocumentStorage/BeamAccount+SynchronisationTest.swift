@@ -221,7 +221,7 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         print("Third journal id: \(thirdJournal.id)")
 
         print(reloadedJournals.map {
-            "\($0.id) - \($0.title) - \($0.deletedAt)"
+            "\($0.id) - \($0.title) - \(String(describing: $0.deletedAt))"
         })
 
 //        XCTAssertEqual(fetchAllRemoteObjects().count, 12)

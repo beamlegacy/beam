@@ -3,7 +3,6 @@
 //  Beam
 //
 //  Created by Remi Santos on 16/07/2021.
-//  swiftlint:disable file_length
 
 import Foundation
 import Combine

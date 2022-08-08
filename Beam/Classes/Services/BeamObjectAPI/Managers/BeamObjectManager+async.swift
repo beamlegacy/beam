@@ -2,8 +2,6 @@ import Foundation
 import BeamCore
 import Atomics
 
-// swiftlint:disable file_length
-
 extension BeamObjectManager {
     func syncAllFromAPI(force: Bool = false, delete: Bool = true, prepareBeforeSaveAll: (() -> Void)? = nil) async throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -35,7 +33,6 @@ extension BeamObjectManager {
                 prepareBeforeSaveAll()
             }
 
-            // swiftlint:disable:next date_init
             let localTimer = Date()
             Logger.shared.logDebug("syncAllFromAPI: calling saveAllToAPI",
                                    category: .sync)
@@ -54,7 +51,6 @@ extension BeamObjectManager {
     }
 
     @discardableResult
-    // swiftlint:disable:next function_body_length
     func saveAllToAPI(force: Bool = false) async throws -> Int {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
@@ -97,7 +93,6 @@ extension BeamObjectManager {
         await withTaskGroup(of: Swift.Result<(Int, Date?), Error>.self, body: { group in
             for (beamObjectObjectType, manager) in Self.managerInstances {
                 group.addTask {
-                    // swiftlint:disable:next date_init
                     let localTimer = Date()
                     defer {
                         Logger.shared.logDebug("saveAllToAPI using \(manager) done",
@@ -147,7 +142,6 @@ extension BeamObjectManager {
     // Will fetch remote checksums for objects since `lastReceivedAt` and then fetch objects for which we have a different
     // checksum locally, and therefor must be fetched from the API. This allows for a faster fetch since most of the time
     // we might already have those object locally if they had been sent and updated from the same device
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func fetchAllByChecksumsFromAPI(force: Bool = false) async throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
@@ -168,7 +162,6 @@ extension BeamObjectManager {
             return
         }
 
-        // swiftlint:disable:next date_init
         var localTimer = Date()
 
         let beamObjects = try await beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt,
@@ -194,7 +187,6 @@ extension BeamObjectManager {
         Self.synchronizationStatusUpdated(.downloading(33))
 
         do {
-            // swiftlint:disable:next date_init
             localTimer = Date()
             let changedObjects = self.parseObjectChecksums(beamObjects)
 
@@ -204,7 +196,6 @@ extension BeamObjectManager {
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
 
-            // swiftlint:disable:next date_init
             localTimer = Date()
 
             let ids: [UUID] = changedObjects.map { $0.id }
@@ -299,7 +290,6 @@ extension BeamObjectManager {
         }
     }
 
-    // swiftlint:disable function_body_length cyclomatic_complexity
     func saveToAPIClassic<T: BeamObjectProtocol>(_ objects: [T],
                                                  force: Bool = false,
                                                  maxChunk: Int = 1000) async throws -> [T] {
@@ -329,13 +319,11 @@ extension BeamObjectManager {
         return objects
     }
 
-    // swiftlint:disable function_body_length cyclomatic_complexity
     @discardableResult
     private func saveToAPIClassicChunk<T: BeamObjectProtocol>(_ objects: [T],
                                                               force: Bool = false) async throws -> [T] {
         assert(objects.count <= 1000)
 
-        // swiftlint:disable:next date_init
         var localTimer = Date()
 
         let beamObjects: [BeamObject] = try objects.map {
@@ -346,7 +334,6 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
-        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let beamObjectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
@@ -362,7 +349,6 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
-        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjectsToSave)
@@ -452,7 +438,6 @@ extension BeamObjectManager {
         return (totalSize, errors)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func saveToAPIWithDirectUpload<T: BeamObjectProtocol>(_ objects: [T],
                                                           force: Bool = false) async throws -> [T] {
 
@@ -464,7 +449,6 @@ extension BeamObjectManager {
             return []
         }
 
-        // swiftlint:disable:next date_init
         var localTimer = Date()
 
         let beamObjects: [BeamObject] = try objects.map {
@@ -474,7 +458,6 @@ extension BeamObjectManager {
         Logger.shared.logDebug("Converted \(objects.count) \(T.beamObjectType) to beam objects",
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
-        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let objectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
@@ -491,7 +474,6 @@ extension BeamObjectManager {
                                localTimer: localTimer)
 
         let chunkSize = Configuration.env == .test ? 1 : 100
-        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objectsToSave)
@@ -512,7 +494,6 @@ extension BeamObjectManager {
         Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
                                category: .beamObjectNetwork)
 
-        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let request = BeamObjectRequest()
@@ -545,7 +526,6 @@ extension BeamObjectManager {
 
         let  s3Upload: S3Transfer = S3TransferManager.shared
 
-        // swiftlint:disable:next date_init
         localTimer = Date()
         let totalSize: Int, errors: [Error]
         (totalSize, errors) = try await uploadS3(beamObjectsUpload: beamObjectsUpload, decoder: decoder, objectsToSave: objectsToSave, chunkSize: chunkSize, s3Upload: s3Upload)
@@ -568,7 +548,6 @@ extension BeamObjectManager {
 
         let saveRequest = BeamObjectRequest()
 
-        // swiftlint:disable:next date_init
         localTimer = Date()
 
         do {
@@ -684,7 +663,6 @@ extension BeamObjectManager {
         return try self.beamObjectsToObjects(remoteBeamObjects)
     }
 
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
     internal func saveToAPIFailureApiErrors<T: BeamObjectProtocol>(_ objects: [T], _ error: Error) async throws -> [T] {
         guard case APIRequestError.apiErrors(let errorable) = error,
               let remoteBeamObjects = (errorable as? BeamObjectRequest.UpdateBeamObjects)?.beamObjects,
@@ -782,7 +760,6 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         let beamObject = try BeamObject(object: object)
@@ -810,15 +787,12 @@ extension BeamObjectManager {
         }
     }
 
-    // swiftlint:disable:next function_body_length
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func saveToAPIWithDirectUpload<T: BeamObjectProtocol>(_ object: T,
                                                           force: Bool = false) async throws -> T {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         let beamObject = try BeamObject(object: object)
@@ -984,7 +958,6 @@ extension BeamObjectManager {
     }
 
     /// Will look at each errors, and fetch remote object to include it in the completion if it was a checksum error
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     internal func saveToAPIBeamObjectsFailure(_ beamObjects: [BeamObject],
                                               deep: Int = 0,
                                               _ error: Error) async throws -> [BeamObject] {
@@ -1030,7 +1003,6 @@ extension BeamObjectManager {
         throw error
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     internal func saveToAPIFailureAPIErrors(_ beamObjects: [BeamObject],
                                             deep: Int = 0,
                                             _ errors: [UserErrorData]) async throws -> [BeamObject] {
@@ -1061,7 +1033,6 @@ extension BeamObjectManager {
         }
     }
 
-    // swiftlint:disable function_body_length cyclomatic_complexity
     func saveToAPI(_ beamObject: BeamObject,
                    deep: Int = 0) async throws -> BeamObject {
         guard !Self.disableSendingObjects else {

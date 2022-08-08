@@ -58,7 +58,6 @@ extension BeamWebContextMenuItem {
         return items.compactMap { $0.nsMenuItem(from: webView, payload: payload, menu: menu) }
     }
 
-    // swiftlint:disable:next function_body_length
     private static func content(for payload: ContextMenuMessageHandlerPayload) -> [Self] {
         switch payload {
         case .page:

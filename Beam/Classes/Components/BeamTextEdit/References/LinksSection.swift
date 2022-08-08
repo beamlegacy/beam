@@ -137,7 +137,6 @@ class LinksSection: Widget {
     var sectionTypeName: StaticString { "LinksSection" }
     var initialUpdate = true
 
-    //swiftlint:disable:next function_body_length
     func updateLinkedReferences(links: [BeamNoteReference]) {
         os_signpost(.begin, log: sign.log, name: Signs.updateLinkedReferences, signpostID: sign.id, "%{public}s", note.titleAndId)
         defer { sign.end(Signs.updateLinkedReferences) }

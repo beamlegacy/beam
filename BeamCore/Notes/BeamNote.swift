@@ -3,7 +3,6 @@
 //
 //  Created by Sebastien Metrot on 18/09/2020.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import Combine
@@ -598,4 +597,3 @@ extension BeamNote {
         }
     }
 }
-// swiftlint:enable file_length

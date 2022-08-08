@@ -319,7 +319,6 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
 
         Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try await self?.saveOnBeamObjectAPI(record)
                 Logger.shared.logDebug("Saved tree \(record.rootId) on the BeamObject API",
@@ -337,7 +336,6 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     func saveAllOnNetwork(_ records: [BrowsingTreeRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try await self?.saveOnBeamObjectsAPI(records)
                 Logger.shared.logDebug("Saved \(records.count) trees on the BeamObject API",

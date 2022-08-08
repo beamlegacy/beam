@@ -5,8 +5,6 @@ import WebKit
 import BeamCore
 import UniformTypeIdentifiers
 
-// swiftlint:disable file_length
-// swiftlint:disable:next type_body_length
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable {
 
     typealias TabID = UUID
@@ -835,7 +833,6 @@ extension BrowserTab: WebViewControllerDelegate {
         case \.hasOnlySecureContent:
             self.hasOnlySecureContent = value as? Bool ?? self.hasOnlySecureContent
         case \.serverTrust:
-            // swiftlint:disable:next force_cast
             self.serverTrust = (value as! SecTrust?)
         case \.canGoBack:
             self.canGoBack = value as? Bool ?? self.canGoBack

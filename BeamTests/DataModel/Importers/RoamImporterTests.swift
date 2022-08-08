@@ -24,7 +24,6 @@ class RoamImporterTests: CoreDataTests {
         XCTAssertEqual(roamNotes.count, 62)
         XCTAssertEqual(BeamData.shared.currentDatabase?.documentsCount(), 62)
 
-        //swiftlint:disable:next force_try
         let notes = try collection.fetch(filters: [], sortingKey: .title(true))
 
         let dateFormatter = DateFormatter()

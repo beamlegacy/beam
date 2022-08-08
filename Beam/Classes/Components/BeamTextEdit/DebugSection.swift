@@ -142,7 +142,7 @@ class DebugSection: Widget {
             self.layers["noteDatabaseIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
         }), origin: CGPoint(x: 0, y: 50))
 
-        let defaultDatabaseIdLayer = Layer.text("Default Database ID: \(defaultDatabaseId)", color: databaseTextColor, size: 12)
+        let defaultDatabaseIdLayer = Layer.text("Default Database ID: \(String(describing: defaultDatabaseId))", color: databaseTextColor, size: 12)
         addLayer(ButtonLayer("defaultDatabaseIdBtn", defaultDatabaseIdLayer, activated: {
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()

@@ -3,7 +3,6 @@ import CoreData
 import BeamCore
 
 extension Document {
-    //swiftlint:disable identifier_name
     @NSManaged public var id: UUID
     @NSManaged public var data: Data?
     @NSManaged public var deleted_at: Date?
@@ -15,7 +14,6 @@ extension Document {
     @NSManaged public var is_public: Bool
     @NSManaged public var database_id: UUID
     @NSManaged public var journal_day: Int64
-    //swiftlint:enable identifier_name
 
     public var documentType: DocumentType {
         guard let type = DocumentType(rawValue: document_type) else {

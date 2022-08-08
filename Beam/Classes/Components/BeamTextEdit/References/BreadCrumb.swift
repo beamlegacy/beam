@@ -4,7 +4,6 @@
 //
 //  Created by Sebastien Metrot on 28/12/2020.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import AppKit

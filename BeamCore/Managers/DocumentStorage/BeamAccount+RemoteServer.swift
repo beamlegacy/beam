@@ -8,7 +8,6 @@
 import Foundation
 import BeamCore
 
-// swiftlint:disable file_length
 extension BeamAccount {
     public func updateInitialState() {
         switch state {
@@ -280,7 +279,6 @@ extension BeamAccount {
     }
 
     // MARK: - Check private key
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     @MainActor
     func checkPrivateKey(useBuiltinPrivateKeyUI: Bool) async -> ConnectionState {
         guard state == .authenticated || state == .privateKeyCheck else { return state }
@@ -320,8 +318,8 @@ extension BeamAccount {
                     Logger.shared.logInfo("Ask the user for a valid private key for this account", category: .privateKeySignature)
                     let alert = NSAlert()
                     alert.messageText = loc("Beam needs your private key to connect to this account.", comment: "Alert message")
-                    alert.addButton(withTitle: loc("Use Encryption Key", comment: "Alert button"))
-                    alert.addButton(withTitle: loc("Disconnect", comment: "Alert button"))
+                    _ = alert.addButton(withTitle: loc("Use Encryption Key", comment: "Alert button"))
+                    _ = alert.addButton(withTitle: loc("Disconnect", comment: "Alert button"))
 
                     // Add an input NSTextField for the prompt
                     let inputFrame = NSRect(
