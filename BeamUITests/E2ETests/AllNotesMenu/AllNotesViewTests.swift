@@ -100,7 +100,8 @@ class AllNotesViewTests: BaseTest {
     }
     
     //To be refactored with automatically published new note via https://linear.app/beamapp/issue/BE-4445/created-published-note-via-uitest-menu-is-not-recognized-as-published
-    func testAllNotesURLCounter() {
+    func testAllNotesURLCounter() throws {
+        try XCTSkipIf(isBigSurOS(), "issue that happens only on Big Sur - https://linear.app/beamapp/issue/BE-5098/note-is-removed-from-all-notes-table-on-publish-from-all-notes-on-big. Until issue is fixed -> it is skipped for Big Sur")
         
         let rowIndex = 0
         
