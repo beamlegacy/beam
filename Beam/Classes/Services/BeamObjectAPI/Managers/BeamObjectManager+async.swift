@@ -3,6 +3,7 @@ import BeamCore
 import Atomics
 
 extension BeamObjectManager {
+    @MainActor
     func syncAllFromAPI(force: Bool = false, delete: Bool = true, prepareBeforeSaveAll: (() -> Void)? = nil) async throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
