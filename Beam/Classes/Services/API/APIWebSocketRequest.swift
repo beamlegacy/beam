@@ -74,7 +74,7 @@ class APIWebSocketRequest: APIRequest {
         let request = try Self.makeUrlWebSocketRequest()
         let urlSession = URLSession(configuration: URLSessionConfiguration.default,
                                     delegate: self,
-                                    delegateQueue: OperationQueue())
+                                    delegateQueue: nil)
 
         webSocketTask = urlSession.webSocketTask(with: request)
         webSocketTask?.maximumMessageSize = 50*1024*1024 // increase maximum size from 1MB to 50MB
@@ -330,10 +330,10 @@ class APIWebSocketRequest: APIRequest {
             return
         }
 
-        var completionHandler: ((Swift.Result<String, Error>) -> Void)?
-        queryCommandHandlersLock {
-            completionHandler = queryCommandHandlers[channelId]
+        let completionHandler = queryCommandHandlersLock {
+            queryCommandHandlers[channelId]
         }
+
         guard let completionHandler = completionHandler else {
             logDebug("Received result but no query handler: \(messageText)")
             return
@@ -357,9 +357,7 @@ class APIWebSocketRequest: APIRequest {
 
         channelIds.append(channelId)
 
-        var completionHandler: ((Swift.Result<UUID, Error>) -> Void)?
-        subscribeHandlersLock {
-            completionHandler = subscribeHandlers[channelId]
+        let completionHandler = subscribeHandlersLock {
             subscribeHandlers.removeValue(forKey: channelId)
         }
         guard let completionHandler = completionHandler else {
@@ -498,7 +496,7 @@ class APIWebSocketRequest: APIRequest {
 
     /// Unsubscribe the channel, will not get data back for this channel anymore
     /// - Parameter channelId:
-    func unsubscribe(channelId: UUID) {
+    private func unsubscribe(channelId: UUID) {
         guard connected else {
             Logger.shared.logError("Socket isn't connected", category: .webSocket)
             return
@@ -506,7 +504,7 @@ class APIWebSocketRequest: APIRequest {
 
         let commandString = command(channelId, .unsubscribe)
 
-        _ = queryCommandHandlersLock {
+        queryCommandHandlersLock {
             queryCommandHandlers.removeValue(forKey: channelId)
         }
 
