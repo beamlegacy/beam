@@ -135,7 +135,8 @@ class AllNotesPublishProfileTests: BaseTest {
         }
     }
     
-    func testPublishPrivateNote() {
+    func testPublishPrivateNote() throws {
+        try XCTSkipIf(isBigSurOS(), "issue that happens only on Big Sur - https://linear.app/beamapp/issue/BE-5098/note-is-removed-from-all-notes-table-on-publish-from-all-notes-on-big. Until issue is fixed -> it is skipped for Big Sur")
         
         step("WHEN I open Private Notes") {
             allNotes
