@@ -86,10 +86,14 @@ class GeneralPreferencesTests: BaseTest {
     
     func testGeneralPrefsAccessibilityElements() {
         
-        step("THEN Accessibility checkbox is correctly displayed") {
+        step("THEN Accessibility Press Tab to highlight checkbox is correctly displayed") {
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.accessibilityLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(generalPrefView.checkBox(GeneralPreferencesViewLocators.Checkboxes.highlightTab.accessibilityIdentifier).exists)
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.highlightCheckboxDescription.accessibilityIdentifier).exists)
+        }
+        
+        step("THEN Accessibility Force click and haptic feedback checkbox is correctly displayed") {
+            XCTAssertTrue(generalPrefView.checkBox(GeneralPreferencesViewLocators.Checkboxes.forceClickAndHapticFeedback.accessibilityIdentifier).exists)
         }
     }
 }

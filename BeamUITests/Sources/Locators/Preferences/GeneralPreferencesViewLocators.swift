@@ -12,6 +12,7 @@ enum GeneralPreferencesViewLocators {
     enum Checkboxes: String, CaseIterable, UIElement {
         case startBeam = "Start beam with opened tabs"
         case highlightTab = "Press Tab to highlight each item on a web page"
+        case forceClickAndHapticFeedback = "Force Click and haptic feedback"
     }
     
     enum Buttons: String, CaseIterable, UIElement {
