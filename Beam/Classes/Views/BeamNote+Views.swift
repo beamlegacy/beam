@@ -17,7 +17,6 @@ extension BeamNote {
     }
 
     @ViewBuilder static func contextualMenu(for note: BeamNote, state: BeamState) -> some View {
-
         Group {
             Button("Open Note") {
                 state.navigateToNote(id: note.id)
@@ -46,6 +45,9 @@ extension BeamNote {
         Menu("Export") {
             Button("beamNote…") {
                 AppDelegate.main.exportOneNoteToBeamNote(note: note)
+            }
+            Button("Markdown") {
+                NSLog("Exporting to Markdown")
             }
         }
         Divider()

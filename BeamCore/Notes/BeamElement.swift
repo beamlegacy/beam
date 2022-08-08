@@ -778,7 +778,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     open var debugDescription: String {
-        return "BeamElement(\(id) [\(children.count) children] \(kind) - \(childrenFormat) \(!open ? "[closed]" : ""): \(text.text)"
+        return "BeamElement(\(id)) [\(children.count) children] \(kind) - \(childrenFormat) \(!open ? "[closed]" : ""): \(text.text)"
     }
 
     open var isHeader: Bool {

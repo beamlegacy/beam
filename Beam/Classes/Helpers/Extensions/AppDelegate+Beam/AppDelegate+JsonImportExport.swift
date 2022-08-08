@@ -112,4 +112,34 @@ extension AppDelegate {
             openPanel?.close()
         }
     }
+
+    // MARK: Markdown export
+
+    func exportNotesToMarkdown(_ notes: [BeamNote]) {
+        guard !notes.isEmpty else { return }
+
+        let openPanel = NSOpenPanel()
+        openPanel.canChooseDirectories = true
+        openPanel.canCreateDirectories = true
+        openPanel.title = loc("Choose the directory to export to Markdown")
+        openPanel.begin { [weak openPanel] result in
+            guard result == .OK, let selectedURL = openPanel?.url else { return }
+
+            var failedCount: UInt = .zero
+
+            for note in notes {
+                do {
+                    let export = try MarkdownExporter.export(of: note)
+                    try export.write(to: selectedURL)
+                } catch {
+                    Logger.shared.logError("Error exporting \(note) to Markdown: \(error)", category: .general)
+                    failedCount += 1
+                }
+            }
+
+            if failedCount != .zero {
+                UserAlert.showError(message: "Failed to export \(failedCount) \(failedCount > 1 ? "notes" : "note") to Markdown.")
+            }
+        }
+    }
 }
