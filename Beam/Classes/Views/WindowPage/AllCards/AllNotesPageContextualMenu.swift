@@ -146,13 +146,11 @@ class AllNotesPageContextualMenu {
             action: #selector(exportNotesToBeamNote),
             keyEquivalent: ""
         ))
-//        if false {
-//            exportMenu.addItem(NSMenuItem(
-//                title: "Markdown...",
-//                action: nil,
-//                keyEquivalent: ""
-//            ))
-//        }
+        exportMenu.addItem(NSMenuItem(
+            title: "Markdown...",
+            action: #selector(exportNotesToMarkdown),
+            keyEquivalent: ""
+        ))
         if selectedNotes.count <= 0 {
             exportMenu.addItem(NSMenuItem(
                 title: "Entire database...",
@@ -205,6 +203,11 @@ class AllNotesPageContextualMenu {
         } else {
             AppDelegate.main.exportAllNotesToBeamNote(self)
         }
+    }
+
+    @objc
+    private func exportNotesToMarkdown() {
+        AppDelegate.main.exportNotesToMarkdown(selectedNotes)
     }
 
     @objc
