@@ -23,7 +23,6 @@ open class GRDBHandler {
 
     var tableNames: [String] { [] }
 
-    //swiftlint:disable:next large_tuple
     public init(store: GRDBStore) throws {
         self.store = store
         try store.setupMigration(self)

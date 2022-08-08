@@ -6,7 +6,6 @@ import Nimble
 
 @testable import Beam
 class UserSessionRequestTests: QuickSpec {
-    // swiftlint:disable:next function_body_length
     override func spec() {
         let existingAccountEmail = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword

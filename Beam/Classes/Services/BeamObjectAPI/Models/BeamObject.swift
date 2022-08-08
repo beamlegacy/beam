@@ -214,7 +214,6 @@ class BeamObject: Codable {
 
     func encodeObject<T: BeamObjectProtocol>(_ object: T) throws {
         assert(!encoded)
-        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         let encoder = Self.encoder
@@ -225,7 +224,6 @@ class BeamObject: Codable {
         data = jsonData
         dataChecksum = jsonData.SHA256
 
-        // swiftlint:disable:next date_init
         let timeDiff = Date().timeIntervalSince(localTimer)
         if timeDiff > 0.1 {
             Logger.shared.logWarning("Slow BeamObject encoding for \(object.beamObjectId) \(T.beamObjectType), size: \(jsonData.count.byteSize)",

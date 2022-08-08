@@ -57,7 +57,6 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
         overridenManager ?? BeamData.shared.urlHistoryManager!
     }
 
-    //swiftlint:disable:next function_body_length
     init(overridenManager: UrlHistoryManager? = nil) {
         self.overridenManager = overridenManager
     }

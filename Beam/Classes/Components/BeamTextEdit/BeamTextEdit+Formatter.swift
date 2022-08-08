@@ -4,7 +4,6 @@
 //
 //  Created by Ravichandrane Rajendran on 03/01/2021.
 //
-// swiftlint:disable file_length
 
 import Cocoa
 import BeamCore
@@ -198,7 +197,6 @@ extension BeamTextEdit {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     internal func detectTextFormatterType() {
         guard let rootNode = rootNode else { return }
         guard let node = focusedWidget as? TextNode else { return }

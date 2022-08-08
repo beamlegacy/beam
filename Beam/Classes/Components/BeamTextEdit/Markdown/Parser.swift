@@ -4,13 +4,11 @@
 //
 //  Created by Sebastien Metrot on 13/10/2020.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import AppKit
 import BeamCore
 
-// swiftlint:disable:next type_body_length
 class Parser {
     enum NodeType: Equatable, Hashable {
         case text(String)
@@ -86,7 +84,6 @@ class Parser {
             return decoration(.suffix, decorate, font)
         }
 
-        // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case type
             case position
@@ -100,7 +97,6 @@ class Parser {
             case infix
         }
 
-        // swiftlint:disable:next cyclomatic_complexity
         required public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             length = 0
@@ -382,7 +378,6 @@ class Parser {
         parseCouple(context, type: .emphasis)
     }
 
-    // swiftlint:disable:next function_body_length
     private func parseLink(_ context: ASTContext) {
         let linkNode = Node(type: .link(""), context.token.start)
         let prefix = context.token
@@ -574,7 +569,6 @@ class Parser {
         context.nextToken()
     }
 
-    //swiftlint:disable:next cyclomatic_complexity function_body_length
     private func parseToken(_ context: ASTContext) {
         let token = context.token
         switch token.type {

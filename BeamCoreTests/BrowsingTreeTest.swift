@@ -4,12 +4,10 @@
 //
 //  Created by Paul Lefkopoulos on 19/08/2021.
 //
-// swiftlint:disable file_length
 
 import XCTest
 @testable import BeamCore
 
-// swiftlint:disable:next type_body_length
 class BrowsingTreeTest: XCTestCase {
     override func setUpWithError() throws {
         super.setUp()
@@ -163,7 +161,6 @@ class BrowsingTreeTest: XCTestCase {
         XCTAssertEqual(tree.idURLMapping, mapping)
     }
 
-    //swiftlint:disable:next function_body_length
     func testUrlIdMigration() throws {
         //Checks that a tree bearing legacy Uint64 urlId can be decoded and detected as legacy
         var legacyJson = """
@@ -249,7 +246,6 @@ class BrowsingTreeTest: XCTestCase {
         BeamDate.reset()
     }
 
-    // swiftlint:disable:next function_body_length
     func testFlattenUnflatten() throws {
 
         func isEqual(_ leftNode: BrowsingNode, _ rightNode: BrowsingNode) {

@@ -8,7 +8,6 @@ import Nimble
 @testable import BeamCore
 
 class BeamObjectsRequests: QuickSpec {
-    // swiftlint:disable:next function_body_length
     override func spec() {
         let beamHelper = BeamTestsHelper()
         let beamObjectHelper = BeamObjectTestsHelper()
@@ -379,7 +378,6 @@ class BeamObjectsRequests: QuickSpec {
 
 
 class BeamObjectsRequestsTestNetworkError: QuickSpec {
-    // swiftlint:disable:next function_body_length
     override func spec() {
         let beamHelper = BeamTestsHelper()
         var sut: BeamObjectRequest!

@@ -10,7 +10,6 @@ import BeamCore
 import AutoUpdate
 import ZIPFoundation
 
-// swiftlint:disable file_length type_body_length
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, BeamDocumentSource {
     public private(set) static var shared: BeamData!
     public static var sourceId: String { "\(Self.self)" }
@@ -37,7 +36,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     @Published private(set) var pinnedTabs: [BrowserTab] = []
     @Published var currentDraggingSession: ExternalDraggingSession?
 
-    //swiftlint:disable:next large_tuple
     @Published var renamedNote: (noteId: UUID, previousName: String, newName: String) = (UUID.null, "", "")
     var noteAutoSaveService: NoteAutoSaveService
 
@@ -141,7 +139,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     static var idToTitle: [UUID: String] = [:]
     static var titleToId: [String: UUID] = [:]
 
-    //swiftlint:disable:next function_body_length
     override init() {
         LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
         NoteScorer.shared = NoteScorer(dailyStorage: KeychainDailyNoteScoreStore.shared)
@@ -199,7 +196,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         }
     }
 
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func setupSubscribers() {
         $lastChangedElement.sink { [weak self] element in
             guard let self = self, let element = element else { return }

@@ -31,7 +31,6 @@ class AllNotesPageContextualMenu {
         self.onFinishBlock = onFinish
     }
 
-    // swiftlint:disable function_body_length
     func presentMenuForNotes(at: CGPoint, allowImports: Bool = false) {
         guard let window = AppDelegate.main.window else { return }
         let menu = NSMenu()

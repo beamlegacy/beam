@@ -9,7 +9,6 @@ import Foundation
 
 class ShapeLayer: Layer {
     var shapeLayer: CAShapeLayer {
-        //swiftlint:disable:next force_cast
         layer as! CAShapeLayer
     }
 

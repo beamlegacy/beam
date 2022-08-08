@@ -4,7 +4,6 @@
 //
 //  Created by Sebastien Metrot on 18/09/2020.
 //
-// swiftlint:disable file_length
 
 import Cocoa
 import SwiftUI
@@ -26,9 +25,7 @@ public class BeamApplication: SentryCrashExceptionApplication {
 }
 
 @NSApplicationMain
-// swiftlint:disable type_body_length
 class AppDelegate: NSObject, NSApplicationDelegate {
-    // swiftlint:disable:next force_cast
     class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
 
     var skipTerminateMethods = false
@@ -79,7 +76,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSClassFromString("XCTest") != nil
     }
 
-    // swiftlint:disable:next function_body_length
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         splashScreenWindow?.close()
         splashScreenWindow = nil
@@ -243,7 +239,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
 
-            // swiftlint:disable:next date_init
             let localTimer = Date()
             guard let currentAccount = data.currentAccount else {
                 completionHandler?(.success(false))
@@ -554,6 +549,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var deleteAllLocalDataAtStartup = false
     func applicationWillFinishLaunching(_ notification: Notification) {
         // We need to migrate the legacy database BEFORE initializing CoreData so that we can access the sqlite store without making a super slow backup
+        #if DEBUG
+        NSView.classInit
+        #endif
+
         if Persistence.Device.id == nil {
             let uuid: UUID
             if let id = Self.machineSerialNumber() {

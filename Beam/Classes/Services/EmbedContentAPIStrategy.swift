@@ -34,7 +34,6 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
         var keepAspectRatio: Bool?
         var responsive: String?
 
-        // swiftlint:disable:next nesting
         enum CodingKeys: CodingKey {
             case url
             case title
@@ -148,7 +147,6 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
             var error: EmbedContentError?
             var embedContent: EmbedContent?
             switch result {
-                // swiftlint:disable:next empty_enum_arguments
             case .failure(_):
                 error = .notEmbeddable
             case .success(let results):

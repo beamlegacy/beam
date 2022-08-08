@@ -105,7 +105,6 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
     var insertedViews = Set<BeamTextEdit>()
     var removedViews = Set<BeamTextEdit>()
 
-    //swiftlint:disable:next function_body_length
     public override func layout() {
         guard enclosingScrollView != nil else { return }
         inLayout = true
@@ -166,18 +165,15 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
         databaseId = currentDatabaseId
     }
 
-    //swiftlint:disable:next cyclomatic_complexity function_body_length
     private func setNotes(_ notes: [BeamNote], focussingOn: BeamNote?, force: Bool) {
         inspectDatabaseChange()
 
         #if DEBUG
-        // swiftlint:disable print
         //print("JournalStackView.setNotes \(notes)")
         defer {
             let mismatching = self.notes.compactMap({ (views[$0]?.note) === $0 ? nil : $0 })
             print("Mismatching note with note views: \(mismatching)")
         }
-        // swiftlint:enable print
         #endif
 
         let sortedNotes = notes.sorted(by: { lhs, rhs in

@@ -4,14 +4,12 @@
 //
 //  Created by Sebastien Metrot on 25/05/2022.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import BeamCore
 import GRDB
 import UUIDKit
 
-// swiftlint:disable:next type_body_length
 class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
     weak public private(set) var holder: BeamManagerOwner?
     public var database: BeamDatabase? {
@@ -33,7 +31,6 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         try super.init(store: store)
     }
 
-    // swiftlint:disable:previous type_body_length
     public override func prepareMigration(migrator: inout DatabaseMigrator) throws {
         // Initialize DB schema
         migrator.registerMigration("createBase") { db in
@@ -757,7 +754,6 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         if let links = try? self.read({ db in
             return try BidirectionalLink.fetchAll(db)
         }) {
-            //swiftlint:disable:next print
             print("links: \(links)")
         }
     }

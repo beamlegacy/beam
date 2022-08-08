@@ -83,7 +83,6 @@ struct Configuration {
         }
     }
 
-    //swiftlint:disable:next identifier_name
     static private(set) var beamObjectDataUploadOnSeparateCallDefault = true
 
     static private var beamObjectDataUploadOnSeparateCallKey = "beamObjectDataUploadOnSeparateCall"

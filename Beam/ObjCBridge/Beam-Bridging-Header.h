@@ -17,11 +17,11 @@
 
 @interface WKWebView ()
 @property (nonatomic, readonly) BOOL _isInFullscreen;
-@property (nonatomic, readonly) NSString *_MIMEType;
+@property (nonatomic, readonly, nullable) NSString *_MIMEType;
 
 - (void)_setAddsVisitedLinks:(BOOL)addsVisitedLinks;
 
-- (void)_getMainResourceDataWithCompletionHandler:(void (^)(NSData *, NSError *))completionHandler;
+- (void)_getMainResourceDataWithCompletionHandler:(void (^_Nonnull)(NSData * _Nonnull, NSError * _Nonnull))completionHandler;
 
 -(CGFloat)_topContentInset;
 -(void)_setTopContentInset:(CGFloat)inset;
@@ -45,8 +45,8 @@ typedef NS_OPTIONS(NSUInteger, _WKCaptureDevices) {
 };
 
 @protocol WKUIDelegatePrivate <WKUIDelegate>
-- (void)_webView:(WKWebView * _Nonnull)webView getWindowFrameWithCompletionHandler:(void (^)(CGRect))completionHandler;
-- (void)_webView:(WKWebView *)webView requestUserMediaAuthorizationForDevices:(_WKCaptureDevices)devices url:(NSURL *)url mainFrameURL:(NSURL *)mainFrameURL decisionHandler:(void (^)(BOOL authorized))decisionHandler;
+- (void)_webView:(WKWebView * _Nonnull)webView getWindowFrameWithCompletionHandler:(void (^_Nonnull)(CGRect))completionHandler;
+- (void)_webView:(WKWebView * _Nonnull)webView requestUserMediaAuthorizationForDevices:(_WKCaptureDevices)devices url:(NSURL * _Nonnull)url mainFrameURL:(NSURL * _Nonnull)mainFrameURL decisionHandler:(void (^_Nonnull)(BOOL authorized))decisionHandler;
 @end
 
 #endif
@@ -56,7 +56,7 @@ NS_INLINE NSException * _Nullable tryBlock(void(^_Nonnull tryBlock)(void)) {
     @try {
         tryBlock();
     }
-    @catch (NSException *exception) {
+    @catch (NSException *exception _Nonnull) {
         return exception;
     }
     return nil;

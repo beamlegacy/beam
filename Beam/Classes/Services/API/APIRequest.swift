@@ -3,11 +3,8 @@ import os.log
 import BeamCore
 import Vinyl
 
-// swiftlint:disable file_length
-
 class BeamURLSession {
     static var configuration: URLSessionConfiguration = {
-         // swiftlint:disable:next force_cast
          var conf = URLSessionConfiguration.default.copy() as! URLSessionConfiguration
          if Configuration.env == .test {
              return conf
@@ -42,7 +39,6 @@ class BeamURLSessionDelegate: NSObject, URLSessionDelegate {
     }
 }
 
-// swiftlint:disable:next type_body_length
 class APIRequest: NSObject {
     var route: String { "\(Configuration.apiHostname)/graphql" }
     var authenticatedAPICall = true
@@ -58,7 +54,6 @@ class APIRequest: NSObject {
         cancelRequest
     }
 
-    // swiftlint:disable:next function_body_length
     func makeUrlRequest<E: GraphqlParametersProtocol>(_ bodyParamsRequest: E, authenticatedCall: Bool?) throws -> URLRequest {
         guard let url = URL(string: route) else { fatalError("Can't get URL: \(route)") }
         var request = URLRequest(url: url)
@@ -231,7 +226,6 @@ class APIRequest: NSObject {
         }
     }
 
-    // swiftlint:disable function_body_length
     func parseDataTask<T: Decodable & Errorable>(data: Data?,
                                                  response: URLResponse?,
                                                  error: Error?,
@@ -291,12 +285,10 @@ class APIRequest: NSObject {
         }
 
         do {
-            // swiftlint:disable:next date_init
             let localTimer = Date()
 
             let value: T = try self.manageResponse(data, response)
 
-            // swiftlint:disable:next date_init
             let diffTime = Date().timeIntervalSince(localTimer)
             if diffTime > 0.1 {
                 Logger.shared.logWarning("Parsed network response (\(data?.count.byteSize ?? "-"))",
@@ -326,7 +318,6 @@ class APIRequest: NSObject {
         return error
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func handleError<T: Decodable>(result: QueryResult<T>) -> Error {
         let error: Error
         if let errors = result.errors, !errors.isEmpty {
@@ -344,7 +335,6 @@ class APIRequest: NSObject {
         return error
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func handleError<T: Decodable>(result: APIResult<T>) -> Error {
         let error: Error
         if let errors = result.errors, !errors.isEmpty {
@@ -449,4 +439,3 @@ class APIRequest: NSObject {
         cancelRequest = true
     }
 }
-// swiftlint:enable file_length

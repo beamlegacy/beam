@@ -13,7 +13,7 @@ struct OptionSelector<T>: View where T: CaseIterable, T: CustomStringConvertible
 
     var body: some View {
         HStack {
-            ForEach(options.indices) { idx in
+            ForEach(options.indices, id: \.self) { idx in
                 if idx != 0 {
                     Separator(horizontal: false)
                 }

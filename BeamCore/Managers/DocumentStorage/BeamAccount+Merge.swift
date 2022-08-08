@@ -9,7 +9,6 @@ import Foundation
 import BeamCore
 
 extension BeamAccount {
-    //swiftlint:disable:next cyclomatic_complexity function_body_length
     func mergeAllDatabases(initialDBs: Set<BeamDatabase>) {
         // We have just synced all the databases
         // We now need to check if a new database was added from the sync and move all the notes to it

@@ -256,7 +256,6 @@ class CoreDataManager {
 }
 
 // MARK: tests
-#if DEBUG
 extension CoreDataManager {
     func setupWithoutMigration() {
         let semaphore = DispatchSemaphore(value: 0)
@@ -273,4 +272,3 @@ extension CoreDataManager {
         LoggerRecorder.shared.attach()
     }
 }
-#endif

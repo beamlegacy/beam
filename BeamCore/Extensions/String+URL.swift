@@ -62,7 +62,6 @@ public extension String {
     }
 
     private static var TLDextractor: TLDExtract = {
-        //swiftlint:disable:next force_try
         try! TLDExtract(useFrozenData: true)
     }()
 

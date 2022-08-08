@@ -19,7 +19,6 @@ enum PerformanceDebugCategory: String {
 }
 
 class PerformanceDebug {
-    // swiftlint:disable:next date_init
     var localTimer = Date()
     let message: String?
     let maximumTime = 0.9
@@ -75,14 +74,12 @@ class PerformanceDebug {
         if newMessage != nil && message == nil { // This is a simple log
             PerformanceDebug.debugLog(category, newMessage ?? "", false, disabled)
         } else { // This is a performance measure
-            // swiftlint:disable:next date_init
             let diffTime = Date().timeIntervalSince(localTimer)
             let diff = String(format: "%.2f", diffTime)
             let longDiffTime = diffTime >= maximumTime
             let finalMessage = "\(diff)sec \(longDiffTime ? "🛑 " : "")\(message ?? "") \(newMessage ?? "")"
             PerformanceDebug.debugLog(category, finalMessage, longDiffTime, disabled)
         }
-        // swiftlint:disable:next date_init
         localTimer = Date()
     }
 

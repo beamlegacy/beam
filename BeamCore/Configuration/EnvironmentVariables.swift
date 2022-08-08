@@ -11,7 +11,6 @@
  * * * * * * * * *
  */
 
-// swiftlint:disable nesting
 public struct EnvironmentVariables {
     public struct Oauth {
         public struct Google {

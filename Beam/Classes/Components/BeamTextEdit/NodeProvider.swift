@@ -56,7 +56,6 @@ class NodeProviderImpl: NodeProvider {
         return mapping[element]?.ref
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func proxyNodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
         if let h = (holder as? ProxyNode), h.displayedElement.id == element.id {
             h.parent = withParent
@@ -98,7 +97,6 @@ class NodeProviderImpl: NodeProvider {
         return node
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func nodeFor(_ element: BeamElement, withParent: Widget) -> ElementNode {
         guard !proxy,
               element as? ProxyElement == nil else {

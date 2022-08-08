@@ -2,7 +2,6 @@
 //  BeamTextFieldView.swift
 //  Beam
 //
-// swiftlint:disable file_length
 
 import Cocoa
 

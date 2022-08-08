@@ -4,7 +4,6 @@ public class BeamDate {
     static var currentDate: Date?
 
     public static var now: Date {
-        // swiftlint:disable:next date_init
         currentDate ?? Date()
     }
 

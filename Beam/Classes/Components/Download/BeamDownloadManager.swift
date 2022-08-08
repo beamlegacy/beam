@@ -1,10 +1,7 @@
-//swiftlint:disable file_length
 import Foundation
 import BeamCore
 import Combine
 import WebKit
-
-// swiftlint:disable file_length
 
 /// Handles the list of file downloads triggered by webview navigation actions, and one-off image downloads from
 /// Point-and-Shoot.
@@ -17,7 +14,6 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
     @Published private(set) var downloadList = DownloadList<DownloadItem>()
 
     // MARK: - P&S downloads
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> Void) {
         let dispatchGroup = DispatchGroup()
         var results = [(index: Int, result: DownloadManagerResult)]()
