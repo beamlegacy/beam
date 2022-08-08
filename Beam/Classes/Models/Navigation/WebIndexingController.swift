@@ -237,7 +237,7 @@ private final class DelayedReadWebViewOperation: Operation {
         super.init()
     }
 
-    private var dispatchedMainWorkItem: DispatchWorkItem?
+    private weak var dispatchedMainWorkItem: DispatchWorkItem?
     private var hasFinishedAlready = false
     override var isFinished: Bool {
         hasFinishedAlready
