@@ -29,7 +29,6 @@ extension BeamTextEdit {
         cmdManager.endGroup()
     }
 
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
     func preDetectInput(_ input: String) -> Bool {
         guard let rootNode = rootNode else { return true }
         guard inputDetectorEnabled else { return true }

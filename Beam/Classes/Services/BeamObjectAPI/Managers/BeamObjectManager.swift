@@ -95,7 +95,6 @@ class BeamObjectManager {
         translators[object.beamObjectType] = { manager, objects in
             let previousChecksums = BeamObjectChecksum.previousChecksums(beamObjects: objects)
 
-            // swiftlint:disable:next date_init
             var localTimer = Date()
 
             // Any received object with the same content than the one we already sent is skipped
@@ -116,7 +115,6 @@ class BeamObjectManager {
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
 
-            // swiftlint:disable:next date_init
             localTimer = Date()
 
             var totalSize: Int64 = 0
@@ -148,7 +146,6 @@ class BeamObjectManager {
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
 
-            // swiftlint:disable:next date_init
             localTimer = Date()
 
             /*
@@ -250,13 +247,11 @@ class BeamObjectManager {
         return changedObjects
     }
 
-    // swiftlint:disable function_body_length
     internal func parseFilteredObjects(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws {
         var objectsInErrors: Set<String> = Set()
 
         var errors: [Error] = []
 
-        // swiftlint:disable:next date_init
         let localTimer = Date()
         Logger.shared.logDebug("Call object managers: start",
                                category: .beamObject)

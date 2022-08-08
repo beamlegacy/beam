@@ -88,7 +88,6 @@ class DailyUrlScorerTest: XCTestCase {
         XCTAssertEqual(newGroup3, urlIds[4])
     }
 
-    // swiftlint:disable:next function_body_length
     func testAggregrateScores() throws {
         let urlIds = (0..<3).map { _ in UUID() }
         let groups = [
@@ -171,7 +170,6 @@ class DailyUrlScorerTest: XCTestCase {
         XCTAssertEqual(mostRecentTitles[URL(string: "http://def.fr")!], "title 3")
     }
 
-    // swiftlint:disable:next function_body_length
     func testGetHighScores() {
         let urlsAndTitles = [
             ("https://abc.com/page1#anchor", "title 1"),

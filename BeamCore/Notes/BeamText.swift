@@ -4,11 +4,9 @@
 //
 //  Created by Sebastien Metrot on 18/12/2020.
 //
-// swiftlint:disable file_length
 
 import Foundation
 
-//swiftlint:disable:next type_body_length
 public struct BeamText: Codable {
     public var text: String {
         ranges.reduce(String()) { (string, range) -> String in
@@ -28,7 +26,6 @@ public struct BeamText: Codable {
         /// meant for UI temporary styling; will not be persisted
         case decorated(AttributeDecoratedValue)
 
-        // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case type
             case payload
@@ -55,13 +52,11 @@ public struct BeamText: Codable {
             default: return ""
             }
         }
-        // swiftlint:disable:next nesting
         public enum AttributeError: Error {
             case unknownAttribute
             case noNoteWithName(String)
         }
 
-        // swiftlint:disable:next cyclomatic_complexity
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -219,7 +214,6 @@ public struct BeamText: Codable {
         public var end: Int { position + string.count }
         public var range: Swift.Range<Int> { position ..< end }
 
-        // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case string
             case attributes
@@ -325,7 +319,6 @@ public struct BeamText: Codable {
         self.ranges = newText.ranges
     }
 
-    // swiftlint:disable:next nesting
     enum CodingKeys: String, CodingKey {
         case ranges
     }

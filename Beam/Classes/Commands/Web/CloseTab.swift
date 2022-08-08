@@ -59,7 +59,6 @@ class CloseTab: WebCommand {
         try? container.encode(group, forKey: .group)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     override func run(context: BeamState?) -> Bool {
         guard let context = context, let tab = self.tab else { return false }
 

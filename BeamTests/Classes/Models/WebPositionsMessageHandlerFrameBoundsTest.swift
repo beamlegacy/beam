@@ -1,4 +1,3 @@
-// swiftlint:disable file_length
 //
 //  WebPositionsMessageHandlerFrameBoundsTest.swift
 //  BeamTests
@@ -25,7 +24,6 @@ private class MockFrameInfo: WKFrameInfo {
     }
 }
 
-// swiftlint:disable type_body_length type_name file_length
 class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
     let windowHref = TestWebPage.urlStr
     var browserTabConfiguration: BeamWebViewConfigurationBase!
@@ -118,7 +116,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         XCTAssertEqual(positions.framesInfo[windowHref]?.height, expectedFrameInfo.height)
     }
 
-    // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_iFrame() throws {
         guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
@@ -216,7 +213,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         helperAssertFrameInfoEqual(positions.framesInfo["https://www.iframe.com/about-us"]!, expectediFrameInfo)
     }
 
-    // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_iFrame_reverse_order() throws {
         guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
@@ -319,7 +315,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         helperAssertFrameInfoEqual(positions.framesInfo["https://www.iframe.com/about-us"]!, expectediFrameInfo)
     }
 
-    // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_onLoad_frameBounds_sequence() throws {
         guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
@@ -467,7 +462,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         helperAssertFrameInfoEqual(positions.framesInfo["https://www.iframe2.com"]!, expectediFrame2Info)
     }
 
-    // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes() throws {
         guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
@@ -613,7 +607,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         helperAssertFrameInfoEqual(positions.framesInfo["https://www.iframe2.com"]!, expectediFrame2Info)
     }
 
-    // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes_reverse_order() throws {
         guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")
@@ -812,7 +805,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         helperAssertFrameInfoEqual(positions.framesInfo[windowHref]!, expectedWindowFrameInfo)
     }
 
-    // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes_Scroll() throws {
         guard let page = self.testPage else {
                   XCTFail("webPositions are required for test")

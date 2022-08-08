@@ -151,11 +151,6 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(dailyScore.textAmount, 0)
         XCTAssertEqual(dailyScore.area, 0)
 
-        guard page.webPositions != nil else {
-            XCTFail("expected test page")
-            return
-        }
-
         //first scroll
         let scroll1 = WebFrames.FrameInfo(
             href: "https://example.com",

@@ -19,7 +19,6 @@ class BeamTextVisitor {
     init() {
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func visitChildren(_ node: Parser.Node) -> BeamText {
         var attributed = BeamText()
 
@@ -43,7 +42,6 @@ class BeamTextVisitor {
         contextStack = contextStack.dropLast()
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func visit(_ node: Parser.Node) -> BeamText {
         switch node.type {
         case let .text(str):

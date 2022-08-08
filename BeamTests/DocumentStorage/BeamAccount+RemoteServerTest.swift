@@ -18,7 +18,6 @@ import Combine
 class BeamAccountRemoteServerTest: QuickSpec, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
-    // swiftlint:disable:next function_body_length
     override func spec() {
         let basePath = "test-\(UUID())"
         guard let sut = try? BeamAccount(id: UUID(), email: "test@beamapp.co", name: "test", path: basePath) else { fail("Couldn't create test beam account")

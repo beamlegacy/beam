@@ -85,9 +85,7 @@ extension StyledText: View {
             .enumerateAttributes(in: NSRange(location: 0, length: attributedString.length),
                                  options: []) { (attributes, range, _) in
                 let string = attributedString.attributedSubstring(from: range).string
-                // swiftlint:disable:next force_cast
                 let modifiers = attributes.values.map { $0 as! TextStyle }
-                // swiftlint:disable:next shorthand_operator
                 text = text + modifiers.reduce(Text(verbatim: string)) { segment, style in
                     style.apply(segment)
                 }

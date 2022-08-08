@@ -9,7 +9,6 @@ import Foundation
 import BeamCore
 import UniformTypeIdentifiers
 
-// swiftlint:disable file_length
 extension BeamTextEdit {
     // Disable detection during copy / paste
     private func disableInputDetector() {
@@ -102,7 +101,6 @@ extension BeamTextEdit {
         setPasteboard()
     }
 
-    // swiftlint:disable:next function_body_length
     private func setPasteboard() {
         guard let rootNode = rootNode else { return }
 
@@ -194,7 +192,6 @@ extension BeamTextEdit {
     }
 
     // MARK: - Paste
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     @IBAction func paste(_ sender: Any) {
         disableAnimationAtNextLayout()
         if NSPasteboard.general.canReadObject(forClasses: supportedPasteObjects, options: nil) {
@@ -245,7 +242,6 @@ extension BeamTextEdit {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private func paste(elementHolder: BeamNoteDataHolder) {
         guard let rootNode = rootNode else { return }
         do {

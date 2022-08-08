@@ -83,7 +83,6 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         wait(for: [expectation], timeout: 10.0)
     }
 
-    // swiftlint:disable:next function_body_length
     func testTwoShootsToTwoDifferentCards() throws {
         guard let page = self.testPage else {
             XCTFail("test page not found")

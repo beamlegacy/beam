@@ -8,8 +8,6 @@
 import Foundation
 import BeamCore
 
-// swiftlint:disable file_length
-
 public extension BeamElement {
     var treeDepth: Int {
         return (children.map({ child -> Int in
@@ -84,7 +82,6 @@ extension TextRoot {
         _ = decreaseNodeIndentation(node)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     @discardableResult func eraseNodeSelection(createEmptyNodeInPlace: Bool, createNodeInEmptyParent: Bool = true) -> BeamElement? {
         guard let selection = root?.state.nodeSelection else { return nil }
         let sortedNodes = selection.sortedNodes
@@ -158,7 +155,6 @@ extension TextRoot {
         focusedCmdManager.focusElement(node, cursorPosition: selectedTextRange.lowerBound + bText.count)
     }
 
-    // swiftlint:disable:next function_body_length
     public func deleteForward() {
         guard state.nodeSelection == nil else {
             editor?.hideInlineFormatter()
@@ -247,7 +243,6 @@ extension TextRoot {
         }
     }
 
-    //swiftlint:disable:next cyclomatic_complexity function_body_length
     public func deleteBackward() {
         guard root?.state.nodeSelection == nil else {
             editor?.hideInlineFormatter()
@@ -617,7 +612,6 @@ extension TextRoot {
         return (r1.offsetBy(dx: node.offsetInDocument.x + 10, dy: node.offsetInDocument.y), range)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     public func updateTextAttributesAtCursorPosition() {
         guard let node = focusedWidget as? TextNode else { return }
         let ranges = node.text.rangesAt(position: cursorPosition)

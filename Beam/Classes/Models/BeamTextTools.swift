@@ -10,7 +10,6 @@ import BeamCore
 
 // High level manipulation:
 extension BeamText {
-    //swiftlint:disable:next function_body_length
     @discardableResult mutating func makeInternalLink(_ source: BeamDocumentSource, _ range: Swift.Range<Int>) -> UUID? {
         let text = self.extract(range: range)
         let t = text.text

@@ -11,8 +11,6 @@ struct FullPageCollectAnimator {
 
     let webView: BeamWebView
 
-    // swiftlint:disable function_body_length
-    // swiftlint:disable large_tuple
     func buildFullPageCollectAnimation() -> (hoverLayer: CALayer, hoverGroup: CAAnimationGroup, webViewGroup: CAAnimationGroup)? {
 
         guard let layer = webView.layer else { return nil }

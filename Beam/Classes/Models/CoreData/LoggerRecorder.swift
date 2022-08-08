@@ -64,7 +64,6 @@ class LoggerRecorder {
 
         do {
             try context.performAndWait {
-                // swiftlint:disable:next date_init
                 let localTimer = Date()
 
                 let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "LogEntry")

@@ -27,7 +27,7 @@ class PasswordImporterTest: XCTestCase {
             http://test1.com,user1,pass1
             "http://test2.com","user2","pass2"
             """
-        try PasswordImporter.importPasswords(fromCSV: csv)
+        _ = try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
         let password = try PasswordManager.shared.password(hostname: "test1.com", username: "user1")
         XCTAssertEqual(password, "pass1")
@@ -49,7 +49,7 @@ class PasswordImporterTest: XCTestCase {
             1,pass1,11,http://test1.com,user1,111
             "2","pass2","22","http://test2.com","user2","222"
             """
-        try PasswordImporter.importPasswords(fromCSV: csv)
+        _ = try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
         let password = try PasswordManager.shared.password(hostname: "test1.com", username: "user1")
         XCTAssertEqual(password, "pass1")
@@ -71,7 +71,7 @@ class PasswordImporterTest: XCTestCase {
             "http://test1.com","""user1""","pass1"
             "http://test2.com","user2","pass""2"
             """#
-        try PasswordImporter.importPasswords(fromCSV: csv)
+        _ = try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
         let password = try PasswordManager.shared.password(hostname: "test1.com", username: "\"user1\"")
         XCTAssertEqual(password, "pass1")
@@ -109,7 +109,7 @@ class PasswordImporterTest: XCTestCase {
             http://www.test5.com/path,user5,pass5
             https://www.test6.com?key=value,user6,pass6
             """
-        try PasswordImporter.importPasswords(fromCSV: csv)
+        _ = try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
         let password = try PasswordManager.shared.password(hostname: "test1.com", username: "user1")
         XCTAssertEqual(password, "pass1")
@@ -152,7 +152,7 @@ class PasswordImporterTest: XCTestCase {
             test6.com,user6,pass2
             test6.com,user6,pass3
             """
-        try PasswordImporter.importPasswords(fromCSV: csv)
+        _ = try PasswordImporter.importPasswords(fromCSV: csv)
         let expectation1 = expectation(description: "Expect password request returns.")
         let entries = PasswordManager.shared.entries(for: "test6.com", options: .exact)
         XCTAssertEqual(entries.count, 1)

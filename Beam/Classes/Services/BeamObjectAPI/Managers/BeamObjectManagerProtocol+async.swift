@@ -1,6 +1,5 @@
 import Foundation
 import BeamCore
-// swiftlint:disable file_length
 
 extension BeamObjectManagerDelegate {
     func saveAllOnBeamObjectApi(force: Bool = false, progress: ((Float) async -> Void)? = nil) async throws -> (Int, Date?) {
@@ -10,7 +9,6 @@ extension BeamObjectManagerDelegate {
 
         self.willSaveAllOnBeamObjectApi()
 
-        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         var mostRecentUpdatedAt = Date(timeIntervalSince1970: 0)
@@ -70,7 +68,6 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    // swiftlint:disable:next function_body_length
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
                               force: Bool = false) async throws -> [BeamObjectType] {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -172,7 +169,6 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func refreshFromBeamObjectAPI(_ object: BeamObjectType,
                                   _ forced: Bool = false) async throws -> BeamObjectType? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -299,7 +295,6 @@ extension BeamObjectManagerDelegate {
         return allObjects
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     internal func manageMultipleErrors(_ objects: [BeamObjectType],
                                        _ errors: [Error]) async throws -> [BeamObjectType] {
 
