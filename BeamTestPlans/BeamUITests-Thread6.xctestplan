@@ -67,6 +67,8 @@
         "AllCardsDeleteTests",
         "AllNotesDeleteTests",
         "AllNotesPublishProfileTests",
+        "AllNotesPublishProfileTests\/testCreatePublishedAndUnpublishNote()",
+        "AllNotesPublishProfileTests\/testCreatePublishedOnProfileNoteAndRemoveFromProfileNote()",
         "AllNotesSortingTests",
         "AllNotesViewTests",
         "AllNotesViewTests\/testAllNotesLinksCounter()",
