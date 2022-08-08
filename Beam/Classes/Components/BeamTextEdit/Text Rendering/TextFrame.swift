@@ -89,7 +89,6 @@ public class TextFrame {
         var sourceOffset = 0
         var caretOffset = 0
 
-        // swiftlint:disable:next force_cast
         let ctLines = (CTFrameGetLines(ctFrame) as! [CTLine])
         var lineOrigins = [CGPoint](repeating: CGPoint(), count: ctLines.count)
         CTFrameGetLineOrigins(ctFrame, CFRangeMake(0, 0), &lineOrigins)

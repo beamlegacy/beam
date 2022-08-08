@@ -8,8 +8,6 @@
 import Foundation
 import BeamCore
 
-// swiftlint:disable nesting
-
 class NoteBackForwardList: Codable {
     enum Element: Codable, Equatable {
         case note(BeamNote)

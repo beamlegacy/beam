@@ -4,7 +4,6 @@
 //
 //  Created by Remi Santos on 01/12/2021.
 //
-// swiftlint:disable file_length
 
 import BeamCore
 import SwiftUI
@@ -293,7 +292,6 @@ struct TabView: View {
         .lineLimit(1)
     }
 
-    // swiftlint:disable function_body_length
     ///  Layout of leading views, title and trailing views together.
     ///
     ///  To maintain a perfectly centered title

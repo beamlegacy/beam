@@ -22,7 +22,6 @@ class RecentsManagerTests: QuickSpec, BeamDocumentSource {
             return
         }
         for _ in 0..<7 {
-            // swiftlint:disable:next force_try
             let note = try! BeamNote(title: String.randomTitle())
             note.owner = database
             let doc = note.document!
@@ -33,7 +32,6 @@ class RecentsManagerTests: QuickSpec, BeamDocumentSource {
     override func spec() {
 
         var recentsManager: RecentsManager!
-        // swiftlint:disable:next force_try
         let newNote = try! BeamNote(title: "Note")
 
         beforeEach {
@@ -59,23 +57,18 @@ class RecentsManagerTests: QuickSpec, BeamDocumentSource {
             context("when too many recent") {
                 it("respects max count") {
                     expect(recentsManager.recentNotes.count) == 5
-                    // swiftlint:disable force_try
                     recentsManager.currentNoteChanged(try! BeamNote(title: "1"))
                     recentsManager.currentNoteChanged(try! BeamNote(title: "2"))
-                    // swiftlint:enable force_try
                     expect(recentsManager.recentNotes.count) == 5
                 }
 
                 it("removes oldest note") {
-                    // swiftlint:disable:next force_try
                     let firstAddedNote = try! BeamNote(title:"1")
                     recentsManager.currentNoteChanged(firstAddedNote)
-                    // swiftlint:disable force_try
                     recentsManager.currentNoteChanged(try! BeamNote(title: "2"))
                     recentsManager.currentNoteChanged(try! BeamNote(title: "3"))
                     recentsManager.currentNoteChanged(try! BeamNote(title: "4"))
                     recentsManager.currentNoteChanged(try! BeamNote(title: "5"))
-                    // swiftlint:enable force_try
 
                     expect(recentsManager.recentNotes.last?.id) == firstAddedNote.id
                     recentsManager.currentNoteChanged(newNote)
@@ -85,17 +78,14 @@ class RecentsManagerTests: QuickSpec, BeamDocumentSource {
                 }
 
                 it("removes the less used note") {
-                    // swiftlint:disable:next force_try
                     let firstAddedNote = try! BeamNote(title: "1")
                     recentsManager.currentNoteChanged(firstAddedNote)
-                    // swiftlint:disable force_try
                     recentsManager.currentNoteChanged(try! BeamNote(title: "2"))
                     recentsManager.currentNoteChanged(try! BeamNote(title: "3"))
                     recentsManager.currentNoteChanged(firstAddedNote)
                     recentsManager.currentNoteChanged(try! BeamNote(title: "4"))
                     recentsManager.currentNoteChanged(try! BeamNote(title: "5"))
                     recentsManager.currentNoteChanged(firstAddedNote)
-                    // swiftlint:enable force_try
 
                     expect(recentsManager.recentNotes.last?.id) == firstAddedNote.id
                     recentsManager.currentNoteChanged(newNote)
@@ -110,7 +100,6 @@ class RecentsManagerTests: QuickSpec, BeamDocumentSource {
                     recentsManager.currentNoteChanged(newNote)
                     expect(recentsManager.recentNotes.first?.id) == newNote.id
 
-                    // swiftlint:disable:next force_try
                     recentsManager.currentNoteChanged(try! BeamNote(title: "Some"))
                     expect(recentsManager.recentNotes[1].id) == newNote.id
 

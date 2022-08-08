@@ -4,7 +4,6 @@
 //
 //  Created by Sebastien Metrot on 07/10/2020.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import AppKit
@@ -12,7 +11,6 @@ import NaturalLanguage
 import Combine
 import BeamCore
 
-// swiftlint:disable:next type_body_length
 public class TextNode: ElementNode {
     var textFrame: TextFrame? {
         didSet {
@@ -613,7 +611,6 @@ public class TextNode: ElementNode {
     }
 
     // MARK: - Mouse Events
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         guard let editor = self.editor else { return false }
         guard !mouseInfo.rightMouse else {
@@ -1508,7 +1505,6 @@ public class TextNode: ElementNode {
     }
     var sentences: [AccessibleTextElement] = []
 
-    //swiftlint:disable:next function_body_length
     public override func accessibilityChildren() -> [Any]? {
         sentences = []
         let text = self.text.text

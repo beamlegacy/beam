@@ -213,7 +213,6 @@ class BeamDocumentCollectionTest: XCTestCase, BeamDocumentSource {
         XCTAssertNoThrow(try documentCollection.count(filters: [.titleMatch("\\")]))
     }
 
-    // swiftlint:disable function_body_length
     func testFetchNotes() throws {
         var notes: [BeamDocument] = []
 

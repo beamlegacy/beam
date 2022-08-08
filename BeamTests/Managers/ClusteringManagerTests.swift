@@ -41,16 +41,12 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
             TabIndexingInfo(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: ["Not you"]),
             TabIndexingInfo(url: URL(string: "http://www.richardgasquet.net")!, document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: ["Richard Gasquet has a wonderful one-handed backhand"])
         ]
-        // swiftlint:disable force_try
         notes = [
-            // swiftlint:disable force_try
             try! BeamNote(title: "Tennis"),
             try! BeamNote(title: "Paris"),
             try! BeamNote(title: "Machine Learning"),
             try! BeamNote(title: "Short note")
-            // swiftlint:enable force_try
         ]
-        // swiftlint:enable force_try
         for note in notes {
             note.owner = BeamData.shared.currentDatabase
         }

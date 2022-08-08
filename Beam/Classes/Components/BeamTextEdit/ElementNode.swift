@@ -26,8 +26,6 @@ extension ProxyNode {
     }
 }
 
-// swiftlint:disable file_length
-// swiftlint:disable:next type_body_length
 public class ElementNode: Widget {
     var element: BeamElement { didSet {
         subscribeToElement(element)

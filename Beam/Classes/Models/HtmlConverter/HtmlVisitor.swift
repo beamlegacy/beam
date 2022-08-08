@@ -4,7 +4,6 @@
 //
 //  Created by Stef Kors on 06/09/2021.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import SwiftSoup
@@ -59,7 +58,6 @@ class HtmlVisitor {
         completion(elements)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func visit(_ node: SwiftSoup.Node) -> [BeamElement] {
         var text: [BeamElement] = []
         if let element = node as? SwiftSoup.Element {
@@ -95,7 +93,6 @@ class HtmlVisitor {
                 let children: [BeamElement] = visitChildren(element)
                 text.append(contentsOf: children)
 
-            // swiftlint:disable:next fallthrough no_fallthrough_only
             case "i": fallthrough
 
             case "em":
@@ -106,7 +103,6 @@ class HtmlVisitor {
                 })
                 text.append(contentsOf: children)
 
-            // swiftlint:disable:next fallthrough no_fallthrough_only
             case "b": fallthrough
 
             case "strong":

@@ -51,7 +51,6 @@ enum KeyCode: UInt16 {
     // Keycodes reference
     // https://eastmanreference.com/complete-list-of-applescript-key-codes
     // We return the key value we always expect not taking into the account the keyboard layout of the user
-    // swiftlint:disable:next cyclomatic_complexity
     static func getKeyValueFrom(for keyCode: UInt16) -> Int? {
         switch keyCode {
         case KeyCode.zero.rawValue:

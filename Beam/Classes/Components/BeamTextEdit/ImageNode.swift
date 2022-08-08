@@ -11,7 +11,6 @@ import Macaw
 import Lottie
 import Combine
 
-// swiftlint:disable file_length
 class ImageNode: ResizableNode {
 
     private let focusMargin = CGFloat(3)

@@ -5,7 +5,6 @@
 //  Created by Sebastien Metrot on 27/09/2020.
 //  Copyright © 2020 Beam. All rights reserved.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import AppKit
@@ -57,7 +56,6 @@ public extension CALayer {
     }
 }
 
-// swiftlint:disable:next type_body_length
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var data: BeamData?
     public private(set) weak var state: BeamState?
@@ -826,7 +824,6 @@ public extension CALayer {
         self.scroll(NSPoint(x: 0, y: CGFloat(height) - cardHeaderPosY))
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func pressEnter(_ option: Bool, _ command: Bool, _ shift: Bool, _ ctrl: Bool) {
         guard let rootNode = rootNode,
               let node = focusedWidget as? ElementNode
@@ -840,7 +837,6 @@ public extension CALayer {
         } else if inlineFormatter?.formatterHandlesEnter() != true {
             hideInlineFormatter()
 
-            // swiftlint:disable:next empty_enum_arguments
             if case .check(_) = node.elementKind, node.elementText.isEmpty {
                 guard let node = node as? TextNode else { return }
                 node.cmdManager.formatText(in: node, for: .bullet, with: nil, for: nil, isActive: true)
@@ -887,7 +883,6 @@ public extension CALayer {
             }
 
             let newElement = BeamElement(str)
-            // swiftlint:disable:next empty_enum_arguments
             if case .check(_) = node.elementKind {
                 newElement.kind = .check(false)
             }
@@ -928,7 +923,6 @@ public extension CALayer {
     var control: Bool { NSEvent.modifierFlags.contains(.control) }
     var command: Bool { NSEvent.modifierFlags.contains(.command) }
 
-    //swiftlint:disable:next cyclomatic_complexity function_body_length
     override open func keyDown(with event: NSEvent) {
         guard let rootNode = rootNode else { return }
         if self.hasFocus {
@@ -988,7 +982,6 @@ public extension CALayer {
                 case "d":
                     if control, shift {
                         let str = [dumpWidgetTree(), dumpLayers()].flatMap { $0 }.joined(separator: "\n")
-                        //swiftlint:disable:next print
                         print(str)
                         let pasteboard = NSPasteboard.general
                         pasteboard.clearContents()
@@ -1007,7 +1000,6 @@ public extension CALayer {
                         let encoder = JSONEncoder()
                         if let data = try? encoder.encode(note) {
                             if let str = String(data: data, encoding: .utf8) {
-                                //swiftlint:disable:next print
                                 print("JSON Dump of the current note:\n\n\(str)\n")
                                 let pasteboard = NSPasteboard.general
                                 pasteboard.clearContents()
@@ -1075,7 +1067,6 @@ public extension CALayer {
     public func insertText(_ string: Any, replacementRange: NSRange) {
         //        Logger.shared.logDebug("insertText \(string) at \(replacementRange)")
         let range = replacementRange.lowerBound == NSNotFound ? nil :  replacementRange.lowerBound..<replacementRange.upperBound
-        // swiftlint:disable:next force_cast
         if let str = string as? String {
             insertText(string: str, replacementRange: range)
         } else if let str = string as? NSAttributedString {
@@ -1087,7 +1078,6 @@ public extension CALayer {
      */
     public func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
         //        Logger.shared.logDebug("setMarkedText \(string) at \(replacementRange) with selection \(selectedRange)")
-        // swiftlint:disable:next force_cast
 
         let selection = selectedRange.location == NSNotFound ? nil : selectedRange.lowerBound..<selectedRange.upperBound
         let replacement = replacementRange.location == NSNotFound ? nil : replacementRange.lowerBound..<replacementRange.upperBound
@@ -1343,7 +1333,6 @@ public extension CALayer {
         cursorUpdate(with: event)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     public func mouseDraggedUpdate(with event: NSEvent) {
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard let startPos = mouseDownPos else { return }
@@ -1389,14 +1378,12 @@ public extension CALayer {
         let preciseViews = rootNode.getWidgetsAt(point, point, ignoreX: false)
 
 #if DEBUG
-        //swiftlint:disable print
         if event.modifierFlags.contains(.control) {
             print("Widgets:")
             for handler in preciseViews {
                 print("\t\(handler) - \(handler.description)")
             }
         }
-        //swiftlint:enable print
 #endif
 
         let cursors = preciseViews.compactMap { $0.cursor }
@@ -1497,7 +1484,6 @@ public extension CALayer {
     }
 
     func dumpLayers() -> [String] {
-        // swiftlint:disable print
         var strs = ["================", "Dumping editor \(layer?.sublayers?.count ?? 0) layers:"]
 
         if let layer = layer {

@@ -13,7 +13,6 @@ import Combine
 
 
 fileprivate var pnsNoteTitle = "Grocery list"
-// swiftlint:disable:next force_try
 fileprivate var pnsNote = try! BeamNote(title: pnsNoteTitle)
 
 class NoteScoreTriggerTests: XCTestCase {

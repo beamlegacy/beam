@@ -258,7 +258,6 @@ struct FileDetail: View {
 
 struct FileDetail_Previews: PreviewProvider {
     static var previews: some View {
-        // swiftlint:disable:next force_try
         let file = try! BeamFileDBManager.shared?.fetchRandom()
 
         return FileDetail(file: file!).background(Color.white)

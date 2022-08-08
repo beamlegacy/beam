@@ -16,19 +16,16 @@ class BeamNote_BeamDocumentTests: QuickSpec, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
     override func spec() {
-        // swiftlint:disable:next force_try
         var collection: BeamDocumentCollection { BeamData.shared.currentDocumentCollection! }
 
         let prefix = "My Note"
 
         beforeEach {
             BeamTestsHelper.logout()
-            // swiftlint:disable:next force_try
             try! BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
         }
 
         afterEach {
-            // swiftlint:disable:next force_try
             try! BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
         }
 

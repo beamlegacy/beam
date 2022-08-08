@@ -23,7 +23,6 @@ enum ShortcutKey: Hashable {
     case plus
     case minus
 
-    // swiftlint:disable:next cyclomatic_complexity
     func symbol(withBackground: Bool = true) -> some View {
         let image: Image
         switch self {

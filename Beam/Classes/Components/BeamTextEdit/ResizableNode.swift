@@ -88,7 +88,6 @@ class ResizableNode: ElementNode {
             invalidate()
         }
     }
-    //swiftlint:disable:next function_body_length
     override func updateLayout() {
         super.updateLayout()
 

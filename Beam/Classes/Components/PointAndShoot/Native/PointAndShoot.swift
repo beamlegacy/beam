@@ -21,7 +21,6 @@ public struct NoteInfo: Encodable {
     let title: String
 }
 
-// swiftlint:disable file_length
 class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
 
     fileprivate func playShootSound() {
@@ -377,7 +376,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, page.downloadManager, page.fileStorage)
             let helper = ShareHelper(sourceUrl, htmlNoteAdapter: htmlNoteAdapter) { [weak self] url in
                 let webView = self?.page?.createNewWindow(URLRequest(url: url), page.webView.configuration, windowFeatures: ShareWindowFeatures(for: service), setCurrent: true)
-                webView?.load(URLRequest(url: url))
+                _ = webView?.load(URLRequest(url: url))
             }
             await helper.shareContent(group.html(), originURL: sourceUrl, service: service)
             if service != .copy {

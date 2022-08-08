@@ -30,7 +30,6 @@ func parseHTTPContentType(_ headerValue: String) -> (mimeType: String, encoding:
     }
 }
 
-// swiftlint:disable:next cyclomatic_complexity
 func parseStringEncoding(_ value: String) -> String.Encoding? {
     switch value.lowercased() {
     case "iso-8859-1", "latin1": return .isoLatin1

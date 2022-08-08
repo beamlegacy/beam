@@ -34,7 +34,8 @@ class NoteViewTests: XCTestCase {
         AllNotesTestView().openJournal()
 //        ShortcutsHelper().shortcutActionInvoke(action: .showJournal)
 
-
+        // This is needed to prevent a warning to error
+        _ = journalView.isJournalOpened()
     }
 
 //    func SKIPtestDefaultNoteView() throws {

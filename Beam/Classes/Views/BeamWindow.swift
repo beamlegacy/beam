@@ -10,8 +10,6 @@ import Combine
 import SwiftUI
 import BeamCore
 
-// swiftlint:disable file_length
-
 class BeamWindow: NSWindow, NSDraggingDestination, Codable {
     var state: BeamState
     var windowInfo: BeamWindowInfo = BeamWindowInfo()
@@ -42,7 +40,6 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
     private var trafficLightLeftMargin: CGFloat = 20
     private(set) var touchBarController: TouchBarController?
 
-    // swiftlint:disable:next function_body_length
     init(contentRect: NSRect, data: BeamData, state: BeamState? = nil, title: String? = nil, isIncognito: Bool = false, minimumSize: CGSize? = nil) {
         self.data = data
         self.state = state ?? BeamState(incognito: isIncognito)

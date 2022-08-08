@@ -31,7 +31,6 @@ struct SearchBar: View {
     }
 
     public struct CustomTFStyle: TextFieldStyle {
-        // swiftlint:disable identifier_name
         public func _body(configuration: TextField<Self._Label>) -> some View {
             configuration
                 .padding(7)

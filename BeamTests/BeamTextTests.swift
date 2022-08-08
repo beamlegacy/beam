@@ -40,7 +40,6 @@ class BeamTextTests: XCTestCase, BeamDocumentSource {
         Configuration.networkEnabled = true
     }
 
-    // swiftlint:disable:next function_body_length
     func testBasicTextManipulations() {
         var btext = BeamText(text: "some string")
         XCTAssertEqual(btext.text, "some string")

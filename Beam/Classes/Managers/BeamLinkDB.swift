@@ -133,7 +133,6 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
         overridenManager ?? BeamData.shared.urlHistoryManager
     }
 
-    //swiftlint:disable:next function_body_length
     init(overridenManager: UrlHistoryManager? = nil) {
         self.overridenManager = overridenManager
     }
@@ -275,7 +274,6 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
 
         Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try await self?.saveOnBeamObjectsAPI(links)
                 Logger.shared.logDebug("Saved \(links.count) links on the BeamObject API",
@@ -298,7 +296,6 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
 
         Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try await self?.saveOnBeamObjectsAPI(links)
                 Logger.shared.logDebug("Saved links \(links) on the BeamObject API",
@@ -320,7 +317,6 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
                                category: .linkNetwork)
         Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                // swiftlint:disable:next date_init
                 let localTimer = Date()
 
                 try await self?.saveOnBeamObjectAPI(link)

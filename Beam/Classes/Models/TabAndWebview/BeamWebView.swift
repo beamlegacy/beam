@@ -143,7 +143,6 @@ class BeamWebView: WKWebView {
         }
     }
 
-    //swiftlint:disable:next weak_delegate
     private var autoCloseDelegate: BeamWebViewAutoClose?
     var enableAutoCloseWindow: Bool {
         get {

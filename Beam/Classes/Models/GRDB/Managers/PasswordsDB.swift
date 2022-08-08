@@ -4,7 +4,6 @@
 //
 //  Created by Jean-Louis Darmon on 13/05/2021.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import BeamCore
@@ -157,7 +156,6 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
 
     static let tableName = "passwordRecord"
 
-    //swiftlint:disable:next function_body_length
     required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.holder = holder
         self.grdbStore = store
