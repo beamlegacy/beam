@@ -232,7 +232,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool, _ completionHandler: ((Result<Bool, Error>) -> Void)?) -> Task<Void, Error> {
-        Task {
+        Task { @MainActor in
             defer {
                 DispatchQueue.main.async {
                     self.synchronizationTaskDidStop()
@@ -247,8 +247,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let initialDBs = Set(currentAccount.allDatabases)
             Logger.shared.logInfo("syncAllFromAPI calling", category: .sync)
             do {
-                try await beamObjectManager.syncAllFromAPI(force: force,
-                                                           prepareBeforeSaveAll: {
+                try await beamObjectManager.syncAllFromAPI(force: force, prepareBeforeSaveAll: {
                     currentAccount.mergeAllDatabases(initialDBs: initialDBs)
                 })
             } catch {
