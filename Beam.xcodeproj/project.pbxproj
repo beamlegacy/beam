@@ -492,6 +492,8 @@
 		6635D99F2853E8AD00F4B775 /* NSWorkspace+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */; };
 		6635D9A02853E8AD00F4B775 /* Result+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99E2853E8AD00F4B775 /* Result+Beam.swift */; };
 		6650C7C22892C22700F3757B /* UniformTypeIdentifiers+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6650C7BC2892C22700F3757B /* UniformTypeIdentifiers+Beam.swift */; };
+		666DE4E5289DA4C7008CB8E0 /* MarkdownExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666DE4DF289DA4C7008CB8E0 /* MarkdownExporter.swift */; };
+		666DE4E7289DA5C7008CB8E0 /* MarkdownExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666DE4E6289DA5C7008CB8E0 /* MarkdownExportTests.swift */; };
 		66A815C22876D1A3005A8499 /* ContentViewMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */; };
 		66D77CA128351612004D03E9 /* NSMenu+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D77CA028351612004D03E9 /* NSMenu+Beam.swift */; };
 		66E618E928635B5100D06A15 /* WebKitManualDownloadProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */; };
@@ -2186,6 +2188,8 @@
 		6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSWorkspace+Beam.swift"; sourceTree = "<group>"; };
 		6635D99E2853E8AD00F4B775 /* Result+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Result+Beam.swift"; sourceTree = "<group>"; };
 		6650C7BC2892C22700F3757B /* UniformTypeIdentifiers+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UniformTypeIdentifiers+Beam.swift"; sourceTree = "<group>"; };
+		666DE4DF289DA4C7008CB8E0 /* MarkdownExporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkdownExporter.swift; sourceTree = "<group>"; };
+		666DE4E6289DA5C7008CB8E0 /* MarkdownExportTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkdownExportTests.swift; sourceTree = "<group>"; };
 		66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewMenuItem.swift; sourceTree = "<group>"; };
 		66D77CA028351612004D03E9 /* NSMenu+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMenu+Beam.swift"; sourceTree = "<group>"; };
 		66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebKitManualDownloadProxy.swift; sourceTree = "<group>"; };
@@ -4481,6 +4485,7 @@
 			children = (
 				418171BB2581107C00317ED8 /* Lexer.swift */,
 				418171BC2581107C00317ED8 /* Parser.swift */,
+				666DE4DF289DA4C7008CB8E0 /* MarkdownExporter.swift */,
 				96E4CF71258E59F400D6DE22 /* BeamTextVisitor.swift */,
 			);
 			path = Markdown;
@@ -6713,6 +6718,7 @@
 				5227B2CE26DD12EF0006FA7D /* ZZZTests.swift */,
 				33551D6227FF74AD00598164 /* IncognitoTests.swift */,
 				3338064128510808002D1EB3 /* PinNoteTests.swift */,
+				666DE4E6289DA5C7008CB8E0 /* MarkdownExportTests.swift */,
 			);
 			path = BeamTests;
 			sourceTree = "<group>";
@@ -9408,6 +9414,7 @@
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
 				A07C013D2705ED2700D91750 /* GoogleCalendarService.swift in Sources */,
 				A09F26112833A06600543C3E /* AllNotesPageFiltersContextualMenu.swift in Sources */,
+				666DE4E5289DA4C7008CB8E0 /* MarkdownExporter.swift in Sources */,
 				A0CB5ADE268B1FF500D1EF02 /* GeneralPreferencesView.swift in Sources */,
 				A0C3D65727DB69AB007C0BFF /* NetworkMonitor.swift in Sources */,
 				A59D33882655101A002E7E96 /* WiggleBounceEffects.swift in Sources */,
@@ -9927,6 +9934,7 @@
 				DAAF40C427D79BEB00083AA0 /* TabPinSuggesterTests.swift in Sources */,
 				8A7C8C1926B8137F00471A5B /* PointAndShootTargetsPathTests.swift in Sources */,
 				8A5EDB21278C584E007C0C59 /* BrowserTabTests.swift in Sources */,
+				666DE4E7289DA5C7008CB8E0 /* MarkdownExportTests.swift in Sources */,
 				8A7F949226A8611600270A74 /* PointAndShootCancelShootTest.swift in Sources */,
 				37C4130D27854EC600954FD7 /* SearchEngineDescriptionTests.swift in Sources */,
 				963DBB3D2698655C00080928 /* BeamElementLinksTests.swift in Sources */,
