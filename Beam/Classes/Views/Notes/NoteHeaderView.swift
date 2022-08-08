@@ -261,11 +261,9 @@ struct NoteHeaderView: View {
 
 struct NoteHeaderView_Previews: PreviewProvider {
     static var classicModel: NoteHeaderView.ViewModel {
-        // swiftlint:disable:next force_try
         NoteHeaderView.ViewModel(note: try! BeamNote(title: "My note title"))
     }
     static var titleTakenModel: NoteHeaderView.ViewModel {
-        // swiftlint:disable:next force_try
         let model = NoteHeaderView.ViewModel(note: try! BeamNote(title: "Taken Title"))
         model.isTitleTaken = (true, true)
         return model

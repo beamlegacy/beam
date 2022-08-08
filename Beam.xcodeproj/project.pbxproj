@@ -8298,7 +8298,6 @@
 				3390376A26529BD700089E25 /* Sign AutoUpdate XPC */,
 				A0C83F12276E408400DD29FB /* Embed BeamHelper Tool */,
 				870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */,
-				521ED51025B9E43F00FBFA99 /* SwiftLint */,
 			);
 			buildRules = (
 			);
@@ -8408,7 +8407,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1310;
-				LastUpgradeCheck = 1240;
+				LastUpgradeCheck = 1340;
 				TargetAttributes = {
 					96319D0E2616232600D1CF31 = {
 						CreatedOnToolsVersion = 12.4;
@@ -8732,25 +8731,6 @@
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
 			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nscripts/codesign-xpc-autoupdate.sh\n";
-		};
-		521ED51025B9E43F00FBFA99 /* SwiftLint */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 12;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = SwiftLint;
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "PATH=${PATH}:/opt/homebrew/bin:/usr/local/bin\nif which swiftlint >/dev/null; then\n  swiftlint --lenient\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
-			showEnvVarsInLog = 0;
 		};
 		521FEC702604F1FF009000F9 /* Copy Vinyl Cassettes */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -9235,7 +9215,6 @@
 				520088BC2613266600AED835 /* Database+CoreDataProperties.swift in Sources */,
 				DAAFF670283B86C4007305B4 /* AutocompleteManager+Logging.swift in Sources */,
 				DAC803F22850968B00D15371 /* UrlStatsDBManager.swift in Sources */,
-				DAAFF670283B86C4007305B4 /* AutocompleteManager+Logging.swift in Sources */,
 				9670B8FB285011A800BEC4A0 /* AppDelegate+DataTree.swift in Sources */,
 				A5A2D52F27393730003D0925 /* AnimatedGradient.swift in Sources */,
 				A53F8A5A27C4A74E000D168D /* AvailableShortcut.swift in Sources */,
@@ -9527,7 +9506,6 @@
 				A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */,
 				A5DA47EC285B8997005E744B /* TabGroupBeamObject.swift in Sources */,
 				33CC156C28660F9E008A82D9 /* MiniEditorPanel.swift in Sources */,
-				A5DA47EC285B8997005E744B /* TabGroupBeamObject.swift in Sources */,
 				414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */,
 				032562B326051D3B006513E4 /* RBDateRange.m in Sources */,
 				A06B27D42758DC4900688A83 /* NSButtonCheckboxHelper.swift in Sources */,
@@ -10077,7 +10055,6 @@
 				B551F3C126BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift in Sources */,
 				D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
-				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
 				D77A5A9C287C55C800652727 /* RightClickPageMenuTests.swift in Sources */,
 				D7F5BF0528756231008FE546 /* RightClickImageMenuTests.swift in Sources */,
 				A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */,
@@ -10325,6 +10302,7 @@
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = Test;
 		};
@@ -10541,6 +10519,7 @@
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = BetaDebug;
 		};
@@ -10704,7 +10683,6 @@
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				OTHER_CODE_SIGN_FLAGS = "$(inherited) -i $(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.BeamHelper;
 				PRODUCT_NAME = BeamHelper;
@@ -10760,6 +10738,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LLVM_LTO = YES_THIN;
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -10768,6 +10747,7 @@
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = BetaRelease;
 		};
@@ -11010,6 +10990,7 @@
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = PublicDebug;
 		};
@@ -11173,7 +11154,6 @@
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				OTHER_CODE_SIGN_FLAGS = "$(inherited) -i $(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.BeamHelper;
 				PRODUCT_NAME = BeamHelper;
@@ -11229,6 +11209,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LLVM_LTO = YES_THIN;
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -11237,6 +11218,7 @@
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = PublicRelease;
 		};
@@ -11574,6 +11556,7 @@
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = Debug;
 		};
@@ -11623,6 +11606,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LLVM_LTO = YES_THIN;
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -11631,6 +11615,7 @@
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = Release;
 		};
@@ -11657,7 +11642,6 @@
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR/BeamCore.framework/Frameworks/**",
 				);
-				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"BEAM_WEBKIT_ENHANCEMENT_ENABLED=1",
 					"DEBUG=1",
@@ -11904,7 +11888,9 @@
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_SWIFT_FLAGS = "$(CUSTOM_OTHER_SWIFT_FLAGS)";
 				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
 			};
 			name = ReleaseDebugable;
 		};
@@ -12062,7 +12048,6 @@
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				OTHER_CODE_SIGN_FLAGS = "$(inherited) -i $(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.BeamHelper;
 				PRODUCT_NAME = BeamHelper;

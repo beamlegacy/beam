@@ -4,7 +4,6 @@
 //
 //  Created by Sebastien Metrot on 21/09/2020.
 //
-// swiftlint:disable file_length type_body_length
 
 import Foundation
 import Combine
@@ -629,7 +628,6 @@ import Sentry
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private func selectAutocompleteResult(_ result: AutocompleteResult, modifierFlags: NSEvent.ModifierFlags? = nil) {
         EventsTracker.logBreadcrumb(message: "\(#function) - \(result)", category: "BeamState")
         switch result.source {

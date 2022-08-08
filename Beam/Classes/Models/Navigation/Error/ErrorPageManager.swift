@@ -86,7 +86,6 @@ class ErrorPageManager {
     func htmlPage() -> Data {
         let file = "GenericErrorPage"
         let htmlErrorFile = Bundle.main.path(forResource: file, ofType: "html")!
-        //swiftlint:disable:next force_try
         let htmlErrorPage = try! String(contentsOfFile: htmlErrorFile)
             .replacingOccurrences(of: "%errorTitle%", with: title)
         return htmlErrorPage.data(using: .utf8)!

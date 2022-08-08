@@ -4,7 +4,6 @@
 //
 //  Created by Frank Lefebvre on 23/03/2021.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import BeamCore
@@ -24,7 +23,6 @@ enum PasswordSaveAction: Equatable {
     case saveSilently
 }
 
-// swiftlint:disable type_body_length
 class WebAutofillController: NSObject, WebPageRelated {
     private var scope = Set<AnyCancellable>()
     private let lock = RWLock()

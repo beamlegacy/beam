@@ -134,9 +134,7 @@ class NIOContextManager {
         let eventLoopGroup = eventLoopGroup
         let client = self.httpClient
         Task.detached {
-            // swiftlint:disable force_try
             try! await client.shutdown()
-            // swiftlint:disable force_try
             try! eventLoopGroup.syncShutdownGracefully()
         }
     }

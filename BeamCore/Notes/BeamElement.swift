@@ -4,7 +4,6 @@
 //
 //  Created by Sebastien Metrot on 27/11/2020.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import Combine
@@ -130,7 +129,6 @@ public enum ElementKind: Codable, Equatable {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -261,7 +259,6 @@ public enum ElementKind: Codable, Equatable {
         }
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -330,7 +327,6 @@ public enum ElementChildrenFormat: String, Codable {
 }
 
 // Editable Text Data:
-//swiftlint:disable:next type_body_length
 open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, CustomDebugStringConvertible {
     open var id = UUID() { didSet { change(.meta) } }
     @Published open var text = BeamText() { didSet { change(.text) } }
@@ -450,7 +446,6 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
     }
 
-    // swiftlint:disable cyclomatic_complexity
     open func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         let recursive = encoder.userInfo[Self.recursiveCoding] as? Bool ?? true

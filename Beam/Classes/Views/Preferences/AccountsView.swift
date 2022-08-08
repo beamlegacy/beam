@@ -377,5 +377,4 @@ struct AccountsView_Previews: PreviewProvider {
     static var previews: some View {
         AccountsView(viewModel: AccountsViewModel(calendarManager: BeamData.shared.calendarManager))
     }
-    // swiftlint:disable:next file_length
 }

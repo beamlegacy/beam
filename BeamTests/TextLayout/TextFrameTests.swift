@@ -40,7 +40,6 @@ class TextFrameTests: XCTestCase {
         }
     }
 
-    // swiftlint:disable:next function_body_length
     func testLinkLayoutForOneLine() {
         let fontSize = CGFloat(12)
         let elementKind = ElementKind.bullet
@@ -80,7 +79,6 @@ class TextFrameTests: XCTestCase {
         expect(textFrame.caretIndexForSourcePosition(position2)) == position2 * 2
         expect(textFrame.caretIndexForSourcePosition(position2 + 1)) == (position2 + 1) * 2 + 1
 
-        //swiftlint:disable:next print
 //        print("Carets:\n\(dumpCarets())")
 
         // Check all carets:
@@ -133,7 +131,6 @@ class TextFrameTests: XCTestCase {
         checkCaret(cursor, 0, 0, .leading, true, "", "")
     }
 
-    // swiftlint:disable:next function_body_length
     func testLinkLayoutForOneMultipleLines() {
         let fontSize = CGFloat(12)
         let elementKind = ElementKind.bullet
@@ -168,7 +165,6 @@ class TextFrameTests: XCTestCase {
 
         expect(textFrame.carets.count) == actualString.count * 2 + 2 // * 2 because two edges per character, + 2 because the link add the virtual image character
 
-        //swiftlint:disable:next print
 //        print("Carets:\n\(dumpCarets())")
         expect(textFrame.caretIndexForSourcePosition(0)) == 0
         expect(textFrame.caretIndexForSourcePosition(1)) == 2
@@ -249,7 +245,6 @@ class TextFrameTests: XCTestCase {
         expect(self.cursor) == 0
     }
 
-    // swiftlint:disable:next function_body_length
     func testLinkLayoutForOneLineWithSpaces() {
         let fontSize = CGFloat(12)
         let elementKind = ElementKind.bullet
@@ -289,7 +284,6 @@ class TextFrameTests: XCTestCase {
         expect(textFrame.caretIndexForSourcePosition(position2)) == position2 * 2
         expect(textFrame.caretIndexForSourcePosition(position2 + 2)) == (position2 + 2) * 2 + 1
 
-        //swiftlint:disable:next print
 //        print("Carets:\n\(dumpCarets())")
 
         // Check all carets:

@@ -136,7 +136,6 @@ struct BeamTextAttributedStringBuilder {
         return (close, inside)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private func attributesForRange(config: Config, range: BeamText.Range, selected: Bool) -> [NSAttributedString.Key: Any] {
         var stringAttributes = [NSAttributedString.Key: Any]()
         var strong = false

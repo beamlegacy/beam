@@ -5,7 +5,6 @@
 //  Created by Sebastien Metrot on 26/10/2020.
 //
 
-// swiftlint:disable type_body_length file_length
 
 import Foundation
 import XCTest
@@ -147,7 +146,6 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         let root = editor.rootNode!
         validateRootWithNote(root: root, note: note)
 
-        // swiftlint:disable:next force_cast
         root.element.removeChild((root.children.first as! TextNode).element)
 
         let str1 = """
@@ -395,7 +393,6 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         BeamNote.clearFetchedNotes()
     }
 
-    // swiftlint:disable:next function_body_length
     func testInsertText1() throws {
         defer { reset() }
         let note = try createMiniArborescence(title: "title")
@@ -453,7 +450,6 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         BeamNote.clearFetchedNotes()
     }
 
-    // swiftlint:disable:next function_body_length
     func testInsertText2() throws {
         defer { reset() }
         let note = try createMiniArborescence(title: "title")
@@ -510,7 +506,6 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         BeamNote.clearFetchedNotes()
     }
 
-    // swiftlint:disable:next function_body_length
     func testInsertText3() throws {
         defer { reset() }
         let note = try createMiniArborescence(title: "title")
@@ -601,7 +596,6 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
     }
 
     // MARK: - Delete
-    // swiftlint:disable:next function_body_length
     func testDeleteBackward() throws {
         defer { reset() }
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)
@@ -642,7 +636,6 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         BeamNote.clearFetchedNotes()
     }
 
-    // swiftlint:disable:next function_body_length
     func testDeleteForward() throws {
         defer { reset() }
         let frame = NSRect(x: 0, y: 0, width: 400, height: 500)

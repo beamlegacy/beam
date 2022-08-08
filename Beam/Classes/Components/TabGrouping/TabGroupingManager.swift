@@ -205,8 +205,6 @@ extension TabGroupingManager {
     /// Transforms the pageIDs groups into TabClusteringGroup associated to each pageID.
     /// It will try to maintain the same group properties for each update.
     private func buildTabGroups(receivingClusters clusters: [[ClusteringManager.PageID]], allOpenTabs: [BrowserTab]) {
-        // swiftlint:disable:previous cyclomatic_complexity function_body_length
-
         temporaryInManualPageGroups.removeAll()
         let (manualPageGroups, forcedOutOfGroups) = buildManualPageGroups(allOpenTabs: allOpenTabs)
         let clusteringPageGroups = clusteringPageGroups

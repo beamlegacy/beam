@@ -94,6 +94,5 @@ func export_all_note_sources(to url: URL?) {
     } catch {
         Logger.shared.logError("Unable to save note sources to \(destination): \(error)", category: .web)
     }
-    //swiftlint:disable:next print
     print("All note sources saved to file \(destination)")
 }

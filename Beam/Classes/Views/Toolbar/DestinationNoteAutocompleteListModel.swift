@@ -110,7 +110,6 @@ extension DestinationNoteAutocompleteList {
             return nil
         }
 
-        // swiftlint:disable:next nesting
         enum CardReplacementKeyword: String, CaseIterable {
             case yesterday = "Yesterday"
             case today = "Today"

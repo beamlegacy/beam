@@ -50,7 +50,6 @@ class Lexer {
             self.string = string
         }
 
-        // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case type
             case string

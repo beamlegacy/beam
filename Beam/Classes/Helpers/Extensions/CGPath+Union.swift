@@ -80,7 +80,6 @@ private class AlgorithmPhase1 {
             self.y1 = y1
         }
 
-        // swiftlint:disable:next nesting
         enum Status {
             case empty
             case partial

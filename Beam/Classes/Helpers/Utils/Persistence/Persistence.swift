@@ -99,7 +99,6 @@ struct Persistence {
         @StandardStorable("currentDatabase.id") static var currentDatabaseId: UUID?
     }
 
-    // swiftlint:disable nesting
     enum Sync {
         enum BeamObjects {
             @StandardStorable("sync.beam_objects.last_received_at") static var last_received_at: Date?

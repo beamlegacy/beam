@@ -3,7 +3,6 @@ import Foundation
 import Combine
 import BeamCore
 
-// swiftlint:disable file_length
 class EmbedNode: ResizableNode {
 
     var isExpandable: Bool { true }

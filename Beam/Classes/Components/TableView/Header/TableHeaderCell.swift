@@ -31,7 +31,6 @@ class TableHeaderCell: NSTableHeaderCell {
     // Had to go with this trick thanks to Thomas.
     // Since NSTableHeaderCell are copied but doesn't strongly retain we need to do this to avoid a crash when being deallocated
     override func copy(with zone: NSZone? = nil) -> Any {
-        // swiftlint:disable:next force_cast
         let cell = super.copy(with: zone) as! TableHeaderCell
 
         _ = Unmanaged.passRetained(cell.headerTitleColor)

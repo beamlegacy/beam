@@ -35,7 +35,6 @@ func export_all_browsing_sessions(to url: URL?) {
     } catch {
         Logger.shared.logError("Unable to save list of browsing sessions to \(sessionsFileURL)", category: .web)
     }
-    //swiftlint:disable:next print
     print("All browsing sessions saved to file \(sessionsFileURL)")
 
     // MARK: Links
@@ -50,6 +49,5 @@ func export_all_browsing_sessions(to url: URL?) {
     } catch {
         Logger.shared.logError("Unable to save list of browsing sessions", category: .web)
     }
-    //swiftlint:disable:next print
     print("All links saved to file \(linksFileURL)")
 }

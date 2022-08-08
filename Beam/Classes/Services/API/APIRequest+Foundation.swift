@@ -5,7 +5,6 @@ import Vinyl
 
 extension APIRequest {
     @discardableResult
-    //swiftlint:disable:next function_body_length
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil,
                                                                                 completionHandler: @escaping (Swift.Result<T, Error>) -> Void) throws -> Foundation.URLSessionDataTask {
@@ -37,7 +36,6 @@ extension APIRequest {
         // code called in the completion handler is blocking, it will prevent new following requests
         // to be parsed in the NSURLSession delegate callback thread
 
-        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         #if DEBUG
@@ -72,7 +70,6 @@ extension APIRequest {
         }
     }
 
-    // swiftlint:disable:next function_parameter_count
     func logRequest(_ filename: String,
                     _ response: URLResponse?,
                     _ localTimer: Date,
@@ -95,7 +92,6 @@ extension APIRequest {
                                    category: .network)
             return
         }
-        // swiftlint:disable:next date_init
         let diffTime = Date().timeIntervalSince(localTimer)
         let diff = String(format: "%.3f", diffTime)
         let request_id = httpResponse.allHeaderFields["X-Request-Id"] ?? "-"
@@ -118,14 +114,12 @@ extension APIRequest {
     func logCancelledRequest(_ filename: String,
                              _ localTimer: Date) {
         #if DEBUG_API_0
-        // swiftlint:disable:next date_init
         let diffTime = Date().timeIntervalSince(localTimer)
         let diff = String(format: "%.2f", diffTime)
         Logger.shared.logDebug("\(diff)sec cancelled \(filename)", category: .network)
         #endif
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func manageResponse<T: Decodable & Errorable>(_ data: Data?,
                                                   _ response: URLResponse?) throws -> T {
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -157,10 +151,8 @@ extension APIRequest {
                 throw APIRequestError.error
             }
 
-            // swiftlint:disable:next date_init
             let localTimer = Date()
             let jsonStruct = try self.defaultDecoder().decode(APIRequest.APIResult<T>.self, from: data)
-            // swiftlint:disable:next date_init
             let diffTime = Date().timeIntervalSince(localTimer)
             if diffTime > 0.1 {
                 Logger.shared.logWarning("Parsed network response from JSON to Beam Objects",

@@ -118,7 +118,6 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
     }
 
     /// This version of receivedObjects can force the use of a destination database, that is all the incomming BeamDocuments will be deleted from their original database if it isn't the given destination.
-    //swiftlint:disable:next cyclomatic_complexity
     func receivedObjects(_ objects: [BeamDocument], destination: BeamDatabase?) throws {
         Logger.shared.logInfo("BeamDocumentSynchronizer.receivedObjects called with \(objects.map { $0.id })", category: .sync)
 

@@ -4,7 +4,6 @@
 //
 //  Created by Jean-Louis Darmon on 29/06/2021.
 //
-// swiftlint:disable file_length
 
 import SwiftUI
 import BeamCore

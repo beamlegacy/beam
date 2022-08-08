@@ -9,7 +9,6 @@ import Nimble
 class APIRequestTests: QuickSpec {
     var sut: APIRequest!
 
-    // swiftlint:disable:next function_body_length
     override func spec() {
         let beamHelper = BeamTestsHelper()
 

@@ -134,7 +134,6 @@ class DailyStatsExporter {
         } catch {
             Logger.shared.logError("Unable to daily url stats to \(url)", category: .web)
         }
-        //swiftlint:disable:next print
         print("Daily url stats saved to file \(url)")
     }
     static func exportNoteStats(daysAgo: Int, to url: URL?) {
@@ -148,7 +147,6 @@ class DailyStatsExporter {
         } catch {
             Logger.shared.logError("Unable to daily note stats to \(url)", category: .web)
         }
-        //swiftlint:disable:next print
         print("Daily note stats saved to file \(url)")
     }
 }

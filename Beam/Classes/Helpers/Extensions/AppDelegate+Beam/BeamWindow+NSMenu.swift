@@ -206,7 +206,6 @@ extension BeamWindow {
         super.sendEvent(event)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     override func keyDown(with event: NSEvent) {
         if event.keyCode == KeyCode.escape.rawValue {
             state.browserTabsManager.currentTab?.respondToEscapeKey()

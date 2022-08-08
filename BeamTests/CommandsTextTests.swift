@@ -16,7 +16,6 @@ import Nimble
 class CommandsTextTests: QuickSpec, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
-    // swiftlint:disable:next function_body_length
     override func spec() {
         var editor: BeamTextEdit!
         var tree: String!

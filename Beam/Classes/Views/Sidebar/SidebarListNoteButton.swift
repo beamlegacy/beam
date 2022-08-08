@@ -111,7 +111,6 @@ struct SidebarListNoteButton: View {
 
 struct SidebarListNoteButton_Previews: PreviewProvider {
 
-    // swiftlint:disable:next force_try
     static var note = try! BeamNote(title: "Baudrillard")
 
     static var previews: some View {
