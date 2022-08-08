@@ -26,13 +26,11 @@ public struct SourceMetadata: Codable, Equatable, Hashable {
         /// References a local note
         case local(UUID)
 
-        // swiftlint:disable:next nesting
         enum CodingKeys: String, CodingKey {
             case remote
             case local
         }
 
-        // swiftlint:disable:next cyclomatic_complexity
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             // Compatibility: We went through multiple strategies to encode and decode the origin.

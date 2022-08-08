@@ -20,7 +20,6 @@ class WebAutofillMessageHandler: SimpleBeamMessageHandler {
         super.init(messages: messages, jsFileName: "PasswordManager_prod")
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         guard let messageKey = PasswordMessages(rawValue: messageName) else {
             Logger.shared.logError("Unsupported message \(messageName) for password message handler", category: .web)

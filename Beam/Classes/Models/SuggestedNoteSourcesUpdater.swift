@@ -93,7 +93,6 @@ public class SuggestedNoteSourceUpdater {
         return allSources
     }
 
-    // swiftlint:disable:next large_tuple
     func createUpdateInstructions(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: [UUID: [UUID]]) -> UpdateInstructions? {
         var sourcesToAdd: [UUID: Set<UUID>] = [:]
         var sourcesToRemove: [UUID: Set<UUID>] = [:]

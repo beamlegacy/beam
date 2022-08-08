@@ -4,7 +4,6 @@
 //
 //  Created by Remi Santos on 30/04/2021.
 //
-// swiftlint:disable file_length
 
 import Foundation
 import Combine
@@ -146,7 +145,6 @@ class BrowserTabsManager: ObservableObject {
             self.pinned = pinned
         }
     }
-    // swiftlint:disable:next function_body_length
     private func updateListItems() {
         var sections = TabsListItemsSections()
         let groups = localTabsGroup

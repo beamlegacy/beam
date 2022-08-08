@@ -221,7 +221,7 @@ class DataView: NSView, NSOutlineViewDataSource, MenuOutlineViewDelegate, BeamDo
         itemUnderMenu = item
         let menu = NSMenu(title: "Context menu")
 
-        if let documentNode = item as? DocumentTreeNode {
+        if item as? DocumentTreeNode != nil {
             menu.addItem(withTitle: "Delete", action: #selector(deleteDocument), keyEquivalent: "")
         } else if let databaseNode = item as? DatabaseTreeNode {
             if databaseNode.database?.isLoaded == true {
@@ -239,7 +239,7 @@ class DataView: NSView, NSOutlineViewDataSource, MenuOutlineViewDelegate, BeamDo
 
             menu.addItem(withTitle: "Sanitize Database Contents", action: #selector(sanitizeDatabaseContents), keyEquivalent: "")
 
-        } else if let accountNode = item as? AccountTreeNode {
+        } else if item as? AccountTreeNode != nil {
             menu.addItem(withTitle: "Hard delete", action: #selector(hardDeleteAccount), keyEquivalent: "")
         }
         return menu

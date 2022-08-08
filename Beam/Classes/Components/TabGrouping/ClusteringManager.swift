@@ -4,7 +4,6 @@
 //
 //  Created by Jean-Louis Darmon on 31/05/2021.
 //
-// swiftlint:disable:next file_length type_body_length
 
 import Foundation
 import BeamCore
@@ -18,7 +17,6 @@ protocol ClusteringManagerProtocol {
     func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?)
 }
 
-// swiftlint:disable:next type_body_length
 class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
 
     public struct SummaryForNewDay: Codable {
@@ -92,7 +90,6 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     public var continueToNotes = [UUID]()
     public var continueToPage: PageID?
 
-    // swiftlint:disable:next function_body_length
     init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources, tabGroupingManager: TabGroupingManager?) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
@@ -193,7 +190,6 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         return nil
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func getIdAndParent(tabToIndex: TabIndexingInfo) -> (UUID?, UUID?) {
         guard tabToIndex.isPinnedTab == false else {
             return (nil, nil)
@@ -268,7 +264,6 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         addPage(id: id, parentId: parentId, value: value, newContent: nil)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?) {
         var pageToAdd: Page?
         if let value = value {
@@ -581,7 +576,6 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         sessionExporter.urls = [AnyUrl]()
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     public func exportSummaryForNextSession() {
         if self.notesChangedByUserInSession.isEmpty {
             for (pageGroup, noteGroup) in zip(self.clusteredPagesId, self.clusteredNotesId).reversed() {
@@ -634,5 +628,4 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
             Persistence.ContinueTo.summary = jsonString
         }
     }
-    // swiftlint:disable:next file_length
 }

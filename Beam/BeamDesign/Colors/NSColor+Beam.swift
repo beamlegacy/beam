@@ -52,7 +52,6 @@ extension NSColor {
         return lhs.add(rhs)
     }
 
-    //swiftlint:disable:next large_tuple
     var componentsRGBA: (r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat) {
         guard let color = self.usingColorSpace(.deviceRGB) else {
             fatalError()

@@ -65,7 +65,6 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
 
     public override var tableNames: [String] { [BeamDocument.databaseTableName] }
 
-    //swiftlint:disable:next large_tuple
     public required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.holder = holder
         try super.init(store: store)
@@ -239,7 +238,6 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
 
     // MARK: Generic fetch requests
     //
-    // swiftlint:disable:next cyclomatic_complexity function_body_length
     private class func fetchRequest(filters: [DocumentFilter], sortingKey: DocumentSortingKey?) ->  QueryInterfaceRequest<BeamDocument> {
         var request = BeamDocument.all()
 

@@ -25,7 +25,6 @@ extension BeamObjectRequest {
         request.allHTTPHeaderFields = headers
 
         let session = BeamURLSession.shared
-        // swiftlint:disable:next date_init
         let localTimer = Date()
         let task = session.dataTask(with: request) { (data, response, error) -> Void in
             #if DEBUG
@@ -75,7 +74,6 @@ extension BeamObjectRequest {
         request.allHTTPHeaderFields = headers
 
         let session = BeamURLSession.shared
-        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         let task = session.dataTask(with: request) { (responseData, response, error) -> Void in

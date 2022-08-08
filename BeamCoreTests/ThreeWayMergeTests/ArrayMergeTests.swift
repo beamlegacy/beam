@@ -4,7 +4,6 @@ import Quick
 @testable import BeamCore
 
 class ArrayMergeTests: QuickSpec {
-    // swiftlint:disable function_body_length
     override func spec() {
         describe("apply") {
             let a = ["a", "b", "c"]

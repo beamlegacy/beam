@@ -4,7 +4,6 @@
 //
 //  Created by Frank Lefebvre on 02/06/2021.
 //
-//swiftlint:disable file_length
 
 import Foundation
 import BeamCore
@@ -389,7 +388,6 @@ final class WebFieldClassifier {
         self.autofillRules = .default
     }
 
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func evaluateForPassword(action: WebAutofillAction, field: DOMInputElement, bestUsernameAutocomplete: DOMInputAutocomplete?, bias: Int) -> WeightedRole? {
         let usernameRole: WebInputField.Role
         let passwordRole: WebInputField.Role
@@ -453,7 +451,6 @@ final class WebFieldClassifier {
         return .init(role: expectedRole, match: .score(score + bias))
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private func evaluateForPayment(field: DOMInputElement) -> WeightedRole? {
         switch field.decodedAutocomplete {
         case .creditCardFullName, .creditCardFamilyName:
@@ -598,7 +595,6 @@ final class WebFieldClassifier {
         return ClassifierResult(autofillGroups: groups, activeFields: activeFields)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private func makeAutofillGroup(from field: EvaluatedField, in fields: [EvaluatedField], thresholds: [WebAutofillAction: Match], ambiguousPasswordAction: Bool, incompleteCardExpirationDate: Bool) -> WebAutofillGroup? {
         guard let best = field.bestMatch(thresholds: thresholds) else { return nil }
         Logger.shared.logDebug("Best match for: \(field): \(best)", category: .webAutofillInternal)

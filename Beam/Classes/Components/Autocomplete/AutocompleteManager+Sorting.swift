@@ -55,7 +55,6 @@ extension AutocompleteManager {
         return (results: finalResults, canCreateNote: canCreateNote)
     }
 
-    //swiftlint:disable:next function_parameter_count
     private func sortResults(notesResults: [AutocompleteResult],
                              historyResults: [AutocompleteResult],
                              urlResults: [AutocompleteResult],

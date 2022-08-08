@@ -1,4 +1,3 @@
-//swiftlint:disable file_length
 import Foundation
 
 public enum CursorPositionAfterSelection {
@@ -155,7 +154,6 @@ extension TextRoot {
         node.invalidateText()
     }
 
-    //swiftlint:disable cyclomatic_complexity function_body_length
     func moveWordLeftAndModifySelection() {
         guard root?.state.nodeSelection == nil else { return }
         guard let node = focusedWidget as? TextNode else { return }
