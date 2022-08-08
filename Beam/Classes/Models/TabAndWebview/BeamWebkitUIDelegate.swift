@@ -49,27 +49,15 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        let url = frame.request.url?.absoluteString ?? "unknown-url"
-        let alertSuppressionKey = "WebView-AlertSuppression-\(url)"
-        let defaults = UserDefaults.standard
-        if defaults.bool(forKey: alertSuppressionKey) {
-            Logger.shared.logDebug("webView suppressing runJavaScriptAlertPanelWithMessage for \(url)", category: .web)
-        } else {
-            Logger.shared.logDebug("webView runJavaScriptAlertPanelWithMessage \(message)", category: .web)
-            // Set the message as the NSAlert text
-            let alert = NSAlert()
-            alert.informativeText = message
-            alert.addButton(withTitle: "OK")
-            alert.showsSuppressionButton = true
-            alert.suppressionButton?.title = "Block this website from sending alerts"
-            // Display the NSAlert
-            alert.runModal()
+        Logger.shared.logDebug("webView runJavaScriptAlertPanelWithMessage \(message)", category: .web)
 
-            if let suppressionButton = alert.suppressionButton,
-               suppressionButton.state == .on {
-                defaults.set(true, forKey: alertSuppressionKey)
-            }
-        }
+        // Set the message as the NSAlert text
+        let alert = NSAlert()
+        alert.informativeText = message
+        alert.addButton(withTitle: "OK")
+
+        // Display the NSAlert
+        alert.runModal()
 
         // Call completionHandler
         completionHandler()
