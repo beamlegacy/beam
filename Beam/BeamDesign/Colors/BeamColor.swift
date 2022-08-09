@@ -143,7 +143,7 @@ extension BeamColor {
         let shouldBeCached = shouldBeCached
         var cgCacheKey = ""
         if shouldBeCached {
-            let currentAppearance = NSAppearance.currentAppearance.name.rawValue
+            let currentAppearance = NSApp.effectiveAppearance.name.rawValue
             cgCacheKey = cacheKey + "-" + currentAppearance
             if let cached = Self.cgColorCache[cgCacheKey] {
                 return cached
