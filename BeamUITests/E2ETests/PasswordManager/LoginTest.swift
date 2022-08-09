@@ -49,7 +49,7 @@ class LoginTest: BaseTest {
             XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(testUrl))
             XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(email))
             XCTAssertEqual(passwordsWindow.getNumberOfEntries(),1)
-            passwordsWindow.selectPassword(testUrl)
+            passwordsWindow.selectFirstPasswordItem(testUrl)
             passwordsWindow.clickDetails()
             XCTAssertEqual(passwordsWindow.getPasswordFieldToFill(.site).getStringValue(), testUrl)
             XCTAssertEqual(passwordsWindow.getPasswordFieldToFill(.username).getStringValue(), email)
