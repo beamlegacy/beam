@@ -24,6 +24,7 @@ final class CreditCardsMenuViewModel: ObservableObject {
 
     private var revealMoreItemsInList = false
     private var otherCreditCardsDialog: PopoverWindow?
+    private var waitingForAuthentication = false
     private var subscribers = Set<AnyCancellable>()
 
     init(entries: [CreditCardEntry]) {
@@ -64,10 +65,13 @@ final class CreditCardsMenuViewModel: ObservableObject {
     }
 
     func fillCreditCard(_ entry: CreditCardEntry) {
+        delegate?.dismissMenu()
         Task { @MainActor in
+            waitingForAuthentication = true
             if await DeviceAuthenticationManager.shared.checkDeviceAuthentication() {
                 delegate?.fillCreditCard(entry)
             }
+            waitingForAuthentication = false
         }
     }
 
@@ -76,7 +80,7 @@ final class CreditCardsMenuViewModel: ObservableObject {
     }
 
     var isPresentingModalDialog: Bool {
-        otherCreditCardsDialog != nil
+        otherCreditCardsDialog != nil || waitingForAuthentication
     }
 
     private func closeOtherCreditCardsDialog() {
