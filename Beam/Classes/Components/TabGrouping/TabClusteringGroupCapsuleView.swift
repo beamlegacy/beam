@@ -70,6 +70,7 @@ struct TabClusteringGroupCapsuleView: View {
                     .frame(width: 12, height: 6)
             } else {
                 Text(displayedText)
+                    .truncationMode(.middle)
             }
         }
         .frame(height: 22)

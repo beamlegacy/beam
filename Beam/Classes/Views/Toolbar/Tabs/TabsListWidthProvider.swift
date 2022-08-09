@@ -63,6 +63,10 @@ final class TabsListWidthProvider {
         22
     }
 
+    private var maximumGroupItemWidth: CGFloat {
+        300
+    }
+
     var separatorWidth: CGFloat {
         4
     }
@@ -90,7 +94,7 @@ final class TabsListWidthProvider {
                 } else if !title.isEmpty {
                     width = max(width, widthForText(title) + (hPadding*2))
                 }
-                customWidths[item.id] = width
+                customWidths[item.id] = min(maximumGroupItemWidth, width)
             }
         }
         self.computedFixedWidths = customWidths
