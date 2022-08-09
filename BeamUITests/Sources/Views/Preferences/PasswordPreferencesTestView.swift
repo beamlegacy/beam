@@ -74,8 +74,14 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     }
     
     @discardableResult
-    func selectPassword(_ text: String) -> PasswordPreferencesTestView {
-        passwordTables.children(matching: .tableRow).element(boundBy: 0).staticTexts[text].clickOnExistence()
+    func selectFirstPasswordItem(_ text: String) -> PasswordPreferencesTestView {
+        let passwordItem = passwordTables.children(matching: .tableRow).element(boundBy: 0).staticTexts[text]
+        _ = passwordItem.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        if BaseTest().isBigSurOS() {
+            passwordItem.doubleTapInTheMiddle()
+        } else {
+            passwordItem.hoverAndTapInTheMiddle()
+        }
         return self
     }
     
