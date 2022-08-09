@@ -20,13 +20,16 @@ class PasswordPreferencesTests: BaseTest {
     let usernameExample = "quentin"
     let passwordExample = "quentin"
     
-    func setup(isPasswordProtectionDisabled: Bool = true) {
+    func setup(isPasswordProtectionDisabled: Bool = true, doPopulatePasswordsDB: Bool = true) {
         step ("GIVEN I open password preferences"){
             launchApp()
-            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             if isPasswordProtectionDisabled {
                 uiMenu.disablePasswordAndCardsProtection()
             }
+            if doPopulatePasswordsDB {
+                uiMenu.populatePasswordsDB()
+            }
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
         }
     }
@@ -48,7 +51,7 @@ class PasswordPreferencesTests: BaseTest {
     
     func testPasswordProtectionLock() {
         
-        setup(isPasswordProtectionDisabled: false)
+        setup(isPasswordProtectionDisabled: false, doPopulatePasswordsDB: false)
         
         step ("THEN I see the view is locked"){
             XCTAssertTrue(passwordPreferencesView.staticText(PasswordPreferencesViewLocators.StaticTexts.passwordProtectionTitle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -60,7 +63,7 @@ class PasswordPreferencesTests: BaseTest {
     }
     
     func testAddPasswordItem() throws {
-        setup()
+        setup(isPasswordProtectionDisabled: true, doPopulatePasswordsDB: false)
         
         step ("AND I click on add password button"){
             passwordPreferencesView.clickFill()
@@ -147,15 +150,18 @@ class PasswordPreferencesTests: BaseTest {
     
     func testRemovePasswordItem() throws {
         setup()
-        var alertView: AlertTestView?
-        step ("WHEN I click to delete passwordentry \(hostnameApple)"){
-            uiMenu.populatePasswordsDB()
-            passwordPreferencesView.selectPassword(hostnameApple)
+        var alertView: AlertTestView!
+        
+        step ("WHEN I click to delete password entry \(hostnameApple)"){
+            passwordPreferencesView.selectFirstPasswordItem(hostnameApple)
+            if BaseTest().isBigSurOS() {
+                passwordPreferencesView.clickCancel()
+            }
             alertView = passwordPreferencesView.clickRemove()
         }
         
         step ("AND I do not confirm deletion"){
-            XCTAssertTrue(alertView!.cancelDeletionFromSheets())
+            XCTAssertTrue(alertView.cancelDeletionFromSheets())
         }
         
         step ("THEN password entry \(hostnameApple) is not deleted"){
@@ -163,12 +169,14 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("WHEN I click to delete password entry \(hostnameApple)"){
-            passwordPreferencesView.selectPassword(hostnameApple)
+            if !BaseTest().isBigSurOS() {
+                passwordPreferencesView.selectFirstPasswordItem(hostnameApple)
+            }
             passwordPreferencesView.clickRemove()
         }
         
         step ("AND I confirm deletion"){
-            XCTAssertTrue(alertView!.confirmRemoveFromSheets())
+            XCTAssertTrue(alertView.confirmRemoveFromSheets())
         }
         
         step ("THEN password entry \(hostnameApple) is correctly deleted"){
@@ -180,8 +188,7 @@ class PasswordPreferencesTests: BaseTest {
         setup()
         
         step ("WHEN I click to see password details of \(hostnameApple)"){
-            uiMenu.populatePasswordsDB()
-            passwordPreferencesView.selectPassword(hostnameApple)
+            passwordPreferencesView.selectFirstPasswordItem(hostnameApple)
             passwordPreferencesView.clickDetails()
         }
         
@@ -200,7 +207,7 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("WHEN I update username of \(hostnameApple)"){
-            passwordPreferencesView.selectPassword(hostnameApple)
+            passwordPreferencesView.selectFirstPasswordItem(hostnameApple)
             passwordPreferencesView.clickDetails()
             passwordPreferencesView.getPasswordFieldToFill(.username).clickClearAndType("user1Update", true)
             passwordPreferencesView.clickDone()
@@ -215,7 +222,6 @@ class PasswordPreferencesTests: BaseTest {
     
     func testSearchForPassword() throws {
         setup()
-        uiMenu.populatePasswordsDB()
         
         step ("WHEN I search for specific password entry 'apple'"){
             passwordPreferencesView.searchForPasswordBy("apple")
@@ -249,7 +255,6 @@ class PasswordPreferencesTests: BaseTest {
     
     func testSortPasswords() throws {
         setup()
-        uiMenu.populatePasswordsDB()
         
         step ("WHEN I click on Sites to sort passwords"){
             passwordPreferencesView.sortPasswords()
