@@ -78,8 +78,8 @@ public class TextLine {
     }
 
     public func stringIndexFor(position: CGPoint) -> Int {
-        var previous = (carets.first?.offset ?? CGPoint.zero).x
-        for caret in carets where caret.edge.isLeading {
+        var previous = carets.first?.offset.x ?? 0
+        for caret in carets where caret.edge.isTrailing {
             let offset = caret.offset.x
             let middle = CGFloat(0.5 * (offset + previous))
             if middle > position.x {
