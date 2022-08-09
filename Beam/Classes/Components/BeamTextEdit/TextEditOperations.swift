@@ -243,7 +243,10 @@ extension TextRoot {
         }
     }
 
-    public func deleteBackward() {
+    //swiftlint:disable:next cyclomatic_complexity function_body_length
+    /// recursionDepth is a counter that prevents extreme recursion calls we've seen in production but have no repro case for
+    public func deleteBackward(_ recursionDepth: Int = 0) {
+        guard recursionDepth < 10 else { return }
         guard root?.state.nodeSelection == nil else {
             editor?.hideInlineFormatter()
             eraseNodeSelection(createEmptyNodeInPlace: false)
@@ -316,7 +319,7 @@ extension TextRoot {
 
                 // Complex case: the previous node contains an embed or an image
                 cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
-                deleteBackward()
+                deleteBackward(recursionDepth + 1)
             } else {
                 // Standard text deletion
                 cmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: false))
@@ -330,7 +333,7 @@ extension TextRoot {
                 // If prev node's a text node then we must remove the last character from the text node and leave the cursor there
                 if let prevTextNode = prevNode as? TextNode, prevTextNode.textCount > 0 {
                     cmdManager.focusElement(prevTextNode, cursorPosition: prevTextNode.textCount)
-                    deleteBackward()
+                    deleteBackward(recursionDepth + 1)
                 } else {
                     // If the previous node is not a text node with text
                     // then we must remove the node altogether and leave the cursor where it is
@@ -340,7 +343,7 @@ extension TextRoot {
                         cmdManager.focusElement(node, cursorPosition: 0)
                     } else {
                         cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
-                        deleteBackward()
+                        deleteBackward(recursionDepth + 1)
                         cmdManager.focusElement(node, cursorPosition: 0)
                     }
                 }
