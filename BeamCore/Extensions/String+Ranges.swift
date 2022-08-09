@@ -43,7 +43,7 @@ public extension String {
             }
             return endIndex
         }
-        if let i = index(endIndex, offsetBy: position, limitedBy: endIndex) {
+        if let i = index(endIndex, offsetBy: position, limitedBy: startIndex) {
             return i
         }
         return startIndex
