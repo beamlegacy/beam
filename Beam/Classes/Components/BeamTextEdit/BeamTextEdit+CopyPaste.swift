@@ -151,12 +151,12 @@ extension BeamTextEdit {
             // We only selected partial text inside a TextNode.
             // We will copy the text as BeamText for beam paste destination, and prepare a NSAttributedString for non-beam paste destination
             if let node = focusedWidget as? TextNode {
-                let range = NSRange(location: selectedTextRange.lowerBound, length: selectedTextRange.count)
-                let attributedString = node.attributedString.attributedSubstring(from: range)
-                strNodes.append(attributedString)
-                if let range = Range(range) {
-                    beamText = node.element.text.extract(range: range)
+                if let range = node.screenRange(for: selectedTextRange) {
+                    let attributedString = node.attributedString.attributedSubstring(from: range)
+                    strNodes.append(attributedString)
                 }
+
+                beamText = node.element.text.extract(range: selectedTextRange)
             }
         }
 
