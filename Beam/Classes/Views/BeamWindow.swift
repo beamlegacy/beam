@@ -218,6 +218,11 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
             }
         }
 
+        // For some obscure reason, SwiftUI will cause a temporary leak of our BeamWindow if
+        // we don't do this.
+        state.cachedJournalStackView = nil
+        state.cachedJournalScrollView = nil
+
         super.close()
     }
 
