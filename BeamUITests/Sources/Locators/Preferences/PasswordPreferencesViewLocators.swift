@@ -24,6 +24,11 @@ enum PasswordPreferencesViewLocators {
         case unlockButton = "Unlock"
     }
 
+    enum Groups: String, CaseIterable, UIElement {
+        case addRemovePassword = "addRemovePassword"
+        case addRemoveCreditCard = "addRemoveCreditCard"
+    }
+
     enum Pickers: String, CaseIterable, UIElement {
         case importPicker = "Import…" // not a button anymore
     }

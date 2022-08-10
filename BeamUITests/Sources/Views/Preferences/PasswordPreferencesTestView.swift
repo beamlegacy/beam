@@ -28,13 +28,21 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     
     @discardableResult
     func clickFill() -> PasswordPreferencesTestView {
-        button(PasswordPreferencesViewLocators.Buttons.fillButton.accessibilityIdentifier).clickOnExistence()
+        if BaseTest().isBigSurOS() {
+            button(PasswordPreferencesViewLocators.Buttons.fillButton.accessibilityIdentifier).clickOnExistence()
+        } else {
+            group(PasswordPreferencesViewLocators.Groups.addRemovePassword.accessibilityIdentifier).children(matching: .button).firstMatch.clickOnExistence()
+        }
         return PasswordPreferencesTestView()
     }
     
     @discardableResult
     func clickRemove() -> AlertTestView {
-        button(PasswordPreferencesViewLocators.Buttons.removeButton.accessibilityIdentifier).clickOnExistence()
+        if BaseTest().isBigSurOS() {
+            button(PasswordPreferencesViewLocators.Buttons.removeButton.accessibilityIdentifier).clickOnExistence()
+        } else {
+            group(PasswordPreferencesViewLocators.Groups.addRemovePassword.accessibilityIdentifier).children(matching: .button).lastMatch.clickOnExistence()
+        }
         return AlertTestView()
     }
     
