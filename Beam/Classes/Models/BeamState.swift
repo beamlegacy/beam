@@ -785,8 +785,13 @@ import Sentry
         }
         backForwardList = try container.decode(NoteBackForwardList.self, forKey: .backForwardList)
 
-        browserTabsManager.tabs = try container.decode([BrowserTab].self, forKey: .tabs)
-        if let tabIndex = try? container.decode(Int.self, forKey: .currentTab), tabIndex < browserTabsManager.tabs.count {
+        let decodedTabs = try container.decode([BrowserTab].self, forKey: .tabs)
+        browserTabsManager.tabs.append(contentsOf: decodedTabs)
+        if let currentTabId = try? container.decode(UUID.self, forKey: .currentTab),
+           let tab = browserTabsManager.tabs.first(where: { $0.id == currentTabId }) {
+            browserTabsManager.setCurrentTab(tab)
+        } else if let tabIndex = try? container.decode(Int.self, forKey: .currentTab),
+                  tabIndex < browserTabsManager.tabs.count {
             browserTabsManager.setCurrentTab(at: tabIndex)
         }
 
@@ -837,9 +842,9 @@ import Sentry
         }
         try container.encode(backForwardList, forKey: .backForwardList)
         try container.encode(mode, forKey: .mode)
-        try container.encode(browserTabsManager.tabs, forKey: .tabs)
+        try container.encode(browserTabsManager.tabs.filter({ !$0.isPinned }), forKey: .tabs)
         if let tab = currentTab {
-            try container.encode(browserTabsManager.tabs.firstIndex(of: tab), forKey: .currentTab)
+            try container.encode(tab.id, forKey: .currentTab)
         }
 
         var tabGroups: Set<TabGroup> = []
