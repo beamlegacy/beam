@@ -68,6 +68,8 @@ extension BeamWindow {
                 state.mode = .web
             }
             _ = state.cmdManager.undo(context: state)
+        } else {
+            AppDelegate.main.reopenAllWindowsFromLastSession()
         }
     }
 

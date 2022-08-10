@@ -118,11 +118,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         startDisplayingBrowserImportCompletions()
 
-        if !isRunningTests {
-            if !shouldRestoreSession() || !reopenAllWindowsFromLastSession() {
-                setupCanRestoreSession()
-                createWindow(frame: nil)
-            }
+        if !isRunningTests, !restoreSessionAtLaunch() {
+            createWindow(frame: nil)
         }
 
         Logger.shared.logInfo("This version of Beam was built from a \(EnvironmentVariables.branchType) branch", category: .general)
@@ -410,13 +407,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var canRestoreSession = false
 
-    private func setupCanRestoreSession() {
+    private func restoreSessionAtLaunch() -> Bool {
         let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
         canRestoreSession = FileManager.default.fileExists(atPath: sessionURL.path)
-    }
 
-    private func shouldRestoreSession() -> Bool {
-        return restoreSession && !PreferencesManager.isWindowsRestorationPrevented
+        guard canRestoreSession,
+              restoreSession,
+              !PreferencesManager.isWindowsRestorationPrevented,
+              !NSEvent.modifierFlags.contains(.shift) else {
+            return false
+        }
+
+        return reopenAllWindowsFromLastSession()
     }
 
     @discardableResult
@@ -441,6 +443,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @discardableResult
     func reopenAllWindowsFromLastSession() -> Bool {
+        guard canRestoreSession else { return false }
         do {
             let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
             let data = try Data(contentsOf: sessionURL)
