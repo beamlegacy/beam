@@ -178,26 +178,29 @@ struct Passwords: View {
 
     private var bottomRow: some View {
         HStack {
-            Group {
-                Button {
-                    showingAddPasswordSheet = true
-                } label: {
-                    Image("basicAdd")
-                        .renderingMode(.template)
-                }.buttonStyle(.bordered)
-                    .sheet(isPresented: $showingAddPasswordSheet) {
-                        PasswordEditView(entry: nil, password: "", editType: .create)
-                            .frame(width: 400, height: 179, alignment: .center)
-                    }
-                Button {
-                    promptDeletePasswordsAlert()
-                } label: {
-                    Image("basicRemove")
-                        .renderingMode(.template)
-                }.buttonStyle(.bordered)
-                    .disabled(passwordsViewModel.selectedEntries.count == 0)
+            BeamControlGroup {
+                Group {
+                    Button {
+                        showingAddPasswordSheet = true
+                    } label: {
+                        Image("basicAdd")
+                            .renderingMode(.template)
+                    }.buttonStyle(.bordered)
+                    Button {
+                        promptDeletePasswordsAlert()
+                    } label: {
+                        Image("basicRemove")
+                            .renderingMode(.template)
+                    }.buttonStyle(.bordered)
+                        .disabled(passwordsViewModel.selectedEntries.count == 0)
+                }
             }
             .fixedSize()
+            .accessibilityIdentifier("addRemovePassword")
+            .sheet(isPresented: $showingAddPasswordSheet) {
+                PasswordEditView(entry: nil, password: "", editType: .create)
+                    .frame(width: 400, height: 179, alignment: .center)
+            }
             Button {
                 if let entry = passwordsViewModel.selectedEntries.first {
                     do {
