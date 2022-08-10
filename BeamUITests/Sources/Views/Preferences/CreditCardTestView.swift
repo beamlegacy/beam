@@ -18,10 +18,9 @@ class CreditCardTestView: BaseView {
         if BaseTest().isBigSurOS() {
             button(PasswordPreferencesViewLocators.Buttons.addCreditCardButton.accessibilityIdentifier).clickOnExistence()
         } else {
-        app.windows["Passwords"].sheets.groups.children(matching: .button).element(boundBy: 0).clickOnExistence()
+            XCTAssertTrue(group(PasswordPreferencesViewLocators.Groups.addRemoveCreditCard.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            group(PasswordPreferencesViewLocators.Groups.addRemoveCreditCard.accessibilityIdentifier).children(matching: .button).firstMatch.clickOnExistence()
         }
-        //Once BE-4139 is implemented to be replaced with 
-        //button(PasswordPreferencesViewLocators.Buttons.addCreditCardButton.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
@@ -105,10 +104,9 @@ class CreditCardTestView: BaseView {
         if BaseTest().isBigSurOS() {
             return button(PasswordPreferencesViewLocators.Buttons.removeCreditCardButton.accessibilityIdentifier)
         } else {
-        return app.windows["Passwords"].sheets.groups.children(matching: .button).element(boundBy: 1)
+            XCTAssertTrue(group(PasswordPreferencesViewLocators.Groups.addRemoveCreditCard.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            return group(PasswordPreferencesViewLocators.Groups.addRemoveCreditCard.accessibilityIdentifier).children(matching: .button).lastMatch
         }
-        //Once BE-4139 is implemented to be replaced with 
-        //button(PasswordPreferencesViewLocators.Buttons.removeCreditCardButton.accessibilityIdentifier)
     }
     
     func cancelCreditCardDeletion() {

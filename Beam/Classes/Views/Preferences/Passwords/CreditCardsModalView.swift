@@ -62,6 +62,7 @@ struct CreditCardsModalView: View {
                     }
                 }
                 .fixedSize()
+                .accessibilityIdentifier("addRemoveCreditCard")
                 Spacer()
                 Button {
                     dismiss()
