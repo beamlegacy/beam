@@ -13,20 +13,25 @@ class FileMenu: BaseMenuBar {
     let menuBarTitle = "File"
     
     func deleteAllLocalContents() {
-        openMenu().hoverImportExport().menuItem("Delete all local contents").clickOnExistence()
+        openMenu().menuItem("Delete all local contents").clickOnExistence()
     }
     
     func deleteAllNotes() {
-        openMenu().hoverImportExport().menuItem("Delete all notes").clickOnExistence()
+        openMenu().menuItem("Delete all notes").clickOnExistence()
     }
     
     func openMenu() -> FileMenu {
         menuBarItem(menuBarTitle).clickOnExistence()
         return self
     }
-    
-    func hoverImportExport() -> FileMenu {
-        menuItem("Import and Export").hover()
+
+    func hoverImport() -> FileMenu {
+        menuItem("Import").hover()
+        return self
+    }
+
+    func hoverExport() -> FileMenu {
+        menuItem("Export").hover()
         return self
     }
     
