@@ -182,6 +182,12 @@ extension AppDelegate {
             openPanel?.close()
         }
     }
+
+    // MARK: Markdown
+
+    @IBAction func exportToMarkdown(_ sender: Any) {
+        exportNotesToMarkdown([])
+    }
 }
 
 // MARK: - DB Integrity check
