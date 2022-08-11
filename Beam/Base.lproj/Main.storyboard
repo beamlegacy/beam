@@ -465,79 +465,54 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
-                                        <menuItem title="Import and Export" id="AOL-7q-9yo">
+                                        <menuItem isSeparatorItem="YES" id="aJh-i4-bef"/>
+                                        <menuItem title="Import" id="AOL-7q-9yo">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Import and Export" id="4nL-wI-84W">
+                                            <menu key="submenu" title="Import" id="4nL-wI-84W">
                                                 <items>
-                                                    <menuItem title="Import From Roam" id="rHG-BR-6jc">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="importRoam:" target="Voe-Tx-rLC" id="8Ni-tq-Xk9"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="o5q-Jj-gQl"/>
-                                                    <menuItem title="Import notes from files" tag="-1111" id="FI2-89-hxd">
+                                                    <menuItem title="Beam note..." tag="-1111" id="FI2-89-hxd">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="importJSONFiles:" target="Voe-Tx-rLC" id="TAT-1g-YMg"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Export all notes to files" tag="-1111" id="5Hb-MJ-akg">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="exportAllNotesToJSON:" target="Voe-Tx-rLC" id="xv1-5n-Ltx"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="ITV-pu-Qpw"/>
-                                                    <menuItem title="Delete all notes" id="4e7-0u-pUE">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="resetDatabase:" target="Voe-Tx-rLC" id="BZD-93-Qp0"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Delete all local contents" tag="-1111" id="T1w-pc-FGT">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="deleteLocalContent:" target="Voe-Tx-rLC" id="C4r-KP-XsZ"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="EDR-BD-fNS"/>
-                                                    <menuItem title="Backup all notes" id="XvI-yN-rpy">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="exportNotes:" target="Voe-Tx-rLC" id="a3N-KW-vL7"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Import from backup" id="IpA-D7-xmG">
+                                                    <menuItem title="Beam Backup..." id="IpA-D7-xmG">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="importNotes:" target="Voe-Tx-rLC" id="5ba-tS-OS3"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="tjb-m3-N6g"/>
-                                                    <menuItem title="Import History" id="cgO-8L-fvv">
+                                                    <menuItem isSeparatorItem="YES" id="o5q-Jj-gQl"/>
+                                                    <menuItem title="Roam file..." id="rHG-BR-6jc">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <menu key="submenu" title="Import History" id="gAp-RQ-KWx">
+                                                        <connections>
+                                                            <action selector="importRoam:" target="Voe-Tx-rLC" id="8Ni-tq-Xk9"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="tjb-m3-N6g"/>
+                                                    <menuItem title="History" id="cgO-8L-fvv">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <menu key="submenu" title="History" id="gAp-RQ-KWx">
                                                             <items>
-                                                                <menuItem title="Import Safari History" id="3xJ-aB-Hsi">
+                                                                <menuItem title="From Safari..." id="3xJ-aB-Hsi">
                                                                     <modifierMask key="keyEquivalentModifierMask"/>
                                                                     <connections>
                                                                         <action selector="importSafariHistory:" target="Voe-Tx-rLC" id="yBq-S3-5zY"/>
                                                                     </connections>
                                                                 </menuItem>
-                                                                <menuItem title="Import Firefox History" id="ORD-oT-gZt">
+                                                                <menuItem title="From Firefox..." id="ORD-oT-gZt">
                                                                     <modifierMask key="keyEquivalentModifierMask"/>
                                                                     <connections>
                                                                         <action selector="importFirefoxHistory:" target="Voe-Tx-rLC" id="ctj-vu-7Yk"/>
                                                                     </connections>
                                                                 </menuItem>
-                                                                <menuItem title="Import Chrome History" id="1up-Ef-3Fj">
+                                                                <menuItem title="From Chrome..." id="1up-Ef-3Fj">
                                                                     <modifierMask key="keyEquivalentModifierMask"/>
                                                                     <connections>
                                                                         <action selector="importChromeHistory:" target="Voe-Tx-rLC" id="BAG-iw-5da"/>
                                                                     </connections>
                                                                 </menuItem>
-                                                                <menuItem title="Import Brave History" id="IJF-Y1-BdP" userLabel="Import Brave History">
+                                                                <menuItem title="From Brave..." id="IJF-Y1-BdP" userLabel="Import Brave History">
                                                                     <modifierMask key="keyEquivalentModifierMask"/>
                                                                     <connections>
                                                                         <action selector="importBraveHistory:" target="Voe-Tx-rLC" id="dPX-aH-3OB"/>
@@ -546,23 +521,23 @@
                                                             </items>
                                                         </menu>
                                                     </menuItem>
-                                                    <menuItem title="Import Passwords" id="o1h-Xz-REj">
+                                                    <menuItem title="Passwords" id="o1h-Xz-REj">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <menu key="submenu" title="Import Passwords" id="Dfw-BA-NRF">
+                                                        <menu key="submenu" title="Passwords" id="Dfw-BA-NRF">
                                                             <items>
-                                                                <menuItem title="Import Chrome Passwords" id="9Le-VN-E3u">
+                                                                <menuItem title="From Chrome..." id="9Le-VN-E3u">
                                                                     <modifierMask key="keyEquivalentModifierMask"/>
                                                                     <connections>
                                                                         <action selector="importChromePasswords:" target="Voe-Tx-rLC" id="cJD-vG-pFV"/>
                                                                     </connections>
                                                                 </menuItem>
-                                                                <menuItem title="Import Brave Passwords" id="rVv-Tv-cBI">
+                                                                <menuItem title="From Brave..." id="rVv-Tv-cBI">
                                                                     <modifierMask key="keyEquivalentModifierMask"/>
                                                                     <connections>
                                                                         <action selector="importBravePasswords:" target="Voe-Tx-rLC" id="9Q5-s3-QYa"/>
                                                                     </connections>
                                                                 </menuItem>
-                                                                <menuItem title="Import Passwords from CSV File…" id="V1a-7E-Uh2">
+                                                                <menuItem title="From CSV File…" id="V1a-7E-Uh2">
                                                                     <modifierMask key="keyEquivalentModifierMask"/>
                                                                     <connections>
                                                                         <action selector="importCSVPasswords:" target="Voe-Tx-rLC" id="mlZ-AN-bEQ"/>
@@ -574,7 +549,27 @@
                                                 </items>
                                             </menu>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="aJh-i4-bef"/>
+                                        <menuItem title="Export" id="5zn-xS-F3N" userLabel="Export">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" title="Export" id="7pW-xj-1Sf">
+                                                <items>
+                                                    <menuItem title="Beam Backup..." id="XvI-yN-rpy">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="exportNotes:" target="Voe-Tx-rLC" id="a3N-KW-vL7"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="ci5-nd-Obf"/>
+                                                    <menuItem title="Markdown file..." id="0ic-HM-Rf4">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="exportToMarkdown:" target="Voe-Tx-rLC" id="oE9-wN-xXs"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="pPB-WR-CLk"/>
                                         <menuItem title="Page Setup…" keyEquivalent="P" id="qIS-W8-SiK">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
@@ -584,6 +579,19 @@
                                         <menuItem title="Print…" keyEquivalent="p" id="aTl-1u-JFS">
                                             <connections>
                                                 <action selector="print:" target="Ady-hI-5gd" id="qaZ-4w-aoO"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="08I-A3-GkX"/>
+                                        <menuItem title="Delete all notes" id="4e7-0u-pUE">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="resetDatabase:" target="Voe-Tx-rLC" id="BZD-93-Qp0"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Delete all local contents" tag="-1111" id="T1w-pc-FGT">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="deleteLocalContent:" target="Voe-Tx-rLC" id="C4r-KP-XsZ"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -1413,13 +1421,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="651"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="642"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="649"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="640"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="908" height="649"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="908" height="640"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1581,7 +1589,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0zW-aA-Txg">
-                                    <rect key="frame" x="1" y="634" width="798" height="16"/>
+                                    <rect key="frame" x="1" y="625" width="798" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="sMU-KD-F4T">

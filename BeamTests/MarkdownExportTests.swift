@@ -96,7 +96,7 @@ final class MarkdownExportTests: XCTestCase {
 
             ## Images
 
-              * ![cpt-0.jpg](cpt-0.jpg)
+              * ![cpt-0.jpg](Capture_cpt-0.jpg)
 
             ## Videos
 
