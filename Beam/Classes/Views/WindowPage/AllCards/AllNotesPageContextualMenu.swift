@@ -8,14 +8,13 @@
 import Foundation
 import BeamCore
 
-
 protocol AllNotesPageContextualMenuDelegate: AnyObject {
     func contextualMenuShouldPublishNote() -> Bool
     func contextualMenuWillUndoRedoDeleteDocuments()
     func contextualMenuWillDeleteDocuments(ids: [UUID], all: Bool)
 }
 
-class AllNotesPageContextualMenu {
+final class AllNotesPageContextualMenu {
 
     private let selectedNotes: [BeamNote]
     private let onLoadBlock: ((_ isLoading: Bool) -> Void)?
@@ -33,15 +32,16 @@ class AllNotesPageContextualMenu {
 
     func presentMenuForNotes(at: CGPoint, allowImports: Bool = false) {
         guard let window = AppDelegate.main.window else { return }
+
         let menu = NSMenu()
         menu.font = BeamFont.regular(size: 13).nsFont
 
         let allIds = selectedNotes.map { $0.id }
         let containsToday =  allIds.contains(BeamData.shared.todaysNote.id)
 
+        let count = selectedNotes.count
         var countSuffix = " All"
         if selectedNotes.count > 0 {
-            let count = selectedNotes.count
             countSuffix = count == 1 ? "" : " \(count) Notes"
 
             guard let pinnedManager = AppDelegate.main.window?.state.data.pinnedManager else { return }
@@ -90,14 +90,13 @@ class AllNotesPageContextualMenu {
                 ))
             }
             menu.addItem(NSMenuItem.separator())
-
         }
 
         if allowImports {
             setupImportMenu(in: menu)
         }
 
-       setupExportMenu(in: menu, countSuffix: countSuffix)
+        setupExportMenu(in: menu, selectedNodesCount: count)
 
         if !(allIds.count == 1 && containsToday) {
             menu.addItem(NSMenuItem.separator())
@@ -116,18 +115,19 @@ class AllNotesPageContextualMenu {
     private func setupImportMenu(in menu: NSMenu) {
         let importMenu = NSMenu()
         importMenu.addItem(NSMenuItem(
-            title: "Roam...",
-            action: #selector(roamImport),
+            title: "Beam note...",
+            action: #selector(importFromJSON),
             keyEquivalent: ""
         ))
         importMenu.addItem(NSMenuItem(
-            title: "Backup...",
+            title: "Beam Backup...",
             action: #selector(backupImport),
             keyEquivalent: ""
         ))
+        importMenu.addItem(.separator())
         importMenu.addItem(NSMenuItem(
-            title: "JSON...",
-            action: #selector(importFromJSON),
+            title: "Roam file...",
+            action: #selector(roamImport),
             keyEquivalent: ""
         ))
         let importItem = NSMenuItem(
@@ -139,27 +139,29 @@ class AllNotesPageContextualMenu {
         menu.setSubmenu(importMenu, for: importItem)
     }
 
-    private func setupExportMenu(in menu: NSMenu, countSuffix: String) {
+    private func setupExportMenu(in menu: NSMenu, selectedNodesCount: Int) {
         let exportMenu = NSMenu()
-        exportMenu.addItem(NSMenuItem(
-            title: "beamNote...",
-            action: #selector(exportNotesToBeamNote),
-            keyEquivalent: ""
-        ))
+        if selectedNodesCount >= 1 {
+            exportMenu.addItem(NSMenuItem(
+                title: "Beam \(selectedNodesCount == 1 ? "Note" : "Notes")...",
+                action: #selector(exportNotesToBeamNote),
+                keyEquivalent: ""
+            ))
+        } else {
+            exportMenu.addItem(NSMenuItem(
+                title: "Beam Backup...",
+                action: #selector(databaseExport),
+                keyEquivalent: ""
+            ))
+        }
+        exportMenu.addItem(.separator())
         exportMenu.addItem(NSMenuItem(
             title: "Markdown...",
             action: #selector(exportNotesToMarkdown),
             keyEquivalent: ""
         ))
-        if selectedNotes.count <= 0 {
-            exportMenu.addItem(NSMenuItem(
-                title: "Entire database...",
-                action: #selector(databaseExport),
-                keyEquivalent: ""
-            ))
-        }
         let exportItem = NSMenuItem(
-            title: "Export\(countSuffix)",
+            title: "Export",
             action: nil,
             keyEquivalent: ""
         )
@@ -191,6 +193,10 @@ class AllNotesPageContextualMenu {
 
     @objc private func importFromJSON() {
         AppDelegate.main.importJSONFiles(self)
+    }
+
+    @objc private func exportToMarkdown() {
+        AppDelegate.main.exportNotesToMarkdown()
     }
 
     @objc private func exportNotesToBeamNote() {
@@ -281,6 +287,8 @@ class AllNotesPageContextualMenu {
     }
 
     @objc private func deleteNotes() {
+        guard let window = AppDelegate.main.window else { return }
+
         let alert = NSAlert()
         let messageNotesInfo = selectedNotes.count == 1 ?
             "this note" :
@@ -291,7 +299,6 @@ class AllNotesPageContextualMenu {
         alert.addButton(withTitle: "Delete")
         alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .warning
-        guard let window = AppDelegate.main.window else { return }
         alert.beginSheetModal(for: window) { (response) in
             if response == .alertFirstButtonReturn {
                 self.confirmedDeleteSelectedNotes()
