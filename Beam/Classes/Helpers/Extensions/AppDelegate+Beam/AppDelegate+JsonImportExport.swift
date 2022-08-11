@@ -101,7 +101,7 @@ extension AppDelegate {
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
         // TODO: i18n
-        openPanel.title = loc("Choose the files import")
+        openPanel.title = loc("Choose the files to import")
         openPanel.begin { [weak openPanel] result in
             guard result == .OK
             else { openPanel?.close(); return }
@@ -115,26 +115,43 @@ extension AppDelegate {
 
     // MARK: Markdown export
 
-    func exportNotesToMarkdown(_ notes: [BeamNote]) {
-        guard !notes.isEmpty else { return }
-
+    func exportNotesToMarkdown(_ selectedNotes: [BeamNote] = []) {
         let openPanel = NSOpenPanel()
         openPanel.canChooseDirectories = true
         openPanel.canCreateDirectories = true
+        openPanel.canChooseFiles = false
         openPanel.title = loc("Choose the directory to export to Markdown")
+        openPanel.prompt = loc("Export", comment: "Export Panel Button")
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let selectedURL = openPanel?.url else { return }
 
             var failedCount: UInt = .zero
 
-            for note in notes {
+            func export(note: BeamNote, isExportingAllNotes: Bool = false) {
                 do {
-                    let export = try MarkdownExporter.export(of: note)
+                    let export = try MarkdownExporter.export(of: note, forceFetchIfEmpty: true)
                     try export.write(to: selectedURL)
+                } catch MarkdownExporter.Error.emptyNote {
+                    Logger.shared.logError("Error exporting empty note \(note) to Markdown", category: .general)
+                    guard !isExportingAllNotes else { return }
+                    // incrementing failedCount note for errorAlerts  only if we're not exporting all notes
+                    failedCount += 1
                 } catch {
                     Logger.shared.logError("Error exporting \(note) to Markdown: \(error)", category: .general)
                     failedCount += 1
                 }
+            }
+
+            if selectedNotes.isEmpty, let allNotesIDs = try? self.data.currentDocumentCollection?.fetchIds(filters: []) {
+                for note in allNotesIDs.compactMap({ BeamNote.fetch(id: $0, keepInMemory: false) }) {
+                    export(note: note, isExportingAllNotes: true)
+                }
+            } else if !selectedNotes.isEmpty {
+                for note in selectedNotes {
+                    export(note: note)
+                }
+            } else {
+                UserAlert.showError(message: "There are no notes to export.")
             }
 
             if failedCount != .zero {

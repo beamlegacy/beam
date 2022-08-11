@@ -31,32 +31,28 @@ struct BeamNoteMarkdownExport {
     func write(to url: URL) throws {
         let markdownURL: URL
         let attachmentsURL: URL
+        let sanitizedTitle: String = title.sanitized
         if url.hasDirectoryPath {
-            markdownURL = url.appendingPathComponent(sanitize(title)).appendingPathExtension(Self.fileExtension)
+            markdownURL = url.appendingPathComponent(sanitizedTitle).appendingPathExtension(Self.fileExtension)
             attachmentsURL = url
         } else {
             markdownURL = url
             attachmentsURL = url.deletingLastPathComponent()
         }
         try contents.write(to: markdownURL, atomically: true, encoding: .utf8)
-        try writeAttachments(to: attachmentsURL) // watch out for security scopes if you're writing somewhere special
+        try writeAttachments(to: attachmentsURL, sanitizedPrefix: sanitizedTitle) // watch out for security scopes if you're writing somewhere special
     }
 
     /// Writes attachments to the directory where the Markdown contents export will be located.
-    private func writeAttachments(to baseURL: URL) throws {
+    private func writeAttachments(to baseURL: URL, sanitizedPrefix: String) throws {
         for attachment in attachments {
-            let dstURL = baseURL.appendingPathComponent(sanitize(attachment.name)).appendingPathExtension(attachment.type)
+            let dstURL = baseURL
+                .appendingPathComponent(attachment.sanitizedFilename(withSanitizedPrefix: sanitizedPrefix))
+                .appendingPathExtension(attachment.type)
             try dstURL.performWithSecurityScopedResource { url in
                 try attachment.data.write(to: url)
             }
         }
-    }
-
-    /// Sanitizes a string that could be used in a path/URL.
-    /// - Parameter string: the string to sanitize.
-    /// - Returns: the sanitized string.
-    private func sanitize(_ string: String) -> String {
-        return string.replacingOccurrences(of: "/", with: ":")
     }
 }
 
@@ -103,14 +99,24 @@ enum MarkdownExporter {
     }
 
     /// Exports a ``BeamNote`` to a ``BeamNoteMarkdownExport``.
-    /// - Parameter note: a  ``BeamNote`` instance.
-    /// - Returns: A Markdown export if it succeeds, `nil` otherwise.
-    static func export(of note: BeamNote) throws -> BeamNoteMarkdownExport {
-        guard !note.isEntireNoteEmpty() else {
-            throw Error.emptyNote
+    /// - Parameters:
+    ///   - note: a  ``BeamNote`` instance.
+    ///   - forceFetchIfEmpty: try to fetch the note if the passed instance is empty, `false` by default.
+    /// - Returns: A Markdown export if it succeeds, throws with appropriate otherwise.
+    static func export(of note: BeamNote, forceFetchIfEmpty: Bool = false) throws -> BeamNoteMarkdownExport {
+        let noteToExport: BeamNote
+        if note.isEntireNoteEmpty() {
+            guard forceFetchIfEmpty, let fetchedNote = BeamNote.fetch(id: note.id, keepInMemory: false), !fetchedNote.isEntireNoteEmpty()
+            else {
+                throw Error.emptyNote
+            }
+            noteToExport = fetchedNote
+        } else {
+            noteToExport = note
         }
-        var document = BeamNoteMarkdownExport(title: note.title)
-        for (content, attachments) in note.children.compactMap({ Self.content(for: $0) }) {
+        // We have a non-empty note, let's build the Markdown contents
+        var document = BeamNoteMarkdownExport(title: noteToExport.title)
+        for (content, attachments) in noteToExport.children.compactMap({ Self.content(for: $0, filenamePrefix: noteToExport.title) }) {
             document.append(content)
             document.appendAttachments(attachments)
         }
@@ -128,9 +134,10 @@ private extension MarkdownExporter {
     /// Provides content for a ``BeamElement``.
     /// - Parameters:
     ///   - child: the ``BeamElement`` instance.
+    ///   - filenamePrefix: a prefix to use for all the filenames attachment of the export.
     ///   - level: the level at which we render the element.
     /// - Returns: Markdown content if any, `nil` otherwise.
-    static func content(for child: BeamElement, level: Int = .zero) -> MarkdownContent? {
+    static func content(for child: BeamElement, filenamePrefix: String, level: Int = .zero) -> MarkdownContent? {
         switch child.kind {
         case .bullet where child.children.isEmpty:
             guard !child.text.isEmpty else { return nil }
@@ -139,7 +146,9 @@ private extension MarkdownExporter {
         case .bullet:
             guard !child.text.isEmpty else { return nil }
             let subContent = child.children.reduce(into: (String.empty, [])) { partialResult, element in
-                Self.content(for: element, level: level+1).map { partialResult = (partialResult.0 + $0.0, partialResult.1 + $0.1) }
+                Self.content(for: element, filenamePrefix: filenamePrefix, level: level+1).map {
+                    partialResult = (partialResult.0 + $0.0, partialResult.1 + $0.1)
+                }
             }
             let headerContent = render(child.text.markdown, deepLevel: level)
             let finalHeaderContent = level == .zero ? (headerContent + .newline) : headerContent
@@ -154,7 +163,9 @@ private extension MarkdownExporter {
             let heading = child.text.text
             guard !heading.isEmpty else { return nil }
             let subContent = child.children.reduce(into: (String.empty, [])) { partialResult, element in
-                Self.content(for: element, level: level+1).map { partialResult = (partialResult.0 + $0.0, partialResult.1 + $0.1) }
+                Self.content(for: element, filenamePrefix: filenamePrefix, level: level+1).map {
+                    partialResult = (partialResult.0 + $0.0, partialResult.1 + $0.1)
+                }
             }
             let headerContent = render(headingify(heading, headingLevel: headingLevel), deepLevel: level)
             let finalHeaderContent = level == .zero ? (headerContent + .newline) : headerContent
@@ -176,7 +187,8 @@ private extension MarkdownExporter {
             guard let file = try? BeamFileDBManager.shared?.fetch(uid: uuid) else {
                 return nil
             }
-            return (render("![\(file.name)](\(file.name))", deepLevel: level), [file])
+            let sanitizedFilename = file.sanitizedFilename(withSanitizedPrefix: filenamePrefix.sanitized)
+            return (render("![\(file.name)](\(sanitizedFilename))", deepLevel: level), [file])
 
         default:
             return nil
@@ -238,6 +250,12 @@ private extension MarkdownExporter {
     }
 }
 
+private extension BeamFileRecord {
+    func sanitizedFilename(withSanitizedPrefix sanitizedPrefix: String) -> String {
+        return sanitizedPrefix.appending("_").appending(name.sanitized)
+    }
+}
+
 private extension BeamText {
     /// Renders as Markdown for all ranges of the receiver.
     var markdown: String {
@@ -294,6 +312,10 @@ private extension String {
 
     func surround(with delimitor: String) -> String {
         "\(delimitor)\(self)\(delimitor)"
+    }
+
+    var sanitized: String {
+        return replacingOccurrences(of: "/", with: ":")
     }
 }
 
