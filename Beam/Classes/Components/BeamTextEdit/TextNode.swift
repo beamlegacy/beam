@@ -56,14 +56,6 @@ public class TextNode: ElementNode {
         }
     }
 
-    override var hover: Bool {
-        didSet {
-            if oldValue != hover {
-                invalidateTextAsync()
-            }
-        }
-    }
-
     override var availableWidth: CGFloat {
         didSet {
             if availableWidth != oldValue {

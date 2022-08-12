@@ -20,6 +20,8 @@ class CheckBoxTableCellView: NSTableCellView {
     }
     var onCheckChange: ((Bool) -> Void)?
 
+    override var wantsUpdateLayer: Bool { true }
+
     override init(frame frameRect: NSRect) {
         checkBoxLayer = BeamCheckboxCALayer()
         super.init(frame: frameRect)
@@ -28,7 +30,6 @@ class CheckBoxTableCellView: NSTableCellView {
     }
 
     override func updateLayer() {
-        super.updateLayer()
         var frame = checkBoxLayer.bounds
         frame.origin = CGPoint(x: (bounds.width - frame.width) / 2, y: (bounds.height - frame.height) / 2)
         checkBoxLayer.frame = frame

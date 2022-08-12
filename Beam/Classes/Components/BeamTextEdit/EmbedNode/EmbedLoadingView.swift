@@ -6,6 +6,8 @@ final class EmbedLoadingView: NSView {
     private var imageName: String?
     private let imageMinSize: CGFloat = 32
 
+    override var wantsUpdateLayer: Bool { true }
+
     init() {
         super.init(frame: .zero)
         prepare()
@@ -20,9 +22,7 @@ final class EmbedLoadingView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func layout() {
-        super.layout()
-
+    override func updateLayer() {
         updateImage()
     }
 
