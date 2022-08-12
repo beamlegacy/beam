@@ -19,6 +19,7 @@ struct BoxedTextFieldView: View {
     var onBackspace: (() -> Void)?
     var onEscape: (() -> Void)?
     var onTab: (() -> Bool)?
+    var onBacktab: (() -> Bool)?
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -32,7 +33,8 @@ struct BoxedTextFieldView: View {
                           onCommit: { _ in onCommit?() },
                           onEscape: onEscape,
                           onBackspace: onBackspace,
-                          onTab: onTab)
+                          onTab: onTab,
+                          onBacktab: onBacktab)
                 .frame(height: 32)
         }
         .padding(.horizontal, BeamSpacing._80)
