@@ -16,6 +16,7 @@ class CreditCardTestView: BaseView {
     @discardableResult
     func clickAddCreditCardButton() -> CreditCardTestView {
         if BaseTest().isBigSurOS() {
+            XCTAssertTrue(button(PasswordPreferencesViewLocators.Buttons.addCreditCardButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             button(PasswordPreferencesViewLocators.Buttons.addCreditCardButton.accessibilityIdentifier).clickOnExistence()
         } else {
             XCTAssertTrue(group(PasswordPreferencesViewLocators.Groups.addRemoveCreditCard.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))

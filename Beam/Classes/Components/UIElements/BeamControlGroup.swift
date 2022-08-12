@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct BeamControlGroup<Content>: View where Content: View {
+    let accessibilityIdentifier: String
     let content: () -> Content
 
     var body: some View {
@@ -15,6 +16,7 @@ struct BeamControlGroup<Content>: View where Content: View {
             ControlGroup {
                 content()
             }
+            .accessibilityIdentifier(accessibilityIdentifier)
         } else {
             Group {
                 content()

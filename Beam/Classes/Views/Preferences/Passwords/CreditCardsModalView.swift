@@ -37,8 +37,8 @@ struct CreditCardsModalView: View {
             .background(BeamColor.Generic.background.swiftUI)
 
             HStack {
-                BeamControlGroup {
-                    Group {
+                BeamControlGroup(accessibilityIdentifier: "addRemoveCreditCard") {
+                    HStack {
                         Button {
                             creditCardsViewModel.editCreditCard(row: nil)
                             showingEditSheet = true
@@ -62,7 +62,6 @@ struct CreditCardsModalView: View {
                     }
                 }
                 .fixedSize()
-                .accessibilityIdentifier("addRemoveCreditCard")
                 Spacer()
                 Button {
                     dismiss()
