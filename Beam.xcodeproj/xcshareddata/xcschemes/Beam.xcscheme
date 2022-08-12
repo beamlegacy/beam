@@ -811,6 +811,10 @@
             isEnabled = "NO">
          </CommandLineArgument>
          <CommandLineArgument
+            argument = "-NSConstraintBasedLayoutVisualizeMutuallyExclusiveConstraints YES"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "-noFIRAnalyticsDebugEnabled"
             isEnabled = "NO">
          </CommandLineArgument>

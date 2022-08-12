@@ -82,13 +82,10 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
         guard !layoutInvalidated, !inLayout else { return }
         layoutInvalidated = true
         invalidateIntrinsicContentSize()
-        DispatchQueue.main.async { [weak self] in
-            self?.layout()
-        }
+        needsLayout = true
     }
 
     override func updateLayer() {
-        super.updateLayer()
         layer?.backgroundColor = BeamColor.Generic.background.cgColor
     }
 
@@ -106,7 +103,10 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
     var removedViews = Set<BeamTextEdit>()
 
     public override func layout() {
+        super.layout()
+
         guard enclosingScrollView != nil else { return }
+
         inLayout = true
         defer {
             layoutInvalidated = false
@@ -231,7 +231,7 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
         }
 
         if !insertedViews.isEmpty || !removedViews.isEmpty {
-            layout()
+            needsLayout = true
         }
     }
 
@@ -333,6 +333,8 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
     }
 
     override func viewDidMoveToWindow() {
+        guard window != nil else { return }
+
         initialLayout = false
         if let offset = state.lastScrollOffset[UUID.null],
            let clipView = enclosingScrollView?.contentView,
