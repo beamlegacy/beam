@@ -78,7 +78,7 @@ struct OnboardingEmailConfirmationView: View {
                         .font(BeamFont.regular(size: 14).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
 
-                    ButtonLabel("Send Confirmation Email Again", customStyle: .init(font: BeamFont.medium(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                        ButtonLabel("Send Confirmation Email Again", customStyle: .init(font: BeamFont.medium(size: 13).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                         resendEmailConfirmation()
                     }
                     .overlay(emailConfirmationTooltip == nil ? nil : Tooltip(title: emailConfirmationTooltip ?? "")
