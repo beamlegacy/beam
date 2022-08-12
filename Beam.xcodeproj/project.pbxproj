@@ -1457,6 +1457,7 @@
 		DA3A84B7280466C900092200 /* NoteScoreTriggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3A84B6280466C900092200 /* NoteScoreTriggerTests.swift */; };
 		DA3A84BE2805C3D500092200 /* NoteDailySummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3A84BD2805C3D500092200 /* NoteDailySummary.swift */; };
 		DA3A84C52805DCCD00092200 /* NoteDailySummaryTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3A84C42805DCCD00092200 /* NoteDailySummaryTest.swift */; };
+		DA3AB61528A4F0B700BB52EC /* ReadabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3AB61428A4F0B700BB52EC /* ReadabilityTests.swift */; };
 		DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3E41BF2642CC7900BA3952 /* TextSaver.swift */; };
 		DA3FD00D282D12AD00294A14 /* WebBrowsingBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3FD00C282D12AD00294A14 /* WebBrowsingBaseTests.swift */; };
 		DA52E967276B4430008D4990 /* BrowserType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA52E966276B4430008D4990 /* BrowserType.swift */; };
@@ -3420,6 +3421,7 @@
 		DA3A84B6280466C900092200 /* NoteScoreTriggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteScoreTriggerTests.swift; sourceTree = "<group>"; };
 		DA3A84BD2805C3D500092200 /* NoteDailySummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDailySummary.swift; sourceTree = "<group>"; };
 		DA3A84C42805DCCD00092200 /* NoteDailySummaryTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDailySummaryTest.swift; sourceTree = "<group>"; };
+		DA3AB61428A4F0B700BB52EC /* ReadabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadabilityTests.swift; sourceTree = "<group>"; };
 		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextSaver.swift; sourceTree = "<group>"; };
 		DA3FD00C282D12AD00294A14 /* WebBrowsingBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebBrowsingBaseTests.swift; sourceTree = "<group>"; };
 		DA52E966276B4430008D4990 /* BrowserType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserType.swift; sourceTree = "<group>"; };
@@ -6673,6 +6675,7 @@
 		965A78402514F149009980D4 /* BeamTests */ = {
 			isa = PBXGroup;
 			children = (
+				DA3AB61428A4F0B700BB52EC /* ReadabilityTests.swift */,
 				DA3FD00C282D12AD00294A14 /* WebBrowsingBaseTests.swift */,
 				DA3A84B6280466C900092200 /* NoteScoreTriggerTests.swift */,
 				A5E00B4C27EB5A9F00474360 /* Autocomplete */,
@@ -9941,6 +9944,7 @@
 				A519F0732721A68100BB42E2 /* CacheTests.swift in Sources */,
 				96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */,
 				3338064228510808002D1EB3 /* PinNoteTests.swift in Sources */,
+				DA3AB61528A4F0B700BB52EC /* ReadabilityTests.swift in Sources */,
 				8768566D27723A6E002A8069 /* PasswordListViewModelTests.swift in Sources */,
 				8A7F949A26A8750A00270A74 /* PointAndShootCreateTargetTest.swift in Sources */,
 				A00F5A262656965900D338E1 /* PasswordsDBTests.swift in Sources */,
