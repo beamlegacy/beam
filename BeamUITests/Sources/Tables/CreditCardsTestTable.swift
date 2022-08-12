@@ -46,6 +46,9 @@ class CreditCardsTestTable: BaseView, Rowable {
     
     @discardableResult
     func selectCreditCardItem(index: Int) -> CreditCardsTestTable {
+        if BaseTest().isBigSurOS() {
+            getCardIconElement(index: index).hoverAndTapInTheMiddle()
+        }
         getCardIconElement(index: index).tapInTheMiddle()
         return self
     }
