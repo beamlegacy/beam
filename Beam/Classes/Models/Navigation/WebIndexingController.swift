@@ -68,6 +68,7 @@ class WebIndexingController {
         if tabIndexingInfo.shouldBeIndexed {
             Logger.shared.logInfo("Indexing navigation to: '\(tabIndexingInfo.url)', title: '\(tabIndexingInfo.document.title)'", category: .webIndexing)
 
+
             _ = LinkStore.shared.visit(tabIndexingInfo.url.string, title: tabIndexingInfo.document.title, content: tabIndexingInfo.textContent)
             appendToClustering(url: url, tabIndexingInfo: tabIndexingInfo, readabilityResult: read)
         }
