@@ -219,11 +219,11 @@ extension BeamColor {
     }
 
     enum ActionableButtonPurple {
-        static let background = BeamColor.Beam.alpha(0.1)
+        static let background = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.1, darkColor: .Beam, darkAlpha: 0.28)
         static let backgroundHovered = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.16,
-                                                           darkColor: .Beam, darkAlpha: 0.2)
+                                                           darkColor: .Beam, darkAlpha: 0.38)
         static let backgroundClicked = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.28,
-                                                           darkColor: .Beam, darkAlpha: 0.34)
+                                                           darkColor: .Beam, darkAlpha: 0.50)
         static let backgroundDisabled = BeamColor.Generic.transparent
         static let strokeDisabled = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.15,
                                                                   darkColor: .Beam, darkAlpha: 0.2)
@@ -232,12 +232,12 @@ extension BeamColor {
     }
 
     enum ActionableButtonSecondary {
-        static let background = BeamColor.combining(lightColor: .Mercury, darkColor: .Mercury)
+        static let background = BeamColor.combining(lightColor: .Mercury, darkColor: .AlphaGray, darkAlpha: 0.64)
         static let backgroundHovered = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.6,
-                                                           darkColor: .AlphaGray, darkAlpha: 0.8)
+                                                           darkColor: .LightStoneGray, darkAlpha: 0.8)
         static let backgroundClicked = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.8,
                                                            darkColor: .LightStoneGray, darkAlpha: 0.75)
-        static let foreground = BeamColor.Corduroy
+        static let foreground = BeamColor.Niobium
         static let backgroundDisabled = BeamColor.Nero
         static let activeForeground = BeamColor.Niobium
         static let disabledForeground = BeamColor.AlphaGray.alpha(0.5)

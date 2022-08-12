@@ -135,9 +135,10 @@ struct OnboardingEmailConnectView: View {
                             .foregroundColor(BeamColor.Shiraz.swiftUI)
                     } else if !isSignIn && isPasswordEditing {
                         StyledText(verbatim: "Use at least 8 characters, 1 symbol and 1 number")
-                            .style(.foregroundColor(BeamColor.Generic.text.swiftUI), ranges: { passwordHelpRanges(in: $0, matchingRequirements: false) })
+                            .style(.foregroundColor(BeamColor.Niobium.swiftUI))
+                            .style(.foregroundColor(BeamColor.CharmedGreen.swiftUI), ranges: { passwordHelpRanges(in: $0, matchingRequirements: false) })
                     } else if !isSignIn, !passwordField.isEmpty, passwordField != passwordVerificationField {
-                        Text(verbatim: "Make sure your passwords match")
+                        Text("Make sure your passwords match").foregroundColor(BeamColor.Niobium.swiftUI)
                     } else {
                         Text("Preserve Height").hidden()
                     }
@@ -148,7 +149,7 @@ struct OnboardingEmailConnectView: View {
             .padding(.bottom, 24)
             .allowsHitTesting(loadingState == nil)
             if isSignIn {
-                ButtonLabel("Forgot password", customStyle: .init(font: BeamFont.medium(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                ButtonLabel("Forgot password", customStyle: .init(font: BeamFont.medium(size: 13).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                     sendForgotPassword()
                 }
                 .overlay(forgotPasswordTooltip == nil ? nil : Tooltip(title: forgotPasswordTooltip ?? "")
