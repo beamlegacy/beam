@@ -53,7 +53,7 @@ struct OnboardingWelcomeView: View {
                 }
                 VStack(spacing: BeamSpacing._200) {
                     GoogleButton(buttonType: .signin, onClick: nil, onConnect: onSigninDone, onDataSync: nil, onFailure: onGoogleSigninError, label: { _ in
-                        ActionableButton(text: "Continue with Google", defaultState: .normal, variant: googleVariant, minWidth: 280, height: 34)
+                        ActionableButton(text: "Continue with Google", defaultState: .normal, variant: googleVariant, minWidth: 280, height: 34, invertBlendMode: true)
                     })
                     .buttonStyle(.borderless)
                     .overlay(error != .googleFailed ? nil : Tooltip(title: "Couldn't login with Google")
@@ -65,7 +65,7 @@ struct OnboardingWelcomeView: View {
                         .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                     VStack(spacing: 14) {
                         BeamTextField(text: $email, isEditing: $isEditingEmail, placeholder: "Sign Up/In with email address", font: BeamFont.regular(size: 14).nsFont,
-                                      textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor, onCommit: { _ in
+                                      textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.LightStoneGray.nsColor, onCommit: { _ in
                             checkAccountExistence()
                         }).accessibilityIdentifier("emailField")
                             .frame(width: 280, height: 40)
@@ -85,7 +85,7 @@ struct OnboardingWelcomeView: View {
                     }
                 }
                 if welcoming {
-                    ButtonLabel("Sign Up/In Later", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                    ButtonLabel("Sign Up/In Later", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                         OnboardingNoteCreator.shared.createOnboardingNotes()
                         finish(nil)
                     }
