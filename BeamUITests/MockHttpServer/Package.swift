@@ -15,7 +15,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Kitura/Kitura.git", from: "2.9.0"),
-        .package(name: "KituraStencil", url: "https://github.com/Kitura/Kitura-StencilTemplateEngine.git", from: "1.11.1"),
+        .package(name: "KituraStencil", url: "https://github.com/Kitura/Kitura-StencilTemplateEngine.git", from: "2.0.0"),
         .package(name: "LoggingOSLog", url: "https://github.com/chrisaljoudi/swift-log-oslog.git", from: "0.2.1"),
     ],
     targets: [
