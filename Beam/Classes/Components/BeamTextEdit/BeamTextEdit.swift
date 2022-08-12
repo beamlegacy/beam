@@ -616,7 +616,10 @@ public extension CALayer {
     var realContentSize: NSSize = .zero
     var safeContentSize: NSSize = .zero
 
+    private var computingIntrinsicContentSize = false
     func computeIntrinsicContentSize() -> NSSize {
+        computingIntrinsicContentSize = true
+        defer { computingIntrinsicContentSize = false }
         guard !delayedInit, !frame.isEmpty, let rootNode = rootNode else {
             if let root = unpreparedRoot, journalMode {
                 let fontSize = Int(TextNode.fontSizeFor(kind: .bullet)) * 3
@@ -660,7 +663,7 @@ public extension CALayer {
 
     var layoutInvalidated = false
     public func invalidateLayout() {
-        guard !inRelayout, !layoutInvalidated else { return }
+        guard !computingIntrinsicContentSize, !inRelayout, !layoutInvalidated else { return }
         layoutInvalidated = true
         DispatchQueue.mainSync {
             self.invalidateIntrinsicContentSize()

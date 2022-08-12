@@ -12,6 +12,8 @@ class BeamTableCellIconAndTextView: NSTableCellView {
     private let _iconView: NSImageView
     private let _textField: NSTextField
 
+    override var wantsUpdateLayer: Bool { true }
+
     override init(frame frameRect: NSRect) {
         _contentView = NSView(frame: frameRect)
         _iconView = CustomImageView()
@@ -61,8 +63,7 @@ class BeamTableCellIconAndTextView: NSTableCellView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func layout() {
-        super.layout()
+    override func updateLayer() {
         if self.effectiveAppearance.isDarkMode {
             _textField.layer?.compositingFilter = nil
         } else {

@@ -18,7 +18,7 @@ class BeamTableCellView: NSTableCellView, SelectableTableCellView {
     var isLink = false
     var isSelected: Bool = false {
         didSet {
-            needsLayout = isSelected != oldValue
+            needsDisplay = isSelected != oldValue
         }
     }
 
@@ -32,6 +32,8 @@ class BeamTableCellView: NSTableCellView, SelectableTableCellView {
     }
     private var centerYConstraint: NSLayoutConstraint?
     private var defaultFontBottomBaselineOffset: CGFloat = 3
+
+    override var wantsUpdateLayer: Bool { true }
 
     override init(frame frameRect: NSRect) {
         _textField = NSTextField(frame: frameRect)
@@ -60,8 +62,7 @@ class BeamTableCellView: NSTableCellView, SelectableTableCellView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func layout() {
-        super.layout()
+    override func updateLayer() {
         let color = !isSelected || selectedForegroundColor == nil ? foregroundColor : selectedForegroundColor
         _textField.textColor = color
         if self.effectiveAppearance.isDarkMode {
@@ -72,13 +73,13 @@ class BeamTableCellView: NSTableCellView, SelectableTableCellView {
     }
 
     override func updateConstraints() {
-        super.updateConstraints()
         let diff = defaultFontBottomBaselineOffset - _textField.baselineOffsetFromBottom
         if diff != 0 {
             // to visually align all textfield that are not the default font size of 13
             // we need to apply the baseline offset difference to the centering constraint
             centerYConstraint?.constant = -diff
         }
+        super.updateConstraints()
     }
 
     override func updateTrackingAreas() {

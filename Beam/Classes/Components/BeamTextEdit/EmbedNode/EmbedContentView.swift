@@ -16,6 +16,8 @@ final class EmbedContentView: NSView {
 
     private let borderRadius: CGFloat = 3
 
+    override var wantsUpdateLayer: Bool { true }
+
     init(frame frameRect: NSRect, webViewProvider: BeamWebViewProviding, loadingView: NSView) {
         self.webViewProvider = webViewProvider
 
@@ -34,9 +36,7 @@ final class EmbedContentView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func layout() {
-        super.layout()
-
+    override func updateLayer() {
         layer?.mask = makeMaskLayer(rect: bounds)
     }
 

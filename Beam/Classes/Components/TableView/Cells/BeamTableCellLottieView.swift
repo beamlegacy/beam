@@ -12,6 +12,8 @@ class BeamTableCellLottieView: NSTableCellView {
     private let lottieView: Lottie.AnimationView
     private var animationName: String?
 
+    override var wantsUpdateLayer: Bool { true }
+
     override init(frame frameRect: NSRect) {
         lottieView = Lottie.AnimationView()
         super.init(frame: frameRect)
@@ -33,8 +35,7 @@ class BeamTableCellLottieView: NSTableCellView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func layout() {
-        super.layout()
+    override func updateLayer() {
         if self.effectiveAppearance.isDarkMode {
             lottieView.layer?.compositingFilter = nil
         } else {
