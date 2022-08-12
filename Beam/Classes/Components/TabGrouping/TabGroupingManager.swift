@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 struct TabForcedGroup {
     var inGroup: TabGroup?
@@ -75,6 +76,11 @@ class TabGroupingManager {
     func createNewGroup() -> TabGroup {
         TabGroup(pageIds: [], color: colorGenerator.generateNewColor())
     }
+
+    private func createNewEmptyGroupForClustering() -> TabGroup {
+        Logger.shared.logInfo("New TabGroup created by clustering", category: .tabGrouping)
+        return createNewGroup()
+    }
 }
 
 // MARK: - Group Editing
@@ -88,6 +94,7 @@ extension TabGroupingManager {
 
     func renameGroup(_ group: TabGroup, title: String) {
         group.changeTitle(title)
+        Logger.shared.logInfo("Tab Group renamed to '\(title)' (\(group.id))", category: .tabGrouping)
         groupDidChangeMetadata(group)
     }
 
@@ -101,6 +108,7 @@ extension TabGroupingManager {
     }
 
     func pageWasMoved(pageId: ClusteringManager.PageID, fromGroup: TabGroup?, toGroup: TabGroup?) {
+        Logger.shared.logInfo("Page(\(pageId)) moved from group '\(fromGroup?.title ?? "")' to group '\(toGroup?.title ?? "")'", category: .tabGrouping)
         if let fromGroup = fromGroup {
             fromGroup.updatePageIds(fromGroup.pageIds.filter { $0 != pageId })
             groupDidChangeContent(fromGroup, fromUser: true)
@@ -112,12 +120,14 @@ extension TabGroupingManager {
     }
 
     func ungroup(_ group: TabGroup) {
+        Logger.shared.logInfo("Ungrouping Gab Group '\(group.title ?? "\(group.id)")'", category: .tabGrouping)
         group.updatePageIds([])
         groupDidChangeContent(group, fromUser: true)
     }
 
     func toggleCollapse(_ group: TabGroup) {
         group.toggleCollapsed()
+        Logger.shared.logInfo("Tab Group '\(group.title ?? "\(group.id)")' \(group.collapsed ? "collapsed" : "expanded")", category: .tabGrouping)
     }
 
     private func allOpenTabs() -> [BrowserTab] {
@@ -255,7 +265,7 @@ extension TabGroupingManager {
                     finalGroup = manualGroupWithMostMatches.group
                 } else {
                     // no group? create one for leftovers.
-                    finalGroup = createNewGroup()
+                    finalGroup = createNewEmptyGroupForClustering()
                 }
 
             } else if suggestedGroupsFound.count == 1, let first = suggestedGroupsFound.first {
@@ -277,10 +287,10 @@ extension TabGroupingManager {
                 if bestCount > 0, let bestGroup = bestGroup {
                     finalGroup = bestGroup
                 } else {
-                    finalGroup = createNewGroup()
+                    finalGroup = createNewEmptyGroupForClustering()
                 }
             } else {
-                finalGroup = createNewGroup()
+                finalGroup = createNewEmptyGroupForClustering()
             }
 
             unassignedPages.forEach { pageId in
@@ -299,6 +309,7 @@ extension TabGroupingManager {
             self.groupsWereUpdatedByClustering(allGroups)
             self.colorGenerator.updateUsedColor(allGroups.compactMap { $0.color })
         }
+        Logger.shared.logDebug("TabGroups updated by clustering", category: .tabGrouping)
     }
 
     private func mergeFinalPageGroupAssociations(manualPageGroups: PageGroupDictionary, forcedOutOfGroups: PageGroupDictionary,
