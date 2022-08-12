@@ -332,6 +332,47 @@ extension BrowserTabsManagerTests {
         XCTAssertEqual(sut.currentTab, tabB)
     }
 
+    func testRemoveTabSetChildTabAsCurrent() {
+        let (tabA, tabB, tabC) = (tab("Tab A"), tab("Tab B"), tab("Tab C"))
+        sut.addNewTabAndNeighborhood(tabA, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabB, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabC, setCurrent: true)
+        XCTAssertEqual(sut.tabs, [tabA, tabB, tabC])
+        XCTAssertEqual(sut.currentTab, tabC)
+
+        // Opening Tab D from cmd-T in tab A
+        let tabD = tab("Tab D", origin: .searchBar(query: "D", referringRootId: tabA.browsingTree.rootId))
+        sut.addNewTabAndNeighborhood(tabD, setCurrent: true)
+        XCTAssertEqual(sut.currentTab, tabD)
+
+        // Opening Tab E from cmd-click in tab E
+        let tabE = tab("Tab E", origin: .browsingNode(id: UUID(), pageLoadId: nil, rootOrigin: tabD.browsingTree.origin.rootOrigin, rootId: tabD.browsingTree.rootId))
+        sut.addNewTabAndNeighborhood(tabE, setCurrent: false)
+
+        // closing TabD goes to child Tab E
+        sut.removeTab(tabId: tabD.id)
+        XCTAssertEqual(sut.currentTab, tabE)
+
+        // closing TabE goes to parent origin tab A
+        sut.removeTab(tabId: tabE.id)
+        XCTAssertEqual(sut.currentTab, tabA)
+    }
+
+    func testRemoveTabThatHaveParentAndChildren() {
+        let (tabA, tabB, tabC) = (tab("Tab A"), tab("Tab B"), tab("Tab C"))
+        sut.addNewTabAndNeighborhood(tabA, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabB, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabC, setCurrent: true)
+        XCTAssertEqual(sut.tabs, [tabA, tabB, tabC])
+        XCTAssertEqual(sut.currentTab, tabC)
+
+        // Opening Tab D from cmd-click in tab A
+        let tabD = tab("Tab D", origin: .browsingNode(id: UUID(), pageLoadId: nil, rootOrigin: tabA.browsingTree.origin.rootOrigin, rootId: tabA.browsingTree.rootId))
+        sut.addNewTabAndNeighborhood(tabD, setCurrent: true)
+        sut.removeTab(tabId: tabA.id)
+        XCTAssertEqual(sut.currentTab, tabD)
+    }
+
     func testRemoveTabDoesntSetPinnedTabAsCurrent() {
         let (tabA, tabB, tabC) = (tab("Tab A"), tab("Tab B"), tab("Tab C"))
         sut.addNewTabAndNeighborhood(tabA, setCurrent: true)

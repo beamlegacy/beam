@@ -456,21 +456,24 @@ extension BrowserTabsManager {
                 Logger.shared.logError("Suggested new current tab is not visible", category: .web)
             }
         } else {
-
-            // If the tab is in a group, stay in the group if possible:
-            if let nextTabIdFromNeighborhood = nextTabIdFromNeighborhood {
+            let browsingTreeOrigin = tab.browsingTreeOrigin ?? tab.browsingTree.origin
+            let findTabWithRootId: (UUID) -> BrowserTab? = { rootId in self.visibleTabs.first(where: { !$0.isPinned && $0.browsingTree.rootId == rootId }) }
+            if case .browsingNode(_, _, _, let rootId) = browsingTreeOrigin, let rootId = rootId, let parentTab = findTabWithRootId(rootId) {
+                // 1. If user cmd+click to open the tab, we want to go back to parent tab
+                newCurrentTab = parentTab
+            } else if let rootId = tab.browsingTree.rootId,
+                      let childTab = visibleTabs.first(where: { !$0.isPinned && $0.browsingTreeOrigin?.rootId == rootId }) {
+                // 2. If user cmd+click from a the tab, we want to go to the first child tab.
+                newCurrentTab = childTab
+            } else if case .searchBar(_, let refRootId) = browsingTreeOrigin, let refRootId = refRootId, let originTab = findTabWithRootId(refRootId) {
+                // 3. If user cmd+T from a current tab, we want to comeback to that origin tab.
+                newCurrentTab = originTab
+            } else if case .searchBar(_, let refRootId) = browsingTreeOrigin.rootOrigin, let refRootId = refRootId, let originTab = findTabWithRootId(refRootId) {
+                // 4. If the tab's parent origin is from a cmd+T, but parent is not here, we want to comeback to that origin tab.
+                newCurrentTab = originTab
+            } else if let nextTabIdFromNeighborhood = nextTabIdFromNeighborhood {
+                // 5. If tab has a neighborhood.
                 newCurrentTab = visibleTabs.first(where: { $0.id == nextTabIdFromNeighborhood })
-            } else {
-                switch tab.browsingTreeOrigin {
-                case .browsingNode(_, _, _, let rootId):
-                    // If user cmd+click from a tab we want to go back to this tab
-                    newCurrentTab = visibleTabs.first(where: { !$0.isPinned && $0.browsingTree.rootId == rootId })
-                case .searchBar(_, referringRootId: let referringRootId):
-                    // If user cmd+T from a current tab we want to comeback to that origin tab
-                    newCurrentTab = visibleTabs.first(where: { !$0.isPinned && $0.browsingTree.rootId == referringRootId })
-                default:
-                    break
-                }
             }
         }
         if let newCurrentTab = newCurrentTab {
