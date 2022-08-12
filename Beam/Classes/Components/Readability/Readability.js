@@ -1467,18 +1467,18 @@ Readability.prototype = {
     })
 
     // get title
-    metadata.title = jsonld.title ||
-                     values["dc:title"] ||
-                     values["dcterm:title"] ||
-                     values["og:title"] ||
-                     values["weibo:article:title"] ||
-                     values["weibo:webpage:title"] ||
-                     values["title"] ||
-                     values["twitter:title"]
+    metadata.metaTitle = jsonld.title ||
+                         values["dc:title"] ||
+                         values["dcterm:title"] ||
+                         values["og:title"] ||
+                         values["weibo:article:title"] ||
+                         values["weibo:webpage:title"] ||
+                         values["title"] ||
+                         values["twitter:title"]
 
-    if (!metadata.title) {
-      metadata.title = this._getArticleTitle()
-    }
+    metadata.htmlTitle = this._getArticleTitle()
+
+    metadata.title = metadata.htmlTitle || metadata.metaTitle
 
     // get author
     metadata.byline = jsonld.byline ||
@@ -1506,6 +1506,10 @@ Readability.prototype = {
     metadata.byline = this._unescapeHtmlEntities(metadata.byline)
     metadata.excerpt = this._unescapeHtmlEntities(metadata.excerpt)
     metadata.siteName = this._unescapeHtmlEntities(metadata.siteName)
+    metadata.htmlTitle = this._unescapeHtmlEntities(metadata.htmlTitle)
+    metadata.metaTitle = this._unescapeHtmlEntities(metadata.metaTitle)
+
+
 
     return metadata
   },
@@ -2189,6 +2193,8 @@ Readability.prototype = {
     var textContent = articleContent.textContent
     return {
       title: this._articleTitle,
+      metaTitle: metadata.metaTitle,
+      htmlTitle: metadata.htmlTitle,
       byline: metadata.byline || this._articleByline,
       dir: this._articleDir,
       content: this._serializer(articleContent),
