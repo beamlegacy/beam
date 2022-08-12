@@ -13,6 +13,8 @@ class BeamTableCellTwoTextFieldView: NSTableCellView {
     let topTextField: NSTextField
     let botTextField: NSTextField
 
+    override var wantsUpdateLayer: Bool { true }
+
     override init(frame frameRect: NSRect) {
         _contentView = NSView(frame: frameRect)
         topTextField = NSTextField()
@@ -72,8 +74,7 @@ class BeamTableCellTwoTextFieldView: NSTableCellView {
         self.textField?.isHidden = false
     }
 
-    override func layout() {
-        super.layout()
+    override func updateLayer() {
         if self.effectiveAppearance.isDarkMode {
             topTextField.layer?.compositingFilter = nil
             botTextField.layer?.compositingFilter = nil

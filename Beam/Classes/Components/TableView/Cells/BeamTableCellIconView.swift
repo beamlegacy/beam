@@ -9,6 +9,9 @@ import Foundation
 
 class BeamTableCellIconView: NSTableCellView {
     private let _iconView: NSImageView
+
+    override var wantsUpdateLayer: Bool { true }
+
     override init(frame frameRect: NSRect) {
         _iconView = CustomImageView(frame: frameRect)
         super.init(frame: frameRect)
@@ -30,8 +33,7 @@ class BeamTableCellIconView: NSTableCellView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func layout() {
-        super.layout()
+    override func updateLayer() {
         if self.effectiveAppearance.isDarkMode {
             _iconView.layer?.compositingFilter = nil
         } else {

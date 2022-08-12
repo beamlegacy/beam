@@ -331,7 +331,7 @@ public class TextRoot: ElementNode {
 
     override func didMoveToWindow(_ window: NSWindow?) {
         super.didMoveToWindow(window)
-        if let note = note, note.isTodaysNote {
+        if window != nil, let note = note, note.isTodaysNote {
             self.setPlaceholder()
             self.updateSummary()
         }
