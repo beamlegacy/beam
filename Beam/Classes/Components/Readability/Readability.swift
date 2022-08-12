@@ -23,6 +23,8 @@ struct Readability: Codable, Equatable {
     var textContent: String = ""
     var dir: Direction = .ltr
     var title: String = ""
+    var htmlTitle: String = ""
+    var metaTitle: String = ""
     var length: Int = 0
     var content: String = ""
     var excerpt: String = ""
@@ -46,11 +48,12 @@ struct Readability: Codable, Equatable {
                 read.textContent = str(r["textContent"])
                 read.dir = str(r["dir"]) == "ltor" ? .ltr : .rtl
                 read.title = str(r["title"])
+                read.metaTitle = str(r["metaTitle"])
+                read.htmlTitle = str(r["htmlTitle"])
                 read.length = num(r["length"])
                 read.content = str(r["content"])
                 read.excerpt = str(r["excerpt"])
                 read.byLine = str(r["byLine"])
-
                 //let t0 = now.distance(to: BeamDate.now)
                 getResults(.success(read))
 
