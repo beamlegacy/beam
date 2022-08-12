@@ -285,13 +285,13 @@
         "repositoryURL": "https://github.com/Kitura/Kitura-StencilTemplateEngine.git",
         "state": {
           "branch": null,
-          "revision": "398d7311af0481a73362621f1ba8ac282b7696d8",
-          "version": "1.11.1"
+          "revision": "1909bd470295fb7653a58f93a7a8a0776570bc4d",
+          "version": "2.0.0"
         }
       },
       {
         "package": "Kitura-TemplateEngine",
-        "repositoryURL": "https://github.com/IBM-Swift/Kitura-TemplateEngine.git",
+        "repositoryURL": "https://github.com/Kitura/Kitura-TemplateEngine.git",
         "state": {
           "branch": null,
           "revision": "1670b09bfb63b66f7dffff627a06b50492485407",
