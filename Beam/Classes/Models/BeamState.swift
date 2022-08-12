@@ -785,7 +785,7 @@ import Sentry
         }
         backForwardList = try container.decode(NoteBackForwardList.self, forKey: .backForwardList)
 
-        let decodedTabs = try container.decode([BrowserTab].self, forKey: .tabs)
+        let decodedTabs = try container.decode([BrowserTab].self, forKey: .tabs).filter { !$0.isPinned }
         browserTabsManager.tabs.append(contentsOf: decodedTabs)
         if let currentTabId = try? container.decode(UUID.self, forKey: .currentTab),
            let tab = browserTabsManager.tabs.first(where: { $0.id == currentTabId }) {
