@@ -8740,6 +8740,7 @@
 		};
 		521FEC702604F1FF009000F9 /* Copy Vinyl Cassettes */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
