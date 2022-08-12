@@ -75,9 +75,15 @@ struct CreditCardEditView: View {
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                             .frame(width: 96, alignment: .trailing)
-                        BoxedTextFieldView(title: "", text: $editedEntry.cardDescription, isEditing: $editingCardDescription, onEscape: dismiss)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
-                            .frame(width: 286, height: 19, alignment: .center)
+                        BoxedTextFieldView(title: "",
+                                           text: $editedEntry.cardDescription,
+                                           isEditing: $editingCardDescription,
+                                           onEscape: dismiss,
+                                           onTab: { navigateToField($editingCardHolder) },
+                                           onBacktab: { navigateToField($editingExpirationDate) }
+                        )
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        .frame(width: 286, height: 19, alignment: .center)
                     }
                     .padding(.bottom, 10)
                     HStack {
@@ -85,9 +91,14 @@ struct CreditCardEditView: View {
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                             .frame(width: 96, alignment: .trailing)
-                        BoxedTextFieldView(title: "", text: $editedEntry.cardHolder, isEditing: $editingCardHolder, textWillChange: { proposedText in
-                            (proposedText.filteredAsCardHolderName(), nil)
-                        }, onEscape: dismiss)
+                        BoxedTextFieldView(title: "",
+                                           text: $editedEntry.cardHolder,
+                                           isEditing: $editingCardHolder,
+                                           textWillChange: { proposedText in (proposedText.filteredAsCardHolderName(), nil) },
+                                           onEscape: dismiss,
+                                           onTab: { navigateToField($editingCardNumber) },
+                                           onBacktab: { navigateToField($editingCardDescription) }
+                        )
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .frame(width: 286, height: 19, alignment: .center)
                     }
@@ -97,9 +108,14 @@ struct CreditCardEditView: View {
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                             .frame(width: 96, alignment: .trailing)
-                        BoxedTextFieldView(title: "", text: $cardNumber, isEditing: $editingCardNumber, textWillChange: { proposedText in
-                            (proposedText.filteredAsCardNumber(), nil)
-                        }, onEscape: dismiss)
+                        BoxedTextFieldView(title: "",
+                                           text: $cardNumber,
+                                           isEditing: $editingCardNumber,
+                                           textWillChange: { proposedText in (proposedText.filteredAsCardNumber(), nil) },
+                                           onEscape: dismiss,
+                                           onTab: { navigateToField($editingExpirationDate) },
+                                           onBacktab: { navigateToField($editingCardHolder) }
+                        )
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .frame(width: 210, height: 19, alignment: .center)
                         .onChange(of: cardNumber) { newValue in
@@ -124,9 +140,14 @@ struct CreditCardEditView: View {
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                             .frame(width: 96, alignment: .trailing)
-                        BoxedTextFieldView(title: "MM/YYYY", text: $expirationDate, isEditing: $editingExpirationDate, textWillChange: { proposedText in
-                            (proposedText.filteredAsExpirationDate(), nil)
-                        }, onEscape: dismiss)
+                        BoxedTextFieldView(title: "MM/YYYY",
+                                           text: $expirationDate,
+                                           isEditing: $editingExpirationDate,
+                                           textWillChange: { proposedText in (proposedText.filteredAsExpirationDate(), nil) },
+                                           onEscape: dismiss,
+                                           onTab: { navigateToField($editingCardDescription) },
+                                           onBacktab: { navigateToField($editingCardNumber) }
+                        )
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .frame(width: 80, height: 19, alignment: .center)
                         .onChange(of: expirationDate) { _ in
@@ -238,6 +259,11 @@ struct CreditCardEditView: View {
 
     private func dismiss() {
         presentationMode.wrappedValue.dismiss()
+    }
+
+    private func navigateToField(_ next: Binding<Bool>) -> Bool {
+        next.wrappedValue = true
+        return true
     }
 }
 
