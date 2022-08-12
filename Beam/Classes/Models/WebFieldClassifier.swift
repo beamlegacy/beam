@@ -513,7 +513,7 @@ final class WebFieldClassifier {
             return WebAutofillRules(ignorePasswordAutocompleteOff: .never, ignoreUntaggedPasswordFieldAlone: true)
         case "pinterest.com", "maderasbarber.com", "testrail.io":
             return WebAutofillRules(discardAutocompleteAttribute: .whenPasswordFieldPresent)
-        case "agoda.com", "figma.com":
+        case "agoda.com", "figma.com", "poolsuite.net":
             return WebAutofillRules(discardAutocompleteAttribute: .forAutocompleteValues(["new-password"]))
         case "netflix.com", "payment-netflix.form.lvh.me":
             return WebAutofillRules(ignoreTelAutocompleteOff: .always, discardAutocompleteAttribute: .whenPasswordFieldPresent, mergeIncompleteCardExpirationDate: true)
