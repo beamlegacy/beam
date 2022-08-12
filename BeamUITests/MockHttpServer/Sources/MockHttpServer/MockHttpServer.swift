@@ -49,6 +49,7 @@ public class MockHttpServer {
         installRedirectionHandlers(to: router)
         installAdBlockHandlers(to: router)
         installOtherFrameHandlers(to: router)
+        installReadabilityHandlers(to: router)
         router.all("/view", middleware: BodyParser())
         router.post("/view", handler: submitHandler)
         router.all("/signinstep2", middleware: BodyParser())
@@ -101,7 +102,14 @@ public class MockHttpServer {
             }
         }
     }
-
+    private func installReadabilityHandlers(to router: Router) {
+        for templateName in readabilityNames {
+            router.get("readability/\(templateName)") { request, response, next in
+                self.renderStencil(request, response, "readability/\(templateName)")
+                next()
+            }
+        }
+    }
     private func rootHandler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
         if let formTemplateName = request.hostname.removingSuffix(".form.lvh.me") {
             renderStencil(request, response, "form/\(formTemplateName)")
@@ -251,6 +259,11 @@ public class MockHttpServer {
     
     private var otherFrameNames: [String] {
         Bundle.module.paths(forResourcesOfType: "stencil", inDirectory: "/Resources/templates/otherframe")
+            .compactMap { $0.lastPathComponent.removingSuffix(".stencil") }
+    }
+
+    private var readabilityNames: [String] {
+        Bundle.module.paths(forResourcesOfType: "stencil", inDirectory: "/Resources/templates/readability")
             .compactMap { $0.lastPathComponent.removingSuffix(".stencil") }
     }
 
