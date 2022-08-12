@@ -55,6 +55,8 @@ class BeamWebView: WKWebView {
         }
     }
 
+    override var wantsUpdateLayer: Bool { true }
+
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
         Self.setURLSchemeHandlers(in: configuration)
         currentConfiguration = configuration
@@ -106,7 +108,6 @@ class BeamWebView: WKWebView {
     }
 
     override func updateLayer() {
-        super.updateLayer()
         layer?.backgroundColor = BeamColor.Generic.background.cgColor
     }
 

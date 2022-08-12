@@ -13,29 +13,20 @@ public class NSViewContainerView<ContentView: NSView>: NSView {
     var contentView: ContentView? {
         didSet {
             guard oldValue !== contentView, let contentView = contentView else { return }
-            DispatchQueue.mainSync { self.insertNewContentView(contentView, oldValue: oldValue) }
+            insertNewContentView(contentView, oldValue: oldValue)
         }
     }
 
-    private let contentHolder: NSView
-
-    init() {
-        contentHolder = NSView()
+    init(contentView: ContentView?) {
+        self.contentView = contentView
         super.init(frame: NSRect())
-        addSubview(contentHolder)
-        contentHolder.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            contentHolder.leadingAnchor.constraint(equalTo: leadingAnchor),
-            contentHolder.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentHolder.topAnchor.constraint(equalTo: topAnchor),
-            contentHolder.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
+        if let contentView = contentView {
+            self.insertNewContentView(contentView, oldValue: nil)
+        }
     }
 
-    convenience init(contentView: ContentView) {
-        self.init()
-        self.contentView = contentView
-        self.insertNewContentView(contentView, oldValue: nil)
+    convenience init() {
+        self.init(contentView: nil)
     }
 
     required init?(coder: NSCoder) {
@@ -44,11 +35,11 @@ public class NSViewContainerView<ContentView: NSView>: NSView {
 
     private func insertNewContentView(_ contentView: ContentView, oldValue: ContentView?) {
         contentView.autoresizingMask = [.width, .height]
-        contentView.frame = contentHolder.bounds
+        contentView.frame = bounds
         if let oldValue = oldValue {
-            contentHolder.replaceSubview(oldValue, with: contentView)
+            replaceSubview(oldValue, with: contentView)
         } else {
-            contentHolder.addSubview(contentView)
+            addSubview(contentView)
         }
     }
 }

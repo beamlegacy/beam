@@ -61,16 +61,24 @@ class BeamCheckboxCALayer: CALayer {
     private var checkLayer: CALayer?
     private var mixedLayer: CAShapeLayer?
     private var innerStrokeLayer: CAShapeLayer?
-    var isMouseDown = false
-    var isHovering = false
+    var isMouseDown = false {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
+    var isHovering = false {
+        didSet {
+            setNeedsDisplay()
+        }
+    }
     var isChecked = false {
         didSet {
-            updateLayers()
+            setNeedsDisplay()
         }
     }
     var isMixedState = false {
         didSet {
-            updateLayers()
+            setNeedsDisplay()
         }
     }
 
@@ -120,16 +128,9 @@ class BeamCheckboxCALayer: CALayer {
         mixedLayer.fillColor = BeamColor.Niobium.cgColor
         self.mixedLayer = mixedLayer
         self.addSublayer(mixedLayer)
-
-        updateLayers()
     }
 
-    override func layoutSublayers() {
-        super.layoutSublayers()
-        updateLayers()
-    }
-
-    private func updateLayers() {
+    override func display() {
         NSAppearance.withAppAppearance {
             checkLayer?.isHidden = !isChecked
             mixedLayer?.isHidden = isChecked || !isMixedState
