@@ -86,6 +86,9 @@ class BeamWebView: WKWebView {
         #if TEST || DEBUG
             Self.aliveWebViewsCount -= 1
         #endif
+        #if DEBUG
+            SoundEffectPlayer.shared.playWebViewDeinitSound()
+        #endif
         guard let monitor = monitor else { return }
         NSEvent.removeMonitor(monitor)
     }
