@@ -178,8 +178,8 @@ struct Passwords: View {
 
     private var bottomRow: some View {
         HStack {
-            BeamControlGroup {
-                Group {
+            BeamControlGroup(accessibilityIdentifier: "addRemovePassword") {
+                HStack {
                     Button {
                         showingAddPasswordSheet = true
                     } label: {
@@ -196,7 +196,6 @@ struct Passwords: View {
                 }
             }
             .fixedSize()
-            .accessibilityIdentifier("addRemovePassword")
             .sheet(isPresented: $showingAddPasswordSheet) {
                 PasswordEditView(entry: nil, password: "", editType: .create)
                     .frame(width: 400, height: 179, alignment: .center)
