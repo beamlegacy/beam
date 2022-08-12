@@ -66,7 +66,7 @@ struct OnboardingImportsView: View {
                         .padding(-4)
                     HStack(spacing: 0) {
                         iconImage(for: selectedSource)
-                        ButtonLabel(selectedSource.rawValue, variant: .dropdown, customStyle: .init(disableAnimations: false))
+                        ButtonLabel(selectedSource.rawValue, variant: .dropdown, customStyle: .init(foregroundColor: BeamColor.Niobium.swiftUI, disableAnimations: false))
                     }
                     .padding(.leading, 12)
                 }.allowsHitTesting(false)

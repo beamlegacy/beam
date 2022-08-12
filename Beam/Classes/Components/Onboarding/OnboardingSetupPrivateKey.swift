@@ -52,7 +52,7 @@ struct OnboardingSetupPrivateKey: View {
                             importBeamKey()
                         }
                     }.padding(.bottom, 42)
-                    ButtonLabel("I can’t find my private key", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                    ButtonLabel("I can’t find my private key", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                         finish(.init(type: .lostPrivateKey))
                     }
                 }.onDrop(of: ["public.file-url"], isTargeted: nil, perform: { items in

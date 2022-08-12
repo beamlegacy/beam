@@ -66,12 +66,15 @@ struct ActionableButtonStyle {
 }
 
 struct ActionableButton: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let text: String
     var defaultState: ActionableButtonState = .normal
     let variant: ActionableButtonVariant
     var minWidth: CGFloat = 0
     var height: CGFloat = 30
     var action: (() -> Void)?
+    var invertBlendMode: Bool = false
 
     @State private var isHovered = false
     @State private var isTouched = false
@@ -109,7 +112,7 @@ struct ActionableButton: View {
     var body: some View {
         HStack(spacing: hSpacing) {
             if let icon = variant.style.icon, icon.alignment == .leading {
-                Icon(name: icon.name, width: icon.size, color: iconColor)
+                Icon(name: icon.name, width: icon.size, color: iconColor, invertBlendMode: invertBlendMode ? colorScheme == .light : false)
                     .padding(.leading, hPadding)
             }
             Text(LocalizedStringKey(text))
@@ -117,6 +120,7 @@ struct ActionableButton: View {
                 .foregroundColor(foregroundColor)
                 .padding(.leading, textLeadingPadding)
                 .padding(.trailing, textTrailingPadding)
+                .blendModeLightMultiplyDarkScreen(invert: invertBlendMode ? colorScheme == .light : false)
                 .if(minWidth > 0) {
                     $0.frame(minWidth: textMinWidth, alignment: Alignment(horizontal: variant.style.textAlignment, vertical: .center))
                 }

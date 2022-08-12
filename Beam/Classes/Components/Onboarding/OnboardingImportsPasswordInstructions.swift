@@ -32,7 +32,7 @@ extension OnboardingImportsView {
 
         private func indexIcon(_ index: Int) -> some View {
             Text("\(index)")
-                .foregroundColor(BeamColor.AlphaGray.swiftUI)
+                .foregroundColor(BeamColor.Corduroy.swiftUI)
                 .font(BeamFont.medium(size: 11).swiftUI)
                 .frame(width: 20, height: 20)
         }

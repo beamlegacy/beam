@@ -19,7 +19,7 @@ struct OnboardingView: View {
     var currentStep: OnboardingStep {
         displayedStep ?? model.currentStep
     }
-    @State private var stepOffset: [OnboardingStep.StepType: CGFloat] = [:]
+    @State private var stepOffset: [OnboardingStep.StepType: CGFloat] = [.welcome: -24]
     @State private var stepOpacity: [OnboardingStep.StepType: CGFloat] = [:]
     private let estimatedSafeAreaInsets = NSEdgeInsets(top: 38, left: 0, bottom: 0, right: 0) // invisible toolbar
     private let contentWidth: Double = 512
@@ -98,6 +98,9 @@ struct OnboardingView: View {
             }
             withAnimation(BeamAnimation.easeInOut(duration: 0.3)) {
                 stepOffset[newType] = 0
+                if newType == .welcome {
+                    stepOffset[newType] = -24
+                }
             }
         }
     }
@@ -256,7 +259,7 @@ struct OnboardingView: View {
     struct BackButton: View {
         @State private var isHovering = false
         private var foregroundColor: Color {
-            (isHovering ? BeamColor.Niobium : BeamColor.AlphaGray).swiftUI
+            (isHovering ? BeamColor.Niobium : BeamColor.LightStoneGray).swiftUI
         }
         var body: some View {
             HStack(spacing: 1) {
