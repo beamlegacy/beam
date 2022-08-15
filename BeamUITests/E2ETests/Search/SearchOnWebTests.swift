@@ -161,8 +161,27 @@ class SearchOnWebTests: BaseTest {
         try XCTSkipIf(true, "WIP")
     }
     
-    func SKIPtestTriggerSearchFieldFromSelectedText() throws {
-        try XCTSkipIf(true, "WIP once https://linear.app/beamapp/issue/BE-1848/cmd-f-on-selected-text-launches-search-with-pre-filled-query")
+    func testTriggerSearchFieldFromSelectedText() {
+        let searchText = "Ultralight Beam, Kanye West"
+        let textElementToSelect = webView.staticText(searchText).firstMatch
+        
+        step("GIVEN I open a test page and select a text: \(searchText)"){
+            uiMenu.loadUITestPage1()
+            webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: textElementToSelect)
+        }
+        
+        step("WHEN I press CMD+E") {
+            shortcutHelper.shortcutActionInvoke(action: .instantTextSearch)
+        }
+        
+        step("THEN search option appears"){
+            XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
+        }
+        
+        step("THEN search field value is: \(searchText)") {
+            XCTAssertEqual(searchView.getSearchFieldValue(isWebSearch: true), searchText)
+        }
     }
     
     func testSearchResultsHighlights() {

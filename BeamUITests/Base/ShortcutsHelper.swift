@@ -62,6 +62,7 @@ class ShortcutsHelper {
         case paste
         case cut
         case search
+        case instantTextSearch
         case openPreferences
         case openLocation
         case showJournal
@@ -122,6 +123,7 @@ class ShortcutsHelper {
         case .paste: invokeCMDKey("v")
         case .cut: invokeCMDKey("x")
         case .search: invokeCMDKey("f")
+        case .instantTextSearch: invokeCMDKey("e")
         case .openPreferences: invokeCMDKey(",")
         case .openLocation: invokeCMDKey("l")
         case .showJournal: invokeCMDShiftKey("j")
