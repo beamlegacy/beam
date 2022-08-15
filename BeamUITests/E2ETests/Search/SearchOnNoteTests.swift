@@ -10,8 +10,11 @@ import XCTest
 
 class SearchOnNoteTests: BaseTest {
     
+    let noteView = NoteTestView()
+    let searchView = SearchTestView()
+    
     func testSearchViewAppearace() {
-        let searchView = prepareTest(populateNoteTimes: 2)
+        prepareTest(populateNoteTimes: 2)
         
         step("Then by default search field is unavailable"){
             XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -49,7 +52,7 @@ class SearchOnNoteTests: BaseTest {
     }
     
     func testSearchResultsCounter() {
-        let searchView = prepareTest(populateNoteTimes: 5)
+        prepareTest(populateNoteTimes: 5)
         
         step("When I search for available letter in text"){
             searchView.triggerSearchField()
@@ -113,7 +116,7 @@ class SearchOnNoteTests: BaseTest {
     
     func testSearchKeywordCaseSensitivity() {
         //Impossible to locate highlighted elements, highlight is covered only for web
-        let searchView = prepareTest(populateNoteTimes: 2)
+        prepareTest(populateNoteTimes: 2)
         let firstSearch = "TeST"
 
         step("When I search for \(firstSearch)"){
@@ -127,7 +130,7 @@ class SearchOnNoteTests: BaseTest {
     }
     
     func testSearchFieldPasteAndTypeText() {
-        let searchView = prepareTest(populateNoteTimes: 1)
+        prepareTest(populateNoteTimes: 1)
         let textToPaste = "test 0: "
         
         step("When I paste \(textToPaste) in the search field"){
@@ -141,8 +144,7 @@ class SearchOnNoteTests: BaseTest {
     }
     
     func testSearchFieldUpdateInstantly() {
-        let searchView = prepareTest(populateNoteTimes: 1)
-        let noteView = NoteTestView()
+        prepareTest(populateNoteTimes: 1)
         let textToType = "test"
         
         searchView.activateSearchField(isWebSearch: false).typeInSearchField(textToType, true)
@@ -185,18 +187,42 @@ class SearchOnNoteTests: BaseTest {
         }
     }
     
+    func testTriggerSearchFieldFromSelectedText() {
+        let searchText = "Lorem Ipsum"
+        
+        step("GIVEN I type in a note: \(searchText)"){
+            launchApp().createNoteViaOmniboxSearch("SearchNote")
+            noteView.waitForNoteViewToLoad()
+            noteView.typeInNoteNodeByIndex(noteIndex: 0, text: searchText, needsActivation: true)
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
+        }
+        
+        step("WHEN I press CMD+E") {
+            shortcutHelper.shortcutActionInvoke(action: .instantTextSearch)
+        }
+        
+        step("THEN search option appears"){
+            XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
+        }
+        
+        step("THEN search field value is: \(searchText)") {
+            XCTAssertEqual(searchView.getSearchFieldValue(isWebSearch: false), searchText)
+        }
+    }
+    
     func SKIPtestSearchFieldLinksReferenceTakenIntoConsideration() throws {
         try XCTSkipIf(true, "WIP once https://linear.app/beamapp/issue/BE-2085/card-search-includes-links-and-references is implemented")
     }
     
+    @discardableResult
     func prepareTest(populateNoteTimes: Int) -> SearchTestView {
-        let searchView = SearchTestView()
         launchApp().createNoteViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
         //https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
         step("Given I populate the note"){
             for _ in 1...populateNoteTimes {
                 uiMenu.insertTextInCurrentNote()
-                NoteTestView().waitForNoteViewToLoad() 
+                noteView.waitForNoteViewToLoad()
             }
         }
         self.clearPasteboard()
