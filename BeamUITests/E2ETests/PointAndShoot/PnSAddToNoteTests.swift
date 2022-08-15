@@ -397,48 +397,46 @@ class PnSAddToNoteTests: BaseTest {
         }
     }
     
-    func SKIPtestDismissShootCardPicker() throws {
-        try XCTSkipIf(true, "Skipped due to PointFrame cannot be detected BE-2591")
-       //Shoot "dismiss shootCardPicker by clicking on page and pressing escape"
-       launchApp()
-       uiMenu.loadUITestPage1()
+    func testDismissShootCardPicker() {
+
        let searchText = "Ultralight Beam, Kanye West"
        let parent = webView.app.webViews.containing(.staticText,
                                             identifier: searchText).element
        
         let parentElement = webView.staticText(searchText).firstMatch
 
-       // click and drag between start and end of full text
-       step ("TBD"){
+       step ("WHEN I select a text on a test page"){
+           uiMenu.loadUITestPage1()
            webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
         }
        
-       // click and drag between start and end of full text
        let child = parent.staticTexts[searchText]
        
-       // Press option once to enable shoot mode
-       step ("TBD"){
+       step ("WHEN I press option once to enable shoot mode"){
            pnsView.pressOptionButtonFor(seconds: 1)
-           XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
-        }
+           XCTAssertTrue(pnsView.waitForCollectPopUpAppear())
+           XCTAssertTrue(pnsView.assertPointFrameExists())
+       }
 
-       step ("TBD"){
-           let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -1))
+       step ("THEN Capture pop-up is dismissed with a click on a web page"){
+           let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -2))
            emptyLocation.click()
-           XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
+           XCTAssertTrue(waitForDoesntExist(pnsView.textField(PnSViewLocators.TextFields.shootCardPickerTextField.accessibilityIdentifier)))
+           XCTAssertTrue(waitForDoesntExist(pnsView.otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier)))
         }
 
-       step ("TBD"){
+       step ("WHEN I invoke Capture frame"){
            webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
            // Press option once to enable shoot mode
            pnsView.pressOptionButtonFor(seconds: 1)
-           XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
+           XCTAssertTrue(pnsView.waitForCollectPopUpAppear())
+           XCTAssertTrue(pnsView.assertPointFrameExists())
        }
 
-       step ("TBD"){
-          // dismiss shootCardPicker with escape
+       step ("THEN Capture pop-up is dismissed with escape button click"){
           webView.typeKeyboardKey(.escape)
-          XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
+           XCTAssertTrue(waitForDoesntExist(pnsView.textField(PnSViewLocators.TextFields.shootCardPickerTextField.accessibilityIdentifier)))
+           XCTAssertTrue(waitForDoesntExist(pnsView.otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier)))
         }
     }
     
