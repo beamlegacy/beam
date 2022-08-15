@@ -264,6 +264,7 @@ class NoteEditorTests: BaseTest {
         launchAppAndOpenFirstNote()
         
         step("Given I add text in a note") {
+            noteTestView.waitForNoteViewToLoad()
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: textToAddLink,  needsActivation: true)
         }
         
