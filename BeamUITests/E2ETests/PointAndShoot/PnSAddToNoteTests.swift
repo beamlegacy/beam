@@ -12,11 +12,6 @@ class PnSAddToNoteTests: BaseTest {
        
     let noteNameToBeCreated = "Test1"
     let pnsView = PnSTestView()
-    let titles = [
-        "Point And Shoot Test Fixture Ultralight Beam",
-        "Point And Shoot Test Fixture I-Beam",
-        "Point And Shoot Test Fixture Cursor"
-    ]
     var noteNodes: [XCUIElement]!
     var noteView: NoteTestView!
     var journalView: JournalTestView!
@@ -28,7 +23,7 @@ class PnSAddToNoteTests: BaseTest {
     
     func SKIPtestAddTextToTodaysNote() throws {
         try XCTSkipIf(true, "Skipped so far, to replace NavigationCollectUITests")
-        let expectedItemText1 = "Point And Shoot Test Fixture Cursor"
+        let expectedItemText1 = uiTestPageThree
         let expectedItemText2 = "Go to UITests-1"
         var todaysDateInNoteTitleFormat: String?
         
@@ -106,11 +101,11 @@ class PnSAddToNoteTests: BaseTest {
         step("Then 2 non-empty notes are added to an empty first one?"){
             XCTAssertTrue(noteNodes.count == 2 || noteNodes.count == 3) //CI specific issue handling
             if noteNodes.count == 2 {
-                XCTAssertEqual(noteNodes[0].getStringValue(), "Point And Shoot Test Fixture Cursor")
+                XCTAssertEqual(noteNodes[0].getStringValue(), uiTestPageThree)
                 XCTAssertEqual(noteNodes[1].getStringValue(), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
             } else {
                 XCTAssertEqual(noteNodes[0].getStringValue(), emptyString)
-                XCTAssertEqual(noteNodes[1].getStringValue(), "Point And Shoot Test Fixture Cursor")
+                XCTAssertEqual(noteNodes[1].getStringValue(), uiTestPageThree)
                 XCTAssertEqual(noteNodes[2].getStringValue(), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
             }
         }
@@ -246,7 +241,7 @@ class PnSAddToNoteTests: BaseTest {
     
     func testCollectFullPage() {
         launchApp()
-        let expectedNoteText = "Point And Shoot Test Fixture Cursor"
+        let expectedNoteText = uiTestPageThree
         
         step ("Given I open Test page"){
             uiMenu.loadUITestPage3()

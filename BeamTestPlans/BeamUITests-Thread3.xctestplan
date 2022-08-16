@@ -175,6 +175,7 @@
         "TabGroupCaptureToANoteTests",
         "TabGroupCloseTests",
         "TabGroupDragTabTests",
+        "TabGroupInOmniboxTests",
         "TabGroupManualTests",
         "TabGroupNameTests",
         "TabGroupNewTabTests",
