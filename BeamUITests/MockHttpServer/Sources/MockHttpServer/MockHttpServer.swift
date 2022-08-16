@@ -5,6 +5,18 @@ import LoggerAPI
 import Logging
 import LoggingOSLog
 
+private class SlowStaticFileServer: StaticFileServer {
+    override func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
+        let fileName = request.urlURL.lastPathComponent
+        if fileName.starts(with: "slow_") {
+            Task {
+                try await Task.sleep(nanoseconds: 500_000_000)
+            }
+        }
+        super.handle(request: request, response: response, next: next)
+    }
+}
+
 public class MockHttpServer {
     private static var loggerInitialized = false
     private static var instances: [Int: MockHttpServer] = [:]
@@ -40,7 +52,7 @@ public class MockHttpServer {
         let staticFilesPath = basePath + "/Resources/static"
         let templatesPath = basePath + "/Resources/templates"
         let router = Router()
-        router.all("/static", middleware: StaticFileServer(path: staticFilesPath))
+        router.all("/static", middleware: SlowStaticFileServer(path: staticFilesPath))
         router.setDefault(templateEngine: StencilTemplateEngine())
         router.viewsPath = templatesPath
         router.get("/", handler: rootHandler)
@@ -342,6 +354,7 @@ extension MockHttpServer {
         case javascriptReplaceSlow
         case none
         case navigation
+        case youtube
     }
 
     private enum RedirectionError: Swift.Error {
@@ -448,6 +461,8 @@ extension MockHttpServer {
             renderStencil(request, response, "redirection/navigation", additionalParams: parameters)
         case .none:
             renderStencil(request, response, "redirection/destination", additionalParams: parameters)
+        case .youtube:
+            renderStencil(request, response, "redirection/youtube", additionalParams: parameters)
         }
     }
 }

@@ -183,6 +183,26 @@ class BrowserTabIndexingTests: WebBrowsingBaseTests {
         let resultLinkForLinkURL2 = linkStore.getLinks(matchingUrl: linkURL2.absoluteString).values.first
         XCTAssertNil(resultLinkForLinkURL2)
     }
+    func testYoutubeRedirect() {
+        //simulate clicking on a video while the page is still loading
+        //it should not lead to an aliased link.
+        var expectation: XCTestExpectation?
+        mockIndexingDelegate?.onIndexingFinished = { _ in
+            expectation?.fulfill()
+        }
 
+        expectation = self.expectation(description: "done_indexing")
+        let requestedUrl = URL(string: "http://lvh.me:\(Configuration.MockHttpServer.port)/redirection/youtube")!
+        let finalUrl = URL(string: "http://lvh.me:\(Configuration.MockHttpServer.port)/youtube_redirected")!
+        tab.load(request: URLRequest(url: requestedUrl))
+        waitForExpectations(timeout: 10, handler: nil)
 
+        let allLinks = linkStore.allLinks
+        XCTAssertEqual(allLinks.count, 2)
+
+        let resultLinkForRequestedUrl = linkStore.getLinks(matchingUrl: requestedUrl.absoluteString)
+        XCTAssertEqual(resultLinkForRequestedUrl.count, 0)
+        let resultLinkForFinalUrl = linkStore.getLinks(matchingUrl: finalUrl.absoluteString).values.first
+        XCTAssertNil(resultLinkForFinalUrl?.destination)
+    }
 }

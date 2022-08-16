@@ -1,0 +1,17 @@
+<html>
+<head>
+<title>Youtube redirection</title>
+<script>
+function delayedLoad() {
+    window.history.pushState(null, "", "/youtube_redirected");
+    const body = document.querySelector("body");
+    const slowImage = document.createElement('img');
+    slowImage.setAttribute('src', "http://lvh.me:{{ params.port }}/static/slow_bart_simpson.jpg");
+    body.appendChild(slowImage)
+}
+</script>
+</head>
+<body onload="delayedLoad()">
+    <p>Cool content</p>
+</body>
+</html>
