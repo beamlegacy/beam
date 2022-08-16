@@ -49,7 +49,7 @@ public extension String {
     }
 
     func validUrl() -> (isValid: Bool, url: String) {
-        guard let url = URL(string: self) else { return (false, "") }
+        guard self.tld != nil, let url = URL(string: self) else { return (false, "") }
 
         if self.mayBeEmail {
             return (true, "mailto:\(self)")
