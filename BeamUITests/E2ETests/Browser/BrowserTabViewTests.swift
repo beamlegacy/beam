@@ -11,7 +11,6 @@ import XCTest
 class BrowserTabViewTests: BaseTest {
     
     let linkToOpen = "released his perhaps still-in-progress album"
-    let uiTestPage1Title = "Point And Shoot Test Fixture Ultralight Beam"
     var journalView: JournalTestView!
     
     override func setUp() {
@@ -64,7 +63,7 @@ class BrowserTabViewTests: BaseTest {
         
         step("When I open a link with CMD+Click"){
             XCUIElement.perform(withKeyModifiers: .command) {
-                XCUIApplication().webViews[uiTestPage1Title].staticTexts[linkToOpen].clickOnExistence()
+                XCUIApplication().webViews[uiTestPageOne].staticTexts[linkToOpen].clickOnExistence()
             }
         }
         

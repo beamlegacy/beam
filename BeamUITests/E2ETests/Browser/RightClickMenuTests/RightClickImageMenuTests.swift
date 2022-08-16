@@ -10,7 +10,6 @@ import XCTest
 
 class RightClickImageMenuTests: BaseTest {
     
-    let pageTitle = "Point And Shoot Test Fixture I-Beam"
     let imageName = "800px-Beam_mode_2.gif"
     let imageToRightClickOn = WebTestView().image("File:Beam mode 2.gif")
     let rightClickMenuTestView = RightClickMenuTestView()
@@ -66,7 +65,7 @@ class RightClickImageMenuTests: BaseTest {
             let imageTitle = imageName + " 800×476 pixels"
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             helper.moveMouseOutOfTheWay() // move mouse to not be on tab title
-            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), pageTitle)
+            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), uiTestPageTwo)
             waitForStringValueEqual(imageTitle, webView.getBrowserTabTitleElements()[1])
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 1), imageTitle)
             _ = webView.focusTabByIndex(index: 0)
