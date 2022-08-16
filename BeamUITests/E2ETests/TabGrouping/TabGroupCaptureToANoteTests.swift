@@ -33,7 +33,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             AllNotesTestView().openFirstNote()
             XCTAssertTrue(noteView.isTabGroupDisplayed(index: 0))
-            XCTAssertEqual(noteView.getTabGroupElementName(index: 0), "Point And Shoot Test Fixture Ultralight Beam & 3 more tab group")
+            XCTAssertEqual(noteView.getTabGroupElementName(index: 0), uiTestPageOne + " & 3 more tab group")
         }
 
         step("When I close the tab group") {
@@ -48,7 +48,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             noteView.openTabGroup(index: 0)
             webView.waitForWebViewToLoad()
             XCTAssertEqual(webView.getNumberOfTabs(),4)
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "Point And Shoot Test Fixture Ultralight Beam & 3 more")
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), uiTestPageOne + " & 3 more")
         }
         
     }
@@ -115,7 +115,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             AllNotesTestView().openFirstNote()
             XCTAssertEqual(noteView.getTabGroupCount(), 2)
             XCTAssertEqual(noteView.getTabGroupElementName(index: 0), "E2E Test tab group")
-            XCTAssertEqual(noteView.getTabGroupElementName(index: 1), "Point And Shoot Test Fixture Ultralight Beam & 3 more tab group")
+            XCTAssertEqual(noteView.getTabGroupElementName(index: 1), uiTestPageOne + " & 3 more tab group")
         }
 
     }

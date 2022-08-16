@@ -126,4 +126,13 @@ class OmniBoxTestView: BaseView {
     func getAutocompleteURLIdentifierFor(domainURL: String) -> String {
         return getAutocompleteIdentifierFor(domainURL: domainURL) + "-url"
     }
+    
+    func areAutocompleteResultsInCorrectOrder(results: Array<String>) -> Bool {
+        var result = true
+        for i in 0...getAutocompleteResults().count - 1 {
+            result =  result && (getAutocompleteResults().element(boundBy: i).getStringValue().elementsEqual(results[i]))
+        }
+        return result
+    }
+
 }

@@ -28,6 +28,14 @@ class WebTestView: BaseView {
         return getBrowserTabTitleElements()[index].getStringValue()
     }
     
+    func areTabsInCorrectOrder(tabs: Array<String>) -> Bool {
+        var result = true
+        for i in 0...getNumberOfTabs() - 1 {
+            result =  result && (getBrowserTabTitleValueByIndex(index: i).elementsEqual(tabs[i]))
+        }
+        return result
+    }
+    
     func getBrowserTabTitleElements() -> [XCUIElement] {
         return app.windows.staticTexts.matching(identifier: WebViewLocators.Tabs.tabTitle.accessibilityIdentifier).allElementsBoundByIndex
     }
