@@ -681,11 +681,13 @@ extension BrowserTabsManager {
     }
 
     func closeTabsInGroup(_ group: TabGroup) {
+        Logger.shared.logInfo("Closing Tab Group '\(group.title ?? "\(group.id)")'", category: .tabGrouping)
         let tabs = tabs(inGroup: group)
         state?.closeTabs(tabs, groupName: "CloseTabsInGroup")
     }
 
     func moveGroupToNewWindow(_ group: TabGroup) {
+        Logger.shared.logInfo("Moving Tab Group '\(group.title ?? "\(group.id)")' to new window", category: .tabGrouping)
         let tabsIDs = tabsIds(inGroup: group)
         let tabs = tabs.filter { tabsIDs.contains($0.id) }
         tabsIDs.forEach { tabID in
@@ -717,6 +719,7 @@ extension BrowserTabsManager {
 
     func createNewGroup(withTabs tabs: [BrowserTab]) {
         let group = tabGroupingManager.createNewGroup()
+        Logger.shared.logInfo("New TabGroup created by user. (\(tabs.count) tabs)", category: .tabGrouping)
         tabs.forEach {
             moveTabToGroup($0.id, group: group)
         }
