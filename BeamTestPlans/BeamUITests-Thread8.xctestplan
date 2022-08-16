@@ -104,7 +104,8 @@
         "RightClickTextMenuTests",
         "SearchOnNoteTests",
         "SearchOnNoteTests\/testSearchResultsCounter()",
-        "SearchOnNoteTests\/testSearchViewAppearace()"
+        "SearchOnNoteTests\/testSearchViewAppearace()",
+        "TabGroupInOmniboxTests"
       ],
       "target" : {
         "containerPath" : "container:Beam.xcodeproj",

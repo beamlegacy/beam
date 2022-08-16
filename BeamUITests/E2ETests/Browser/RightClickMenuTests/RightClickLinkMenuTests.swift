@@ -9,7 +9,6 @@ import Foundation
 import XCTest
 
 class RightClickLinkMenuTests: BaseTest {
-    let pageTitle = "Point And Shoot Test Fixture I-Beam"
     let linkToRightClickOn = WebTestView().staticText("structural steel")
     let linkName = "Structural_steel"
     let rightClickMenuTestView = RightClickMenuTestView()
@@ -52,7 +51,7 @@ class RightClickLinkMenuTests: BaseTest {
         
         step("Then link is correctly opened in a new tab") {
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
-            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), pageTitle)
+            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), uiTestPageTwo)
             _ = webView.focusTabByIndex(index: 0)
             // URL will be displayed on focus only if tab is the one used - URL without prefix http
             // It means the image is opened in a new tab which is not directly displayed to the user

@@ -124,7 +124,6 @@ class BrowserPinnedTabTests: BaseTest {
     func testOpenLinkFromPinnedTab() throws {
 
         let linkToOpen = "released his perhaps still-in-progress album"
-        let uiTestPage1Title = "Point And Shoot Test Fixture Ultralight Beam"
 
         step("When I pin the tab"){
             webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
@@ -132,7 +131,7 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("And I open a link with CMD+Click"){
             XCUIElement.perform(withKeyModifiers: .command) {
-                XCUIApplication().webViews[uiTestPage1Title].staticTexts[linkToOpen].clickOnExistence()
+                XCUIApplication().webViews[uiTestPageOne].staticTexts[linkToOpen].clickOnExistence()
             }
         }
         
