@@ -76,9 +76,9 @@ extension Omnibox {
 
         private let boxCornerRadius: CGFloat = 10
         private let defaultStrokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.3))
-        private let lowStrokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.15))
-        private let defaultBackgroundColor = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
-        private let lowBackgroundColor = BeamColor.Generic.background
+        private let lowStrokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.05), darkColor: .From(color: .white, alpha: 0.1))
+        private let defaultBackgroundColor = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury).alpha(0.4)
+        private let lowBackgroundColor = BeamColor.Nero
 
         private let baseShadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.36), darkColor: .From(color: .black, alpha: 0.7))
         private let pulledShadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.07), darkColor: .From(color: .black, alpha: 0.3))
@@ -120,7 +120,7 @@ extension Omnibox {
                         .cornerRadius(boxCornerRadius)
                 }
                 RoundedRectangle(cornerRadius: boxCornerRadius)
-                    .fill(backgroundColor.opacity(0.4))
+                    .fill(backgroundColor)
                 content()
                     .cornerRadius(boxCornerRadius)
                     .clipped()
