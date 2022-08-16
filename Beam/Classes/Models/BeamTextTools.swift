@@ -44,7 +44,14 @@ extension BeamText {
             return nil
         }
 
-        guard let linkedNote = try? BeamNote.fetchOrCreate(source, title: link) else { return nil }
+        var linkedNote: BeamNote?
+        if let journalDate = BeamNoteType.dateFrom(journalDateString: link) {
+            linkedNote = try? BeamNote.fetchOrCreateJournalNote(source, date: journalDate)
+        } else {
+            linkedNote = try? BeamNote.fetchOrCreate(source, title: link)
+        }
+        guard let linkedNote = linkedNote else { return nil}
+
         if linkedNote.children.isEmpty {
             linkedNote.addChild(BeamElement())
         }
