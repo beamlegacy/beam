@@ -300,7 +300,7 @@ extension WebViewController: WebViewNavigationHandler {
         //on drive.google.com hitting back triggers a replaceState
         //so we need compare backForwardList evolution to disambiguate between goForward, navigateTo and goBack
         var keepSameParent = false
-        if case .javascript(event: _) = source {
+        if case .javascript(event: let JSevent) = source {
             switch getNavigationDirection(webView: webView) {
             case .historyBackward:
                 delegate?.webViewController(self, willMoveInHistory: false)
@@ -312,6 +312,11 @@ extension WebViewController: WebViewNavigationHandler {
                 keepSameParent = true
             default:
                 break
+            }
+            //url requests separated by .pushState events shouldn't count as redirection from one to another.
+            //should solve wrong aliasing when clicking on youtube when the page is still loading
+            if case .pushState = JSevent {
+                requestedURL = nil
             }
         }
 
