@@ -45,10 +45,10 @@ class BeamTextEditTests: XCTestCase {
         pasteboard.clearContents()
         XCTAssertEqual(note.sources.count, 0)
         let urls = [
-            "http://awe.some",
-            "http://fantas.tic",
-            "http://wonder.ful",
-            "http://miraculo.us",
+            "http://awesome.com",
+            "http://fantastic.nl",
+            "http://wonderful.fr",
+            "http://miraculous.gov",
         ]
 
         //Pasting raw string
