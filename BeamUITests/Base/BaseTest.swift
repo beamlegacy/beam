@@ -30,6 +30,11 @@ class BaseTest: XCTestCase {
     let mockBaseUrl = "http://form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
     let stagingEnvironmentServerAddress = "staging-web-server.ew.r.appspot.com"
     
+    let uiTestPageOne = "Point And Shoot Test Fixture Ultralight Beam"
+    let uiTestPageTwo = "Point And Shoot Test Fixture I-Beam"
+    let uiTestPageThree = "Point And Shoot Test Fixture Cursor"
+    let uiTestPageFour = "Point And Shoot Test Fixture Background image"
+    
     let uiMenu = UITestsMenuBar()
     let shortcutHelper = ShortcutsHelper()
     let mockPage = MockHTTPWebPages()
