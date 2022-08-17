@@ -311,6 +311,12 @@ import UniformTypeIdentifiers
         }
 
         let tree: BrowsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
+        tree.set(
+            frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
+            longTermScoreStore: LongTermUrlScoreStore(),
+            domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
+            dailyScoreStore: GRDBDailyUrlScoreStore()
+        )
         browsingTree = tree
         noteController = try container.decode(WebNoteController.self, forKey: .noteController)
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
