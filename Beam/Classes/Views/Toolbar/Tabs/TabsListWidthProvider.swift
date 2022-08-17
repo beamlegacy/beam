@@ -75,11 +75,9 @@ final class TabsListWidthProvider {
         18
     }
 
-    private let defaultFont = BeamFont.medium(size: 11).nsFont
-
+    static private let defaultFontAttributes = [NSAttributedString.Key.font: BeamFont.medium(size: 11).nsFont]
     private func widthForText(_ text: String) -> CGFloat {
-        let fontAttributes = [NSAttributedString.Key.font: defaultFont]
-        return (text as NSString).size(withAttributes: fontAttributes).width
+        (text as NSString).size(withAttributes: Self.defaultFontAttributes).width
     }
 
     private func computeWidths() {
@@ -88,11 +86,17 @@ final class TabsListWidthProvider {
             if item.isAGroupCapsule, let group = item.group {
                 var width: CGFloat = minimumGroupItemWidth
                 let hPadding: CGFloat = 8
-                let title = item.displayedText
+                let displayText = item.displayedText(allowingStatus: false)
                 if group.title?.isEmpty != false && group.collapsed && item.count ?? 0 >= 1000 {
                     width = 12 + (hPadding*2) // showing infinite icon
-                } else if !title.isEmpty {
-                    width = max(width, widthForText(title) + (hPadding*2))
+                } else if !displayText.isEmpty {
+                    width = max(width, widthForText(displayText) + (hPadding*2))
+                }
+                if case .sharing = group.status {
+                    let textWithStatus = item.displayedText(allowingStatus: true)
+                    var widthWithStatus = widthForText(textWithStatus) + (hPadding*2)
+                    widthWithStatus += 16 // showing the loader
+                    width = max(width, widthWithStatus)
                 }
                 customWidths[item.id] = min(maximumGroupItemWidth, width)
             }

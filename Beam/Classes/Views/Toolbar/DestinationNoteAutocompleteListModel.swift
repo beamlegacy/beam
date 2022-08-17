@@ -258,7 +258,7 @@ extension DestinationNoteAutocompleteList {
 
         private func getEmptySearchRecentsNotes(collection: BeamDocumentCollection, itemLimit: Int) -> ([BeamDocument], [UUID: FrecencyNoteRecord]) {
             let scores = BeamData.shared.noteLinksAndRefsManager?.getTopNoteFrecencies(limit: itemLimit, paramKey: AutocompleteManager.noteFrecencyParamKey) ?? [:]
-            var items = (try? collection.fetch(filters: [.ids(Array(scores.keys))])) ?? []
+            var items = (try? collection.fetch(filters: [.userFacingNotes, .ids(Array(scores.keys))])) ?? []
             if recentsAlwaysShowTodayNote, let todayNote = data?.todaysNote.document {
                 if let index = items.firstIndex(where: { $0.id == todayNote.id }) {
                     items.remove(at: index)
@@ -279,7 +279,7 @@ extension DestinationNoteAutocompleteList {
             var shouldSortResult = true
             if !text.isEmpty {
                 allowCreateCard = true
-                items = (try? collection.fetch(filters: [.titleMatch(text)])) ?? []
+                items = (try? collection.fetch(filters: [.userFacingNotes, .titleMatch(text)])) ?? []
                 let noteIds = items.map { $0.id }
                 scores = BeamData.shared.noteLinksAndRefsManager?.getFrecencyScoreValues(noteIds: noteIds, paramKey: AutocompleteManager.noteFrecencyParamKey) ?? [:]
             } else if useRecents {

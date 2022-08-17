@@ -11,12 +11,18 @@ final class TabGroup: Identifiable {
 
     typealias GroupID = UUID
 
+    enum Status {
+        case `default`, sharing
+    }
+
     private(set) var id = GroupID()
     private(set) var title: String?
     private(set) var color: TabGroupingColor?
     private(set) var pageIds: [ClusteringManager.PageID]
     private(set) var collapsed = false
     private(set) var isLocked: Bool = false
+    var status = Status.default
+    private(set) var parentGroup: UUID?
 
     /// Whether or not the group should allow the clustering to append / remove pages.
     var canBeUpdatedByClustering: Bool {
@@ -27,13 +33,15 @@ final class TabGroup: Identifiable {
     private(set) var shouldBePersisted: Bool = false
 
     init(id: GroupID = GroupID(), pageIds: [ClusteringManager.PageID],
-         title: String? = nil, color: TabGroupingColor? = nil, isLocked: Bool = false) {
+         title: String? = nil, color: TabGroupingColor? = nil,
+         isLocked: Bool = false, parentGroup: UUID? = nil) {
         self.id = id
         self.pageIds = pageIds
         self.title = title
         self.color = color
         self.isLocked = isLocked
-        shouldBePersisted = title?.isEmpty == false
+        self.parentGroup = parentGroup
+        shouldBePersisted = title?.isEmpty == false || isLocked
     }
 
     required init(from decoder: Decoder) throws {
@@ -44,6 +52,7 @@ final class TabGroup: Identifiable {
         color = TabGroupingColor(designColor: .init(rawValue: codableColor.colorName ?? ""), randomColorHueTint: codableColor.hueTint)
         pageIds = try values.decode([ClusteringManager.PageID].self, forKey: .pages)
         isLocked = try values.decode(Bool.self, forKey: .isLocked)
+        parentGroup = try? values.decode(UUID.self, forKey: .parentGroup)
         collapsed = try values.decode(Bool.self, forKey: .collapsed)
     }
 
@@ -74,6 +83,7 @@ final class TabGroup: Identifiable {
         newGroup.collapsed = collapsed
         newGroup.shouldBePersisted = shouldBePersisted
         newGroup.isLocked = locked
+        newGroup.parentGroup = id
         newGroup.pageIds = discardPages ? [] : pageIds
         return newGroup
     }
@@ -96,6 +106,7 @@ extension TabGroup: Codable {
         case color
         case pages
         case isLocked
+        case parentGroup
         case collapsed
     }
 
@@ -107,5 +118,6 @@ extension TabGroup: Codable {
         try container.encode(pageIds, forKey: .pages)
         try container.encode(isLocked, forKey: .isLocked)
         try container.encode(collapsed, forKey: .collapsed)
+        try container.encode(parentGroup, forKey: .parentGroup)
     }
 }

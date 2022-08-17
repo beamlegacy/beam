@@ -29,9 +29,16 @@ struct TabsListItem: Identifiable, CustomStringConvertible {
     var count: Int?
 
     var displayedText: String {
+        displayedText(allowingStatus: true)
+    }
+
+    /// more precise helper to calculate need width depending on states.
+    func displayedText(allowingStatus: Bool = true) -> String {
         if isAGroupCapsule, let group = group {
             var title = group.title ?? ""
-            if group.collapsed, let count = count, count > 0 {
+            if case .sharing = group.status, allowingStatus {
+                title = loc("Sharing...")
+            } else if group.collapsed, let count = count, count > 0 {
                 if title.isEmpty {
                     title = "\(count)"
                 } else {
@@ -91,7 +98,7 @@ struct TabsListView: View {
     @StateObject private var dragModel = TabsDragModel()
     @StateObject private var externalDragModel = TabsListExternalDragViewModel()
     @StateObject private var viewModel = TabsListViewModel()
-    @State private var contextMenuManager: TabsListContextMenuBuilder?
+    @StateObject private var contextMenuManager = TabsListContextMenuBuilder()
 
     private var sections: TabsListItemsSections {
         browserTabsManager.listItems
@@ -103,6 +110,10 @@ struct TabsListView: View {
 
     private var isDraggingATab: Bool {
         dragModel.draggingOverIndex != nil
+    }
+
+    private var loadingTabGroup: TabGroup? {
+        contextMenuManager.tabGroupIsSharing
     }
 
     private var selectedIndex: Int {
@@ -237,11 +248,15 @@ struct TabsListView: View {
                             onToggleMute: { onTabToggleMute(at: index) },
                             onFileDrop: { onFileDrop(at: index, url: $0) })
                 } else if let group = item.group, let color = group.color {
-                    TabClusteringGroupCapsuleView(title: group.title ?? "", color: color,
-                                                  collapsed: group.collapsed, itemsCount: item.count ?? group.pageIds.count,
-                                                  onTap: { (isRightMouse, event) in
+                    TabClusteringGroupCapsuleView(displayedText: item.displayedText,
+                                                  groupTitle: group.title, color: color,
+                                                  collapsed: group.collapsed,
+                                                  loading: loadingTabGroup == group,
+                                                  itemsCount: item.count ?? group.pageIds.count,
+
+                                                  onTap: { (isRightMouse, event, frame) in
                         if isRightMouse {
-                            contextMenuManager?.showContextMenu(forGroup: group, with: event)
+                            contextMenuManager.showContextMenu(forGroup: group, with: event, itemFrame: frame)
                         } else {
                             browserTabsManager.toggleGroupCollapse(group)
                         }
@@ -409,7 +424,7 @@ struct TabsListView: View {
                 startOtherMouseDownMonitor()
                 externalDragModel.setup(withState: state, tabsMananger: browserTabsManager)
                 updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider, singleTabFrame: viewModel.singleTabCurrentFrame, lastItemFrame: viewModel.lastItemCurrentFrame)
-                contextMenuManager = .init(state: state)
+                contextMenuManager.setup(withState: state)
             }
             .onDisappear {
                 removeMouseMonitors()
@@ -525,7 +540,7 @@ extension TabsListView {
 
     private func onTabRightClick(at index: Int, event: NSEvent?) {
         guard let tab = sections.allItems[index].tab else { return }
-        contextMenuManager?.showContextMenu(forTab: tab, atListIndex: index, sections: sections, event: event,
+        contextMenuManager.showContextMenu(forTab: tab, atListIndex: index, sections: sections, event: event,
                                             onCloseItem: { _ in
             onItemClose(at: index, fromContextMenu: true)
         })

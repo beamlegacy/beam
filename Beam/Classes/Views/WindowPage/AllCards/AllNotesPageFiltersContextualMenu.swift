@@ -73,6 +73,15 @@ final class AllNotesPageFiltersContextualMenu {
         showDailyNotesItem.state = state.showDailyNotes ? .on : .off
         menu.addItem(showDailyNotesItem)
 
+        if Configuration.branchType == .develop {
+            let showTabGroupsNotesItem = NSMenuItem(
+                title: "Show Tab Groups",
+                action: #selector(showTabGroupNotes),
+                keyEquivalent: "")
+            showTabGroupsNotesItem.state = viewModel.showTabGroupNotes ? .on : .off
+            menu.addItem(showTabGroupsNotesItem)
+        }
+
         for item in menu.items {
             item.isEnabled = true
         }
@@ -116,5 +125,10 @@ final class AllNotesPageFiltersContextualMenu {
     @objc
     private func showDailyNotes() {
         state.showDailyNotes.toggle()
+    }
+
+    @objc
+    private func showTabGroupNotes() {
+        viewModel.setShowTabGroupNotes(!viewModel.showTabGroupNotes)
     }
 }

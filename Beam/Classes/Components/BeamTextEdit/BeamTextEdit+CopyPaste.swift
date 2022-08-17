@@ -44,7 +44,7 @@ extension BeamTextEdit {
         strNode.append(NSAttributedString(string: String.tabs(max(0, node.element.depth - 1)) + String.bullet() + String.spaces(1)))
 
         switch node.elementKind {
-        case .bullet, .heading, .quote, .check, .blockReference, .code, .dailySummary:
+        case .bullet, .heading, .quote, .check, .blockReference, .code, .dailySummary, .tabGroup:
             let config = BeamTextAttributedStringBuilder.Config(elementKind: node.elementKind,
                                                                 ranges: node.elementText.ranges,
                                                                 fontSize: TextNode.fontSizeFor(kind: node.elementKind),

@@ -14,7 +14,7 @@ extension AutocompleteManager {
         static var journalAction: AutocompleteResult {
             AutocompleteResult(text: loc("Journal"), source: .action,
                                shortcut: Shortcut.AvailableShortcut.showJournal.value,
-                               handler: { beamState in
+                               handler: { beamState, _ in
                 beamState.navigateToJournal(note: nil)
             })
         }
@@ -22,7 +22,7 @@ extension AutocompleteManager {
         static var allNotesAction: AutocompleteResult {
             AutocompleteResult(text: loc("All Notes"), source: .action,
                                shortcut: Shortcut.AvailableShortcut.showAllNotes.value,
-                               handler: { beamState in
+                               handler: { beamState, _ in
                 beamState.navigateToPage(.allNotesWindowPage)
             })
         }
@@ -30,7 +30,7 @@ extension AutocompleteManager {
         static var switchToWebAction: AutocompleteResult {
             AutocompleteResult(text: loc("Switch to Web"), source: .action,
                                shortcut: Shortcut.AvailableShortcut.toggleNoteWeb.value,
-                               handler: { beamState in
+                               handler: { beamState, _ in
                 beamState.toggleBetweenWebAndNote()
             })
         }
@@ -38,7 +38,7 @@ extension AutocompleteManager {
         static var switchToNotesAction: AutocompleteResult {
             AutocompleteResult(text: loc("Switch to Notes"), source: .action,
                                shortcut: Shortcut.AvailableShortcut.toggleNoteWeb.value,
-                               handler: { beamState in
+                               handler: { beamState, _ in
                 beamState.toggleBetweenWebAndNote()
             })
         }
@@ -47,7 +47,7 @@ extension AutocompleteManager {
             AutocompleteResult(text: loc("Copy Address"), source: .action,
                                customIcon: "editor-url_copy_16",
                                shortcut: Shortcut(modifiers: [.shift, .command], keys: [.string("C")]),
-                               handler: { beamState in
+                               handler: { beamState, _ in
                 guard let urlString = beamState.browserTabsManager.currentTab?.url?.absoluteString else { return }
                 let pasteboard = NSPasteboard.general
                 pasteboard.clearContents()
@@ -59,7 +59,7 @@ extension AutocompleteManager {
             AutocompleteResult(text: loc("Capture Page"), source: .action,
                                customIcon: "collect-page",
                                shortcut: Shortcut(modifiers: [.option], keys: [.string("S")]),
-                               handler: { beamState in
+                               handler: { beamState, _ in
                 beamState.browserTabsManager.currentTab?.collectTab()
             })
         }
@@ -81,7 +81,7 @@ extension AutocompleteManager {
             let source: AutocompleteResult.Source = hasNoteTitle || !asAction ? .createNote : .action
             return AutocompleteResult(text: text, source: source, information: noteTitle, customIcon: icon,
                                       shortcut: shortcut, completingText: completingText ?? noteTitle, additionalSearchTerms: ["@", "new"],
-                                      handler: hasNoteTitle ? nil : { beamState in
+                                      handler: hasNoteTitle ? nil : { beamState, _ in
                 beamState.autocompleteManager.animateToMode(.noteCreation)
             })
         }
