@@ -496,4 +496,14 @@ class NoteTestView: TextEditorContextTestView {
             getTabGroupElementIndex(index: index).children(matching: .button).firstMatch.clickInTheMiddle()
         }
     }
+    
+    @discardableResult
+    func openTabGroupMenu(index: Int) -> TabGroupMenuView {
+        getTabGroupElementIndex(index: index).rightClickInTheMiddle()
+        return TabGroupMenuView()
+    }
+    
+    func getTabGroupNameOfWindow(index: Int) -> String {
+        return app.windows.element(boundBy: index).staticTexts[TabGroupMenuViewLocators.MenuItems.tabGroupCapsuleName.accessibilityIdentifier].getStringValue()
+    }
 }

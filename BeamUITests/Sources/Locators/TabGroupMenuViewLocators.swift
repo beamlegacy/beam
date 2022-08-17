@@ -20,6 +20,9 @@ enum TabGroupMenuViewLocators {
         case tabGroupExpand = "Expand Group"
         case tabGroupUngroup = "Ungroup"
         case tabGroupCloseGroup = "Close Group"
+        case tabGroupOpenInBackground = "Open in Background"
+        case tabGroupOpenInNewWindow = "Open in New Window"
+        case tabGroupDeleteGroup = "Delete Group"
     }
     
     enum TabGroups: String, CaseIterable, UIElement {

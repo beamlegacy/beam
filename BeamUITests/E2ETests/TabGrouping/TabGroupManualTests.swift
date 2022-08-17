@@ -94,7 +94,7 @@ class TabGroupManualTests: BaseTest {
             webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.createTabGroup)
             tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: tabGroupNamed)
         }
         
