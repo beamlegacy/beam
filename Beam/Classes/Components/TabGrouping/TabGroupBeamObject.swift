@@ -93,7 +93,7 @@ extension TabGroupBeamObject: BeamObjectProtocol {
     }
 
     func copy() throws -> TabGroupBeamObject {
-        TabGroupBeamObject(id: id, title: title, color: color, pages: pages,
+        TabGroupBeamObject(id: id, title: title, color: color, pages: pages, isLocked: isLocked,
                            createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
     }
 }

@@ -257,7 +257,7 @@ extension TabGroupingManager {
                     }
                 }
                 unassignedPages = leftovers
-                if let manualGroupWithMostMatches = manualGroupWithMostMatches {
+                if let manualGroupWithMostMatches = manualGroupWithMostMatches, manualGroupWithMostMatches.group.canBeUpdatedByClustering {
                     leftovers.forEach { pageId in
                         guard forcedOutOfGroups[pageId] != manualGroupWithMostMatches.group else { return }
                         temporaryInManualPageGroups[pageId] = manualGroupWithMostMatches.group
