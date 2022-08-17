@@ -61,12 +61,10 @@ class CheckBoxTableCellView: NSTableCellView {
 
     override func mouseEntered(with event: NSEvent) {
         isHovering = true
-        checkBoxLayer.setNeedsLayout()
     }
 
     override func mouseExited(with event: NSEvent) {
         isHovering = false
-        checkBoxLayer.setNeedsLayout()
     }
 }
 
@@ -85,7 +83,6 @@ class CheckBoxTableHeaderCell: TableHeaderCell {
         didSet {
             checkBoxLayer.isHidden = !isHovering
             checkBoxLayer.isHovering = isHovering
-            checkBoxLayer.setNeedsLayout()
         }
     }
 
