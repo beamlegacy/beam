@@ -440,7 +440,7 @@ js_test:
     RUN_BENCHMARK: "true"
   stage: test
   needs: []
-  image: node:16-alpine
+  image: node:16.16-alpine
   before_script:
     - date
   cache:
