@@ -14,6 +14,8 @@ struct TabPreview: View {
 
     @State private var isHovered: Bool = false
     @State private var favicon: Image?
+    @State var requestedFaviconURL: URL?
+
     var placeholderTintColor: Color
 
     @Environment(\.colorScheme) private var colorScheme
@@ -54,8 +56,19 @@ struct TabPreview: View {
         .animation(nil)
         .transition(.opacity.animation(.easeInOut(duration: 0.15)))
         .onAppear {
-            FaviconProvider.shared.favicon(fromURL: tab.url) { favicon in
-                if let nsImage = favicon?.image {
+            setFavicon(for: tab.url)
+        }
+        .onChange(of: tab.url) { change in
+            setFavicon(for: change)
+        }
+    }
+
+    private func setFavicon(for url: URL) {
+        favicon = nil
+        requestedFaviconURL = url
+        FaviconProvider.shared.favicon(fromURL: url) { favicon in
+            DispatchQueue.main.async {
+                if let nsImage = favicon?.image, url == requestedFaviconURL {
                     self.favicon = Image(nsImage: nsImage)
                 }
             }
