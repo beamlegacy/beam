@@ -46,10 +46,11 @@ public extension BeamNote {
                             createdAt: creationDate,
                             updatedAt: updateDate,
                             data: Data(),
-                            documentType: type.isJournal ? .journal : .note,
+                            documentType: DocumentType(from: type),
                             version: version,
                             isPublic: publicationStatus.isPublic,
-                            journalDate: JournalDateConverter.toInt(from: type.journalDateString ?? "0")
+                            journalDate: JournalDateConverter.toInt(from: type.journalDateString ?? "0"),
+                            tabGroupId: type.tabGroupId
         )
     }
 
@@ -349,6 +350,34 @@ public extension BeamNote {
         return nil
     }
 
+    static func fetch(tabGroupId: UUID,
+                      keepInMemory: Bool = true,
+                      decodeChildren: Bool = true) -> BeamNote? {
+        guard let collection = Self.defaultCollection else { return nil }
+        beamCheckMainThread()
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.fetchTabGroupNote, tabGroupId.uuidString)
+        defer {
+            sign.end(Signs.fetchTabGroupNote)
+        }
+        // Is the note in the cache?
+        if let note = getFetchedNote(tabGroupId: tabGroupId) {
+            return note
+        }
+
+        // Is the note in the document store?
+        do {
+            guard let doc = try collection.fetchFirst(filters: [.tabGroups([tabGroupId])]) else {
+                return nil
+            }
+            return try instanciateNote(doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
+        } catch {
+            Logger.shared.logError("Unable to fetch or decode tab group note for id \(tabGroupId))", category: .document)
+        }
+
+        return nil
+    }
+
     static func fetch(id: UUID,
                       keepInMemory: Bool = true, fetchFromMemory: Bool = true,
                       decodeChildren: Bool = true, verifyDatabase: Bool = true) -> BeamNote? {
@@ -424,20 +453,12 @@ public extension BeamNote {
             return note
         }
 
-        guard let collection = Self.defaultCollection else { throw BeamNoteError.noDefaultCollection }
-
         let sign = Self.signPost.createId()
         sign.begin(Signs.createTitle, title)
         defer {
             sign.end(Signs.createTitle)
         }
-        //assert(getFetchedNote(title) == nil)
-
-        let document = try collection.fetchOrCreate(source, type: .note(title: title))
-        let note = try instanciateNote(document, keepInMemory: true, decodeChildren: true)
-
-        Self.insertDefaultFrecency(noteId: note.id)
-        return note
+        return try fetchOrCreate(source, type: .note(title: title))
     }
 
     static func fetchOrCreateJournalNote(_ source: BeamDocumentSource, date: Date) throws -> BeamNote {
@@ -447,15 +468,34 @@ public extension BeamNote {
             return note
         }
 
-        guard let collection = Self.defaultCollection else { throw BeamNoteError.noDefaultCollection }
-
         let sign = Self.signPost.createId()
         sign.begin(Signs.createJournalDate, date.description)
         defer {
             sign.end(Signs.createJournalDate)
         }
+        return try fetchOrCreate(source, type: .journal(date: date))
+    }
 
-        let document = try collection.fetchOrCreate(source, type: .journal(date: date))
+    static func fetchOrCreate(_ source: BeamDocumentSource, tabGroupId: UUID) throws -> BeamNote {
+        beamCheckMainThread()
+
+        if let note = getFetchedNote(tabGroupId: tabGroupId) {
+            return note
+        }
+
+        let sign = Self.signPost.createId()
+        sign.begin(Signs.createTabGroupNote, tabGroupId.description)
+        defer {
+            sign.end(Signs.createTabGroupNote)
+        }
+        return try fetchOrCreate(source, type: .tabGroup(tabGroupId: tabGroupId))
+    }
+
+    private static func fetchOrCreate(_ source: BeamDocumentSource, type: BeamDocumentCollection.CreationType) throws -> BeamNote {
+        beamCheckMainThread()
+        guard let collection = Self.defaultCollection else { throw BeamNoteError.noDefaultCollection }
+
+        let document = try collection.fetchOrCreate(source, type: type)
         let note = try instanciateNote(document, keepInMemory: true, decodeChildren: true)
 
         Self.insertDefaultFrecency(noteId: note.id)
@@ -585,7 +625,14 @@ public extension BeamNote {
                     validated.append("\tdocumentStruct should have a journal_date but it hasn't")
                 }
             }
-
+        case .tabGroup:
+            if !type.isTabGroup {
+                validated.append("\tdocumentStruct has wrong type \(document.documentType)")
+            } else {
+                if document.tabGroupId == nil {
+                    validated.append("\tdocumentStruct should have a tabGroupId but it hasn't")
+                }
+            }
         case .note:
             if type.isJournal {
                 validated.append("\tdocumentStruct has wrong type \(document.documentType)")
@@ -593,6 +640,9 @@ public extension BeamNote {
 
             if document.journalDate != 0 {
                 validated.append("\tdocumentStruct shouldn't have a journal_date but it has \(document.journalDate)")
+            }
+            if let tabGroupId = document.tabGroupId {
+                validated.append("\tdocumentStruct shouldn't have a tabGroupId but it has \(tabGroupId)")
             }
         }
 
@@ -648,12 +698,14 @@ public extension BeamNote {
         static let syncedSave: StaticString = "syncedSave"
         static let fetchTitle: StaticString = "fetchTitle"
         static let fetchJournalDate: StaticString = "fetchJournalDate"
+        static let fetchTabGroupNote: StaticString = "fetchTabGroupNote"
         static let fetchId: StaticString = "fetchId"
         static let fetchNotesWithType: StaticString = "fetchNotesWithType"
         static let fetchJournalsFromDate: StaticString = "fetchJournalsFromDate"
         static let fetchJournalsBefore: StaticString = "fetchJournalsBefore"
         static let createTitle: StaticString = "createTitle"
         static let createJournalDate: StaticString = "createJournalDate"
+        static let createTabGroupNote: StaticString = "createTabGroupNote"
         static let fetchOrCreate: StaticString = "fetchOrCreate"
         static let fetchOrCreateJournal: StaticString = "fetchOrCreateJournal"
         static let indexAllNotes: StaticString = "indexAllNotes"

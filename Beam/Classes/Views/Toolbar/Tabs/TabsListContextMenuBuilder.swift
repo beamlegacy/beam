@@ -8,9 +8,12 @@
 import SwiftUI
 import BeamCore
 
-final class TabsListContextMenuBuilder {
+final class TabsListContextMenuBuilder: ObservableObject {
     private weak var state: BeamState?
-    init(state: BeamState) {
+    @Published var tabGroupIsSharing: TabGroup?
+
+    init() { }
+    func setup(withState state: BeamState) {
         self.state = state
     }
 }
@@ -56,33 +59,39 @@ extension TabsListContextMenuBuilder {
         .fixedSize()
     }
 
-    private func addGroup(_ group: TabGroup,
-                          toNote targetNote: BeamNote?,
-                          from window: NSWindow,
-                          completion: (PointAndShootCardPicker.ExternalCaptureConfirmation?) -> Void) {
+    private func addGroup(_ group: TabGroup, toNote targetNote: BeamNote?,
+                          from window: NSWindow, completion: (PointAndShootCardPicker.ExternalCaptureConfirmation?) -> Void) {
         guard let note = targetNote, let tabsManager = state?.browserTabsManager else {
             let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
             window.contentView?.layer?.add(anim, forKey: "disappear")
             return
         }
         let tabGroupingManager = tabsManager.tabGroupingManager
-        let copiedGroup = tabGroupingManager.copyForSharing(group)
-        if copiedGroup.title == nil || copiedGroup.title?.isEmpty == true {
-            let title = tabsManager.describingTitle(forGroup: group, truncated: false)
-            tabGroupingManager.renameGroup(copiedGroup, title: title)
-        }
-        note.addTabGroup(copiedGroup.id)
-        if note.save(self) {
-            Logger.shared.logInfo("Added group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note) id: \(note.id)", category: .tabGrouping)
+        if tabGroupingManager.addGroup(group, toNote: note) {
             completion(.success)
             DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
                 let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
                 window.contentView?.layer?.add(anim, forKey: "disappear")
             }
         } else {
-            Logger.shared.logInfo("Failed to add group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note) id: \(note.id)", category: .tabGrouping)
             completion(.failure)
         }
+    }
+
+    private func shareGroup(_ group: TabGroup, itemFrame: CGRect?, shareService: ShareService) {
+        guard let tabGroupingManager = state?.browserTabsManager.tabGroupingManager else { return }
+        let canShare = tabGroupingManager.shareGroup(group, shareService: shareService) { [weak self] result in
+            self?.tabGroupIsSharing = nil
+            guard shareService == .copy, let itemFrame = itemFrame else { return }
+            switch result {
+            case .success:
+                let point = CGPoint(x: itemFrame.midX, y: itemFrame.maxY + 20)
+                self?.state?.overlayViewModel.presentTooltip(text: loc("Link Copied"), at: point)
+            case .failure:
+                break
+            }
+        }
+        tabGroupIsSharing = canShare ? group : nil
     }
 }
 
@@ -254,12 +263,14 @@ extension TabsListContextMenuBuilder {
 // MARK: - Group Context Menu
 extension TabsListContextMenuBuilder {
 
-    func showContextMenu(forGroup group: TabGroup, with event: NSEvent?) {
+    func showContextMenu(forGroup group: TabGroup, with event: NSEvent?, itemFrame: CGRect?) {
         let menu = NSMenu()
 
         let nameAndColorItem = buildNameAndColorPickerItem(in: menu, forGroup: group)
         menu.addItem(nameAndColorItem)
         menu.addItem(.fullWidthSeparator())
+
+        addShareGroupSubMenu(in: menu, forGroup: group, itemFrame: itemFrame)
 
         menu.addItem(withTitle: "Capture Group to a Note…") { [weak self] _ in
             let location = event?.locationInWindow ?? .zero
@@ -287,6 +298,24 @@ extension TabsListContextMenuBuilder {
         }
 
         menu.popUp(positioning: nil, at: event?.locationInWindow ?? .zero, in: event?.window?.contentView)
+    }
+
+    private func addShareGroupSubMenu(in menu: NSMenu, forGroup group: TabGroup, itemFrame: CGRect?) {
+        let subMenu = NSMenu()
+        let handlerForService: (ShareService) -> HandlerMenuItem.Handler = { [weak self] service in
+            return { _ in self?.shareGroup(group, itemFrame: itemFrame, shareService: service) }
+        }
+        var subItems = [
+            HandlerMenuItem(title: "Copy Link", icon: "editor-url_link", handler: handlerForService(.copy)),
+            NSMenuItem.separator()
+        ]
+        subItems.append(contentsOf: ShareService.allCases(except: [.copy]).map {
+            HandlerMenuItem(title: $0.title, icon: $0.icon, handler: handlerForService($0))
+        })
+        subItems.forEach { subMenu.addItem($0) }
+        let menuItem = NSMenuItem(title: "Share Group", action: nil, keyEquivalent: "")
+        menu.setSubmenu(subMenu, for: menuItem)
+        menu.addItem(menuItem)
     }
 
     private func buildNameAndColorPickerItem(in menu: NSMenu, forGroup group: TabGroup) -> ContentViewMenuItem<TabClusteringNameColorPickerView> {

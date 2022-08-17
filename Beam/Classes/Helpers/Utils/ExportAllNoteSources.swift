@@ -69,7 +69,7 @@ func export_all_note_sources(to url: URL?) {
     else { return }
     let destination = url.appendingPathComponent("beam_all_note_sources-\(BeamDate.now).csv")
     do {
-        let notesAndSources = try currentDocumentCollection.fetchIds(filters: [])
+        let notesAndSources = try currentDocumentCollection.fetchIds(filters: [.userFacingNotes])
             .compactMap { id -> [NoteAndSourcesRow]? in
                 guard let note = BeamNote.fetch(id: id) else { return nil }
                 note.sources.refreshScores()

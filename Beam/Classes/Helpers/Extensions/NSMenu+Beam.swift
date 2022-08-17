@@ -9,9 +9,14 @@ final class HandlerMenuItem: NSMenuItem {
 
     let handler: Handler
 
-    init(title: String, keyEquivalent: String = "", handler: @escaping Handler) {
+    init(title: String, icon: String? = nil, keyEquivalent: String = "", handler: @escaping Handler) {
         self.handler = handler
         super.init(title: title, action: #selector(performAction(_:)), keyEquivalent: keyEquivalent)
+        if let icon = icon {
+            let image = NSImage(named: icon)
+            image?.isTemplate = true
+            self.image = image
+        }
         self.target = self
     }
 

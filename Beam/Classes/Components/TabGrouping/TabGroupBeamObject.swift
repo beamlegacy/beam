@@ -12,13 +12,16 @@ import GRDB
 /// Database representation of a Tab Group (aka `Beam.TabGroup`), conforming to BeamObjectProtocol.
 struct TabGroupBeamObject: Identifiable {
 
-    var id: UUID = .null
+    var id: UUID = UUID()
     var title: String?
     var color: TabGroupingColor?
     var pages: [PageInfo] = []
 
     /// locked is for a tab group that has been frozen to be inserted into a Note or shared.
     var isLocked: Bool = false
+
+    /// a locked group can be the copy of a parent group, for sharing.
+    var parentGroup: UUID?
 
     // BeamObject defaults
     var createdAt: Date = BeamDate.now
@@ -62,6 +65,7 @@ extension TabGroupBeamObject: BeamObjectProtocol {
         case color
         case pages
         case isLocked
+        case parentGroup
         case createdAt
         case updatedAt
         case deletedAt
@@ -77,6 +81,7 @@ extension TabGroupBeamObject: BeamObjectProtocol {
         color = TabGroupingColor(designColor: .init(rawValue: codableColor.colorName ?? ""), randomColorHueTint: codableColor.hueTint)
         pages = try values.decode([PageInfo].self, forKey: .pages)
         isLocked = try values.decode(Bool.self, forKey: .isLocked)
+        parentGroup = try values.decode(UUID.self, forKey: .parentGroup)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -85,6 +90,7 @@ extension TabGroupBeamObject: BeamObjectProtocol {
         try container.encode(TabGroupingColor.CodableColor(colorName: color?.designColor?.rawValue, hueTint: color?.randomColorHueTint), forKey: .color)
         try container.encode(pages, forKey: .pages)
         try container.encode(isLocked, forKey: .isLocked)
+        try container.encode(parentGroup, forKey: .parentGroup)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(updatedAt, forKey: .updatedAt)
         if deletedAt != nil {
@@ -100,7 +106,7 @@ extension TabGroupBeamObject: BeamObjectProtocol {
 
 extension TabGroupBeamObject: TableRecord {
     enum Columns: String, ColumnExpression {
-        case id, title, colorName, colorHue, pages, isLocked, createdAt, updatedAt, deletedAt
+        case id, title, colorName, colorHue, pages, isLocked, parentGroup, createdAt, updatedAt, deletedAt
     }
     static var databaseTableName = "TabGroup"
 }
@@ -120,6 +126,7 @@ extension TabGroupBeamObject: FetchableRecord {
             pages = []
         }
         isLocked = row[Columns.isLocked]
+        parentGroup = row[Columns.parentGroup]
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
         deletedAt = row[Columns.deletedAt]
@@ -137,6 +144,7 @@ extension TabGroupBeamObject: MutablePersistableRecord {
         container[Columns.colorHue] = color?.randomColorHueTint
         container[Columns.pages] = try? JSONEncoder().encode(pages)
         container[Columns.isLocked] = isLocked
+        container[Columns.parentGroup] = parentGroup
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt

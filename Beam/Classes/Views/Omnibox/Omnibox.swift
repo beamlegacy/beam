@@ -53,34 +53,41 @@ struct Omnibox: View {
     var body: some View {
         Omnibox.Background(isLow: boxIsLow, isPressingCharacter: showPressedState) {
             VStack(spacing: 0) {
-                HStack(spacing: BeamSpacing._180) {
-                    OmniboxSearchField(isEditing: isEditingBinding,
-                                       modifierFlagsPressed: $modifierFlagsPressed)
+                if case .customView(let view) = autocompleteManager.mode  {
+                    view
+                        .frame(height: Self.defaultHeight)
+                        .padding(.horizontal, BeamSpacing._180)
+                } else {
+                    HStack(spacing: BeamSpacing._180) {
+                        OmniboxSearchField(isEditing: isEditingBinding,
+                                           modifierFlagsPressed: $modifierFlagsPressed)
                         .animation(nil)
                         .frame(height: Self.defaultHeight)
                         .frame(maxWidth: .infinity)
-                    if !autocompleteManager.searchQuery.isEmpty {
-                        OmniboxClearButton()
-                            .simultaneousGesture(TapGesture().onEnded {
-                                autocompleteManager.setQuery("", updateAutocompleteResults: true)
-                            })
+                        if !autocompleteManager.searchQuery.isEmpty {
+                            OmniboxClearButton()
+                                .simultaneousGesture(TapGesture().onEnded {
+                                    autocompleteManager.setQuery("", updateAutocompleteResults: true)
+                                })
+                        }
                     }
-                }
-                .padding(.horizontal, BeamSpacing._180)
-                .overlay(!shouldShowAutocompleteResults ? nil :
-                            Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
-                            .blendModeLightMultiplyDarkScreen(),
-                         alignment: .bottom)
-                .frame(height: Self.defaultHeight, alignment: .top)
-                if shouldShowAutocompleteResults {
-                    ScrollView {
-                        AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex,
-                                             elements: autocompleteManager.autocompleteResults,
-                                             modifierFlagsPressed: modifierFlagsPressed)
+                    .padding(.horizontal, BeamSpacing._180)
+                    .overlay(!shouldShowAutocompleteResults ? nil :
+                                Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
+                        .blendModeLightMultiplyDarkScreen(),
+                             alignment: .bottom)
+                    .frame(height: Self.defaultHeight, alignment: .top)
+                    if shouldShowAutocompleteResults {
+                        ScrollView {
+                            AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex,
+                                                 elements: autocompleteManager.autocompleteResults,
+                                                 loadingElement: autocompleteManager.autocompleteLoadingResult,
+                                                 modifierFlagsPressed: modifierFlagsPressed)
+                        }
+                        .frame(maxHeight: 380)
+                    } else if state.isIncognito && isInsideNote {
+                        OmniboxIncognitoExplanation()
                     }
-                    .frame(maxHeight: 380)
-                } else if state.isIncognito && isInsideNote {
-                    OmniboxIncognitoExplanation()
                 }
             }
         }
