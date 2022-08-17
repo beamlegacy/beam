@@ -66,6 +66,8 @@ public enum ElementKind: Codable, Equatable {
     case blockReference(UUID, UUID, origin: SourceMetadata? = nil)
     /// Daily Summary
     case dailySummary
+    /// Tab Group reference
+    case tabGroup(tabGroupId: UUID)
 
     public var isText: Bool {
         !isMedia
@@ -102,6 +104,7 @@ public enum ElementKind: Codable, Equatable {
         case width
         case displayInfos
         case sourceMetadata
+        case tabGroupId
     }
 
     public var rawValue: String {
@@ -126,6 +129,8 @@ public enum ElementKind: Codable, Equatable {
             return "blockReference '\(note).\(elementId)'"
         case .dailySummary:
             return "dailySummary"
+        case .tabGroup(let tabGroupId):
+            return "tabGroup '\(tabGroupId)'"
         }
     }
 
@@ -254,6 +259,12 @@ public enum ElementKind: Codable, Equatable {
             self = .blockReference(noteID, elementID)
         case "dailySummary":
             self = .dailySummary
+        case "tabGroup":
+            var tabGroupId = UUID.null
+            if let id = try? container.decodeIfPresent(UUID.self, forKey: .tabGroupId) {
+                tabGroupId = id
+            }
+            self = .tabGroup(tabGroupId: tabGroupId)
         default:
             throw ElementKindError.typeNameUnknown(typeName)
         }
@@ -316,7 +327,9 @@ public enum ElementKind: Codable, Equatable {
             }
         case .dailySummary:
             try container.encode("dailySummary", forKey: .type)
-
+        case .tabGroup(let tabGroupId):
+            try container.encode("tabGroup", forKey: .type)            
+            try container.encode(tabGroupId, forKey: .tabGroupId)
         }
     }
 }

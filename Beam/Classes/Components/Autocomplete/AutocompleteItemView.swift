@@ -15,6 +15,7 @@ struct AutocompleteItemView: View {
     @State var item: AutocompleteResult
     let selected: Bool
     var disabled: Bool = false
+    var loading = false
     var displayIcon: Bool = true
     var displaySubtitle: Bool = true
     var allowsShortcut: Bool = true
@@ -148,7 +149,13 @@ struct AutocompleteItemView: View {
 
     @ViewBuilder
     var iconView: some View {
-        if let icon = favicon {
+        if loading {
+            ProgressView()
+                .scaleEffect(0.5, anchor: .center)
+                .frame(width: 16, height: 16)
+                .progressViewStyle(CircularProgressViewStyle(tint: secondaryTextColor))
+                .blendModeLightMultiplyDarkScreen()
+        } else if let icon = favicon {
             Image(nsImage: icon)
                 .resizable()
                 .scaledToFit()

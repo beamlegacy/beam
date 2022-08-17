@@ -253,26 +253,34 @@ extension OmniboxSearchField {
             .allowsHitTesting(false)
     }
 
-    private func fakeSearchField(for mode: AutocompleteManager.Mode, animatingOut: Bool) -> some View {
-        var transition: AnyTransition
+    private func fakeSearchFieldTransition(animatingOut: Bool) -> AnyTransition {
         if animatingOut {
-            transition = .asymmetric(insertion: .modifier(active: _OpacityEffect(opacity: 1), identity: _OpacityEffect(opacity: 0))
-                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 10)))
-                                        .animation(BeamAnimation.easeInOut(duration: 0.1)),
+            return .asymmetric(insertion: .modifier(active: _OpacityEffect(opacity: 1), identity: _OpacityEffect(opacity: 0))
+                .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 10)))
+                .animation(BeamAnimation.easeInOut(duration: 0.1)),
                                      removal: .identity)
         } else {
-            transition = .asymmetric(insertion: .opacity
-                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 10)))
-                                        .animation(BeamAnimation.easeInOut(duration: 0.1).delay(0.05)),
+            return .asymmetric(insertion: .opacity
+                .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 10)))
+                .animation(BeamAnimation.easeInOut(duration: 0.1).delay(0.05)),
                                      removal: .identity)
         }
-        return HStack(spacing: BeamSpacing._120) {
-            if let iconName = leadingIconName(for: mode) {
-                Icon(name: iconName, width: 16, color: BeamColor.LightStoneGray.swiftUI)
+    }
+
+    @ViewBuilder
+    private func fakeSearchField(for mode: AutocompleteManager.Mode, animatingOut: Bool) -> some View {
+        let transition = fakeSearchFieldTransition(animatingOut: animatingOut)
+        HStack(spacing: BeamSpacing._120) {
+            if case .customView(let view) = mode {
+                view
+            } else {
+                if let iconName = leadingIconName(for: mode) {
+                    Icon(name: iconName, width: 16, color: BeamColor.LightStoneGray.swiftUI)
+                }
+                Text(placeholder(for: mode))
+                    .font(textFont.swiftUI)
+                    .foregroundColor(placeholderColor.swiftUI)
             }
-            Text(placeholder(for: mode))
-                .font(textFont.swiftUI)
-                .foregroundColor(placeholderColor.swiftUI)
         }
         .offset(x: 0, y: animatingOut ? -10 : 0)
         .transition(transition)

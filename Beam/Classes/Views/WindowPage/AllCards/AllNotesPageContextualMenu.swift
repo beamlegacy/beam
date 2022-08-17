@@ -204,7 +204,7 @@ final class AllNotesPageContextualMenu {
         let selectedNotesCount = selectedNotes.count
         if selectedNotes.count == 1 {
             AppDelegate.main.exportOneNoteToBeamNote(note: selectedNotes[0])
-        } else if selectedNotesCount != .zero, selectedNotes.count != (try? collection.count(filters: [])) ?? 0 {
+        } else if selectedNotesCount != .zero, selectedNotes.count != (try? collection.count(filters: [.userFacingNotes])) ?? 0 {
             AppDelegate.main.exportNotesToBeamNote(selectedNotes)
         } else {
             AppDelegate.main.exportAllNotesToBeamNote(self)

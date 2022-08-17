@@ -13,6 +13,7 @@ class TabGroupInOmniboxTests: BaseTest {
     let tabGroupMenu = TabGroupMenuView()
     let omniboxView = OmniBoxTestView()
     let openAllTabsLabel = "Open All Tabs"
+    let shareGroup = "Share Tab Group"
     let tabGroupUnamedSuffix = " & 3 more"
     let tabGroupNamed = "Test1"
 
@@ -37,7 +38,8 @@ class TabGroupInOmniboxTests: BaseTest {
             uiTestPageOne,
             uiTestPageTwo,
             uiTestPageThree,
-            uiTestPageFour
+            uiTestPageFour,
+            shareGroup
         ]
         
         step("Given I capture an unnamed tab group") {
@@ -57,7 +59,7 @@ class TabGroupInOmniboxTests: BaseTest {
         step("Then tab group details are displayed") {
             _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: autocompleteResults.count)
             XCTAssertEqual(omniboxView.getOmniBoxSearchField().placeholderValue, uiTestPageOne + tabGroupUnamedSuffix)
-            XCTAssertEqual(omniboxView.getAutocompleteResults().count, 5)
+            XCTAssertEqual(omniboxView.getAutocompleteResults().count, 6)
             XCTAssertTrue(omniboxView.areAutocompleteResultsInCorrectOrder(results: autocompleteResults))
         }
         
@@ -76,7 +78,7 @@ class TabGroupInOmniboxTests: BaseTest {
         step("Then tab group details are displayed") {
             _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: autocompleteResults.count)
             XCTAssertEqual(omniboxView.getOmniBoxSearchField().placeholderValue, uiTestPageOne + tabGroupUnamedSuffix)
-            XCTAssertEqual(omniboxView.getAutocompleteResults().count, 5)
+            XCTAssertEqual(omniboxView.getAutocompleteResults().count, 6)
             XCTAssertTrue(omniboxView.areAutocompleteResultsInCorrectOrder(results: autocompleteResults))
         }
     }
@@ -98,7 +100,7 @@ class TabGroupInOmniboxTests: BaseTest {
         step("When I reopen all tabs") {
             omniboxView.searchInOmniBox("Point", false)
             omniboxView.typeKeyboardKey(.enter)
-            _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5)
+            _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 6)
             omniboxView.getAutocompleteResults().firstMatch.clickInTheMiddle()
         }
         
@@ -123,7 +125,7 @@ class TabGroupInOmniboxTests: BaseTest {
         step("When I open one tab") {
             omniboxView.searchInOmniBox("Point", false)
             omniboxView.typeKeyboardKey(.enter)
-            _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5)
+            _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 6)
             omniboxView.getAutocompleteResults().element(boundBy: 1).clickInTheMiddle()
         }
         
