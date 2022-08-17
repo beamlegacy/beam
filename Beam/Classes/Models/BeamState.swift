@@ -556,7 +556,7 @@ import Sentry
         let inBackground = openingOption.contains(.inBackground)
 
         let tabs: [BrowserTab] = urls.compactMap { url in
-            if let tab = state.browserTabsManager.openedTab(for: url) { return tab }
+            if let tab = state.browserTabsManager.openedTab(for: url, allowPinnedTabs: false) { return tab }
             return state.createTab(withURLRequest: URLRequest(url: url), setCurrent: !inBackground)
         }
 
