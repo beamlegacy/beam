@@ -384,6 +384,9 @@ struct TabsListView: View {
                 draggedItem
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+//            .background(// use this to debug the draggable area
+//                Path(draggableContentPath(geometry: geometry)).stroke(Color.red)
+//            )
             .contentShape(
                 // limit the drag gesture space
                 Path(draggableContentPath(geometry: geometry))
@@ -427,6 +430,9 @@ struct TabsListView: View {
                 updateDraggableTabsAreas(with: nil, tabsSections: sections, widthProvider: widthProvider)
             }
             .onChange(of: sections.allItems.count) { _ in
+                if sections.unpinnedItems.count <= 1 {
+                    updateDraggableTabsAreas(with: nil, tabsSections: sections, widthProvider: widthProvider)
+                }
                 guard hoveredIndex != nil else { return }
                 isChangingTabsCountWhileHovering = true
                 startTrackingMouseMove()
@@ -452,7 +458,8 @@ extension TabsListView {
         var pinnedFrame: CGRect = .zero
         if tabsSections.pinnedItems.count > 0 {
             pinnedFrame = globalFrame
-            pinnedFrame.size.width = widthProvider.widthForAllPinnedItems(pinnedItemsCount: tabsSections.pinnedItems.count)
+            pinnedFrame.size.width = widthProvider.widthForAllPinnedItems(pinnedItemsCount: tabsSections.pinnedItems.count,
+                                                                          includeSpaceBetweenPinnedAndOther: false)
             areas.append(pinnedFrame)
         }
         if tabsSections.unpinnedItems.count == 1, let singleTabFrame = singleTabFrame {
@@ -470,7 +477,7 @@ extension TabsListView {
                 let itemsWidth = tabsSections.unpinnedItems.reduce(0, { partialResult, item in
                     return partialResult + widthProvider.width(forItem: item, selected: false, pinned: false)
                 })
-                let pinnedMaxX = pinnedFrame.maxX + (pinnedFrame != .zero ? widthProvider.separatorBetweenPinnedAndOther - widthProvider.separatorWidth : 0)
+                let pinnedMaxX = pinnedFrame.maxX + (pinnedFrame != .zero ? widthProvider.separatorBetweenPinnedAndOther : 0)
                 let itemsMinX = max(globalFrame.minX, pinnedMaxX)
                 let itemsArea = CGRect(x: itemsMinX, y: globalFrame.minY, width: itemsWidth, height: globalFrame.height)
                 areas.append(itemsArea)

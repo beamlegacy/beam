@@ -112,12 +112,12 @@ final class TabsListWidthProvider {
         return containerSize.width - fixedWidthUsed
     }
 
-    func widthForAllPinnedItems(pinnedItemsCount: Int) -> CGFloat {
+    func widthForAllPinnedItems(pinnedItemsCount: Int, includeSpaceBetweenPinnedAndOther: Bool = true) -> CGFloat {
         guard pinnedItemsCount > 0 else { return 0 }
         let allPinnedsWidth: CGFloat = Array(0..<pinnedItemsCount).reduce(into: 0) { partialResult, index in
             partialResult += width(forItemAtIndex: index, selected: false, pinned: true) + separatorWidth
         }
-        return separatorBetweenPinnedAndOther + allPinnedsWidth - separatorWidth
+        return (includeSpaceBetweenPinnedAndOther ? separatorBetweenPinnedAndOther : 0) + allPinnedsWidth - separatorWidth
     }
 
     func width(forItemAtIndex index: Int, selected: Bool, pinned: Bool) -> CGFloat {
