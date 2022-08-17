@@ -199,7 +199,7 @@ extension AppDelegate {
 
     private func existingOpenedTab(for url: URL) -> (BrowserTab, BeamWindow)? {
         for window in windows {
-            if let tab = window.state.browserTabsManager.openedTab(for: url) {
+            if let tab = window.state.browserTabsManager.openedTab(for: url, allowPinnedTabs: true) {
                 return (tab, window)
             }
         }

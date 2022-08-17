@@ -369,8 +369,8 @@ extension BrowserTabsManager {
         }
     }
 
-    func openedTab(for url: URL) -> BrowserTab? {
-        tabs.first { $0.url?.absoluteString == url.absoluteString }
+    func openedTab(for url: URL, allowPinnedTabs: Bool) -> BrowserTab? {
+        tabs.first { (allowPinnedTabs || !$0.isPinned) && $0.url?.absoluteString == url.absoluteString }
     }
 
     private func updateIsPinned(for tab: BrowserTab, isPinned: Bool) {
