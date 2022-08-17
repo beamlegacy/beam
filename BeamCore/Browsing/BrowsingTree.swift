@@ -453,11 +453,11 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     @Published public private(set) var current: BrowsingNode!
 
     public let origin: BrowsingTreeOrigin
-    let frecencyScorer: FrecencyScorer?
-    let longTermScoreStore: LongTermUrlScoreStoreProtocol?
-    let dailyScoreStore: DailyUrlScoreStoreProtocol?
-    let domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol?
-    let linkStore: LinkStore
+    var frecencyScorer: FrecencyScorer?
+    var longTermScoreStore: LongTermUrlScoreStoreProtocol?
+    var dailyScoreStore: DailyUrlScoreStoreProtocol?
+    var domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol?
+    var linkStore: LinkStore
 
     public static func incognitoBrowsingTree(origin: BrowsingTreeOrigin?) -> BrowsingTree {
         BrowsingTree(origin, linkStore: LinkStore(linkManager: FakeLinkManager()), frecencyScorer: nil, longTermScoreStore: nil, domainPath0TreeStatsStore: nil, dailyScoreStore: nil)
@@ -492,6 +492,15 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         longTermScoreStore = nil
         domainPath0TreeStatsStore = nil
     }
+
+    public func set(frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil,
+                    domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil, dailyScoreStore: DailyUrlScoreStoreProtocol? = nil) {
+        self.frecencyScorer = frecencyScorer
+        self.longTermScoreStore = longTermScoreStore
+        self.dailyScoreStore = dailyScoreStore
+        self.domainPath0TreeStatsStore = domainPath0TreeStatsStore
+    }
+
     func lifeTime(to date: Date = BeamDate.now) -> Double {
         guard let birthDate = root.events.first?.date else { return 0 }
         return date.timeIntervalSince(birthDate)
@@ -586,6 +595,9 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
     public var currentLink: String {
         linkStore.linkFor(id: current.link)?.url ?? Link.missing.url
+    }
+    public var isFrecencyActive: Bool {
+        frecencyScorer != nil
     }
 
     @discardableResult
