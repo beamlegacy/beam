@@ -22,6 +22,14 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
         default: return self
         }
     }
+
+    public var rootId: UUID? {
+        switch self {
+        case let .browsingNode(_, _, _, rootOriginId): return rootOriginId
+        case let .searchBar(_, referringRootId): return referringRootId
+        default: return nil
+        }
+    }
     public var anonymized: BrowsingTreeOrigin {
         switch self {
         case .searchBar(query: _, referringRootId: let id): return .searchBar(query: nil, referringRootId: id)
