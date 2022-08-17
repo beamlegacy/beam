@@ -25,15 +25,7 @@ struct WindowBottomToolBar: View {
         state.currentNote
     }
 
-    private let barHeight: CGFloat = 42
-
-    private func recentsStack(containerGeometry: GeometryProxy) -> some View {
-        GlobalCenteringContainer(containerGeometry: containerGeometry) {
-            CardSwitcher(currentNote: currentNote, pinnedManager: state.data.pinnedManager)
-                .environmentObject(state.recentsManager)
-        }
-        .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
-    }
+    static let height: CGFloat = 42
 
     private static let scrollLabelStyle: ButtonLabelStyle = {
         var style = ButtonLabelStyle.tinyIconStyle
@@ -60,64 +52,69 @@ struct WindowBottomToolBar: View {
     }
 
     var body: some View {
-        VStack {
-            Spacer()
-            ZStack {
-                HStack(alignment: .lastTextBaseline) {
-                    BottomToolBarLeadingIconView(versionChecker: state.data.versionChecker)
-                    Spacer()
-                    BottomToolBarTrailingIconView()
-                        .environmentObject(state.noteMediaPlayerManager)
-                }
+        ZStack {
+            HStack(alignment: .center) {
+                BottomToolBarLeadingIconView(versionChecker: state.data.versionChecker)
+                Spacer()
+                BottomToolBarTrailingIconView()
+                    .environmentObject(state.noteMediaPlayerManager)
+            }
 
-                if state.mode == .today {
-                    journalScrollButton
-                }
+            if state.mode == .today {
+                journalScrollButton
             }
         }
         .padding(BeamSpacing._100)
+        .frame(height: Self.height, alignment: .bottom)
     }
 
-    fileprivate static func buttonStyle(withIcon hasIcon: Bool) -> ButtonLabelStyle {
+    fileprivate static func buttonStyle(withIcon hasIcon: Bool, withTitle: Bool) -> ButtonLabelStyle {
         ButtonLabelStyle(
             font: BeamFont.medium(size: 12).swiftUI,
             spacing: 1,
             foregroundColor: BeamColor.LightStoneGray.swiftUI,
             activeForegroundColor: BeamColor.Niobium.swiftUI,
-            backgroundColor: Color.clear,
-            hoveredBackgroundColor: Color.clear,
-            activeBackgroundColor: BeamColor.Mercury.swiftUI,
-            leadingPaddingAdjustment: hasIcon ? 4 : 0
+            backgroundColor: BeamColor.Generic.background.swiftUI,
+            hoveredBackgroundColor: BeamColor.Mercury.swiftUI,
+            activeBackgroundColor: BeamColor.AlphaGray.swiftUI.opacity(0.5),
+            disableAnimations: false,
+            leadingPaddingAdjustment: hasIcon ? 3 : 0,
+            trailingPaddingAdjustment: !withTitle && hasIcon ? 3 : 0
         )
     }
 
+    /// Make the animation slightly longer for longer text
+    /// base: "Help" = 0.20s . "New Note"  = 0.25s
+    fileprivate static func buttonAnimation(forText text: String) -> Animation {
+        let minLength = 4
+        let additionalLength = max(0, text.count - minLength)
+        return BeamAnimation.easeInOut(duration: 0.2 + Double(additionalLength / minLength) * 0.05)
+    }
 }
 
 private struct HelpButtonView: View {
 
     @EnvironmentObject var state: BeamState
     @Environment(\.showHelpAction) var showHelpAction
+    @Environment(\.isCompactWindow) private var isCompactWindow
     @State private var buttonFrameInGlobalCoordinates: CGRect?
+    @State private var isHovering: Bool = false
+    private let title = loc("Help")
 
+    private var showTitle: Bool {
+        isHovering && !isCompactWindow
+    }
     var body: some View {
-        ButtonLabel("Help", customStyle: WindowBottomToolBar.buttonStyle(withIcon: false)) {
+        ButtonLabel(showTitle ? title : nil, icon: "help-question", compactMode: isCompactWindow,
+                    customStyle: WindowBottomToolBar.buttonStyle(withIcon: true, withTitle: showTitle)) {
             showHelpAction()
         }
-        .accessibility(identifier: "HelpButton")
-        .background(geometryReaderView)
-        .onPreferenceChange(ButtonFramePreferenceKey.self) { frame in
-            buttonFrameInGlobalCoordinates = frame
-        }
+                    .animation(WindowBottomToolBar.buttonAnimation(forText: title), value: isHovering)
+                    .accessibilityElement()
+                    .accessibility(addTraits: .isButton)
+                    .accessibility(identifier: "HelpButton")
+                    .onHover { isHovering = $0 }
     }
-
-    private var geometryReaderView: some View {
-        GeometryReader { proxy in
-            let frame = proxy.frame(in: .global)
-            Color.clear.preference(key: ButtonFramePreferenceKey.self, value: frame)
-        }
-    }
-
-    private struct ButtonFramePreferenceKey: FramePreferenceKey {}
 }
 
 private struct BottomToolBarLeadingIconView: View {
@@ -145,6 +142,13 @@ private struct BottomToolBarTrailingIconView: View {
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var noteMediaPlayerManager: NoteMediaPlayerManager
+    @Environment(\.isCompactWindow) private var isCompactWindow
+    @State private var isHoveringNewNote: Bool = false
+
+    private let title = loc("New Note")
+    private var showNewNoteTitle: Bool {
+        isHoveringNewNote && !isCompactWindow
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -160,11 +164,16 @@ private struct BottomToolBarTrailingIconView: View {
     }
 
     private var newNoteButton: some View {
-        ButtonLabel("New Note", icon: "tool-new", customStyle: WindowBottomToolBar.buttonStyle(withIcon: true)) {
+        ButtonLabel(showNewNoteTitle ? title : nil, icon: "tool-new", compactMode: isCompactWindow,
+                    customStyle: WindowBottomToolBar.buttonStyle(withIcon: true, withTitle: showNewNoteTitle)) {
             state.startNewNote()
         }
-        .tooltipOnHover(Shortcut.AvailableShortcut.newNote.keysDescription, alignment: .top)
-        .accessibility(identifier: "NewNoteButton")
+                    .animation(WindowBottomToolBar.buttonAnimation(forText: title), value: isHoveringNewNote)
+                    .onHover { isHoveringNewNote = $0 }
+                    .tooltipOnHover(Shortcut.AvailableShortcut.newNote.keysDescription, alignment: .top)
+                    .accessibilityElement()
+                    .accessibility(addTraits: .isButton)
+                    .accessibility(identifier: "NewNoteButton")
     }
 
     private var mediaButton: some View {

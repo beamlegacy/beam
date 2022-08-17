@@ -155,6 +155,11 @@ extension EnvironmentValues {
         get { self[WindowFrameEnvironmentKey.self] }
         set { self[WindowFrameEnvironmentKey.self] = newValue }
     }
+
+    var isCompactWindow: Bool {
+        get { windowFrame.width <= 810 }
+        set { _ = newValue }
+    }
 }
 
 // MARK: - Window Help

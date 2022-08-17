@@ -21,8 +21,6 @@ struct SmallUpdateIndicatorView: View {
     @State private var updateInstalledTimerCancellable: Cancellable?
     @State private var timerExpired = false
 
-    @State private var indicatorFrameInGlobalCoordinates: CGRect?
-
     var body: some View {
         Group {
             let message = versionChecker.state.informativeMessage
@@ -90,19 +88,8 @@ struct SmallUpdateIndicatorView: View {
             }
         }
         .opacity(opacity)
-        .background(geometryReaderView)
-        .onPreferenceChange(ButtonFramePreferenceKey.self) { frame in
-            indicatorFrameInGlobalCoordinates = frame
-        }
         .onHover { hover in
             state.shouldDisableLeadingGutterHover = hover
-        }
-    }
-
-    private var geometryReaderView: some View {
-        GeometryReader { proxy in
-            let frame = proxy.frame(in: .global)
-            Color.clear.preference(key: ButtonFramePreferenceKey.self, value: frame)
         }
     }
 
@@ -115,8 +102,8 @@ struct SmallUpdateIndicatorView: View {
                                 foregroundColor: BeamColor.LightStoneGray.swiftUI,
                                 activeForegroundColor: BeamColor.Niobium.swiftUI,
                                 backgroundColor: BeamColor.Generic.background.swiftUI,
-                                hoveredBackgroundColor: BeamColor.Generic.background.swiftUI,
-                                activeBackgroundColor: BeamColor.Mercury.swiftUI,
+                                hoveredBackgroundColor: BeamColor.Mercury.swiftUI,
+                                activeBackgroundColor: BeamColor.AlphaGray.swiftUI.opacity(0.5),
                                 leadingPaddingAdjustment: 4)
     }
 
@@ -126,8 +113,8 @@ struct SmallUpdateIndicatorView: View {
                                 foregroundColor: BeamColor.LightStoneGray.swiftUI,
                                 activeForegroundColor: BeamColor.Niobium.swiftUI,
                                 backgroundColor: BeamColor.Generic.background.swiftUI,
-                                hoveredBackgroundColor: BeamColor.Generic.background.swiftUI,
-                                activeBackgroundColor: BeamColor.Mercury.swiftUI,
+                                hoveredBackgroundColor: BeamColor.Mercury.swiftUI,
+                                activeBackgroundColor: BeamColor.AlphaGray.swiftUI.opacity(0.5),
                                 leadingPaddingAdjustment: 4)
     }
 

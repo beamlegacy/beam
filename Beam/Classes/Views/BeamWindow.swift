@@ -134,7 +134,7 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
         let view = HelpAndFeedbackMenuView(window: window)
             .environmentObject(state)
 
-        var origin = NSPoint(x: 10, y: frame.size.height-10)
+        var origin = NSPoint(x: BeamSpacing._100, y: frame.size.height - (WindowBottomToolBar.height-6))
 
         if let parentWindow = window?.parent {
             origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
