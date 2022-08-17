@@ -76,26 +76,30 @@ class CaptureCopyShareTests: BaseTest {
     func testShareCapturedText() {
         launchApp()
         uiMenu.loadUITestPage3()
+        
         let windows = ["Twitter", "Facebook", "LinkedIn", "Reddit"]
         let apps = ["Email", "Messages"]
         
         let textElementToAdd = pnsView.staticText(textToCapture)
         
         for windowTitle in windows {
+            if windowTitle != windows[2] { //To be removed as part of BE-5195
             step ("Then \(windowTitle) window is opened using Share option") {
                 self.triggerShareOption(elementToAdd: textElementToAdd, title: windowTitle)
                 _ = webView.waitForWebViewToLoad()
-                waitForIntValueEqual(timeout: BaseTest.maximumWaitTimeout, expectedNumber: 2, query: getNumberOfWindows())
+                XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: getNumberOfWindows()), "Second window wasn't opened during \(BaseTest.implicitWaitTimeout) seconds timeout")
                 XCTAssertTrue(
-                    pnsView.isWindowOpenedWithContaining(title: windowTitle) ||
-                    pnsView.isWindowOpenedWithContaining(title: windowTitle, isLowercased: true)
+                pnsView.isWindowOpenedWithContaining(title: windowTitle) ||
+                pnsView.isWindowOpenedWithContaining(title: windowTitle, isLowercased: true)
                     )
                 shortcutHelper.shortcutActionInvoke(action: .close)
-            }
+                }
+            } 
         }
         
         step ("Then \(apps.joined(separator: ",")) options exist in Share options") {
             self.triggerShareOption(elementToAdd: textElementToAdd, title: apps[0], clickMenuItem: false)
+            XCTAssertTrue(pnsView.menuItem(windows[2]).waitForExistence(timeout: BaseTest.minimumWaitTimeout)) //To be removed as part of BE-5195
             for appTitle in apps {
                 XCTAssertTrue(pnsView.menuItem(appTitle).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             }
