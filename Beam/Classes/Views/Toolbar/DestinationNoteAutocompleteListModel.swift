@@ -139,7 +139,7 @@ extension DestinationNoteAutocompleteList {
             }
 
             guard let previousDate = BeamNoteType.previousJournal().journalDate else { return nil }
-            let previousDateName = BeamDate.journalNoteTitle(for: previousDate, with: .long)
+            let previousDateName = BeamDate.journalNoteTitle(for: previousDate)
             // Return true / false for the card name matching previous days date
             if cardName == previousDateName {
                 return previousDate
@@ -163,10 +163,10 @@ extension DestinationNoteAutocompleteList {
                         realCardName = data.todaysName
                     case .tomorrow:
                         guard let date = BeamNoteType.nextJournal().journalDate else { break }
-                        realCardName = BeamDate.journalNoteTitle(for: date)
+                        realCardName = BeamNoteType.titleForDate(date)
                     case .yesterday:
                         guard let date = BeamNoteType.previousJournal().journalDate else { break }
-                        realCardName = BeamDate.journalNoteTitle(for: date)
+                        realCardName = BeamNoteType.titleForDate(date)
                     }
                 }
             }
