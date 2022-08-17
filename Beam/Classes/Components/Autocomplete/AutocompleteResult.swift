@@ -116,7 +116,8 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     private(set) var uuid: UUID
     /// Base score of the result. For actual sorting score including text completion, use `weightedScore`
     private(set) var score: Float?
-    private(set) var handler: ((BeamState) -> Void)?
+    private(set) var shouldDisplayTopDivider: Bool = false
+    private(set) var handler: ((BeamState, AutocompleteResult) -> Void)?
 
     /// This option set tell us which of the String fields of this struct contains an URL. Right now only the "text" and "information" field can be a textual url. We use this to match the query with the start of the url (ignoring the scheme).
     private(set) var urlFields: URLFields
@@ -136,7 +137,8 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
 
     init(text: String, source: Source, disabled: Bool = false, url: URL? = nil, aliasForDestinationURL: URL? = nil,
          information: String? = nil, customIcon: String? = nil, shortcut: Shortcut? = nil, completingText: String? = nil, additionalSearchTerms: [String]? = nil,
-         uuid: UUID = UUID(), score: Float? = nil, urlFields: URLFields = [], handler: ((BeamState) -> Void)? = nil) {
+         uuid: UUID = UUID(), score: Float? = nil, urlFields: URLFields = [], displayTopDivider: Bool = false,
+         handler: ((BeamState, AutocompleteResult) -> Void)? = nil) {
         self.text = text
         self.source = source
         self.disabled = disabled
@@ -151,6 +153,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         self.score = score
         self.handler = handler
         self.urlFields = urlFields
+        self.shouldDisplayTopDivider = displayTopDivider || source == .createNote
 
         computePrefixScores()
     }

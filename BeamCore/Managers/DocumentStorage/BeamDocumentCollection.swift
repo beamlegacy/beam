@@ -25,6 +25,8 @@ public enum DocumentFilter {
     case beforeJournalDate(Int64)
     case nonFutureJournalDate(Int64)
     case type(DocumentType)
+    case userFacingNotes // notes of type tab groups should not be visible to the user.
+    case tabGroups([UUID])
     case updatedSince(Date)
     case updatedBetween(Date, Date)
     case isPublic(Bool)
@@ -106,6 +108,12 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                 _ = try document.inserted(db)
             }
         }
+
+        migrator.registerMigration("BeamDocumentCollection.tabGroupType") { db in
+            try db.alter(table: BeamDocument.databaseTableName) { table in
+                table.add(column: "tabGroupId", .blob)
+            }
+        }
     }
 
     // MARK: Primary access to the database
@@ -113,6 +121,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
     public enum CreationType {
         case note(title: String)
         case journal(date: Date)
+        case tabGroup(tabGroupId: UUID)
     }
 
     public func fetchOrCreate(_ source: BeamDocumentSource, id: UUID, type: CreationType, _ creator: @escaping (inout BeamNote) throws -> Void = { _ in }) throws -> BeamDocument {
@@ -133,6 +142,8 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
             case .journal(let date):
                 let t = JournalDateConverter.toInt(from: BeamNoteType.journalForDate(date).journalDateString ?? "")
                 filters = [.journalDate(t)]
+            case .tabGroup(let tabGroupId):
+                filters = [.tabGroups([tabGroupId])]
             }
 
             guard let document = try self.fetchFirst(filters: filters, sortingKey: .title(true)) else {
@@ -238,7 +249,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
 
     // MARK: Generic fetch requests
     //
-    private class func fetchRequest(filters: [DocumentFilter], sortingKey: DocumentSortingKey?) ->  QueryInterfaceRequest<BeamDocument> {
+    private class func fetchRequest(filters: [DocumentFilter], sortingKey: DocumentSortingKey?) -> QueryInterfaceRequest<BeamDocument> {
         var request = BeamDocument.all()
 
         for filter in filters {
@@ -266,6 +277,12 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
 
             case let .type(type):
                 request = request.filter(BeamDocument.Columns.documentType == type)
+
+            case .userFacingNotes:
+                request = request.filter(BeamDocument.Columns.documentType != DocumentType.tabGroup)
+
+            case let .tabGroups(ids):
+                request = request.filter(ids.contains(BeamDocument.Columns.tabGroupId))
 
             case let .updatedSince(date):
                 request = request.filter(BeamDocument.Columns.updatedAt >= date)
@@ -319,6 +336,8 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
             note = BeamNote(journalDate: date)
         case .note(title: let title):
             note = try BeamNote(title: title)
+        case .tabGroup(let id):
+            note = try BeamNote(tabGroupId: id)
         }
 
         note.id = id
@@ -337,10 +356,11 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                                     updatedAt: BeamDate.now,
                                     deletedAt: nil,
                                     data: noteData,
-                                    documentType: note.type.isJournal ? .journal : .note,
+                                    documentType: DocumentType(from: note.type),
                                     version: note.version,
                                     isPublic: note.publicationStatus.isPublic,
-                                    journalDate: JournalDateConverter.toInt(from: note.type.journalDateString ?? "0")
+                                    journalDate: JournalDateConverter.toInt(from: note.type.journalDateString ?? "0"),
+                                    tabGroupId: note.type.tabGroupId
         )
 
         try checkValidations(document)

@@ -10,12 +10,13 @@ import GRDB
 import BeamCore
 
 /*
- When changing this, you *must* let backend know. We have to add new values to
- `app/models/document.rb` in our API codebase.
+ When changing this, you *must* let backend know.
+ There is are schema validators to update.
  */
 public enum DocumentType: Int16, Codable {
     case journal
     case note
+    case tabGroup
 }
 
 public struct BeamDocument {
@@ -34,11 +35,11 @@ public struct BeamDocument {
     public var data: Data
     public var documentType: DocumentType {
         didSet {
-            switch documentType {
-            case .journal:
-                break
-            case .note:
+            if documentType != .journal {
                 journalDate = 0
+            }
+            if documentType != .tabGroup {
+                tabGroupId = nil
             }
         }
     }
@@ -55,6 +56,9 @@ public struct BeamDocument {
         }
     }
 
+    /// Only for document of type .tabGroup
+    public var tabGroupId: UUID?
+
     public var collection: BeamDocumentCollection? {
         database?.collection
     }
@@ -70,7 +74,8 @@ public struct BeamDocument {
                 documentType: DocumentType,
                 version: BeamVersion,
                 isPublic: Bool,
-                journalDate: Int64) {
+                journalDate: Int64,
+                tabGroupId: UUID? = nil) {
         self.id = id
         self.source = source.sourceId
         self.database = database
@@ -84,6 +89,7 @@ public struct BeamDocument {
         self.version = version
         self.isPublic = isPublic
         self.journalDate = journalDate
+        self.tabGroupId = tabGroupId
     }
 
     public var uuidString: String {
@@ -134,8 +140,9 @@ public extension BeamDocument {
         case deletedAt
         case data
         case documentType
-        case isPublic
         case journalDate
+        case tabGroupId
+        case isPublic
         case version
         case formatVersion
     }
@@ -169,6 +176,13 @@ public extension BeamDocument {
             } else {
                 journalDate = try container.decode(Int64.self, forKey: .journalDate)
             }
+        
+        case "tabGroup":
+            guard let tabGroupId = try? container.decodeIfPresent(UUID.self, forKey: .tabGroupId) else {
+                fallthrough
+            }
+            self.tabGroupId = tabGroupId
+            documentType = .tabGroup
         case "note":
             documentType = .note
         default:
@@ -199,6 +213,11 @@ public extension BeamDocument {
         case .journal:
             try container.encode("journal", forKey: .documentType)
             try container.encode(JournalDateConverter.toString(from: journalDate), forKey: .journalDate)
+        case .tabGroup:
+            try container.encode("tabGroup", forKey: .documentType)
+            if let tabGroupId = tabGroupId {
+                try container.encode(tabGroupId, forKey: .tabGroupId)
+            }
         case .note:
             try container.encode("note", forKey: .documentType)
         }
@@ -225,6 +244,7 @@ public extension BeamDocument {
         self.version = document.version
         self.isPublic = document.isPublic
         self.journalDate = document.journalDate
+        self.tabGroupId = document.tabGroupId
     }
 }
 
@@ -243,7 +263,8 @@ extension BeamDocument: Equatable {
         lhs.createdAt.intValue == rhs.createdAt.intValue &&
         lhs.updatedAt.intValue == rhs.updatedAt.intValue &&
         lhs.deletedAt?.intValue == rhs.deletedAt?.intValue &&
-        lhs.journalDate == rhs.journalDate
+        lhs.journalDate == rhs.journalDate &&
+        lhs.tabGroupId == rhs.tabGroupId
     }
 }
 
@@ -260,6 +281,7 @@ extension BeamDocument: Hashable {
         hasher.combine(version)
         hasher.combine(isPublic)
         hasher.combine(journalDate)
+        hasher.combine(tabGroupId)
     }
 }
 
@@ -296,7 +318,7 @@ extension BeamVersion: DatabaseValueConvertible {
 
 extension BeamDocument: TableRecord {
     public enum Columns: String, ColumnExpression {
-        case id, source, title, createdAt, updatedAt, data, documentType, version, isPublic, journalDate
+        case id, source, title, createdAt, updatedAt, data, documentType, version, isPublic, journalDate, tabGroupId
     }
 }
 
@@ -338,6 +360,7 @@ extension BeamDocument: FetchableRecord {
         }
         isPublic = row[Columns.isPublic]
         journalDate = row[Columns.journalDate]
+        tabGroupId = row[Columns.tabGroupId]
     }
 }
 
@@ -355,6 +378,7 @@ extension BeamDocument: MutablePersistableRecord {
         container[Columns.version] = version
         container[Columns.isPublic] = isPublic
         container[Columns.journalDate] = journalDate
+        container[Columns.tabGroupId] = tabGroupId
     }
 }
 
@@ -374,5 +398,16 @@ public extension BeamDocument {
     static var formatVersion: String { [formatVersionMain, formatVersionVariant].joined(separator: " - ") }
     static private func checkFormatVersion(_ version: String?) throws {
         // Do nothing for now
+    }
+}
+
+
+public extension DocumentType {
+    init(from beamNoteType: BeamNoteType) {
+        switch beamNoteType {
+        case .journal: self = .journal
+        case .tabGroup: self = .tabGroup
+        case .note: self = .note
+        }
     }
 }

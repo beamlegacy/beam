@@ -228,6 +228,14 @@ public class BeamNote: BeamElement {
         checkHasNote()
     }
 
+    public convenience init(tabGroupId: UUID) throws {
+        try self.init(title: "TabGroup(\(tabGroupId))")
+        type = .tabGroup(tabGroupId)
+        let onlyChild = BeamElement("Tab Group: \(tabGroupId)")
+        onlyChild.kind = .tabGroup(tabGroupId: tabGroupId)
+        addChild(onlyChild)
+    }
+
     enum CodingKeys: String, CodingKey {
         case title
         case type
@@ -287,7 +295,7 @@ public class BeamNote: BeamElement {
         noteSettings = (try? container.decodeIfPresent(NoteMetadata.self, forKey: .noteSettings)) ?? NoteMetadata()
         tabGroups = (try? container.decodeIfPresent([UUID].self, forKey: .tabGroups)) ?? []
         switch type {
-        case .note:
+        case .note, .tabGroup:
             break
         case .journal:
             let date = type.journalDate ?? creationDate
@@ -373,6 +381,10 @@ public class BeamNote: BeamElement {
 
     public static func getFetchedNote(_ journalDate: Date) -> BeamNote? {
         getFetchedNote(BeamDate.journalNoteTitle(for: journalDate))
+    }
+
+    public static func getFetchedNote(tabGroupId: UUID) -> BeamNote? {
+        getFetchedNote(tabGroupId.uuidString)
     }
 
     public func getFetchedNote(_ title: String) -> BeamNote? {

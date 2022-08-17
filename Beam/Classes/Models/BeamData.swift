@@ -240,7 +240,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
                 // All notes go through this publisher
                 BeamNote.updateNote(self, document)
                 switch document.documentType {
-                case .note:
+                case .note, .tabGroup:
                     break
                 case .journal:
                     // Only send journal updates to this one

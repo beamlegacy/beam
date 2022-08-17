@@ -28,6 +28,7 @@ final class AllNotesPageViewModel: ObservableObject, Identifiable {
     @Published var publishingNoteTitle: String?
 
     private var showDailyNotes = true
+    @Published var showTabGroupNotes = false
 
     private var databaseObservers = Set<AnyCancellable>()
     private var metadataFetchers = Set<AnyCancellable>()
@@ -88,6 +89,11 @@ final class AllNotesPageViewModel: ObservableObject, Identifiable {
         updateNoteItemsFromAllNotes()
     }
 
+    func setShowTabGroupNotes(_ show: Bool) {
+        showTabGroupNotes = show
+        updateNoteItemsFromAllNotes()
+    }
+
     /// We're hiding empty journal notes; except for today's
     private func noteShouldBeDisplayed(_ doc: BeamDocument) -> Bool {
         if doc.title == publishingNoteTitle {
@@ -116,6 +122,9 @@ final class AllNotesPageViewModel: ObservableObject, Identifiable {
     private func updatePublicPrivateLists() {
         if !showDailyNotes {
             allNotesItems = allNotesItems.filter { $0.isJournal == false }
+        }
+        if !showTabGroupNotes {
+            allNotesItems = allNotesItems.filter { $0.isTabGroup == false }
         }
         publicNotesItems = allNotesItems.filter({ $0.isPublic })
         onProfileNotesItems = publicNotesItems.filter({ $0.isOnProfile })
@@ -213,6 +222,7 @@ class NoteTableViewItem: IconButtonTableViewItem {
     var createdAt: Date = BeamDate.now
     var updatedAt: Date = BeamDate.now
     var isJournal: Bool = false
+    var isTabGroup: Bool = false
     var words: Int = -1
     var links: Int = -1
     var copyLinkIconName: String?
@@ -225,6 +235,7 @@ class NoteTableViewItem: IconButtonTableViewItem {
         createdAt = document.createdAt
         updatedAt = document.updatedAt
         isJournal = (document.journalDate != 0 && document.documentType == .journal)
+        isTabGroup = document.documentType == .tabGroup
         words = note?.textStats.wordsCount ?? -1
 
         super.init()

@@ -33,6 +33,7 @@ class AutocompleteManager: ObservableObject {
             updateSearchQueryWhenSelectingAutocomplete(autocompleteSelectedIndex, previousSelectedIndex: oldValue)
         }
     }
+    @Published var autocompleteLoadingResult: AutocompleteResult?
 
     @Published var animateInputingCharacter = false
 
@@ -223,6 +224,7 @@ class AutocompleteManager: ObservableObject {
             setQuery(previousResult.completingText ?? "", updateAutocompleteResults: false)
         }
         searchQuerySelectedRange = nil
+        autocompleteLoadingResult = nil
         autocompleteSelectedIndex = canHaveNoSelection ? nil : 0
     }
 
@@ -297,6 +299,7 @@ extension AutocompleteManager {
         } else {
             autocompleteResults = newResults
         }
+        autocompleteLoadingResult = nil
     }
 
     func clearAutocompleteResults(animated: Bool = true) {

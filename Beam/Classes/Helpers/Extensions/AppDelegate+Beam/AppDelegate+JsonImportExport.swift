@@ -12,7 +12,7 @@ extension AppDelegate {
             defer { openPanel?.close() }
 
             guard result == .OK, let selectedPath = openPanel?.url?.path,
-                  let ids = try? self.data.currentDocumentCollection?.fetchIds(filters: [])
+                  let ids = try? self.data.currentDocumentCollection?.fetchIds(filters: [.userFacingNotes])
             else { return }
 
             let baseURL = URL(fileURLWithPath: selectedPath)

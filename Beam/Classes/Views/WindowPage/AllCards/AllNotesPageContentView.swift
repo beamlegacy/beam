@@ -28,6 +28,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
     @State private var selectedRowsIndexes = IndexSet()
     @State private var hoveredRowIndex: Int?
     @State private var hoveredRowFrame: NSRect?
+    @State private var showTabGroupNotes = false
 
     private static var dateFormatter: DateFormatter = {
         let fmt = DateFormatter()
@@ -247,6 +248,9 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
         .id(model.id)
         .onChange(of: state.showDailyNotes) { newValue in
             model.setShowDailyNotes(newValue)
+        }
+        .onChange(of: showTabGroupNotes) { newValue in
+            model.setShowTabGroupNotes(newValue)
         }
         .onAppear {
             model.data = data

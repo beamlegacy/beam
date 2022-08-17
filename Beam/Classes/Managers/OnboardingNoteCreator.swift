@@ -80,7 +80,7 @@ class OnboardingNoteCreator: BeamDocumentSource {
                 newNote.owner = BeamData.shared.currentDatabase
                 _ = newNote.save(self)
             }
-        case .note:
+        case .note, .tabGroup:
             addImages(in: note)
             note.creationDate = BeamDate.now
             note.updateDate = BeamDate.now
