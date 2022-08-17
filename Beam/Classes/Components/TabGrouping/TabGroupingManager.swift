@@ -86,10 +86,19 @@ class TabGroupingManager {
 // MARK: - Group Editing
 extension TabGroupingManager {
 
-    func copyForSharing(_ group: TabGroup) -> TabGroup {
+    /// create a copy of the group, updates it with existing tabs and save it into DB.
+    func copyForNoteInsertion(_ group: TabGroup) -> TabGroup {
         let newGroup = group.copy(locked: true, discardPages: false)
         groupDidChangeMetadata(newGroup)
         return newGroup
+    }
+
+    /// creates a copy of the tab group beam object as is, and save it into DB.
+    func copyForSharing(_ group: TabGroup) -> TabGroup {
+        guard let copy = storeManager?.makeLockedCopy(group) else {
+             return copyForNoteInsertion(group)
+        }
+        return copy
     }
 
     func renameGroup(_ group: TabGroup, title: String) {
@@ -130,7 +139,7 @@ extension TabGroupingManager {
         Logger.shared.logInfo("Tab Group '\(group.title ?? "\(group.id)")' \(group.collapsed ? "collapsed" : "expanded")", category: .tabGrouping)
     }
 
-    private func allOpenTabs() -> [BrowserTab] {
+    func allOpenTabs() -> [BrowserTab] {
         delegate?.allOpenTabsForTabGroupingManager(self) ?? []
     }
 

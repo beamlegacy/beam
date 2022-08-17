@@ -10,11 +10,13 @@ import SwiftUI
 struct TabClusteringGroupCapsuleView: View {
     @Environment(\.colorScheme) var colorScheme
 
-    var title: String
+    var displayedText: String
+    var groupTitle: String?
     var color: TabGroupingColor
     var collapsed = false
+    var loading = false
     var itemsCount: Int = 0
-    var onTap: ((Bool, NSEvent?) -> Void)?
+    var onTap: ((Bool, NSEvent?, CGRect) -> Void)?
 
     @State private var isHovering = false
     @State private var isTouchDown = false
@@ -36,18 +38,6 @@ struct TabClusteringGroupCapsuleView: View {
         color.textColor?.swiftUI ?? .white
     }
 
-    private var displayedText: String {
-        var title = title
-        if collapsed && itemsCount > 0 {
-            if title.isEmpty {
-                title = "\(itemsCount)"
-            } else {
-                title += " (\(itemsCount))"
-            }
-        }
-        return title
-    }
-
     @ViewBuilder
     private var interactionOverlay: some View {
         if isTouchDown || isHovering {
@@ -61,16 +51,23 @@ struct TabClusteringGroupCapsuleView: View {
     @ViewBuilder
     private var renderTitle: some View {
         Group {
-            let displayedText = displayedText
-            if title.isEmpty && collapsed && itemsCount >= 1000 {
+            if groupTitle?.isEmpty != false && collapsed && itemsCount >= 1000 {
                 Image("nav-pivot-infinite")
                     .resizable()
                     .scaledToFill()
                     .foregroundColor(textColor)
                     .frame(width: 12, height: 6)
             } else {
-                Text(displayedText)
-                    .truncationMode(.middle)
+                HStack(spacing: BeamSpacing._40) {
+                    Text(displayedText)
+                        .truncationMode(.middle)
+                    if loading {
+                        ProgressView()
+                            .scaleEffect(0.375, anchor: .center)
+                            .frame(width: 12, height: 12)
+                    }
+                }
+
             }
         }
         .frame(height: 22)
@@ -108,16 +105,18 @@ struct TabClusteringGroupCapsuleView: View {
                     .blendMode(forLightScheme: .normal, forDarkScheme: .screen)
             })
             .accessibilityIdentifier("TabGroupNameStaticText")
-            .overlay(ClickCatchingView(onRightTap: { event in
-                onTap?(true, event)
-            }))
+            .overlay(GeometryReader { proxy in
+                ClickCatchingView(onRightTap: { event in
+                    onTap?(true, event, proxy.frame(in: .global))
+                })
+            })
             .onHover { isHovering = $0 }
             .onTouchDown { isTouchDown = $0 }
             .simultaneousGesture(TapGesture().onEnded({ _ in
                 // We can't use the ClickCatchingView for the left click because of the parent drag gesture.
                 // But we still need it for right click and control-click, which could end up here.
                 guard NSApp.currentEvent?.isRightClick != true else { return }
-                onTap?(false, nil)
+                onTap?(false, nil, .zero)
             }))
     }
 }
@@ -152,8 +151,8 @@ struct TabViewGroupUnderline: View {
 struct TabClusteringGroupCapsuleView_Previews: PreviewProvider {
 
     static func renderGroup(_ title: String, color: TabGroupingColor, collapsed: Bool = false, count: Int = 0) -> some View {
-        TabClusteringGroupCapsuleView(title: title, color: color,
-                                      collapsed: collapsed, itemsCount: count)
+        TabClusteringGroupCapsuleView(displayedText: title, color: color,
+                                      collapsed: collapsed, loading: false, itemsCount: count)
             .fixedSize()
             .overlay(
                 TabViewGroupUnderline(color: color),

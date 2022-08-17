@@ -22,7 +22,7 @@ extension AutocompleteManager {
     func getDefaultSuggestionsPublishers() -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
         let mode = self.animatingToMode ?? self.mode
         switch mode {
-        case .noteCreation:
+        case .noteCreation, .customView:
             return []
         case .tabGroup(let group):
             return [futureToPublisher(autocompleteTabGroupingResultsInTabGroupMode(for: "", inGroup: group), source: .tabGroup(group: nil))]
@@ -104,7 +104,7 @@ extension AutocompleteManager {
         Future { [weak self] promise in
             let start = DispatchTime.now()
             guard let collection = BeamData.shared.currentDocumentCollection else { return promise(.success([])) }
-            guard let documents = try? collection.fetch(filters: [.titleMatch(query)]) else { return promise(.success([])) }
+            guard let documents = try? collection.fetch(filters: [.userFacingNotes, .titleMatch(query)]) else { return promise(.success([])) }
             let ids = documents.map { $0.id }
             guard let scores = BeamData.shared.noteLinksAndRefsManager?.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey) else { return promise(.success([])) }
             let autocompleteResults = documents.map {
@@ -119,7 +119,7 @@ extension AutocompleteManager {
     private func _autocompleteNotesResults(for query: String) -> [AutocompleteResult] {
         let start = DispatchTime.now()
         guard let collection = BeamData.shared.currentDocumentCollection else { return [] }
-        guard let documents = try? collection.fetch(filters: [.titleMatch(query)]) else { return [] }
+        guard let documents = try? collection.fetch(filters: [.userFacingNotes, .titleMatch(query)]) else { return [] }
         let ids = documents.map { $0.id }
         guard let scores = BeamData.shared.noteLinksAndRefsManager?.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey) else { return [] }
         let autocompleteResults = documents.map {
@@ -139,7 +139,7 @@ extension AutocompleteManager {
                 case .success(let notesContentResults):
                     let ids = notesContentResults.map { $0.noteId }
                     guard let collection = BeamData.shared.currentDocumentCollection,
-                          let docs = try? collection.fetch(filters: [.ids(ids)])
+                          let docs = try? collection.fetch(filters: [.userFacingNotes, .ids(ids)])
                     else {
                         promise(.failure(BeamDataError.databaseNotFound))
                         return
@@ -338,7 +338,7 @@ extension AutocompleteManager {
             if query.isEmpty {
                 results.append(
                     AutocompleteResult(text: loc("Open All Tabs"), source: .action, customIcon: "field-web", score: .greatestFiniteMagnitude,
-                                       handler: { beamState in
+                                       handler: { beamState, _ in
                                            beamState.openTabGroup(group)
                                        })
                 )
@@ -359,12 +359,21 @@ extension AutocompleteManager {
                 return AutocompleteResult(text: hasTitle ? title : urlString, source: .url, url: url,
                                           information: hasTitle ? urlString : nil, completingText: query,
                                           uuid: link.id, score: score, urlFields: hasTitle ? .info : .text,
-                                          handler: { state in
+                                          handler: { state, _ in
                     guard let url = url else { return }
                     state.createTab(withURLRequest: URLRequest(url: url))
                 })
             }))
 
+            if query.isEmpty {
+                results.append(
+                    AutocompleteResult(text: loc("Share Tab Group"), source: .action,
+                                       customIcon: "social-share", score: 0, displayTopDivider: true,
+                                       handler: { beamState, result in
+                                           beamState.shareTabGroup(group, fromOmniboxResult: result)
+                                       })
+                )
+            }
             self.logIntermediate(step: "TabGroupingInMode", stepShortName: "TG", results: results, startedAt: start)
 
             promise(.success(results))
@@ -379,7 +388,7 @@ extension AutocompleteManager {
                 let scores = LinkStore.shared.getLinks(for: group.pageIds).compactMap { $1.frecencyVisitSortScore }
                 let bestScore = scores.max()
                 results.append(AutocompleteResult(text: group.title ?? "Tab Group (\(group.pageIds.count) tabs)",
-                                                  source: .tabGroup(group: group), completingText: query, uuid: group.id, score: bestScore, handler: { state in
+                                                  source: .tabGroup(group: group), completingText: query, uuid: group.id, score: bestScore, handler: { state, _ in
                     state.autocompleteManager.animateToMode(.tabGroup(group: group), updateResults: true)
                 }))
             }

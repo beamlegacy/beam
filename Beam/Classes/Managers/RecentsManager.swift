@@ -39,11 +39,11 @@ class RecentsManager: ObservableObject {
         guard let collection = BeamData.shared.currentDocumentCollection else { return }
         var docs: [BeamDocument] = []
         let scores = BeamData.shared.noteLinksAndRefsManager?.getTopNoteFrecencies(limit: maxNumberOfRecents * 2, paramKey: AutocompleteManager.noteFrecencyParamKey) ?? [:]
-        let docsWithFrecencies = try collection.fetch(filters: [.ids(Array(scores.keys))]) .filter(shouldIncludeDocumentInRecents).prefix(maxNumberOfRecents)
+        let docsWithFrecencies = try collection.fetch(filters: [.userFacingNotes, .ids(Array(scores.keys))]) .filter(shouldIncludeDocumentInRecents).prefix(maxNumberOfRecents)
         docs.append(contentsOf: docsWithFrecencies)
         if docs.count < maxNumberOfRecents {
             // if we don't have much frecency scores let's use the recently updated notes.
-            let docsRecentlyUpdated = try collection.fetch(filters: [.limit(maxNumberOfRecents * 2, offset: 0)], sortingKey: .updatedAt(false))
+            let docsRecentlyUpdated = try collection.fetch(filters: [.userFacingNotes, .limit(maxNumberOfRecents * 2, offset: 0)], sortingKey: .updatedAt(false))
                 .filter { !docs.contains($0) }
                 .filter(shouldIncludeDocumentInRecents)
             docs.append(contentsOf: docsRecentlyUpdated.prefix(maxNumberOfRecents - docs.count))

@@ -122,16 +122,21 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
                 t.column("deletedAt", .datetime)
             }
         }
+        migrator.registerMigration("addParentGroupColumn") { db in
+            try db.alter(table: "TabGroup") { t in
+                t.add(column: "parentGroup", .text)
+            }
+        }
     }
 }
 
 extension TabGroupingStoreManager {
     static func convertGroupToBeamObject(_ group: TabGroup, pages: [TabGroupBeamObject.PageInfo]) -> TabGroupBeamObject {
-        TabGroupBeamObject(id: group.id, title: group.title, color: group.color, pages: pages, isLocked: group.isLocked)
+        TabGroupBeamObject(id: group.id, title: group.title, color: group.color, pages: pages, isLocked: group.isLocked, parentGroup: group.parentGroup)
     }
 
     static func convertBeamObjectToGroup(_ beamObject: TabGroupBeamObject) -> TabGroup {
-        TabGroup(id: beamObject.id, pageIds: beamObject.pages.map { $0.id }, title: beamObject.title, color: beamObject.color, isLocked: beamObject.isLocked)
+        TabGroup(id: beamObject.id, pageIds: beamObject.pages.map { $0.id }, title: beamObject.title, color: beamObject.color, isLocked: beamObject.isLocked, parentGroup: beamObject.parentGroup)
     }
 
     static func suggestedDefaultTitle(for group: TabGroup, withTabs tabs: [BrowserTab]? = nil, truncated: Bool) -> String {
@@ -223,6 +228,13 @@ extension TabGroupingStoreManager: BeamObjectManagerDelegate {
 // MARK: - Database
 extension TabGroupingStoreManager {
 
+    func makeLockedCopy(_ group: TabGroup) -> TabGroup? {
+        guard let beamObject = fetch(byIds: [group.id]).first else { return nil }
+        let copy = beamObject.makeLockedCopy()
+        save(groups: [copy])
+        return Self.convertBeamObjectToGroup(copy)
+    }
+
     func save(groups: [TabGroupBeamObject]) {
         do {
             try write { db in
@@ -285,6 +297,20 @@ extension TabGroupingStoreManager {
         }
     }
 
+    func fetch(copiesOfGroup tabGroupId: UUID) -> [TabGroupBeamObject] {
+        do {
+            return try read { db in
+                return try TabGroupBeamObject
+                    .filter(TabGroupBeamObject.Columns.parentGroup == tabGroupId)
+                    .order(TabGroupBeamObject.Columns.updatedAt.desc)
+                    .fetchAll(db)
+            }
+        } catch {
+            Logger.shared.logError("Couldn't fetch tab groups copied from '\(tabGroupId)'. \(error)", category: .database)
+            return []
+        }
+    }
+
     fileprivate func deleteAllGroups() {
         do {
             _ = try write { db in
@@ -293,6 +319,13 @@ extension TabGroupingStoreManager {
         } catch {
             Logger.shared.logError("Couldn't delete all tab groups", category: .database)
         }
+    }
+}
+
+private extension TabGroupBeamObject {
+    func makeLockedCopy() -> TabGroupBeamObject {
+        TabGroupBeamObject(title: title, color: color, pages: pages, isLocked: true, parentGroup: id,
+                           createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
     }
 }
 

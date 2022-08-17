@@ -112,7 +112,7 @@ extension BeamText {
         switch elementKind {
         case .heading:
             heading = true
-        case .bullet, .code, .quote, .check, .divider, .image, .embed, .blockReference, .dailySummary:
+        case .bullet, .code, .quote, .check, .divider, .image, .embed, .blockReference, .dailySummary, .tabGroup:
             break
         }
 
