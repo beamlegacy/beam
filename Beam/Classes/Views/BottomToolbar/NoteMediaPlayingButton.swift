@@ -20,10 +20,17 @@ struct NoteMediaPlayingButton: View {
     @StateObject var contextMenuModel: ContextMenuViewModel = ContextMenuViewModel()
     @State var contextMenuSize = CGSize.zero
 
+    private let buttonStyle = ButtonLabelStyle(horizontalPadding: 3,
+                                               foregroundColor: BeamColor.LightStoneGray.swiftUI,
+                                               activeForegroundColor: BeamColor.Niobium.swiftUI,
+                                               backgroundColor: BeamColor.Generic.background.swiftUI,
+                                               hoveredBackgroundColor: BeamColor.Mercury.swiftUI,
+                                               activeBackgroundColor: BeamColor.AlphaGray.swiftUI.opacity(0.5))
+
     var body: some View {
         ZStack(alignment: .center) {
             let isAnyMediaUnmuted = playerManager.isAnyMediaUnmuted
-            ButtonLabel(icon: isAnyMediaUnmuted ? "tabs-media" : "tabs-media_muted") {
+            ButtonLabel(icon: isAnyMediaUnmuted ? "tabs-media" : "tabs-media_muted", customStyle: buttonStyle) {
                 onMuteNote?(nil)
                 updateContextMenuItems()
             }.onHover { hovering in
