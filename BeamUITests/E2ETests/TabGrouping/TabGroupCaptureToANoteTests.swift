@@ -23,7 +23,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         
         step("When I capture the tab group") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCapture)
             tabGroupMenu.typeKeyboardKey(.enter)
             tabGroupMenu.typeKeyboardKey(.escape)
@@ -63,7 +63,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         
         step("When I capture the tab group") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCapture)
             tabGroupMenu.typeKeyboardKey(.enter)
             tabGroupMenu.typeKeyboardKey(.escape)
@@ -105,9 +105,9 @@ class TabGroupCaptureToANoteTests: BaseTest {
         
         step("And I capture the tab group with different name") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: "E2E Test")
-            tabGroupMenu.captureTabGroup(index: 0)
+                .captureTabGroup(index: 0)
         }
         
         step("Then both tab groups are captured") {

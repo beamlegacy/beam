@@ -24,7 +24,7 @@ class TabGroupUngroupTests: BaseTest {
         
         step("When I ungroup tabs") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupUngroup)
         }
         
@@ -46,7 +46,7 @@ class TabGroupUngroupTests: BaseTest {
         
         step("And I ungroup tabs") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupUngroup)
         }
         
