@@ -11,6 +11,7 @@ struct DiscoverShortcutsView: View {
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var windowInfo: BeamWindowInfo
+    @Environment(\.isCompactWindow) var isCompactWindow
 
     let sections: [SectionShortcuts] = [.browser, .editor]
 
@@ -20,7 +21,7 @@ struct DiscoverShortcutsView: View {
                 Spacer()
             }
             ScrollView {
-                HStack(alignment: .top, spacing: compactWidth ? 40 : 60) {
+                HStack(alignment: .top, spacing: isCompactWindow ? 40 : 60) {
                     ForEach(sections, id: \.self) {
                         SectionFeaturesView(section: $0)
                     }
@@ -33,7 +34,7 @@ struct DiscoverShortcutsView: View {
             Spacer()
         }
         .animation(.default, value: compactHeight)
-        .animation(.default, value: compactWidth)
+        .animation(.default, value: isCompactWindow)
         .background(KeyEventHandlingView(handledKeyCodes: [.enter, .escape], firstResponder: true, onKeyDown: { _ in
             navigateBack()
         }))
@@ -41,13 +42,6 @@ struct DiscoverShortcutsView: View {
 
     private var compactHeight: Bool {
         if windowInfo.windowFrame.size.height < 720 {
-            return true
-        }
-        return false
-    }
-
-    private var compactWidth: Bool {
-        if windowInfo.windowFrame.size.width < 810 {
             return true
         }
         return false
