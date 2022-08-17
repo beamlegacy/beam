@@ -173,6 +173,7 @@
         "SlashMenuTests",
         "SyncTests",
         "TabGroupCaptureToANote",
+        "TabGroupCaptureToANoteMenuTests",
         "TabGroupCaptureToANoteTests",
         "TabGroupCloseTests",
         "TabGroupDragTabTests",
