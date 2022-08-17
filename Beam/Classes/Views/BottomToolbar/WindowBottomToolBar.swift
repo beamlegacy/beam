@@ -84,11 +84,14 @@ struct WindowBottomToolBar: View {
     }
 
     /// Make the animation slightly longer for longer text
-    /// base: "Help" = 0.20s . "New Note"  = 0.25s
-    fileprivate static func buttonAnimation(forText text: String) -> Animation {
+    /// base: "Help" = 0.2s . "New Note"  = 0.3s
+    fileprivate static func buttonAnimation(forText text: String, appearing: Bool) -> Animation {
+        if !appearing {
+            return BeamAnimation.easeInOut(duration: 0.1)
+        }
         let minLength = 4
         let additionalLength = max(0, text.count - minLength)
-        return BeamAnimation.easeInOut(duration: 0.2 + Double(additionalLength / minLength) * 0.05)
+        return BeamAnimation.easeInOut(duration: 0.2 + Double(additionalLength / minLength) * 0.1)
     }
 }
 
@@ -109,7 +112,7 @@ private struct HelpButtonView: View {
                     customStyle: WindowBottomToolBar.buttonStyle(withIcon: true, withTitle: showTitle)) {
             showHelpAction()
         }
-                    .animation(WindowBottomToolBar.buttonAnimation(forText: title), value: isHovering)
+                    .animation(WindowBottomToolBar.buttonAnimation(forText: title, appearing: showTitle), value: isHovering)
                     .accessibilityElement()
                     .accessibility(addTraits: .isButton)
                     .accessibility(identifier: "HelpButton")
@@ -168,9 +171,9 @@ private struct BottomToolBarTrailingIconView: View {
                     customStyle: WindowBottomToolBar.buttonStyle(withIcon: true, withTitle: showNewNoteTitle)) {
             state.startNewNote()
         }
-                    .animation(WindowBottomToolBar.buttonAnimation(forText: title), value: isHoveringNewNote)
-                    .onHover { isHoveringNewNote = $0 }
                     .tooltipOnHover(Shortcut.AvailableShortcut.newNote.keysDescription, alignment: .top)
+                    .animation(WindowBottomToolBar.buttonAnimation(forText: title, appearing: showNewNoteTitle), value: isHoveringNewNote)
+                    .onHover { isHoveringNewNote = $0 }
                     .accessibilityElement()
                     .accessibility(addTraits: .isButton)
                     .accessibility(identifier: "NewNoteButton")
