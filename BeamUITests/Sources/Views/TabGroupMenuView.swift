@@ -76,12 +76,25 @@ class TabGroupMenuView: BaseView {
     }
     
     @discardableResult
+    func renameExistingTabGroupName(tabGroupName: String) -> TabGroupMenuView {
+        let tabGroupNameElement = textField(TabGroupMenuViewLocators.MenuItems.tabGroupName.accessibilityIdentifier).clickOnExistence()
+        tabGroupNameElement.clickOnExistence()
+        shortcutHelper.shortcutActionInvoke(action: .selectAll)
+        tabGroupNameElement.typeText(tabGroupName)
+        self.typeKeyboardKey(.enter)
+        waitForDoesntExist(tabGroupNameElement)
+        return self
+    }
+    
+    @discardableResult
     func getTabGroupName() -> String {
         return staticText(TabGroupMenuViewLocators.MenuItems.tabGroupCapsuleName.accessibilityIdentifier).getStringValue()
     }
     
-    func clickTabGroupMenu(_ item: TabGroupMenuViewLocators.MenuItems) {
+    @discardableResult
+    func clickTabGroupMenu(_ item: TabGroupMenuViewLocators.MenuItems) -> TabGroupMenuView {
         menuItem(item.accessibilityIdentifier).clickOnExistence()
+        return self
     }
     
     @discardableResult

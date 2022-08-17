@@ -32,7 +32,7 @@ class TabGroupOpenNewWindowTests: BaseTest {
         
         step("When I open one tab group to another window") {
             tabGroupMenu.openTabGroupMenuWithName(tabGroupName: "Test1")
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupMoveNewWindow)
         }
         
