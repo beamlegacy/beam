@@ -172,6 +172,7 @@
         "SlashMenuTests\/testNoteDividerCreation()",
         "SyncTests",
         "TabGroupCaptureToANote",
+        "TabGroupCaptureToANoteMenuTests",
         "TabGroupCaptureToANoteTests",
         "TabGroupCloseTests",
         "TabGroupDragTabTests",

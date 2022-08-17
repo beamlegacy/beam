@@ -24,7 +24,7 @@ class TabGroupNewTabTests: BaseTest {
         
         step("When I add a tab to the group") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupNewTab)
         }
         
@@ -48,7 +48,7 @@ class TabGroupNewTabTests: BaseTest {
         
         step("When I add a tab to the group") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupNewTab)
         }
         
