@@ -37,6 +37,7 @@ class BrowserTabTests: XCTestCase {
         let decodedTab = try PropertyListDecoder().decode(BrowserTab.self, from: data)
 
         XCTAssert(decodedTab.preloadUrl == url)
+        XCTAssert(decodedTab.browsingTree.isFrecencyActive)
     }
 
     func testPerformance_InitTab() throws {
