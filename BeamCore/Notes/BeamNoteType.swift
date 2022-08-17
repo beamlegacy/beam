@@ -9,10 +9,20 @@ enum NoteType: String, Codable {
 public enum BeamNoteType: Codable, Equatable {
     case journal(String) // The date is stored as an ISO 8601 string
     case note
+    case tabGroup(UUID)
 
     public var isJournal: Bool {
         switch self {
         case .journal:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isTabGroup: Bool {
+        switch self {
+        case .tabGroup:
             return true
         default:
             return false
@@ -33,6 +43,15 @@ public enum BeamNoteType: Codable, Equatable {
         switch self {
         case .journal(let dateString):
             return dateString
+        default:
+            return nil
+        }
+    }
+
+    public var tabGroupId: UUID? {
+        switch self {
+        case .tabGroup(let id):
+            return id
         default:
             return nil
         }
@@ -120,6 +139,7 @@ public enum BeamNoteType: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case type
         case date
+        case tabGroupId
     }
 
     public init(from decoder: Decoder) throws {
@@ -135,6 +155,11 @@ public enum BeamNoteType: Codable, Equatable {
             self = .journal(date)
         case "note":
             self = .note
+        case "tabGroup":
+            guard let id = (try? container.decode(UUID.self, forKey: .tabGroupId)) else {
+                fallthrough
+            }
+            self = .tabGroup(id)
         default:
             Logger.shared.logError("Invalid NoteType '\(value)'", category: .document)
             self = .note
@@ -148,6 +173,9 @@ public enum BeamNoteType: Codable, Equatable {
         case .journal(let date):
             try container.encode("journal", forKey: .type)
             try container.encode(date, forKey: .date)
+        case .tabGroup(let groupId):
+            try container.encode("tabGroup", forKey: .type)
+            try container.encode(groupId, forKey: .tabGroupId)
         case .note:
             try container.encode("note", forKey: .type)
         }

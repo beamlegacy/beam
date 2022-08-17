@@ -13,6 +13,7 @@ struct AutocompleteListView: View {
     @EnvironmentObject var state: BeamState
     @Binding var selectedIndex: Int?
     var elements: [AutocompleteResult]
+    var loadingElement: AutocompleteResult?
     var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     @State private var hoveredItemIndex: Int?
@@ -50,12 +51,12 @@ struct AutocompleteListView: View {
                 let isSelected = isSelectedItem(item)
                 let displaySubtitle = shouldItemDisplaySubtitle(item, atIndex: index)
                 let allowsShortcut = item.shortcut != nil || (isSelected && !isItemSelectedByHovering(item))
-                if item.source == .createNote && elements.count > 1 && index > 0 {
+                if item.shouldDisplayTopDivider && elements.count > 1 && index > 0 {
                     Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                         .blendModeLightMultiplyDarkScreen()
                         .padding(.vertical, BeamSpacing._60)
                 }
-                AutocompleteItemView(item: item, selected: isSelected,
+                AutocompleteItemView(item: item, selected: isSelected, loading: loadingElement?.id == item.id,
                                      displaySubtitle: displaySubtitle,
                                      allowsShortcut: allowsShortcut,
                                      colorPalette: Self.colorPalette(for: item, mode: state.autocompleteManager.animatingToMode ?? state.autocompleteManager.mode))

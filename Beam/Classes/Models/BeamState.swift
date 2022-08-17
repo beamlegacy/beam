@@ -568,6 +568,30 @@ import Sentry
         stopFocusOmnibox()
     }
 
+    func shareTabGroup(_ group: TabGroup, fromOmniboxResult: AutocompleteResult? = nil) {
+        if let result = fromOmniboxResult {
+            autocompleteManager.autocompleteLoadingResult = result
+        }
+        browserTabsManager.tabGroupingManager.shareGroup(group) { [weak self] result in
+            guard let self = self else { return }
+            self.autocompleteManager.autocompleteLoadingResult = nil
+            switch result {
+            case .success:
+                guard fromOmniboxResult != nil else { break }
+                let previousMode = self.autocompleteManager.mode
+                let groupTitle = group.title ?? "Tab Group"
+                let view = OmniboxCustomStatusView(title: "Shared ", suffix: groupTitle,
+                                                   suffixColor: group.color?.mainColor?.swiftUI ?? .red).asAnyView
+                self.autocompleteManager.animateToMode(.customView(view: view))
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    self.autocompleteManager.animateToMode(previousMode)
+                }
+            case .failure:
+                break
+            }
+        }
+    }
+
     func fetchOrCreateNoteForQuery(_ query: String) throws -> BeamNote {
         EventsTracker.logBreadcrumb(message: "fetchOrCreateNoteForQuery \(query)", category: "BeamState")
         return try BeamNote.fetchOrCreate(self, title: query)
@@ -679,7 +703,7 @@ import Sentry
                 navigateToNote(id: noteId)
             }
         case .action, .tabGroup:
-            result.handler?(self)
+            result.handler?(self, result)
         case .createNote:
             if let noteTitle = result.information {
                 _ = try? navigateToNote(fetchOrCreateNoteForQuery(noteTitle))
