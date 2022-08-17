@@ -25,6 +25,7 @@ enum ToolbarLocators {
         case noteSwitcher = "card-switcher"
         case noteSwitcherJournal = "card-switcher-journal"
         case noteSwitcherAllNotes = "card-switcher-all-cards"
+        case helpButton = "HelpButton"
     }
     
     enum Labels: String, CaseIterable, UIElement {

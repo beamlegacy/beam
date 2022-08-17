@@ -91,7 +91,7 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getNewNoteCreationButton() -> XCUIElement {
-        return staticText(NoteViewLocators.Buttons.newNoteCreation.accessibilityIdentifier)
+        button(NoteViewLocators.Buttons.newNoteCreation.accessibilityIdentifier)
     }
     
     @discardableResult
