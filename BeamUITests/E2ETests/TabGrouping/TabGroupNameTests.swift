@@ -42,7 +42,7 @@ class TabGroupNameTests: BaseTest {
         
         step("When I delete tab group name") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.deleteTabGroupName()
         }
         
@@ -55,7 +55,7 @@ class TabGroupNameTests: BaseTest {
 
         step("When I collapse tab group") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCollapse)
         }
         
@@ -65,7 +65,7 @@ class TabGroupNameTests: BaseTest {
         
         step("When I set a tab group name") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: tabGroupName)
         }
         
@@ -75,7 +75,7 @@ class TabGroupNameTests: BaseTest {
         
         step("When I delete tab group name") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.deleteTabGroupName()
         }
 
@@ -88,7 +88,7 @@ class TabGroupNameTests: BaseTest {
 
         step("When I set a tab group name with special chars") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: tabGroupNameSpecialChars)
 
         }
@@ -109,11 +109,10 @@ class TabGroupNameTests: BaseTest {
 
         step("When I collapse tab group, set a tab group name and restart the app") {
             tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCollapse)
-
-            tabGroupMenu.openTabGroupMenu(index: 0)
-            tabGroupMenu.waitForMenuToBeDisplayed()
+                .openTabGroupMenu(index: 0)
+                .waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: tabGroupName)
 
             restartApp(storeSessionWhenTerminated: true)
