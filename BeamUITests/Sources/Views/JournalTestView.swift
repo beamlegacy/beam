@@ -11,7 +11,7 @@ import XCTest
 class JournalTestView: TextEditorContextTestView {
     
     func getHelpButton() -> XCUIElement {
-        return staticText("HelpButton")
+        button(ToolbarLocators.Buttons.helpButton.accessibilityIdentifier)
     }
     
     @discardableResult

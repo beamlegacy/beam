@@ -43,12 +43,18 @@ struct ButtonLabelStyle {
 struct ButtonLabel: View {
     var text: String?
     var iconName: String?
+
     var lottieName: String?
     var lottiePlaying: Bool?
     var lottieLoopMode: LottieLoopMode?
     var lottieCompletion: (() -> Void)?
+
     let defaultState: ButtonLabelState
     let variant: ButtonLabelVariant
+
+    /// Display compact version, usually icon only or with less padding
+    private var isCompactMode: Bool = false
+
     // TODO replace style by a custom modifier like .buttonLabelStyle()
     let style: ButtonLabelStyle
 
@@ -60,17 +66,18 @@ struct ButtonLabel: View {
     @State private var isTouching = false
 
     init(_ text: String? = nil, icon: String? = nil, state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary,
-         customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
+         compactMode: Bool = false, customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
         self.text = text
         self.iconName = icon
         self.defaultState = state
         self.variant = variant
+        self.isCompactMode = compactMode
         self.style = customStyle
         self.action = action
     }
 
     init(_ text: String? = nil, lottie: String, lottiePlaying: Bool = true, lottieLoopMode: LottieLoopMode = .loop, lottieCompletion: (() -> Void)? = nil, state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary,
-         customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
+         compactMode: Bool = false, customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
         self.text = text
         self.lottieName = lottie
         self.lottiePlaying = lottiePlaying
@@ -78,6 +85,7 @@ struct ButtonLabel: View {
         self.lottieCompletion = lottieCompletion
         self.defaultState = state
         self.variant = variant
+        self.isCompactMode = compactMode
         self.style = customStyle
         self.action = action
     }
@@ -131,7 +139,7 @@ struct ButtonLabel: View {
                                completion: lottieCompletion)
                         .alignmentGuide(.lastTextBaseline) { dimensions in dimensions[VerticalAlignment.center] }
                 }
-                if let text = text {
+                if let text = text, (!isCompactMode || (iconName == nil && lottieName == nil)) {
                     Text(text)
                         .foregroundColor(foregroundColor)
                         .font(style.font)
