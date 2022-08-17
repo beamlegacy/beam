@@ -18,6 +18,11 @@ final class TabGroup: Identifiable {
     private(set) var collapsed = false
     private(set) var isLocked: Bool = false
 
+    /// Whether or not the group should allow the clustering to append / remove pages.
+    var canBeUpdatedByClustering: Bool {
+        !isLocked
+    }
+
     /// Whether or not the group has been interacted with by the user and should therefore be persisted
     private(set) var shouldBePersisted: Bool = false
 
@@ -27,6 +32,7 @@ final class TabGroup: Identifiable {
         self.pageIds = pageIds
         self.title = title
         self.color = color
+        self.isLocked = isLocked
         shouldBePersisted = title?.isEmpty == false
     }
 
