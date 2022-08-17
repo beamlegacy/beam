@@ -113,6 +113,7 @@ struct ContentView: View {
                 .zIndex(1)
         }
         .environment(\.isMainWindow, windowInfo.windowIsMain)
+        .environment(\.isCompactWindow, windowInfo.windowIsCompact)
         .environment(\.windowFrame, windowInfo.windowFrame)
     }
 
@@ -150,6 +151,9 @@ extension EnvironmentValues {
 private struct WindowFrameEnvironmentKey: EnvironmentKey {
     static let defaultValue = CGRect.zero
 }
+private struct IsCompactWindowEnvironmentKey: EnvironmentKey {
+    static let defaultValue = false
+}
 extension EnvironmentValues {
     var windowFrame: CGRect {
         get { self[WindowFrameEnvironmentKey.self] }
@@ -157,8 +161,8 @@ extension EnvironmentValues {
     }
 
     var isCompactWindow: Bool {
-        get { windowFrame.width <= 810 }
-        set { _ = newValue }
+        get { self[IsCompactWindowEnvironmentKey.self] }
+        set { self[IsCompactWindowEnvironmentKey.self] = newValue }
     }
 }
 
