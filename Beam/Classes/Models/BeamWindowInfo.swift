@@ -14,4 +14,7 @@ class BeamWindowInfo: ObservableObject {
     @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
     weak var window: NSWindow?
+    var windowIsCompact: Bool {
+        windowFrame.width <= 810
+    }
 }
