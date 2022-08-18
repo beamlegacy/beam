@@ -15,29 +15,17 @@ struct SocialShareContextMenu {
     var socialShareMenuViewModel: SocialShareContextMenuViewModel
 
     init(urlToShare: URL?, of noteTitle: String?) {
-        let items =  [
-            ContextMenuItem(title: "Twitter", icon: "social-twitter_fill", action: {
-                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: .twitter)
-            }),
-            ContextMenuItem(title: "Facebook", icon: "social-facebook_fill", action: {
-                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: .facebook)
-            }),
-            ContextMenuItem(title: "LinkedIn", icon: "social-linkedin_fill", action: {
-                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: .linkedin)
-            }),
-            ContextMenuItem(title: "Reddit", icon: "social-reddit_fill", action: {
-                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: .reddit)
-            }),
-            ContextMenuItem(title: "Messages", icon: "social-message_fill", action: {
-                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: .messages)
-            }),
-            ContextMenuItem(title: "Mail", icon: "social-mail_fill", action: {
-                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: .email)
-            }),
+        var items = [
             ContextMenuItem(title: "Copy URL", icon: "editor-url_link", action: {
                 SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: .copy)
-            })
+            }),
+            ContextMenuItem.separator()
         ]
+        items.append(contentsOf: ShareService.allCases(except: [.copy]).map { service -> ContextMenuItem in
+            ContextMenuItem(title: service.title, icon: service.icon, action: {
+                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: service)
+            })
+        })
 
         socialShareMenuViewModel = SocialShareContextMenuViewModel()
         socialShareMenuViewModel.items = items
@@ -51,7 +39,7 @@ struct SocialShareContextMenu {
         guard let url = url else { return }
         Task { @MainActor in
             let helper = ShareHelper { url in
-                AppDelegate.main.openMinimalistWebWindow(url: url, title: nil, rect: ShareWindowFeatures(for: service).toRect())
+                AppDelegate.main.openMinimalistWebWindow(url: url, title: service.title, rect: ShareWindowFeatures(for: service).toRect())
             }
             await helper.share(link: url, of: noteTitle, to: service)
         }
