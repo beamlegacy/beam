@@ -18,34 +18,53 @@ struct UpdatePanel: View {
     private let windowBarHeight = 28.0
     @StateObject private var webViewModel = WebViewModel()
 
-    static let panelSize = CGSize(width: 638, height: 406)
+    static let panelSize = CGSize(width: 684, height: 400)
 
     var body: some View {
         HStack(spacing: 0) {
             ZStack(alignment: .top) {
-                BeamColor.Mercury.swiftUI
-                    .frame(height: Self.panelSize.height)
-                VStack(spacing: 22) {
+                VStack(spacing: 6) {
                     AppIcon()
                         .frame(width: 66, height: 66)
                     texts
                     buttons
-                        .padding(.top, 28)
+                        .padding(.top, 53)
                 }
-                .padding(.top, 82)
+                .padding(.top, 18)
             }
-            .frame(width: 248, height: Self.panelSize.height - windowBarHeight)
+            .frame(width: 238, height: Self.panelSize.height - windowBarHeight)
             if let releaseNoteURL = appRelease.releaseNoteURL {
-                ReleaseNoteWebView(url: releaseNoteURL, viewModel: webViewModel)
-                    .frame(width: 390)
+                VStack {
+                    ReleaseNoteWebView(url: releaseNoteURL, viewModel: webViewModel)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 30)
+                        .if(webViewModel.isLoading, transform: {
+                            $0.hidden()
+                        })
+                }.frame(width: 440)
+                    .background(BeamColor.Generic.background.swiftUI)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.5, darkColor: .From(color: .black), darkAlpha: 0.85).swiftUI, lineWidth: 0.5)
+                    )
                     .overlay(loadingOverlay, alignment: .center)
+                    .cornerRadius(10)
+                    .padding(3)
+
             }
-        }
+        }.foregroundColor(BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.8, darkColor: .Mercury, darkAlpha: 0.7).swiftUI)
+            .visualEffect(material: .hudWindow)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.1, darkColor: .From(color: .white), darkAlpha: 0.3).swiftUI, lineWidth: 0.5)
+            )
     }
 
     @ViewBuilder private var loadingOverlay: some View {
         if webViewModel.isLoading {
             ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: BeamColor.LightStoneGray.swiftUI))
+                .scaleEffect(0.5, anchor: .center)
         } else {
             EmptyView()
         }
@@ -53,46 +72,48 @@ struct UpdatePanel: View {
 
     private var texts: some View {
         VStack(spacing: 6) {
-            Text("\(appRelease.versionName) \(appRelease.version)")
-                .font(BeamFont.semibold(size: 20).swiftUI)
+            Text("beam")
                 .foregroundColor(BeamColor.Niobium.swiftUI)
-            Text("\(appRelease.versionName) \(appRelease.version) is available.\nTime to update!")
+                .font(BeamFont.regular(size: 20).swiftUI)
+                .blendModeLightMultiplyDarkScreen()
+            Text("\(appRelease.versionName) \(appRelease.version) is available.")
                 .multilineTextAlignment(.center)
                 .font(BeamFont.regular(size: 12).swiftUI)
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
+                .blendModeLightMultiplyDarkScreen()
         }
     }
 
     private var buttons: some View {
         VStack(spacing: 10) {
-            ActionableButton(text: loc("Update now"), defaultState: .normal, variant: updateVariant, minWidth: 180) {
+            ActionableButton(text: loc("Update now"), defaultState: .normal, variant: updateVariant, minWidth: 180, height: 34, invertBlendMode: true) {
                 Task {
                     await versionChecker.performUpdateIfAvailable(forceInstall: true)
                 }
                 closeAction()
             }
-            Button {
+            ActionableButton(text: loc("Later"), defaultState: .normal, variant: laterUpdateVariant, minWidth: 180, height: 34, invertBlendMode: false) {
                 closeAction()
-            } label: {
-                Text(loc("Later"))
-                    .font(BeamFont.medium(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-                    .frame(width: 180, height: 34, alignment: .center)
-            }.buttonStyle(.borderless)
+            }
         }
     }
 
     private var updateVariant: ActionableButtonVariant {
-        var updateVariant = ActionableButtonVariant.primaryPurple.style
+        var updateVariant = ActionableButtonVariant.primaryBeam.style
+        updateVariant.icon = nil
+        updateVariant.textAlignment = .center
+        return .custom(updateVariant)
+    }
+
+    private var laterUpdateVariant: ActionableButtonVariant {
+        var updateVariant = ActionableButtonVariant.ghost.style
         updateVariant.icon = nil
         updateVariant.textAlignment = .center
         return .custom(updateVariant)
     }
 
     static func showReleaseNoteWindow(with release: AppRelease, versionChecker: VersionChecker, hideButtonOnClose: Bool = false) {
-        let window = SimpleHostingWindow(rect: .zero, styleMask: [.titled, .closable, .miniaturizable, .unifiedTitleAndToolbar, .fullSizeContentView])
-        window.titlebarAppearsTransparent = true
-        window.titleVisibility = .hidden
+        let window = SimpleClearHostingWindow(rect: .zero, styleMask: [.titled, .closable, .miniaturizable, .unifiedTitleAndToolbar, .fullSizeContentView])
 
         let releaseNoteView = UpdatePanel(appRelease: release, versionChecker: versionChecker, closeAction: {
             window.close()
@@ -164,6 +185,10 @@ private struct ReleaseNoteWebView: View, NSViewRepresentable {
 
 struct UpdatePanel_Previews: PreviewProvider {
     static var previews: some View {
-        UpdatePanel(appRelease: AppRelease.mockedReleases()[3], versionChecker: VersionChecker(mockedReleases: AppRelease.mockedReleases()), closeAction: {})
+        Group {
+            UpdatePanel(appRelease: AppRelease.mockedReleases()[3], versionChecker: VersionChecker(mockedReleases: AppRelease.mockedReleases()), closeAction: {})
+            UpdatePanel(appRelease: AppRelease.mockedReleases()[3], versionChecker: VersionChecker(mockedReleases: AppRelease.mockedReleases()), closeAction: {})
+                .preferredColorScheme(.light)
+        }
     }
 }
