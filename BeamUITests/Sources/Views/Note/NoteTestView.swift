@@ -128,6 +128,20 @@ class NoteTestView: TextEditorContextTestView {
         return self
     }
     
+    @discardableResult
+    func sharePublishedNoteMenuDisplay() -> NoteTestView {
+        app.staticTexts[NoteViewLocators.StaticTexts.sharePublishedNote.accessibilityIdentifier].hoverInTheMiddle()
+        return self
+    }
+    
+    @discardableResult
+    func sharePublishedNoteAction(_ item: NoteViewLocators.SharePublishedNote) -> NoteTestView {
+        // hover first item to not dismiss the menu
+        app.staticTexts[NoteViewLocators.SharePublishedNote.shareTwitter.accessibilityIdentifier].hoverInTheMiddle()
+        app.staticTexts[item.accessibilityIdentifier].clickOnExistence()
+        return self
+    }
+    
     func getNoteElementsQueryForVisiblePart() -> XCUIElementQuery {
         return app.windows.textViews.matching(identifier: NoteViewLocators.TextFields.textNode.accessibilityIdentifier)
     }
