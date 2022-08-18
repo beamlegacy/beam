@@ -3,6 +3,8 @@ import CommonCrypto
 import BeamCore
 
 class BeamObjectRequest: APIRequest {
+    override var route: String { "\(Configuration.beamObjectsApiHostname)/graphql" }
+
     override init() {
         super.init()
 
