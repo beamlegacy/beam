@@ -76,11 +76,16 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         case .populateCreditCardsDB: populateCreditCardsDB()
         case .disablePasswordProtect: disablePasswordProtection()
         case .resetUserPreferences: resetUserPreferences()
+        case .showUpdateWindow: showUpdateWindow()
         default: break
         }
     }
 
     var googleCalendarService = GoogleCalendarService(accessToken: nil, refreshToken: nil)
+
+    private func showUpdateWindow() {
+        UpdatePanel.showReleaseNoteWindow(with: AppRelease.mockedReleases()[3], versionChecker: VersionChecker(mockedReleases: AppRelease.mockedReleases()))
+    }
 
     private func logout() {
         for window in AppDelegate.main.windows {
