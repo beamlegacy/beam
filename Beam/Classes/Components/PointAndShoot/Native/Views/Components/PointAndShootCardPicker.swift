@@ -159,7 +159,13 @@ struct PointAndShootCardPicker: View {
                 Spacer()
 
                 // MARK: - Icon
-                if completed {
+                if !completed && destinationCardName != nil && currentCardName == destinationCardName {
+                    ShortcutView(shortcut: .init(modifiers: [], keys: [.enter]), withBackground: true)
+                        .onTapGesture {
+                            enableResizeAnimation()
+                            onFinishEditing()
+                        }
+                } else if completed {
                     let confirmationIcon = confirmation == .success ? "collect-generic" : "tool-close"
                     Icon(name: confirmationIcon, width: 16, color: BeamColor.Generic.text.swiftUI)
                         .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15).delay(0.05)))
