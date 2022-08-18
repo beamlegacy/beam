@@ -94,6 +94,8 @@ class APIRequest: NSObject {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601withFractionalSeconds
         #if DEBUG
+        // One day maybe we can ask here to keep nulls instead of removing them
+        // https://github.com/apple/swift-corelibs-foundation/issues/3594
         encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
         #else
         encoder.outputFormatting = [.withoutEscapingSlashes]
