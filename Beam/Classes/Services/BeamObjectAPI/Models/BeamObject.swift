@@ -53,7 +53,7 @@ extension BeamObjectProtocol {
 }
 
 /// Used to store data on the BeamObject Beam API.
-class BeamObject: Codable {
+class BeamObject: Decodable {
     var beamObjectType: String
     var createdAt: Date?
     var updatedAt: Date?
@@ -66,6 +66,9 @@ class BeamObject: Codable {
     var previousChecksum: String?
     var privateKeySignature: String?
     var largeDataBlobId: String?
+
+    // Only used for multipart uploads
+    var largeData: String?
 
     var id: UUID
 
@@ -87,14 +90,15 @@ class BeamObject: Codable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id = "id"
+        case id
         case beamObjectType = "type"
         case createdAt
         case updatedAt
         case deletedAt
         case receivedAt
         case data
-        case dataUrl = "dataUrl"
+        case largeData
+        case dataUrl
         case dataChecksum = "checksum"
         case previousChecksum
         case privateKeySignature
@@ -143,6 +147,25 @@ class BeamObject: Codable {
 //            Logger.shared.logDebug("🦞 SHA checksum on \(text): \(dataChecksum)",
 //                                   category: .beamObjectDebug)
 //        }
+    }
+
+    required init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try values.decode(UUID.self, forKey: .id)
+        beamObjectType = try values.decode(String.self, forKey: .beamObjectType)
+
+        createdAt = try values.decodeIfPresent(String.self, forKey: .createdAt)?.iso8601withFractionalSeconds
+        updatedAt = try values.decodeIfPresent(String.self, forKey: .updatedAt)?.iso8601withFractionalSeconds
+        deletedAt = try values.decodeIfPresent(String.self, forKey: .deletedAt)?.iso8601withFractionalSeconds
+        receivedAt = try values.decodeIfPresent(String.self, forKey: .receivedAt)?.iso8601withFractionalSeconds
+
+        data = try values.decodeIfPresent(Data.self, forKey: .data)
+        dataUrl = try values.decodeIfPresent(String.self, forKey: .dataUrl)
+        dataChecksum = try values.decodeIfPresent(String.self, forKey: .dataChecksum)
+        previousChecksum = try values.decodeIfPresent(String.self, forKey: .previousChecksum)
+        privateKeySignature = try values.decodeIfPresent(String.self, forKey: .privateKeySignature)
+        largeDataBlobId = try values.decodeIfPresent(String.self, forKey: .largeDataBlobId)
     }
 
     static var encoder: JSONEncoder {
@@ -251,6 +274,30 @@ class BeamObject: Codable {
                                    category: .beamObject)
         }
         return nil
+    }
+}
+
+// The GraphQL API expects `largeData: nil` when we upload with multipart but Swift doesn't support that and remove null values
+// Writing our own encodable to keep those
+extension BeamObject: Encodable {
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(id, forKey: .id)
+        try container.encode(beamObjectType, forKey: .beamObjectType)
+        try container.encodeIfPresent(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(updatedAt, forKey: .updatedAt)
+        try container.encodeIfPresent(deletedAt, forKey: .deletedAt)
+        try container.encodeIfPresent(receivedAt, forKey: .receivedAt)
+        try container.encodeIfPresent(data, forKey: .data)
+        try container.encodeIfPresent(dataUrl, forKey: .dataUrl)
+        try container.encodeIfPresent(dataChecksum, forKey: .dataChecksum)
+        try container.encodeIfPresent(previousChecksum, forKey: .previousChecksum)
+        try container.encodeIfPresent(privateKeySignature, forKey: .privateKeySignature)
+        try container.encodeIfPresent(largeDataBlobId, forKey: .largeDataBlobId)
+
+        // If we don't send this as `null` multipart uploads aren't considered on the GraphQL server-side
+        try container.encode(largeData, forKey: .largeData)
     }
 }
 

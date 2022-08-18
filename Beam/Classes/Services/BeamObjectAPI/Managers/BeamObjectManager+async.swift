@@ -499,13 +499,6 @@ extension BeamObjectManager {
 
         let request = BeamObjectRequest()
 
-        #if DEBUG
-        if objectsToSave.count > 200 {
-            Logger.shared.logWarning("Saving \(objectsToSave.count), which is probably too many to be efficient using direct uploads",
-                                     category: .beamObject)
-        }
-        #endif
-
         let beamObjectsUpload: [BeamObjectRequest.BeamObjectUpload]
         do {
             beamObjectsUpload = try await request.prepare(objectsToSave)

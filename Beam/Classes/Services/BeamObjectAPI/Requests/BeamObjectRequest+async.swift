@@ -543,7 +543,7 @@ extension BeamObjectRequest {
                     do {
                         try await group.next()
                     } catch {
-                        Logger.shared.logWarning("Failed to download beam object content from \(dataUrl)", category: .sync)
+                        Logger.shared.logError("Failed to download beam object content from \(dataUrl): \(error)", category: .sync)
                     }
                 }
                 group.addTask(operation: S3TransferManager.shared.makeOperation(downloadUrl: dataUrl, request: self, beamObject: beamObject))
