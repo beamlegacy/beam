@@ -167,6 +167,18 @@ struct Configuration {
         }
     }
 
+    static private var beamObjectsApiHostnameKey = "beamObjectsApiHostname"
+    static var beamObjectsApiHostname: String {
+        get {
+            UserDefaults.standard.string(forKey: beamObjectsApiHostnameKey) ?? apiHostname
+        }
+        set {
+            if newValue != beamObjectsApiHostname {
+                UserDefaults.standard.set(newValue, forKey: beamObjectsApiHostnameKey)
+            }
+        }
+    }
+
     static private var restApiHostnameKey = "restApiHostname"
     static var restApiHostname: String {
         get {
@@ -294,6 +306,7 @@ struct Configuration {
         UserDefaults.standard.removeObject(forKey: publicAPIembedKey)
         UserDefaults.standard.removeObject(forKey: apiHostnameKey)
         UserDefaults.standard.removeObject(forKey: restApiHostnameKey)
+        UserDefaults.standard.removeObject(forKey: beamObjectsApiHostnameKey)
 
         // Download & upload settings
         UserDefaults.standard.removeObject(forKey: beamObjectsPageSizeKey)
