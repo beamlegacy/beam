@@ -83,5 +83,7 @@ cherry_pick_to_develop:
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
   script:
     - scripts/handle_cherry_pick.sh
+  after_script:
+    - if [ ${CI_JOB_STATUS} == "failed" ]; then source ./scripts/cherry_pick_failure_slack_notif.sh; share_slack_update; fi
   interruptible: true
   allow_failure: true
