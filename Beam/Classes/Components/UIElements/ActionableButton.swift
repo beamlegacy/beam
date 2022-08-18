@@ -15,14 +15,21 @@ enum ActionableButtonState {
 }
 
 enum ActionableButtonVariant {
+    case primaryBeam
     case primaryBlue
     case primaryPurple
     case secondary
     case destructive
+    case ghost
     case custom(ActionableButtonStyle)
 
     var style: ActionableButtonStyle {
         switch self {
+        case .primaryBeam:
+            return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
+                                         foregroundColor: .primaryBeamForeground,
+                                         backgroundColor: .primaryBeamBackground,
+                                         icon: .init(name: "shortcut-return"))
         case .primaryBlue:
             return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
                                          foregroundColor: .primaryBlueForeground,
@@ -43,6 +50,11 @@ enum ActionableButtonVariant {
                                          foregroundColor: .destructiveForeground,
                                          backgroundColor: .destructiveBackground,
                                          icon: .init(name: "shortcut-bttn_esc", size: 16, palette: .destructiveBackground))
+        case .ghost:
+            return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
+                                         foregroundColor: .ghostForeground,
+                                         backgroundColor: .ghostBackground,
+                                         icon: .init(name: "shortcut-return"))
         case .custom(let customStyle):
             return customStyle
         }
@@ -73,8 +85,8 @@ struct ActionableButton: View {
     let variant: ActionableButtonVariant
     var minWidth: CGFloat = 0
     var height: CGFloat = 30
-    var action: (() -> Void)?
     var invertBlendMode: Bool = false
+    var action: (() -> Void)?
 
     @State private var isHovered = false
     @State private var isTouched = false
@@ -237,6 +249,16 @@ extension ActionableButtonState {
         var disabled: BeamColor
         var disabledStroke: BeamColor?
 
+        static let primaryBeamForeground = ActionableButtonState.Palette(normal: .ActionableButtonBeam.foreground,
+                                                                         hovered: .ActionableButtonBeam.foreground,
+                                                                         clicked: .ActionableButtonBeam.foreground,
+                                                                         disabled: .ActionableButtonBeam.disabledForeground)
+        static let primaryBeamBackground = ActionableButtonState.Palette(normal: .ActionableButtonBeam.background,
+                                                                         hovered: .ActionableButtonBeam.backgroundHovered,
+                                                                         clicked: .ActionableButtonBeam.backgroundClicked,
+                                                                         disabled: .ActionableButtonBeam.backgroundDisabled,
+                                                                         disabledStroke: .ActionableButtonBeam.strokeDisabled)
+
         static let primaryBlueForeground = ActionableButtonState.Palette(normal: .ActionableButtonBlue.foreground,
                                                                          hovered: .ActionableButtonBlue.foreground,
                                                                          clicked: .ActionableButtonBlue.foreground,
@@ -279,6 +301,16 @@ extension ActionableButtonState {
                                                                          hovered: BeamColor.Shiraz.alpha(0.1),
                                                                          clicked: BeamColor.Shiraz.alpha(0.3),
                                                                          disabled: BeamColor.Shiraz.alpha(0))
+
+        static let ghostForeground = ActionableButtonState.Palette(normal: BeamColor.Corduroy,
+                                                                   hovered: BeamColor.Niobium,
+                                                                   clicked: BeamColor.Niobium,
+                                                                   disabled: BeamColor.Corduroy)
+        static let ghostBackground = ActionableButtonState.Palette(normal: BeamColor.Generic.background.alpha(0),
+                                                                   hovered: BeamColor.combining(lightColor: .Mercury, lightAlpha: 1, darkColor: .AlphaGray, darkAlpha: 0.64),
+                                                                   clicked: BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.6, darkColor: .LightStoneGray, darkAlpha: 0.6),
+                                                                   disabled: BeamColor.Generic.background.alpha(0),
+                                                                   disabledStroke: BeamColor.Generic.background.alpha(0))
     }
 }
 
@@ -305,6 +337,12 @@ struct ActionableButton_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             HStack {
+                VStack {
+                    ActionableButton(text: "Primary Button", defaultState: .normal, variant: .primaryBeam)
+                    ActionableButton(text: "Primary Button", defaultState: .hovered, variant: .primaryBeam)
+                    ActionableButton(text: "Primary Button", defaultState: .clicked, variant: .primaryBeam)
+                    ActionableButton(text: "Primary Button", defaultState: .disabled, variant: .primaryBeam)
+                }
                 VStack {
                     ActionableButton(text: "Primary Button", defaultState: .normal, variant: .primaryBlue)
                     ActionableButton(text: "Primary Button", defaultState: .hovered, variant: .primaryBlue)
