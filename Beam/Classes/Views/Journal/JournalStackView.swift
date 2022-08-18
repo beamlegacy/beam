@@ -184,9 +184,9 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
 
         defer {
             if let focus = focussingOn, let focused = views[focus] {
-                DispatchQueue.main.async {
-                    self.scrollToVisible(focused.frame)
-                    self.window?.makeFirstResponder(focused)
+                DispatchQueue.main.async { [self] in
+                    scrollToVisible(focused.frame)
+                    window?.makeFirstResponder(focused)
                 }
             }
         }
@@ -277,8 +277,12 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
         textEditView.startQuery = { [weak state] textNode, animated in
             state?.startQuery(textNode, animated: animated)
         }
-        textEditView.onFocusChanged = { [weak state] elementId, cursorPosition in
-            state?.updateNoteFocusedState(note: note, focusedElement: elementId, cursorPosition: cursorPosition)
+        textEditView.onFocusChanged = { [weak state] elementId, cursorPosition, selectedRange in
+            state?.currentJournalNoteID = note.id
+            state?.updateNoteFocusedState(note: note,
+                                          focusedElement: elementId,
+                                          cursorPosition: cursorPosition,
+                                          selectedRange: selectedRange)
         }
         textEditView.minimumWidth = 800
         textEditView.maximumWidth = 1024
@@ -333,13 +337,27 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
     }
 
     override func viewDidMoveToWindow() {
-        guard window != nil else { return }
+        guard let window = window else { return }
 
         initialLayout = false
         if let offset = state.lastScrollOffset[UUID.null],
            let clipView = enclosingScrollView?.contentView,
            clipView.bounds.origin.y != offset {
             scroll(NSPoint(x: 0, y: offset))
+        }
+
+        if let noteID = state.currentJournalNoteID,
+           let fs = state.notesFocusedStates.getSavedNoteFocusedState(noteId: noteID),
+           let note = notes.first(where: { $0.id == noteID }),
+           let view = views[note] {
+            view.focusElement(withId: fs.elementId,
+                              atCursorPosition: fs.cursorPosition,
+                              selectedRange: fs.selectedRange,
+                              highlight: fs.highlight,
+                              unfold: fs.unfold,
+                              scroll: false,
+                              notify: false)
+            window.makeFirstResponder(view)
         }
     }
 

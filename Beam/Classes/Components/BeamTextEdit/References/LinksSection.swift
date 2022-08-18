@@ -68,9 +68,6 @@ class LinksSection: Widget {
 
             let chevron = ChevronButton("disclosure", open: openChildren, changed: { [unowned self] value in
                 self.open = value
-                guard let root = self.parent as? TextRoot else { return }
-                root.editor?.hideInlineFormatter()
-                root.cancelSelection(.current)
             })
             chevron.setAccessibilityIdentifier("linksSection_arrow")
             self.addLayer(chevron)

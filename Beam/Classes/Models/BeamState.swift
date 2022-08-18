@@ -61,6 +61,8 @@ import Sentry
         }
     }
 
+    var currentJournalNoteID: BeamNote.ID?
+
     private(set) lazy var recentsManager: RecentsManager = {
         RecentsManager()
     }()
@@ -223,6 +225,8 @@ import Sentry
                 navigateToJournal(note: note)
             } else if let note = noteController?.note ?? currentNote {
                 navigateToNote(note)
+            } else if let page = currentPage {
+                navigateToPage(page)
             } else {
                 navigateToJournal(note: nil)
             }
@@ -313,7 +317,11 @@ import Sentry
         currentPage = nil
         currentNote = note
         if let elementId = elementId {
-            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: elementId, cursorPosition: 0, highlight: true, unfold: unfold)
+            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: elementId,
+                                                                          cursorPosition: 0,
+                                                                          selectedRange: 0..<0,
+                                                                          highlight: true,
+                                                                          unfold: unfold)
         } else {
             notesFocusedStates.currentFocusedState = notesFocusedStates.getSavedNoteFocusedState(noteId: note.id)
         }
@@ -1134,11 +1142,16 @@ extension BeamState: BrowserTabsManagerDelegate {
 // MARK: - Notes focused state
 extension BeamState {
 
-    func updateNoteFocusedState(note: BeamNote, focusedElement: UUID, cursorPosition: Int) {
+    func updateNoteFocusedState(note: BeamNote, focusedElement: UUID, cursorPosition: Int, selectedRange: Range<Int>) {
         if note == currentNote {
-            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: focusedElement, cursorPosition: cursorPosition)
+            notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: focusedElement,
+                                                                          cursorPosition: cursorPosition,
+                                                                          selectedRange: selectedRange)
         }
-        notesFocusedStates.saveNoteFocusedState(noteId: note.id, focusedElement: focusedElement, cursorPosition: cursorPosition)
+        notesFocusedStates.saveNoteFocusedState(noteId: note.id,
+                                                focusedElement: focusedElement,
+                                                cursorPosition: cursorPosition,
+                                                selectedRange: selectedRange)
     }
 }
 
