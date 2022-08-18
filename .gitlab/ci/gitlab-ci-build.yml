@@ -64,3 +64,24 @@ build:macos:
   interruptible: true
   retry:
     max: 2
+
+cherry_pick_to_develop:
+  timeout: 2 minutes
+  image: registry.gitlab.com/beamgroup/beam/curl-jq
+  before_script:
+    - date
+  dependencies: []
+  stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+  script:
+    - scripts/handle_cherry_pick.sh
+  interruptible: true
+  allow_failure: true
