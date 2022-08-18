@@ -10,6 +10,7 @@ import Foundation
 struct NoteEditFocusedState {
     var elementId: UUID
     var cursorPosition: Int
+    var selectedRange: Range<Int>
     var highlight: Bool = false
     var unfold: Bool = false
 }
@@ -24,8 +25,10 @@ class NoteEditFocusedStateStorage: ObservableObject {
         Self.notesFocusedElementInfos[noteId]
     }
 
-    func saveNoteFocusedState(noteId: UUID, focusedElement: UUID, cursorPosition: Int) {
-        let focused = NoteEditFocusedState(elementId: focusedElement, cursorPosition: cursorPosition)
+    func saveNoteFocusedState(noteId: UUID, focusedElement: UUID, cursorPosition: Int, selectedRange: Range<Int>) {
+        let focused = NoteEditFocusedState(elementId: focusedElement,
+                                           cursorPosition: cursorPosition,
+                                           selectedRange: selectedRange)
         Self.notesFocusedElementInfos[noteId] = focused
     }
 }

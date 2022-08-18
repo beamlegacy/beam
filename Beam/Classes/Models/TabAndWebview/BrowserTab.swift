@@ -367,9 +367,11 @@ import UniformTypeIdentifiers
 
     private func updateFocusedStateToElement(_ element: BeamElement) {
         guard let note = element.note ?? noteController.note else { return }
+        let position = element.text.wholeRange.upperBound
         state?.updateNoteFocusedState(note: note,
                                       focusedElement: element.id,
-                                      cursorPosition: element.text.wholeRange.upperBound)
+                                      cursorPosition: position,
+                                      selectedRange: position..<position)
     }
 
     internal func logInNote(url: URL, reason: NoteElementAddReason) {
