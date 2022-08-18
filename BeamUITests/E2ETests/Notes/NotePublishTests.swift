@@ -176,6 +176,51 @@ class NotePublishTests: BaseTest {
         }
     }
     
+    func testCopyURLPublishedNote() {
+        
+        let noteNameToBeCreated = "Test1"
+
+        step("GIVEN I created and publish a note") {
+            setupStaging(withRandomAccount: true)
+            uiMenu.createAndOpenPublishedNote()
+            noteView = NoteTestView()
+        }
+        
+        step("When I click on Publish link") {
+            NSPasteboard.general.clearContents() //to clean the paste contents
+            noteView.publishNote()
+        }
+        
+        step("Then Link is copied I can open it in the web") {
+            XCTAssertTrue(noteView.staticText(NoteViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
+        }
+        
+        step("And I can open it in the web") {
+            noteView.shortcutHelper.shortcutActionInvoke(action: .newTab)
+            noteView.shortcutHelper.shortcutActionInvoke(action: .paste)
+            noteView.typeKeyboardKey(.enter)
+            XCTAssertTrue(webView.waitForPublishedNoteToLoad(noteName: noteNameToBeCreated))
+        }
+
+        
+        step("When I copy URL through publish menu") {
+            NSPasteboard.general.clearContents() //to clean the paste contents
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            noteView.waitForNoteViewToLoad()
+            noteView.clickPublishedMenuDisclosureTriangle()
+                .sharePublishedNoteMenuDisplay()
+                .sharePublishedNoteAction(.shareCopyUrl)
+        }
+        
+        step("Then I can open it in the web") {
+            noteView.waitForNoteViewToLoad()
+            noteView.shortcutHelper.shortcutActionInvoke(action: .newTab)
+            noteView.shortcutHelper.shortcutActionInvoke(action: .paste)
+            noteView.typeKeyboardKey(.enter)
+            XCTAssertTrue(webView.waitForPublishedNoteToLoad(noteName: noteNameToBeCreated))
+        }
+    }
+    
     func SKIPtestPublishedNoteContentCorrectness() throws {
         try XCTSkipIf(true, "TBD Make sure the content is correctly applied on changes")
     }
