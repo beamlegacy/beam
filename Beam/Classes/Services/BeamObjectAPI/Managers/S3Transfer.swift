@@ -106,7 +106,7 @@ class S3TransferURLNIO: S3Transfer {
             let response = try await httpClient.execute(uploadRequest, timeout: S3TransferConfiguration.requestTimeout)
             if response.status != .ok {
                 // Probably should not be looged here, but there is no apparent logging at use site
-                Logger.shared.logWarning("Failed to download beam object content from \(downloadUrl) \(response)", category: .sync)
+                Logger.shared.logError("Failed to download beam object content from \(downloadUrl) \(response)", category: .sync)
                 throw APIRequestError.error
             }
             // Throws if the body is bigger than asked

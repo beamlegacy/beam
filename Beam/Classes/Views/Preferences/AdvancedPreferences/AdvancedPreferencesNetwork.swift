@@ -12,6 +12,7 @@ struct AdvancedPreferencesNetwork: View {
     @State private var loading: Bool = false
 
     @State private var apiHostname: String = Configuration.apiHostname
+    @State private var beamObjectsApiHostname: String = Configuration.beamObjectsApiHostname
     @State private var restApiHostname: String = Configuration.restApiHostname
     @State private var publicAPIpublishServer: String = Configuration.publicAPIpublishServer
     @State private var publicAPIembed: String = Configuration.publicAPIembed
@@ -30,6 +31,14 @@ struct AdvancedPreferencesNetwork: View {
         let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
         self.apiHostname = cleanValue
         Configuration.apiHostname = cleanValue
+    })}
+
+    private var beamObjectsApiHostnameBinding: Binding<String> { Binding<String>(get: {
+        self.beamObjectsApiHostname
+    }, set: {
+        let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.beamObjectsApiHostname = cleanValue
+        Configuration.beamObjectsApiHostname = cleanValue
     })}
 
     private var restApiHostnameBinding: Binding<String> { Binding<String>(get: {
@@ -59,8 +68,8 @@ struct AdvancedPreferencesNetwork: View {
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {
             endpointsRows
-            Settings.Row {
-                Text("").labelsHidden()
+            Settings.Row(hasDivider: true) {
+                Text("Actions").labelsHidden()
             } content: {
                 ResetAPIEndpointsButton
                 SetAPIEndPointsToStagingButton
@@ -112,24 +121,35 @@ struct AdvancedPreferencesNetwork: View {
     var endpointsRows: some View {
         Group {
             Settings.Row {
-                Text("API endpoints:")
+                Text("GraphQL endpoint hostname")
             } content: {
                 TextField("API hostname", text: apiHostnameBinding)
                     .lineLimit(1)
                     .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
+            }
+            Settings.Row {
+                Text("BeamObjects GraphQL hostname")
+            } content: {
+                TextField("BeamObjects API hostname", text: beamObjectsApiHostnameBinding)
+                    .lineLimit(1)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
+            }
+            Settings.Row {
+                Text("REST endpoint hostname")
+            } content: {
                 TextField("REST API hostname", text: restApiHostnameBinding)
                     .lineLimit(1)
                     .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
             }
             Settings.Row {
-                Text("Public API publish server:")
+                Text("Public API publish server")
             } content: {
                 TextField("public api publish server", text: publicAPIpublishServerBinding)
                     .lineLimit(1)
                     .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
             }
-            Settings.Row {
-                Text("Public API embed server:")
+            Settings.Row(hasDivider: true) {
+                Text("Public API embed server")
             } content: {
                 TextField("public api embed server", text: publicAPIembedBinding)
                     .lineLimit(1)
@@ -186,7 +206,7 @@ struct AdvancedPreferencesNetwork: View {
     }
 
     private var restBeamObjectRow: Settings.Row {
-        Settings.Row {
+        Settings.Row(hasDivider: true) {
             Text("REST API")
         } content: {
             RestBeamObject(restBeamObject: $restBeamObject)
