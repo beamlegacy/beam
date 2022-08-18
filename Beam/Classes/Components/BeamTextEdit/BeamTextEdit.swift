@@ -378,7 +378,11 @@ public extension CALayer {
 
     public var onStartEditing: (() -> Void)?
     public var onEndEditing: (() -> Void)?
-    public var onFocusChanged: ((UUID, Int) -> Void)?
+    public var onFocusChanged: ((UUID, Int, Range<Int>) -> Void)?
+
+    private var disableOnFocusChanged = false
+    private var disableFocusScroll = false
+
     var onSearchToggle: (SearchViewModel?) -> Void = { _ in }
     var searchViewModel: SearchViewModel? {
         didSet {
@@ -654,8 +658,9 @@ public extension CALayer {
     func stopSelectionDrag() { dragging = false }
 
     public func setHotSpot(_ spot: NSRect) {
+        guard !disableFocusScroll else { return }
         guard !dragging else { return }
-        guard !self.visibleRect.contains(spot) else { return }
+        guard !visibleRect.contains(spot) else { return }
         var centeredSpot = spot
         centeredSpot.size.height = max(centeredSpot.size.height, self.visibleRect.height / 2)
         _ = scrollToVisible(centeredSpot)
@@ -765,6 +770,9 @@ public extension CALayer {
     }
 
     public override func resignFirstResponder() -> Bool {
+        disableOnFocusChanged = true
+        defer { disableOnFocusChanged = false }
+
         blinkPhase = true
         hasFocus = false
         onEndEditing?()
@@ -783,18 +791,37 @@ public extension CALayer {
         return true
     }
 
-    func focusElement(withId elementId: UUID?, atCursorPosition: Int?, highlight: Bool = false, unfold: Bool = false) {
+    func focusElement(withId elementId: UUID?,
+                      atCursorPosition: Int?,
+                      selectedRange: Range<Int>,
+                      highlight: Bool = false,
+                      unfold: Bool = false,
+                      scroll: Bool = true,
+                      notify: Bool = true) {
+        self.disableFocusScroll = !scroll
+        self.disableOnFocusChanged = !notify
+        defer {
+            self.disableFocusScroll = false
+            self.disableOnFocusChanged = false
+        }
+
         guard let id = elementId,
-              let element = note.findElement(id)
+              let element = note.findElement(id, ignoreClosed: true)
         else {
-            self.scroll(.zero)
+            if !self.disableFocusScroll {
+                self.scroll(.zero)
+            }
             return
         }
 
         guard let node = rootNode?.nodeFor(element) else {
             // the element exists but we don't yet have an UI for it, try again later:
             DispatchQueue.main.async { [weak self] in
-                self?.focusElement(withId: elementId, atCursorPosition: atCursorPosition, highlight: highlight, unfold: unfold)
+                self?.focusElement(withId: elementId,
+                                   atCursorPosition: atCursorPosition,
+                                   selectedRange: selectedRange,
+                                   highlight: highlight,
+                                   unfold: unfold)
             }
             return
         }
@@ -805,6 +832,7 @@ public extension CALayer {
         }
         self.setHotSpot(node.frameInDocument)
         self.focusedWidget = node
+        self.selectedTextRange = selectedRange
         node.focus(position: atCursorPosition)
         if highlight == true {
             node.highlight()
@@ -1896,6 +1924,11 @@ public extension CALayer {
     */
 //    override public func quickLookPreviewItems(_ sender: Any?) {
 //    }
+
+    func focusChanged(_ id: UUID, _ cursorPosition: Int, _ selectedRange: Range<Int>) {
+        guard !disableOnFocusChanged else { return }
+        onFocusChanged?(id, cursorPosition, selectedRange)
+    }
 
     // MARK: - Drag and drop:
 
