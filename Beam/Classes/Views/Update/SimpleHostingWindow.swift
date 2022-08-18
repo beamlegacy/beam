@@ -21,3 +21,14 @@ class SimpleHostingWindow: NSWindow {
         self.contentView = NSHostingView(rootView: content)
     }
 }
+
+class SimpleClearHostingWindow: SimpleHostingWindow {
+    override init(rect: CGRect, styleMask: NSWindow.StyleMask) {
+        super.init(rect: rect, styleMask: styleMask)
+
+        titlebarAppearsTransparent = true
+        titleVisibility = .hidden
+        isOpaque = false
+        backgroundColor = .clear
+    }
+}
