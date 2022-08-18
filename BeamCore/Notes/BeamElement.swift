@@ -742,11 +742,12 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
     }
 
-    open func findElement(_ id: UUID) -> BeamElement? {
+    open func findElement(_ id: UUID, ignoreClosed: Bool = false) -> BeamElement? {
+        guard (!ignoreClosed || open) else { return nil }
         guard id != self.id else { return self }
 
         for c in children {
-            if let result = c.findElement(id) {
+            if let result = c.findElement(id, ignoreClosed: ignoreClosed) {
                 return result
             }
         }

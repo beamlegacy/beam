@@ -47,6 +47,10 @@ public class TextRoot: ElementNode {
         set {
             state.selectedTextRange = newValue
             textIsSelected = !selectedText.isEmpty
+
+            if let n = focusedWidget as? TextNode {
+                editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange)
+            }
         }
     }
     var markedTextRange: Range<Int>? {
@@ -71,9 +75,6 @@ public class TextRoot: ElementNode {
             let position = newValue > textCount ? textCount : newValue
             let caretIndex = n?.caretIndexForSourcePosition(position) ?? 0
             self.caretIndex = caretIndex
-            if let n = n {
-                editor?.onFocusChanged?(n.elementId, position)
-            }
         }
     }
 
@@ -101,6 +102,9 @@ public class TextRoot: ElementNode {
         }
         if let focused = focusedWidget as? ElementNode {
             focused.updateCursor()
+        }
+        if let n = n {
+            editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange)
         }
     }
 
