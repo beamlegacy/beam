@@ -70,7 +70,13 @@ enum NoteViewLocators {
         case blockRefRemove = "ContextMenuItem-remove"
         case blockRefOrigin = "ContextMenuItem-view origin"
         case addToProfile = "ContextMenuItem-add to profile"
+        case sharePublishedNote = "ContextMenuItem-share"
         case backgroundTabOpened = "Opened in background"
+    }
+    
+    enum SharePublishedNote: String, CaseIterable, UIElement {
+        case shareTwitter = "ContextMenuItem-twitter"
+        case shareCopyUrl = "ContextMenuItem-copy url"
     }
     
     enum TextViews: String, CaseIterable, UIElement {
