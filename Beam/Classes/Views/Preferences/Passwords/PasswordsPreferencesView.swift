@@ -318,6 +318,7 @@ struct Passwords: View {
         savePanel.canCreateDirectories = true
         savePanel.showsTagField = false
         savePanel.nameFieldStringValue = "PasswordsExport.csv"
+        savePanel.allowedContentTypes = [BeamUniformTypeIdentifiers.passwordsExportType]
         savePanel.begin { (result) in
             guard result == .OK, let url = savePanel.url else {
                 savePanel.close()

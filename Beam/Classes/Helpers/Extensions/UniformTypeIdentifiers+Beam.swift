@@ -3,6 +3,8 @@ import UniformTypeIdentifiers
 /// UniformTypeIdentifiers related helpers for Beam, useful to avoid importing the framework everywhere.
 enum BeamUniformTypeIdentifiers {
 
+    static let passwordsExportType: UTType = .commaSeparatedText
+
     private static let supportedSuperTypes: [UTType] = [
         .audiovisualContent,
         .image,
