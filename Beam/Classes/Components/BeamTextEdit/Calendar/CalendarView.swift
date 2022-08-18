@@ -40,6 +40,7 @@ struct CalendarView: View, BeamDocumentSource {
     @State var isHoveringConnect = false
     @State var isHoveringNotConnect = false
 
+    @EnvironmentObject var windowInfo: BeamWindowInfo
     @EnvironmentObject var state: BeamState
     @ObservedObject var viewModel: CalendarGutterViewModel
 
@@ -63,7 +64,7 @@ struct CalendarView: View, BeamDocumentSource {
     var body: some View {
         if viewModel.isConnected {
             VStack(alignment: .leading) {
-                if isHoveringConnect {
+                if isHoveringConnect && !windowInfo.windowIsResizing {
                     VStack(alignment: .leading, spacing: CalendarView.itemSpacing) {
                         ForEach(viewModel.meetings) { meeting in
                             CalendarIemView(allDayEvent: meeting.allDayEvent, time: meeting.startTime,
@@ -94,7 +95,7 @@ struct CalendarView: View, BeamDocumentSource {
             }
         } else if viewModel.todaysCalendar && viewModel.calendarManager.showedNotConnectedView < 3 && !viewModel.isConnected {
             isNotConnectedView
-                .padding(.leading, 14)
+                .padding(.leading, 16)
                 .foregroundColor(isHoveringNotConnect ? BeamColor.Niobium.swiftUI : BeamColor.Generic.placeholder.swiftUI)
                 .animation(.easeInOut(duration: 0.3))
                 .onHover { isHoveringNotConnect = $0 }
@@ -239,6 +240,7 @@ struct CalendarIemView: View {
                         .font(BeamFont.regular(size: 11).swiftUI)
                         .foregroundColor(isHoveringItem ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
                         .fixedSize(horizontal: true, vertical: false)
+                        .frame(width: 24, alignment: .trailing)
                 }
                 if let meetingLink = meetingLink, let url = URL(string: meetingLink) {
                     Button {
@@ -257,13 +259,14 @@ struct CalendarIemView: View {
                             .frame(width: CalendarIemView.itemSize.width, height: CalendarIemView.itemSize.height)
                             .foregroundColor(isHoveringMeetingBtn ? BeamColor.Bluetiful.swiftUI : isHoveringItem ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
                     }.buttonStyle(PlainButtonStyle())
-                        .frame(width: CalendarIemView.itemSize.width, height: CalendarIemView.itemSize.height)
+                        .frame(width: CalendarIemView.itemSize.width, height: CalendarIemView.itemSize.height, alignment: .leading)
                         .padding(.bottom, 1)
                         .onHover { isHoveringMeetingBtn = $0 }
                 }
                 Text(title)
                     .font(BeamFont.regular(size: 12).swiftUI)
                     .foregroundColor(isHoveringItem ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                    .frame(alignment: .leading)
                 if isHoveringItem {
                     Image("editor-calendar_arrow")
                         .renderingMode(.template)
@@ -277,7 +280,7 @@ struct CalendarIemView: View {
                 }
             }
         }.frame(height: CalendarIemView.itemSize.height)
-        .padding(.leading, 14)
+        .padding(.leading, 16)
         .onHover { isHovering in
             isHoveringItem = isHovering
         }
