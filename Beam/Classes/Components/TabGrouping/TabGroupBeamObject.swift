@@ -90,7 +90,9 @@ extension TabGroupBeamObject: BeamObjectProtocol {
         try container.encode(TabGroupingColor.CodableColor(colorName: color?.designColor?.rawValue, hueTint: color?.randomColorHueTint), forKey: .color)
         try container.encode(pages, forKey: .pages)
         try container.encode(isLocked, forKey: .isLocked)
-        try container.encode(parentGroup, forKey: .parentGroup)
+        if let parentGroup = parentGroup {
+            try container.encode(parentGroup, forKey: .parentGroup)
+        }
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(updatedAt, forKey: .updatedAt)
         if deletedAt != nil {

@@ -37,7 +37,7 @@ class AutocompleteManager: ObservableObject {
 
     @Published var animateInputingCharacter = false
 
-    @Published var stateBeforeModeChange: AutocompleteManagerState?
+    @Published var previousModeStates = [AutocompleteManagerState]()
     @Published var isPreparingForAnimatingToMode = false
     @Published var animatingToMode: Mode?
 
@@ -315,14 +315,14 @@ extension AutocompleteManager {
             clearAutocompleteResults(animated: false)
         }
         mode = .general
+        previousModeStates.removeAll()
         stopCurrentCompletionWork()
     }
 
-    func resetAutocompleteMode() {
-        mode = .general
-        if let stateBeforeModeChange = stateBeforeModeChange {
+    func resetAutocompleteMode(to mode: Mode = .general) {
+        self.mode = mode
+        if let stateBeforeModeChange = previousModeStates.popLast() {
             resetAutocompleteToState(stateBeforeModeChange)
-            self.stateBeforeModeChange = nil
         }
     }
 

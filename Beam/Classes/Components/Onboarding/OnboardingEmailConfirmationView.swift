@@ -16,7 +16,7 @@ struct OnboardingEmailConfirmationView: View {
     @State private var email: String = "..."
     @State private var password: String = ""
 
-    @State private var emailConfirmationTooltip: String?
+    @State private var emailConfirmationTooltip: LocalizedStringKey?
 
     private enum LoadingState: Equatable {
         case signinin
@@ -171,7 +171,7 @@ struct OnboardingEmailConfirmationView: View {
         BeamData.shared.currentAccount?.resendVerificationEmail(email: email) { result in
             switch result {
             case .failure(let error):
-                emailConfirmationTooltip = error.localizedDescription
+                emailConfirmationTooltip = LocalizedStringKey(error.localizedDescription)
             case .success:
                 emailConfirmationTooltip = "Another confirmation email has been sent"
             }
