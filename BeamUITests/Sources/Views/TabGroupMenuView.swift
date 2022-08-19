@@ -121,10 +121,15 @@ class TabGroupMenuView: BaseView {
         clickTabGroupMenu(.tabGroupCloseGroup)
     }
     
-    func captureTabGroup(index: Int) {
+    func captureTabGroup(index: Int, destinationNote: String? = nil) {
         openTabGroupMenu(index: index)
         waitForMenuToBeDisplayed()
         clickTabGroupMenu(.tabGroupCapture)
+        if destinationNote != nil {
+            let destinationNoteField = app.windows.textFields.matching(identifier: PnSViewLocators.TextFields.shootCardPickerTextField.accessibilityIdentifier).firstMatch
+            _ = destinationNoteField.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+            destinationNoteField.clickAndType(destinationNote!)
+        }
         typeKeyboardKey(.enter)
         typeKeyboardKey(.escape)
     }
