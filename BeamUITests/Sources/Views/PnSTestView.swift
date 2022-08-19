@@ -161,7 +161,4 @@ class PnSTestView: BaseView {
         return image(PnSViewLocators.StaticTexts.share.accessibilityIdentifier)
     }
     
-    func isWindowOpenedWithContaining(title: String, isLowercased: Bool = false) -> Bool {
-        return app.windows.matching(NSPredicate(format: "title CONTAINS '\(isLowercased ? title.lowercased() : title)'")).element.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
-    }
 }
