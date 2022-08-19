@@ -76,12 +76,12 @@ extension TabGroupBeamObject: BeamObjectProtocol {
         createdAt = try values.decode(Date.self, forKey: .createdAt)
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         deletedAt = try values.decodeIfPresent(Date.self, forKey: .deletedAt)
-        title = try values.decode(String.self, forKey: .title)
+        title = try values.decodeIfPresent(String.self, forKey: .title)
         let codableColor = try values.decode(TabGroupingColor.CodableColor.self, forKey: .color)
         color = TabGroupingColor(designColor: .init(rawValue: codableColor.colorName ?? ""), randomColorHueTint: codableColor.hueTint)
         pages = try values.decode([PageInfo].self, forKey: .pages)
         isLocked = try values.decode(Bool.self, forKey: .isLocked)
-        parentGroup = try values.decode(UUID.self, forKey: .parentGroup)
+        parentGroup = try values.decodeIfPresent(UUID.self, forKey: .parentGroup)
     }
 
     func encode(to encoder: Encoder) throws {
