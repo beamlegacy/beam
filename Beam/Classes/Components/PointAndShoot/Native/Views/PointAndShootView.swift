@@ -171,6 +171,12 @@ struct PointAndShootView: View {
                     }
                 }
             })
+            .onDisappear {
+                // This fixes a crash seemingly caused by SwiftUI animations (commenting the `.transition(transitionInOut)`
+                // line in PointAndShootView.swift makes the crash disappear) when showing the point and shoot card picker
+                // then going to notes and back to web.
+                pns.cancelShoot()
+            }
         }
     }
 }
