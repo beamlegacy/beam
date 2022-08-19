@@ -76,6 +76,9 @@ enum NoteViewLocators {
     
     enum SharePublishedNote: String, CaseIterable, UIElement {
         case shareTwitter = "ContextMenuItem-twitter"
+        case shareFacebook = "ContextMenuItem-facebook"
+        case shareLinkedin = "ContextMenuItem-linkedin"
+        case shareReddit = "ContextMenuItem-reddit"
         case shareCopyUrl = "ContextMenuItem-copy url"
     }
     
