@@ -25,7 +25,7 @@ class OverlayViewCenterViewModel: ObservableObject {
         }
     }
 
-    @Published var showTooltip: String?
+    @Published var tooltip: (text: LocalizedStringKey?, icon: String?)?
     /// global position in window
     @Published var tooltipPosition: CGPoint = .zero
     private var tooltipCancellable: DispatchWorkItem?
@@ -48,11 +48,11 @@ class OverlayViewCenterViewModel: ObservableObject {
     /// Present tooltip of text for few seconds
     ///
     /// at point should be in TopLeft coordinate system
-    func presentTooltip(text: String?, at point: CGPoint) {
+    func presentTooltip(text: LocalizedStringKey?, icon: String? = nil, at point: CGPoint) {
         tooltipCancellable?.cancel()
-        guard showTooltip == nil else {
+        guard tooltip == nil else {
             // dismiss current tooltip then retry to present
-            showTooltip = nil
+            tooltip = nil
             let workItem = DispatchWorkItem { [weak self] in
                 self?.presentTooltip(text: text, at: point)
             }
@@ -60,10 +60,10 @@ class OverlayViewCenterViewModel: ObservableObject {
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300), execute: workItem)
             return
         }
-        showTooltip = text
+        tooltip = (text, icon)
         tooltipPosition = point
         let workItem = DispatchWorkItem { [weak self] in
-            self?.showTooltip = nil
+            self?.tooltip = nil
         }
         tooltipCancellable = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1500), execute: workItem)
