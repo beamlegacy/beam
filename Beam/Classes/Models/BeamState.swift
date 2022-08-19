@@ -592,7 +592,7 @@ import Sentry
                                                    suffixColor: group.color?.mainColor?.swiftUI ?? .red).asAnyView
                 self.autocompleteManager.animateToMode(.customView(view: view))
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    self.autocompleteManager.animateToMode(previousMode)
+                    self.autocompleteManager.resetAutocompleteMode(to: previousMode)
                 }
             case .failure:
                 break
@@ -615,7 +615,7 @@ import Sentry
             if inBackground, let currentEvent = NSApp.currentEvent, let window = associatedWindow {
                 var location = currentEvent.locationInWindow.flippedPointToTopLeftOrigin(in: window)
                 location.y -= 20
-                overlayViewModel.presentTooltip(text: loc("Opened in background"), at: location)
+                overlayViewModel.presentTooltip(text: "Opened in background", at: location)
             }
         } else if url.scheme != nil {
             NSWorkspace.shared.open(url)

@@ -53,7 +53,7 @@ struct CardSwitcher: View {
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 .layoutPriority(2)
-                .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.keysDescription)
+                .tooltipOnHover(LocalizedStringKey(Shortcut.AvailableShortcut.showJournal.keysDescription))
                 .accessibilityIdentifier("card-switcher-journal")
 
                 ToolbarCapsuleButton(iconName: "editor-allnotes", text: "All Notes", isSelected: isAllNotesActive) {
@@ -61,7 +61,7 @@ struct CardSwitcher: View {
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 .layoutPriority(2)
-                .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription)
+                .tooltipOnHover(LocalizedStringKey(Shortcut.AvailableShortcut.showAllNotes.keysDescription))
                 .accessibilityIdentifier("card-switcher-all-cards")
             }
 

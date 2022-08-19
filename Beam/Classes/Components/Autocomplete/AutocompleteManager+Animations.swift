@@ -29,8 +29,8 @@ extension AutocompleteManager {
         let animationIn = BeamAnimation.spring(stiffness: 420, damping: 24)
         let animationOut = BeamAnimation.spring(stiffness: 420, damping: 34)
         let selectedResult = autocompleteResult(at: autocompleteSelectedIndex)
-        stateBeforeModeChange = .init(searchQuery: selectedResult?.completingText ?? searchQuery,
-                                      selectedIndex: autocompleteSelectedIndex, results: autocompleteResults)
+        previousModeStates.append(.init(searchQuery: selectedResult?.completingText ?? searchQuery,
+                                        selectedIndex: autocompleteSelectedIndex, results: autocompleteResults))
         withAnimation(animationIn) {
             self.isPreparingForAnimatingToMode = true
         }

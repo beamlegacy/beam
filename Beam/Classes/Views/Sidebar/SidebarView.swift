@@ -79,7 +79,7 @@ struct SidebarView: View {
             state.showSidebar = false
             state.navigateToJournal(note: nil)
         }
-        .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.keysDescription, alignment: .top)
+        .tooltipOnHover(LocalizedStringKey(Shortcut.AvailableShortcut.showJournal.keysDescription), alignment: .top)
         .accessibilityIdentifier("sidebar-journal")
     }
 
@@ -88,7 +88,7 @@ struct SidebarView: View {
             state.showSidebar = false
             state.navigateToPage(.allNotesWindowPage)
         }
-        .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription, alignment: .top)
+        .tooltipOnHover(LocalizedStringKey(Shortcut.AvailableShortcut.showAllNotes.keysDescription), alignment: .top)
         .accessibilityIdentifier("sidebar-all-notes")
     }
 

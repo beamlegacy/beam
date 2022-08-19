@@ -20,7 +20,7 @@ struct OnboardingEmailConnectView: View {
     @State private var isPasswordVerificationEditing: Bool = false
 
     @State private var areCredentialsValid: Bool = false
-    @State private var forgotPasswordTooltip: String?
+    @State private var forgotPasswordTooltip: LocalizedStringKey?
 
     private enum LoadingState: Equatable {
         case signinin
@@ -331,7 +331,7 @@ struct OnboardingEmailConnectView: View {
         BeamData.shared.currentAccount?.forgotPassword(email: email) { result in
             switch result {
             case .failure(let error):
-                forgotPasswordTooltip = error.localizedDescription
+                forgotPasswordTooltip = LocalizedStringKey(error.localizedDescription)
             case .success:
                 forgotPasswordTooltip = "Instructions to reset password have been sent."
             }

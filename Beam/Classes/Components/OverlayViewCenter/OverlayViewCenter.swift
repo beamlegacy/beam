@@ -24,8 +24,8 @@ struct OverlayViewCenter: View {
                 })
                 .transition(AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.3)))
             }
-            if let tooltipText = viewModel.showTooltip {
-                Tooltip(title: tooltipText)
+            if let tooltip = viewModel.tooltip {
+                Tooltip(title: tooltip.text, icon: tooltip.icon)
                     .position(viewModel.tooltipPosition)
                     .transition(Tooltip.defaultTransition)
             }
