@@ -214,4 +214,8 @@ class BaseView {
         XCTAssertTrue(noteView.waitForNoteToOpen(noteTitle: noteTitleToOpen), "\(noteTitleToOpen) note is failed to load")
         return noteView
     }
+    
+    func isWindowOpenedWithContaining(title: String, isLowercased: Bool = false) -> Bool {
+        return app.windows.matching(NSPredicate(format: "title CONTAINS '\(isLowercased ? title.lowercased() : title)'")).element.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+    }
 }

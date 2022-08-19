@@ -221,6 +221,62 @@ class NotePublishTests: BaseTest {
         }
     }
     
+    private func verifySharePublishedNoteMenu() {
+        for item in NoteViewLocators.SharePublishedNote.allCases {
+            XCTAssertTrue(app.staticTexts[item.accessibilityIdentifier].exists)
+        }
+    }
+    
+    struct ShareMenu {
+        let name: String
+        let accId: NoteViewLocators.SharePublishedNote
+    }
+    
+    func testSharePublishedNote() {
+        
+        var shareOptions = [ShareMenu]()
+        let twitterOption = ShareMenu(name: "Twitter", accId: .shareTwitter)
+        let facebookOption = ShareMenu(name: "Facebook", accId: .shareFacebook)
+//        let linkedinOption = ShareMenu(name: "LinkedIn", accId: .shareLinkedin) // to reactivate as part of BE-5195
+        let redditOption = ShareMenu(name: "Reddit", accId: .shareReddit)
+        
+        shareOptions.append(contentsOf:[twitterOption, facebookOption, redditOption]) // add linkedinOption once BE-5195 is solved
+        
+        let apps = ["Mail", "Messages"]
+        
+        step("Given I created and publish a note") {
+            setupStaging(withRandomAccount: true)
+            uiMenu.createAndOpenPublishedNote()
+            noteView = NoteTestView()
+        }
+        
+        step("When I open share menu") {
+            noteView.clickPublishedMenuDisclosureTriangle()
+                .sharePublishedNoteMenuDisplay()
+        }
+        
+        step ("Then \(apps.joined(separator: ",")) options exist in Share options") {
+            XCTAssertTrue(app.staticTexts[NoteViewLocators.SharePublishedNote.shareLinkedin.accessibilityIdentifier].exists) //To be removed as part of BE-5195
+            verifySharePublishedNoteMenu()
+            noteView.typeKeyboardKey(.escape)
+        }
+        
+        for i in 0 ... shareOptions.count - 1 {
+            step ("Then \(shareOptions[i].name) window is opened using Share option") {
+            noteView.clickPublishedMenuDisclosureTriangle()
+                .sharePublishedNoteMenuDisplay()
+                .sharePublishedNoteAction(shareOptions[i].accId)
+            _ = webView.waitForWebViewToLoad()
+            XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: getNumberOfWindows()), "Second window wasn't opened during \(BaseTest.implicitWaitTimeout) seconds timeout")
+            XCTAssertTrue(
+                noteView.isWindowOpenedWithContaining(title: shareOptions[i].name) ||
+                noteView.isWindowOpenedWithContaining(title: shareOptions[i].name, isLowercased: true)
+                )
+            shortcutHelper.shortcutActionInvoke(action: .close)
+            }
+        }
+    }
+    
     func SKIPtestPublishedNoteContentCorrectness() throws {
         try XCTSkipIf(true, "TBD Make sure the content is correctly applied on changes")
     }
