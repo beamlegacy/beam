@@ -95,8 +95,8 @@ struct EditorTabGroupView: View {
         }
         .background(background)
         .overlay(!showShareConfirmation ? nil :
-                    Tooltip(title: loc("Link Copied"), icon: "editor-url_link")
-            .offset(x: 0, y: -20)
+                    Tooltip(title: "Link Copied")
+            .offset(x: 0, y: -(Tooltip.defaultHeight + 4))
             .transition(Tooltip.defaultTransition), alignment: .top)
         .frame(minWidth: 100, maxWidth: 200, idealHeight: Self.height)
         .accessibilityElement(children: .contain)

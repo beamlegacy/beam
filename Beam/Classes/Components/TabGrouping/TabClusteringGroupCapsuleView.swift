@@ -58,10 +58,11 @@ struct TabClusteringGroupCapsuleView: View {
                     .foregroundColor(textColor)
                     .frame(width: 12, height: 6)
             } else {
-                HStack(spacing: BeamSpacing._40) {
+                HStack(spacing: 0) {
                     Text(displayedText)
                         .truncationMode(.middle)
                     if loading {
+                        Spacer(minLength: BeamSpacing._40)
                         ProgressView()
                             .scaleEffect(0.375, anchor: .center)
                             .frame(width: 12, height: 12)

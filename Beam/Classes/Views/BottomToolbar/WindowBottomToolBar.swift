@@ -171,7 +171,7 @@ private struct BottomToolBarTrailingIconView: View {
                     customStyle: WindowBottomToolBar.buttonStyle(withIcon: true, withTitle: showNewNoteTitle)) {
             state.startNewNote()
         }
-                    .tooltipOnHover(Shortcut.AvailableShortcut.newNote.keysDescription, alignment: .top)
+                    .tooltipOnHover(LocalizedStringKey(Shortcut.AvailableShortcut.newNote.keysDescription), alignment: .top)
                     .animation(WindowBottomToolBar.buttonAnimation(forText: title, appearing: showNewNoteTitle), value: isHoveringNewNote)
                     .onHover { isHoveringNewNote = $0 }
                     .accessibilityElement()
