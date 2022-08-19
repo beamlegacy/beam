@@ -20,20 +20,20 @@ struct ToolbarChevrons: View {
                 ToolbarButton(icon: "nav-back", customIconSize: CGSize(width: 20, height: 24),
                               customContainerSize: CGSize(width: 22, height: 28), action: goBack)
                     .disabled(!canGoBackForward.back)
-                    .tooltipOnHover(
+                    .tooltipOnHover(LocalizedStringKey(
                         (state.mode != .web ? Shortcut.AvailableShortcut.goBackEditor : Shortcut.AvailableShortcut.goBack)
                             .description
-                    )
+                    ))
                     .accessibilityIdentifier("goBack")
             }
             if canGoBackForward.forward || alwaysShow.forward {
                 ToolbarButton(icon: "nav-forward", customIconSize: CGSize(width: 20, height: 24),
                               customContainerSize: CGSize(width: 22, height: 28), action: goForward)
                     .disabled(!canGoBackForward.forward)
-                    .tooltipOnHover(
+                    .tooltipOnHover(LocalizedStringKey(
                         (state.mode != .web ? Shortcut.AvailableShortcut.goForwardEditor : Shortcut.AvailableShortcut.goForward)
                             .description
-                    )
+                    ))
                     .accessibilityIdentifier("goForward")
             }
         }

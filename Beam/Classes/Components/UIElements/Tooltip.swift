@@ -8,9 +8,9 @@
 import SwiftUI
 
 struct Tooltip: View {
-    var title: String?
+    var title: LocalizedStringKey?
     var icon: String?
-    var subtitle: String?
+    var subtitle: LocalizedStringKey?
 
     private var foregroundColor: Color {
         BeamColor.Corduroy.swiftUI
@@ -20,6 +20,8 @@ struct Tooltip: View {
                       darkColor: NSColor.black.withAlphaComponent(0.24)))
     }
 
+    /// basic height when there's one line of text. To use for positioning
+    static let defaultHeight: CGFloat = 23
     static let defaultTransition = AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
                                                             removal: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08)))
 
@@ -53,7 +55,7 @@ struct Tooltip: View {
 struct TooltipHoverModifier: ViewModifier {
     @Environment(\.windowFrame) private var windowFrame
 
-    var title: String
+    var title: LocalizedStringKey
     var alignment: Alignment = .bottom
     private let tooltipMargin = BeamSpacing._100
     private let showDelay = 1300 // 1.3s just like Apple's macOS button tooltips
@@ -154,7 +156,7 @@ struct TooltipHoverModifier: ViewModifier {
 }
 
 extension View {
-    func tooltipOnHover(_ title: String, alignment: Alignment = .bottom) -> some View {
+    func tooltipOnHover(_ title: LocalizedStringKey, alignment: Alignment = .bottom) -> some View {
         modifier(TooltipHoverModifier(title: title, alignment: alignment))
     }
 }
@@ -191,7 +193,7 @@ struct ToolTipFormatter: View {
 
     var body: some View {
         FormatterViewBackground(boxCornerRadius: 4, shadowOpacity: 0) {
-            Tooltip(title: text)
+            Tooltip(title: LocalizedStringKey(text))
                 .background(Color.clear)
                 .frame(width: size.width, height: size.height, alignment: .center)
         }
