@@ -58,7 +58,7 @@ extension ContextMenuMessageHandlerPayload {
     var linkHrefURL: URL? {
         switch self {
         case .page(let href), .link(let href):
-            return URL(string: href)
+            return href.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed).flatMap { URL(string: $0) }
         case .multiple(let items):
             return items.compactMap(\.linkHrefURL).first
         default:
