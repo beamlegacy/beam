@@ -12,6 +12,19 @@ class TabGroupCaptureToANoteTests: BaseTest {
     
     let tabGroupMenu = TabGroupMenuView()
     let noteView = NoteTestView()
+    let allNotesView = AllNotesTestView()
+    
+    private func verifyTabGroupCapturedInNote (tabGroupName: String, noteName: String? = nil, indexOfTabGroup: Int = 0){
+        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+        allNotesView.waitForAllNotesViewToLoad()
+        if noteName != nil {
+            allNotesView.openNoteByName(noteTitle: noteName!)
+        } else {
+            allNotesView.openFirstNote()
+        }
+        XCTAssertTrue(noteView.isTabGroupDisplayed(index: indexOfTabGroup))
+        XCTAssertEqual(noteView.getTabGroupElementName(index: indexOfTabGroup), tabGroupName)
+    }
     
     func testUnnamedTabGroupCapture() throws {
         
@@ -30,10 +43,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         }
         
         step("Then tab group is captured on note") {
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            AllNotesTestView().openFirstNote()
-            XCTAssertTrue(noteView.isTabGroupDisplayed(index: 0))
-            XCTAssertEqual(noteView.getTabGroupElementName(index: 0), uiTestPageOne + " & 3 more tab group")
+            verifyTabGroupCapturedInNote(tabGroupName: uiTestPageOne + " & 3 more tab group")
         }
 
         step("When I close the tab group") {
@@ -42,7 +52,6 @@ class TabGroupCaptureToANoteTests: BaseTest {
             tabGroupMenu.closeTabGroup(index: 0)
             XCTAssertTrue(noteView.waitForTodayNoteViewToLoad())
         }
-
 
         step("Then I can reopen tab group through note") {
             noteView.openTabGroup(index: 0)
@@ -70,10 +79,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         }
         
         step("Then tab group is captured on note") {
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            AllNotesTestView().openFirstNote()
-            XCTAssertTrue(noteView.isTabGroupDisplayed(index: 0))
-            XCTAssertEqual(noteView.getTabGroupElementName(index: 0), "Test1 tab group")
+            verifyTabGroupCapturedInNote(tabGroupName: "Test1 tab group")
         }
 
         step("When I close the tab group") {
@@ -111,11 +117,32 @@ class TabGroupCaptureToANoteTests: BaseTest {
         }
         
         step("Then both tab groups are captured") {
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            AllNotesTestView().openFirstNote()
+            verifyTabGroupCapturedInNote(tabGroupName: "E2E Test tab group")
+            verifyTabGroupCapturedInNote(tabGroupName: uiTestPageOne + " & 3 more tab group", indexOfTabGroup: 1)
             XCTAssertEqual(noteView.getTabGroupCount(), 2)
-            XCTAssertEqual(noteView.getTabGroupElementName(index: 0), "E2E Test tab group")
-            XCTAssertEqual(noteView.getTabGroupElementName(index: 1), uiTestPageOne + " & 3 more tab group")
+        }
+    }
+    
+    func testCaptureSingleGroupToMultipleNotes() throws {
+        
+        let note1 = "Test Note"
+        let note2 = "Test Note 2"
+        let capturedTabGroupName = "Test1 tab group"
+        
+        step("Given I have one tab group") {
+            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
+            uiMenu.createTabGroupNamed()
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+        }
+        
+        step("When I capture the tab group to different notes") {
+            tabGroupMenu.captureTabGroup(index: 0, destinationNote: note1)
+            tabGroupMenu.captureTabGroup(index: 0, destinationNote: note2)
+        }
+        
+        step("Then tab group is saved in \(note1) and \(note2)") {
+            verifyTabGroupCapturedInNote(tabGroupName: capturedTabGroupName, noteName: note1)
+            verifyTabGroupCapturedInNote(tabGroupName: capturedTabGroupName, noteName: note2)
         }
 
     }
