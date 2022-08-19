@@ -47,12 +47,12 @@ final class TabGroup: Identifiable {
     required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         id = try values.decode(GroupID.self, forKey: .id)
-        title = try? values.decode(String.self, forKey: .title)
+        title = try values.decodeIfPresent(String.self, forKey: .title)
         let codableColor = try values.decode(TabGroupingColor.CodableColor.self, forKey: .color)
         color = TabGroupingColor(designColor: .init(rawValue: codableColor.colorName ?? ""), randomColorHueTint: codableColor.hueTint)
         pageIds = try values.decode([ClusteringManager.PageID].self, forKey: .pages)
         isLocked = try values.decode(Bool.self, forKey: .isLocked)
-        parentGroup = try? values.decode(UUID.self, forKey: .parentGroup)
+        parentGroup = try values.decodeIfPresent(UUID.self, forKey: .parentGroup)
         collapsed = try values.decode(Bool.self, forKey: .collapsed)
     }
 
