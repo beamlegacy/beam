@@ -67,18 +67,16 @@ final class AllNotesPageFiltersContextualMenu {
         menu.addItem(NSMenuItem.separator())
 
         let showDailyNotesItem = NSMenuItem(
-            title: "Show Daily Notes",
+            title: state.showDailyNotes ? loc("Hide Daily Notes") : loc("Show Daily Notes"),
             action: #selector(showDailyNotes),
             keyEquivalent: "")
-        showDailyNotesItem.state = state.showDailyNotes ? .on : .off
         menu.addItem(showDailyNotesItem)
 
         if Configuration.branchType == .develop {
             let showTabGroupsNotesItem = NSMenuItem(
-                title: "Show Tab Groups",
+                title: viewModel.showTabGroupNotes ? loc("Hide Tab Groups") : loc("Show Tab Groups"),
                 action: #selector(showTabGroupNotes),
                 keyEquivalent: "")
-            showTabGroupsNotesItem.state = viewModel.showTabGroupNotes ? .on : .off
             menu.addItem(showTabGroupsNotesItem)
         }
 

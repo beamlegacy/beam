@@ -80,15 +80,20 @@ extension TabsListContextMenuBuilder {
 
     private func shareGroup(_ group: TabGroup, itemFrame: CGRect?, shareService: ShareService) {
         guard let tabGroupingManager = state?.browserTabsManager.tabGroupingManager else { return }
+        let startTime = BeamDate.now
         let canShare = tabGroupingManager.shareGroup(group, shareService: shareService) { [weak self] result in
-            self?.tabGroupIsSharing = nil
-            guard shareService == .copy, let itemFrame = itemFrame else { return }
-            switch result {
-            case .success:
-                let point = CGPoint(x: itemFrame.midX, y: itemFrame.maxY + 20)
-                self?.state?.overlayViewModel.presentTooltip(text: loc("Link Copied"), at: point)
-            case .failure:
-                break
+            // let's make sure the loading state was visible for at least 2s to avoid blinking.
+            let delay: DispatchTime = .now() + .seconds(max(0, 2 + Int(startTime.timeIntervalSinceNow)))
+            DispatchQueue.main.asyncAfter(deadline: delay) {
+                self?.tabGroupIsSharing = nil
+                guard shareService == .copy, let itemFrame = itemFrame else { return }
+                switch result {
+                case .success:
+                    let point = CGPoint(x: itemFrame.midX, y: itemFrame.maxY + (Tooltip.defaultHeight / 2) + 3)
+                    self?.state?.overlayViewModel.presentTooltip(text: "Link Copied", at: point)
+                case .failure:
+                    break
+                }
             }
         }
         tabGroupIsSharing = canShare ? group : nil
