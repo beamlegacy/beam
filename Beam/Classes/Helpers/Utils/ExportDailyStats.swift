@@ -109,22 +109,24 @@ private struct DailyNoteStatsRow: CsvRow {
 }
 
 class DailyStatsExporter {
-    static func urlStatsDefaultFileName(daysAgo: Int) -> String {
-        let date = Calendar(identifier: .iso8601).date(byAdding: .day, value: -daysAgo, to: BeamDate.now)?.localDayString() ?? "0000-00-00"
-        return "beam_daily_url_stats-\(date).csv"
+    static func urlStatsDefaultFileName(offset0: Int, offset1: Int) -> String {
+        let date0 = Calendar(identifier: .iso8601).date(byAdding: .day, value: -offset0, to: BeamDate.now)?.localDayString() ?? "0000-00-00"
+        let date1 = Calendar(identifier: .iso8601).date(byAdding: .day, value: -offset1, to: BeamDate.now)?.localDayString() ?? "0000-00-00"
+
+        return "beam_daily_url_stats-\(date0)-\(date1).csv"
     }
     static func noteStatsDefaultFileName(daysAgo: Int) -> String {
         let date = Calendar(identifier: .iso8601).date(byAdding: .day, value: -daysAgo, to: BeamDate.now)?.localDayString() ?? "0000-00-00"
         return "beam_daily_note_stats-\(date).csv"
     }
 
-    static func exportUrlStats(daysAgo: Int, to url: URL?) {
+    static func exportUrlStats(offset0: Int, offset1: Int, to url: URL?) {
         guard let url = url else { return }
         let scoreStore = GRDBDailyUrlScoreStore()
         let scorer = DailyUrlScorer(store: scoreStore)
         let params = scorer.params
-        let distinctVisitDayCounts = scoreStore.getUrlWithoutFragmentDistinctVisitDayCount(between: daysAgo + params.maxRepeatTimeFrame, and: daysAgo)
-        let urlStats = scorer.getHighScoredUrls(daysAgo: daysAgo, topN: 5000, filtered: false)
+        let distinctVisitDayCounts = scoreStore.getUrlWithoutFragmentDistinctVisitDayCount(between: max(offset1 + params.maxRepeatTimeFrame, offset0), and: offset1)
+        let urlStats = scorer.getHighScoredUrls(between: offset0, and: offset1, topN: 5000, filtered: false)
         let urlStatsRows: [DailyUrlStatsRow] = urlStats.map {
             DailyUrlStatsRow(scoredUrl: $0, distinctVisitDayCount: distinctVisitDayCounts[$0.url.absoluteString])
         }

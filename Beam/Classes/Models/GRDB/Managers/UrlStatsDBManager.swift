@@ -134,6 +134,38 @@ class UrlStatsDBManager: GRDBHandler, BeamManager {
             return [:]
         }
     }
+    func getAggregatedDailyUrlScore(leftBound: String, rightBound: String) -> [UUID: AggregatedURLScore] {
+        let query: SQLRequest<Row> = SQLRequest("""
+            SELECT
+                urlId,
+                SUM(visitCount) AS visitCount,
+                SUM(readingTimeToLastEvent) AS readingTimeToLastEvent,
+                SUM(textSelections) AS textSelections,
+                MAX(scrollRatioX) AS scrollRatioX,
+                MAX(scrollRatioY) AS scrollRatioY,
+                MAX(textAmount) AS textAmount,
+                MAX(area) AS area,
+                MAX(isPinned) AS isPinned,
+                MIN(navigationCountSinceLastSearch) AS navigationCountSinceLastSearch
+            FROM DailyUrlScore
+            WHERE localDay BETWEEN \(leftBound) AND \(rightBound)
+            GROUP BY urlId
+            """
+        )
+        do {
+            let cursor = try self.read { db in
+                return try AggregatedURLScore.fetchAll(db, query)
+                    .compactMap { record -> (UUID, AggregatedURLScore)? in
+                            guard let urlId = record.urlId else { return nil }
+                            return (urlId, record)
+                        }
+            }
+            return Dictionary(uniqueKeysWithValues: cursor)
+        } catch {
+            Logger.shared.logError("Couldn't aggregate daily url scores between \(leftBound) and \(rightBound): \(error)", category: .database)
+            return [:]
+        }
+    }
 
     //day in format "YYYY-MM-DD"
     func clearDailyUrlScores(toDay day: String? = nil) throws {
