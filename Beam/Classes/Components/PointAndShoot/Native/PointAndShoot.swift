@@ -52,6 +52,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     @Published var mouseLocation: NSPoint = NSPoint()
     @Published var hasCollectedFullPage: Bool = false
 
+    private var shootConfirmationDismissBlock: DispatchWorkItem?
     private var isEnabled: Bool {
         guard let page = self.page else { return false }
         return !isTypingOnWebView && page.pointAndShootEnabled
@@ -405,10 +406,13 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         }
 
         // Finish animation
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+        shootConfirmationDismissBlock?.cancel()
+        let block = DispatchWorkItem  { [weak self] in
             guard let self = self else { return }
             self.shootConfirmationGroup = nil
         }
+        shootConfirmationDismissBlock = block
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: block)
     }
 
     /// Add url to the note's sources
@@ -458,6 +462,8 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         }
         dismissedGroups.removeAll()
         shootConfirmationGroup = nil
+        shootConfirmationDismissBlock?.cancel()
+        shootConfirmationDismissBlock = nil
         isAltKeyDown = false
         hasActiveSelection = false
         hasCollectedFullPage = false
@@ -471,6 +477,11 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         if let group = activeSelectGroup {
             dismissShootGroup(id: group.id, href: group.href)
             activeSelectGroup = nil
+        }
+        if shootConfirmationGroup != nil {
+            shootConfirmationDismissBlock?.cancel()
+            shootConfirmationDismissBlock = nil
+            shootConfirmationGroup = nil
         }
     }
 
