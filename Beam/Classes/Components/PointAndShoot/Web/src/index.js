@@ -1,6 +1,7 @@
 import {PointAndShoot} from "./PointAndShoot"
 import {PointAndShootUI_native} from "./PointAndShootUI_native"
 import {Native} from "@beam/native-beamtypes"
+import "./Cursor.scss"
 
 const native = Native.getInstance(window, "pointAndShoot")
 const pointAndShootUI = new PointAndShootUI_native(native)
