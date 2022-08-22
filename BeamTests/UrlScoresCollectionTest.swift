@@ -32,6 +32,7 @@ class UrlScoresCollectionTest: XCTestCase {
             data[urlId] = score
         }
         func getScores(daysAgo: Int) -> [UUID: DailyURLScore] { [:] }
+        func getAggregatedScores(between offset0: Int, and offset1: Int) -> [UUID : AggregatedURLScore] { [UUID:AggregatedURLScore]() }
         func getDailyRepeatingUrlsWithoutFragment(between offset0: Int, and offset1: Int, minRepeat: Int) -> Set<String> { Set<String>() }
         func getUrlWithoutFragmentDistinctVisitDayCount(between offset0: Int, and offset1: Int) -> [String : Int] { [String: Int]() }
     }

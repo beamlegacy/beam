@@ -18,6 +18,8 @@ extension DailyURLScore: TableRecord {
 }
 extension DailyURLScore: Identifiable {}
 
+extension AggregatedURLScore: FetchableRecord {}
+
 class GRDBDailyUrlScoreStore: DailyUrlScoreStoreProtocol {
     let providedDb: UrlStatsDBManager?
     var db: UrlStatsDBManager? {
@@ -64,6 +66,15 @@ class GRDBDailyUrlScoreStore: DailyUrlScoreStoreProtocol {
         let cal = Calendar(identifier: .iso8601)
         guard let day = cal.date(byAdding: DateComponents(day: -daysAgo), to: now)?.localDayString() else { return [:] }
         return db.getDailyUrlScores(day: day)
+    }
+
+    func getAggregatedScores(between offset0: Int = 1, and offset1: Int = 1) -> [UUID: AggregatedURLScore] {
+        guard let db = db else { return [UUID: AggregatedURLScore]() }
+        let now = BeamDate.now
+        let cal = Calendar(identifier: .iso8601)
+        guard let leftBound = cal.date(byAdding: DateComponents(day: -offset0), to: now)?.localDayString(),
+              let rightBound = cal.date(byAdding: DateComponents(day: -offset1), to: now)?.localDayString() else { return [:] }
+        return db.getAggregatedDailyUrlScore(leftBound: leftBound, rightBound: rightBound)
     }
     func getDailyRepeatingUrlsWithoutFragment(between offset0: Int, and offset1: Int, minRepeat: Int) -> Set<String> {
         guard let db = db else { return Set<String>() }
