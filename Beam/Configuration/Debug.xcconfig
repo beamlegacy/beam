@@ -1,4 +1,6 @@
-CUSTOM_OTHER_SWIFT_FLAGS = -DDEBUG -DDEBUG_PERF -DDEBUG_API_0 -DBEAM_WEBKIT_ENHANCEMENT_ENABLED -Xfrontend -warn-long-expression-type-checking=200 -Xfrontend -warn-long-function-bodies=200 // -DDEBUG_API_1 -DDEBUG_API_2
+COMMON_CUSTOM_OTHER_SWIFT_FLAGS = -DDEBUG -DDEBUG_PERF -DDEBUG_API_0 -DBEAM_WEBKIT_ENHANCEMENT_ENABLED -Xfrontend // -DDEBUG_API_1 -DDEBUG_API_2
+CUSTOM_OTHER_SWIFT_FLAGS[arch=x86_64] = $(COMMON_CUSTOM_OTHER_SWIFT_FLAGS) -warn-long-expression-type-checking=400 -Xfrontend -warn-long-function-bodies=400
+CUSTOM_OTHER_SWIFT_FLAGS[arch=arm*] = $(COMMON_CUSTOM_OTHER_SWIFT_FLAGS) -warn-long-expression-type-checking=200 -Xfrontend -warn-long-function-bodies=200
 AUTOMATIC_UPDATE = 0
 SENTRY_ENABLED = 0
 ENV = debug
