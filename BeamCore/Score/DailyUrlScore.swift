@@ -42,29 +42,18 @@ public class DailyURLScore: Codable, UrlScoreProtocol {
             + log(1 + Float(textSelections))
             + log(1 + Float(navigationCountSinceLastSearch ?? 0))
     }
-    public func merge(other: AggregatedURLScore) -> AggregatedURLScore {
-        return AggregatedURLScore(
-            visitCount: other.visitCount + self.visitCount,
-            readingTimeToLastEvent: other.readingTimeToLastEvent + self.readingTimeToLastEvent,
-            textSelections: other.textSelections + self.textSelections,
-            scrollRatioX: max(other.scrollRatioX, self.scrollRatioX),
-            scrollRatioY: max(other.scrollRatioY, self.scrollRatioY),
-            textAmount: max(other.textAmount, self.textAmount),
-            area: max(other.area, self.area),
-            isPinned: other.isPinned || self.isPinned,
-            navigationCountSinceLastSearch: nilMin(navigationCountSinceLastSearch, self.navigationCountSinceLastSearch)
-        )
-    }
 }
 
 public protocol DailyUrlScoreStoreProtocol {
     func apply(to urlId: UUID, changes: @escaping (DailyURLScore) -> Void)
     func getScores(daysAgo: Int) -> [UUID: DailyURLScore]
+    func getAggregatedScores(between offset0: Int, and offset1: Int) -> [UUID: AggregatedURLScore]
     func getDailyRepeatingUrlsWithoutFragment(between offset0: Int, and offset1: Int, minRepeat: Int) -> Set<String>
     func getUrlWithoutFragmentDistinctVisitDayCount(between offset0: Int, and offset1: Int) -> [String: Int]
 }
 
-public struct AggregatedURLScore {
+public struct AggregatedURLScore: Decodable {
+    public var urlId: UUID?
     public var visitCount: Int = 0
     public var readingTimeToLastEvent: CFTimeInterval = 0
     public var textSelections: Int = 0
@@ -89,6 +78,21 @@ public struct AggregatedURLScore {
             || textSelections > 0 // pns'd page are to be displayed in a dedicated section
         )
     }
+    public func merge(other: AggregatedURLScore, keepUrlId: Bool = false) -> AggregatedURLScore {
+        return AggregatedURLScore(
+            urlId: keepUrlId ? urlId : nil,
+            visitCount: other.visitCount + self.visitCount,
+            readingTimeToLastEvent: other.readingTimeToLastEvent + self.readingTimeToLastEvent,
+            textSelections: other.textSelections + self.textSelections,
+            scrollRatioX: max(other.scrollRatioX, self.scrollRatioX),
+            scrollRatioY: max(other.scrollRatioY, self.scrollRatioY),
+            textAmount: max(other.textAmount, self.textAmount),
+            area: max(other.area, self.area),
+            isPinned: other.isPinned || self.isPinned,
+            navigationCountSinceLastSearch: nilMin(navigationCountSinceLastSearch, self.navigationCountSinceLastSearch)
+        )
+    }
+
 }
 
 public struct ScoredURL {
@@ -165,7 +169,7 @@ public class UrlGroups {
         }
         return UrlGroups(groups: schemeGrouped)
     }
-    func aggregate(scores: [UUID: DailyURLScore]) -> [URL: AggregatedURLScore] {
+    func aggregate(scores: [UUID: AggregatedURLScore]) -> [URL: AggregatedURLScore] {
         var aggregatedScores = [URL: AggregatedURLScore]()
         for (url, urlIds) in groups {
             var acc = AggregatedURLScore()
@@ -215,15 +219,15 @@ public class DailyUrlScorer {
         self.params = params ?? self.params
         self.linkStore = linkStore
     }
-    public func getHighScoredUrls(daysAgo: Int = 1, topN: Int = 5, filtered: Bool = true) -> [ScoredURL] {
-        let scores = store.getScores(daysAgo: daysAgo)
+    public func getHighScoredUrls(between offset0: Int = 1, and offset1: Int = 1, topN: Int = 5, filtered: Bool = true) -> [ScoredURL] {
+        let scores = store.getAggregatedScores(between: offset0, and: offset1)
         let links = linkStore.getLinks(for: Array(scores.keys))
             .filter { (id, link) in id != Link.missing.id || link.url != Link.missing.url }
         let urlGroups = UrlGroups(links: links).regroup { $0.fragmentRemoved }
         let schemeGroups = urlGroups.groupHTTPSchemes
         let mostRecentTitle = schemeGroups.getMostRecentTitles(links: links)
         let aggregatedScores = schemeGroups.aggregate(scores: scores)
-        let repeatingUrls = store.getDailyRepeatingUrlsWithoutFragment(between: daysAgo + params.maxRepeatTimeFrame, and: daysAgo, minRepeat: params.maxRepeat)
+        let repeatingUrls = store.getDailyRepeatingUrlsWithoutFragment(between: offset1 + params.maxRepeatTimeFrame, and: offset1, minRepeat: params.maxRepeat)
         return Array(
             aggregatedScores
                 .filter { (url, score) in (score.isSummaryEligible(minReadingTime: params.minReadingTime, minTextAmount: params.minTextAmount)

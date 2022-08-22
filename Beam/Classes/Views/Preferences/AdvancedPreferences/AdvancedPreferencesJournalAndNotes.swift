@@ -11,7 +11,9 @@ import BeamCore
 struct AdvancedPreferencesJournalAndNotes: View, BeamDocumentSource {
     public static var sourceId: String { "\(Self.self)"}
 
-    @State private var dailyStatsExportDaysAgo: String = "0"
+    @State private var urlStatsExportOffset0: String = "0"
+    @State private var urlStatsExportOffset1: String = "0"
+    @State private var noteStatsExportDaysAgo: String = "0"
     @State private var showDebugSection = PreferencesManager.showDebugSection
     @State private var enableDailySummary = PreferencesManager.enableDailySummary
     @State private var createJournalOncePerWindow = PreferencesManager.createJournalOncePerWindow
@@ -47,11 +49,20 @@ struct AdvancedPreferencesJournalAndNotes: View, BeamDocumentSource {
             } content: {
                 enableDailySummaryView
                 HStack {
-                    TextField("", text: $dailyStatsExportDaysAgo)
+                    Text("Between")
+                    TextField("", text: $urlStatsExportOffset0)
+                        .frame(width: 50, height: 25, alignment: .center)
+                    Text("and")
+                    TextField("", text: $urlStatsExportOffset1)
+                        .frame(width: 50, height: 25, alignment: .center)
+                    Text("days ago")
+                }
+                ExportDailyUrlStats
+                HStack {
+                    TextField("", text: $noteStatsExportDaysAgo)
                         .frame(width: 50, height: 25, alignment: .center)
                     Text("Days ago")
                 }
-                ExportDailyUrlStats
                 ExportDailyNoteStats
             }
         }
@@ -161,7 +172,7 @@ struct AdvancedPreferencesJournalAndNotes: View, BeamDocumentSource {
     private var ExportDailyNoteStats: some View {
         Button(action: {
             let panel = NSSavePanel()
-            let daysAgo = Int(dailyStatsExportDaysAgo) ?? 0
+            let daysAgo = Int(noteStatsExportDaysAgo) ?? 0
             panel.canCreateDirectories = true
             panel.nameFieldStringValue = DailyStatsExporter.noteStatsDefaultFileName(daysAgo: daysAgo)
             panel.showsTagField = false
@@ -179,16 +190,17 @@ struct AdvancedPreferencesJournalAndNotes: View, BeamDocumentSource {
     private var ExportDailyUrlStats: some View {
         Button(action: {
             let panel = NSSavePanel()
-            let daysAgo = Int(dailyStatsExportDaysAgo) ?? 0
+            let offset0 = Int(urlStatsExportOffset0) ?? 0
+            let offset1 = Int(urlStatsExportOffset1) ?? 0
             panel.canCreateDirectories = true
-            panel.nameFieldStringValue = DailyStatsExporter.urlStatsDefaultFileName(daysAgo: daysAgo)
+            panel.nameFieldStringValue = DailyStatsExporter.urlStatsDefaultFileName(offset0: offset0, offset1: offset1)
             panel.showsTagField = false
             panel.begin { (result) in
                 guard result == .OK, let url = panel.url else {
                     panel.close()
                     return
                 }
-                DailyStatsExporter.exportUrlStats(daysAgo: daysAgo, to: url)
+                DailyStatsExporter.exportUrlStats(offset0: offset0, offset1: offset1, to: url)
             }
         }, label: {
             Text("Export url stats").frame(minWidth: 100)

@@ -175,9 +175,74 @@ class DailyUrlStorageTest: XCTestCase {
         }
 
         BeamDate.travel(2 * 24 * 60 * 60)
-        let scores = scorer.getHighScoredUrls(daysAgo: 2, topN: 1, filtered: true)
+        let scores = scorer.getHighScoredUrls(between: 2, and: 2, topN: 1, filtered: true)
         XCTAssertEqual(scores.count, 1)
         XCTAssertEqual(scores[0].url.absoluteString, urls[1])
+        BeamDate.reset()
+    }
+
+    func testGetAggregated() throws {
+        BeamDate.freeze("2001-01-01T00:00:00+000")
+        let store = GRDBDailyUrlScoreStore(db: urlStatsDb, daysToKeep: 10)
+        let urlIds = [UUID(), UUID()]
+        store.apply(to: urlIds[0]) {
+            $0.textSelections = 3 // out of time frame
+        }
+        BeamDate.travel(24 * 60 * 60)
+        store.apply(to: urlIds[0]) {
+            $0.textSelections = 1
+        }
+        BeamDate.travel(24 * 60 * 60)
+        store.apply(to: urlIds[1]) {
+            $0.visitCount = 1
+            $0.readingTimeToLastEvent = 1
+            $0.textSelections = 1
+            $0.scrollRatioX = 0.5
+            $0.scrollRatioY = 0.4
+            $0.textAmount = 10
+            $0.area = 13
+            $0.isPinned = false
+            $0.navigationCountSinceLastSearch = 3
+        }
+        BeamDate.travel(24 * 60 * 60)
+        store.apply(to: urlIds[1]) {
+            $0.visitCount = 3
+            $0.readingTimeToLastEvent = 0
+            $0.textSelections = 7
+            $0.scrollRatioX = 0.4
+            $0.scrollRatioY = 0.8
+            $0.textAmount = 12
+            $0.area = 10
+            $0.isPinned = true
+            $0.navigationCountSinceLastSearch = 2
+        }
+        BeamDate.travel(24 * 60 * 60)
+        store.apply(to: urlIds[0]) {
+            $0.textSelections = 3 // out of timeframe
+        }
+        let scores = store.getAggregatedScores(between: 3, and: 1)
+        let score0 = try XCTUnwrap(scores[urlIds[0]])
+        XCTAssertEqual(score0.visitCount, 0)
+        XCTAssertEqual(score0.readingTimeToLastEvent, 0)
+        XCTAssertEqual(score0.textSelections, 1)
+        XCTAssertEqual(score0.scrollRatioX, 0)
+        XCTAssertEqual(score0.scrollRatioY, 0)
+        XCTAssertEqual(score0.textAmount, 0)
+        XCTAssertEqual(score0.area, 0)
+        XCTAssertEqual(score0.isPinned, false)
+        XCTAssertNil(score0.navigationCountSinceLastSearch)
+
+        let score1 = try XCTUnwrap(scores[urlIds[1]])
+        XCTAssertEqual(score1.visitCount, 4)
+        XCTAssertEqual(score1.readingTimeToLastEvent, 1)
+        XCTAssertEqual(score1.textSelections, 8)
+        XCTAssertEqual(score1.scrollRatioX, 0.5)
+        XCTAssertEqual(score1.scrollRatioY, 0.8)
+        XCTAssertEqual(score1.textAmount, 12)
+        XCTAssertEqual(score1.area, 13)
+        XCTAssertEqual(score1.isPinned, true)
+        XCTAssertEqual(score1.navigationCountSinceLastSearch, 2)
+
         BeamDate.reset()
     }
 }
