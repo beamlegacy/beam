@@ -288,6 +288,8 @@ export class PointAndShoot {
    * @memberof PointAndShoot
    */
   onMouseMove(ev: BeamMouseEvent): void {
+    this.updateCursor(ev)
+
     if (
       PointAndShootHelper.hasMouseLocationChanged(
         this.mouseLocation,
@@ -307,6 +309,19 @@ export class PointAndShoot {
     this.mouseLocation.x = ev.clientX
     this.mouseLocation.y = ev.clientY
   }
+  private updateCursor(ev: BeamMouseEvent) {
+    // With alt key down and pointing enabled
+    if (
+      PointAndShootHelper.isOnlyAltKey(ev) &&
+      !PointAndShootHelper.isPointDisabled(this.win, ev.target)
+    ) {
+      // eslint-disable-next-line quotes
+      this.win.document.documentElement?.setAttribute?.("beam-cursor", "true")
+    } else {
+      this.win.document.documentElement?.setAttribute?.("beam-cursor", "false")
+    }
+  }
+
   /**
    * When the user clicks and pointing is allowed on the target element, a new 
    * Shoot target is created. onClick should always send updated bounds so the 

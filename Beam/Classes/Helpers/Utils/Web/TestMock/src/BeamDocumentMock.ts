@@ -10,6 +10,7 @@ import { BeamSelectionMock } from "./BeamSelectionMock"
 import { BeamNodeMock } from "./BeamNodeMock"
 import { BeamElementMock } from "./BeamElementMock"
 import { BeamRangeMock } from "./BeamRangeMock"
+import { BeamHTMLElementMock } from "./BeamHTMLElementMock"
 
 export const BeamDocumentMockDefaults = {
   body: {
@@ -41,7 +42,7 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
   /**
    * @type {HTMLHtmlElement}
    */
-  documentElement
+  documentElement: BeamHTMLElement = new BeamHTMLElementMock("div", {})
 
   activeElement: BeamHTMLElement
 
@@ -55,7 +56,6 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
   constructor(attributes = {}) {
     super("#document", BeamNodeType.document)
     this.body = {}
-    this.documentElement = {}
     this.selection = new BeamSelectionMock("div")
     this.childNodes = [new BeamNodeMock("#text", 3)]
     Object.assign(this, attributes)
