@@ -32,7 +32,7 @@ class SummaryEngine {
             }
         }
 
-        let urlScores = DailyUrlScorer(store: GRDBDailyUrlScoreStore()).getHighScoredUrls(daysAgo: 1, topN: 2)
+        let urlScores = DailyUrlScorer(store: GRDBDailyUrlScoreStore()).getHighScoredUrls(between: 1, and: 1, topN: 2)
         guard !urlScores.isEmpty else { return hasNotes ? element : nil }
         var siteToContinueText: [BeamText] = []
         for urlScore in urlScores {
@@ -80,7 +80,7 @@ class SummaryEngine {
             }
         }
 
-        let urlScores = DailyUrlScorer(store: GRDBDailyUrlScoreStore()).getHighScoredUrls(daysAgo: 0, topN: 2)
+        let urlScores = DailyUrlScorer(store: GRDBDailyUrlScoreStore()).getHighScoredUrls(between: 0, and: 0, topN: 2)
         guard !urlScores.isEmpty,
               let spentTimeOnSiteText = buildSpentTimeOnSiteText(urlScores) else { return element }
         if !hasUpdatedNotes {
