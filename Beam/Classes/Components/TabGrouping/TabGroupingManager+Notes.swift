@@ -104,7 +104,8 @@ extension TabGroupingManager: BeamDocumentSource {
 
     private func showShareGroupError(error: TabGroupSharingError, forGroup group: TabGroup) {
         if error == .notAuthenticated {
-            BeamData.shared.onboardingManager.showOnboardingForConnectOnly(withConfirmationAlert: true)
+            BeamData.shared.onboardingManager.showOnboardingForConnectOnly(withConfirmationAlert: true,
+                                                                           message: loc("Connect to Beam to share your tab groups."))
             return
         }
         var groupTitle = group.title ?? ""

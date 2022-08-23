@@ -83,9 +83,16 @@ extension TabsListContextMenuBuilder {
         let startTime = BeamDate.now
         let canShare = tabGroupingManager.shareGroup(group, shareService: shareService) { [weak self] result in
             // let's make sure the loading state was visible for at least 2s to avoid blinking.
-            let delay: DispatchTime = .now() + .seconds(max(0, 2 + Int(startTime.timeIntervalSinceNow)))
-            DispatchQueue.main.asyncAfter(deadline: delay) {
+            let delayInSeconds: Int = max(0, 2 + Int(startTime.timeIntervalSinceNow))
+            let previousStatus = group.status
+            if delayInSeconds > 0 {
+                group.status = .sharing
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(delayInSeconds)) {
                 self?.tabGroupIsSharing = nil
+                if delayInSeconds > 0 {
+                    group.status = previousStatus
+                }
                 guard shareService == .copy, let itemFrame = itemFrame else { return }
                 switch result {
                 case .success:
@@ -269,6 +276,7 @@ extension TabsListContextMenuBuilder {
 extension TabsListContextMenuBuilder {
 
     func showContextMenu(forGroup group: TabGroup, with event: NSEvent?, itemFrame: CGRect?) {
+        guard group.status != .sharing else { return }
         let menu = NSMenu()
 
         let nameAndColorItem = buildNameAndColorPickerItem(in: menu, forGroup: group)
