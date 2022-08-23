@@ -10,14 +10,11 @@ import Foundation
 extension BeamWindow {
 
     @IBAction func performFindPanelAction(_ sender: Any?) {
-        let pboard = NSPasteboard(name: .find)
-        let terms = pboard.string(forType: .string) ?? ""
-        
         switch state.mode {
         case .web:
-            state.browserTabsManager.currentTab?.searchInContent(terms: terms, fromSelection: false)
+            state.browserTabsManager.currentTab?.searchInContent(fromSelection: false)
         case .note:
-            state.currentEditor?.searchInNote(terms: terms, fromSelection: false)
+            state.currentEditor?.searchInNote(fromSelection: false)
         default:
             break
         }
@@ -26,9 +23,9 @@ extension BeamWindow {
     @IBAction func performFindNextPanelAction(_ sender: Any?) {
         switch state.mode {
         case .web:
-            state.browserTabsManager.currentTab?.searchViewModel?.next()
+            state.browserTabsManager.currentTab?.searchNext()
         case .note:
-            state.currentEditor?.searchViewModel?.next()
+            state.currentEditor?.searchNext()
         default:
             break
         }
@@ -37,9 +34,9 @@ extension BeamWindow {
     @IBAction func performFindPreviousPanelAction(_ sender: Any?) {
         switch state.mode {
         case .web:
-            state.browserTabsManager.currentTab?.searchViewModel?.previous()
+            state.browserTabsManager.currentTab?.searchPrevious()
         case .note:
-            state.currentEditor?.searchViewModel?.previous()
+            state.currentEditor?.searchPrevious()
         default:
             break
         }

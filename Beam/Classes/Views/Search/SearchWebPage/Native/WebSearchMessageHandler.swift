@@ -54,7 +54,7 @@ class WebSearchMessageHandler: SimpleBeamMessageHandler {
             }
         case .SearchWebPage_webSearchCurrentSelection:
             if let selection = body["selection"] as? String {
-                searchViewModel.searchTerms = selection
+                searchViewModel.setSearchTerms(selection, debounce: false)
             }
         }
     }
