@@ -115,13 +115,13 @@ class OnboardingManager: ObservableObject {
         onlyConnect = true
     }
 
-    func showOnboardingForConnectOnly(withConfirmationAlert: Bool = false) {
+    func showOnboardingForConnectOnly(withConfirmationAlert: Bool = false, message: String? = nil) {
         let presentBlock: () -> Void = {
             self.prepareForConnectOnly()
             self.presentOnboardingWindow()
         }
         if withConfirmationAlert {
-            UserAlert.showAlert(message: loc("Connect to Beam"), informativeText: loc("Connect to Beam to sync, encrypt and publish your notes."),
+            UserAlert.showAlert(message: loc("Connect to Beam"), informativeText: message ?? loc("Connect to Beam to sync, encrypt and publish your notes."),
                                 buttonTitle: loc("Connect"), secondaryButtonTitle: loc("Cancel"), buttonAction: presentBlock)
         } else {
             presentBlock()
