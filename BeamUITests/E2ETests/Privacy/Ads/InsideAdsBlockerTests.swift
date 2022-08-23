@@ -16,15 +16,17 @@ class InsideAdsBlockerTests: BaseTest {
     let view = "AdBlock"
 
     override func setUpWithError() throws {
-        app = launchApp().app
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-        shortcutHelper.shortcutActionInvoke(action: .openPreferences)
-        PreferencesBaseView().navigateTo(preferenceView: .privacy)
+        step ("GIVEN I start mock server and navigate to privacy prefs"){
+            launchApp()
+            uiMenu.destroyDB()
+                .startMockHTTPServer()
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+            PreferencesBaseView().navigateTo(preferenceView: .privacy)
+        }
     }
     
     func testDisabledInsideAdsBlocker(){
-        
+        testrailId("C642")
         step ("Given ads blocking setting is disabled"){
             if privacyWindow.getInsideAdBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickInsideAdBlockerSetting()
@@ -43,7 +45,7 @@ class InsideAdsBlockerTests: BaseTest {
     }
     
     func testEnabledInsideAdsBlocker(){
-        
+        testrailId("C642")
         step ("Given ads blocking setting is enabled"){
             if !privacyWindow.getInsideAdBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickInsideAdBlockerSetting()

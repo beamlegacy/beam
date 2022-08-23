@@ -37,10 +37,12 @@ class GoogleServicesTests: BaseTest {
     }
 
     func testGoogleSheetsFileLoading() {
+        testrailId("C909")
         runTest(url: spreadsheetURL, docTitle: "Google spreadsheet")
     }
     
     func testGoogleDocFileLoading() {
+        testrailId("C908")
         runTest(url: docURL, docTitle: "Google doc")
     }
 

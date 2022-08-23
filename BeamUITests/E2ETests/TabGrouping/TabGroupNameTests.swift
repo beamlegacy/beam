@@ -13,7 +13,8 @@ class TabGroupNameTests: BaseTest {
     let tabGroupMenu = TabGroupMenuView()
     let tabGroupName = "Tab Group Name"
     let tabGroupNameSpecialChars = "+-.,!@#$%^&*();\\/|<>\"\'"
-
+    let expectedTabGroupName = "4"
+    
     override func setUp() {
         step("Given I have a tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
@@ -23,7 +24,7 @@ class TabGroupNameTests: BaseTest {
     }
     
     func testTabGroupName() throws {
-
+        testrailId("C979")
         step("When I open Tab Group Menu") {
             tabGroupMenu.openTabGroupMenu(index: 0)
         }
@@ -52,7 +53,7 @@ class TabGroupNameTests: BaseTest {
     }
     
     func testTabGroupNameCollapsed() throws {
-
+        testrailId("C985")
         step("When I collapse tab group") {
             tabGroupMenu.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
@@ -60,7 +61,7 @@ class TabGroupNameTests: BaseTest {
         }
         
         step("Then Tab Group name contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "4")
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), expectedTabGroupName)
         }
         
         step("When I set a tab group name") {
@@ -70,7 +71,7 @@ class TabGroupNameTests: BaseTest {
         }
         
         step("Then tab group name is set and contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (4)")
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (\(expectedTabGroupName))")
         }
         
         step("When I delete tab group name") {
@@ -80,17 +81,16 @@ class TabGroupNameTests: BaseTest {
         }
 
         step("Then tab group name is unset but we still see tab group number") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "4")
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), expectedTabGroupName)
         }
     }
     
     func testTabGroupNameSpecialChar() throws {
-
+        testrailId("C979")
         step("When I set a tab group name with special chars") {
             tabGroupMenu.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: tabGroupNameSpecialChars)
-
         }
         
         step("Then tab group name is set") {
@@ -98,7 +98,8 @@ class TabGroupNameTests: BaseTest {
         }
     }
 
-    func testTabGroupRestoration() throws {
+    func testTabGroupRestoration() {
+        testrailId("C979")
         step("When I restart the app") {
             restartApp(storeSessionWhenTerminated: true)
         }
@@ -119,7 +120,7 @@ class TabGroupNameTests: BaseTest {
         }
 
         step("Then tab group name is set and contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (4)")
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (\(expectedTabGroupName))")
         }
     }
 }

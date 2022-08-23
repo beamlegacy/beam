@@ -11,21 +11,26 @@ import XCTest
 class NoteCreationTests: BaseTest {
     
     let noteNameToBeCreated = "NoteCreation"
-    var noteView: NoteTestView!
+    let noteView = NoteTestView()
+    var journalView: JournalTestView!
+    var allNotesView: AllNotesTestView!
+    
+    override func setUp() {
+        journalView = launchApp()
+    }
     
     func testCreateNoteFromAllNotes() {
-        let journalView = launchApp()
-        
+        testrailId("C708")
         step("Given I get number of notes in All Notes view"){
             waitFor(PredicateFormat.isHittable.rawValue,    journalView.button(ToolbarLocators.Buttons.noteSwitcherAllNotes.accessibilityIdentifier))
         }
         let numberOfNotesBeforeAdding = journalView.openAllNotesMenu().getNumberOfNotes()
-        var allNotesView: AllNotesTestView?
+        
         step("When I create a note from All Notes view"){
             allNotesView = AllNotesTestView().addNewPrivateNote(noteNameToBeCreated)
             var timeout = 5 //temp solution while looking for an elegant way to wait
             repeat {
-                if numberOfNotesBeforeAdding != allNotesView!.getNumberOfNotes() {
+                if numberOfNotesBeforeAdding != allNotesView.getNumberOfNotes() {
                     return
                 }
                 sleep(1)
@@ -34,19 +39,18 @@ class NoteCreationTests: BaseTest {
         }
 
         step("Then number of notes is increased to +1 in All Notes list"){
-            XCTAssertEqual(numberOfNotesBeforeAdding + 1, allNotesView!.getNumberOfNotes())
+            XCTAssertEqual(numberOfNotesBeforeAdding + 1, allNotesView.getNumberOfNotes())
         }
     }
     
     func SKIPtestCreateNoteUsingNotesSearchList() throws {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
-        let journalView = launchApp()
+
         step("When I create \(noteNameToBeCreated) a note from Webview notes search results"){
             let webView = journalView.searchInOmniBox(noteNameToBeCreated, true)
             webView.searchForNoteByTitle(noteNameToBeCreated)
             XCTAssertTrue(waitForStringValueEqual(noteNameToBeCreated, webView.getDestinationNoteElement()), "Destination note is not \(noteNameToBeCreated), but \(String(describing: webView.getDestinationNoteElement().value))")
-            noteView = webView.openDestinationNote()
-            
+            webView.openDestinationNote()
         }
 
         step("Then note with \(noteNameToBeCreated) is opened"){
@@ -57,8 +61,7 @@ class NoteCreationTests: BaseTest {
     }
     
     func testCreateNoteUsingNoteReference() {
-        let journalView = launchApp()
-        
+        testrailId("C746")
         step("When I create \(noteNameToBeCreated) a note referencing it from another Note"){
             journalView.textView(NoteViewLocators.TextFields.textNode.accessibilityIdentifier).firstMatch.clickOnExistence()
             journalView.app.typeText("@" + noteNameToBeCreated)
@@ -72,10 +75,9 @@ class NoteCreationTests: BaseTest {
     }
     
     func testCreateNoteOmniboxSearch() {
-        let journalView = launchApp()
-        
+        testrailId("C745")
         step("When I create \(noteNameToBeCreated) a note from Omnibox search results"){
-            noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
+            journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
         }
         
         step("Then note with \(noteNameToBeCreated) is opened"){
@@ -93,8 +95,7 @@ class NoteCreationTests: BaseTest {
     }
     
     func testCreateNoteOmniboxOptionEnter() {
-        let journalView = launchApp()
-        
+        testrailId("C745")
         step("When I create \(noteNameToBeCreated) a note from Omnibox search results via Option+Enter"){
             journalView.searchInOmniBox(noteNameToBeCreated, false)
             _ = OmniBoxTestView().getAutocompleteResults().firstMatch.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
@@ -102,7 +103,6 @@ class NoteCreationTests: BaseTest {
         }
 
         step("Then note with \(noteNameToBeCreated) is opened"){
-            noteView = NoteTestView()
             XCTAssertTrue(noteView.waitForNoteViewToLoad())
             XCTAssertEqual(noteView.getNoteTitle(), noteNameToBeCreated)
         }
@@ -110,9 +110,7 @@ class NoteCreationTests: BaseTest {
     }
     
     func testCreateNoteViewIcon() {
-        launchApp()
-        noteView = NoteTestView()
-        
+        testrailId("C744")
         step("When I click New note icon") {
             noteView.clickNewNoteCreationButton().getOmniBoxSearchField().typeText(noteNameToBeCreated)
             noteView.typeKeyboardKey(.enter)

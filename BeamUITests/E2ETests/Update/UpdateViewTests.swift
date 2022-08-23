@@ -10,13 +10,14 @@ import XCTest
 
 class UpdateViewTests: BaseTest {
 
-    private var journalView: JournalTestView!
+    var journalView: JournalTestView!
 
     override func setUp() {
         journalView = launchApp()
     }
     
     func testUpdateViewAppearance() {
+        testrailId("C696")
         step ("Given I enable Update for the app"){
             uiMenu.setAutoUpdateToMock()
         }
@@ -30,6 +31,7 @@ class UpdateViewTests: BaseTest {
     }
     
     func testUpdateAvailableEverywhereInNoteView() {
+        testrailId("C696")
         step ("Given I enable Update for the app"){
             uiMenu.setAutoUpdateToMock()
             XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))

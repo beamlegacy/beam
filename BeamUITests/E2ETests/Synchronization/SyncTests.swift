@@ -11,6 +11,7 @@ import XCTest
 class SyncTests: BaseTest {
     
     func testMergeNotesForNewlyCreatedAccount() {
+        testrailId("C1158")
         var notesBeforeSync: AllNotesTestTable!
         
         step("GIVEN I setup staging environment") {

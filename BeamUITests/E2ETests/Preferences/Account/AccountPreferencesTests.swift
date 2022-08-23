@@ -25,7 +25,7 @@ class AccountPreferencesTests: BaseTest {
     }
     
     func testSavePrivateKey() {
-        
+        testrailId("C623")
         let expectedPKName = "private.beamkey"
         let dialogueTitle = "Save"
         
@@ -43,7 +43,7 @@ class AccountPreferencesTests: BaseTest {
     }
     
     func testDeleteDB() {
-        
+        testrailId("C624")
         step ("GIVEN I add some notes and open Account preferences") {
             uiMenu.resizeSquare1000()
             uiMenu.create10Notes()
@@ -99,6 +99,7 @@ class AccountPreferencesTests: BaseTest {
             self.openAccountPrefs()
         }
         
+        testrailId("C621")
         step ("THEN I see correct PK format") {
             accountView = AccountTestView()
             XCTAssertTrue(accountView.staticText(AccountViewLocators.StaticTexts.encryptionLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -111,6 +112,7 @@ class AccountPreferencesTests: BaseTest {
             XCTAssertEqual(pkString[pkLastCharIndex], "=", "PK ends with incorrect char")
         }
         
+        testrailId("C622")
         step ("THEN I successfully copy PK") {
             accountView.getEncryptionKeyLabel().tapInTheMiddle()
             XCTAssertTrue(accountView.staticText("Encryption Key Copied!").waitForExistence(timeout: BaseTest.minimumWaitTimeout))

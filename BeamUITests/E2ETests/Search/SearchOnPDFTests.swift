@@ -19,6 +19,7 @@ class SearchOnPDFTests: BaseTest {
     }
     
     func testSearchViewAppearace() {
+        testrailId("C859")
         let searchView = SearchTestView()
         let searchText = "Beam"
         

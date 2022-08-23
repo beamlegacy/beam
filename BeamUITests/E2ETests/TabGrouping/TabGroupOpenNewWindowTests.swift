@@ -24,7 +24,7 @@ class TabGroupOpenNewWindowTests: BaseTest {
     }
     
     func testTabGroupMoveOutsideWindow() throws {
-        
+        testrailId("C983")
         step("Then one window is opened with 8 tabs") {
             XCTAssertEqual(getNumberOfWindows(), 1)
             XCTAssertEqual(webView.getNumberOfTabs(), 8)

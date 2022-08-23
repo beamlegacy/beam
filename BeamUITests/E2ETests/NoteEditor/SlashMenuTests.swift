@@ -18,6 +18,7 @@ class SlashMenuTests: BaseTest {
     let textToFormat = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
     
     func testDatePickerNoteCreation() {
+        testrailId("C782")
         let localDateFormat = "\(dayToSelect) \(monthToSelect) \(yearToSelect)"
         let ciDateFormat = "\(monthToSelect) \(dayToSelect), \(yearToSelect)"
         noteTestView = launchAppAndOpenFirstNote()
@@ -44,6 +45,7 @@ class SlashMenuTests: BaseTest {
     }
     
     func testNoteDividerCreation() {
+        testrailId("C790")
         let row1Text = "row 1"
         let row2Text = "row 2"
         noteTestView = launchAppAndOpenFirstNote()
@@ -73,6 +75,8 @@ class SlashMenuTests: BaseTest {
     }
     
     func testCheckBoxCreationMovementDeletion() {
+        testrailId("C781")
+        
         noteTestView = launchAppAndOpenFirstNote()
 
         step("Then I can successfuly create a checkbox using a shortcut") {
@@ -135,7 +139,7 @@ class SlashMenuTests: BaseTest {
     }
     
     func testSlashMenuTextFormatShortcutsApplying() {
-        
+        testrailId("C783, C784, C785, C786, C787, C788, C953")
         step("GIVEN I type text in first note") {
             noteTestView = launchAppAndOpenFirstNote()
             noteTestView.app.typeText(textToFormat)
