@@ -73,7 +73,7 @@ class AllNotesViewTests: BaseTest {
     
     //To be refactored once https://linear.app/beamapp/issue/BE-4401/all-notes-links-column-counts-backlinks-references-instead-of-just
     func testAllNotesLinksCounter() {
-        
+        testrailId("C725")
         let linkNoteName = "How to beam"
         let linkedNoteName = "Capture"
         
@@ -101,6 +101,7 @@ class AllNotesViewTests: BaseTest {
     
     //To be refactored with automatically published new note via https://linear.app/beamapp/issue/BE-4445/created-published-note-via-uitest-menu-is-not-recognized-as-published
     func testAllNotesURLCounter() throws {
+        testrailId("C723")
         try XCTSkipIf(isBigSurOS(), "issue that happens only on Big Sur - https://linear.app/beamapp/issue/BE-5098/note-is-removed-from-all-notes-table-on-publish-from-all-notes-on-big. Until issue is fixed -> it is skipped for Big Sur")
         
         let rowIndex = 0
@@ -125,7 +126,7 @@ class AllNotesViewTests: BaseTest {
     }
     
     func testAllNotesWordsCounter() {
-        
+        testrailId("C724")
         let noteName = "How to beam"
         let wordsToAdd = "Here are_the words to-add"
         
@@ -151,7 +152,7 @@ class AllNotesViewTests: BaseTest {
     }
     
     func testAllNotesUpdatedDateView() {
-        
+        testrailId("C726")
         let expectedDate = DateHelper().getTodaysDateString(.allNotesViewDates)
         
         step ("THEN by default the notes has correct today's '\(expectedDate)' date") {
@@ -163,6 +164,7 @@ class AllNotesViewTests: BaseTest {
     }
     
     func testShowDailyNotesFilter() throws {
+        testrailId("C736")
         let tableBeforeFilterApplied = AllNotesTestTable()
         
         step ("WHEN I disable displaying of the Daily notes") {

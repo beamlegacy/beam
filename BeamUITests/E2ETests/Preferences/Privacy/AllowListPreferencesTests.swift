@@ -32,7 +32,7 @@ class AllowListPreferencesTests: BaseTest {
     }
     
     func testAddAllowUrlItem() throws {
-
+        testrailId("C651")
         allowUrl(hostUrl: hostUrl)
         
         step("Then host \(hostUrl) is correctly added") {
@@ -54,7 +54,7 @@ class AllowListPreferencesTests: BaseTest {
     }
     
     func testRemoveAllowUrlItem() throws {
-        
+        testrailId("C652")
         allowUrl(hostUrl: hostUrl)
         
         step("And I save Allow List") {
@@ -73,6 +73,7 @@ class AllowListPreferencesTests: BaseTest {
     }
     
     func testSortAllowUrlItem() throws {
+        testrailId("C655")
         allowUrl(hostUrl: hostUrl)
         allowUrl(hostUrl: hostUrlGoogle)
         allowUrl(hostUrl: hostUrlFacebook)
@@ -104,7 +105,8 @@ class AllowListPreferencesTests: BaseTest {
         }
     }
     
-    func testCancelAllowUrlOperation() throws {
+    func testCancelAllowUrlOperation() {
+        testrailId("C653")
         allowUrl(hostUrl: hostUrl)
         
         step("Then host \(hostUrl) is correctly added") {
@@ -122,6 +124,7 @@ class AllowListPreferencesTests: BaseTest {
     }
     
     func testSearchForAllowUrl() throws {
+        testrailId("C650")
         allowUrl(hostUrl: hostUrl)
         allowUrl(hostUrl: hostUrlGoogle)
         

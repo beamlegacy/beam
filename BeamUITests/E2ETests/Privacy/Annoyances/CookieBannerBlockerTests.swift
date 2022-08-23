@@ -34,7 +34,7 @@ class CookieBannerBlockerTests: BaseTest {
     }
     
     func testEnabledCookieBannerBlocker(){
-        
+        testrailId("C646")
         step ("Given Hide Cookie Banner blocker setting is enabled"){
             if !privacyWindow.getCookieBannerBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickCookieBannerBlockerSetting()
@@ -53,7 +53,7 @@ class CookieBannerBlockerTests: BaseTest {
     }
     
     func testDisabledCookieBannerBlocker(){
-        
+        testrailId("C646")
         step ("Given Hide Cookie Banner button blocker setting is disabled"){
             if privacyWindow.getCookieBannerBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickCookieBannerBlockerSetting()

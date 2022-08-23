@@ -30,6 +30,7 @@ class OmniboxViewTests: BaseTest {
     }
     
     func testOmniBoxSearchField() {
+        testrailId("C742")
         let textInput = "Hello World"
         let omniboxSearchField = omniboxView.getOmniBoxSearchField()
 
@@ -57,6 +58,7 @@ class OmniboxViewTests: BaseTest {
             XCTAssertEqual(omniboxView.getSearchFieldValue(), partiallyDeletedSearchText)
         }
         
+        testrailId("C565")
         step("When I delete all input: \(partiallyDeletedSearchText)") {
             shortcutHelper.shortcutActionInvoke(action: .selectAll)
             omniboxView.typeKeyboardKey(.delete)
@@ -69,7 +71,7 @@ class OmniboxViewTests: BaseTest {
     }
     
     func testOmniboxPivotButtonClicking() {
-
+        
         step("Given I open 2 test pages"){
             uiMenu.loadUITestPage1()
             uiMenu.loadUITestPage2()
@@ -83,15 +85,17 @@ class OmniboxViewTests: BaseTest {
             XCTAssertTrue(pivotButton.exists)
             XCTAssertEqual(pivotButton.title, "note")
         }
-
+        
+        testrailId("C1095")
         step("When I click on pivot button"){
             webView.openDestinationNote()
         }
         
         step("Then journal view is opened"){
-            XCTAssertTrue(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(journalView.getScrollViewElement().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
+        testrailId("C1096")
         step("Then pivot button shows the number of tabs"){
             let pivotWebButton = omniboxView.button(ToolbarLocators.Buttons.openWebButton.accessibilityIdentifier)
             XCTAssertTrue(pivotWebButton.exists)
@@ -99,18 +103,17 @@ class OmniboxViewTests: BaseTest {
         }
 
         step("When I open web view"){
-            NoteTestView().navigateToWebView()
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
         
         step("Then Webview is opened and Journal is closed"){
             XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            XCTAssertFalse(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).exists)
+            XCTAssertFalse(journalView.getScrollViewElement().exists)
         }
-
     }
 
-    func testOmniboxDefaultActions() {
-
+    func testOmniboxDropdownItems() {
+        testrailId("C1097")
         let helper = BeamUITestsHelper(journalView.app)
         let noteATitle = "Test1"
         let noteBTitle = "Test2"
@@ -195,7 +198,8 @@ class OmniboxViewTests: BaseTest {
         }
     }
     
-    func testOmniboxTextSelectionAndEditing() throws {
+    func testOmniboxTextSelectionAndEditing() {
+        testrailId("C1098")
         let initialSearch = mockPage.getMockPageUrl(.mainView)
         let expectedInitialSearchURLinTab = "http://localhost:\(EnvironmentVariables.MockHttpServer.port)/"
         let expectedTabTitle = "Mock HTTP Server"
@@ -266,7 +270,7 @@ class OmniboxViewTests: BaseTest {
     }
     
     func testOmniboxCreateNoteMode() {
-
+        testrailId("C745")
         let noteATitle = "Test1"
 
         step("Given I have at least 1 note"){
@@ -327,7 +331,7 @@ class OmniboxViewTests: BaseTest {
     
     // BE-2546
     func testOmniboxIsDismissedWhenSummonedTwice() {
-
+        testrailId("C1099")
         step("When I open omnibox with shortcut") {
             omniboxView.focusOmniBoxSearchField()
         }

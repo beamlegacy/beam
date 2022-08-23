@@ -23,7 +23,7 @@ class RightClickTabMenuTests: BaseTest {
     }
     
     func testCloseTabsToTheRight() {
-        
+        testrailId("C1068")
         openThreeTabsAndSwitchToWebView()
         
         step("THEN Close Tabs to the right is disabled for the last tab"){
@@ -44,7 +44,7 @@ class RightClickTabMenuTests: BaseTest {
     }
     
     func testCloseOtherTabs() {
-        
+        testrailId("C1069")
         openThreeTabsAndSwitchToWebView()
         
         step("WHEN I Close Other Tabs on 2nd tab"){
@@ -61,7 +61,7 @@ class RightClickTabMenuTests: BaseTest {
     }
     
     func testMuteTab() {
-        
+        testrailId("C1070")
         step("GIVEN I open a web page where no sounds are playing"){
             launchApp().waitForJournalViewToLoad()
             uiMenu.loadUITestPage1()
@@ -77,7 +77,7 @@ class RightClickTabMenuTests: BaseTest {
     }
     
     func testCopyAddressPasteAndGo() {
-        
+        testrailId("C1071, C1072")
         step("GIVEN I open 2 different web pages"){
             launchApp().waitForJournalViewToLoad()
             uiMenu.loadUITestPage1()

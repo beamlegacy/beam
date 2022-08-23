@@ -82,7 +82,7 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination1() {
-        
+        testrailId("C860")
         step("Given I navigate to \(mockPage.getMockPageUrl(.signup1Form))") {
             mockPage.openMockPage(.signup1Form)
         }
@@ -110,6 +110,7 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination2() {
+        testrailId("C861")
         step("Given I navigate to \(mockPage.getMockPageUrl(.signup2Form))") {
             mockPage.openMockPage(.signup2Form)
         }
@@ -137,6 +138,7 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination3() {
+        testrailId("C862")
         step("Given I navigate to \(mockPage.getMockPageUrl(.signup3Form))") {
             mockPage.openMockPage(.signup3Form)
         }
@@ -159,6 +161,7 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination4() {
+        testrailId("C863")
         step("Given I navigate to \(mockPage.getMockPageUrl(.signup4Form))") {
             mockPage.openMockPage(.signup4Form)
         }
@@ -184,6 +187,7 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination5() {
+        testrailId("C864")
         step("Given I navigate to \(mockPage.getMockPageUrl(.signup51Form))") {
             mockPage.openMockPage(.signup51Form)
         }
@@ -205,6 +209,7 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination6() {
+        testrailId("C865")
         step("Given I navigate to \(mockPage.getMockPageUrl(.signup6Form))") {
             mockPage.openMockPage(.signup6Form)
         }

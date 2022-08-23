@@ -30,6 +30,7 @@ class SigninTests: BaseTest {
     }
     
     func testUseAppWithoutSignIn() {
+        testrailId("C658")
         step("WHEN I choose to sign up later"){
             onboardingView.signUpLater()
         }
@@ -45,6 +46,7 @@ class SigninTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
         }
             
+        testrailId("C616")
         step("THEN there is no sign up later button on appeared sign in pop-up"){
             PreferencesBaseView().navigateTo(preferenceView: .account)
             AccountTestView().getConnectToBeamButtonElement().clickOnExistence()

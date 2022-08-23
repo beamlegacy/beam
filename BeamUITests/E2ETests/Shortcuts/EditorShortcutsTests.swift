@@ -14,6 +14,7 @@ class EditorShortcutsTests: BaseTest {
     var noteView: NoteTestView!
     
     func testInstantSearchFromNote() {
+        testrailId("C773")
         let searchWord = "Everest"
         
         step ("Given I search for \(searchWord)"){
@@ -55,6 +56,7 @@ class EditorShortcutsTests: BaseTest {
     
     func testSelectAllCopyPasteUndoRedoTextInNote() {
         
+        testrailId("C1112, C1113, C1114, C1115, C1117, C1120")
         let textToType = "This text replaces selected notes text"
         step ("Then app doesn't crash after using text edit shortcuts on empty note"){
             launchApp()

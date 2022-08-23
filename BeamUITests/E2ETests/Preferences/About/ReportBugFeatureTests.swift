@@ -10,7 +10,7 @@ import XCTest
 
 class ReportBugFeatureTests: BaseTest {
     
-    var aboutPreferencesView: AboutPreferencesTestView?
+    var aboutPreferencesView: AboutPreferencesTestView!
     
     @discardableResult
     private func openAboutPreferences() -> AboutPreferencesTestView {
@@ -20,7 +20,7 @@ class ReportBugFeatureTests: BaseTest {
     }
     
     func testBugFeatureWebPagesOpening() {
-        
+        testrailId("C613, C614")
         let expectedBugsUrl = "https://beamapp.canny.io/bugs"
         let expectedFeaturesUrl = "https://beamapp.canny.io/feature-r"
         
@@ -30,7 +30,7 @@ class ReportBugFeatureTests: BaseTest {
         }
         
         step ("WHEN I click Report Feature button") {
-            aboutPreferencesView?.clickFeatureRequestButton()
+            aboutPreferencesView.clickFeatureRequestButton()
             shortcutHelper.shortcutActionInvoke(action: .close)
         }
         
@@ -42,7 +42,7 @@ class ReportBugFeatureTests: BaseTest {
         
         step ("WHEN I click Report Bug button") {
             self.openAboutPreferences()
-            aboutPreferencesView?.clickReportBugButton()
+            aboutPreferencesView.clickReportBugButton()
             shortcutHelper.shortcutActionInvoke(action: .close)
         }
         

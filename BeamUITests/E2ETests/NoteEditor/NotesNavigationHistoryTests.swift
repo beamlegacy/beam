@@ -27,8 +27,10 @@ class NotesNavigationHistoryTests: BaseTest {
     }
     
     func testNotesNavigationHistory() {
+        testrailId("C825, C826")
         launchApp()
         
+        testrailId("C828")
         step("GIVEN I open All notes and default note") {
             noteView = openFirstNoteInAllNotesList()
         }

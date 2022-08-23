@@ -11,8 +11,8 @@ import SwiftUI
 
 class DailySummaryTests: BaseTest {
     
-    var noteView = NoteTestView()
-    var journalView = JournalTestView()
+    var journalView: JournalTestView!
+    let noteView = NoteTestView()
     let allNotes = AllNotesTestView()
     let linkToOpen = "Pitchfork"
     let noteToOpen = "Triplego"
@@ -21,7 +21,7 @@ class DailySummaryTests: BaseTest {
     let continueOnDailySummaryExpected = "Continue on Key Glock, Maxo Kream and LeMonde, Twitter"
     
     override func setUp() {
-        launchApp()
+        journalView = launchApp()
 
         step("Given I populate daily summary"){
             uiMenu.createFakeDailySummary()
@@ -53,7 +53,6 @@ class DailySummaryTests: BaseTest {
         
         step("Then webview is opened"){
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
-
         }
         
     }
@@ -71,11 +70,12 @@ class DailySummaryTests: BaseTest {
     }
     
     func testDailySummaryInTodayNote() {
+        testrailId("C804")
         let todaysDateInNoteTitleFormat = DateHelper().getTodaysDateString(.noteViewTitle)
         
         step("When I go to Today Note"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            noteView = allNotes.openNoteByName(noteTitle: todaysDateInNoteTitleFormat)
+            allNotes.openNoteByName(noteTitle: todaysDateInNoteTitleFormat)
         }
         
         verifyDailySummaryInView()
@@ -84,14 +84,14 @@ class DailySummaryTests: BaseTest {
 
         step("When I go to Today Note"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            noteView = allNotes.openNoteByName(noteTitle: todaysDateInNoteTitleFormat)
+            allNotes.openNoteByName(noteTitle: todaysDateInNoteTitleFormat)
         }
         
         verifyDailySummaryOpenLink()
     }
     
     func testDailySummaryInJournal() {
-        
+        testrailId("C804")
         verifyDailySummaryInView()
         
         verifyDailySummaryOpenNote()
@@ -104,7 +104,7 @@ class DailySummaryTests: BaseTest {
     }
     
     func testNoBulletDragDropAllowedOnDailySummary() {
-        
+        testrailId("C804")
         step("When I open Journal"){
             shortcutHelper.shortcutActionInvoke(action: .showJournal)
         }
@@ -126,7 +126,7 @@ class DailySummaryTests: BaseTest {
     }
     
     func testDailySummaryCannotBeDeleted() {
-        
+        testrailId("C804")
         step("When I open Journal"){
             shortcutHelper.shortcutActionInvoke(action: .showJournal)
         }

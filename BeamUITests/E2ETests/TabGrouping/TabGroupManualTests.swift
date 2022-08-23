@@ -24,20 +24,26 @@ class TabGroupManualTests: BaseTest {
         }
     }
     
-    func testCreateManualGroup() throws {
-        
+    private func createTabGroupManuallyForTab(index: Int) {
+        step("When I create tab group manually") {
+            webView
+                .openTabMenu(tabIndex: index)
+                .selectTabMenuItem(.createTabGroup)
+        }
+    }
+    
+    func testCreateTabGroupManually() {
+        testrailId("C973")
         step("Then tab group is not created") {
             webView.waitForWebViewToLoad()
             XCTAssertEqual(webView.getNumberOfTabs(), 3)
             XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
         }
         
-        step("When I create tab group manually") {
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.createTabGroup)
-            XCTAssertEqual(webView.getNumberOfTabs(), 3)
-        }
+        createTabGroupManuallyForTab(index: 0)
         
         step("Then tab group is created") {
+            XCTAssertEqual(webView.getNumberOfTabs(), 3)
             XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
             tabGroupMenu.clickTabGroupCapsule(index: 0)
             XCTAssertEqual(tabGroupMenu.getTabGroupName(), "1")
@@ -46,7 +52,7 @@ class TabGroupManualTests: BaseTest {
     }
     
     func testAddOtherTabToGroup() throws {
-        
+        testrailId("C974")
         step("Then Add to group option is not available if group does not exist") {
             XCTAssertFalse(webView.openTabMenu(tabIndex: 0).isTabMenuOptionDisplayed(.addToGroup))
             webView.typeKeyboardKey(.escape)
@@ -56,9 +62,7 @@ class TabGroupManualTests: BaseTest {
             webView.typeKeyboardKey(.escape)
         }
         
-        step("When I create tab group manually") {
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.createTabGroup)
-        }
+        createTabGroupManuallyForTab(index: 0)
         
         step("Then Add to group option is available on tabs not grouped") {
             XCTAssertFalse(webView.openTabMenu(tabIndex: 0).isTabMenuOptionDisplayed(.addToGroup))
@@ -71,7 +75,9 @@ class TabGroupManualTests: BaseTest {
         }
         
         step("When I add another tab to the unnamed group") {
-            webView.openTabMenu(tabIndex: 1).selectTabMenuItem(.addToGroup)
+            webView
+                .openTabMenu(tabIndex: 1)
+                .selectTabMenuItem(.addToGroup)
             app.menuItems[tabGroupUnnamed].clickInTheMiddle()
         }
         
@@ -89,43 +95,47 @@ class TabGroupManualTests: BaseTest {
     }
     
     func testAddOtherTabToNamedGroup() throws {
-        
+        testrailId("C974")
         step("When I create tab group manually and name it") {
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.createTabGroup)
+            createTabGroupManuallyForTab(index: 0)
             tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupMenu
+                .openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
             tabGroupMenu.setTabGroupName(tabGroupName: tabGroupNamed)
         }
         
         step("Then Add to group option is mentioning the correct name") {
-            webView.openTabMenu(tabIndex: 2).selectTabMenuItem(.addToGroup)
+            webView
+                .openTabMenu(tabIndex: 2)
+                .selectTabMenuItem(.addToGroup)
             XCTAssertTrue(app.menuItems[tabGroupNamed].exists)
         }
     }
     
     func testUngroupManualTabGroupOneTab() throws {
-        
-        step("When I create tab group manually and name it") {
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.createTabGroup)
-        }
+        testrailId("C986")
+        createTabGroupManuallyForTab(index: 0)
         
         step("Then I can ungroup it") {
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.ungroup)
+            webView
+                .openTabMenu(tabIndex: 0)
+                .selectTabMenuItem(.ungroup)
             XCTAssertEqual(webView.getNumberOfTabs(), 3)
             XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
         }
     }
     
     func testCreateMultipleManualTabGroup() throws {
-        
-        step("When I create tab group manually and name it") {
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.createTabGroup)
-            webView.openTabMenu(tabIndex: 1).selectTabMenuItem(.createTabGroup)
+        testrailId("C1051")
+        let expectedGroupsNumber = 2
+        step("When I create 2 tab groups manually") {
+            createTabGroupManuallyForTab(index: 0)
+            createTabGroupManuallyForTab(index: 1)
         }
         
-        step("Then I have multiple groups") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupCount(), 2)
+        step("Then I have \(expectedGroupsNumber) groups") {
+            XCTAssertEqual(tabGroupMenu.getTabGroupCount(), expectedGroupsNumber)
         }
     }
 }
