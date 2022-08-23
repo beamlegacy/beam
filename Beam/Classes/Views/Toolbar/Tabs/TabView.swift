@@ -413,7 +413,7 @@ struct TabView: View {
                     .background(!isSingleTab || isDragging ? nil : GeometryReader { prxy in
                         Color.clear.preference(key: TabsListView.SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
                     })
-                    .background(isDragging ? nil :
+                    .background(onFileDrop == nil ? nil :
                             Color.clear.onDrop(of: [UTType.fileURL], delegate: FileDropDelegate(onFileDrop: onFileDrop))
                             .accessibilityElement()
                     )

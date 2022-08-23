@@ -246,7 +246,7 @@ struct TabsListView: View {
                             onTap: { onTabTapped(at: index, isRightMouse: $0, event: $1) },
                             onClose: { onItemClose(at: index) }, onCopy: { onItemCopy(at: index) },
                             onToggleMute: { onTabToggleMute(at: index) },
-                            onFileDrop: { onFileDrop(at: index, url: $0) })
+                            onFileDrop: isDraggingATab ? nil : { onFileDrop(at: index, url: $0) })
                 } else if let group = item.group, let color = group.color {
                     TabClusteringGroupCapsuleView(displayedText: item.displayedText,
                                                   groupTitle: group.title, color: color,
@@ -795,10 +795,10 @@ extension TabsListView: TabsExternalDropDelegateHandler {
             // then ask the dragModel to calculate what would be the actual insert index
             // then move the tab to the correct index and get the starting location
             // then reset the dragModel to be correctly setup in the next drop gesture move.
-            browserTabsManager.setCurrentTab(tab)
             if !browserTabsManager.tabs.contains(tab) {
                 browserTabsManager.tabs.append(tab)
             }
+            browserTabsManager.setCurrentTab(tab)
             let sections = state.browserTabsManager.listItems
             let gestureValue = TabGestureValue(startLocation: startLocation, location: location, time: BeamDate.now)
             let currentTabIndex = index(of: tab) ?? sections.allItems.count
