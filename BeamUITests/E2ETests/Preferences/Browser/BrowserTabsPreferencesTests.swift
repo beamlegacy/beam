@@ -85,4 +85,50 @@ class BrowserTabsPreferencesTests: BaseTest {
             XCTAssertFalse(waitFor(PredicateFormat.isSelected.rawValue, webView.getTabByIndex(index: 3), BaseTest.minimumWaitTimeout))
         }
     }
+    
+    func testGroupTabsAutomatically() {
+        
+        let expectedCheckboxTitle = "Group tabs automatically"
+        let tabGroupMenu = TabGroupMenuView()
+        
+        step("WHEN I disable Auto Group Tab checkbox that has title: \(expectedCheckboxTitle)") {
+            XCTAssertEqual(browserPref.getAutoGroupTabsCheckbox().title, expectedCheckboxTitle)
+            if !browserPref.getAutoGroupTabsCheckbox().isSettingEnabled() {
+                browserPref.getAutoGroupTabsCheckbox().tapInTheMiddle()
+            }
+            shortcutHelper.shortcutActionInvoke(action: .close)
+        }
+        
+        step("WHEN I open multiple time the same tab") {
+            uiMenu.loadUITestPage1()
+            uiMenu.loadUITestPage1()
+            webView.waitForWebViewToLoad()
+        }
+        
+        step("THEN tab group is automatically created") {
+            XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            // Closing opened tabs
+            shortcutHelper.shortcutActionInvoke(action: .close)
+            shortcutHelper.shortcutActionInvoke(action: .close)
+        }
+    
+        step("WHEN I disable Auto Group Tab checkbox that has title: \(expectedCheckboxTitle)") {
+            openBrowserPrefs()
+            browserPref.waitForViewToLoad()
+            if browserPref.getAutoGroupTabsCheckbox().isSettingEnabled() {
+                browserPref.getAutoGroupTabsCheckbox().tapInTheMiddle()
+            }
+            shortcutHelper.shortcutActionInvoke(action: .close)
+        }
+        
+        step("WHEN I open multiple time the same tab") {
+            uiMenu.loadUITestPage1()
+            uiMenu.loadUITestPage1()
+            webView.waitForWebViewToLoad()
+        }
+        
+        step("THEN tab group is automatically created") {
+            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
+        }
+    }
 }
