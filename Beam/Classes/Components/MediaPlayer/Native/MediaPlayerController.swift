@@ -18,14 +18,7 @@ struct MediaPlayerController: WebPageRelated {
 
     private let JSObjectName = "MediaPlayer"
     weak var page: WebPage?
-    var isPlaying: Bool {
-        switch playState {
-        case .playing, .paused:
-            return true
-        default:
-            return false
-        }
-    }
+    var isPlaying: Bool { playState == .playing }
     var playState: MediaPlayState?
     var isMuted = false
     var isPiPSupported = true
