@@ -170,8 +170,9 @@ class SearchOnWebTests: BaseTest {
             webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: textElementToSelect)
         }
         
-        step("WHEN I press CMD+E") {
+        step("WHEN I press CMD+E then CMD+F") {
             shortcutHelper.shortcutActionInvoke(action: .instantTextSearch)
+            shortcutHelper.shortcutActionInvoke(action: .search)
         }
         
         step("THEN search option appears"){

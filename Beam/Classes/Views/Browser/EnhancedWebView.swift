@@ -65,7 +65,7 @@ struct EnhancedWebView: View {
                             HStack(alignment: .top) {
                                 Spacer()
 
-                                if let search = tab.searchViewModel {
+                                if let search = tab.searchViewModel, search.showPanel {
                                     SearchInContentView(viewModel: search)
                                         .padding(.trailing, 30)
                                 }
@@ -82,7 +82,7 @@ struct EnhancedWebView: View {
                         .padding(.vertical, 10)
 
                         // Search locations
-                        if let search = tab.searchViewModel {
+                        if let search = tab.searchViewModel, search.showPanel {
                             VStack(alignment: .trailing) {
                                 HStack(alignment: .top) {
                                     Spacer()
