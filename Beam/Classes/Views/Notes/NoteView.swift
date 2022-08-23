@@ -30,6 +30,7 @@ struct NoteView: View {
     @StateObject private var headerViewModel = NoteHeaderView.ViewModel()
     @StateObject private var headerLayoutModel = HeaderViewContainer.LayoutModel()
     @State private var searchViewModel: SearchViewModel?
+    @State private var showSearchPanel = false
     @State private var tabGroups: [UUID] = []
 
     private var headerHeight: CGFloat {
@@ -117,10 +118,13 @@ struct NoteView: View {
                 headerViewModel.setTabGroups(with: note.tabGroups)
             }
         }
+        .onReceive(showSearchPanelPublisher) { value in
+            showSearchPanel = value
+        }
     }
 
     @ViewBuilder var searchView: some View {
-        if let search = self.searchViewModel {
+        if let search = self.searchViewModel, showSearchPanel {
             GeometryReader { proxy in
                 HStack(alignment: .top, spacing: 12) {
                     Spacer()
@@ -133,6 +137,13 @@ struct NoteView: View {
                 .padding(.top, topInset)
             }
         }
+    }
+
+    private var showSearchPanelPublisher: AnyPublisher<Bool, Never> {
+        if let search = searchViewModel {
+            return search.$showPanel.eraseToAnyPublisher()
+        }
+        return Just(false).eraseToAnyPublisher()
     }
 }
 
