@@ -18,7 +18,10 @@ struct PDFContentView: View {
                 onSelectionChanged: { selection in
                     contentState.setCurrentSelection(selection)
                 },
-                findString: searchState.searchTerms,
+                onEscapeKeyDown: {
+                    searchState.close()
+                },
+                findString: searchState.searching ? searchState.searchTerms : nil,
                 findMatchIndex: $searchState.currentOccurence,
                 onFindMatches: { selections in
                     searchState.foundOccurences = selections.count

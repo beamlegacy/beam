@@ -210,7 +210,14 @@ extension BeamWindow {
 
     override func keyDown(with event: NSEvent) {
         if event.keyCode == KeyCode.escape.rawValue {
-            state.browserTabsManager.currentTab?.respondToEscapeKey()
+            switch state.mode {
+            case .web:
+                state.browserTabsManager.currentTab?.respondToEscapeKey()
+            case .note:
+                state.currentEditor?.searchViewModel?.close()
+            default:
+                break
+            }
         }
         if event.keyCode == KeyCode.tab.rawValue {
             if event.modifierFlags.contains(.control) && state.mode == .web {

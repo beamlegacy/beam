@@ -15,11 +15,8 @@ class SearchViewModel: ObservableObject {
         case card
     }
 
-    @Published var searchTerms: String {
-        didSet {
-            typing = true
-        }
-    }
+    @Published private(set) var searchTerms: String
+
     @Published var foundOccurences: Int {
         didSet {
             typing = false
@@ -36,6 +33,8 @@ class SearchViewModel: ObservableObject {
         }
     }
 
+    @Published var showPanel: Bool = false
+
     @Published var positions: [Double]
     @Published var currentPosition: Double
     @Published var pageHeight: Double?
@@ -44,6 +43,8 @@ class SearchViewModel: ObservableObject {
 
     @Published var isEditing: Bool = true
     @Published var selectAll: Bool = false
+
+    @Published var searching: Bool = false
 
     var didBecomeFirstResponder: Bool
 
@@ -55,12 +56,16 @@ class SearchViewModel: ObservableObject {
 
     let context: PresentationContext
 
+    private let searchTermsDebouncer = PassthroughSubject<String, Never>()
+
+    private var didBecomeActiveObserver: Any?
+
     private var scope: Set<AnyCancellable>
 
-    init(context: PresentationContext, terms: String = "", found: Int = 0, onChange: ((String) -> Void)? = nil, onLocationIndicatorTap: ((Double) -> Void)? = nil, next: ((String) -> Void)? = nil, previous: ((String) -> Void)? = nil, done:(() -> Void)? = nil) {
+    init(context: PresentationContext, found: Int = 0, onChange: ((String) -> Void)? = nil, onLocationIndicatorTap: ((Double) -> Void)? = nil, next: ((String) -> Void)? = nil, previous: ((String) -> Void)? = nil, done:(() -> Void)? = nil) {
         self.context = context
 
-        self.searchTerms = terms
+        self.searchTerms = NSPasteboard(name: .find).string(forType: .string) ?? ""
         self.foundOccurences = found
         self.currentOccurence = 0
 
@@ -80,27 +85,72 @@ class SearchViewModel: ObservableObject {
         self.scope = []
         self.typing = false
 
-        $searchTerms
+        didBecomeActiveObserver = NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification,
+                                                                         object: nil,
+                                                                         queue: .main) { [weak self] notification in
+            self?.updateSearchTermsFromPasteboard()
+        }
+
+        searchTermsDebouncer
             .debounce(for: .milliseconds(400), scheduler: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.search()
+            .sink { [weak self] searchTerms in
+                guard let self = self else { return }
+                self.sendSearchTerms()
             }
             .store(in: &scope)
     }
 
+    deinit {
+        if let observer = didBecomeActiveObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    private func sendSearchTerms() {
+        let pboard = NSPasteboard(name: .find)
+        pboard.clearContents()
+        pboard.setString(searchTerms, forType: .string)
+
+        if self.showPanel || self.searching {
+            self.search()
+        }
+    }
+
+    func setSearchTerms(_ terms: String, debounce: Bool) {
+        searchTerms = terms
+        typing = true
+
+        if debounce {
+            searchTermsDebouncer.send(terms)
+        } else {
+            sendSearchTerms()
+        }
+    }
+
     func search() {
+        searching = true
         onChange?(searchTerms)
     }
 
     func next() {
-        findNext?(searchTerms)
+        if searching {
+            findNext?(searchTerms)
+        } else {
+            search()
+        }
     }
 
     func previous() {
-        findPrevious?(searchTerms)
+        if searching {
+            findPrevious?(searchTerms)
+        } else {
+            search()
+        }
     }
 
     func close() {
+        showPanel = false
+        searching = false
         done?()
     }
 
@@ -112,9 +162,10 @@ class SearchViewModel: ObservableObject {
         }
     }
 
-    func updateSearchTermsFromPasteboard() {
-        if let string = NSPasteboard(name: .find).string(forType: .string) {
-            searchTerms = string
+    private func updateSearchTermsFromPasteboard() {
+        if let string = NSPasteboard(name: .find).string(forType: .string),
+           searchTerms != string {
+            setSearchTerms(string, debounce: false)
         }
     }
 }

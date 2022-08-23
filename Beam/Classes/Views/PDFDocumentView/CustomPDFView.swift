@@ -2,6 +2,8 @@ import PDFKit
 
 final class CustomPDFView: PDFView {
 
+    var onEscapeKeyDown: (() -> Void)?
+
     /// Recreates a new menu from scratch.
     /// We could have instead intercept the default menu in `PDFView.willOpenMenu(_:with:)`, but unfortunately it is
     /// only called when clicking outside the bounds of the PDF document.
@@ -15,6 +17,13 @@ final class CustomPDFView: PDFView {
         items.append(contentsOf: pageNavigationtems())
         menu.items = items
         return menu
+    }
+
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == KeyCode.escape.rawValue {
+            onEscapeKeyDown?()
+        }
+        super.keyDown(with: event)
     }
 
     private func sizingItems() -> [NSMenuItem] {

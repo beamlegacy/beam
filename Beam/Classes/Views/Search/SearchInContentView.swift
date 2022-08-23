@@ -21,7 +21,7 @@ struct SearchInContentView: View {
     var body: some View {
         FloatingToolbar(contentWidth: 320) {
             Group {
-                BeamTextField(text: $viewModel.searchTerms, isEditing: $viewModel.isEditing, selectAll: $viewModel.selectAll, placeholder: title, font: searchFieldFont, textColor: searchFieldTextColor, placeholderColor: BeamColor.AlphaGray.nsColor, onCommit: viewModel.onCommit, onEscape: viewModel.close)
+                BeamTextField(text: textBinding, isEditing: $viewModel.isEditing, selectAll: $viewModel.selectAll, placeholder: title, font: searchFieldFont, textColor: searchFieldTextColor, placeholderColor: BeamColor.AlphaGray.nsColor, onCommit: viewModel.onCommit, onEscape: viewModel.close)
                 if !viewModel.searchTerms.isEmpty && !viewModel.typing {
                     Text(results)
                         .font(resultsTextFont)
@@ -40,10 +40,15 @@ struct SearchInContentView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            viewModel.updateSearchTermsFromPasteboard()
-        }
         .accessibilityIdentifier("search-field")
+    }
+
+    private var textBinding: Binding<String> {
+        Binding(get: {
+            viewModel.searchTerms
+        }, set: {
+            viewModel.setSearchTerms($0, debounce: true)
+        })
     }
 
     private var title: String {
@@ -83,14 +88,14 @@ struct SearchInContentView: View {
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            SearchInContentView(viewModel: SearchViewModel(context: .card, terms: "", found: 0))
-            SearchInContentView(viewModel: SearchViewModel(context: .card, terms: "Anticonstitutionally", found: 0))
-            SearchInContentView(viewModel: SearchViewModel(context: .card, terms: "Label", found: 5))
+            SearchInContentView(viewModel: SearchViewModel(context: .card, found: 0))
+            SearchInContentView(viewModel: SearchViewModel(context: .card, found: 0))
+            SearchInContentView(viewModel: SearchViewModel(context: .card, found: 5))
         }
         Group {
-            SearchInContentView(viewModel: SearchViewModel(context: .card, terms: "", found: 0))
-            SearchInContentView(viewModel: SearchViewModel(context: .card, terms: "Anticonstitutionally", found: 0))
-            SearchInContentView(viewModel: SearchViewModel(context: .card, terms: "Label", found: 5))
+            SearchInContentView(viewModel: SearchViewModel(context: .card, found: 0))
+            SearchInContentView(viewModel: SearchViewModel(context: .card, found: 0))
+            SearchInContentView(viewModel: SearchViewModel(context: .card, found: 5))
         }.colorScheme(.dark)
     }
 }
