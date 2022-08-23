@@ -217,7 +217,7 @@ final class PDFDocumentViewCoordinator: NSObject {
     // MARK: - Search
 
     private func updateFindString() {
-        guard let string = swiftUIView?.findString else { return }
+        let string = swiftUIView?.findString
         findString.send(string)
     }
 

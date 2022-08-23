@@ -53,7 +53,7 @@ struct SearchLocationView: View {
 
 struct SearchLocationView_Previews: PreviewProvider {
     static var previews: some View {
-        SearchLocationView(viewModel: SearchViewModel(context: .card, terms: "", found: 5), height: 50)
+        SearchLocationView(viewModel: SearchViewModel(context: .card, found: 5), height: 50)
     }
 }
 
