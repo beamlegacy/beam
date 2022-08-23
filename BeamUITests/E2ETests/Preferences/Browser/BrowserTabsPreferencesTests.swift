@@ -27,7 +27,7 @@ class BrowserTabsPreferencesTests: BaseTest {
     }
         
     func testCMDClickFunctionalityEnablingDisabling() {
-        
+        testrailId("C594")
         let expectedCheckboxTitle = "⌘-click opens a link in a new tab"
         
         step("THEN by default checkbox is enabled by default and has title: \(expectedCheckboxTitle)") {
@@ -39,7 +39,7 @@ class BrowserTabsPreferencesTests: BaseTest {
     }
     
     func testSwitchTabsUsingCMDNumber() {
-        
+        testrailId("C595")
         let expectedCheckboxTitle = "Use ⌘1 to ⌘9 to switch tabs"
         
         step("WHEN enable Switch Tabs checkbox that has title: \(expectedCheckboxTitle)") {

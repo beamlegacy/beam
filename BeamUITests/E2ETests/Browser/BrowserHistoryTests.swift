@@ -41,7 +41,7 @@ class BrowserHistoryTests: BaseTest {
     }
     
     func testBrowserHistoryNavigation() {
-        
+        testrailId("C823, C824")
         openMultipleWebPagesInSameTab()
         let url3 = url2 + "view"
         
@@ -97,7 +97,7 @@ class BrowserHistoryTests: BaseTest {
     }
     
     func testCMDClickOnNavigationArrowOpensNewTab() {
-        
+        testrailId("C1159")
         openMultipleWebPagesInSameTab()
         
         step("WHEN I CMD click on navigation arrow") {
@@ -113,7 +113,7 @@ class BrowserHistoryTests: BaseTest {
     
     
     func testDuplicatingTabDuplicatesHistory() {
-        
+        testrailId("C1074")
         openMultipleWebPagesInSameTab()
         
         step("WHEN I duplicate a tab") {

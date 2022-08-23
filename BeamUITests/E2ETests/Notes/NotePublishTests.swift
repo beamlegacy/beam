@@ -26,6 +26,7 @@ class NotePublishTests: BaseTest {
     }
     
     func testDefaultPublishStatus() {
+        testrailId("C1040")
         launchApp()
         step("Given I open all notes menu"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
@@ -78,6 +79,7 @@ class NotePublishTests: BaseTest {
             XCTAssertTrue(noteView.waitForNoteViewToLoad(), "Note view wasn't loaded")
         }
         
+        testrailId("C752")
         step("When I publish the note") {
             NSPasteboard.general.clearContents() //to clean the paste contents
             noteView.publishNote()
@@ -91,11 +93,12 @@ class NotePublishTests: BaseTest {
             XCTAssertTrue(webView.waitForPublishedNoteToLoad(noteName: noteNameToBeCreated))
         }
         
+        testrailId("C753")
         step("When I unpublish the note") {
             noteView.shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             noteView.unpublishNote()
         }
-        /*https://linear.app/beamapp/issue/BE-4753/activate-unpublishing-ui-test-scenario
+        
         step("Then I can not open it in the web") {
             switchReloadAndAssert(noteName: noteNameToBeCreated, isPublished: false)
         }
@@ -118,7 +121,7 @@ class NotePublishTests: BaseTest {
         
         step("Then I can not open it in the web") {
             switchReloadAndAssert(noteName: noteNameToBeCreated, isPublished: false)
-        }*/
+        }
     }
     
     func testProfileAddAndRemovePublishedNote() {
@@ -138,6 +141,7 @@ class NotePublishTests: BaseTest {
             XCTAssertFalse(noteView.getStagingProfileLinkElement().exists)
         }
         
+        testrailId("C754")
         step("THEN profile link appears exist on Add to profile toggle click") {
             noteView.getAddToProfileToggleElement().tapInTheMiddle()
             XCTAssertTrue(noteView.getStagingProfileLinkElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -152,6 +156,7 @@ class NotePublishTests: BaseTest {
             XCTAssertTrue(webView.staticText(publishedNoteName).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
+        testrailId("C755")
         step("WHEN I open the note and disable the toggle") {
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             noteView.waitForNoteViewToLoad()
@@ -163,6 +168,7 @@ class NotePublishTests: BaseTest {
             XCTAssertTrue(waitForDoesntExist(noteView.getStagingProfileLinkElement()), "\(self.stagingEnvironmentServerAddress) link is still visible")
         }
         
+        testrailId("C564")
         step("WHEN I reload profile web page") {
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             webView.waitForWebViewToLoad()
@@ -177,7 +183,7 @@ class NotePublishTests: BaseTest {
     }
     
     func testCopyURLPublishedNote() {
-        
+        testrailId("C1160")
         let noteNameToBeCreated = "Test1"
 
         step("GIVEN I created and publish a note") {
@@ -233,7 +239,7 @@ class NotePublishTests: BaseTest {
     }
     
     func testSharePublishedNote() {
-        
+        testrailId("C1161")
         var shareOptions = [ShareMenu]()
         let twitterOption = ShareMenu(name: "Twitter", accId: .shareTwitter)
         let facebookOption = ShareMenu(name: "Facebook", accId: .shareFacebook)

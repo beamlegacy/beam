@@ -47,7 +47,7 @@ class RightClickTextMenuTests: BaseTest {
     }
     
     func testRightClickTextLookUp() throws {
-        
+        testrailId("C844")
         // Look Up option is a system option.
         // I will verify option is filled with the word and we can click on it
         step("Then look up option is filled with keyword") {
@@ -60,7 +60,7 @@ class RightClickTextMenuTests: BaseTest {
     }
     
     func testRightClickTextTranslate() throws {
-        
+        testrailId("C845")
         try XCTSkipIf(isBigSurOS(), "Not available on BigSur")
         // Look Up option is a system option.
         // I will verify option is filled with the word and we can click on it
@@ -74,7 +74,7 @@ class RightClickTextMenuTests: BaseTest {
     }
     
     func testRightClickSearchGoogleText() throws {
-        
+        testrailId("C846")
         step("When I search text with Google") {
             rightClickMenuTestView.clickTextMenu(.searchWithGoogle)
         }
@@ -87,7 +87,7 @@ class RightClickTextMenuTests: BaseTest {
     }
     
     func testRightClickCopyText() throws {
-
+        testrailId("C847")
         step("When I copy text") {
             rightClickMenuTestView.clickTextMenu(.copyText)
         }
@@ -102,7 +102,7 @@ class RightClickTextMenuTests: BaseTest {
     }
     
     func testShareText() throws {
-
+        testrailId("C848")
         step("When I want to share text") {
             rightClickMenuTestView.clickCommonMenu(.share)
         }
@@ -113,7 +113,7 @@ class RightClickTextMenuTests: BaseTest {
     }
     
     func testSpeechText() throws {
-
+        testrailId("C849")
         step("When I want to speech text") {
             rightClickMenuTestView.clickTextMenu(.speech)
         }
@@ -124,7 +124,7 @@ class RightClickTextMenuTests: BaseTest {
     }
     
     func testInspectElementText() throws {
-
+        testrailId("C851")
         step("When I want to inspect element") {
             rightClickMenuTestView.clickCommonMenu(.inspectElement)
         }
@@ -135,7 +135,7 @@ class RightClickTextMenuTests: BaseTest {
     }
     
     func testServicesText() throws {
-
+        testrailId("C850")
         step("When I want to use services") {
             rightClickMenuTestView.clickTextMenu(.services)
         }

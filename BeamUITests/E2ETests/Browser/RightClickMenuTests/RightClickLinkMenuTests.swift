@@ -43,8 +43,8 @@ class RightClickLinkMenuTests: BaseTest {
         }
     }
     
-    func testRightClickOpenNewTabLink() throws {
-        
+    func testRightClickOpenLinkInNewTab() throws {
+        testrailId("C837")
         step("When I open link in a new tab") {
             rightClickMenuTestView.clickLinkMenu(.openLinkInNewTab)
         }
@@ -60,7 +60,7 @@ class RightClickLinkMenuTests: BaseTest {
     }
     
     func testRightClickOpenNewWindowLink() throws {
-        
+        testrailId("C838")
         step("When I open link in a new window") {
             rightClickMenuTestView.clickLinkMenu(.openLinkInNewWindow)
         }
@@ -71,7 +71,7 @@ class RightClickLinkMenuTests: BaseTest {
     }
     
     func testRightClickLinkDownloadLinkedFile() throws {
-
+        testrailId("C839")
         step("When I download linked file") {
             rightClickMenuTestView.clickLinkMenu(.downloadLinkedFile)
         }
@@ -83,8 +83,8 @@ class RightClickLinkMenuTests: BaseTest {
         }
     }
     
-    func testRightClickLinkDownloadLinkedFileAs() throws {
-
+    func testRightClickDownloadLinkedFileAs() throws {
+        testrailId("C840")
         step("When I save link to another location") {
             rightClickMenuTestView.clickLinkMenu(.downloadLinkedFileAs)
         }
@@ -98,7 +98,7 @@ class RightClickLinkMenuTests: BaseTest {
     }
     
     func testRightClickCopyLink() throws {
-
+        testrailId("C841")
         step("When I copy link") {
             rightClickMenuTestView.clickLinkMenu(.copyLink)
         }
@@ -113,7 +113,7 @@ class RightClickLinkMenuTests: BaseTest {
     }
     
     func testShareLink() throws {
-
+        testrailId("C842")
         step("When I want to share link") {
             rightClickMenuTestView.clickCommonMenu(.share)
         }
@@ -124,7 +124,7 @@ class RightClickLinkMenuTests: BaseTest {
     }
     
     func testInspectElementImage() throws {
-
+        testrailId("C851")
         step("When I want to inspect element") {
             rightClickMenuTestView.clickCommonMenu(.inspectElement)
         }
@@ -135,7 +135,7 @@ class RightClickLinkMenuTests: BaseTest {
     }
     
     func testServicesLink() throws {
-
+        testrailId("C843")
         step("When I want to use services") {
             rightClickMenuTestView.clickLinkMenu(.services)
         }

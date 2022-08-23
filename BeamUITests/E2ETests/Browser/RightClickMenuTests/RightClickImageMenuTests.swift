@@ -56,7 +56,7 @@ class RightClickImageMenuTests: BaseTest {
     }
     
     func testRightClickOpenNewTabImage() throws {
-        
+        testrailId("C830")
         step("When I open image in a new tab") {
             rightClickMenuTestView.clickImageMenu(.openImageInNewTab)
         }
@@ -76,7 +76,7 @@ class RightClickImageMenuTests: BaseTest {
     }
     
     func testRightClickOpenNewWindowImage() throws {
-
+        testrailId("C831")
         step("When I open image in a new window") {
             rightClickMenuTestView.clickImageMenu(.openImageInNewWindow)
         }
@@ -87,7 +87,7 @@ class RightClickImageMenuTests: BaseTest {
     }
     
     func testRightClickImageSaveToDownloads() throws {
-
+        testrailId("C832")
         step("When I save image to downloads") {
             rightClickMenuTestView.clickImageMenu(.saveToDownloads)
         }
@@ -98,7 +98,7 @@ class RightClickImageMenuTests: BaseTest {
     }
     
     func testRightClickImageSaveAs() throws {
-
+        testrailId("C833")
         step("When I save image to another location") {
             rightClickMenuTestView.clickImageMenu(.saveAs)
         }
@@ -112,7 +112,7 @@ class RightClickImageMenuTests: BaseTest {
     }
     
     func testRightClickCopyImageAddress() throws {
-
+        testrailId("C834")
         step("When I copy image address") {
             rightClickMenuTestView.clickImageMenu(.copyImageAddress)
         }
@@ -127,7 +127,7 @@ class RightClickImageMenuTests: BaseTest {
     }
     
     func testRightClickCopyImage() throws {
-
+        testrailId("C835")
         step("When I copy image address") {
             rightClickMenuTestView.clickImageMenu(.copyImage)
         }
@@ -143,7 +143,7 @@ class RightClickImageMenuTests: BaseTest {
     }
     
     func testShareImage() throws {
-
+        testrailId("C836")
         step("When I want to share image") {
             rightClickMenuTestView.clickCommonMenu(.share)
         }
@@ -154,7 +154,7 @@ class RightClickImageMenuTests: BaseTest {
     }
     
     func testInspectElementImage() throws {
-
+        testrailId("C851")
         step("When I want to inspect element") {
             rightClickMenuTestView.clickCommonMenu(.inspectElement)
         }

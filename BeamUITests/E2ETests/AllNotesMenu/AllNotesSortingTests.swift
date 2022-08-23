@@ -43,7 +43,7 @@ class AllNotesSortingTests: BaseTest {
         }
     }
     
-    func testSortNotesByWordsAndLinks() {
+    func testSortNotesByTitlesAndWordsAndLinks() {
         
         step("GIVEN I setup staging environment and open All cards") {
             setupStaging(withRandomAccount: true)
@@ -54,6 +54,7 @@ class AllNotesSortingTests: BaseTest {
             allNotesView.waitForAllNotesViewToLoad()
         }
         
+        testrailId("C727")
         step("THEN I successfully sort notes by Title descending") {
             assertTitleSort(descending: true)
         }
@@ -62,6 +63,7 @@ class AllNotesSortingTests: BaseTest {
             assertTitleSort(descending: false)
         }
         
+        testrailId("C729")
         step("THEN I successfully sort notes by Words descending") {
             table = sortBy(.words)
             for i in 1...table.numberOfVisibleItems-1 {
@@ -76,6 +78,7 @@ class AllNotesSortingTests: BaseTest {
             }
         }
         
+        testrailId("C730")
         step("THEN I successfully sort notes by Links descending") {
             table = sortBy(.links)
             for i in 1...table.numberOfVisibleItems-1 {

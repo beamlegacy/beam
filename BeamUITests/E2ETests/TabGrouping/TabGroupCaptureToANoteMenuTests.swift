@@ -30,7 +30,7 @@ class TabGroupCaptureToANoteMenuTests: BaseTest {
     }
     
     func testRenameCapturedTabGroup() throws {
-        
+        testrailId("C1026")
         step("When I open the captured tab group menu") {
             noteView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
@@ -43,7 +43,7 @@ class TabGroupCaptureToANoteMenuTests: BaseTest {
     }
     
     func testOpenInBackgroundCapturedTabGroup() throws {
-        
+        testrailId("C1028")
         let tabTitles = [
             uiTestPageOne,
             uiTestPageTwo,
@@ -66,7 +66,7 @@ class TabGroupCaptureToANoteMenuTests: BaseTest {
     }
     
     func testOpenInNewWindowCapturedTabGroup() throws {
-        
+        testrailId("C1029")
         step("When I open the captured tab group in new window") {
             noteView.openTabGroupMenu(index: 0)
                 .clickTabGroupMenu(.tabGroupOpenInNewWindow)
@@ -81,7 +81,7 @@ class TabGroupCaptureToANoteMenuTests: BaseTest {
     }
     
     func testDeleteCapturedTabGroup() throws {
-        
+        testrailId("C1030")
         step("When I delete the captured tab group from note") {
             noteView.openTabGroupMenu(index: 0)
                 .clickTabGroupMenu(.tabGroupDeleteGroup)

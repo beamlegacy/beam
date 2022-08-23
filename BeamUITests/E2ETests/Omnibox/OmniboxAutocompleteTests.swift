@@ -23,6 +23,7 @@ class OmniboxAutocompleteTests: BaseTest {
     }
     
     func testAutocompleteSelection() {
+        testrailId("C1100")
         step("Given I search in Omnibox"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
             omniboxView.searchInOmniBox("everest", false)
@@ -74,7 +75,7 @@ class OmniboxAutocompleteTests: BaseTest {
     }
 
     func testAutoCompleteURLSelection() {
-        
+        testrailId("C1101")
         let expectedFirstResultURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: domainURL)
         
         step("Given I open website: \(urlToOpen)"){
@@ -101,7 +102,6 @@ class OmniboxAutocompleteTests: BaseTest {
             XCTAssertGreaterThan(results.count, 1)
         }
 
-
         step("When I add 1 letter: \(oneLetterToAdd)"){
             omniboxView.getOmniBoxSearchField().typeText(oneLetterToAdd)
         }
@@ -110,7 +110,6 @@ class OmniboxAutocompleteTests: BaseTest {
             XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
             XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
         }
-
 
         step("When I add 1 more letter: \(anotherOneLetterToAdd) which makes the word to be inexisting one"){
             omniboxView.getOmniBoxSearchField().typeText(anotherOneLetterToAdd)
@@ -130,7 +129,6 @@ class OmniboxAutocompleteTests: BaseTest {
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
         }
 
-
         step("When I type a letter to make search text reasonable"){
             omniboxView.getOmniBoxSearchField().typeText("e")
         }
@@ -142,7 +140,6 @@ class OmniboxAutocompleteTests: BaseTest {
 
         step("When I move to end of search text via right arrow"){
             omniboxView.typeKeyboardKey(.rightArrow)
-
         }
         
         step("Then I see selection is unavailable"){
@@ -159,14 +156,17 @@ class OmniboxAutocompleteTests: BaseTest {
     }
 
     func testAutoCompleteHistorySelection() {
+        testrailId("C1102")
         let partiallyTypedSearchText = "Hel"
         let expectedSearchFieldText = "Hello world"
         let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
         let deletePressRepeatTimes = 2
     
-        uiMenu
-            .omniboxEnableSearchInHistoryContent()
-            .omniboxFillHistory()
+        step("GIVEN I populate browser history with mocked data") {
+            uiMenu
+                .omniboxEnableSearchInHistoryContent()
+                .omniboxFillHistory()
+        }
 
         step("When I type: \(partiallyTypedSearchText)"){
             omniboxView.getOmniBoxSearchField().clickOnExistence()
@@ -230,10 +230,14 @@ class OmniboxAutocompleteTests: BaseTest {
     }
 
     func testAutoCompleteHistoryFromAliasUrlSelection() {
+        testrailId("C1103")
         let partiallyTypedSearchText = "alter"
         let expectedSearchFieldText = "alternateurl.com"
         let expectedURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: expectedSearchFieldText)
-        uiMenu.omniboxFillHistory()
+        
+        step("GIVEN I populate browser history with mocked data") {
+            uiMenu.omniboxFillHistory()
+        }
 
         step("When I type: \(partiallyTypedSearchText)"){
             omniboxView.getOmniBoxSearchField().clickOnExistence()
@@ -246,19 +250,20 @@ class OmniboxAutocompleteTests: BaseTest {
     }
 
     func testAutocompleteLeftRightArrowBehavior() {
+        testrailId("C1104")
         let partiallyTypedSearchText = "Hel"
         let expectedSearchFieldText = "Hello world"
         let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
         let expectedURL = "fr.wikipedia.org/wiki/Hello_world"
     
-        launchApp()
-        uiMenu
-            .omniboxDisableSearchInHistoryContent()
-            .omniboxFillHistory()
+        step("GIVEN I populate browser history with mocked data") {
+            uiMenu
+                .omniboxDisableSearchInHistoryContent()
+                .omniboxFillHistory()
+        }
 
         step("When I type: \(partiallyTypedSearchText)"){
-            omniboxView.getOmniBoxSearchField().clickOnExistence()
-            omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
+            omniboxView.getOmniBoxSearchField().clickAndType(partiallyTypedSearchText)
         }
 
         step("Then search field value is \(expectedSearchFieldText)"){
@@ -303,7 +308,7 @@ class OmniboxAutocompleteTests: BaseTest {
     }
     
     func testAutoCompleteUrlOmniboxDisappear() { //BE-3733
-        
+        testrailId("C1105")
         let expectedFirstResultURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: domainURL)
         
         step("Given I open website: \(urlToOpen)"){

@@ -53,7 +53,8 @@ class RightClickPageMenuTests: BaseTest {
         }
     }
     
-    func testRightClickPageNavigation() throws {
+    func testRightClickPageNavigation() {
+        testrailId("C852, C853")
         let backButton = app.windows.menuItems[RightClickMenuViewLocators.PageMenuItems.back.accessibilityIdentifier]
         let forwardButton = app.windows.menuItems[RightClickMenuViewLocators.PageMenuItems.forward.accessibilityIdentifier]
         
@@ -93,7 +94,7 @@ class RightClickPageMenuTests: BaseTest {
     }
     
     func testRightClickPageReload() throws {
-        
+        testrailId("C854")
         step("When I click on Reload page"){
             rightClickMenuTestView.clickPageMenu(.reloadPage)
         }
@@ -104,7 +105,7 @@ class RightClickPageMenuTests: BaseTest {
     }
     
     func testRightClickCopyPageAddress() throws {
-
+        testrailId("C856")
         step("When I want to copy page address") {
             rightClickMenuTestView.clickPageMenu(.copyPageAddress)
         }
@@ -121,7 +122,7 @@ class RightClickPageMenuTests: BaseTest {
     }
     
     func testRightClickPrintPage() throws {
-
+        testrailId("C855")
         step("When I want to print page") {
             rightClickMenuTestView.clickPageMenu(.printPage)
         }
@@ -132,7 +133,7 @@ class RightClickPageMenuTests: BaseTest {
     }
     
     func testInspectElementPage() throws {
-
+        testrailId("C851")
         step("When I want to inspect page") {
             rightClickMenuTestView.clickPageMenu(.inspectElement)
         }

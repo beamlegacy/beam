@@ -15,15 +15,15 @@ class TextEditorContextViewTests: BaseTest {
     var noteView: NoteTestView!
     
     func testCreateNoteViaContextView() {
+        testrailId("C776")
+        
         let textToType = "text before a new note"
         let numberOfCharsToSelect = 8
         let index = textToType.index(textToType.endIndex, offsetBy: -numberOfCharsToSelect)
         let noteName = String(textToType[index...])
         
         step("Given open today's note"){
-            noteView = launchApp()
-                .openAllNotesMenu()
-                .openFirstNote()
+            noteView = launchAppAndOpenFirstNote()
         }
         
         step("When I create a bidi link out of typed text: \(textToType)"){
@@ -50,6 +50,8 @@ class TextEditorContextViewTests: BaseTest {
     }
     
     func testBidiLinkViaContextView() {
+        testrailId("C776")
+        
         let notePrefix = "prefix"
         let noteName = "BiDi note"
         let notePostix = "postfix"
@@ -90,9 +92,7 @@ class TextEditorContextViewTests: BaseTest {
         let expectedTabURL = "google.com/"
         
         step("Given open today's note"){
-            noteView = launchApp()
-                .openAllNotesMenu()
-                .openFirstNote()
+            noteView = launchAppAndOpenFirstNote()
         }
 
         //create an empty link
@@ -131,11 +131,10 @@ class TextEditorContextViewTests: BaseTest {
     }
     
     func testFormatTextViaContextView() {
+        testrailId("779, 778, 775, 774")
         let text = "THE_text 2 TE$t"
         step("Given open today's note"){
-            noteView = launchApp()
-                .openAllNotesMenu()
-                .openFirstNote()
+            noteView = launchAppAndOpenFirstNote()
         }
 
         step("When I type: \(text)"){

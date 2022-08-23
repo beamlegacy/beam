@@ -31,6 +31,7 @@ class NoteEditorTests: BaseTest {
     }
     
     func testTypeTextInNote() {
+        testrailId("C758")
         let journalView = launchApp()
         let firstJournalEntry = journalView.getNoteByIndex(1)
         firstJournalEntry.clear()
@@ -63,6 +64,7 @@ class NoteEditorTests: BaseTest {
     }
     
     func testSlashCommandsView() {
+        testrailId("C1033")
         let journalView = launchApp()
         let contextMenuTriggerKey = "/"
         
@@ -111,7 +113,7 @@ class NoteEditorTests: BaseTest {
     }
     
     func testOpenTabOnBackground() {
-        
+        testrailId("C810")
         step("Given I open a note") {
             launchApp()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
@@ -143,6 +145,7 @@ class NoteEditorTests: BaseTest {
     }
     
     func testTextNodeIndentationLevels() {
+        testrailId("C803, C951")
         launchAppAndOpenFirstNote()
         
         step("Given I create indentation levels") {
@@ -254,7 +257,7 @@ class NoteEditorTests: BaseTest {
     }
     
     func testInsertLinkPopUp() {
-
+        testrailId("C777, C811")
         let addLinkView = AddLinkView()
         let textToAddLink = "Test Link"
         let urlAdded = "beamapp.co/"
@@ -268,6 +271,7 @@ class NoteEditorTests: BaseTest {
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: textToAddLink,  needsActivation: true)
         }
         
+        testrailId("C1135")
         step("When I access to Link editor") {
             shortcutHelper.shortcutActionInvoke(action: .selectAll)
             shortcutHelper.shortcutActionInvoke(action: .insertLink)

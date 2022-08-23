@@ -28,7 +28,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testValidateAutoFillProposalCC() {
-                
+        testrailId("C1085")
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, inView: view)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, inView: view, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel, inView: view)
@@ -36,7 +36,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testValidateNoAutoFillCC() {
-        
+        testrailId("C1086")
         uiMenu.clearCreditCardsDB()
                 
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, inView: view, autocomplete: false)
@@ -62,7 +62,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
             mockPage.getContinueButtonElement(inView: view).clickOnExistence()
         }
         
-        step("Then the results page is populated with sign in data") {
+        step("Then the results page is populated with credit card data") {
             mockPage.waitForContinueButtonToDisappear(inView: view)
             XCTAssertEqual(mockPage.getResultValue(label: creditCardNumberLabelMockPage), johnCCNumber)
             XCTAssertEqual(mockPage.getResultValue(label: creditCardExpDateLabelMockPage), johnCCExpDate)
@@ -72,7 +72,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testValidateOtherCCMoreThan4() {
-        
+        testrailId("C1087")
         // Add two more cards in DB to have 4 cards
         uiMenu.populateCreditCardsDB()
         
@@ -142,7 +142,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testValidateOtherCCLessThan4() {
-        
+        testrailId("C1088")
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel, inView: view)
         
         step("When I click on Other CC") {
@@ -152,8 +152,10 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         verifyDBCCNotes()
     }
     
-    func skipAutoFillDeactivated() {
-
+    func testAutoFillDeactivated() throws {
+        try XCTSkipIf(true, "To be fixed in scope of BE-5259")
+        testrailId("C638")
+        uiMenu.resetUserPreferences()
         step ("WHEN I deactivate Autofill password setting"){
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)

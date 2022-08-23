@@ -11,20 +11,26 @@ import XCTest
 class BrowserPinnedTabTests: BaseTest {
     
     let newTabToOpen = "google.com"
+    var journalView: JournalTestView!
     
     override func setUp() {
-        
         step("Given I open a web page"){
-            launchApp()
+            journalView = launchApp()
             uiMenu.loadUITestPage1()
         }
     }
     
-    func testPinTab() throws {
-        
+    private func pinFirstTabStep() {
         step("When I pin the tab"){
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
+            webView
+                .openTabMenu(tabIndex: 0)
+                .selectTabMenuItem(.pinTab)
         }
+    }
+    
+    func testPinTab() throws {
+        testrailId("C968")
+        pinFirstTabStep()
         
         step("Then tab is pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
@@ -52,10 +58,8 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testUnpinTab() throws {
-        
-        step("When I pin the tab"){
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
-        }
+        testrailId("C969")
+        pinFirstTabStep()
         
         step("Then tab is pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
@@ -73,7 +77,7 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testPinMultipleTabs() throws {
-        
+        testrailId("C968")
         step("And I open a second tab"){
             uiMenu.loadUITestPage2()
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 0)
@@ -81,8 +85,11 @@ class BrowserPinnedTabTests: BaseTest {
         }
         
         step("When I pin both tabs"){
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
-            webView.openTabMenu(tabIndex: 1).selectTabMenuItem(.pinTab) // new tab is now the first unpinned tab -> index 0
+            webView
+                .openTabMenu(tabIndex: 0)
+                .selectTabMenuItem(.pinTab)
+                .openTabMenu(tabIndex: 1)
+                .selectTabMenuItem(.pinTab) // new tab is now the first unpinned tab -> index 0
         }
                 
         step("Then both tabs are pinned"){
@@ -90,8 +97,11 @@ class BrowserPinnedTabTests: BaseTest {
             XCTAssertEqual(webView.getNumberOfUnpinnedTabs(wait: true), 0)
         }
         
+        testrailId("C969")
         step("When I unpin one tab"){
-            webView.openTabMenu(tabIndex: 0, isPinnedTab: true).selectTabMenuItem(.unpinTab)
+            webView
+                .openTabMenu(tabIndex: 0, isPinnedTab: true)
+                .selectTabMenuItem(.unpinTab)
         }
         
         step("Then tab is unpinned"){
@@ -101,9 +111,11 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testPinnedTabAfterRestart() throws {
-
+        testrailId("C1046")
         step("When I pin the tab"){
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
+            webView
+                .openTabMenu(tabIndex: 0)
+                .selectTabMenuItem(.pinTab)
         }
 
         step("And enable start on opened tabs"){
@@ -122,12 +134,9 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testOpenLinkFromPinnedTab() throws {
-
+        testrailId("C1047")
         let linkToOpen = "released his perhaps still-in-progress album"
-
-        step("When I pin the tab"){
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
-        }
+        pinFirstTabStep()
         
         step("And I open a link with CMD+Click"){
             XCUIElement.perform(withKeyModifiers: .command) {
@@ -142,17 +151,17 @@ class BrowserPinnedTabTests: BaseTest {
     }
     
     func testRestorePinnedTab() throws {
-
-        step("When I pin the tab"){
-            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
-        }
+        testrailId("C1048")
+        pinFirstTabStep()
         
         step("And I close the tab"){
-            webView.openTabMenu(tabIndex: 0, isPinnedTab: true).selectTabMenuItem(.closeTab)
+            webView
+                .openTabMenu(tabIndex: 0, isPinnedTab: true)
+                .selectTabMenuItem(.closeTab)
         }
         
         step("Then journal is displayed"){
-            XCTAssertTrue(JournalTestView().isJournalOpened())
+            XCTAssertTrue(journalView.isJournalOpened())
         }
         
         step("When I restore tabs"){
