@@ -14,6 +14,7 @@ struct PDFDocumentView {
     var destination: Binding<PDFDocumentViewDestination>?
     var onClickLink: ((URL) -> Void)?
     var onSelectionChanged: ((String?) -> Void)?
+    var onEscapeKeyDown: (() -> Void)?
     var findString: String?
     var findMatchIndex: Binding<Int>?
     var onFindMatches: (([PDFSelection]) -> Void)?
@@ -28,6 +29,7 @@ struct PDFDocumentView {
         destination: Binding<PDFDocumentViewDestination>? = nil,
         onClickLink: ((URL) -> Void)? = nil,
         onSelectionChanged: ((String?) -> Void)? = nil,
+        onEscapeKeyDown: (() -> Void)?,
         findString: String?,
         findMatchIndex: Binding<Int>?,
         onFindMatches: (([PDFSelection]) -> Void)?
@@ -41,6 +43,7 @@ struct PDFDocumentView {
         self.destination = destination
         self.onClickLink = onClickLink
         self.onSelectionChanged = onSelectionChanged
+        self.onEscapeKeyDown = onEscapeKeyDown
         self.findString = findString
         self.findMatchIndex = findMatchIndex
         self.onFindMatches = onFindMatches
@@ -72,6 +75,7 @@ extension PDFDocumentView: NSViewRepresentable {
     }
 
     func updateNSView(_ pdfView: CustomPDFView, context: Context) {
+        pdfView.onEscapeKeyDown = onEscapeKeyDown
         context.coordinator.setSwiftUIView(self)
     }
 

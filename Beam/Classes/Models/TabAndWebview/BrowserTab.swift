@@ -71,6 +71,7 @@ import UniformTypeIdentifiers
     var lastViewDate: Date = BeamDate.now
 
     private var observersCancellables = Set<AnyCancellable>()
+    private var searchViewModelCancellable: AnyCancellable?
 
     static let webViewConfiguration = BeamWebViewConfigurationBase(handlers: handlers(isIncognito: false))
 
@@ -121,13 +122,21 @@ import UniformTypeIdentifiers
     var webviewWindow: NSWindow? { webView.window }
     var frame: NSRect { webView.frame }
 
+    var searchViewModel: SearchViewModel? {
+        didSet {
+            searchViewModelCancellable?.cancel()
+            searchViewModelCancellable = searchViewModel?.objectWillChange.sink { [weak self] in
+                self?.objectWillChange.send()
+            }
+        }
+    }
+
     @Published var title: String = ""
     @Published var originalQuery: String?
     @Published var url: URL?
 
     @Published var contentDescription: BrowserContentDescription?
     @Published var authenticationViewModel: AuthenticationViewModel?
-    @Published var searchViewModel: SearchViewModel?
     @Published var mouseHoveringLocation: MouseHoveringLocation = .none
     @Published var textSelection: String?
     @Published var pendingContextMenuPayload: ContextMenuMessageHandlerPayload?
@@ -628,6 +637,7 @@ import UniformTypeIdentifiers
 
     func respondToEscapeKey() {
         webAutofillController?.dismiss()
+        searchViewModel?.close()
     }
 
     func passwordManagerToast(saved: Bool) {
