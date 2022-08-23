@@ -1,6 +1,8 @@
 import {
   BeamElement,
   BeamLogCategory,
+  BeamMutationObserver,
+  BeamNode,
   BeamWebkitPresentationMode,
   BeamWindow,
   MediaPlayState
@@ -32,24 +34,67 @@ export class MediaPlayer<UI extends MediaPlayerUI> {
   }
 
   registerEventListeners(): void {
-    this.win.addEventListener("load", this.media_observe.bind(this))
+    this.win.addEventListener("load", this.media_add_observe.bind(this))
     this.win.addEventListener("beam_historyLoad", this.media_onPlaying.bind(this)) 
+    this.createMediaMutationObserver()
+  }
+
+  createMutationObserver(fn): BeamMutationObserver {
+    return new MutationObserver(fn) as unknown as BeamMutationObserver
+  }
+
+  createMediaMutationObserver(): void {
+    const observer = this.createMutationObserver(this.mediaMutationCallback.bind(this))
+    const options = {
+      childList: true,
+      subtree: true,
+      attributes: true
+    }
+    observer.observe(this.win.document, options)
+  }
+
+  mediaMutationCallback(mutationRecords, _self): void {
+    mutationRecords.map((mutationRecord) => {
+      for (const node of mutationRecord.removedNodes) {
+        if (["VIDEO", "AUDIO"].includes(node.nodeName)) {
+          this.removeEventListenerToMediaTag(node)
+        }
+      }
+
+      for (const node of mutationRecord.addedNodes) {
+        if (["VIDEO", "AUDIO"].includes(node.nodeName)) {
+          this.addEventListenerToMediaTag(node)
+        }
+      }
+    })
   }
 
   media_htmlMediaTags() {
       return this.win.document.querySelectorAll("video,audio")
   }
 
-  media_observe() {
+  media_add_observe() {
       const tags = this.media_htmlMediaTags()
       for (let i = 0; i < tags.length; i++) {
           const tag = tags[i]
-          if (tag.addEventListener) {
-              tag.addEventListener("playing", this.media_onPlaying.bind(this))
-              tag.addEventListener("pause", this.media_onPausePlaying.bind(this))
-              tag.addEventListener("ended", this.media_onStopPlaying.bind(this))
-          }
+          this.addEventListenerToMediaTag(tag)
       }
+  }
+
+  private addEventListenerToMediaTag(tag: BeamNode) {
+    if (tag.addEventListener) {
+      tag.addEventListener("playing", this.media_onPlaying.bind(this))
+      tag.addEventListener("pause", this.media_onPausePlaying.bind(this))
+      tag.addEventListener("ended", this.media_onStopPlaying.bind(this))
+    }
+  }
+
+  private removeEventListenerToMediaTag(tag: BeamNode) {
+    if (tag.removeEventListener) {
+      tag.removeEventListener("playing", this.media_onPlaying.bind(this))
+      tag.removeEventListener("pause", this.media_onPausePlaying.bind(this))
+      tag.removeEventListener("ended", this.media_onStopPlaying.bind(this))
+    }
   }
 
   /**
