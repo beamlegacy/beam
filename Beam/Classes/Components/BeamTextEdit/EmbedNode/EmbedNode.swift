@@ -646,7 +646,7 @@ extension EmbedNode: EmbedContentViewDelegate {
             return
         }
 
-        if mediaPlayerController?.isPlaying == true {
+        if mediaPlayerController?.playState == .playing || mediaPlayerController?.playState == .paused {
             noteMediaPlayerManager.addNotePlaying(note: note, elementId: elementId, webView: webView, url: url)
         } else {
             noteMediaPlayerManager.stopNotePlaying(note: note, elementId: elementId, url: url)
