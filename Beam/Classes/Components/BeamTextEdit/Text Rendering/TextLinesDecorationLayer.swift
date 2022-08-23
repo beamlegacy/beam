@@ -21,7 +21,6 @@ class TextLinesDecorationLayer: CALayer {
             CATransaction.disableAnimations {
                 self.frame = rect
             }
-            self.updateSubLayers()
         }
     }
 
@@ -44,7 +43,7 @@ class TextLinesDecorationLayer: CALayer {
         sublayers?.forEach { $0.removeFromSuperlayer() }
     }
 
-    private func updateSubLayers() {
+    override func layoutSublayers() {
         NSAppearance.withAppAppearance {
             removeAllSublayers()
             guard let textLines = textLines, !textLines.isEmpty else { return }
