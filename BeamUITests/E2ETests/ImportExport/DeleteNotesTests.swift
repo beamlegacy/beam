@@ -15,11 +15,13 @@ class DeleteNotesTests: BaseTest {
     let allNotes = AllNotesTestView()
     
     func testDeleteAllLocalContents() {
+        testrailId("C517")
         //Tests only notes deletion
         runDeleteNoteTest(isLocalContentsTest: true)
     }
     
     func testDeleteAllNotes() {
+        testrailId("C516")
         //Tests only notes deletion, remote deletion assertion to be investigated if that is possible using Vinyls
         runDeleteNoteTest(isLocalContentsTest: false)
     }

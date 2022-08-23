@@ -29,6 +29,7 @@ class BrowserShortcutsTests: BaseTest {
             XCTAssertTrue(testPage.isAlertPageOpened())
         }
 
+        testrailId("C501")
         step ("Then I can open tabs using shortcuts"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
             omniboxView.searchInOmniBox(self.getRandomSearchTerm(), true)
@@ -37,6 +38,7 @@ class BrowserShortcutsTests: BaseTest {
             XCTAssertFalse(testPage.isAlertPageOpened())
         }
         
+        testrailId("C507")
         step ("Then I can close tabs using shortcuts"){
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: 2)
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
@@ -44,6 +46,7 @@ class BrowserShortcutsTests: BaseTest {
             XCTAssertFalse(testPage.isAlertPageOpened())
         }
         
+        testrailId("C502")
         step ("Then I can reopen tabs using shortcuts"){
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .reOpenClosedTab, numberOfTimes: 1)
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
@@ -62,6 +65,7 @@ class BrowserShortcutsTests: BaseTest {
         }
         
         step ("Then I can jump between tabs using shortcuts"){
+            testrailId("C1145, C1146")
             shortcutHelper.shortcutActionInvoke(action: .jumpToPreviousTab)
             XCTAssertTrue(self.isMediaPageOpened())
             
@@ -89,6 +93,7 @@ class BrowserShortcutsTests: BaseTest {
             uiMenu.loadUITestPagePassword()
         }
         
+        testrailId("C556")
         step ("Then I can reload webpage using shortcuts"){
             XCTAssertEqual(testPage.getInputValue(.username), emptyString)
             testPage.enterInput("xyz", .username)

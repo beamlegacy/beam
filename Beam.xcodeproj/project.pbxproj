@@ -1329,7 +1329,6 @@
 		B5DC1F8126B1975900A4C94B /* ToolbarLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1F8026B1975900A4C94B /* ToolbarLocators.swift */; };
 		B5DC1F8A26B19C8700A4C94B /* OmniBoxTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1F8926B19C8700A4C94B /* OmniBoxTestView.swift */; };
 		B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1FB426B928CA00A4C94B /* DateHelper.swift */; };
-		B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1FBD26B92A8800A4C94B /* NoteViewTests.swift */; };
 		B5DC1FC026B9607900A4C94B /* DownloadViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1FBF26B9607900A4C94B /* DownloadViewLocators.swift */; };
 		B5DC1FC226B9608D00A4C94B /* DownloadTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1FC126B9608D00A4C94B /* DownloadTestView.swift */; };
 		B5DC1FC526B963EB00A4C94B /* DownloadsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1FC426B963EB00A4C94B /* DownloadsTest.swift */; };
@@ -3292,7 +3291,6 @@
 		B5DC1F8026B1975900A4C94B /* ToolbarLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarLocators.swift; sourceTree = "<group>"; };
 		B5DC1F8926B19C8700A4C94B /* OmniBoxTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBoxTestView.swift; sourceTree = "<group>"; };
 		B5DC1FB426B928CA00A4C94B /* DateHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelper.swift; sourceTree = "<group>"; };
-		B5DC1FBD26B92A8800A4C94B /* NoteViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteViewTests.swift; sourceTree = "<group>"; };
 		B5DC1FBF26B9607900A4C94B /* DownloadViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadViewLocators.swift; sourceTree = "<group>"; };
 		B5DC1FC126B9608D00A4C94B /* DownloadTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadTestView.swift; sourceTree = "<group>"; };
 		B5DC1FC426B963EB00A4C94B /* DownloadsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsTest.swift; sourceTree = "<group>"; };
@@ -7851,7 +7849,6 @@
 				B57A9B4026AB0947002C954D /* NoteCreationTests.swift */,
 				A316E6C4284D084D008DD4D1 /* DailySummaryTests.swift */,
 				B5BA078C26B0027A00D31FED /* NoteEditTests.swift */,
-				B5DC1FBD26B92A8800A4C94B /* NoteViewTests.swift */,
 				B5FAE2DA270C842700EAC8A3 /* NotePublishTests.swift */,
 				B58A174F27514E0100A588C4 /* NoteViewEmbedsTests.swift */,
 				A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */,
@@ -10083,7 +10080,6 @@
 				B5FAE300270ED94300EAC8A3 /* GeneralPreferenceTestView.swift in Sources */,
 				B551F3C126BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift in Sources */,
 				D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */,
-				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
 				D77A5A9C287C55C800652727 /* RightClickPageMenuTests.swift in Sources */,
 				D7F5BF0528756231008FE546 /* RightClickImageMenuTests.swift in Sources */,
 				A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */,

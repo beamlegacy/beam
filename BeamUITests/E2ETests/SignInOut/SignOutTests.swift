@@ -26,6 +26,7 @@ class SignOutTests: BaseTest {
         //To be fixed with https://linear.app/beamapp/issue/BE-4520/getting-the-rows-for-all-notes-table-fix
         //var defaultNotes: AllNotesTestTable!
         
+        testrailId("C1149")
         step("GIVEN I get the list of newly created notes 10 random notes") {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
@@ -34,6 +35,7 @@ class SignOutTests: BaseTest {
             uiMenu.create10Notes()
         }
         
+        testrailId("C617")
         step("WHEN I click Sign out button") {
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .account)
@@ -50,6 +52,7 @@ class SignOutTests: BaseTest {
             waitForDoesntExist(alertView.staticText(AlertViewLocators.StaticTexts.signOutConfirmation.accessibilityIdentifier))
         }
         
+        testrailId("C1110")
         step("WHEN I sign out the app leaving Delete all enabled") {
             accountView.signOutButtonClick()
             alertView.signOutButtonClick()
@@ -77,6 +80,7 @@ class SignOutTests: BaseTest {
     }
     
     func testSignOutWithoutDeletion() {
+        testrailId("C1111")
         var tableBeforeSignOut: AllNotesTestTable!
         
         step("GIVEN I get the All Notes table content") {

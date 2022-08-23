@@ -19,6 +19,7 @@ class NoteEditTests: BaseTest {
     }
     
     func testRenameNoteSuccessfully() {
+        testrailId("C751")
         let expectedNoteRenameFirstTime = "T"
         let expectedNoteRenameSecondTime = "Td2"
         let numberOfLetterToBeDeleted = 4
@@ -33,7 +34,6 @@ class NoteEditTests: BaseTest {
             noteView.typeKeyboardKey(.delete, numberOfLetterToBeDeleted)
             noteView.typeKeyboardKey(.enter)
         }
-        
         
         step("Then note title is changed to \(expectedNoteRenameFirstTime)"){
             XCTAssertEqual(noteView.getNoteTitle(), expectedNoteRenameFirstTime)
@@ -50,6 +50,7 @@ class NoteEditTests: BaseTest {
     }
     
     func testRenameNoteError() throws {
+        testrailId("C750")
         let expectedErrorMessage = "This note’s title already exists in your knowledge base"
         
         step("Given I create and open a note"){
@@ -70,6 +71,7 @@ class NoteEditTests: BaseTest {
     }
     
     func testNoteDeleteSuccessfully() {
+        testrailId("C749")
         let noteNameToBeCreated = "Test1"
         
         step("Given I create and open \(noteNameToBeCreated) note"){
@@ -98,6 +100,7 @@ class NoteEditTests: BaseTest {
     }
     
     func testImageNotesSourceIconRedirectonToWebSource() {
+        testrailId("C762")
         let pnsView = PnSTestView()
         
         step("When I add image to a note"){
@@ -106,6 +109,7 @@ class NoteEditTests: BaseTest {
             pnsView.addToTodayNote(imageItemToAdd)
         }
         
+        testrailId("C812")
         step("Then it has a source icon"){
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             noteView.waitForTodayNoteViewToLoad()
@@ -124,6 +128,7 @@ class NoteEditTests: BaseTest {
     }
 
     func testMoveHandleAppearsHoverNode() {
+        testrailId("C762")
         let pnsView = PnSTestView()
 
         step("When I add image to a note"){
@@ -142,6 +147,7 @@ class NoteEditTests: BaseTest {
     }
     
     func testMoveBulletsUsingShortcuts() {
+        testrailId("C761")
         var nodesBeforeChange = [String]()
         step("GIVEN I populate today's note with the rows") {
             noteView = launchApp()
@@ -175,6 +181,7 @@ class NoteEditTests: BaseTest {
     }
     
     func testOptionCmdBackpaceShortucsUsage() {
+        testrailId("C758")
         let noteNameToBeCreated = "DeleteShortcuts"
         let firstPart = "text "
         let secondPart = "to be "

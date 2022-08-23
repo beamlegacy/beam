@@ -50,7 +50,7 @@ class PasswordPreferencesTests: BaseTest {
     }
     
     func testPasswordProtectionLock() {
-        
+        testrailId("C625")
         setup(isPasswordProtectionDisabled: false, doPopulatePasswordsDB: false)
         
         step ("THEN I see the view is locked"){
@@ -62,7 +62,8 @@ class PasswordPreferencesTests: BaseTest {
         }
     }
     
-    func testAddPasswordItem() throws {
+    func testAddPasswordItem() {
+        testrailId("C628")
         setup(isPasswordProtectionDisabled: true, doPopulatePasswordsDB: false)
         
         step ("AND I click on add password button"){
@@ -149,6 +150,7 @@ class PasswordPreferencesTests: BaseTest {
     }
     
     func testRemovePasswordItem() throws {
+        testrailId("C629")
         setup()
         var alertView: AlertTestView!
         
@@ -184,7 +186,8 @@ class PasswordPreferencesTests: BaseTest {
         }
     }
     
-    func testViewPasswordItemDetails() throws {
+    func testViewPasswordItemDetails() {
+        testrailId("C630")
         setup()
         
         step ("WHEN I click to see password details of \(hostnameApple)"){
@@ -220,7 +223,8 @@ class PasswordPreferencesTests: BaseTest {
         
     }
     
-    func testSearchForPassword() throws {
+    func testSearchForPassword() {
+        testrailId("C626")
         setup()
         
         step ("WHEN I search for specific password entry 'apple'"){
@@ -253,7 +257,8 @@ class PasswordPreferencesTests: BaseTest {
         
     }
     
-    func testSortPasswords() throws {
+    func testSortPasswords() {
+        testrailId("C631")
         setup()
         
         step ("WHEN I click on Sites to sort passwords"){
@@ -287,7 +292,7 @@ class PasswordPreferencesTests: BaseTest {
         try XCTSkipIf(true, "Skipped due to BE-4951")
         // Test deactivated on Test Plan because we don't have an easy way to restore preferences settings after this test
         // Especially in case of failure at the middle of the test
-        
+        testrailId("C627")
         step ("GIVEN I open password preferences"){
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
@@ -300,7 +305,6 @@ class PasswordPreferencesTests: BaseTest {
             }
             XCTAssertTrue(passwordPreferencesView.getAutofillPasswordSettingElement().isSettingEnabled())
         }
-        
         
         step ("WHEN I go to Password Manager Test page"){
             XCUIApplication().windows["Passwords"].buttons[XCUIIdentifierCloseWindow].clickOnExistence()

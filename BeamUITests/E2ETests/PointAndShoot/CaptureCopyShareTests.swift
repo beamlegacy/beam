@@ -11,7 +11,7 @@ import XCTest
 class CaptureCopyShareTests: BaseTest {
     
     let pnsView = PnSTestView()
-    let journalView = JournalTestView()
+    var journalView: JournalTestView!
     let textToCapture = " capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime"
     
     private func switchToJournalAndPasteToFirstNode() {
@@ -30,9 +30,17 @@ class CaptureCopyShareTests: BaseTest {
         }
     }
     
+    override func setUp() {
+        step ("GIVEN I launch the app") {
+            journalView = launchApp()
+        }
+    }
+    
     func testCopyCapturedText() {
-        launchApp()
-        uiMenu.loadUITestPage3()
+        testrailId("C998")
+        step("GIVEN I load the test page") {
+            uiMenu.loadUITestPage3()
+        }
         
         step ("When I capture text and click Copy") {
             let textElementToAdd = pnsView.staticText(textToCapture)
@@ -52,11 +60,14 @@ class CaptureCopyShareTests: BaseTest {
     }
     
     func testCopyCapturedImage() {
-        let journalView = launchApp()
-        uiMenu.resizeSquare1000()
+        testrailId("C998")
+        
+        step("GIVEN I load the test page") {
+            uiMenu.resizeSquare1000()
+            uiMenu.loadUITestPage4()
+        }
         
         step ("When I capture text and click Copy") {
-            uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.pointAndShootElement(imageItemToAdd)
                 .getCopyButton()
@@ -74,13 +85,15 @@ class CaptureCopyShareTests: BaseTest {
     }
     
     func testShareCapturedText() {
-        launchApp()
-        uiMenu.loadUITestPage3()
-        
+        testrailId("C999, C1000, C1001, C1002, C1003, C1004")
         let windows = ["Twitter", "Facebook", "LinkedIn", "Reddit"]
         let apps = ["Email", "Messages"]
         
         let textElementToAdd = pnsView.staticText(textToCapture)
+        
+        step("GIVEN I load the test page") {
+            uiMenu.loadUITestPage3()
+        }
         
         for windowTitle in windows {
             if windowTitle != windows[2] { //To be removed as part of BE-5195

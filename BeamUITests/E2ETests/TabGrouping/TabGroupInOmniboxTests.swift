@@ -22,7 +22,6 @@ class TabGroupInOmniboxTests: BaseTest {
             uiMenu.createTabGroupNamed()
         } else {
             uiMenu.createTabGroup()
-
         }
         shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         tabGroupMenu.captureTabGroup(index: 0)
@@ -32,7 +31,7 @@ class TabGroupInOmniboxTests: BaseTest {
     }
     
     func testTabGroupNavigationInOmnibox() throws {
-        
+        testrailId("C1057")
         let autocompleteResults = [
             openAllTabsLabel,
             uiTestPageOne,
@@ -42,6 +41,7 @@ class TabGroupInOmniboxTests: BaseTest {
             shareGroup
         ]
         
+        testrailId("C1148")
         step("Given I capture an unnamed tab group") {
             createAndCaptureTabGroup(named: false)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
@@ -57,7 +57,7 @@ class TabGroupInOmniboxTests: BaseTest {
         }
         
         step("Then tab group details are displayed") {
-            _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: autocompleteResults.count)
+            XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: autocompleteResults.count))
             XCTAssertEqual(omniboxView.getOmniBoxSearchField().placeholderValue, uiTestPageOne + tabGroupUnamedSuffix)
             XCTAssertEqual(omniboxView.getAutocompleteResults().count, 6)
             XCTAssertTrue(omniboxView.areAutocompleteResultsInCorrectOrder(results: autocompleteResults))
@@ -76,7 +76,7 @@ class TabGroupInOmniboxTests: BaseTest {
         }
         
         step("Then tab group details are displayed") {
-            _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: autocompleteResults.count)
+            XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: autocompleteResults.count))
             XCTAssertEqual(omniboxView.getOmniBoxSearchField().placeholderValue, uiTestPageOne + tabGroupUnamedSuffix)
             XCTAssertEqual(omniboxView.getAutocompleteResults().count, 6)
             XCTAssertTrue(omniboxView.areAutocompleteResultsInCorrectOrder(results: autocompleteResults))
@@ -84,7 +84,7 @@ class TabGroupInOmniboxTests: BaseTest {
     }
     
     func testOpenAllTabs() throws {
-        
+        testrailId("C1058")
         let tabTitles = [
             uiTestPageOne,
             uiTestPageTwo,
@@ -100,7 +100,7 @@ class TabGroupInOmniboxTests: BaseTest {
         step("When I reopen all tabs") {
             omniboxView.searchInOmniBox("Point", false)
             omniboxView.typeKeyboardKey(.enter)
-            _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 6)
+            XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 6))
             omniboxView.getAutocompleteResults().firstMatch.clickInTheMiddle()
         }
         
@@ -116,7 +116,7 @@ class TabGroupInOmniboxTests: BaseTest {
     }
     
     func testOpenIndividualTab() throws {
-        
+        testrailId("C1059")
         step("Given I capture an unnamed tab group") {
             createAndCaptureTabGroup(named: false)
             tabGroupMenu.closeTabGroup(index: 0)
@@ -125,7 +125,7 @@ class TabGroupInOmniboxTests: BaseTest {
         step("When I open one tab") {
             omniboxView.searchInOmniBox("Point", false)
             omniboxView.typeKeyboardKey(.enter)
-            _ = omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 6)
+            XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 6))
             omniboxView.getAutocompleteResults().element(boundBy: 1).clickInTheMiddle()
         }
         
@@ -136,8 +136,8 @@ class TabGroupInOmniboxTests: BaseTest {
         }
     }
     
-    func testTabGroupNamedInOmnibox() throws {
-        
+    func testNamedTabGroupInOmnibox() throws {
+        testrailId("C1060")
         step("Given I capture a named tab group") {
             createAndCaptureTabGroup(named: true)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)

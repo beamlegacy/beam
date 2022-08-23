@@ -232,4 +232,8 @@ class BaseTest: XCTestCase {
         pboard.clearContents()
         pboard.setString("", forType: .string)
     }
+    
+    func testrailId(_ id: String) {
+        print("TestRail scenario ID: \(id)")
+    }
 }

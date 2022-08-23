@@ -13,10 +13,16 @@ class AllNotesDeleteTests: BaseTest {
     var allNotesView = AllNotesTestView()
     var journalView: JournalTestView!
     
-    func testDeleteAllNotes() {
-        step ("Given I create 2 notes"){
+    override func setUp() {
+        step("GIVEN I launch app and create a note") {
             launchApp()
             uiMenu.createNote()
+        }
+    }
+    
+    func testDeleteAllNotes() {
+        testrailId("C963")
+        step ("Given I create a note and switch to All Notes"){
             uiMenu.createNote()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             XCTAssertTrue(allNotesView.getNumberOfNotes() == 3)
@@ -29,13 +35,12 @@ class AllNotesDeleteTests: BaseTest {
     }
     
     func testDeleteSingleNote() throws {
+        testrailId("C716")
         let indexOfNote = 1
         
         var notesBeforeDeletion: Int!
         
-        step ("Given I create 2 notes") {
-            launchApp()
-            uiMenu.createNote()
+        step ("Given I create a note and switch to All Notes"){
             uiMenu.createNote()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             notesBeforeDeletion = allNotesView.getNumberOfNotes()
@@ -56,17 +61,17 @@ class AllNotesDeleteTests: BaseTest {
     }
     
     func testUndoDeleteNoteAction() throws {
+        testrailId("C716")
         let indexOfNote = 0
         var noteName : String!
         var notesBeforeDeletion: Int!
         
-        step ("Given I create a note") {
-            launchApp()
-            uiMenu.createNote()
+        step ("Given I switch to All Notes") {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             notesBeforeDeletion = allNotesView.getNumberOfNotes()
         }
         
+        testrailId("C527")
         step ("When I delete created note from All Notes view and undo it") {
             noteName = allNotesView.getNoteNameValueByIndex(indexOfNote)
             allNotesView.deleteNoteByIndex(indexOfNote)

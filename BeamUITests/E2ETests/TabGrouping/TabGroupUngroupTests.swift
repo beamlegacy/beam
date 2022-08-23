@@ -21,7 +21,7 @@ class TabGroupUngroupTests: BaseTest {
     }
     
     func testTabGroupUngroup() throws {
-        
+        testrailId("C986")
         step("When I ungroup tabs") {
             tabGroupMenu.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
@@ -35,7 +35,7 @@ class TabGroupUngroupTests: BaseTest {
     }
     
     func testTabGroupUngroupWhenCollapsed() throws {
-        
+        testrailId("C986")
         step("When I collapse tab group") {
             tabGroupMenu.collapseTabGroup(index: 0)
         }

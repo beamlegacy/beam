@@ -28,7 +28,7 @@ class GeneralPreferencesTests: BaseTest {
     }
     
     func testStartBeamWithOpenedTabs() {
-        
+        testrailId("C586")
         step("THEN I see Start beam with opened tabs checkbox available") {
             XCTAssertTrue(startBeamCheckbox.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.startBeamlabel.accessibilityIdentifier).exists)
@@ -74,7 +74,7 @@ class GeneralPreferencesTests: BaseTest {
     }
     
     func testGeneralPrefsAppearanceElements() {
-        
+        testrailId("C585")
         step("THEN Appearance elements are correctly displayed") {
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.appearanceLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             for buttonID in GeneralPreferencesViewLocators.Buttons.allCases {
@@ -85,13 +85,13 @@ class GeneralPreferencesTests: BaseTest {
     }
     
     func testGeneralPrefsAccessibilityElements() {
-        
+        testrailId("C587")
         step("THEN Accessibility Press Tab to highlight checkbox is correctly displayed") {
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.accessibilityLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(generalPrefView.checkBox(GeneralPreferencesViewLocators.Checkboxes.highlightTab.accessibilityIdentifier).exists)
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.highlightCheckboxDescription.accessibilityIdentifier).exists)
         }
-        
+        testrailId("C1106")
         step("THEN Accessibility Force click and haptic feedback checkbox is correctly displayed") {
             XCTAssertTrue(generalPrefView.checkBox(GeneralPreferencesViewLocators.Checkboxes.forceClickAndHapticFeedback.accessibilityIdentifier).exists)
         }

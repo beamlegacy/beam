@@ -18,11 +18,10 @@ class BrowserTabViewTests: BaseTest {
             journalView = launchApp()
             uiMenu.loadUITestPage1()
         }
-        
     }
     
     func testOpenCloseTabs() {
-
+        testrailId("C965, C1050")
         let uiTestPageLink = webView.staticText("new-tab-beam")
         
         step("Then 1 tab is opened"){
@@ -53,14 +52,14 @@ class BrowserTabViewTests: BaseTest {
         }
 
         step("Then I'm redirected to Journal"){
-            XCTAssertTrue(waitFor( PredicateFormat.exists.rawValue, journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier)))
+            XCTAssertTrue(waitFor( PredicateFormat.exists.rawValue, journalView.getScrollViewElement()))
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 0)
         }
         
     }
     
     func testOpenLinkInNewTab() { // BE-3783: crash when opening a tab with CMD+Click
-        
+        testrailId("C1049")
         step("When I open a link with CMD+Click"){
             XCUIElement.perform(withKeyModifiers: .command) {
                 XCUIApplication().webViews[uiTestPageOne].staticTexts[linkToOpen].clickOnExistence()

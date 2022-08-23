@@ -17,12 +17,12 @@ class ReferencesTests: BaseTest {
     private func createNotesAndReferenceThem() -> NoteTestView {
         let journalView = launchApp()
         
-        step ("Given I create 2 notes"){
+        step ("GIVEN I create 2 notes"){
             uiMenu.createAndOpenNote()
             noteView = journalView.createNoteViaOmniboxSearch(noteName2) //to be applied once https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu is fixed
         }
 
-        step ("Then I reference note 2 to note 1"){
+        step ("WHEN I reference note 2 to note 1"){
             noteView.createReference(noteName1)
         }
         
@@ -31,30 +31,41 @@ class ReferencesTests: BaseTest {
     
 
     func testCreateNoteReference() {
+        testrailId("C793")
         noteView = createNotesAndReferenceThem()
-        noteView.openNoteFromAllNotesList(noteTitleToOpen: noteName1)
-
-        XCTAssertEqual(noteView.getLinksNamesNumber(), 0) //Link ONLY
-        XCTAssertEqual(noteView.getLinksContentNumber(), 0)
-        noteView.assertReferenceCounterTitle(expectedNumber: 1)
         
-        noteView.expandReferenceSection()
-        XCTAssertEqual(noteView.getLinksNamesNumber(), 1) // Link and Reference
-        XCTAssertEqual(noteView.getLinksContentNumber(), 1)
-        XCTAssertEqual(noteView.getLinkNameByIndex(0), noteName2)
-        XCTAssertEqual(noteView.getLinkContentByIndex(0), noteName1)
+        step("WHEN I open \(noteName1) note") {
+            noteView.openNoteFromAllNotesList(noteTitleToOpen: noteName1)
+        }
+
+        step("THEN references and links counter are correct") {
+            XCTAssertEqual(noteView.getLinksNamesNumber(), 0) //Link ONLY
+            XCTAssertEqual(noteView.getLinksContentNumber(), 0)
+            noteView.assertReferenceCounterTitle(expectedNumber: 1)
+        }
+        
+        testrailId("C806")
+        step("WHEN I expand reference section") {
+            noteView.expandReferenceSection()
+        }
+        
+        testrailId("C800")
+        step("THEN references and links counter are correct") {
+            XCTAssertEqual(noteView.getLinksNamesNumber(), 1) // Link and Reference
+            XCTAssertEqual(noteView.getLinksContentNumber(), 1)
+            XCTAssertEqual(noteView.getLinkNameByIndex(0), noteName2)
+            XCTAssertEqual(noteView.getLinkContentByIndex(0), noteName1)
+        }
         
         step ("Then I can navigate to a note by Reference to a source note"){
             noteView.openLinkByIndex(0)
             XCTAssertEqual(noteView.getNumberOfVisibleNotes(), 2)
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), noteName1)
         }
-
-        
     }
     
     func testReferenceDeletion() {
-
+        testrailId("C794")
         noteView = createNotesAndReferenceThem()
         noteView.openNoteFromAllNotesList(noteTitleToOpen: noteName1)
             .expandReferenceSection()
@@ -107,7 +118,6 @@ class ReferencesTests: BaseTest {
             noteView.openNoteFromAllNotesList(noteTitleToOpen: noteName2)
         }
 
-        
         step ("When I delete note 1"){
             noteView.clickDeleteButton().confirmDeletion()
         }
@@ -120,7 +130,8 @@ class ReferencesTests: BaseTest {
 
     }
     
-    func testReferenceEditing() throws {
+    func testReferenceEditing() {
+        testrailId("C1042")
         let textToType = " some text"
         let renamedNote1 = noteName1 + textToType
         noteView = createNotesAndReferenceThem()
@@ -168,8 +179,8 @@ class ReferencesTests: BaseTest {
 
     }
     
-    func SKIPtestLinkReferecnes() throws {
-        try XCTSkipIf(true, "Link and Link All buttons are not accessible")
+    func testLinkReferecnes() throws {
+        try XCTSkipIf(true, "Link and Link All buttons are not accessible, https://linear.app/beamapp/issue/BE-5217/link-single-reference-ui-tests")
         let secondReference = "\(noteName1) second REF"
         let thirdReference = "\(noteName1) THIRD_reference"
         noteView = createNotesAndReferenceThem()
@@ -180,13 +191,11 @@ class ReferencesTests: BaseTest {
             noteView.typeInNoteNodeByIndex(noteIndex: 2, text: thirdReference)
         }
 
-        
         step ("Given I open \(noteName1)"){
             noteView.openNoteFromAllNotesList(noteTitleToOpen: noteName1)
             noteView.expandReferenceSection()
         }
 
-        
         /*step ("When I click Link first reference"){
             
         }
@@ -195,19 +204,20 @@ class ReferencesTests: BaseTest {
         step ("Then "){
             
         }*/
-                     
+             
+        testrailId("C796")
         step ("When I click Link All for remained references"){
             noteView.expandReferenceSection()
                 .linkAllReferences()
         }
 
-        
         step ("Then the note has no references available"){
             XCTAssertTrue(waitForDoesntExist(noteView.getRefereceSectionCounterElement()))
         }
     }
     
     func testReferencesSectionBreadcrumbs() throws {
+        testrailId("C802")
         noteView = createNotesAndReferenceThem()
         let additionalNote = "Level1"
         let editedValue = "Level0"
@@ -218,6 +228,7 @@ class ReferencesTests: BaseTest {
             XCTAssertFalse(noteView.waitForBreadcrumbs(), "Breadcrumbs are available though shouldn't be")
         }
 
+        testrailId("C801")
         step ("When I create indentation level for the reference"){
             noteView.openNoteFromAllNotesList(noteTitleToOpen: noteName2)
                 .typeKeyboardKey(.upArrow)
@@ -260,10 +271,9 @@ class ReferencesTests: BaseTest {
                 .expandReferenceSection()
             XCTAssertFalse(noteView.waitForBreadcrumbs(), "Breadcrumbs are available though shouldn't be")
         }
-
     }
     
-    func SKIPtestReferencesIndentationLevels() throws {
-        try XCTSkipIf(true, "WIP")
+    func testReferencesIndentationLevels() throws {
+        try XCTSkipIf(true, "https://linear.app/beamapp/issue/BE-5218/testreferencesindentationlevels-ui-test")
     }
 }

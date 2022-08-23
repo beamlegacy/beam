@@ -16,7 +16,7 @@ class NotesPreferencesTests: BaseTest {
     var showBulletsCheckbox: XCUIElement!
     
     func testIndentationShowBullets() {
-
+        testrailId("C599")
         step("GIVEN I prepare a note with lines") {
             journalView = launchApp()
             journalView.waitForJournalViewToLoad()

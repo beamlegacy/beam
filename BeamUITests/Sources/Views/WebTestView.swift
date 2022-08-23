@@ -297,8 +297,10 @@ class WebTestView: BaseView {
         return self
     }
 
-    func selectTabMenuItem(_ menuAction: WebViewLocators.MenuItem) {
+    @discardableResult
+    func selectTabMenuItem(_ menuAction: WebViewLocators.MenuItem) -> WebTestView {
         menuItem(menuAction.accessibilityIdentifier).tapInTheMiddle()
+        return self
     }
     
     @discardableResult
