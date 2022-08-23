@@ -50,6 +50,7 @@ class OnboardingTests: BaseTest {
     }
     
     func testTermsConditionsAndPrivacyPolicy() {
+        testrailId("C659")
         step("Then by default no terms / privacy pop-up windows opened"){
             XCTAssertFalse(onboardingView.isTermsAndConditionsWindowOpened())
             XCTAssertFalse(onboardingView.isPrivacyPolicyWindowOpened())
@@ -75,6 +76,7 @@ class OnboardingTests: BaseTest {
     }
     
     func testConnectWithGoogle() {
+        testrailId("C657")
         step("Then Google auth window is opened on Continue with Google button click"){
             XCTAssertTrue(onboardingView.clickContinueWithGoogleButton().isGoogleAuthWindowOpened())
         }
@@ -93,7 +95,7 @@ class OnboardingTests: BaseTest {
     }
     
     func testConnectWithEmailUsernameSignInCaseInsensitive() throws {
-        
+        testrailId("C660")
         step("GIVEN I sign up an account and take credentials") {
             setupStaging(withRandomAccount: true)
             accountInfo = getCredentials()
@@ -117,7 +119,7 @@ class OnboardingTests: BaseTest {
     }
     
     func testConnectWithEmailUsernameSignInRequirements() throws {
-        
+        testrailId("C669")
         step("GIVEN I sign up an account and take credentials") {
             setupStaging(withRandomAccount: true)
             accountInfo = getCredentials()
@@ -136,6 +138,7 @@ class OnboardingTests: BaseTest {
             XCTAssertTrue(onboardingView.isContinueWithEmailButtonActivated())
         }
         
+        testrailId("C670")
         step("Then by default Connect button is disabled and Forgot password link is enabled"){
             onboardingView.clickContinueWithEmailButton()
             XCTAssertFalse(onboardingUsernameView.isConnectButtonEnabled())
@@ -146,6 +149,7 @@ class OnboardingTests: BaseTest {
             onboardingUsernameView.typeKeyboardKey(.enter) //it will fail with next steps if bug appears, no assertion possible due to Vynil limitation so far
         }
         
+        testrailId("C663")
         step("And I'm redirected to Landing view on pressing Back button"){
             XCTAssertTrue(onboardingUsernameView.goToPreviousPage().waitForLandingViewToLoad())
             onboardingView.clickContinueWithEmailButton()
@@ -161,6 +165,7 @@ class OnboardingTests: BaseTest {
 //            XCTAssertFalse(onboardingUsernameView.isConnectButtonEnabled())
 //        }
         
+        testrailId("C672")
         step("Then correct password is accepted"){
 //            onboardingUsernameView.getPasswordTextField().clickOnExistence()
 //            shortcutHelper.shortcutActionInvoke(action: .selectAll)
@@ -176,8 +181,8 @@ class OnboardingTests: BaseTest {
         }
     }
     
-    func testConnectWithEmailSignUpPasswrdRequirements() throws {
-
+    func testConnectWithEmailSignUpPasswrdRequirements() {
+        testrailId("C661")
         let onboardingSignupView = OnboardingSignupWithEmailTestView()
         
         step("Given I set correct password and click Continue with Email button") {
@@ -197,6 +202,7 @@ class OnboardingTests: BaseTest {
             onboardingSignupView.getPasswordField().typeText("abcdef")
         }
         
+        testrailId("C662")
         step("Then signup is disabled and Verify password shows an error") {
             onboardingSignupView.getVerifyPasswordField().tapInTheMiddle()
             XCTAssertTrue(onboardingSignupView.waitForSignUpButtonToBeDisabled())
@@ -227,6 +233,7 @@ class OnboardingTests: BaseTest {
             onboardingSignupView.getVerifyPasswordField().typeText("!1")
         }
         
+        testrailId("C664")
         step("Then signup is enabled and Verify password doesn't show an error") {
             XCTAssertTrue(onboardingSignupView.waitForSignUpButtonToBeEnabled())
             XCTAssertFalse(onboardingSignupView.waitForVerifyPasswordsEqualityMessageExistence())
@@ -241,7 +248,7 @@ class OnboardingTests: BaseTest {
     }
     
     func testConnectWithEmailFormatRequirements() {
-        
+        testrailId("C660")
         step("Given I type correct format email") {
             onboardingView.getEmailTextField().tapInTheMiddle()
             onboardingView.getEmailTextField().typeText("ab1@xyz.com")
@@ -303,8 +310,8 @@ class OnboardingTests: BaseTest {
         
     }
 
-    func testSignUpLater() {
-        
+    func testSignUpLater() throws {
+        try XCTSkipIf(true, "duplicate of testUseAppWithoutSignIn")
         step("Then Journal is opened on Sign up later click"){
             XCTAssertTrue(onboardingView.signUpLater()
                             .clickSkipButton()
@@ -326,6 +333,7 @@ class OnboardingTests: BaseTest {
             onboardingPrivateKeyView = passAuthorisationViews(email: accountInfo.email, password: accountInfo.password)
         }
         
+        testrailId("C675")
         step("Then PK view is loaded and Continue button is disabled") {
             XCTAssertTrue(onboardingPrivateKeyView.waitForPKViewLoaded())
             XCTAssertTrue(waitForIsDisabled( (onboardingPrivateKeyView.getContinueButton())))
@@ -333,6 +341,7 @@ class OnboardingTests: BaseTest {
             XCTAssertTrue(onboardingPrivateKeyView.getBackButton().isEnabled)
         }
         
+        testrailId("C1154")
         step("When I click I forgot my key button") {
             onboardingLostPKTestView = onboardingPrivateKeyView.cantFindPKButtonClick()
         }
@@ -342,9 +351,10 @@ class OnboardingTests: BaseTest {
             XCTAssertTrue(onboardingLostPKTestView.getViewDescription().exists)
             XCTAssertTrue(onboardingLostPKTestView.getViewWarningText().exists)
             XCTAssertTrue(onboardingLostPKTestView.getEraseDataButton().isHittable)
-            onboardingLostPKTestView!.getBackButton().tapInTheMiddle()
+            onboardingLostPKTestView.getBackButton().tapInTheMiddle()
         }
         
+        testrailId("C1155")
         step("When I add incorrect PK and click continue button") {
             onboardingPrivateKeyView.getPKTextField().focusAndTypeTextOnExistence("sometext")
             XCTAssertTrue(waitForIsEnabled( (onboardingPrivateKeyView.getContinueButton())))
@@ -369,6 +379,7 @@ class OnboardingTests: BaseTest {
     }
     
     func testSignInSuccessfullyFromOnboarding() {
+        testrailId("C1156")
         step("GIVEN I sign up an account and take credentials") {
             setupStaging(withRandomAccount: true)
             accountInfo = getCredentials()
@@ -381,6 +392,7 @@ class OnboardingTests: BaseTest {
             onboardingImportDataTestView = passAuthorisationViews(email: accountInfo.email, password: accountInfo.password).setPKAndClickContinueButton(privateKey: accountInfo.pk)
         }
         
+        testrailId("C680")
         step("Then I'm on a Journal view") {
             XCTAssertTrue(onboardingImportDataTestView
                                 .clickSkipButton()
@@ -390,6 +402,7 @@ class OnboardingTests: BaseTest {
     }
     
     func testOnboardingImportView() throws {
+        testrailId("C681")
         try XCTSkipIf(true, "blocked by https://linear.app/beamapp/issue/BE-3880/ansible-script-update-to-install-chrome-firefox-brave-browsers-on-ci")
         step("Given I'm on import data view'") {
             onboardingView.signUpLater()
@@ -446,6 +459,7 @@ class OnboardingTests: BaseTest {
     }
     
     func testOnboardingWelcomeAppearance() {
+        testrailId("C690")
         let expectedTabs = 1
         let expectedTabTitle = "Welcome to beam"
         step("GIVEN I sign up an account") {
@@ -460,6 +474,7 @@ class OnboardingTests: BaseTest {
     }
     
     func testOnboardingWelcomeWebViewsCorrectness() throws {
+        testrailId("C691, C692, C693, C694, C695")
         try XCTSkipIf(true, "The test scenario is NOT for MRs as far as welcome web pages are not a part of mac app. The scenario is created to be ran during release activities manually, to make sure the copies are correct and in correct sequence, to avoid making it manually")
         let page1 = ["Welcome to beam", "beam is a new way to navigate the web, ", "gather knowledge and share with others."]
         let page2 = ["Beneath your ", "browser", "…"]

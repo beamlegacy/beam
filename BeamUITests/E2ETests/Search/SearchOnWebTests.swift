@@ -20,7 +20,6 @@ class SearchOnWebTests: BaseTest {
     }
     
     func testSearchViewAppearance() {
-        
         step("Given I open a test page"){
             uiMenu.loadUITestPage2()
             webView.waitForWebViewToLoad()
@@ -30,6 +29,7 @@ class SearchOnWebTests: BaseTest {
             XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
+        testrailId("C1124")
         step("When I use CMD+F"){
             searchView.triggerSearchField()
         }
@@ -49,6 +49,7 @@ class SearchOnWebTests: BaseTest {
             XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
         }
         
+        testrailId("C924")
         step("Then can I close search field via x icon"){
             searchView.closeSearchField()
             XCTAssertFalse(searchView.getSearchFieldElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -62,7 +63,7 @@ class SearchOnWebTests: BaseTest {
     }
     
     func testSearchResultsCounter() {
-        
+        testrailId("C922")
         step("Given I open a test page"){
             uiMenu.loadUITestPage2()
             webView.waitForWebViewToLoad()
@@ -85,6 +86,7 @@ class SearchOnWebTests: BaseTest {
             XCTAssertTrue(searchView.assertResultsCounterNumber("1/5"))
         }
         
+        testrailId("C923")
         step("When I navigate backward"){
             searchView.navigateBackward(numberOfTimes: 2)
         }
@@ -130,16 +132,15 @@ class SearchOnWebTests: BaseTest {
         
     }
     
-    func SKIPtestSearchFieldPasteAndTypeText() throws {
-        try XCTSkipIf(true, "WIP. Test is blocked by https://linear.app/beamapp/issue/BE-1849/no-search-results-displayed-for-the-string-longer-than-visible-part-of")
+    func testSearchFieldPasteAndTypeText() throws {
+        testrailId("C1090")
         
         step("Given I open a test page"){
             uiMenu.loadUITestPage2()
             webView.waitForWebViewToLoad()
         }
         
-        let textToPaste1 = "Spanish, Italian"
-        _ = "An I-beam, also known as H-beam (for universal column, UC), w-beam (for \"wide flange\"), universal beam (UB), rolled steel joist (RSJ)"
+        let textToPaste1 = "The web resists shear forces, while the flanges resist most of the bending moment experienced by the beam"
         
         step("When I paste \(textToPaste1) in the search field"){
             searchView.activateSearchField(isWebSearch: true).pasteText(textToPaste: textToPaste1)
@@ -148,20 +149,14 @@ class SearchOnWebTests: BaseTest {
         step("Then I see correct number of results"){
             XCTAssertTrue(searchView.assertResultsCounterNumber("1/1"))
         }
-        
-        step("When I clean the text field"){
-            searchView.shortcutHelper
-                .shortcutActionInvoke(action: .selectAll)
-                .typeKeyboardKey(.delete)
-        }
-        
     }
     
-    func SKIPtestScrollDownUpToSearchedWord() throws {
-        try XCTSkipIf(true, "WIP")
+    func testScrollDownUpToSearchedWord() throws {
+        try XCTSkipIf(true, "WIP https://linear.app/beamapp/issue/BE-5229/testscrolldownuptosearchedword-ui-test")
     }
     
     func testTriggerSearchFieldFromSelectedText() {
+        testrailId("C1089")
         let searchText = "Ultralight Beam, Kanye West"
         let textElementToSelect = webView.staticText(searchText).firstMatch
         
@@ -170,7 +165,8 @@ class SearchOnWebTests: BaseTest {
             webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: textElementToSelect)
         }
         
-        step("WHEN I press CMD+E then CMD+F") {
+        testrailId("C1127")
+        step("WHEN I press CMD+E") {
             shortcutHelper.shortcutActionInvoke(action: .instantTextSearch)
             shortcutHelper.shortcutActionInvoke(action: .search)
         }
@@ -186,7 +182,7 @@ class SearchOnWebTests: BaseTest {
     }
     
     func testSearchResultsHighlights() {
-        
+        testrailId("C1091")
         let firstSearch = "test"
         let additionalWord = "Confirm"
         let secondSearch = firstSearch + " " + additionalWord
@@ -230,7 +226,7 @@ class SearchOnWebTests: BaseTest {
     }
     
     func testSearchKeywordCaseSensitivityAndSearchAfterReopen() {
-        
+        testrailId("C1092")
         let firstSearch = "buTTOn"
         let secondSearch = "cLIcK"
         let expectedFirstResult = firstSearch.lowercased()
@@ -255,6 +251,7 @@ class SearchOnWebTests: BaseTest {
             XCTAssertEqual(searchView.app.staticTexts.matching(identifier: expectedFirstResult).count, 0)
         }
         
+        testrailId("C1093")
         step("When I reopen and search for \(secondSearch)"){
             searchView.triggerSearchField()
             searchView.typeInSearchField(secondSearch)

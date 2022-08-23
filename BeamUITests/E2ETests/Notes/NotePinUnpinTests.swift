@@ -18,6 +18,7 @@ class NotePinUnpinTests: BaseTest {
         
         launchAppAndOpenFirstNote()
 
+        testrailId("C756")
         step("Given I pin a note") {
             noteTestView.pinUnpinNote()
         }
@@ -27,6 +28,7 @@ class NotePinUnpinTests: BaseTest {
             XCTAssertEqual(noteTestView.getNumberOfPinnedNotes(), 1)
         }
         
+        testrailId("C757")
         step("When I unpin the note") {
             noteTestView.pinUnpinNote()
         }
@@ -38,7 +40,7 @@ class NotePinUnpinTests: BaseTest {
     }
     
     func testMax5PinnedNotes() {
-        
+        testrailId("C1039")
         step("Given I pin 6 notes") {
             launchApp()
             uiMenu.create10Notes()
@@ -49,6 +51,7 @@ class NotePinUnpinTests: BaseTest {
             }
         }
         
+        testrailId("C829")
         step("Then alert is displayed") {
             XCTAssertTrue(XCUIApplication().staticTexts[AlertViewLocators.StaticTexts.fivePinnedNotesMax.accessibilityIdentifier].exists)
             XCTAssertTrue(XCUIApplication().staticTexts[AlertViewLocators.StaticTexts.tooManyPinnedNotes.accessibilityIdentifier].exists)
@@ -63,6 +66,7 @@ class NotePinUnpinTests: BaseTest {
         
         launchAppAndOpenFirstNote()
         
+        testrailId("C505")
         step("Given I pin a note with shortcut") {
             shortcutHelper.shortcutActionInvoke(action: .pinUnpinNote)
         }
@@ -72,6 +76,7 @@ class NotePinUnpinTests: BaseTest {
             XCTAssertEqual(noteTestView.getNumberOfPinnedNotes(), 1)
         }
         
+        testrailId("C505")
         step("When I unpin the note with shortcut") {
             shortcutHelper.shortcutActionInvoke(action: .pinUnpinNote)
         }
@@ -82,8 +87,8 @@ class NotePinUnpinTests: BaseTest {
         }
     }
     
-    func testPinFromAllNotes() {
-        
+    func testPinUnpinFromAllNotes() {
+        testrailId("C711")
         step ("Given I navigate to All Note") {
             launchApp()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
@@ -99,6 +104,7 @@ class NotePinUnpinTests: BaseTest {
             XCTAssertEqual(noteTestView.getNumberOfPinnedNotes(), 1)
         }
         
+        testrailId("C712")
         step("When I unpin a note from All Notes") {
             allNotesView.openMenuForSingleNote(0)
                         .menuItem(AllNotesViewLocators.MenuItems.unpinNote.accessibilityIdentifier).clickOnExistence()

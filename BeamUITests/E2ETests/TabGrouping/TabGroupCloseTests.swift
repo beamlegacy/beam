@@ -11,18 +11,19 @@ import XCTest
 class TabGroupCloseTests: BaseTest {
     
     let tabGroupMenu = TabGroupMenuView()
-    let journalTestView = JournalTestView()
+    var journalTestView: JournalTestView!
     
     override func setUp() {
         step("Given I have a tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
+            journalTestView = launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             uiMenu.createTabGroup()
+            testrailId("C936")
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
     }
     
-    func testTabGroupClose() throws {
-
+    func testTabGroupClose() {
+        testrailId("C987")
         step("When I open Tab Group Menu") {
             tabGroupMenu.openTabGroupMenu(index: 0)
         }
@@ -36,8 +37,9 @@ class TabGroupCloseTests: BaseTest {
         }
         
         step("Then tab group is closed") {
-            journalTestView.waitForJournalViewToLoad()
-            XCTAssertTrue(journalTestView.isJournalOpened())
+            XCTAssertTrue(journalTestView
+                .waitForJournalViewToLoad()
+                .isJournalOpened())
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             XCTAssertTrue(journalTestView.isJournalOpened())
             XCTAssertTrue(OmniBoxTestView().getOmniBoxSearchField().exists)

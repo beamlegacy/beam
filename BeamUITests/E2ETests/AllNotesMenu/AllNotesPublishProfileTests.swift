@@ -29,11 +29,12 @@ class AllNotesPublishProfileTests: BaseTest {
     }
     
     func testCreatePublishedAndUnpublishNote() {
-        
+        testrailId("C709")
         step("THEN by default the All notes counter values are correct") {
             assertSortingCounterValues(expectedValues: AllNotesTestView.SortingCounterValues(all: 4, privat: 4, published: 0, publishedProfile: 0))
         }
         
+        testrailId("C734")
         step("WHEN I open Published Notes") {
             allNotes
                 .openTableView(.publishedNotes)
@@ -49,6 +50,7 @@ class AllNotesPublishProfileTests: BaseTest {
                 .waitForPublishingProcessToStartAndFinishFor(noteName1), "Publishing timed out")
         }
         
+        testrailId("C732, C733, C734, C735")
         step("THEN the sorting counters for Published and All notes are increased, Private and On Profile remain the same") {
             assertSortingCounterValues(expectedValues: AllNotesTestView.SortingCounterValues(all: 5, privat: 4, published: 1, publishedProfile: 0))
             allNotes.typeKeyboardKey(.escape) //to close the drop-down
@@ -60,12 +62,14 @@ class AllNotesPublishProfileTests: BaseTest {
                 .waitForPublishingProcessToStartAndFinishFor(noteName2), "Publishing timed out")
         }
         
+        testrailId("C732, C733, C734, C735")
         step("THEN the sorting counters for Published and All notes are increased, Private and On Profile remain the same") {
             assertSortingCounterValues(expectedValues: AllNotesTestView.SortingCounterValues(all: 6, privat: 4, published: 2, publishedProfile: 0))
             allNotes.typeKeyboardKey(.escape) //to close the drop-down
         }
         
-        step("THEN I unpublish the note is gone from the list on Unpublishing") {
+        testrailId("C714")
+        step("THEN I unpublish the note and it is gone from the list on Published") {
             XCTAssertTrue(allNotes
                 .openMenuForSingleNote(0)
                 .selectActionInMenu(.unpublish).waitForNotesNumberEqualTo(1), "The notes count didn't change after unpublishing")
@@ -78,6 +82,7 @@ class AllNotesPublishProfileTests: BaseTest {
             allNotes.typeKeyboardKey(.escape) //to close the drop-down
         }
         
+        testrailId("C1031")
         step("WHEN I open a published note and tick Add to Profile") {
             XCTAssertTrue(allNotes
                 .openMenuForSingleNote(0)
@@ -85,13 +90,14 @@ class AllNotesPublishProfileTests: BaseTest {
             sleep(3) // wait for note to be published on profile
         }
         
+        testrailId("C732, C733, C734, C735")
         step("THEN Add to Profile sorting counter is increased and other counters remain the same and ") {
             assertSortingCounterValues(expectedValues: AllNotesTestView.SortingCounterValues(all: 6, privat: 5, published: 1, publishedProfile: 1))
         }
     }
     
     func testCreatePublishedOnProfileNoteAndRemoveFromProfileNote() {
-        
+        testrailId("C710, C735")
         step("WHEN I open Published on Profile Notes") {
             allNotes
                 .openTableView(.profileNotes)
@@ -105,6 +111,7 @@ class AllNotesPublishProfileTests: BaseTest {
             XCTAssertTrue(allNotes.typeCardNameAndClickAddFor(sortType: .newFirstPublishedProfileNote, noteName: noteName1).waitForPublishingProcessToStartAndFinishFor(noteName1), "Publishing timed out")
         }
         
+        testrailId("C732, C733, C734, C735")
         step("THEN all sorting counters are increased, apart from Private") {
             assertSortingCounterValues(expectedValues: AllNotesTestView.SortingCounterValues(all: 5, privat: 4, published: 1, publishedProfile: 1))
             allNotes.typeKeyboardKey(.escape) //to close the drop-down
@@ -116,12 +123,13 @@ class AllNotesPublishProfileTests: BaseTest {
                 .waitForPublishingProcessToStartAndFinishFor(noteName1), "Publishing timed out")
         }
         
+        testrailId("C732, C733, C734, C735")
         step("THEN all sorting counters are increased, apart from Private") {
             assertSortingCounterValues(expectedValues: AllNotesTestView.SortingCounterValues(all: 6, privat: 4, published: 2, publishedProfile: 2))
             allNotes.typeKeyboardKey(.escape) //to close the drop-down
         }
         
-
+        testrailId("C1032")
         step("THEN I \(noteName2) note is gone from the list on Unpublishing from profile") {
             XCTAssertTrue(allNotes
                 .openMenuForSingleNote(0)
@@ -129,6 +137,7 @@ class AllNotesPublishProfileTests: BaseTest {
             XCTAssertFalse(allNotes.isNoteNameAvailable(noteName2), "Removed from profile '\(noteName2)' note persists in the list")
         }
         
+        testrailId("C732, C733, C734, C735")
         step("THEN the sorting counters only for On Profile is decreased, but Published, All notes and Private remains the same") {
             assertSortingCounterValues(expectedValues: AllNotesTestView.SortingCounterValues(all: 6, privat: 4, published: 2, publishedProfile: 1))
             allNotes.typeKeyboardKey(.escape) //to close the drop-down
@@ -137,7 +146,7 @@ class AllNotesPublishProfileTests: BaseTest {
     
     func testPublishPrivateNote() throws {
         try XCTSkipIf(isBigSurOS(), "issue that happens only on Big Sur - https://linear.app/beamapp/issue/BE-5098/note-is-removed-from-all-notes-table-on-publish-from-all-notes-on-big. Until issue is fixed -> it is skipped for Big Sur")
-        
+        testrailId("C713, C733")
         step("WHEN I open Private Notes") {
             allNotes
                 .openTableView(.privateNotes)
@@ -155,6 +164,7 @@ class AllNotesPublishProfileTests: BaseTest {
             XCTAssertFalse(allNotes.isNoteNameAvailable(firstNoteTitle), "Removed from profile '\(firstNoteTitle)' note persists in the list")
         }
         
+        testrailId("C732, C733, C734, C735")
         step("THEN all sorting counters remain the same, Private is increased and Published is decreased") {
             assertSortingCounterValues(expectedValues: AllNotesTestView.SortingCounterValues(all: 4, privat: 3, published: 1, publishedProfile: 0))
         }

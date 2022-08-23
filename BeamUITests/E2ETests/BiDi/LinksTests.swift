@@ -29,9 +29,11 @@ class LinksTests: BaseTest {
         return noteView
     }
     
-    func testCreateNoteLink()  {
+    func testCreateNoteLink() {
+        testrailId("C791")
         noteView = createNotesAndLinkThem()
         
+        testrailId("C797")
         step("Then Note with links is correctly created"){
             noteView.waitForNoteTitleToBeVisible()
             noteView.waitForNoteViewToLoad()
@@ -56,6 +58,7 @@ class LinksTests: BaseTest {
     }
     
     func testNoteLinkDeletion() {
+        testrailId("C792")
         noteView = createNotesAndLinkThem()
         
         step("When I delete the link between \(noteName2) and \(noteName1)"){
@@ -116,7 +119,8 @@ class LinksTests: BaseTest {
 
     }
     
-    func testNoteLinkTitleEditing() throws {
+    func testNoteLinkTitleEditing() {
+        testrailId("C1041")
         let textToType = " some text"
         let renamingErrorHandling = " Some Text"
         noteView = createNotesAndLinkThem()
@@ -153,10 +157,10 @@ class LinksTests: BaseTest {
             XCTAssertEqual(noteView.getLinkNameByIndex(0), noteName2 + renamingErrorHandling)
             XCTAssertEqual(noteView.getLinkContentByIndex(0), expectedEditedName1)
         }
-
     }
     
     func testLinksSectionBreadcrumbs() throws {
+        testrailId("C799")
         noteView = createNotesAndLinkThem()
         let additionalNote = "Level1"
         let editedValue = "Level0"
@@ -166,6 +170,7 @@ class LinksTests: BaseTest {
             XCTAssertFalse(noteView.waitForBreadcrumbs(), "Breadcrumbs are available though shouldn't be")
         }
 
+        testrailId("C798")
         step("When I create indentation level for the links"){
             noteView.openNoteFromAllNotesList(noteTitleToOpen: noteName2)
                 .typeKeyboardKey(.upArrow)

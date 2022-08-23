@@ -26,8 +26,8 @@ class TabGroupCaptureToANoteTests: BaseTest {
         XCTAssertEqual(noteView.getTabGroupElementName(index: indexOfTabGroup), tabGroupName)
     }
     
-    func testUnnamedTabGroupCapture() throws {
-        
+    func testUnnamedTabGroupCapture() {
+        testrailId("C981, C1053")
         step("Given I have one tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             uiMenu.createTabGroup()
@@ -42,6 +42,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             tabGroupMenu.typeKeyboardKey(.escape)
         }
         
+        testrailId("C813")
         step("Then tab group is captured on note") {
             verifyTabGroupCapturedInNote(tabGroupName: uiTestPageOne + " & 3 more tab group")
         }
@@ -53,6 +54,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             XCTAssertTrue(noteView.waitForTodayNoteViewToLoad())
         }
 
+        testrailId("C1025")
         step("Then I can reopen tab group through note") {
             noteView.openTabGroup(index: 0)
             webView.waitForWebViewToLoad()
@@ -63,7 +65,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
     }
     
     func testNamedTabGroupCapture() throws {
-        
+        testrailId("C981, C1054")
         step("Given I have one tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             uiMenu.createTabGroupNamed()
@@ -78,6 +80,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             tabGroupMenu.typeKeyboardKey(.escape)
         }
         
+        testrailId("C1026")
         step("Then tab group is captured on note") {
             verifyTabGroupCapturedInNote(tabGroupName: "Test1 tab group")
         }
@@ -97,8 +100,8 @@ class TabGroupCaptureToANoteTests: BaseTest {
         }
     }
     
-    func testTabGroupMultipleCapture() throws {
-        
+    func testMultipleTabGroupsCapture() throws {
+        testrailId("C981, C1055")
         step("Given I have one tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             uiMenu.createTabGroup()
@@ -124,7 +127,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
     }
     
     func testCaptureSingleGroupToMultipleNotes() throws {
-        
+        testrailId("C1056")
         let note1 = "Test Note"
         let note2 = "Test Note 2"
         let capturedTabGroupName = "Test1 tab group"

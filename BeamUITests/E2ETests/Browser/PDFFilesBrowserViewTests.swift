@@ -27,6 +27,7 @@ class PDFFilesBrowserViewTests: BaseTest {
     }
     
     func testPDFDocumentControls() {
+        testrailId("C859")
         let expectedDefaultZoomRatio = "100%"
         
         step("When I open a PDF file") {

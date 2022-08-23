@@ -61,6 +61,7 @@ class AdBlockerTests: BaseTest {
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), tabTitleOfTestPage)
         }
         
+        testrailId("C504")
         step("When I relaunch \(url) in the same tab") {
             shortcutHelper.shortcutActionInvoke(action: .openLocation)
             mockPage.openMockPage(.fullSiteAdBlock)
@@ -151,6 +152,7 @@ class AdBlockerTests: BaseTest {
     }
     
     func testAddManuallyAllowUrl() {
+        testrailId("C650")
         step("Given I access to Allow List in Preferences") {
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .privacy)
