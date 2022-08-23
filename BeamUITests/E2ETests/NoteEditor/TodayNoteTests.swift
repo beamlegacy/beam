@@ -13,9 +13,13 @@ class TodayNoteTests: BaseTest {
     let allNotesView = AllNotesTestView()
     let noteTestView = NoteTestView()
     
+    override func setUp() {
+        launchApp()
+    }
+    
     func testCannotDeleteTodayNoteInAllNote() {
+        testrailId("C748")
         step ("Given I navigate to All Note") {
-            launchApp()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
         }
         
@@ -33,8 +37,7 @@ class TodayNoteTests: BaseTest {
     }
     
     func testCannotDeleteTodayNoteDeletingAll() throws {
-        try XCTSkipIf(true, "to activate once https://linear.app/beamapp/issue/BE-4327/distinguish-all-notes-editor-option-for-all-notes-and-single-note is fixed")
-        launchApp()
+        testrailId("C748")
         
         step ("Given I navigate to All Note") {
             uiMenu.create10Notes()

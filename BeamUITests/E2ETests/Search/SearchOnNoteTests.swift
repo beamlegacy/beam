@@ -14,12 +14,14 @@ class SearchOnNoteTests: BaseTest {
     let searchView = SearchTestView()
     
     func testSearchViewAppearace() {
+        testrailId("C922")
         prepareTest(populateNoteTimes: 2)
         
         step("Then by default search field is unavailable"){
             XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
+        testrailId("C539")
         step("When I use CMD+F"){
             searchView.triggerSearchField()
         }
@@ -39,11 +41,13 @@ class SearchOnNoteTests: BaseTest {
             XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
         }
         
+        testrailId("C809")
         step("Then can I close search field via x icon"){
             searchView.closeSearchField()
             XCTAssertFalse(searchView.getSearchFieldElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
+        testrailId("C1038")
         step("Then I can reopen search field again"){
             searchView.triggerSearchField()
             XCTAssertTrue(searchView.getSearchFieldElement().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
@@ -52,6 +56,7 @@ class SearchOnNoteTests: BaseTest {
     }
     
     func testSearchResultsCounter() {
+        testrailId("C807")
         prepareTest(populateNoteTimes: 5)
         
         step("When I search for available letter in text"){
@@ -116,6 +121,7 @@ class SearchOnNoteTests: BaseTest {
     
     func testSearchKeywordCaseSensitivity() {
         //Impossible to locate highlighted elements, highlight is covered only for web
+        testrailId("C1037")
         prepareTest(populateNoteTimes: 2)
         let firstSearch = "TeST"
 
@@ -130,6 +136,7 @@ class SearchOnNoteTests: BaseTest {
     }
     
     func testSearchFieldPasteAndTypeText() {
+        testrailId("C1035")
         prepareTest(populateNoteTimes: 1)
         let textToPaste = "test 0: "
         
@@ -188,6 +195,7 @@ class SearchOnNoteTests: BaseTest {
     }
     
     func testTriggerSearchFieldFromSelectedText() {
+        testrailId("C1034")
         let searchText = "Lorem Ipsum"
         
         step("GIVEN I type in a note: \(searchText)"){
@@ -197,7 +205,8 @@ class SearchOnNoteTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .selectAll)
         }
         
-        step("WHEN I press CMD+E then CMD+F") {
+        testrailId("C542")
+        step("WHEN I press CMD+E") {
             shortcutHelper.shortcutActionInvoke(action: .instantTextSearch)
             shortcutHelper.shortcutActionInvoke(action: .search)
         }

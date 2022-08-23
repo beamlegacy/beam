@@ -21,7 +21,7 @@ class TabGroupNewTabTests: BaseTest {
     }
     
     func testTabGroupNewTab() throws {
-        
+        testrailId("C982")
         step("When I add a tab to the group") {
             tabGroupMenu.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
@@ -37,7 +37,7 @@ class TabGroupNewTabTests: BaseTest {
     }
     
     func testTabGroupNewTabWhenCollapsed() throws {
-        
+        testrailId("C982")
         step("When I collapse tab group") {
             tabGroupMenu.collapseTabGroup(index: 0)
         }

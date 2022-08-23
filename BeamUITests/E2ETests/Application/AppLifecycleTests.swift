@@ -14,6 +14,7 @@ class AppLifecycleTests: BaseTest {
     var journalView: JournalTestView!
 
     func testRestoreAllTabsFromLastSession() {
+        testrailId("C906")
         step("WHEN I prepare app") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
         }

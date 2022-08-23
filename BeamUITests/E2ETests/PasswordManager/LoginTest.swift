@@ -34,6 +34,7 @@ class LoginTest: BaseTest {
     }
     
     func testloginFormPasswordSave() {
+        testrailId("C857")
         step ("WHEN I save password during my navigation"){
             preparation().savePassword(waitForAlertToDisappear: false)
         }
@@ -58,6 +59,7 @@ class LoginTest: BaseTest {
     }
     
     func testloginFormPasswordSaveCancellation() {
+        testrailId("C902")
         preparation().notNowClick()
 
         step ("THEN no toast is displayed"){

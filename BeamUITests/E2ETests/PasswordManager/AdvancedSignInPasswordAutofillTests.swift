@@ -163,23 +163,27 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     }
     
     func testSignInPageAuthCombination1() {
+        testrailId("C867")
         validateClassicSignInPage(page: .signin1Form, login: loginUsername, password:passwordUsername, autocomplete: false)
     }
     
     func testSignInPageAuthCombination2() {
+        testrailId("C868")
         validateClassicSignInPage(page: .signin2Form, login: loginUsername, password:passwordUsername)
     }
     
     func testSignInPageAuthCombination3() {
+        testrailId("C869")
         validateClassicSignInPage(page: .signin3Form, login: loginUsername, password:passwordUsername)
     }
     
     func testSignInPageAuthCombination4() {
+        testrailId("C870")
         validateClassicSignInPage(page: .signin4Form, login: loginEmail, password:passwordEmail)
     }
     
     func testSignInPageAuthCombination5() {
-        
+        testrailId("C871")
         step("Given I navigate to \(mockPage.getMockPageUrl(.signin5Form))") {
             mockPage.openMockPage(.signin5Form)
         }
@@ -209,18 +213,22 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     }
     
     func testSignInPageAuthCombination6() {
+        testrailId("C872")
         validateTwoStepsSignInPage(usernamePage: .signin61Form, passwordPage: "signinstep2", login: loginEmail, password:passwordEmail)
     }
 
     func testSignInPageAuthCombination7() {
+        testrailId("C873")
         validateTwoStepsSignInPage(usernamePage: .signin71Form, passwordPage: "signinstep2", login: loginUsername, password:passwordUsername)
     }
     
     func testSignInPageAuthCombination8() {
+        testrailId("C874")
         validateClassicSignInPage(page: .signin8Form, login: loginEmail, password:passwordEmail, autocomplete: false)
     }
     
     func testSignInPageAuthCombination9() {
+        testrailId("C875")
         validateTwoStepsSignInPage(usernamePage: .signin91Form, passwordPage: "signinpage9-2", login: loginEmail, password:passwordEmail)
     }
     

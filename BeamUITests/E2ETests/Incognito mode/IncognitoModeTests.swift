@@ -11,7 +11,7 @@ import XCTest
 class IncognitoModeTests: BaseTest {
     
     func testIcognitoModeEnabling() {
-        
+        testrailId("C904, C500")
         let journalView = launchApp()
         
         step ("Given I enable an incognito mode"){

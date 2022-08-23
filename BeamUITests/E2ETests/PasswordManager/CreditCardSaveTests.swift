@@ -33,7 +33,8 @@ class CreditCardSaveTests: BaseCreditCardTest {
         }
     }
     
-    func testSaveCC(){
+    func testSaveCreditCard(){
+        testrailId("C858")
         step("Given I navigate to \(mockPage.getMockPageUrl(.paymentForm))") {
             mockPage.openMockPage(.paymentForm)
         }
@@ -62,7 +63,8 @@ class CreditCardSaveTests: BaseCreditCardTest {
         }
     }
     
-    func testDoNotSaveCC(){
+    func testDoNotSaveCreditCard(){
+        testrailId("C903")
         step("Given I navigate to \(mockPage.getMockPageUrl(.paymentForm))") {
             mockPage.openMockPage(.paymentForm)
         }

@@ -61,7 +61,7 @@ class CreditCardsTests: BaseTest {
     }
     
     func testCreditCardCreation() {
-        
+        testrailId("C639")
         launchAppAndOpenEditCreditCardsTable(populateCardsDB: false)
 
         step("When I add a Credit Card in Preferences ") {
@@ -83,7 +83,7 @@ class CreditCardsTests: BaseTest {
     }
     
     func testCreditCardDeletion() {
-        
+        testrailId("C640")
         launchAppAndOpenEditCreditCardsTable(populateCardsDB: true)
         
         step("WHEN I cancel Credit card item deletion") {
@@ -111,6 +111,7 @@ class CreditCardsTests: BaseTest {
     }
     
     func testCancelCreditCardItemEditing() {
+        testrailId("C1108")
         var rowBeforeEdit = RowCreditCardsTestTable()
         launchAppAndOpenEditCreditCardsTable(populateCardsDB: true)
         
@@ -128,7 +129,7 @@ class CreditCardsTests: BaseTest {
     }
     
     func testConfirmCreditCardItemEditing() {
-        
+        testrailId("C1107")
         launchAppAndOpenEditCreditCardsTable(populateCardsDB: true)
         var expectedRowAfterEdit: RowCreditCardsTestTable!
         

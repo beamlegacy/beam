@@ -45,6 +45,7 @@ class SignInAutocompleteTests: BaseTest {
     }
     
     func testPasswordMenuIsHiddenWhenOmniboxIsVisible() {
+        testrailId("C1080")
         launchApp()
         uiMenu.destroyDB()
             .startMockHTTPServer()
@@ -77,6 +78,7 @@ class SignInAutocompleteTests: BaseTest {
     }
 
     func testPasswordMenuIsHiddenWhenOmniboxTriggersTabChange() {
+        testrailId("C1081")
         launchApp()
         uiMenu.destroyDB()
             .startMockHTTPServer()
@@ -107,6 +109,7 @@ class SignInAutocompleteTests: BaseTest {
     }
 
     func testOtherPasswordsAppearanceRemovalFill() throws {
+        testrailId("C1082")
         try XCTSkipIf(isBigSurOS(), "Reactivate once BE-5032 is fixed")
 
         let login = "qa@beamapp.co"
@@ -191,6 +194,7 @@ class SignInAutocompleteTests: BaseTest {
     }
 
     func testOtherPasswordsSearch() {
+        testrailId("C1083")
         launchApp()
 
         step("Given I populate passwords and load a test page"){
@@ -247,14 +251,6 @@ class SignInAutocompleteTests: BaseTest {
             XCTAssertTrue(passPrefView.staticTextTables("apple.com").exists)
             XCTAssertTrue(passPrefView.staticTextTables("facebook.com").exists)
         }
-    }
-
-    func SKIPtestSearchPasswords() throws {
-        try XCTSkipIf(true, "Identifiers needed")
-    }
-    
-    func SKIPtestSortPasswords() throws {
-        try XCTSkipIf(true, "Identifiers needed")
     }
     
 }

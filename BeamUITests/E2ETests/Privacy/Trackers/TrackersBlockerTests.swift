@@ -51,8 +51,8 @@ class TrackersBlockerTests: BaseTest {
         }
     }
     
-    func testEnabledTrackersBlocker(){
-        
+    func testEnabledSocialMediaTrackersBlocker(){
+        testrailId("C644")
         step ("Given social media button blocker setting is disabled"){
             if !privacyWindow.getSocialMediaButtonBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickInsideSocialMediaButtonBlockerSetting()
@@ -70,8 +70,8 @@ class TrackersBlockerTests: BaseTest {
         }
     }
     
-    func testDisabledTrackersBlocker(){
-        
+    func testDisabledSocialMediaTrackersBlocker(){
+        testrailId("C644")
         step ("Given social media button blocker setting is disabled"){
             if privacyWindow.getSocialMediaButtonBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickInsideSocialMediaButtonBlockerSetting()
