@@ -37,5 +37,6 @@ enum BrowserPreferencesViewLocators {
         case cmdClick = "cmd-click-checkbox"
         case switchTabs = "switch-tabs-checkbox"
         case captureSounds = "capture-sounds-checkbox"
+        case groupTabs = "group-tabs-checkbox"
     }
 }
