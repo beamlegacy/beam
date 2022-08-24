@@ -492,7 +492,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if Configuration.branchType != .beta && Configuration.branchType != .publicRelease {
             data.clusteringManager.saveOrphanedUrlsAtSessionClose(orphanedUrlManager: data.clusteringOrphanedUrlManager)
         }
-        data.clusteringManager.exportSummaryForNextSession()
         KeychainDailyNoteScoreStore.shared.save()
     }
 

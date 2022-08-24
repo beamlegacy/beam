@@ -261,7 +261,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
                 defer { self.signpost.end("documentDeleted") }
 
                 self.clusteringManager.removeNote(noteId: deletedDocument.id)
-                self.activeSources.removeNote(noteId: deletedDocument.id)
 
                 self.maybeRemoveFromJournal(deletedDocument)
                 BeamNote.purgeDeletedNode(self, deletedDocument.id)
