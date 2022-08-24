@@ -161,7 +161,6 @@ extension BeamTextEdit {
             cmdManager.insertText(BeamText(text: " "), in: node, at: range.upperBound)
             cmdManager.beginGroup(with: "Automatically format typed link")
             cmdManager.formatText(in: node, for: nil, with: .link(linkString), for: range, isActive: false)
-            addNoteSourceFrom(url: linkString)
             cmdManager.focusElement(node, cursorPosition: range.upperBound + 1)
             cmdManager.endGroup()
             return false
