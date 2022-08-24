@@ -283,7 +283,6 @@ import UniformTypeIdentifiers
                 origin,
                 linkStore: LinkStore.shared,
                 frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
-                longTermScoreStore: LongTermUrlScoreStore(),
                 domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
                 dailyScoreStore: GRDBDailyUrlScoreStore()
             )
@@ -322,7 +321,6 @@ import UniformTypeIdentifiers
         let tree: BrowsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
         tree.set(
             frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
-            longTermScoreStore: LongTermUrlScoreStore(),
             domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
             dailyScoreStore: GRDBDailyUrlScoreStore()
         )

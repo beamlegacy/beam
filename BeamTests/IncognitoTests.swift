@@ -24,7 +24,6 @@ class IncognitoTests: XCTestCase {
         let tree = BrowsingTree.incognitoBrowsingTree(origin: nil)
 
         XCTAssertNil(tree.domainPath0TreeStatsStore)
-        XCTAssertNil(tree.longTermScoreStore)
         XCTAssertNil(tree.frecencyScorer)
         XCTAssertNil(tree.dailyScoreStore)
     }

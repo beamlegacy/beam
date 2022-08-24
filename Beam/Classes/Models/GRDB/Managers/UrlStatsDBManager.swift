@@ -28,7 +28,7 @@ class UrlStatsDBManager: GRDBHandler, BeamManager {
         try super.init(store: store)
     }
 
-    public override var tableNames: [String] { ["longTermUrlScore", "DailyUrlScore"] }
+    public override var tableNames: [String] { ["DailyUrlScore"] }
 
     public override func prepareMigration(migrator: inout DatabaseMigrator) throws {
         migrator.registerMigration("createUrlStatsTables") { db in
@@ -63,41 +63,9 @@ class UrlStatsDBManager: GRDBHandler, BeamManager {
                 t.uniqueKey(["urlId", "localDay"])
             }
         }
-    }
-
-    // MARK: - LongTermUrlScore
-    func getLongTermUrlScore(urlId: UUID) -> LongTermUrlScore? {
-        return try? self.read { db in try LongTermUrlScore.fetchOne(db, id: urlId) }
-    }
-
-    func updateLongTermUrlScore(urlId: UUID, changes: @escaping (LongTermUrlScore) -> Void ) {
-        do {
-            try self.write { db in
-                let score = (try? LongTermUrlScore.fetchOne(db, id: urlId)) ?? LongTermUrlScore(urlId: urlId)
-                changes(score)
-                try score.save(db)
-            }
-        } catch {
-            Logger.shared.logError("Couldn't update url long term score for \(urlId)", category: .database)
+        migrator.registerMigration("dropLongTermUrlScoreTable") { db in
+            try db.drop(table: "longTermUrlScore")
         }
-    }
-
-    func getManyLongTermUrlScore(urlIds: [UUID]) -> [LongTermUrlScore] {
-        return (try? self.read { db in try LongTermUrlScore.fetchAll(db, ids: urlIds) }) ?? []
-    }
-
-    func save(scores: [LongTermUrlScore]) throws {
-        try self.write { db in
-            for score in scores {
-                try score.save(db)
-            }
-        }
-    }
-    func clearLongTermScores() throws {
-        _ = try self.write { db in
-            try LongTermUrlScore.deleteAll(db)
-        }
-
     }
 
     // MARK: - DailyUrlScore
