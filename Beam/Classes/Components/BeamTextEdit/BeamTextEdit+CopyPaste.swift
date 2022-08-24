@@ -223,7 +223,6 @@ extension BeamTextEdit {
         } else {
             rootNode?.insertText(text: bText, replacementRange: nil)
         }
-        addNoteSourceFrom(text: bText)
     }
 
     @objc func pasteAsPlainText(_ sender: Any) {
@@ -286,7 +285,6 @@ extension BeamTextEdit {
 
                 node.cmdManager.insertElement(newElement, inNode: parent, afterElement: node.element)
                 node.cmdManager.focus(newElement, in: node)
-                addNoteSourceFrom(text: element.text)
             }
             if previousBullet.children.isEmpty, previousBullet.text.isEmpty {
                 node.cmdManager.deleteElement(for: previousBullet)
@@ -392,7 +390,6 @@ extension BeamTextEdit {
                 parent.cmdManager.focus(element, in: node)
                 lastInserted = focusedWidget as? ElementNode
             }
-            addNoteSourceFrom(text: beamText)
         }
         cmdManager.endGroup()
 

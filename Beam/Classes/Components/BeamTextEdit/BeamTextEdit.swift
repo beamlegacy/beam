@@ -897,7 +897,6 @@ public extension CALayer {
 
             if let (linkString, linkRange) = linkStringForPrecedingCharacters(atIndex: rootNode.cursorPosition, in: node) {
                 node.cmdManager.formatText(in: node, for: nil, with: .link(linkString), for: linkRange, isActive: false)
-                addNoteSourceFrom(url: linkString)
             }
 
             guard let range = Range(safeBounds: (rootNode.cursorPosition, node.text.count)) else {
@@ -2248,16 +2247,6 @@ public extension CALayer {
 
     static public let mainLayerName = "beamTextEditMainLayer"
 
-    func addNoteSourceFrom(url: String) {
-        guard let note = note as? BeamNote, let data = data else { return }
-        let urlId = LinkStore.getOrCreateIdFor(url)
-        note.sources.add(urlId: urlId, noteId: note.id, type: .user, sessionId: data.sessionId, activeSources: data.activeSources)
-    }
-    func addNoteSourceFrom(text: BeamText) {
-        for range in text.noteSourceEligibleLinkRanges {
-            addNoteSourceFrom(url: range.string)
-        }
-    }
 
     // MARK: - SignPost
 

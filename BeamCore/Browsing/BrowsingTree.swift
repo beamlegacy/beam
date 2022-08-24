@@ -305,7 +305,6 @@ public class BrowsingNode: ObservableObject, Codable {
         self.isLinkActivation = isLinkActivation
         self.events = [ReadingEvent(type: .creation, date: date, webSessionId: WebSessionnizer.shared.sessionId, pageLoadId: UUID())]
         score.lastCreationDate = date
-        tree.longTermScoreStore?.apply(to: link) { $0.lastCreationDate = date }
         if let scorer = tree.frecencyScorer {
             scorer.update(id: link, value: 1, eventType: visitType, date: date, paramKey: .webVisit30d0)
             Self.updateDomainFrecency(linkStore: linkStore, scorer: scorer, id: link, value: 1, date: date, paramKey: .webVisit30d0)
@@ -454,13 +453,12 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
     public let origin: BrowsingTreeOrigin
     var frecencyScorer: FrecencyScorer?
-    var longTermScoreStore: LongTermUrlScoreStoreProtocol?
     var dailyScoreStore: DailyUrlScoreStoreProtocol?
     var domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol?
     var linkStore: LinkStore
 
     public static func incognitoBrowsingTree(origin: BrowsingTreeOrigin?) -> BrowsingTree {
-        BrowsingTree(origin, linkStore: LinkStore(linkManager: FakeLinkManager()), frecencyScorer: nil, longTermScoreStore: nil, domainPath0TreeStatsStore: nil, dailyScoreStore: nil)
+        BrowsingTree(origin, linkStore: LinkStore(linkManager: FakeLinkManager()), frecencyScorer: nil, domainPath0TreeStatsStore: nil, dailyScoreStore: nil)
     }
 
     public var isPinned = false {
@@ -469,12 +467,11 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         }
     }
 
-    public init(_ origin: BrowsingTreeOrigin?, linkStore: LinkStore = LinkStore.shared, frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil,
+    public init(_ origin: BrowsingTreeOrigin?, linkStore: LinkStore = LinkStore.shared, frecencyScorer: FrecencyScorer? = nil,
                 domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil, dailyScoreStore: DailyUrlScoreStoreProtocol? = nil) {
         self.origin = origin ?? defaultOrigin
         self.linkStore = linkStore
         self.frecencyScorer = frecencyScorer
-        self.longTermScoreStore = longTermScoreStore
         self.dailyScoreStore = dailyScoreStore
         self.domainPath0TreeStatsStore = domainPath0TreeStatsStore
         self.root = BrowsingNode(tree: self, parent: nil, linkStore: linkStore, url: Link.missing.url, title: nil, isLinkActivation: false)
@@ -489,14 +486,12 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
         dailyScoreStore = nil
         frecencyScorer = nil
-        longTermScoreStore = nil
         domainPath0TreeStatsStore = nil
     }
 
-    public func set(frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil,
-                    domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil, dailyScoreStore: DailyUrlScoreStoreProtocol? = nil) {
+    public func set(frecencyScorer: FrecencyScorer? = nil, domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil,
+                    dailyScoreStore: DailyUrlScoreStoreProtocol? = nil) {
         self.frecencyScorer = frecencyScorer
-        self.longTermScoreStore = longTermScoreStore
         self.dailyScoreStore = dailyScoreStore
         self.domainPath0TreeStatsStore = domainPath0TreeStatsStore
     }
@@ -517,7 +512,6 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
         dailyScoreStore = nil
         frecencyScorer = nil
-        longTermScoreStore = nil
         domainPath0TreeStatsStore = nil
         linkStore = LinkStore.shared
     }
@@ -536,7 +530,6 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
         dailyScoreStore = nil
         frecencyScorer = nil
-        longTermScoreStore = nil
         domainPath0TreeStatsStore = nil
         linkStore = LinkStore.shared
 
@@ -561,7 +554,6 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     }
 
     public func scoreApply(to link: UUID, changes: @escaping (UrlScoreProtocol) -> Void) {
-        longTermScoreStore?.apply(to: link, changes: changes)
         dailyScoreStore?.apply(to: link, changes: changes)
     }
 
