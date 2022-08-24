@@ -19,7 +19,7 @@ extension AutocompleteManager {
             case .tabGroup(let groupL):
                 if case .tabGroup(let groupR) = rhs { return groupL == groupR }
                 else { return false }
-            case .customView: return false
+            case .customView, .test: return false
             }
         }
 
@@ -27,6 +27,7 @@ extension AutocompleteManager {
         case tabGroup(group: TabGroup)
         case customView(view: AnyView)
         case general
+        case test(results: AutocompletePublisherSourceResults)
 
         var isGeneral: Bool {
             if case .general = self { return true }
@@ -44,7 +45,7 @@ extension AutocompleteManager {
             case .tabGroup:
                 let isAction = result.source == .action
                 return (!isAction, isAction ? "" : nil)
-            case .general: return (true, nil)
+            case .general, .test: return (true, nil)
             }
         }
     }
