@@ -91,6 +91,7 @@ struct AdvancedPreferencesNetwork: View {
                     Persistence.Sync.BeamObjects.last_updated_at = nil
                     Task { @MainActor in
                          do {
+                             try BeamObjectChecksum.deleteAll();
                              _ = try await AppDelegate.main.syncDataWithBeamObject(force: true)
                          } catch {
                              Logger.shared.logError("Error while syncing data: \(error)", category: .document)
