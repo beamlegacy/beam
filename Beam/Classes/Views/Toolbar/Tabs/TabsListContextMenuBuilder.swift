@@ -84,13 +84,14 @@ extension TabsListContextMenuBuilder {
         let canShare = tabGroupingManager.shareGroup(group, shareService: shareService) { [weak self] result in
             // let's make sure the loading state was visible for at least 2s to avoid blinking.
             let delayInSeconds: Int = max(0, 2 + Int(startTime.timeIntervalSinceNow))
-            let previousStatus = group.status
-            if delayInSeconds > 0 {
+            var previousStatus: TabGroup.Status?
+            if case .success = result, delayInSeconds > 0 {
+                previousStatus = group.status
                 group.status = .sharing
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(delayInSeconds)) {
                 self?.tabGroupIsSharing = nil
-                if delayInSeconds > 0 {
+                if let previousStatus = previousStatus {
                     group.status = previousStatus
                 }
                 guard shareService == .copy, let itemFrame = itemFrame else { return }
