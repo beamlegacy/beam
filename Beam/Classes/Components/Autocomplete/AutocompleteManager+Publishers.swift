@@ -22,7 +22,7 @@ extension AutocompleteManager {
     func getDefaultSuggestionsPublishers() -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
         let mode = self.animatingToMode ?? self.mode
         switch mode {
-        case .noteCreation, .customView:
+        case .noteCreation, .customView, .test:
             return []
         case .tabGroup(let group):
             return [futureToPublisher(autocompleteTabGroupingResultsInTabGroupMode(for: "", inGroup: group), source: .tabGroup(group: nil))]
@@ -35,6 +35,9 @@ extension AutocompleteManager {
     }
 
     func getAutocompletePublishers(for searchText: String) -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
+        if case .test(let results) = mode {
+            return [Just(results).eraseToAnyPublisher()]
+        }
         if case .tabGroup(let group) = mode {
             return [futureToPublisher(autocompleteTabGroupingResultsInTabGroupMode(for: searchText, inGroup: group), source: .tabGroup(group: nil))]
         }
@@ -78,7 +81,7 @@ extension AutocompleteManager {
             }.eraseToAnyPublisher()
     }
 
-    func getSearchEnginePublisher(for searchText: String,
+    private func getSearchEnginePublisher(for searchText: String,
                                   searchEngine: SearchEngineAutocompleter) -> AnyPublisher<AutocompletePublisherSourceResults, Never> {
         futureToPublisher(autocompleteSearchEngineResults(for: searchText, searchEngine: searchEngine), source: .searchEngine).handleEvents(receiveCancel: { [weak searchEngine] in
             searchEngine?.clear()
