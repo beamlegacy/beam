@@ -15,14 +15,58 @@ protocol CreditCardsMenuDelegate: WebAutofillMenuDelegate {
 }
 
 final class CreditCardsMenuViewModel: ObservableObject {
+    enum MenuItem: Equatable, Identifiable {
+        case autofillEntry(CreditCardEntry)
+        case showMore
+        case showAll
+        case separator(Int)
+
+        var id: String {
+            switch self {
+            case .autofillEntry(let entry):
+                return "autofill \(entry.cardNumber) \(entry.expirationMonth) \(entry.expirationYear)"
+            case .showMore:
+                return "showmore"
+            case .showAll:
+                return "showall"
+            case .separator(let identifier):
+                return "separator \(identifier)"
+            }
+        }
+
+        var isSelectable: Bool {
+            switch self {
+            case .separator:
+                return false
+            default:
+                return true
+            }
+        }
+
+        func performAction(with viewModel: CreditCardsMenuViewModel) {
+            switch self {
+            case .autofillEntry(let entry):
+                viewModel.fillCreditCard(entry)
+            case .showMore:
+                viewModel.revealMoreItemsForCurrentHost()
+            case .showAll:
+                viewModel.showOtherCreditCards()
+            default:
+                break
+            }
+        }
+    }
+
     weak var delegate: CreditCardsMenuDelegate?
 
-    @Published var entryDisplayLimit: Int
+    @Published var autofillMenuItems: [MenuItem]
+    @Published var otherMenuItems: [MenuItem]
 
     private(set) var entries: [CreditCardEntry]
     private(set) var otherCreditCardsViewModel: CreditCardListViewModel
 
-    private var revealMoreItemsInList = false
+    private let selectionHandler = WebAutofillMenuSelectionHandler()
+    private var entryDisplayLimit: Int
     private var otherCreditCardsDialog: PopoverWindow?
     private var waitingForAuthentication = false
     private var subscribers = Set<AnyCancellable>()
@@ -30,7 +74,20 @@ final class CreditCardsMenuViewModel: ObservableObject {
     init(entries: [CreditCardEntry]) {
         self.entries = entries
         self.entryDisplayLimit = 1
+        self.autofillMenuItems = []
+        self.otherMenuItems = []
         self.otherCreditCardsViewModel = CreditCardListViewModel()
+        self.updateDisplay()
+    }
+
+    func handleStateChange(itemId: String, newState: WebFieldAutofillMenuCellState) {
+        if selectionHandler.handleStateChange(itemId: itemId, newState: newState) {
+            objectWillChange.send()
+        }
+    }
+
+    func highlightState(of itemId: String) -> Bool {
+        selectionHandler.highlightState(of: itemId)
     }
 
     func resetItems() {
@@ -39,10 +96,12 @@ final class CreditCardsMenuViewModel: ObservableObject {
 
     func revertToFirstItem() {
         entryDisplayLimit = 1
+        updateDisplay()
     }
 
     func revealMoreItemsForCurrentHost() {
         entryDisplayLimit = 3
+        updateDisplay()
     }
 
     func showOtherCreditCards() {
@@ -86,5 +145,33 @@ final class CreditCardsMenuViewModel: ObservableObject {
     private func closeOtherCreditCardsDialog() {
         otherCreditCardsDialog?.close()
         otherCreditCardsDialog = nil
+    }
+
+    private func updateDisplay() {
+        autofillMenuItems = entries.prefix(entryDisplayLimit).map { MenuItem.autofillEntry($0) }
+        if entries.count > entryDisplayLimit {
+            otherMenuItems = [.separator(1),
+                              entryDisplayLimit == 1 ? .showMore : .showAll
+            ]
+        } else {
+            otherMenuItems = []
+        }
+        selectionHandler.update(selectableIds: (autofillMenuItems + otherMenuItems).filter(\.isSelectable).map(\.id))
+    }
+}
+
+extension CreditCardsMenuViewModel: KeyEventHijacking {
+    func onKeyDown(with event: NSEvent) -> Bool {
+        switch selectionHandler.onKeyDown(with: event) {
+        case .none:
+            break
+        case .refresh:
+            objectWillChange.send()
+        case .select(let itemId):
+            if let menuItem = (autofillMenuItems + otherMenuItems).first(where: { $0.id == itemId }) {
+                menuItem.performAction(with: self)
+            }
+        }
+        return true
     }
 }

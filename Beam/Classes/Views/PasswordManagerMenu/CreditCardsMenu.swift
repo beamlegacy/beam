@@ -15,26 +15,19 @@ struct CreditCardsMenu: View {
     var body: some View {
         FormatterViewBackground(boxCornerRadius: 10) {
             VStack(alignment: .leading, spacing: 0) {
-                VStack(spacing: 0) {
-                    ForEach(viewModel.entries.prefix(viewModel.entryDisplayLimit), id: \.self) { entry in
-                        StoredCreditCardCell(cardDescription: entry.cardDescription, obfuscatedNumber: entry.obfuscatedNumber, cardImageName: entry.typeImageName) { newState in
-                            if newState == .clicked {
-                                viewModel.fillCreditCard(entry)
+                if !viewModel.autofillMenuItems.isEmpty {
+                    VStack(spacing: 0) {
+                        ForEach(viewModel.autofillMenuItems) { item in
+                            menuItemView(item: item) { newState in
+                                viewModel.handleStateChange(itemId: item.id, newState: newState)
                             }
                         }
                     }
+                    .padding(.vertical, 6)
                 }
-                .padding(.vertical, 6)
-                if viewModel.entries.count > viewModel.entryDisplayLimit {
-                    Separator(horizontal: true)
-                    OtherCreditCardsCell { newState in
-                        if newState == .clicked {
-                            if viewModel.entryDisplayLimit == 1 {
-                                viewModel.revealMoreItemsForCurrentHost()
-                            } else {
-                                viewModel.showOtherCreditCards()
-                            }
-                        }
+                ForEach(viewModel.otherMenuItems) { item in
+                    menuItemView(item: item) { newState in
+                        viewModel.handleStateChange(itemId: item.id, newState: newState)
                     }
                 }
             }
@@ -51,6 +44,37 @@ struct CreditCardsMenu: View {
         .frame(width: 305, height: height, alignment: .top)
         .animation(nil)
     }
+
+    @ViewBuilder
+    func menuItemView(item: CreditCardsMenuViewModel.MenuItem, onStateChange: @escaping (WebFieldAutofillMenuCellState) -> Void) -> some View {
+        let highlightState = viewModel.highlightState(of: item.id)
+        switch item {
+        case .autofillEntry(let entry):
+            StoredCreditCardCell(cardDescription: entry.cardDescription, obfuscatedNumber: entry.obfuscatedNumber, cardImageName: entry.typeImageName, isHighlighted: highlightState) { newState in
+                onStateChange(newState)
+                if newState == .clicked {
+                    viewModel.fillCreditCard(entry)
+                }
+            }
+        case .showMore:
+            OtherCreditCardsCell(isHighlighted: highlightState) { newState in
+                onStateChange(newState)
+                if newState == .clicked {
+                    viewModel.revealMoreItemsForCurrentHost()
+                }
+            }
+        case .showAll:
+            OtherCreditCardsCell(isHighlighted: highlightState) { newState in
+                onStateChange(newState)
+                if newState == .clicked {
+                    viewModel.showOtherCreditCards()
+                }
+            }
+        case .separator:
+            Separator(horizontal: true)
+        }
+    }
+
     private struct HeightKey: FloatPreferenceKey {}
 }
 

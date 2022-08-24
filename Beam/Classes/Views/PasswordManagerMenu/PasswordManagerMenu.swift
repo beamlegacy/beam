@@ -18,44 +18,19 @@ struct PasswordManagerMenu: View {
     var body: some View {
         FormatterViewBackground(boxCornerRadius: 10) {
             VStack(alignment: .leading, spacing: 0) {
-                if viewModel.display.suggestNewPassword, let passwordGeneratorViewModel = viewModel.passwordGeneratorViewModel {
-                    PasswordGeneratorSuggestionCell(viewModel: passwordGeneratorViewModel)
-                } else {
-                    if !viewModel.display.entriesForHost.isEmpty {
-                        VStack(spacing: 0) {
-                            ForEach(viewModel.display.entriesForHost.prefix(viewModel.display.entryDisplayLimit)) { entry in
-                                StoredPasswordCell(host: viewModel.displayedHost(for: entry), username: entry.username) { newState in
-                                    if newState == .clicked {
-                                        viewModel.fillCredentials(entry)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.vertical, 6)
-                    }
-                    if viewModel.display.separator1 {
-                        Separator(horizontal: true)
-                    }
-                    if viewModel.display.entryDisplayLimit > 0 {
-                        if viewModel.display.entriesForHost.count <= 1 || viewModel.display.entryDisplayLimit > 1 {
-                            OtherPasswordsCell { newState in
-                                if newState == .clicked {
-                                    viewModel.showOtherPasswords()
-                                }
-                            }
-                        } else {
-                            OtherPasswordsCell(host: viewModel.host.minimizedHost) { newState in
-                                if newState == .clicked {
-                                    viewModel.revealMoreItemsForCurrentHost()
-                                }
+                if !viewModel.autofillMenuItems.isEmpty {
+                    VStack(spacing: 0) {
+                        ForEach(viewModel.autofillMenuItems) { item in
+                            menuItemView(item: item) { newState in
+                                viewModel.handleStateChange(itemId: item.id, newState: newState)
                             }
                         }
                     }
-                    if viewModel.display.separator2 {
-                        Separator(horizontal: true)
-                    }
-                    if viewModel.display.showSuggestPasswordOption {
-                        SuggestPasswordCell(onChange: viewModel.onSuggestNewPassword)
+                    .padding(.vertical, 6)
+                }
+                ForEach(viewModel.otherMenuItems) { item in
+                    menuItemView(item: item) { newState in
+                        viewModel.handleStateChange(itemId: item.id, newState: newState)
                     }
                 }
             }
@@ -73,8 +48,42 @@ struct PasswordManagerMenu: View {
         .animation(nil)
     }
 
-    var width: CGFloat {
-        if viewModel.display.suggestNewPassword && viewModel.passwordGeneratorViewModel != nil {
+    @ViewBuilder
+    func menuItemView(item: PasswordManagerMenuViewModel.MenuItem, onStateChange: @escaping (WebFieldAutofillMenuCellState) -> Void) -> some View {
+        let highlightState = viewModel.highlightState(of: item.id)
+        switch item {
+        case .autofillEntry(let entry):
+            StoredPasswordCell(host: viewModel.displayedHost(for: entry), username: entry.username, isHighlighted: highlightState) { newState in
+                onStateChange(newState)
+                if newState == .clicked {
+                    viewModel.fillCredentials(entry)
+                }
+            }
+        case .suggestNewPassword(let passwordGeneratorViewModel):
+            PasswordGeneratorSuggestionCell(viewModel: passwordGeneratorViewModel)
+        case .showMoreEntriesForHost(let hostname):
+            OtherPasswordsCell(host: hostname, isHighlighted: highlightState) { newState in
+                onStateChange(newState)
+                if newState == .clicked {
+                    viewModel.revealMoreItemsForCurrentHost()
+                }
+            }
+        case .showAllPasswords:
+            OtherPasswordsCell(isHighlighted: highlightState) { newState in
+                onStateChange(newState)
+                if newState == .clicked {
+                    viewModel.showOtherPasswords()
+                }
+            }
+        case .showSuggestPassword:
+            SuggestPasswordCell(isHighlighted: highlightState, onChange: viewModel.onSuggestNewPassword)
+        case .separator:
+            Separator(horizontal: true)
+        }
+    }
+
+    private var width: CGFloat {
+        if viewModel.suggestNewPassword && viewModel.passwordGeneratorViewModel != nil {
             return 441
         }
         return 255

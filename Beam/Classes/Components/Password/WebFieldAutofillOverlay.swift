@@ -50,6 +50,17 @@ final class WebFieldAutofillOverlay {
                 return viewModel.isPresentingModalDialog
             }
         }
+
+        var keyEventHijacking: KeyEventHijacking? {
+            switch self {
+            case .none:
+                return nil
+            case .password(let viewModel):
+                return viewModel
+            case .creditCard(let viewModel):
+                return viewModel
+            }
+        }
     }
 
     private(set) var frameInfo: WKFrameInfo? // used in menu delegate, needs to be kept around
@@ -162,9 +173,11 @@ final class WebFieldAutofillOverlay {
             let menuView = PasswordManagerMenu(viewModel: viewModel)
             popoverWindow.setView(with: menuView, at: menuPopover.currentOrigin, fromTopLeft: true)
             popoverWindow.delegate = viewModel.passwordGeneratorViewModel
+            KeyEventHijacker.shared.register(handler: viewModel, forKeyCodes: [.up, .down, .enter, .return])
         case .creditCard(let viewModel):
             let menuView = CreditCardsMenu(viewModel: viewModel)
             popoverWindow.setView(with: menuView, at: menuPopover.currentOrigin, fromTopLeft: true)
+            KeyEventHijacker.shared.register(handler: viewModel, forKeyCodes: [.up, .down, .enter, .return])
         }
         self.menuPopover = menuPopover
         self.menuViewModel = viewModel
@@ -185,6 +198,9 @@ final class WebFieldAutofillOverlay {
     func dismissMenu() {
         if let popoverWindow = menuPopover?.window {
             CustomPopoverPresenter.shared.dismissPopoverWindow(popoverWindow)
+        }
+        if let handler = menuViewModel.keyEventHijacking {
+            KeyEventHijacker.shared.unregister(handler: handler)
         }
         menuPopover = nil
     }
