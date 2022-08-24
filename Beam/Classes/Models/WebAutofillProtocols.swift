@@ -90,7 +90,6 @@ struct CreditCardEntry: Hashable {
     var cardHolder: String
     var expirationMonth: Int
     var expirationYear: Int
-
 }
 
 // MARK: - Credit Card Number

@@ -27,28 +27,64 @@ struct PasswordManagerMenuOptions: Equatable {
     static let ambiguousPassword = PasswordManagerMenuOptions(showExistingCredentials: true, suggestNewPassword: true, showMenu: true)
 }
 
-enum PasswordSearchCellMode {
-    case none
-    case button
-    case field
-}
-
 class PasswordManagerMenuViewModel: ObservableObject {
-    struct Contents {
-        var entriesForHost: [PasswordManagerEntry]
-        var entryDisplayLimit: Int
-        var showSuggestPasswordOption: Bool
-        var suggestNewPassword: Bool
-        var separator1: Bool
-        var separator2: Bool
-        var userInfo: UserInformations?
+    enum MenuItem: Equatable, Identifiable {
+        case autofillEntry(PasswordManagerEntry)
+        case showMoreEntriesForHost(String)
+        case showAllPasswords
+        case showSuggestPassword
+        case suggestNewPassword(PasswordGeneratorViewModel) // not used anymore?
+        case separator(Int)
+
+        var id: String {
+            switch self {
+            case .autofillEntry(let entry):
+                return "autofill \(entry.minimizedHost) \(entry.username)"
+            case .showMoreEntriesForHost(let host):
+                return "showmore \(host)"
+            case .showAllPasswords:
+                return "showall"
+            case .showSuggestPassword:
+                return "showsuggest"
+            case .suggestNewPassword:
+                return "suggest"
+            case .separator(let identifier):
+                return "separator \(identifier)"
+            }
+        }
+
+        var isSelectable: Bool {
+            switch self {
+            case .separator, .suggestNewPassword:
+                return false
+            default:
+                return true
+            }
+        }
+
+        func performAction(with viewModel: PasswordManagerMenuViewModel) {
+            switch self {
+            case .autofillEntry(let entry):
+                viewModel.fillCredentials(entry)
+            case .showMoreEntriesForHost:
+                viewModel.revealMoreItemsForCurrentHost()
+            case .showAllPasswords:
+                viewModel.showOtherPasswords()
+            case .suggestNewPassword:
+                viewModel.onSuggestNewPassword(state: WebFieldAutofillMenuCellState.clicked)
+            default:
+                break
+            }
+        }
     }
 
     weak var delegate: PasswordManagerMenuDelegate?
     var otherPasswordsViewModel: PasswordListViewModel
 
     @Published var passwordGeneratorViewModel: PasswordGeneratorViewModel?
-    @Published var display: Contents
+    @Published var suggestNewPassword = false
+    @Published var autofillMenuItems: [MenuItem]
+    @Published var otherMenuItems: [MenuItem]
     @Published var scrollingListHeight: CGFloat?
 
     let host: URL
@@ -57,6 +93,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
     let credentialsBuilder: PasswordManagerCredentialsBuilder
     private let userInfoStore: UserInformationsStore
     private var entriesForHost: [PasswordManagerEntry]
+    private let selectionHandler = WebAutofillMenuSelectionHandler()
     private var revealFullList = false
     private var revealMoreItemsInList = false
     private var showPasswordGenerator = false
@@ -70,15 +107,8 @@ class PasswordManagerMenuViewModel: ObservableObject {
         self.credentialsBuilder = credentialsBuilder
         self.userInfoStore = userInfoStore
         self.entriesForHost = []
-        self.display = Contents(
-            entriesForHost: entriesForHost,
-            entryDisplayLimit: 0,
-            showSuggestPasswordOption: false,
-            suggestNewPassword: false,
-            separator1: false,
-            separator2: false,
-            userInfo: userInfoStore.fetchAll().first ?? nil
-        )
+        self.autofillMenuItems = []
+        self.otherMenuItems = []
         self.otherPasswordsViewModel = PasswordListViewModel()
         if options.suggestNewPassword {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()
@@ -87,6 +117,16 @@ class PasswordManagerMenuViewModel: ObservableObject {
         }
         self.loadEntries()
         self.updateDisplay()
+    }
+
+    func handleStateChange(itemId: String, newState: WebFieldAutofillMenuCellState) {
+        if selectionHandler.handleStateChange(itemId: itemId, newState: newState) {
+            objectWillChange.send()
+        }
+    }
+
+    func highlightState(of itemId: String) -> Bool {
+        selectionHandler.highlightState(of: itemId)
     }
 
     func displayedHost(for entry: PasswordManagerEntry) -> String {
@@ -157,22 +197,35 @@ class PasswordManagerMenuViewModel: ObservableObject {
     }
 
     private func updateDisplay() {
-        let existingCredentials = options.showExistingCredentials && !entriesForHost.isEmpty
         let showOtherPasswordsOption = options.showExistingCredentials
         let showSuggestPasswordOption = options.showMenu && !showPasswordGenerator && options.suggestNewPassword
-        let separator1 = existingCredentials && showOtherPasswordsOption
-        let separator2 = (existingCredentials || showOtherPasswordsOption) && showSuggestPasswordOption
-        let suggestNewPassword = (!options.showMenu || showPasswordGenerator) && options.suggestNewPassword
+        suggestNewPassword = (!options.showMenu || showPasswordGenerator) && options.suggestNewPassword
         let entryDisplayLimit = options.showExistingCredentials ? revealMoreItemsInList ? 3 : 1 : 0
-        display = Contents(
-            entriesForHost: entriesForHost,
-            entryDisplayLimit: entryDisplayLimit,
-            showSuggestPasswordOption: showSuggestPasswordOption,
-            suggestNewPassword: suggestNewPassword,
-            separator1: separator1,
-            separator2: separator2,
-            userInfo: display.userInfo
-        )
+        if suggestNewPassword, let passwordGeneratorViewModel = passwordGeneratorViewModel {
+            autofillMenuItems = []
+            otherMenuItems = [.suggestNewPassword(passwordGeneratorViewModel)]
+        } else {
+            autofillMenuItems = entriesForHost.prefix(entryDisplayLimit).map { MenuItem.autofillEntry($0) }
+            var menuItems = [MenuItem]()
+            if showOtherPasswordsOption {
+                if !autofillMenuItems.isEmpty {
+                    menuItems.append(.separator(1))
+                }
+                if entriesForHost.count <= entryDisplayLimit || revealMoreItemsInList {
+                    menuItems.append(.showAllPasswords)
+                } else {
+                    menuItems.append(.showMoreEntriesForHost(minimizedHost))
+                }
+            }
+            if showSuggestPasswordOption {
+                if !autofillMenuItems.isEmpty || !menuItems.isEmpty {
+                    menuItems.append(.separator(2))
+                }
+                menuItems.append(.showSuggestPassword)
+            }
+            otherMenuItems = menuItems
+        }
+        selectionHandler.update(selectableIds: (autofillMenuItems + otherMenuItems).filter(\.isSelectable).map(\.id))
     }
 }
 
@@ -204,6 +257,22 @@ extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
         Logger.shared.logDebug("Delete \(entries.count) password manager entries")
         delegate?.deleteCredentials(entries)
         loadEntries()
+    }
+}
+
+extension PasswordManagerMenuViewModel: KeyEventHijacking {
+    func onKeyDown(with event: NSEvent) -> Bool {
+        switch selectionHandler.onKeyDown(with: event) {
+        case .none:
+            break
+        case .refresh:
+            objectWillChange.send()
+        case .select(let itemId):
+            if let menuItem = (autofillMenuItems + otherMenuItems).first(where: { $0.id == itemId }) {
+                menuItem.performAction(with: self)
+            }
+        }
+        return true
     }
 }
 

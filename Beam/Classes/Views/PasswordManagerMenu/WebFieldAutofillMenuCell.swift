@@ -22,6 +22,7 @@ struct WebFieldAutofillMenuCell<Content: View>: View {
 
     let type: CellType
     let height: CGFloat
+    let isHighlighted: Bool
     let onChange: ((WebFieldAutofillMenuCellState) -> Void)?
     let content: () -> Content
 
@@ -30,7 +31,7 @@ struct WebFieldAutofillMenuCell<Content: View>: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
-    @State private var highlightState: WebFieldAutofillMenuCellState = .idle
+    @State private var localHighlightState: WebFieldAutofillMenuCellState = .idle
     @State private var hoveringState = false
     @State private var mouseDownState = false
 
@@ -98,6 +99,15 @@ struct WebFieldAutofillMenuCell<Content: View>: View {
         }
     }
 
+    private var highlightState: WebFieldAutofillMenuCellState {
+        switch localHighlightState {
+        case .idle, .hovering:
+            return isHighlighted ? .hovering : .idle
+        case .down, .clicked:
+            return localHighlightState
+        }
+    }
+
     private func updateHighlightState() {
         let newHighlightState: WebFieldAutofillMenuCellState
         if mouseDownState {
@@ -107,9 +117,9 @@ struct WebFieldAutofillMenuCell<Content: View>: View {
         } else {
             newHighlightState = .idle
         }
-        if highlightState != newHighlightState {
-            highlightState = newHighlightState
-            onChange?(highlightState)
+        if localHighlightState != newHighlightState {
+            localHighlightState = newHighlightState
+            onChange?(localHighlightState)
         }
     }
 }
