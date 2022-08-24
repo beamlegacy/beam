@@ -11,12 +11,13 @@ struct StoredCreditCardCell: View {
     let cardDescription: String
     let obfuscatedNumber: String
     let cardImageName: String
+    let isHighlighted: Bool
     let onChange: (WebFieldAutofillMenuCellState) -> Void
 
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        WebFieldAutofillMenuCell(type: .autofill, height: 56, onChange: onChange) {
+        WebFieldAutofillMenuCell(type: .autofill, height: 56, isHighlighted: isHighlighted, onChange: onChange) {
             HStack(spacing: 12) {
                 Image(cardImageName)
                     .renderingMode(.original)
@@ -38,6 +39,6 @@ struct StoredCreditCardCell: View {
 
 struct StoredCreditCardCell_Previews: PreviewProvider {
     static var previews: some View {
-        StoredCreditCardCell(cardDescription: "Personal", obfuscatedNumber: "xxxx-xxxx-xxxx-1234", cardImageName: "autofill-card_visa") { _ in }
+        StoredCreditCardCell(cardDescription: "Personal", obfuscatedNumber: "xxxx-xxxx-xxxx-1234", cardImageName: "autofill-card_visa", isHighlighted: false) { _ in }
     }
 }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct WebFieldAutofillActionCell: View {
     var label: String
+    let isHighlighted: Bool
     var onChange: ((WebFieldAutofillMenuCellState) -> Void)?
 
     @Environment(\.colorScheme) private var colorScheme
@@ -16,7 +17,7 @@ struct WebFieldAutofillActionCell: View {
     @State private var highlightState: WebFieldAutofillMenuCellState = .idle
 
     var body: some View {
-        WebFieldAutofillMenuCell(type: .action, height: 35, onChange: updateHighlightState) {
+        WebFieldAutofillMenuCell(type: .action, height: 35, isHighlighted: isHighlighted, onChange: updateHighlightState) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(label)
                     .font(BeamFont.medium(size: 12).swiftUI)
@@ -45,31 +46,34 @@ struct WebFieldAutofillActionCell: View {
 
 struct OtherPasswordsCell: View {
     var host: String?
+    let isHighlighted: Bool
     var onChange: ((WebFieldAutofillMenuCellState) -> Void)?
 
     var body: some View {
-        WebFieldAutofillActionCell(label: host != nil ? "Other Passwords for \(host!)" : "Other Passwords...", onChange: onChange)
+        WebFieldAutofillActionCell(label: host != nil ? "Other Passwords for \(host!)" : "Other Passwords...", isHighlighted: isHighlighted, onChange: onChange)
     }
 }
 
 struct SuggestPasswordCell: View {
+    let isHighlighted: Bool
     var onChange: ((WebFieldAutofillMenuCellState) -> Void)?
 
     var body: some View {
-        WebFieldAutofillActionCell(label: "Suggest new password", onChange: onChange)
+        WebFieldAutofillActionCell(label: "Suggest new password", isHighlighted: isHighlighted, onChange: onChange)
     }
 }
 
 struct OtherCreditCardsCell: View {
+    let isHighlighted: Bool
     var onChange: ((WebFieldAutofillMenuCellState) -> Void)?
 
     var body: some View {
-        WebFieldAutofillActionCell(label: "Other Credit Cards...", onChange: onChange)
+        WebFieldAutofillActionCell(label: "Other Credit Cards...", isHighlighted: isHighlighted, onChange: onChange)
     }
 }
 
 struct OtherPasswordsCell_Previews: PreviewProvider {
     static var previews: some View {
-        OtherPasswordsCell()
+        OtherPasswordsCell(isHighlighted: false)
     }
 }
