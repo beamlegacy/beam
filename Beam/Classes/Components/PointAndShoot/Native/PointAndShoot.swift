@@ -342,7 +342,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             page.addContent(content: elements, with: withSourceBullet ? sourceUrl : nil, reason: .pointandshoot)
 
             // Add sourceUrl to note sources
-            self.setNoteSources(targetNote: targetNote, sourceUrl: sourceUrl)
+            self.updateScores(targetNote: targetNote)
 
             // Show confirmation UI
             shootGroup.setConfirmation(.success)
@@ -364,7 +364,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
 
             await MainActor.run { [weak self, mutableShootGroup] in
                 // Add sourceUrl to note sources
-                self?.setNoteSources(targetNote: note, sourceUrl: sourceUrl)
+                self?.updateScores(targetNote: note)
                 // Show confirmation UI
                 self?.showShootConfirmation(group: mutableShootGroup)
             }
@@ -419,18 +419,9 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     /// - Parameters:
     ///   - targetNote
     ///   - sourceUrl
-    private func setNoteSources(targetNote: BeamNote, sourceUrl: URL) {
+    private func updateScores(targetNote: BeamNote) {
         // Update BrowsingScorer about note submission
         scorer?.addTextSelection()
-        // Adds urlId to current note source
-        let urlId = LinkStore.getOrCreateIdFor(sourceUrl.absoluteString)
-        targetNote.sources.add(
-            urlId: urlId,
-            noteId: targetNote.id,
-            type: .user,
-            sessionId: self.data.sessionId,
-            activeSources: data.activeSources
-        )
         // Updates frecency score of destination note
         self.data.noteFrecencyScorer.update(
             id: targetNote.id,

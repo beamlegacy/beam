@@ -158,9 +158,8 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).0) == nodes[4]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).1) == nodes[1]?.link
     }
-    
-    /// Test that the when a page is opened through a link in a note the page is added as an active source for the session
-    /// (and that this doesn't happen for consequent pages)
+
+
     func testGetIdAndParentLinkFromNote() throws {
         // Start a new browsing tree and navigate to a page through a link in a note
         let _ = try BeamNote.fetchOrCreate(self, title: notes[0].title)
@@ -171,7 +170,6 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
         swapInfo(at: 0, tabTree: tree, parentBrowsingNode: nodes[0], currentTabTree: nil)
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).0) == nodes[1]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).1).to(beNil())
-        expect(self.activeSources.activeSources) == [BeamNote.fetch(title: notes[0].title)!.id: [nodes[1]!.link]]
         
         // Navigate to second page from first page
         tree.navigateTo(url: informations[1].url.string, title: nil, startReading: false, isLinkActivation: true)
@@ -179,7 +177,6 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
         swapInfo(at: 1, tabTree: tree, parentBrowsingNode: nodes[1], currentTabTree: nil)
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).0) == nodes[2]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).1) == nodes[1]?.link
-        expect(self.activeSources.activeSources) == [BeamNote.fetch(title: notes[0].title)!.id: [nodes[1]!.link]]
     }
 
     /// Test that URLs that are not suggested for any note are extracted correctly for the pourposes of monitoring
@@ -200,49 +197,6 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
         let fullText = self.clusteringManager.cleanTextFrom(note: notes[0])
         expect(fullText[0]) == "Tennis"
         expect(fullText[1]) == "The official site of Roger Federer is "
-    }
-    
-    func testSummaryUpdate() throws {
-        let oldSummary = Persistence.ContinueTo.summary
-        var testSummary = ClusteringManager.SummaryForNewDay()
-        testSummary.notes = [Calendar.current.date(byAdding: .day, value: -11, to: BeamDate.now)!: [notes[0].id, notes[1].id],
-                             Calendar.current.date(byAdding: .day, value: -10, to: BeamDate.now)!: [notes[0].id, notes[3].id],
-                             Calendar.current.date(byAdding: .day, value: -9, to: BeamDate.now)!: [notes[0].id, notes[1].id],
-                             Calendar.current.date(byAdding: .day, value: -8, to: BeamDate.now)!: [notes[0].id, notes[3].id],
-                             Calendar.current.date(byAdding: .day, value: -7, to: BeamDate.now)!: [notes[0].id, notes[1].id],
-                             Calendar.current.date(byAdding: .day, value: -6, to: BeamDate.now)!: [notes[0].id, notes[3].id],
-                             Calendar.current.date(byAdding: .day, value: -5, to: BeamDate.now)!: [notes[0].id, notes[1].id],
-                             Calendar.current.date(byAdding: .day, value: -4, to: BeamDate.now)!: [notes[0].id, notes[3].id],
-                             Calendar.current.date(byAdding: .day, value: -3, to: BeamDate.now)!: [notes[0].id, notes[1].id],
-                             Calendar.current.date(byAdding: .day, value: -2, to: BeamDate.now)!: [notes[1].id, notes[3].id],
-                             Calendar.current.date(byAdding: .day, value: -1, to: BeamDate.now)!: [notes[2].id]]
-        
-        testSummary.pageId = pageIDs[0]
-        testSummary.pageScore = Float(9.5)
-        testSummary.pageDate = Calendar.current.date(byAdding: .day, value: -1, to: BeamDate.now)!
-        if let jsonData = try? JSONEncoder().encode(testSummary),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-            Persistence.ContinueTo.summary = jsonString
-        }
-        let otherClusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: UUID(), activeSources: activeSources, tabGroupingManager: tabGroupingManager)
-        expect(Set(otherClusteringManager.continueToNotes)) == Set([notes[0].id, notes[2].id])
-        expect(otherClusteringManager.continueToPage!) == pageIDs[0]
-        
-        otherClusteringManager.addPage(id: documents[1].id, parentId: nil, value: informations[1])
-        expect(otherClusteringManager.clusteredPagesId).toEventually(equal([[self.pageIDs[1]]]))
-        otherClusteringManager.addNote(note: notes[2])
-        expect(otherClusteringManager.clusteredNotesId).toEventually(contain([notes[2].id]))
-
-        otherClusteringManager.exportSummaryForNextSession()
-        var newSummary = ClusteringManager.SummaryForNewDay()
-        if let summaryString = Persistence.ContinueTo.summary,
-           let jsonData = summaryString.data(using: .utf8),
-           let unwrappedSummary = try? BeamJSONDecoder().decode(ClusteringManager.SummaryForNewDay.self, from: jsonData) {
-            newSummary = unwrappedSummary
-        }
-        expect(newSummary.notes?.count).toEventually(equal(10))
-        
-        Persistence.ContinueTo.summary = oldSummary
     }
 
     func testShouldBeWithAndApart() throws {

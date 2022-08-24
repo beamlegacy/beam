@@ -8,22 +8,9 @@
 @testable import Beam
 
 import XCTest
-private typealias Table = [UUID: LongTermUrlScore]
 
 
 class UrlScoresCollectionTest: XCTestCase {
-    class FakeLongTermScoreStore: LongTermUrlScoreStoreProtocol {
-        fileprivate var data = Table()
-        func apply(to urlId: UUID, changes: (LongTermUrlScore) -> Void) {
-            let score = data[urlId] ?? LongTermUrlScore(urlId: urlId)
-            changes(score)
-            data[urlId] = score
-        }
-        func getMany(urlIds: [UUID]) -> [UUID: LongTermUrlScore] {
-            return [:]
-        }
-        func save(scores: [LongTermUrlScore]) {}
-    }
     class FakeDailyScoreStore: DailyUrlScoreStoreProtocol {
         fileprivate var data = [UUID: DailyURLScore]()
         func apply(to urlId: UUID, changes: (DailyURLScore) -> Void) {
@@ -40,28 +27,15 @@ class UrlScoresCollectionTest: XCTestCase {
     func testNodeCreationScores() throws {
         //first url is visited once then sencond url and first url once again
 
-        let store = FakeLongTermScoreStore()
         let dailyStore = FakeDailyScoreStore()
         let firstUrl = "www.poivre.com"
         let secondUrl = "www.sel.fr"
-        let tree = BrowsingTree(nil, frecencyScorer: nil, longTermScoreStore: store, dailyScoreStore: dailyStore)
+        let tree = BrowsingTree(nil, frecencyScorer: nil, dailyScoreStore: dailyStore)
         tree.navigateTo(url: firstUrl, title: nil, startReading: true, isLinkActivation: false)
         tree.update(for: firstUrl, readCount: 50)
         let firstNode = try XCTUnwrap(tree.current)
         let firstLink = firstNode.link
-        var score = try XCTUnwrap(store.data[firstLink])
         var dailyScore = try XCTUnwrap(dailyStore.data[firstLink])
-
-        XCTAssertEqual(score.urlId, firstLink)
-        XCTAssertEqual(score.visitCount, 1)
-        XCTAssertEqual(score.readingTimeToLastEvent, 0)
-        XCTAssertEqual(score.textSelections, 0)
-        XCTAssertEqual(score.scrollRatioX, 0)
-        XCTAssertEqual(score.scrollRatioY, 0)
-        XCTAssertEqual(score.textAmount, 50)
-        XCTAssertEqual(score.area, 0)
-        XCTAssertEqual(score.lastCreationDate, firstNode.events.first?.date)
-        XCTAssertEqual(score.navigationCountSinceLastSearch, 0)
 
         XCTAssertEqual(dailyScore.urlId, firstLink)
         XCTAssertEqual(dailyScore.visitCount, 1)
@@ -79,7 +53,6 @@ class UrlScoresCollectionTest: XCTestCase {
         tree.switchToBackground()
 
         let secondNode = try XCTUnwrap(tree.current)
-        score = try XCTUnwrap(store.data[firstLink])
         dailyScore = try XCTUnwrap(dailyStore.data[firstLink])
         let firstStartReading = firstNode.events[1].date
         let firstEndReading = try XCTUnwrap(firstNode.events.last?.date)
@@ -87,17 +60,6 @@ class UrlScoresCollectionTest: XCTestCase {
         let secondEndReading = try XCTUnwrap(secondNode.events.last?.date)
 
         let expectedDuration = firstEndReading.timeIntervalSince(firstStartReading) + secondEndReading.timeIntervalSince(secondStartReading)
-
-        XCTAssertEqual(score.urlId, firstLink)
-        XCTAssertEqual(score.visitCount, 2)
-        XCTAssertEqual(score.readingTimeToLastEvent, expectedDuration)
-        XCTAssertEqual(score.textSelections, 0)
-        XCTAssertEqual(score.scrollRatioX, 0)
-        XCTAssertEqual(score.scrollRatioY, 0)
-        XCTAssertEqual(score.textAmount, 100)
-        XCTAssertEqual(score.area, 0)
-        XCTAssertEqual(score.lastCreationDate, secondNode.events.first?.date)
-        XCTAssertEqual(score.navigationCountSinceLastSearch, 0)
 
         XCTAssertEqual(dailyScore.urlId, firstLink)
         XCTAssertEqual(dailyScore.visitCount, 2)
@@ -114,9 +76,8 @@ class UrlScoresCollectionTest: XCTestCase {
         let config = BeamWebViewConfigurationBase()
         let webView = BeamWebView(frame: CGRect(), configuration: config)
         let page = WebPageBaseImpl(webView: webView)
-        let store = FakeLongTermScoreStore()
         let dailyStore = FakeDailyScoreStore()
-        let tree = BrowsingTree(nil, frecencyScorer: nil, longTermScoreStore: store, dailyScoreStore: dailyStore)
+        let tree = BrowsingTree(nil, frecencyScorer: nil, dailyScoreStore: dailyStore)
         let scorer = BrowsingTreeScorer(browsingTree: tree)
         page.browsingScorer = scorer
         scorer.page = page
@@ -125,23 +86,11 @@ class UrlScoresCollectionTest: XCTestCase {
         page.webFrames = frames
         page.webPositions = positions
 
-        let creationDate = try XCTUnwrap(tree.root.events.first?.date)
         let link = tree.root.link
 
         //adding text section
         scorer.addTextSelection()
-        var score = try XCTUnwrap(store.data[link])
         var dailyScore = try XCTUnwrap(dailyStore.data[link])
-
-        XCTAssertEqual(score.urlId, link)
-        XCTAssertEqual(score.visitCount, 1)
-        XCTAssertEqual(score.readingTimeToLastEvent, 0)
-        XCTAssertEqual(score.textSelections, 1)
-        XCTAssertEqual(score.scrollRatioX, 0)
-        XCTAssertEqual(score.scrollRatioY, 0)
-        XCTAssertEqual(score.textAmount, 0)
-        XCTAssertEqual(score.area, 0)
-        XCTAssertEqual(score.lastCreationDate, creationDate)
 
         XCTAssertEqual(dailyScore.urlId, link)
         XCTAssertEqual(dailyScore.visitCount, 1)
@@ -167,18 +116,7 @@ class UrlScoresCollectionTest: XCTestCase {
         )
 
         scorer.updateScrollingScore(scroll1)
-        score = try XCTUnwrap(store.data[link])
         dailyScore = try XCTUnwrap(dailyStore.data[link])
-
-        XCTAssertEqual(score.urlId, link)
-        XCTAssertEqual(score.visitCount, 1)
-        XCTAssertEqual(score.readingTimeToLastEvent, 0)
-        XCTAssertEqual(score.textSelections, 1)
-        XCTAssertEqual(score.scrollRatioX, 0.2)
-        XCTAssertEqual(score.scrollRatioY, 0.5)
-        XCTAssertEqual(score.textAmount, 0)
-        XCTAssertEqual(score.area, 100)
-        XCTAssertEqual(score.lastCreationDate, creationDate)
 
         XCTAssertEqual(dailyScore.urlId, link)
         XCTAssertEqual(dailyScore.visitCount, 1)
@@ -203,18 +141,7 @@ class UrlScoresCollectionTest: XCTestCase {
             height: 1
         )
         scorer.updateScrollingScore(scroll2)
-        score = try XCTUnwrap(store.data[link])
         dailyScore = try XCTUnwrap(dailyStore.data[link])
-
-        XCTAssertEqual(score.urlId, link)
-        XCTAssertEqual(score.visitCount, 1)
-        XCTAssertEqual(score.readingTimeToLastEvent, 0)
-        XCTAssertEqual(score.textSelections, 1)
-        XCTAssertEqual(score.scrollRatioX, 0.4) //max of current and previous score
-        XCTAssertEqual(score.scrollRatioY, 0.5) //max of current and previous score
-        XCTAssertEqual(score.textAmount, 0)
-        XCTAssertEqual(score.area, 400) // gets overwritten
-        XCTAssertEqual(score.lastCreationDate, creationDate)
 
         XCTAssertEqual(dailyScore.urlId, link)
         XCTAssertEqual(dailyScore.visitCount, 1)
@@ -239,14 +166,11 @@ class UrlScoresCollectionTest: XCTestCase {
             height: 1
         )
         scorer.updateScrollingScore(scroll3)
-        score = try XCTUnwrap(store.data[link])
-        XCTAssertEqual(score.scrollRatioX, 0.4) //doesn't get replaced by nan
-        XCTAssertEqual(score.scrollRatioY, 0.5) //doesn't get replaced by nan
     }
 
     func testDailyIsPinned() throws {
         let dailyStore = FakeDailyScoreStore()
-        let tree = BrowsingTree(nil, frecencyScorer: nil, longTermScoreStore: nil, dailyScoreStore: dailyStore)
+        let tree = BrowsingTree(nil, frecencyScorer: nil, dailyScoreStore: dailyStore)
         tree.navigateTo(url: "http://abc.com", title: "", startReading: false, isLinkActivation: false)
         let urlId0 = tree.current.link
         tree.navigateTo(url: "http://def.com", title: "", startReading: false, isLinkActivation: false)

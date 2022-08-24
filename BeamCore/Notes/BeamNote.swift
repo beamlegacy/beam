@@ -140,7 +140,6 @@ public class BeamNote: BeamElement {
     /// URLs whose content were used to create this note
     @Published public var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } }
     public var browsingSessionIds = [UUID]() { didSet { change(.meta) } }
-    public var sources = NoteSources()
     private var _version = BeamVersion()
     private var versionLock = RWLock()
     public var version: BeamVersion {
@@ -208,7 +207,6 @@ public class BeamNote: BeamElement {
         }
 
         self.sign = Self.signPost.createId(object: self)
-        setupSourceObserver()
         checkHasNote()
     }
 
@@ -224,7 +222,6 @@ public class BeamNote: BeamElement {
         }
 
         self.sign = Self.signPost.createId(object: self)
-        setupSourceObserver()
         checkHasNote()
     }
 
@@ -278,11 +275,6 @@ public class BeamNote: BeamElement {
         }
 
         self.sign = Self.signPost.createId(object: self)
-        if container.contains(.sources),
-           let decodedSources = try? container.decode(NoteSources.self, forKey: .sources) {
-            sources = decodedSources
-        }
-        setupSourceObserver()
 
         if let oldType = try? container.decode(NoteType.self, forKey: .type) {
             type = BeamNoteType.fromOldType(oldType, title: ttl, fallbackDate: creationDate)
@@ -323,7 +315,6 @@ public class BeamNote: BeamElement {
         try container.encode(type, forKey: .type)
         try container.encode(searchQueries, forKey: .searchQueries)
         try container.encode(visitedSearchResults, forKey: .visitedSearchResults)
-        try container.encode(sources, forKey: .sources)
         try container.encode(publicationStatus, forKey: .publicationStatus)
         try container.encode(browsingSessionIds, forKey: .browsingSessionIds)
         try container.encode(contactId, forKey: .contactId)
@@ -532,11 +523,6 @@ public class BeamNote: BeamElement {
     }
 
     var sourceObserver: Cancellable?
-    private func setupSourceObserver() {
-        sourceObserver = sources.$changed
-            .dropFirst(1)
-            .sink { [weak self] _ in self?.change(.meta) }
-    }
 
     public var shouldUpdatePublishedVersion: Bool {
         guard case .published(_, _, let publicationDate, _) = publicationStatus else { return false }
@@ -573,7 +559,6 @@ public class BeamNote: BeamElement {
         self.searchQueries = other.searchQueries
         self.visitedSearchResults = other.visitedSearchResults
         self.browsingSessionIds = other.browsingSessionIds
-        self.sources = other.sources
         self.version = other.version
         self.owner = other.owner
         self.saving = other.saving
