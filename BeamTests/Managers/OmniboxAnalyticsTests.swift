@@ -40,33 +40,47 @@ class OmniboxAnalyticsTests: XCTestCase {
         XCTAssertEqual(lastEvent.exitState, .aborted)
     }
 
-    private func queryAndTestOmnibox(_ query: String, selectedIndex: Int?, expectedExitState: OmniboxExitState, expectResults: Bool = true) throws {
-        state.startFocusOmnibox()
+    private func queryAndTestOmnibox(_ query: String, selectedIndex: Int?, expectedExitState: OmniboxExitState,
+                                     autocompleteResults: AutocompleteManager.AutocompletePublisherSourceResults) throws {
+        state.startFocusOmnibox(autocompleteMode: .test(results: autocompleteResults))
         state.autocompleteManager.searchQuery = query
         _ = state.autocompleteManager.replacementTextForProposedText(query) //feeds the actual typed query in autocompleteManager
-        let condition = expectResults ? beGreaterThan(0) : equal(0)
-        expect(self.state.autocompleteManager.autocompleteResults.count).toEventually(condition)
-        let resultCount = state.autocompleteManager.autocompleteResults.count
+        expect(self.state.autocompleteManager.autocompleteResults.count).toEventually(equal(autocompleteResults.results.count))
         state.autocompleteManager.autocompleteSelectedIndex = selectedIndex
         state.startOmniboxQuery(navigate: false) //runs method without actually navigating to destination url
 
         let lastEvent = try XCTUnwrap(analyticsBackend.events.last as? OmniboxQueryAnalyticsEvent)
         XCTAssertEqual(lastEvent.type, .omniboxQuery)
-        XCTAssertEqual(lastEvent.resultCount, resultCount)
+        XCTAssertEqual(lastEvent.resultCount, autocompleteResults.results.count)
         XCTAssertEqual(lastEvent.queryLength, query.count)
         XCTAssertEqual(lastEvent.chosenItemPosition, selectedIndex)
         XCTAssertEqual(lastEvent.exitState, expectedExitState)
     }
 
     func testChosenAutocomplete() throws {
-        try queryAndTestOmnibox("lem", selectedIndex: 1, expectedExitState: .autocompleteResult(source: .searchEngine))
+        let results = AutocompleteManager.AutocompletePublisherSourceResults(
+            id: UUID(),
+            source: .searchEngine,
+            results: [AutocompleteResult(text: "abc", source: .searchEngine), AutocompleteResult(text: "def", source: .searchEngine)]
+        )
+        try queryAndTestOmnibox("lem", selectedIndex: 1, expectedExitState: .autocompleteResult(source: .searchEngine), autocompleteResults: results)
     }
 
     func testRawQueryUrl() throws {
-        try queryAndTestOmnibox("http://www.lemonde.fr/", selectedIndex: nil, expectedExitState: .url, expectResults: false)
+        let results = AutocompleteManager.AutocompletePublisherSourceResults(
+            id: UUID(),
+            source: .searchEngine,
+            results: []
+        )
+        try queryAndTestOmnibox("http://www.lemonde.fr/", selectedIndex: nil, expectedExitState: .url, autocompleteResults: results)
     }
 
     func testRawQuerySearch() throws {
-        try queryAndTestOmnibox("a walk in the park", selectedIndex: nil, expectedExitState: .searchQuery)
+        let results = AutocompleteManager.AutocompletePublisherSourceResults(
+            id: UUID(),
+            source: .searchEngine,
+            results: []
+        )
+        try queryAndTestOmnibox("a walk in the park", selectedIndex: nil, expectedExitState: .searchQuery, autocompleteResults: results)
     }
 }
