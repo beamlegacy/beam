@@ -10,12 +10,13 @@ import SwiftUI
 struct StoredPasswordCell: View {
     let host: String
     let username: String
+    let isHighlighted: Bool
     let onChange: (WebFieldAutofillMenuCellState) -> Void
 
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        WebFieldAutofillMenuCell(type: .autofill, height: 56, onChange: onChange) {
+        WebFieldAutofillMenuCell(type: .autofill, height: 56, isHighlighted: isHighlighted, onChange: onChange) {
             HStack(spacing: 12) {
                 Image("autofill-password")
                     .renderingMode(.template)
@@ -37,6 +38,6 @@ struct StoredPasswordCell: View {
 
 struct StoredPasswordCell_Previews: PreviewProvider {
     static var previews: some View {
-        StoredPasswordCell(host: "beamapp.co", username: "beam@beamapp.co") { _ in }
+        StoredPasswordCell(host: "beamapp.co", username: "beam@beamapp.co", isHighlighted: false) { _ in }
     }
 }
