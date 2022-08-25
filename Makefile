@@ -163,6 +163,9 @@ js_test:
 	./scripts/build_js.sh
 	yarn run alltests
 
+setup_js_xcfilelists:
+	./scripts/build_xcfilelist_web.sh
+
 clean_app_files:
 	rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/"*
 	rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/"*
@@ -181,7 +184,7 @@ update_curl_jq_image:
 	@echo "Pushing image"
 	docker push registry.gitlab.com/beamgroup/beam/curl-jq
 
-setup: git_checkout install_dependencies install_swiftlint install_cmake install_direnv install_variable_injector install_js
+setup: git_checkout install_dependencies install_swiftlint install_cmake install_direnv install_variable_injector install_js setup_js_xcfilelists
 
 #Feature Flags
 

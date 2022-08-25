@@ -167,3 +167,7 @@ allure-report/
 
 # Webpack build cache
 .temp_cache
+
+# JS filelists generated with build_xcfilelist_web.sh
+WebFileList_input.xcfilelist
+WebFileList_output.xcfilelist
