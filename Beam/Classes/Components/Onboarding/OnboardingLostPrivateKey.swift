@@ -35,8 +35,9 @@ struct OnboardingLostPrivateKey: View {
             }.padding(.bottom, 40)
             ActionableButton(text: "Erase all data", defaultState: .normal, variant: destructiveCenteredVariant, minWidth: 280, height: 34) {
                 // Two alerts and delete
-                UserAlert.showMessage(message: "Erase all data", informativeText: "This operation cannot be undone.", buttonTitle: "Erase all data", secondaryButtonTitle: "Cancel") {
-                    UserAlert.showMessage(message: "Are you sure you want to erase all your beam data?", informativeText: "This operation cannot be undone.", buttonTitle: "Yes, Erase All Data", secondaryButtonTitle: "Cancel") {
+                UserAlert.showMessage(message: "Erase all data", informativeText: "This operation cannot be undone.", buttonTitle: "Erase all data", secondaryButtonTitle: "Cancel",
+                                      buttonAction: {
+                    UserAlert.showMessage(message: "Are you sure you want to erase all your beam data?", informativeText: "This operation cannot be undone.", buttonTitle: "Yes, Erase All Data", secondaryButtonTitle: "Cancel", buttonAction: {
                         // Delete All Local Content && Remote data
                         Task { @MainActor in
                             do {
@@ -46,8 +47,8 @@ struct OnboardingLostPrivateKey: View {
                                 Logger.shared.logError("Cannot deleted data: \(error)", category: .database)
                             }
                         }
-                    }
-                }
+                    })
+                })
             }
         }
     }

@@ -1107,6 +1107,7 @@
 		A52B5022271DCB950078670C /* TabsDragModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52B5021271DCB950078670C /* TabsDragModel.swift */; };
 		A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFDF62608D6710028D3F3 /* BeamFont.swift */; };
 		A52BFE63260901980028D3F3 /* Separator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52BFE62260901980028D3F3 /* Separator.swift */; };
+		A52D1DDD28AFD2DF00FF7CB4 /* TabGroupNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52D1DDC28AFD2DF00FF7CB4 /* TabGroupNode.swift */; };
 		A52E73F72865B4E600D0E2AF /* LightBeamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52E73F62865B4E500D0E2AF /* LightBeamView.swift */; };
 		A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */; };
 		A5316A192667B9110039ED9C /* Range+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5316A182667B9110039ED9C /* Range+BeamTests.swift */; };
@@ -3064,6 +3065,7 @@
 		A52B5021271DCB950078670C /* TabsDragModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsDragModel.swift; sourceTree = "<group>"; };
 		A52BFDF62608D6710028D3F3 /* BeamFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFont.swift; sourceTree = "<group>"; };
 		A52BFE62260901980028D3F3 /* Separator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Separator.swift; sourceTree = "<group>"; };
+		A52D1DDC28AFD2DF00FF7CB4 /* TabGroupNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupNode.swift; sourceTree = "<group>"; };
 		A52E73F62865B4E500D0E2AF /* LightBeamView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LightBeamView.swift; sourceTree = "<group>"; };
 		A52FCB622666514000BCD38A /* TextLinesDecorationLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextLinesDecorationLayer.swift; sourceTree = "<group>"; };
 		A5316A182667B9110039ED9C /* Range+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Range+BeamTests.swift"; sourceTree = "<group>"; };
@@ -4460,6 +4462,7 @@
 				A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */,
 				9691C2A52645F90600F70DA1 /* ImageNode.swift */,
 				A5A2314426FB355B00D01D08 /* DividerNode.swift */,
+				A52D1DDC28AFD2DF00FF7CB4 /* TabGroupNode.swift */,
 				A5919F63268EA024009015C5 /* EmbedNode */,
 				9661A58A266A70DA00CB56B3 /* NodeProvider.swift */,
 				A5919F7E268EF964009015C5 /* TextEditCmdReturnAnimator.swift */,
@@ -9494,6 +9497,7 @@
 				A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */,
 				416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */,
 				37DB5A1327BB515700534760 /* CollapseButtonLayer.swift in Sources */,
+				A52D1DDD28AFD2DF00FF7CB4 /* TabGroupNode.swift in Sources */,
 				9688F2BE2851F02600FAA51B /* DataView.swift in Sources */,
 				DABFD3B026FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
