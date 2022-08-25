@@ -228,12 +228,33 @@ class BaseTest: XCTestCase {
     }
     
     func clearPasteboard() {
+        NSPasteboard.general.clearContents()
         let pboard = NSPasteboard(name: .find)
         pboard.clearContents()
         pboard.setString("", forType: .string)
     }
-    
+
+    func captureGroupToNoteAndOpenNote() {
+        let tabGroupMenu = TabGroupMenuView()
+        let allNotesView = AllNotesTestView()
+        
+        tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
+        tabGroupMenu.captureTabGroup(index: 0)
+        tabGroupMenu.closeTabGroup(index: 0)
+        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+        allNotesView.waitForAllNotesViewToLoad()
+        allNotesView.openFirstNote()
+    }
+
     func testrailId(_ id: String) {
         print("TestRail scenario ID: \(id)")
+    }
+    
+    func getNumberOfPasteboardItem() -> Int? {
+        return NSPasteboard.general.pasteboardItems?.count
+    }
+    
+    func isPasteboardEmpty() -> Bool {
+        return getNumberOfPasteboardItem() == 0
     }
 }

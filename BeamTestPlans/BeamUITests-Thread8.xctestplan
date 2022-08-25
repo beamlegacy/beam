@@ -106,7 +106,9 @@
         "SearchOnNoteTests\/testSearchResultsCounter()",
         "SearchOnNoteTests\/testSearchViewAppearace()",
         "TabGroupCaptureToANoteMenuTests",
-        "TabGroupInOmniboxTests"
+        "TabGroupInOmniboxTests",
+        "TabGroupSharingFromNoteTests",
+        "TabGroupSharingTests"
       ],
       "target" : {
         "containerPath" : "container:Beam.xcodeproj",
