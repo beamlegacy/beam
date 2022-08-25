@@ -83,6 +83,7 @@ extension AppDelegate {
         }
         AppDelegate.main.windows = []
         self.deleteSessionData()
+        self.data.deleteJournal()
         self.data.onboardingManager.forceDisplayOnboarding()
         self.data.onboardingManager.delegate = self
         self.data.onboardingManager.presentOnboardingWindow()

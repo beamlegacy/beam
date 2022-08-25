@@ -371,7 +371,8 @@ import UniformTypeIdentifiers
         state?.updateNoteFocusedState(note: note,
                                       focusedElement: element.id,
                                       cursorPosition: position,
-                                      selectedRange: position..<position)
+                                      selectedRange: position..<position,
+                                      isReference: false)
     }
 
     internal func logInNote(url: URL, reason: NoteElementAddReason) {

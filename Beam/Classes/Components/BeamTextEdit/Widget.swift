@@ -999,6 +999,17 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         root?.focusedWidget == self
     }
 
+    func isDescendant(of widgetType: Widget.Type) -> Bool {
+        var node: Widget? = self
+        while let n = node {
+            if type(of: n) == widgetType {
+                return true
+            }
+            node = n.parent
+        }
+        return false
+    }
+
     // MARK: - Mouse Events
     enum DragMode {
         case none
