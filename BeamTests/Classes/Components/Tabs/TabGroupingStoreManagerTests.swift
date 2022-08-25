@@ -93,5 +93,30 @@ class TabGroupingStoreManagerTests: XCTestCase {
         XCTAssertTrue (saved)
     }
 
+    func testIsAPureCopy() {
+        let pages = [
+            TabGroupBeamObject.PageInfo(id: UUID(), url: URL(string: "beamapp.co")!, title: "Beam App")
+        ]
+        let title = "Group Title"
+        let color = TabGroupingColor(designColor: .green)
+        let parent = TabGroupBeamObject(title: title, color: color, pages: pages, parentGroup: nil)
 
+        let copy = TabGroupBeamObject(title: title, color: color, pages: pages, parentGroup: parent.id)
+        XCTAssertTrue(copy.isACopy(of: parent))
+
+        let copyNewTitle = TabGroupBeamObject(title: "Other Group", color: color, pages: pages, parentGroup: parent.id)
+        XCTAssertFalse(copyNewTitle.isACopy(of: parent))
+
+        let newPages = [
+            TabGroupBeamObject.PageInfo(id: UUID(), url: URL(string: "teal.com")!, title: "Best Color")
+        ]
+        let copyNewPages = TabGroupBeamObject(title: title, color: color, pages: newPages, parentGroup: parent.id)
+        XCTAssertFalse(copyNewPages.isACopy(of: parent))
+
+        let copyNewColor = TabGroupBeamObject(title: title, color: .init(designColor: .red), pages: pages, parentGroup: parent.id)
+        XCTAssertFalse(copyNewColor.isACopy(of: parent))
+
+        let copyNoParent = TabGroupBeamObject(title: title, color: color, pages: pages, parentGroup: UUID())
+        XCTAssertFalse(copyNoParent.isACopy(of: parent))
+    }
 }
