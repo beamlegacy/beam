@@ -195,7 +195,7 @@ class ImageNode: ResizableNode {
     private func setupFocusLayer() {
         let borderLayer = CAShapeLayer()
         borderLayer.lineWidth = 5
-        borderLayer.strokeColor = selectionColor.cgColor
+        borderLayer.strokeColor = selectionColor
         borderLayer.fillColor = NSColor.clear.cgColor
         borderLayer.zPosition = 0
         borderLayer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
@@ -311,7 +311,7 @@ class ImageNode: ResizableNode {
         super.updateColors()
 
         if let focusLayer = layers["focus"], let borderLayer = focusLayer.layer as? CAShapeLayer {
-            borderLayer.strokeColor = selectionColor.cgColor
+            borderLayer.strokeColor = selectionColor
         }
 
         if let collapseExpandLayer = layers["global-expand"]?.layer,

@@ -84,7 +84,7 @@ public class DividerNode: ElementNode {
         super.updateColors()
 
         lineLayer?.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
-        focusLayer?.backgroundColor = BeamColor.Generic.textSelection.cgColor
+        focusLayer?.backgroundColor = BeamColor.Cursor.cache.selection.cgColor
         lineLayer?.backgroundColor = BeamColor.Mercury.cgColor
     }
 
