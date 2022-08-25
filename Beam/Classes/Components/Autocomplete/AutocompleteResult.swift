@@ -110,6 +110,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     private(set) var aliasForDestinationURL: URL?
     private(set) var information: String?
     private var customIcon: String?
+    private(set) var iconColor: NSColor?
     private(set) var shortcut: Shortcut?
     private(set) var completingText: String?
     private(set) var additionalSearchTerms: [String]?
@@ -136,7 +137,8 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     private(set) var prefixScore: Float = 0
 
     init(text: String, source: Source, disabled: Bool = false, url: URL? = nil, aliasForDestinationURL: URL? = nil,
-         information: String? = nil, customIcon: String? = nil, shortcut: Shortcut? = nil, completingText: String? = nil, additionalSearchTerms: [String]? = nil,
+         information: String? = nil, customIcon: String? = nil, iconColor: NSColor? = nil, shortcut: Shortcut? = nil,
+         completingText: String? = nil, additionalSearchTerms: [String]? = nil,
          uuid: UUID = UUID(), score: Float? = nil, urlFields: URLFields = [], displayTopDivider: Bool = false,
          handler: ((BeamState, AutocompleteResult) -> Void)? = nil) {
         self.text = text
@@ -146,6 +148,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         self.aliasForDestinationURL = aliasForDestinationURL
         self.information = information
         self.customIcon = customIcon
+        self.iconColor = iconColor
         self.shortcut = shortcut
         self.completingText = completingText
         self.additionalSearchTerms = additionalSearchTerms

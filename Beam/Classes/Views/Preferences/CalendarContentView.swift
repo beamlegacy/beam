@@ -87,9 +87,10 @@ struct GoogleAccountView: View {
                         UserAlert.showMessage(message: "Are you sure you want to disconnect your Google account?",
                                               informativeText: "You’ll need to add it again to sync your Google Calendars and Contacts.",
                                               buttonTitle: "Disconnect",
-                                              secondaryButtonTitle: "Cancel") {
+                                              secondaryButtonTitle: "Cancel",
+                                              buttonAction: {
                             onDisconnect?()
-                        }
+                        })
                     } label: {
                         Text("Disconnect")
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -135,9 +136,10 @@ struct AppleAccountView: View {
                     Button {
                         UserAlert.showMessage(message: "Are you sure you want to disconnect your calendar?",
                                               buttonTitle: "Disconnect",
-                                              secondaryButtonTitle: "Cancel") {
+                                              secondaryButtonTitle: "Cancel",
+                                              buttonAction: {
                             onDisconnect?()
-                        }
+                        })
                     } label: {
                         Text("Disconnect")
                             .foregroundColor(BeamColor.Generic.text.swiftUI)

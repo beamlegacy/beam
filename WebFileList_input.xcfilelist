@@ -165,6 +165,7 @@
 ./Beam/Classes/Components/PointAndShoot/Web/src/mixins.scss
 ./Beam/Classes/Components/PointAndShoot/Web/src/index_web.scss
 ./Beam/Classes/Components/PointAndShoot/Web/src/PopupUI_web.scss
+./Beam/Classes/Components/PointAndShoot/Web/src/Cursor.scss
 ./Beam/Classes/Components/PointAndShoot/Web/src/PointAndShootUI_web.scss
 ./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/src/ContextMenu.css
 ./Beam/Classes/Components/MediaPlayer/Web/src/MediaPlayer.css

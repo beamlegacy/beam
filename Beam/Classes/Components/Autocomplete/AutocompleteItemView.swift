@@ -147,6 +147,13 @@ struct AutocompleteItemView: View {
         }
     }
 
+    private var iconColor: Color {
+        if let iconColor = item.iconColor {
+            return Color(iconColor)
+        }
+        return secondaryTextColor
+    }
+
     @ViewBuilder
     var iconView: some View {
         if loading {
@@ -161,7 +168,7 @@ struct AutocompleteItemView: View {
                 .scaledToFit()
                 .frame(maxWidth: 16, maxHeight: 16)
         } else {
-            Icon(name: item.icon, color: secondaryTextColor)
+            Icon(name: item.icon, color: iconColor)
         }
     }
 
