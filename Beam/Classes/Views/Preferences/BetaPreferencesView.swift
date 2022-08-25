@@ -136,7 +136,7 @@ struct BetaPreferencesView: View, BeamDocumentSource {
     private var DatabasePicker: some View {
         Picker("", selection: $selectedDatabase.onChange(dbChange)) {
             ForEach(databases, id: \.id) {
-                Text($0.title).tag($0)
+                Text($0.title).tag($0 as BeamDatabase?)
             }
         }.labelsHidden()
             .frame(maxWidth: 200)
