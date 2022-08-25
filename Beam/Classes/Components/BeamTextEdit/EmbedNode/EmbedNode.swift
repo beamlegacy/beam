@@ -113,7 +113,7 @@ class EmbedNode: ResizableNode {
     }
 
     private var focusColor: CGColor {
-        isCollapsed ? BeamColor.Editor.linkActiveBackground.cgColor : selectionColor.cgColor
+        isCollapsed ? BeamColor.Editor.linkActiveBackground.cgColor : selectionColor
     }
 
     private var sourceURL: URL? {
