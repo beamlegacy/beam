@@ -1398,12 +1398,7 @@ public class TextNode: ElementNode {
                 self.invalidateText()
             }.store(in: &elementScope)
 
-        element.$open
-            .sink { [unowned self] newValue in
-                if open != newValue {
-                    open = newValue
-                }
-            }.store(in: &elementScope)
+        open = element.open
 
         elementText = element.text
         elementKind = element.kind
