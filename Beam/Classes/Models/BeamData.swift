@@ -308,6 +308,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     }
 
     func setupJournal(firstSetup: Bool = false) throws {
+        guard (!firstSetup || _todaysNote == nil) else { return }
+
         journal.removeAll()
         journalSet.removeAll()
 
@@ -315,6 +317,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         appendToJournal([note], fetchEvents: !firstSetup)
         _todaysNote = note
         loadMorePastJournalNotes(count: 4, fetchEvents: !firstSetup)
+    }
+
+    func deleteJournal() {
+        _todaysNote = nil
+        journal.removeAll()
+        journalSet.removeAll()
+        calendarManager.meetingsForNote.removeAll()
     }
 
     func loadMorePastJournalNotes(count: Int, fetchEvents: Bool) {
