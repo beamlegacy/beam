@@ -259,7 +259,6 @@ public extension CALayer {
                 prepareRoot()
             }
         }
-
     }
 
     var unpreparedRoot: BeamElement?
@@ -332,6 +331,9 @@ public extension CALayer {
 
     public override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
+
+        // We need to update cursor cache when changing appearances since some colors are heavy to compute
+        BeamColor.Cursor.updateCache()
 
         updateColors()
         rootNode?.updateColorsIfNeeded()

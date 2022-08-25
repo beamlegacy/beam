@@ -115,9 +115,9 @@ public class ElementNode: Widget {
     }
 
     var color: NSColor { config.color }
-    var disabledColor: NSColor { config.disabledColor }
-    var cursorColor: BeamColor { config.cursorColor }
-    var selectionColor: BeamColor { config.selectionColor }
+    var disabledColor: CGColor { config.disabledColor }
+    var cursorColor: CGColor { config.cursorColor }
+    var selectionColor: CGColor { config.selectionColor }
     var alpha: Float { config.alpha }
     var blendMode: CGBlendMode { config.blendMode }
 
@@ -600,7 +600,7 @@ public class ElementNode: Widget {
         let layer = self.cursorLayer
 
         performLayerChanges {
-            layer.shapeLayer.fillColor = self.enabled ? self.cursorColor.cgColor : self.disabledColor.cgColor
+            layer.shapeLayer.fillColor = self.enabled ? self.cursorColor : self.disabledColor
             layer.layer.isHidden = !on
             layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
         }
@@ -613,7 +613,7 @@ public class ElementNode: Widget {
         let layer = self.cursorLayer
 
         performLayerChanges {
-            layer.shapeLayer.fillColor = self.enabled ? self.cursorColor.cgColor : self.disabledColor.cgColor
+            layer.shapeLayer.fillColor = self.enabled ? self.cursorColor : self.disabledColor
             layer.layer.isHidden = !on
             layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
         }

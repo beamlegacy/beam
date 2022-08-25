@@ -383,7 +383,7 @@ public class TextNode: ElementNode {
         super.deepInvalidateText()
     }
 
-    private func createMarkeeLayer(name: String, color: BeamColor) -> ShapeLayer {
+    private func createMarkeeLayer(name: String, color: CGColor) -> ShapeLayer {
         let layer = ShapeLayer(name: name)
         layer.layer.actions = [
             kCAOnOrderIn: NSNull(),
@@ -395,7 +395,7 @@ public class TextNode: ElementNode {
 
         layer.layer.zPosition = -1
         layer.layer.position = CGPoint(x: contentsLead, y: 0)
-        layer.shapeLayer.fillColor = color.cgColor
+        layer.shapeLayer.fillColor = color
         addLayer(layer)
         return layer
     }
@@ -413,6 +413,7 @@ public class TextNode: ElementNode {
 
     func updateSelection() {
         selectedTextLayer.layer.isHidden = true
+        selectedTextLayer.shapeLayer.fillColor = selectionColor
 
         guard !readOnly else { return }
 
@@ -444,9 +445,9 @@ public class TextNode: ElementNode {
 
         let cursorRect = rectAt(caretIndex: caretIndex)
 
-        cursorLayer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
+        cursorLayer.shapeLayer.fillColor = enabled ? cursorColor : disabledColor
         cursorLayer.layer.isHidden = !on
-        cursorLayer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+        cursorLayer.shapeLayer.path = CGPath(roundedRect: cursorRect, cornerWidth: 1.5, cornerHeight: 1.5, transform: nil)
     }
 
     var _decorationLayer: Layer?
@@ -494,7 +495,8 @@ public class TextNode: ElementNode {
             deepInvalidateText()
         }
 
-        selectedTextLayer.shapeLayer.fillColor = selectionColor.cgColor
+        selectedTextLayer.shapeLayer.fillColor = selectionColor
+        cursorLayer.shapeLayer.fillColor = cursorColor
     }
 
     var useActionLayer = true
