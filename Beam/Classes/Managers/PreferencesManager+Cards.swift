@@ -27,20 +27,22 @@ enum PreferencesEmbedOptions: Int, CaseIterable, Identifiable {
 
 // MARK: - Keys
 extension PreferencesManager {
-    static let checkSpellingIsOnKey = "checkSpellingIsOn"
-    static let checkGrammarIsOnKey = "checkGrammarIsOn"
-    static let correctSpellingIsOnKey = "correctSpellingIsOn"
-    static let embedContentPreferenceKey = "embedContentPreference"
-    static let alwaysShowBulletsKey = "alwaysShowBullets"
+    static let checkSpellingIsOnKey: String = "checkSpellingIsOn"
+    static let checkGrammarIsOnKey: String = "checkGrammarIsOn"
+    static let correctSpellingIsOnKey: String = "correctSpellingIsOn"
+    static let embedContentPreferenceKey: String = "embedContentPreference"
+    static let alwaysShowBulletsKey: String = "alwaysShowBullets"
+    static let cursorColorKey: String = "cursorColorKey"
 }
 
 // MARK: - Default Values
 extension PreferencesManager {
-    static let checkSpellingIsOnDefault = true
-    static let checkGrammarIsOnDefault = true
-    static let correctSpellingIsOnDefault = true
-    static let embedContentPreferenceDefault = 1
-    static let alwaysShowBulletsDefault = true
+    static let checkSpellingIsOnDefault: Bool = true
+    static let checkGrammarIsOnDefault: Bool = true
+    static let correctSpellingIsOnDefault: Bool = true
+    static let embedContentPreferenceDefault: Int = 1
+    static let alwaysShowBulletsDefault: Bool = true
+    static let cursorColorDefault: String = BeamColor.Cursor.default.rawValue
 }
 
 extension PreferencesManager {
@@ -58,4 +60,7 @@ extension PreferencesManager {
 
     @UserDefault(key: alwaysShowBulletsKey, defaultValue: alwaysShowBulletsDefault, suiteName: BeamUserDefaults.cardsPreferences.suiteName)
     static var alwaysShowBullets: Bool
+
+    @UserDefault(key: cursorColorKey, defaultValue: cursorColorDefault, suiteName: BeamUserDefaults.cardsPreferences.suiteName)
+    static var cursorColor: String
 }

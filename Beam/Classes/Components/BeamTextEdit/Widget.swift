@@ -43,7 +43,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         didSet {
             selectionLayer.removeAllAnimations()
             selectionLayer.backgroundColor = selected ?
-                BeamColor.Generic.textSelection.cgColor :
+                BeamColor.Cursor.cache.widget.cgColor :
                 NSColor(white: 1, alpha: 0).cgColor
             invalidate()
             invalidateLayout()
@@ -1188,7 +1188,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self.layer.opacity = isDragging ? moveOpacityFactor : 1.0
 
         selectionLayer.backgroundColor = selected && !(isDragging || isDraggedForMoveByParent) ?
-            BeamColor.Generic.textSelection.cgColor :
+            BeamColor.Cursor.cache.widget.cgColor :
             NSColor(white: 1, alpha: 0).cgColor
 
         for c in children {

@@ -25,9 +25,9 @@ public struct TextConfig {
     var keepCursorMidScreen = false //true
 
     var color = BeamColor.Generic.text.staticColor
-    var disabledColor = NSColor.disabledControlTextColor
-    var cursorColor = BeamColor.Generic.cursor
-    var selectionColor = BeamColor.Generic.textSelection
+    var disabledColor: CGColor = NSColor.disabledControlTextColor.cgColor
+    var cursorColor: CGColor { BeamColor.Cursor.cache.cursor.cgColor }
+    var selectionColor: CGColor { BeamColor.Cursor.cache.selection.cgColor }
     var alpha: Float = 1.0
     var blendMode: CGBlendMode = .normal
 }
