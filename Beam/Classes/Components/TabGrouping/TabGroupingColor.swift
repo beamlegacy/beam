@@ -71,12 +71,12 @@ struct TabGroupingColor: Identifiable, Hashable {
             mainColor = designColor.color
             var hue: CGFloat = 0
             designColor.color.nsColor.usingColorSpace(.deviceRGB)?.getHue(&hue, saturation: nil, brightness: nil, alpha: nil)
-            textColor = BeamColor.From(color: NSColor(hue: hue, saturation: 1, brightness: 0.18, alpha: 1))
+            textColor = BeamColor.combining(lightColor: .From(color: .white), darkColor: .From(color: .black, alpha: 0.94))
         } else if let hue = randomColorHueTint {
-            let light = BeamColor.From(color: NSColor(hue: hue, saturation: 0.63, brightness: 0.99, alpha: 1))
-            let dark = BeamColor.From(color: NSColor(hue: hue, saturation: 0.63, brightness: 0.85, alpha: 1))
+            let light = BeamColor.From(color: NSColor(hue: hue, saturation: 0.85, brightness: 0.75, alpha: 1))
+            let dark = BeamColor.From(color: NSColor(hue: hue, saturation: 0.58, brightness: 0.85, alpha: 1))
             mainColor = BeamColor.combining(lightColor: light, darkColor: dark)
-            textColor = BeamColor.From(color: NSColor(hue: hue, saturation: 1, brightness: 0.18, alpha: 1))
+            textColor = BeamColor.combining(lightColor: .From(color: .white), darkColor: .From(color: .black, alpha: 0.94))
         }
         textSelectionColor = mainColor?.alpha(0.14)
     }
