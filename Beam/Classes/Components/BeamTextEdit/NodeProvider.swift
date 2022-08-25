@@ -132,6 +132,8 @@ class NodeProviderImpl: NodeProvider {
                     return BlockReferenceNode(parent: withParent, element: element, availableWidth: width)
                 case .divider:
                     return DividerNode(parent: withParent, element: element, availableWidth: width)
+                case .tabGroup:
+                    return TabGroupNode(parent: withParent, element: element, availableWidth: width)
                 default:
                     return TextNode(parent: withParent, element: element, availableWidth: width)
                 }

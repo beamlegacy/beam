@@ -71,19 +71,24 @@ extension TabGroupingManager: BeamDocumentSource {
     }
 
     /// checks if group is already shared and in a tab group note.
-    private func fetchTabGroupNote(for group: TabGroup) -> BeamNote? {
+    func fetchTabGroupNote(for group: TabGroup) -> BeamNote? {
+        let store = TabGroupingStoreManager.shared
+        guard let groupBeamObject = store?.fetch(byIds: [group.id]).first else { return nil }
         var note: BeamNote?
         if group.isLocked, let groupNote = BeamNote.fetch(tabGroupId: group.id) {
+            // group already has a shared note.
             return groupNote
         }
-        TabGroupingStoreManager.shared?.fetch(copiesOfGroup: group.id).forEach { groupBeamObject in
-            guard note == nil else { return }
-            note = BeamNote.fetch(tabGroupId: groupBeamObject.id)
+
+        // Check if this group already have a shared copy.
+        store?.fetch(copiesOfGroup: group.id).forEach { childGroup in
+            guard note == nil, childGroup.isACopy(of: groupBeamObject) else { return }
+            note = BeamNote.fetch(tabGroupId: childGroup.id)
         }
         return note
     }
 
-    private func fetchOrCreateTabGroupNote(for group: TabGroup) throws -> BeamNote {
+    func fetchOrCreateTabGroupNote(for group: TabGroup) throws -> BeamNote {
         var note: BeamNote? = fetchTabGroupNote(for: group)
         if note == nil {
             let frozenGroup = self.copyForSharing(group)
@@ -126,11 +131,25 @@ extension TabGroupingManager: BeamDocumentSource {
         }
         note.addTabGroup(copiedGroup.id)
         if note.save(self) {
-            Logger.shared.logInfo("Added group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note) id: \(note.id)", category: .tabGrouping)
+            Logger.shared.logInfo("Added group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note)", category: .tabGrouping)
             return true
         } else {
-            Logger.shared.logInfo("Failed to add group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note) id: \(note.id)", category: .tabGrouping)
+            Logger.shared.logInfo("Failed to add group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note)", category: .tabGrouping)
             return false
+        }
+    }
+
+    func findNoteContainingGroup(_ group: TabGroup) async -> [BeamNote] {
+        await withCheckedContinuation { continuation in
+            BeamData.shared.noteLinksAndRefsManager?.search(containingTabGroup: group.id) { result in
+                switch result {
+                case .success(let searchResults):
+                    let notes = searchResults.compactMap { BeamNote.fetch(id: $0.noteId) }
+                    continuation.resume(returning: notes)
+                case .failure:
+                    continuation.resume(returning: [])
+                }
+            }
         }
     }
 }

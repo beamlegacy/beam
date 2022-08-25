@@ -357,9 +357,10 @@ struct AccountsView: View {
         UserAlert.showMessage(message: "Are you sure you want to delete all your graphs?",
                               informativeText: "All your notes will be deleted and cannot be recovered.",
                               buttonTitle: "Delete",
-                              secondaryButtonTitle: "Cancel") {
+                              secondaryButtonTitle: "Cancel",
+                              buttonAction: {
             AppDelegate.main.deleteDocumentsAndDatabases(includedRemote: true)
-        }
+        })
     }
 
     // TODO: Implement when endpoint is ready
@@ -367,9 +368,10 @@ struct AccountsView: View {
         UserAlert.showMessage(message: "Are you sure you want to delete your Beam account?",
                               informativeText: "Your account, all your graphs and all your notes will be deleted and cannot be recovered.",
                               buttonTitle: "Delete",
-                              secondaryButtonTitle: "Cancel") {
+                              secondaryButtonTitle: "Cancel",
+                              buttonAction: {
             // TODO: Implement when endpoint is ready
-        }
+        })
     }
 }
 

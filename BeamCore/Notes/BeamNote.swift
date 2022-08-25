@@ -225,11 +225,10 @@ public class BeamNote: BeamElement {
         checkHasNote()
     }
 
-    public convenience init(tabGroupId: UUID) throws {
-        try self.init(title: "TabGroup(\(tabGroupId))")
+    public convenience init(tabGroupId: UUID, title: String? = nil) throws {
+        try self.init(title: title ?? "TabGroup(\(tabGroupId))")
         type = .tabGroup(tabGroupId)
-        let onlyChild = BeamElement("Tab Group: \(tabGroupId)")
-        onlyChild.kind = .tabGroup(tabGroupId: tabGroupId)
+        let onlyChild = BeamElement(tabGroupId: tabGroupId)
         addChild(onlyChild)
     }
 
@@ -585,12 +584,17 @@ public func beamCheckMainThread() {
 extension BeamNote {
     public func addTabGroup(_ id: UUID) {
         self.tabGroups.append(id)
+        addChild(BeamElement(tabGroupId: id))
     }
 
     public func removeTabGroup(_ id: UUID) {
         if let index = tabGroups.firstIndex(of: id) {
             tabGroups.remove(at: index)
             self.tombstones.insert(id)
+        }
+        children.forEach { child in
+            guard case .tabGroup(let childGroupId) = child.kind, childGroupId == id else { return }
+            removeChild(child)
         }
     }
 }

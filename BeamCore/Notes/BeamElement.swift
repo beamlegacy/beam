@@ -408,6 +408,11 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         updateTextStats()
     }
 
+    public convenience init(tabGroupId: UUID) {
+        self.init("TabGroupElement:\(tabGroupId)")
+        kind = .tabGroup(tabGroupId: tabGroupId)
+    }
+
     public required init(from decoder: Decoder) throws {
         defer {
             changePropagationEnabled = true

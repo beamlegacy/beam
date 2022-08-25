@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 indirect enum BeamColor {
+    // MARK: Primary
     /** A light gray. */
     case AlphaGray
     /** Also known as Burple. A mix of blue and purple */
@@ -42,6 +43,10 @@ indirect enum BeamColor {
     /** A smoke white in light mode. A mid gray in dark mode */
     case Tundora
 
+    // MARK: Secondary
+    case Munsell
+
+    // MARK: Helpers
     case Custom(named: String)
     case From(color: NSColor, alpha: CGFloat? = nil)
 
@@ -211,6 +216,7 @@ extension BeamColor: CustomStringConvertible {
         case .Sanskrit: return "Sanskrit"
         case .Shiraz: return "Shiraz"
         case .Tundora: return "Tundora"
+        case .Munsell: return "Munsell"
         case .Custom(let named): return named
         case .From(let color, let alpha): return "From(\(color.componentsRGBAArray),a:\(alpha ?? 1)"
         #if DEBUG

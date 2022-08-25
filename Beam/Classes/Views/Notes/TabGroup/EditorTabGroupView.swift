@@ -35,7 +35,7 @@ struct EditorTabGroupView: View {
                 ZStack {
                     HStack {
                         title
-                        Spacer(minLength: 8)
+                        Spacer(minLength: isLoading ? BeamSpacing._160 : BeamSpacing._80)
                     }
                     HStack {
                         Spacer()
