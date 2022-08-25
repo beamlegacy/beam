@@ -1,8 +1,12 @@
 import Foundation
 
+// Please remember that on 12.4, using NSAlert in a swift async context can crash.
+// Use the async version below when needed.
+
 class UserAlert {
-    static func showMessage(message: String, informativeText: String? = nil, buttonTitle: String? = nil, secondaryButtonTitle: String? = nil, buttonAction: (() -> Void)? = nil) {
-        showAlert(message: message, informativeText: informativeText, buttonTitle: buttonTitle, secondaryButtonTitle: secondaryButtonTitle, buttonAction: buttonAction)
+    static func showMessage(message: String, informativeText: String? = nil, buttonTitle: String? = nil, secondaryButtonTitle: String? = nil,
+                            buttonAction: (() -> Void)? = nil, secondaryButtonAction: (() -> Void)? = nil) {
+        showAlert(message: message, informativeText: informativeText, buttonTitle: buttonTitle, secondaryButtonTitle: secondaryButtonTitle, buttonAction: buttonAction, secondaryButtonAction: secondaryButtonAction)
     }
 
     static func showMessage(message: String, informativeText: String? = nil, buttonTitle: String? = nil) {
@@ -54,5 +58,31 @@ class UserAlert {
         } else {
             DispatchQueue.main.async { call() }
         }
+    }
+}
+
+// MARK: - Alert in async context
+extension UserAlert {
+    /// Workaround to allow using `NSAlert` in a `Task`.
+    /// Also allow the user of async to wait for the user's action.
+    /// See [FB9857161](https://github.com/feedback-assistant/reports/issues/288)
+    static func showMessageAsync(message: String, informativeText: String? = nil, buttonTitle: String? = nil, secondaryButtonTitle: String? = nil,
+                                 buttonAction: (() -> Void)? = nil, secondaryButtonAction: (() -> Void)? = nil) async {
+
+        return await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            DispatchQueue.main.async {
+                showMessage(message: message,
+                                      informativeText: informativeText,
+                                      buttonTitle: buttonTitle,
+                                      secondaryButtonTitle: secondaryButtonTitle) {
+                    buttonAction?()
+                    continuation.resume()
+                } secondaryButtonAction: {
+                    secondaryButtonAction?()
+                    continuation.resume()
+                }
+            }
+        }
+
     }
 }

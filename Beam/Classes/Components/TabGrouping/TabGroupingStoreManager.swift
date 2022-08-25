@@ -62,7 +62,7 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
             return (tab, id)
         }
 
-        let screenshots = await screenshots(for: tabs)
+        let screenshots = group.isLocked ? await screenshots(for: tabs) : [:]
 
         let pages = tabs.compactMap { (tab, id) -> TabGroupBeamObject.PageInfo? in
             guard let url = tab.url else { return nil }
@@ -86,6 +86,18 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
         return true
     }
 
+    func deleteGroup(_ group: TabGroup, deleteParentIfRelevant: Bool = false) {
+        guard let object = fetch(byIds: [group.id]).first else { return }
+        let parentId = group.parentGroup
+        delete(groups: [object])
+        // if the group is a pure copy of its parent, we can delete the parent too.
+        guard deleteParentIfRelevant, let parentId = parentId else { return }
+        fetch(byIds: [parentId]).forEach { parent in
+            guard object.isACopy(of: parent), !parent.isLocked else { return }
+            delete(groups: [parent])
+        }
+    }
+
     private func sortPageIdsInGroup(_ group: TabGroup, withOpenTabs openTabs: [BrowserTab]) {
         var groupPageIds = group.pageIds
         var sortedPageIds = [ClusteringManager.PageID]()
@@ -98,7 +110,7 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
         group.updatePageIds(sortedPageIds)
     }
 
-    func screenshots(for tabs: [(BrowserTab, UUID)]) async -> [BrowserTab: NSImage] {
+    private func screenshots(for tabs: [(BrowserTab, UUID)]) async -> [BrowserTab: NSImage] {
         var screenshots: [BrowserTab: NSImage] = [:]
         for (tab, _) in tabs {
             if let screenshot = await tab.screenshotTab() {
@@ -233,6 +245,18 @@ extension TabGroupingStoreManager {
         let copy = beamObject.makeLockedCopy()
         save(groups: [copy])
         return Self.convertBeamObjectToGroup(copy)
+    }
+
+    func delete(groups: [TabGroupBeamObject]) {
+        do {
+            try write { db in
+                try groups.forEach { group in
+                    try group.delete(db)
+                }
+            }
+        } catch {
+            Logger.shared.logError("Couldn't delete tab groups, \(error)", category: .database)
+        }
     }
 
     func save(groups: [TabGroupBeamObject]) {

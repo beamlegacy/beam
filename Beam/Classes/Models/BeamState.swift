@@ -549,56 +549,6 @@ import Sentry
         case inBackground, newWindow
     }
 
-    func openTabGroup(_ group: TabGroup, openingOption: Set<TabOpeningOption> = []) {
-        let links = LinkStore.shared.getLinks(for: group.pageIds)
-        let urls = group.pageIds.compactMap({ URL(string: links[$0]?.url ?? "") })
-
-        let state: BeamState
-        if openingOption.contains(.newWindow), let window = AppDelegate.main.createWindow(frame: nil) {
-            state = window.state
-        } else {
-            state = self
-        }
-
-        let inBackground = openingOption.contains(.inBackground)
-
-        let tabs: [BrowserTab] = urls.compactMap { url in
-            if let tab = state.browserTabsManager.openedTab(for: url, allowPinnedTabs: false) { return tab }
-            return state.createTab(withURLRequest: URLRequest(url: url), setCurrent: !inBackground)
-        }
-
-        state.browserTabsManager.reopenGroup(group, withTabs: tabs)
-
-        if mode != .web && hasBrowserTabs && !inBackground {
-            mode = .web
-        }
-        stopFocusOmnibox()
-    }
-
-    func shareTabGroup(_ group: TabGroup, fromOmniboxResult: AutocompleteResult? = nil) {
-        if let result = fromOmniboxResult {
-            autocompleteManager.autocompleteLoadingResult = result
-        }
-        browserTabsManager.tabGroupingManager.shareGroup(group) { [weak self] result in
-            guard let self = self else { return }
-            self.autocompleteManager.autocompleteLoadingResult = nil
-            switch result {
-            case .success:
-                guard fromOmniboxResult != nil else { break }
-                let previousMode = self.autocompleteManager.mode
-                let groupTitle = group.title ?? "Tab Group"
-                let view = OmniboxCustomStatusView(title: "Shared ", suffix: groupTitle,
-                                                   suffixColor: group.color?.mainColor?.swiftUI ?? .red).asAnyView
-                self.autocompleteManager.animateToMode(.customView(view: view))
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    self.autocompleteManager.resetAutocompleteMode(to: previousMode)
-                }
-            case .failure:
-                break
-            }
-        }
-    }
-
     func fetchOrCreateNoteForQuery(_ query: String) throws -> BeamNote {
         EventsTracker.logBreadcrumb(message: "fetchOrCreateNoteForQuery \(query)", category: "BeamState")
         return try BeamNote.fetchOrCreate(self, title: query)
@@ -1136,6 +1086,59 @@ extension BeamState: BrowserTabsManagerDelegate {
         createTab(withURLRequest: URLRequest(url: onboardingURL))
         Persistence.Authentication.hasSeenWelcomeTour = true
     }
+}
+
+// MARK: - Tab Grouping
+extension BeamState {
+    func openTabGroup(_ group: TabGroup, openingOption: Set<TabOpeningOption> = []) {
+        let links = LinkStore.shared.getLinks(for: group.pageIds)
+        let urls = group.pageIds.compactMap({ URL(string: links[$0]?.url ?? "") })
+
+        let state: BeamState
+        if openingOption.contains(.newWindow), let window = AppDelegate.main.createWindow(frame: nil) {
+            state = window.state
+        } else {
+            state = self
+        }
+
+        let inBackground = openingOption.contains(.inBackground)
+
+        let tabs: [BrowserTab] = urls.compactMap { url in
+            if let tab = state.browserTabsManager.openedTab(for: url, allowPinnedTabs: false) { return tab }
+            return state.createTab(withURLRequest: URLRequest(url: url), setCurrent: !inBackground)
+        }
+
+        state.browserTabsManager.reopenGroup(group, withTabs: tabs)
+
+        if mode != .web && hasBrowserTabs && !inBackground {
+            mode = .web
+        }
+        stopFocusOmnibox()
+    }
+
+    func shareTabGroup(_ group: TabGroup, fromOmniboxResult: AutocompleteResult? = nil) {
+        if let result = fromOmniboxResult {
+            autocompleteManager.autocompleteLoadingResult = result
+        }
+        data.tabGroupingManager.shareGroup(group) { [weak self] result in
+            guard let self = self else { return }
+            self.autocompleteManager.autocompleteLoadingResult = nil
+            switch result {
+            case .success:
+                guard fromOmniboxResult != nil else { break }
+                let previousMode = self.autocompleteManager.mode
+                let groupTitle = group.title ?? "Tab Group"
+                let view = OmniboxCustomStatusView(title: "Shared ", suffix: groupTitle,
+                                                   suffixColor: group.color?.mainColor?.swiftUI ?? .red).asAnyView
+                self.autocompleteManager.animateToMode(.customView(view: view))
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    self.autocompleteManager.resetAutocompleteMode(to: previousMode)
+                }
+            case .failure:
+                break
+            }
+        }
+    } 
 }
 
 // MARK: - Notes focused state
