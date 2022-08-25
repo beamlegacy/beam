@@ -91,7 +91,7 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
     private var _placeholderText: String?
     private var _placeholderIcon: NSImage?
 
-    private var _selectionRangeColor: NSColor = BeamColor.Generic.textSelection.nsColor
+    private var _selectionRangeColor: NSColor = BeamColor.Cursor.cache.selection.nsColor
     private var _caretColor: NSColor?
     private var flagsMonitor: Any?
     fileprivate var ignoreResponderChanges = false

@@ -130,7 +130,7 @@ class DebugSection: Widget {
             pasteboard.clearContents()
             pasteboard.setString(self.note.id.uuidString, forType: .string)
         }, hovered: { [unowned self] hovered in
-            self.layers["noteIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
+            self.layers["noteIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Cursor.cache.selection.cgColor : NSColor.clear.cgColor
         }), origin: CGPoint(x: 0, y: 30))
 
         let databaseIdLayer = Layer.text("Database ID: \(nodeDatabaseId)", color: databaseTextColor, size: 12)
@@ -139,7 +139,7 @@ class DebugSection: Widget {
             pasteboard.clearContents()
             pasteboard.setString(nodeDatabaseId, forType: .string)
         }, hovered: { [unowned self] hovered in
-            self.layers["noteDatabaseIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
+            self.layers["noteDatabaseIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Cursor.cache.selection.cgColor : NSColor.clear.cgColor
         }), origin: CGPoint(x: 0, y: 50))
 
         let defaultDatabaseIdLayer = Layer.text("Default Database ID: \(String(describing: defaultDatabaseId))", color: databaseTextColor, size: 12)
@@ -148,7 +148,7 @@ class DebugSection: Widget {
             pasteboard.clearContents()
             pasteboard.setString(defaultDatabaseId ?? "no default database id", forType: .string)
         }, hovered: { [unowned self] hovered in
-            self.layers["defaultDatabaseIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
+            self.layers["defaultDatabaseIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Cursor.cache.selection.cgColor : NSColor.clear.cgColor
         }), origin: CGPoint(x: 0, y: 70))
 
         let previousChecksumIdLayer = Layer.text("Previous Checksum: \(previousChecksum)", color: BeamColor.Generic.text.nsColor, size: 12)
@@ -157,7 +157,7 @@ class DebugSection: Widget {
             pasteboard.clearContents()
             pasteboard.setString(previousChecksum, forType: .string)
         }, hovered: { [unowned self] hovered in
-            self.layers["previousChecksum"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
+            self.layers["previousChecksum"]?.layer.backgroundColor = hovered ? BeamColor.Cursor.cache.selection.cgColor : NSColor.clear.cgColor
         }), origin: CGPoint(x: 0, y: 90))
     }
 

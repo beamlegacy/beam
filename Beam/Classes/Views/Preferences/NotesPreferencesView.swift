@@ -7,11 +7,76 @@
 
 import SwiftUI
 
+extension BeamColor.Cursor: Identifiable {
+    var id: Self { self }
+
+    fileprivate  var title: LocalizedStringKey {
+        switch self {
+        case .whiteBlack:
+            return NSApp.effectiveAppearance.isDarkMode ? "White" : "Black"
+        default:
+            return .init(rawValue.capitalized)
+        }
+    }
+}
+
+private struct CursorColorOption: View {
+    let cursor: BeamColor.Cursor
+
+    // cached to avoid computing it again when redrawing
+    private let drawingColor: NSColor
+
+    init(cursor: BeamColor.Cursor) {
+        self.cursor = cursor
+        self.drawingColor = cursor.color.nsColor
+    }
+
+    var body: some View {
+        HStack {
+            Image(nsImage: colorImage)
+            Text(cursor.title)
+        }
+    }
+
+    private var colorImage: NSImage {
+        return .init(size: CGSize(width: 24, height: 12), flipped: false, drawingHandler: { rect in
+            let path = NSBezierPath(roundedRect: rect, xRadius: 1, yRadius: 1)
+            drawingColor.setFill()
+            path.fill()
+            NSColor(red: .zero, green: .zero, blue: .zero, alpha: 0.1).setStroke()
+            path.lineWidth = 0.5
+            path.stroke()
+            return true
+        })
+    }
+}
+
 struct NotesPreferencesView: View {
-    @State private var alwaysShowBullets = PreferencesManager.alwaysShowBullets
+    @State private var alwaysShowBullets: Bool = PreferencesManager.alwaysShowBullets
+    @State private var cursorColor: BeamColor.Cursor = .current
 
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {
+            Settings.Row {
+                Text("Cursor Color:")
+            } content: {
+                Picker(selection: $cursorColor, content: {
+                    ForEach(BeamColor.Cursor.allCases) { value in
+                        CursorColorOption(cursor: value)
+                    }
+                }, label: {
+                    EmptyView()
+                })
+                .onChange(of: cursorColor) { newValue in
+                    // Updating preference cursorColor name (String value)
+                    PreferencesManager.cursorColor = newValue.rawValue
+                    // Updating color cache since it might expensive to retrieve it
+                    BeamColor.Cursor.updateCache(newCursorColor: newValue)
+                }
+                .pickerStyle(MenuPickerStyle())
+                .fixedSize()
+            }
+
             Settings.Row {
                 Text("Indentation:")
             } content: {
