@@ -23,10 +23,25 @@ enum TabGroupMenuViewLocators {
         case tabGroupOpenInBackground = "Open in Background"
         case tabGroupOpenInNewWindow = "Open in New Window"
         case tabGroupDeleteGroup = "Delete Group"
+        case tabGroupShareGroup = "Share Group"
     }
     
     enum TabGroups: String, CaseIterable, UIElement {
         case tabGroupPrefix = "TabItem-GroupCapsule-"
+    }
+    
+    enum ShareTabGroupMenu: String, CaseIterable, UIElement {
+        case shareTwitter = "Twitter"
+        case shareFacebook = "Facebook"
+        case shareLinkedin = "LinkedIn"
+        case shareReddit = "Reddit"
+        case shareCopyLink = "Copy Link"
+        case shareEmail = "Email"
+        case shareMessages = "Messages"
+    }
+    
+    enum StaticTexts: String, CaseIterable, UIElement {
+        case linkCopiedLabel = "Link Copied"
     }
 }
 

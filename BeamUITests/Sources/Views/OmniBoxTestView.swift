@@ -119,6 +119,12 @@ class OmniBoxTestView: BaseView {
         return getAutocompleteResults().matching(NSPredicate(format: "label == '\(OmniboxLocators.Labels.action.accessibilityIdentifier)' && value == '\(OmniboxLocators.Labels.allNotes.accessibilityIdentifier)'")).firstMatch.exists
     }
     
+    @discardableResult
+    func selectAutocompleteResult(autocompleteResult: String) -> OmniBoxTestView{
+        getAutocompleteResults().matching(NSPredicate(format: "value == '\(autocompleteResult)'")).firstMatch.clickInTheMiddle()
+        return self
+    }
+    
     func getAutocompleteIdentifierFor(domainURL: String) -> String {
         return "autocompleteResult-selected-" + domainURL
     }
@@ -133,6 +139,12 @@ class OmniBoxTestView: BaseView {
             result =  result && (getAutocompleteResults().element(boundBy: i).getStringValue().elementsEqual(results[i]))
         }
         return result
+    }
+    
+    @discardableResult
+    func shareTabGroup() -> NoteTestView {
+        app.links.matching(NSPredicate(format: "identifier CONTAINS '\(OmniboxLocators.Labels.shareTabGroup.accessibilityIdentifier)'")).firstMatch.clickInTheMiddle()
+        return NoteTestView()
     }
 
 }
