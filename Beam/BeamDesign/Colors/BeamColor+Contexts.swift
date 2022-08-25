@@ -300,33 +300,68 @@ extension BeamColor {
 }
 
 // MARK: - Cursor & Selection
-extension BeamColor.Generic {
-    static private let possibleCursorColors = [
-        BeamColor.Niobium.alpha(0.6),
-        BeamColor.Niobium.alpha(0.45),
-        BeamColor.Bluetiful.alpha(0.6),
-        BeamColor.Beam.alpha(0.6),
-        BeamColor.Shiraz.alpha(0.6),
-        BeamColor.CharmedGreen.alpha(0.6)
-    ]
-    static private let possibleSelectionColors = [
-        BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.1,
-                            darkColor: .Niobium, darkAlpha: 0.2),
-        BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.075,
-                            darkColor: .Niobium, darkAlpha: 0.15),
-        BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.1,
-                            darkColor: .Bluetiful, darkAlpha: 0.2),
-        BeamColor.combining(lightColor: .Beam, lightAlpha: 0.1,
-                            darkColor: .Beam, darkAlpha: 0.2),
-        BeamColor.combining(lightColor: .Shiraz, lightAlpha: 0.1,
-                            darkColor: .Shiraz, darkAlpha: 0.2),
-        BeamColor.combining(lightColor: .CharmedGreen, lightAlpha: 0.1,
-                            darkColor: .CharmedGreen, darkAlpha: 0.2)
-    ]
-    static private let randomCursorColorIndex = Int.random(in: 0..<6)
+extension BeamColor {
+    enum Cursor: String, CaseIterable {
+        typealias ColorTuple = (nsColor: NSColor, cgColor: CGColor)
 
-    static let cursor = possibleCursorColors[randomCursorColorIndex]
-    static let textSelection = possibleSelectionColors[randomCursorColorIndex]
+        static var `default`: Self { .whiteBlack }
+
+        static var current: Self { .init(rawValue: PreferencesManager.cursorColor) ?? .default }
+
+        static private(set) var cache: (cursor: ColorTuple, selection: ColorTuple, widget: ColorTuple) = {
+            let color = current
+            let (cursor, selection, widget) = (color.color, color.selectionColor, color.widgetColor)
+            return ((cursor.nsColor, cursor.cgColor), (selection.nsColor, selection.cgColor), (widget.nsColor, widget.cgColor))
+        }()
+
+        case whiteBlack
+        case gray
+        case blue
+        case purple
+        case red
+        case green
+
+        var color: BeamColor {
+            switch self {
+            case .whiteBlack:   return .Niobium
+            case .gray:         return .LightStoneGray
+            case .blue:         return .Bluetiful.alpha(0.6)
+            case .purple:       return .Beam.alpha(0.6)
+            case .red:          return .Shiraz.alpha(0.6)
+            case .green:        return .CharmedGreen.alpha(0.6)
+            }
+        }
+
+        private var selectionColor: BeamColor {
+            switch self {
+            case .whiteBlack:   return .combining(lightColor: .Niobium, lightAlpha: 0.34, darkColor: .Niobium, darkAlpha: 0.34)
+            case .gray:         return .combining(lightColor: .LightStoneGray, lightAlpha: 0.44, darkColor: .LightStoneGray, darkAlpha: 0.54)
+            case .blue:         return .combining(lightColor: .Bluetiful, lightAlpha: 0.34, darkColor: .Bluetiful, darkAlpha: 0.44)
+            case .purple:       return .combining(lightColor: .Beam, lightAlpha: 0.34, darkColor: .Beam, darkAlpha: 0.44)
+            case .red:          return .combining(lightColor: .Shiraz, lightAlpha: 0.34, darkColor: .Shiraz, darkAlpha: 0.44)
+            case .green:        return .combining(lightColor: .CharmedGreen, lightAlpha: 0.34, darkColor: .CharmedGreen, darkAlpha: 0.44)
+            }
+        }
+
+        private var widgetColor: BeamColor {
+            switch self {
+            case .whiteBlack:   return .combining(lightColor: .Niobium, lightAlpha: 0.12, darkColor: .Niobium, darkAlpha: 0.12)
+            case .gray:         return .combining(lightColor: .LightStoneGray, lightAlpha: 0.16, darkColor: .LightStoneGray, darkAlpha: 0.24)
+            case .blue:         return .combining(lightColor: .Bluetiful, lightAlpha: 0.12, darkColor: .Bluetiful, darkAlpha: 0.16)
+            case .purple:       return .combining(lightColor: .Beam, lightAlpha: 0.12, darkColor: .Beam, darkAlpha: 0.16)
+            case .red:          return .combining(lightColor: .Shiraz, lightAlpha: 0.12, darkColor: .Shiraz, darkAlpha: 0.16)
+            case .green:        return .combining(lightColor: .CharmedGreen, lightAlpha: 0.12, darkColor: .CharmedGreen, darkAlpha: 0.16)
+            }
+        }
+
+        static func updateCache(newCursorColor: Cursor = .current) {
+            let (cursor, selection, widget) = (newCursorColor.color, newCursorColor.selectionColor, newCursorColor.widgetColor)
+            cache = ((cursor.nsColor, cursor.cgColor), (selection.nsColor, selection.cgColor), (widget.nsColor, widget.cgColor))
+        }
+    }
+}
+
+extension BeamColor.Generic {
     static let blueTextSelection = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.14,
                                                        darkColor: .Bluetiful, darkAlpha: 0.4)
 }
