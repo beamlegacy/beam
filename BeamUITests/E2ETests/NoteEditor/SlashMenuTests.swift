@@ -80,6 +80,7 @@ class SlashMenuTests: BaseTest {
         noteTestView = launchAppAndOpenFirstNote()
 
         step("Then I can successfuly create a checkbox using a shortcut") {
+            noteTestView.waitForTodayNoteViewToLoad()
             noteTestView.createCheckboxAtNote(1)
             XCTAssertTrue(noteTestView.getCheckboxAtTextNote(1).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
