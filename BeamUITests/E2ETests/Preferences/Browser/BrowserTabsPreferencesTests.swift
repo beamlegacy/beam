@@ -87,7 +87,7 @@ class BrowserTabsPreferencesTests: BaseTest {
     }
     
     func testGroupTabsAutomatically() {
-        
+        testrailId("C593")
         let expectedCheckboxTitle = "Group tabs automatically"
         let tabGroupMenu = TabGroupMenuView()
         

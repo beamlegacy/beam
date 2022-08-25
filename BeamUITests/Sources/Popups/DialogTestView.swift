@@ -17,4 +17,9 @@ class DialogTestView: BaseView{
     func getStaticText(locator: AlertViewLocators.StaticTexts) -> XCUIElement {
         return app.dialogs.buttons[locator.accessibilityIdentifier]
     }
+    
+    func isConnectTabGroupDisplayed() -> Bool {
+        _ = app.staticTexts[ AlertViewLocators.StaticTexts.connectBeam.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        return app.staticTexts[ AlertViewLocators.StaticTexts.connectDescriptionTabGroups.accessibilityIdentifier].exists && app.staticTexts[ AlertViewLocators.StaticTexts.connectBeam.accessibilityIdentifier].exists
+    }
 }

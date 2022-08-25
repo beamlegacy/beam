@@ -134,4 +134,32 @@ class TabGroupMenuView: BaseView {
         typeKeyboardKey(.escape)
     }
     
+    @discardableResult
+    func waitForShareMenuToBeDisplayed() -> Bool {
+        return menuItem(TabGroupMenuViewLocators.ShareTabGroupMenu.shareCopyLink.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
+    
+    func isShareTabMenuDisplayed() -> Bool {
+        waitForShareMenuToBeDisplayed()
+        var result = true
+        for item in TabGroupMenuViewLocators.ShareTabGroupMenu.allCases {
+            result = result && menuItem(item.accessibilityIdentifier).isEnabled
+        }
+        return result
+    }
+    
+    @discardableResult
+    func shareTabGroupAction(_ item: String) -> WebTestView {
+        // hover first item to not dismiss the menu
+        app.menuItems[TabGroupMenuViewLocators.ShareTabGroupMenu.shareCopyLink.accessibilityIdentifier].hoverInTheMiddle()
+        app.menuItems[item].clickOnExistence()
+        return WebTestView()
+    }
+    
+    func isTabGroupLinkInPasteboard() -> Bool {
+        let regex = try! NSRegularExpression(pattern: "https://staging-web-server.ew.r.appspot.com/.*/.*")
+        let pasteboardContent = NSPasteboard.general.pasteboardItems?.first?.string(forType: NSPasteboard.PasteboardType.string)
+        let range = NSRange(location: 0, length: pasteboardContent!.utf16.count)
+        return regex.firstMatch(in: pasteboardContent!, options: [], range: range) != nil
+    }
 }

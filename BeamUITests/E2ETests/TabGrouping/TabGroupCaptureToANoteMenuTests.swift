@@ -22,10 +22,7 @@ class TabGroupCaptureToANoteMenuTests: BaseTest {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             uiMenu.createTabGroup()
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            tabGroupMenu.captureTabGroup(index: 0)
-            tabGroupMenu.closeTabGroup(index: 0)
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            allNotesView.openFirstNote()
+            captureGroupToNoteAndOpenNote()
         }
     }
     

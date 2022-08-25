@@ -16,6 +16,7 @@ class BaseView {
     let implicitWaitTimeout = TimeInterval(5)
     /// 2 seconds
     let minimumWaitTimeout = TimeInterval(2)
+    let maximumWaitTimeout = TimeInterval(10)
     let defaultPressDurationSeconds = 1.5
     let shortcutHelper = ShortcutsHelper()
     let uiMenu = UITestsMenuBar()
