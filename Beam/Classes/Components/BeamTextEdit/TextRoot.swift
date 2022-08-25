@@ -49,7 +49,8 @@ public class TextRoot: ElementNode {
             textIsSelected = !selectedText.isEmpty
 
             if let n = focusedWidget as? TextNode {
-                editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange)
+                let isReference = (n is ProxyTextNode) && n.isDescendant(of: ReferencesSection.self)
+                editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange, isReference)
             }
         }
     }
@@ -104,7 +105,8 @@ public class TextRoot: ElementNode {
             focused.updateCursor()
         }
         if let n = n {
-            editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange)
+            let isReference = (n is ProxyTextNode) && n.isDescendant(of: ReferencesSection.self)
+            editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange, isReference)
         }
     }
 
@@ -311,6 +313,30 @@ public class TextRoot: ElementNode {
 
     var focusedCmdManager: CommandManager<Widget> {
         return focusedWidget?.cmdManager ?? cmdManager
+    }
+
+    func findLinkElement(_ id: UUID) -> ElementNode? {
+        guard let links = linksSection else { return nil }
+        return findLinkElement(id, in: links)
+    }
+
+    func findReferenceElement(_ id: UUID) -> ElementNode? {
+        guard let references = referencesSection else { return nil }
+        return findLinkElement(id, in: references)
+    }
+
+    private func findLinkElement(_ id: UUID, in widget: Widget) -> ElementNode? {
+        if let breadcrumb = widget as? BreadCrumb,
+           let node = breadcrumb.proxyNode,
+           node.elementId == id {
+            return node
+        }
+        for child in widget.children {
+            if let e = findLinkElement(id, in: child) {
+                return e
+            }
+        }
+        return nil
     }
 
     func insertElementNearNonTextElement(_ string: String = "") {

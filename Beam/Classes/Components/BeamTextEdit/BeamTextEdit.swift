@@ -380,7 +380,7 @@ public extension CALayer {
 
     public var onStartEditing: (() -> Void)?
     public var onEndEditing: (() -> Void)?
-    public var onFocusChanged: ((UUID, Int, Range<Int>) -> Void)?
+    public var onFocusChanged: ((UUID, Int, Range<Int>, Bool) -> Void)?
 
     private var disableOnFocusChanged = false
     private var disableFocusScroll = false
@@ -793,13 +793,22 @@ public extension CALayer {
         return true
     }
 
-    func focusElement(withId elementId: UUID?,
-                      atCursorPosition: Int?,
+    func focusElement(id: UUID?,
+                      cursorPosition: Int?,
                       selectedRange: Range<Int>,
+                      isReference: Bool = false,
                       highlight: Bool = false,
                       unfold: Bool = false,
                       scroll: Bool = true,
                       notify: Bool = true) {
+
+        guard let id = id else {
+            if scroll {
+                self.scroll(.zero)
+            }
+            return
+        }
+
         self.disableFocusScroll = !scroll
         self.disableOnFocusChanged = !notify
         defer {
@@ -807,23 +816,31 @@ public extension CALayer {
             self.disableOnFocusChanged = false
         }
 
-        guard let id = elementId,
-              let element = note.findElement(id, ignoreClosed: true)
-        else {
-            if !self.disableFocusScroll {
-                self.scroll(.zero)
+        var node: ElementNode? = nil
+
+        if isReference {
+            rootNode?.referencesSection?.open = true
+            node = rootNode?.findReferenceElement(id)
+        } else if let element = note.findElement(id, ignoreClosed: true) {
+            guard let n = rootNode?.nodeFor(element) else {
+                // the element exists but we don't yet have an UI for it, try again later:
+                DispatchQueue.main.async { [weak self] in
+                    self?.focusElement(id: id,
+                                       cursorPosition: cursorPosition,
+                                       selectedRange: selectedRange,
+                                       highlight: highlight,
+                                       unfold: unfold)
+                }
+                return
             }
-            return
+            node = n
+        } else {
+            node = rootNode?.findLinkElement(id)
         }
 
-        guard let node = rootNode?.nodeFor(element) else {
-            // the element exists but we don't yet have an UI for it, try again later:
-            DispatchQueue.main.async { [weak self] in
-                self?.focusElement(withId: elementId,
-                                   atCursorPosition: atCursorPosition,
-                                   selectedRange: selectedRange,
-                                   highlight: highlight,
-                                   unfold: unfold)
+        guard let node = node else {
+            if scroll {
+                self.scroll(.zero)
             }
             return
         }
@@ -835,7 +852,7 @@ public extension CALayer {
         self.setHotSpot(node.frameInDocument)
         self.focusedWidget = node
         self.selectedTextRange = selectedRange
-        node.focus(position: atCursorPosition)
+        node.focus(position: cursorPosition)
         if highlight == true {
             node.highlight()
         }
@@ -1926,9 +1943,9 @@ public extension CALayer {
 //    override public func quickLookPreviewItems(_ sender: Any?) {
 //    }
 
-    func focusChanged(_ id: UUID, _ cursorPosition: Int, _ selectedRange: Range<Int>) {
+    func focusChanged(_ id: UUID, _ cursorPosition: Int, _ selectedRange: Range<Int>, _ isReference: Bool) {
         guard !disableOnFocusChanged else { return }
-        onFocusChanged?(id, cursorPosition, selectedRange)
+        onFocusChanged?(id, cursorPosition, selectedRange, isReference)
     }
 
     // MARK: - Drag and drop:

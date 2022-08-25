@@ -65,11 +65,12 @@ struct NoteView: View {
                     state.startQuery(textNode, animated: animated)
                 },
                 onStartEditing: { onStartEditing?() },
-                onFocusChanged: { [weak state] elementId, cursorPosition, selectedRange in
+                onFocusChanged: { [weak state] elementId, cursorPosition, selectedRange, isReference in
                     state?.updateNoteFocusedState(note: note,
                                                   focusedElement: elementId,
                                                   cursorPosition: cursorPosition,
-                                                  selectedRange: selectedRange)
+                                                  selectedRange: selectedRange,
+                                                  isReference: isReference)
                 },
                 onScroll: onScroll,
                 onSearchToggle: { search in
