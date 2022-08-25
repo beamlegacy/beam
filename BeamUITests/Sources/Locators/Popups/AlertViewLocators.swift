@@ -24,6 +24,7 @@ enum AlertViewLocators {
     enum StaticTexts: String, CaseIterable, UIElement {
         case connectBeam = "Connect to Beam"
         case connectDescription = "Connect to Beam to sync, encrypt and publish your notes."
+        case connectDescriptionTabGroups = "Connect to Beam to share your tab groups."
         case tooManyPinnedNotes = "Too many pinned notes"
         case fivePinnedNotesMax = "You can only have 5 pinned notes.\nUnpin some notes to pin new ones."
         case signOutConfirmation = "Are you sure you want to sign out?"

@@ -1410,6 +1410,8 @@
 		D7251BC2288ED72900CD5D64 /* TabGroupDragTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7251BC1288ED72800CD5D64 /* TabGroupDragTabTests.swift */; };
 		D73C597D28AB9482004D41DF /* TabGroupInOmniboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73C597C28AB9482004D41DF /* TabGroupInOmniboxTests.swift */; };
 		D73C598428ABA9B2004D41DF /* TabGroupCaptureToANoteMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D73C598328ABA9B2004D41DF /* TabGroupCaptureToANoteMenuTests.swift */; };
+		D75AA9C928B4AD8300E495D9 /* TabGroupSharingFromBrowserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75AA9C828B4AD8300E495D9 /* TabGroupSharingFromBrowserTests.swift */; };
+		D75AA9D028B4C59F00E495D9 /* TabGroupSharingFromNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75AA9CF28B4C59F00E495D9 /* TabGroupSharingFromNoteTests.swift */; };
 		D75EEB402844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */; };
 		D75EEB4F2845F8B000994C17 /* InsideAdsBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */; };
 		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
@@ -3371,6 +3373,8 @@
 		D73C597C28AB9482004D41DF /* TabGroupInOmniboxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupInOmniboxTests.swift; sourceTree = "<group>"; };
 		D73C598328ABA9B2004D41DF /* TabGroupCaptureToANoteMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupCaptureToANoteMenuTests.swift; sourceTree = "<group>"; };
 		D7472EAA27E0940300F629EF /* BeamUITests-Thread5.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread5.xctestplan"; sourceTree = "<group>"; };
+		D75AA9C828B4AD8300E495D9 /* TabGroupSharingFromBrowserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupSharingFromBrowserTests.swift; sourceTree = "<group>"; };
+		D75AA9CF28B4C59F00E495D9 /* TabGroupSharingFromNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupSharingFromNoteTests.swift; sourceTree = "<group>"; };
 		D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedCreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
 		D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsideAdsBlockerTests.swift; sourceTree = "<group>"; };
 		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
@@ -8135,6 +8139,8 @@
 				D7CC5970289970350036A02B /* TabGroupManualTests.swift */,
 				D73C597C28AB9482004D41DF /* TabGroupInOmniboxTests.swift */,
 				D73C598328ABA9B2004D41DF /* TabGroupCaptureToANoteMenuTests.swift */,
+				D75AA9C828B4AD8300E495D9 /* TabGroupSharingFromBrowserTests.swift */,
+				D75AA9CF28B4C59F00E495D9 /* TabGroupSharingFromNoteTests.swift */,
 			);
 			path = TabGrouping;
 			sourceTree = "<group>";
@@ -10042,6 +10048,7 @@
 				B507CB34275F8CB800DFF11A /* SlashMenuTests.swift in Sources */,
 				B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */,
 				D77A5A8428780F2100652727 /* RightClickLinkMenuTests.swift in Sources */,
+				D75AA9C928B4AD8300E495D9 /* TabGroupSharingFromBrowserTests.swift in Sources */,
 				A307FBE6285A776F001DE30D /* SignOutTests.swift in Sources */,
 				6EC995B8287D6F8400691668 /* WindowMenu.swift in Sources */,
 				A3B6C98A2863181F00E7F78C /* BrowserPreferencesViewLocators.swift in Sources */,
@@ -10159,6 +10166,7 @@
 				B5984C9A27031F3B00192B5F /* AutoFillPasswordsTestView.swift in Sources */,
 				A38D1A25284A10DC007EBB25 /* RowCreditCardsTestTable.swift in Sources */,
 				B5CDFF31274E400F00742CC9 /* OnboardingLandingViewLocators.swift in Sources */,
+				D75AA9D028B4C59F00E495D9 /* TabGroupSharingFromNoteTests.swift in Sources */,
 				A3AF8CF4288893AE00FB6310 /* NotesPreferencesViewLocators.swift in Sources */,
 				A388B452280DE43F008D2247 /* PDFFilesBrowserViewTests.swift in Sources */,
 				8AA6D92427FB4E3400F42FAB /* UITestPageBrowserWindow.swift in Sources */,
