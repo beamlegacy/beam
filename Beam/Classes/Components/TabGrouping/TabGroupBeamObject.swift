@@ -104,6 +104,11 @@ extension TabGroupBeamObject: BeamObjectProtocol {
         TabGroupBeamObject(id: id, title: title, color: color, pages: pages, isLocked: isLocked,
                            createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
     }
+
+    /// checks if the other group is the parent and still have the same properties and pages.
+    func isACopy(of otherGroup: TabGroupBeamObject) -> Bool {
+        self.parentGroup == otherGroup.id && self.title == otherGroup.title && self.color == otherGroup.color && self.pages == otherGroup.pages
+    }
 }
 
 extension TabGroupBeamObject: TableRecord {

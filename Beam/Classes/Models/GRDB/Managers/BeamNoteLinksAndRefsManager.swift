@@ -591,6 +591,17 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         }
     }
 
+    func search(containingTabGroup tabGroupId: UUID,
+                maxResults: Int? = nil,
+                completion: @escaping CompletionSearch) {
+        let sampleElement = BeamElement(tabGroupId: tabGroupId)
+        let text = sampleElement.text.text
+        guard !text.isEmpty, let pattern = FTS3Pattern(matchingPhrase: text) else {
+            return completion(.failure(ReadError.invalidFTSPattern))
+        }
+        search(pattern, maxResults, false, nil, nil, .text, completion)
+    }
+
     var linksCount: Int {
         do {
             return try self.read({ db in
