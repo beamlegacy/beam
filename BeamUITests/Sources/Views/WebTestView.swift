@@ -166,7 +166,7 @@ class WebTestView: BaseView {
     
     @discardableResult
     func waitForWebViewToLoad() -> Bool {
-        return app.windows.scrollViews.webViews.firstMatch.waitForExistence(timeout: implicitWaitTimeout)
+        return app.windows.scrollViews.webViews.firstMatch.waitForExistence(timeout: maximumWaitTimeout)
     }
 
     private let anyTabPredicate = NSPredicate(format: "identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPrefix.accessibilityIdentifier)'")

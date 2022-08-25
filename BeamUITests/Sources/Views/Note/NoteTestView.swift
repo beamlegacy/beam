@@ -513,6 +513,8 @@ class NoteTestView: TextEditorContextTestView {
     
     @discardableResult
     func openTabGroupMenu(index: Int) -> TabGroupMenuView {
+        _ = getTabGroupElementIndex(index: index).waitForExistence(timeout: implicitWaitTimeout)
+        getTabGroupElementIndex(index: index).children(matching: .staticText).firstMatch.hoverInTheMiddle()
         getTabGroupElementIndex(index: index).rightClickInTheMiddle()
         return TabGroupMenuView()
     }
