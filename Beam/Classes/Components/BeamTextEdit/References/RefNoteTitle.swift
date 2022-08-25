@@ -29,7 +29,6 @@ class RefNoteTitle: Widget {
 
     override var open: Bool {
         didSet {
-            super.open = open
             self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 5 : 2, right: 0)
         }
     }
