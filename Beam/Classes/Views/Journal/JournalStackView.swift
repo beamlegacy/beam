@@ -277,12 +277,13 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
         textEditView.startQuery = { [weak state] textNode, animated in
             state?.startQuery(textNode, animated: animated)
         }
-        textEditView.onFocusChanged = { [weak state] elementId, cursorPosition, selectedRange in
+        textEditView.onFocusChanged = { [weak state] elementId, cursorPosition, selectedRange, isReference in
             state?.currentJournalNoteID = note.id
             state?.updateNoteFocusedState(note: note,
                                           focusedElement: elementId,
                                           cursorPosition: cursorPosition,
-                                          selectedRange: selectedRange)
+                                          selectedRange: selectedRange,
+                                          isReference: isReference)
         }
         textEditView.minimumWidth = 800
         textEditView.maximumWidth = 1024
@@ -350,9 +351,10 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
            let fs = state.notesFocusedStates.getSavedNoteFocusedState(noteId: noteID),
            let note = notes.first(where: { $0.id == noteID }),
            let view = views[note] {
-            view.focusElement(withId: fs.elementId,
-                              atCursorPosition: fs.cursorPosition,
+            view.focusElement(id: fs.elementId,
+                              cursorPosition: fs.cursorPosition,
                               selectedRange: fs.selectedRange,
+                              isReference: fs.isReference,
                               highlight: fs.highlight,
                               unfold: fs.unfold,
                               scroll: false,

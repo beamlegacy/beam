@@ -1144,16 +1144,22 @@ extension BeamState {
 // MARK: - Notes focused state
 extension BeamState {
 
-    func updateNoteFocusedState(note: BeamNote, focusedElement: UUID, cursorPosition: Int, selectedRange: Range<Int>) {
+    func updateNoteFocusedState(note: BeamNote,
+                                focusedElement: UUID,
+                                cursorPosition: Int,
+                                selectedRange: Range<Int>,
+                                isReference: Bool) {
         if note == currentNote {
             notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: focusedElement,
                                                                           cursorPosition: cursorPosition,
-                                                                          selectedRange: selectedRange)
+                                                                          selectedRange: selectedRange,
+                                                                          isReference: isReference)
         }
         notesFocusedStates.saveNoteFocusedState(noteId: note.id,
                                                 focusedElement: focusedElement,
                                                 cursorPosition: cursorPosition,
-                                                selectedRange: selectedRange)
+                                                selectedRange: selectedRange,
+                                                isReference: isReference)
     }
 }
 
