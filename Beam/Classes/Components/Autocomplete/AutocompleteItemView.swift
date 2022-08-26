@@ -134,7 +134,7 @@ struct AutocompleteItemView: View {
         switch item.source {
         case .createNote:
             return item.displayText
-        case .searchEngine, .note, .tabGroup:
+        case .searchEngine, .note:
             return item.displayInformation ?? item.source.shortDescription
         default: return item.source.shortDescription
         }
