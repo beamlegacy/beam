@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+import Combine
 
 struct TabForcedGroup {
     var inGroup: TabGroup?
@@ -30,6 +31,10 @@ class TabGroupingManager {
     var hasPagesGroup: Bool {
         !builtPagesGroups.isEmpty
     }
+    var publisherForDeletedGroup: AnyPublisher<TabGroup, Never> {
+        subjectForDeletedGroup.eraseToAnyPublisher()
+    }
+    private var subjectForDeletedGroup = PassthroughSubject<TabGroup, Never>()
     private var storeManager: TabGroupingStoreManager? {
         BeamData.shared.tabGroupingDBManager
     }
@@ -130,6 +135,12 @@ extension TabGroupingManager {
 
     func ungroup(_ group: TabGroup) {
         Logger.shared.logInfo("Ungrouping Tab Group '\(group.title ?? "\(group.id)")'", category: .tabGrouping)
+        let beWith: [ClusteringManager.PageID] = []
+        let beApart: [ClusteringManager.PageID] = group.pageIds
+        let clusteringManager = BeamData.shared.clusteringManager
+        beApart.forEach { pageId in
+            clusteringManager.shouldBeWithAndApart(pageId: pageId, beWith: beWith, beApart: beApart)
+        }
         group.updatePageIds([])
         groupDidChangeContent(group, fromUser: true)
     }
@@ -164,6 +175,12 @@ extension TabGroupingManager {
 
         // 3. delete the group itself.
         storeManager?.deleteGroup(group, deleteParentIfRelevant: true)
+
+        broadcastTabGroupDeleted(group)
+    }
+
+    private func broadcastTabGroupDeleted(_ group: TabGroup) {
+        subjectForDeletedGroup.send(group)
     }
 
     @MainActor
@@ -192,6 +209,9 @@ extension TabGroupingManager {
                                          secondaryButtonTitle: loc("Cancel"), buttonAction: {
             confirmed = true
         })
+        if confirmed {
+            await deleteGroupInDB(group)
+        }
         
         return confirmed
     }
