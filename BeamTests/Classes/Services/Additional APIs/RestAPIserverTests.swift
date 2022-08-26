@@ -63,7 +63,7 @@ class RestAPIserverTests: QuickSpec {
                     fail("Error while creating note")
                     return
                 }
-                let request = RestAPIServer.Request.publishNote(note: note, publicationGroups: [])
+                let request = RestAPIServer.Request.publishNote(note: note, tabGroups: nil, publicationGroups: [])
 
                 describe("with default configuration") {
                     it("Returns the env url") {
@@ -103,7 +103,7 @@ class RestAPIserverTests: QuickSpec {
                     fail("Error while creating note")
                     return
                 }
-                let request = RestAPIServer.Request.updatePublicationGroup(note: note, publicationGroups: [])
+                let request = RestAPIServer.Request.updatePublicationGroup(note: note, tabGroups: nil, publicationGroups: [])
 
                 describe("with default configuration") {
                     it("Returns the env url") {
