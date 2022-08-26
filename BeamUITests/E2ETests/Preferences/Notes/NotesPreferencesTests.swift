@@ -15,10 +15,13 @@ class NotesPreferencesTests: BaseTest {
     let notesView = NoteTestView()
     var showBulletsCheckbox: XCUIElement!
     
+    override func setUp() {
+        journalView = launchApp()
+    }
+    
     func testIndentationShowBullets() {
         testrailId("C599")
         step("GIVEN I prepare a note with lines") {
-            journalView = launchApp()
             journalView.waitForJournalViewToLoad()
             journalView.createNoteViaOmniboxSearch("Test1")
             uiMenu.insertTextInCurrentNote()
@@ -65,6 +68,33 @@ class NotesPreferencesTests: BaseTest {
             notesView.waitForNoteViewToLoad()
             XCTAssertEqual(notesView.getNumberOfVisibleBullets(), 3)
         }
+    }
+    
+    func testCursorColourViewAndSelection() {
+        testrailId("C1172")
+        let expectedDropDownValuesBlackTheme = ["Black", "Gray", "Blue", "Purple", "Red", "Green"]
+        let expectedDropDownValuesLightTheme = ["White", "Gray", "Blue", "Purple", "Red", "Green"]
+        let randomColorIndex = Int.random(in: 1..<expectedDropDownValuesBlackTheme.count)
+        let colorToSelect = expectedDropDownValuesBlackTheme[randomColorIndex]
+        
+        step("GIVEN I open Notes preferences") {
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+            notesPrefView.navigateTo(preferenceView: .notes)
+        }
+        
+        step("THEN I see the Cursor color with correct options") {
+            XCTAssertTrue(notesPrefView.staticText(NotesPreferencesViewLocators.StaticTexts.cursorColor.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            notesPrefView.getCursorColorDropDownElement().hoverAndTapInTheMiddle()
+            let actualDropDownValues = notesPrefView.getCursorColorValues()
+            XCTAssertTrue(expectedDropDownValuesBlackTheme == actualDropDownValues || expectedDropDownValuesLightTheme == actualDropDownValues)
+        }
+        
+        step("THEN I successfully select the colour option") {
+            XCTAssertTrue(notesPrefView
+                .selectCursorColorBy(colorName: colorToSelect)
+                .isColorSelectedAs(expectedColorName: colorToSelect), "\(notesPrefView.getCursorColorDropDownElement().getStringValue()) is selected instead of \(colorToSelect)")
+        }
+        
     }
     
 }

@@ -123,6 +123,7 @@
         "NoteViewTests",
         "NotesNavigationHistoryTests",
         "NotesPreferencesTests",
+        "NotesPreferencesTests\/testIndentationShowBullets()",
         "OmniboxAutocompleteTests",
         "OmniboxAutocompleteTests\/testAutoCompleteHistoryFromAliasUrlSelection()",
         "OmniboxAutocompleteTests\/testAutoCompleteHistorySelection()",

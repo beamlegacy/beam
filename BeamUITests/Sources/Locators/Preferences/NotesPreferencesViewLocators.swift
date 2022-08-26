@@ -15,6 +15,11 @@ enum NotesPreferencesViewLocators {
     
     enum StaticTexts: String, CaseIterable, UIElement {
         case indentationLabel = "Indentation:"
+        case cursorColor = "Cursor Color:"
+    }
+    
+    enum PopUpButtons: String, CaseIterable, UIElement {
+        case cursorColor = "cursor_color"
     }
     
 }
