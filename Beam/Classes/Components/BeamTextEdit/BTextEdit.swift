@@ -22,7 +22,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
 
     var onStartEditing: () -> Void = { }
     var onEndEditing: () -> Void = { }
-    var onFocusChanged: ((UUID, Int, Range<Int>, Bool) -> Void)?
+    var onFocusChanged: ((UUID, Int, Range<Int>, Bool, NodeSelectionState?) -> Void)?
     var onScroll: ((CGPoint) -> Void)?
     var onSearchToggle: (SearchViewModel?) -> Void = { _ in }
 
@@ -122,6 +122,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
                                     cursorPosition: fs.cursorPosition,
                                     selectedRange: fs.selectedRange,
                                     isReference: fs.isReference,
+                                    nodeSelectionState: fs.nodeSelectionState,
                                     highlight: fs.highlight,
                                     unfold: fs.unfold)
             }
