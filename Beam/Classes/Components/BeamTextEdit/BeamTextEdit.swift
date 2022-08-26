@@ -380,7 +380,7 @@ public extension CALayer {
 
     public var onStartEditing: (() -> Void)?
     public var onEndEditing: (() -> Void)?
-    public var onFocusChanged: ((UUID, Int, Range<Int>, Bool) -> Void)?
+    public var onFocusChanged: ((UUID, Int, Range<Int>, Bool, NodeSelectionState?) -> Void)?
 
     private var disableOnFocusChanged = false
     private var disableFocusScroll = false
@@ -797,6 +797,7 @@ public extension CALayer {
                       cursorPosition: Int?,
                       selectedRange: Range<Int>,
                       isReference: Bool = false,
+                      nodeSelectionState: NodeSelectionState?,
                       highlight: Bool = false,
                       unfold: Bool = false,
                       scroll: Bool = true,
@@ -828,6 +829,7 @@ public extension CALayer {
                     self?.focusElement(id: id,
                                        cursorPosition: cursorPosition,
                                        selectedRange: selectedRange,
+                                       nodeSelectionState: nodeSelectionState,
                                        highlight: highlight,
                                        unfold: unfold)
                 }
@@ -852,6 +854,11 @@ public extension CALayer {
         self.setHotSpot(node.frameInDocument)
         self.focusedWidget = node
         self.selectedTextRange = selectedRange
+        if let rootNode = rootNode, let nodeProvider = rootNode.nodeProvider {
+            rootNode.state.nodeSelection = nodeSelectionState?.nodeSelectionWith(nodeProvider: nodeProvider) {
+                rootNode.updateSelectionState()
+            }
+        }
         node.focus(position: cursorPosition)
         if highlight == true {
             node.highlight()
@@ -1943,9 +1950,9 @@ public extension CALayer {
 //    override public func quickLookPreviewItems(_ sender: Any?) {
 //    }
 
-    func focusChanged(_ id: UUID, _ cursorPosition: Int, _ selectedRange: Range<Int>, _ isReference: Bool) {
+    func focusChanged(_ id: UUID, _ cursorPosition: Int, _ selectedRange: Range<Int>, _ isReference: Bool, _ nodeSelection: NodeSelectionState?) {
         guard !disableOnFocusChanged else { return }
-        onFocusChanged?(id, cursorPosition, selectedRange, isReference)
+        onFocusChanged?(id, cursorPosition, selectedRange, isReference, nodeSelection)
     }
 
     // MARK: - Drag and drop:
