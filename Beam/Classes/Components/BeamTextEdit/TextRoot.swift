@@ -48,12 +48,17 @@ public class TextRoot: ElementNode {
             state.selectedTextRange = newValue
             textIsSelected = !selectedText.isEmpty
 
-            if let n = focusedWidget as? TextNode {
-                let isReference = (n is ProxyTextNode) && n.isDescendant(of: ReferencesSection.self)
-                editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange, isReference)
-            }
+            updateSelectionState()
         }
     }
+
+    func updateSelectionState() {
+        if let n = focusedWidget as? TextNode {
+            let isReference = (n is ProxyTextNode) && n.isDescendant(of: ReferencesSection.self)
+            editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange, isReference, NodeSelectionState(state.nodeSelection))
+        }
+    }
+
     var markedTextRange: Range<Int>? {
         get {
             state.markedTextRange
@@ -106,7 +111,7 @@ public class TextRoot: ElementNode {
         }
         if let n = n {
             let isReference = (n is ProxyTextNode) && n.isDescendant(of: ReferencesSection.self)
-            editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange, isReference)
+            editor?.focusChanged(n.elementId, cursorPosition, selectedTextRange, isReference, NodeSelectionState(state.nodeSelection))
         }
     }
 

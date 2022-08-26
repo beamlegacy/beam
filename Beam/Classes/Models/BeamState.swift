@@ -1148,18 +1148,21 @@ extension BeamState {
                                 focusedElement: UUID,
                                 cursorPosition: Int,
                                 selectedRange: Range<Int>,
-                                isReference: Bool) {
+                                isReference: Bool, 
+                                nodeSelectionState: NodeSelectionState?) {
         if note == currentNote {
             notesFocusedStates.currentFocusedState = NoteEditFocusedState(elementId: focusedElement,
                                                                           cursorPosition: cursorPosition,
                                                                           selectedRange: selectedRange,
-                                                                          isReference: isReference)
+                                                                          isReference: isReference,
+                                                                          nodeSelectionState: nodeSelectionState)
         }
         notesFocusedStates.saveNoteFocusedState(noteId: note.id,
                                                 focusedElement: focusedElement,
                                                 cursorPosition: cursorPosition,
                                                 selectedRange: selectedRange,
-                                                isReference: isReference)
+                                                isReference: isReference,
+                                                nodeSelectionState: nodeSelectionState)
     }
 }
 
