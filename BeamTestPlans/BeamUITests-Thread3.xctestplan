@@ -117,6 +117,8 @@
         "NoteViewTests",
         "NotesNavigationHistoryTests",
         "NotesPreferencesTests",
+        "NotesPreferencesTests\/testCursorColourViewAndSelection()",
+        "NotesPreferencesTests\/testIndentationShowBullets()",
         "OmniboxAutocompleteTests",
         "OmniboxAutocompleteTests\/testAutoCompleteHistoryFromAliasUrlSelection()",
         "OmniboxAutocompleteTests\/testAutoCompleteHistorySelection()",

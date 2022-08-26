@@ -134,6 +134,8 @@
         "NoteViewTests",
         "NotesNavigationHistoryTests",
         "NotesPreferencesTests",
+        "NotesPreferencesTests\/testCursorColourViewAndSelection()",
+        "NotesPreferencesTests\/testIndentationShowBullets()",
         "PnSAddToCardTests",
         "PnSAddToCardTests\/testAddTextToExistingCard()",
         "PnSAddToCardTests\/testAddTextToNewCard()",

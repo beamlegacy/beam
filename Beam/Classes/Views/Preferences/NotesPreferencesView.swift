@@ -75,6 +75,7 @@ struct NotesPreferencesView: View {
                 }
                 .pickerStyle(MenuPickerStyle())
                 .fixedSize()
+                .accessibilityIdentifier("cursor_color")
             }
 
             Settings.Row {
