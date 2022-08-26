@@ -87,13 +87,13 @@ class BrowserTabsManager: ObservableObject {
         self.data = data
         self.state = state
         tabs.append(contentsOf: data.pinnedTabs)
-        setupPinnedTabObserver()
+        setupMainObservers()
         currentTab = tabs.first
         setupTabsClustering()
     }
 
     private var isModifyingPinnedTabs = false
-    private func setupPinnedTabObserver() {
+    private func setupMainObservers() {
         data.$pinnedTabs
             .scan(([], [])) { ($0.1.map({ $0.id }), $1) } // getting the previous pinned tabs ids to avoid leaks (BE-4882)
             .sink { [weak self] (previousPinnedTabsIds, newPinnedTabs) in
@@ -109,6 +109,10 @@ class BrowserTabsManager: ObservableObject {
                 tabs.insert(contentsOf: newPinnedTabs, at: 0)
                 self?.tabs = tabs
                 self?.changeCurrentTabIfNotVisible(previousTabsList: previousTabs)
+        }.store(in: &dataScope)
+
+        data.tabGroupingManager.publisherForDeletedGroup.sink { [weak self] group in
+            self?.ungroupTabsInGroup(group)
         }.store(in: &dataScope)
     }
 
@@ -669,14 +673,8 @@ extension BrowserTabsManager {
     func ungroupTabsInGroup(_ group: TabGroup) {
         pauseListItemsUpdate = true
         let tabs = tabs(inGroup: group)
-        let beWith: [ClusteringManager.PageID] = []
-        let beApart: [ClusteringManager.PageID] = group.pageIds
-        let clusteringManager = state?.data.clusteringManager
         tabs.forEach { tab in
             tabGroupingManager.moveTab(tab, inGroup: nil, outOfGroup: group)
-        }
-        beApart.forEach { pageId in
-            clusteringManager?.shouldBeWithAndApart(pageId: pageId, beWith: beWith, beApart: beApart)
         }
         tabGroupingManager.ungroup(group)
         updateListItems()
