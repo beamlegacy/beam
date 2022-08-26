@@ -29,6 +29,6 @@ class SimpleClearHostingWindow: SimpleHostingWindow {
         titlebarAppearsTransparent = true
         titleVisibility = .hidden
         isOpaque = false
-        backgroundColor = .clear
+        backgroundColor = BeamColor.combining(lightColor: BeamColor.Mercury.alpha(0.7), darkColor: BeamColor.Mercury.alpha(0.8)).nsColor
     }
 }
