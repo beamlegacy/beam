@@ -444,7 +444,9 @@ extension TextRoot {
             textNode.updateActionLayerVisibility(hidden: true)
         }
 
-        let selection = NodeSelection(start: node, end: node)
+        let selection = NodeSelection(start: node, end: node) { [weak self] in
+            self?.updateSelectionState()
+        }
         root?.state.nodeSelection = selection
         cancelSelection(.current)
         return selection
@@ -454,6 +456,7 @@ extension TextRoot {
         guard let selection = root?.state.nodeSelection else { return }
         selection.end.focus()
         root?.state.nodeSelection = nil
+        updateSelectionState()
     }
 
     func wordSelection(from pos: Int) {

@@ -8,10 +8,34 @@
 import Foundation
 import BeamCore
 
-class NodeSelection {
-    var start: ElementNode
-    var end: ElementNode
+public struct NodeSelectionState {
+    var start: UUID
+    var end: UUID
     var isSelectingProxy: Bool = false
+
+    init?(_ selection: NodeSelection?) {
+        guard let selection = selection else { return nil }
+        start = selection.start.displayedElementId
+        end = selection.end.displayedElementId
+        isSelectingProxy = selection.isSelectingProxy
+    }
+
+    func nodeSelectionWith(nodeProvider: NodeProvider, changed: @escaping () -> Void) -> NodeSelection? {
+        guard let note = nodeProvider.holder?.root?.note,
+              let startElement = note.findElement(start),
+              let endElement = note.findElement(end),
+              let startNode = nodeProvider.nodeFor(startElement),
+              let endNode = nodeProvider.nodeFor(endElement)
+        else { return nil }
+        return NodeSelection(start: startNode, end: endNode, changed: changed)
+    }
+}
+
+class NodeSelection {
+    var start: ElementNode { didSet { changed() }}
+    var end: ElementNode { didSet { changed() }}
+    var isSelectingProxy: Bool = false { didSet { changed() }}
+    var changed: () -> Void
 
     /// All the selected nodes
     public private(set) var nodes: Set<ElementNode>
@@ -52,11 +76,12 @@ class NodeSelection {
         nodes.contains(where: { $0 is TextNode })
     }
 
-    init(start: ElementNode, end: ElementNode, elements: Set<ElementNode> = Set<ElementNode>()) {
+    init(start: ElementNode, end: ElementNode, elements: Set<ElementNode> = Set<ElementNode>(), changed: @escaping () -> Void) {
         self.start = start
         self.end = end
         self.nodes = elements
         self.isSelectingProxy = ((start as? ProxyNode) != nil)
+        self.changed = changed
         selectRange(start: start, end: end)
     }
 
