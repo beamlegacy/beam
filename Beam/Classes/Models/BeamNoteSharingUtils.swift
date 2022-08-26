@@ -80,7 +80,8 @@ class BeamNoteSharingUtils {
         note.ongoingPublicationOperation = true
 
         if becomePublic {
-            publishNote(note, publicationGroups: publicationGroups) { result in
+            let tabGroups = getAssociatedTabGroups(for: note)
+            publishNote(note, tabGroups: tabGroups, publicationGroups: publicationGroups) { result in
                 makeNotePublicHandler(note, becomePublic, result, completion)
             }
         } else {
@@ -88,6 +89,15 @@ class BeamNoteSharingUtils {
                 makeNotePublicHandler(note, becomePublic, result, completion)
             })
         }
+    }
+
+    static private func getAssociatedTabGroups(for note: BeamNote) -> [TabGroupBeamObject]? {
+        if case .tabGroup(let groupId) = note.type, let tabGroup = BeamData.shared.tabGroupingDBManager?.fetch(byIds: [groupId]) {
+            return tabGroup
+        } else if !note.tabGroups.isEmpty {
+            return BeamData.shared.tabGroupingDBManager?.fetch(byIds: note.tabGroups)
+        }
+        return nil
     }
 
     static private func makeNotePublicHandler(_ note: BeamNote,
@@ -165,8 +175,9 @@ class BeamNoteSharingUtils {
         }
 
         note.ongoingPublicationOperation = true
+        let tabGroups = getAssociatedTabGroups(for: note)
 
-        updatePublicationGroup(for: note, with: publicationGroups, completion: { result in
+        updatePublicationGroup(for: note, tabGroups: tabGroups, publicationGroups: publicationGroups, completion: { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let status):
@@ -187,10 +198,17 @@ class BeamNoteSharingUtils {
     /// This method DOESN'T update the note with the PublicationStatus
     /// - Parameters:
     ///   - note: The note to publish
+    ///   - tabGroups: The tab groups included in that note (in type or in content)
     ///   - publicationGroups: The publication groups the note belongs to
     ///   - completion: The callback with the resulted PublicationStatus or error
-    static func publishNote(_ note: BeamNote, publicationGroups: [String]?, completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
-        Self.publicServer.request(serverRequest: .publishNote(note: note, publicationGroups: publicationGroups), completion: { completion($0) })
+    static func publishNote(_ note: BeamNote,
+                            tabGroups: [TabGroupBeamObject]?,
+                            publicationGroups: [String]?,
+                            completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
+        Self.publicServer.request(serverRequest: .publishNote(note: note,
+                                                              tabGroups: tabGroups,
+                                                              publicationGroups: publicationGroups),
+                                  completion: { completion($0) })
     }
 
     /// Unpublish a note from the Public Server.
@@ -206,9 +224,16 @@ class BeamNoteSharingUtils {
     /// This method DOESN'T update the note with the PublicationStatus
     /// - Parameters:
     ///   - note: The note to updates its publcationGroups
+    ///   - tabGroups: The tab groups included in that note (in type or in content)
     ///   - publicationGroups: The publication groups the note belongs to
     ///   - completion: The callback with the resulted PublicationStatus or error
-    private static func updatePublicationGroup(for note: BeamNote, with publicationGroups: [String], completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
-        Self.publicServer.request(serverRequest: .updatePublicationGroup(note: note, publicationGroups: publicationGroups), completion: { completion($0) })
+    private static func updatePublicationGroup(for note: BeamNote,
+                                               tabGroups: [TabGroupBeamObject]?,
+                                               publicationGroups: [String],
+                                               completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
+        Self.publicServer.request(serverRequest: .updatePublicationGroup(note: note,
+                                                                         tabGroups: tabGroups,
+                                                                         publicationGroups: publicationGroups),
+                                  completion: { completion($0) })
     }
 }
