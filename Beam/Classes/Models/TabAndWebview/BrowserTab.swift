@@ -379,7 +379,8 @@ import UniformTypeIdentifiers
                                       focusedElement: element.id,
                                       cursorPosition: position,
                                       selectedRange: position..<position,
-                                      isReference: false)
+                                      isReference: false,
+                                      nodeSelectionState: nil)
     }
 
     internal func logInNote(url: URL, reason: NoteElementAddReason) {
