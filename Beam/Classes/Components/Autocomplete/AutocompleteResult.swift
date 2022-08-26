@@ -283,6 +283,10 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
 
     /// The weighted score is used to sort AutocompleResults. It combines all subscore, higher is better.
     var weightedScore: Float {
+        if Configuration.branchType == .develop {
+            guard prefixScore > 0 else { return -Float.greatestFiniteMagnitude }
+            return (score ?? 1.0) + log(prefixScore)
+        }
         return (score ?? 1.0) * prefixScore
     }
 

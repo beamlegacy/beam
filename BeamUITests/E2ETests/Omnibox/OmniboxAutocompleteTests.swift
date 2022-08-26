@@ -76,7 +76,7 @@ class OmniboxAutocompleteTests: BaseTest {
 
     func testAutoCompleteURLSelection() {
         testrailId("C1101")
-        let expectedFirstResultURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: domainURL)
+        let expectedFirstResultURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: urlToOpen)
         
         step("Given I open website: \(urlToOpen)"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
@@ -96,9 +96,9 @@ class OmniboxAutocompleteTests: BaseTest {
         let firstResult = results.firstMatch
         let autocompleteSelectedResultQuery = omniboxView.getSelectedAutocompleteElementQuery()
         
-        step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(domainURL) search text available"){
+        step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(urlToOpen) search text available"){
             XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
-            XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(urlToOpen, omniboxView.getOmniBoxSearchField()))
             XCTAssertGreaterThan(results.count, 1)
         }
 
@@ -108,7 +108,7 @@ class OmniboxAutocompleteTests: BaseTest {
 
         step("Then I see selection persists"){
             XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
-            XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(urlToOpen, omniboxView.getOmniBoxSearchField()))
         }
 
         step("When I add 1 more letter: \(anotherOneLetterToAdd) which makes the word to be inexisting one"){
@@ -134,7 +134,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then I see selection available"){
-            XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(urlToOpen, omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
         }
 
@@ -151,7 +151,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then I see search text: \(domainURL + "s")"){
-            XCTAssertTrue(waitForStringValueEqual(domainURL + "s", omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(urlToOpen + "s", omniboxView.getOmniBoxSearchField()))
         }
     }
 
@@ -309,7 +309,7 @@ class OmniboxAutocompleteTests: BaseTest {
     
     func testAutoCompleteUrlOmniboxDisappear() { //BE-3733
         testrailId("C1105")
-        let expectedFirstResultURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: domainURL)
+        let expectedFirstResultURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: urlToOpen)
         
         step("Given I open website: \(urlToOpen)"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
@@ -326,9 +326,9 @@ class OmniboxAutocompleteTests: BaseTest {
             omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
         }
         
-        step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(domainURL) search text available"){
+        step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(urlToOpen) search text available"){
             XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, omniboxView.getAutocompleteResults().firstMatch))
-            XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(urlToOpen, omniboxView.getOmniBoxSearchField()))
         }
         
         step("When I validate autocomplete with Enter"){
