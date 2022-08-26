@@ -12,21 +12,21 @@ import BeamCore
 class RestAPIServer {
 
     enum Request {
-        case publishNote(note: BeamNote, publicationGroups: [String]?)
+        case publishNote(note: BeamNote, tabGroups: [TabGroupBeamObject]?, publicationGroups: [String]?)
         case unpublishNote(noteId: UUID)
-        case updatePublicationGroup(note: BeamNote, publicationGroups: [String])
+        case updatePublicationGroup(note: BeamNote, tabGroups: [TabGroupBeamObject]?, publicationGroups: [String])
         case embed(url: URL)
         case providers
         case iframeProviders
 
         func bodyParameters() throws -> (Data, String)? {
             switch self {
-            case .publishNote(let note, let publicationGroups):
-                return createBody(for: note, and: publicationGroups)
+            case .publishNote(let note, let tabGroups, let publicationGroups):
+                return createBody(for: note, tabGroups: tabGroups, publicationGroups: publicationGroups)
             case .unpublishNote, .embed, .providers, .iframeProviders:
                 return nil
-            case .updatePublicationGroup(let note, let publicationGroups):
-                return createBody(for: note, and: publicationGroups)
+            case .updatePublicationGroup(let note, let tabGroups, let publicationGroups):
+                return createBody(for: note, tabGroups: tabGroups, publicationGroups: publicationGroups)
             }
         }
 
@@ -105,10 +105,10 @@ class RestAPIServer {
             }
         }
 
-        private func createBody(for note: BeamNote, and publicationGroups: [String]?) -> (Data, String)? {
+        private func createBody(for note: BeamNote, tabGroups: [TabGroupBeamObject]?, publicationGroups: [String]?) -> (Data, String)? {
             let richContent = note.richContent
 
-            let publicNote = PublicNote(note: note)
+            let publicNote = PublicNote(note: note, tabGroups: tabGroups)
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             guard let encodedNote = try? encoder.encode(publicNote) else { return nil }

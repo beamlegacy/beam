@@ -63,9 +63,12 @@ struct TabClusteringGroupCapsuleView: View {
                         .truncationMode(.middle)
                     if loading {
                         Spacer(minLength: BeamSpacing._40)
-                        ProgressView()
-                            .scaleEffect(0.375, anchor: .center)
-                            .frame(width: 12, height: 12)
+                        LottieView(
+                            name: "status-update_restart",
+                            playing: true,
+                            color: color.textColor?.nsColor,
+                            animationSize: CGSize(width: 12, height: 12)
+                        )
                     }
                 }
 
