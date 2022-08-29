@@ -126,7 +126,7 @@ extension TabGroupingManager: BeamDocumentSource {
     func addGroup(_ group: TabGroup, toNote note: BeamNote) -> Bool {
         let copiedGroup = self.copyForNoteInsertion(group)
         if copiedGroup.title == nil || copiedGroup.title?.isEmpty == true  {
-            let title = TabGroupingStoreManager.suggestedDefaultTitle(for: group, withTabs: allOpenTabs(), truncated: false)
+            let title = TabGroupingStoreManager.suggestedDefaultTitle(for: group, withTabs: allOpenTabs(inGroup: group), truncated: false)
             renameGroup(copiedGroup, title: title)
         }
         note.addTabGroup(copiedGroup.id)
