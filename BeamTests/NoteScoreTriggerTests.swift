@@ -154,7 +154,7 @@ class NoteScoreTriggerTests: XCTestCase {
             id: "id",
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         pns.activeShootGroup = PointAndShoot.ShootGroup(id: "abc", targets: [target], text: "placeholder", href: "abc", shapeCache: .init())
@@ -164,22 +164,18 @@ class NoteScoreTriggerTests: XCTestCase {
         XCTAssertNotNil(pns.activeShootGroup)
         XCTAssertNil(NoteScorer.shared.getLocalDailyScore(noteId: pnsNote.id, daysAgo: 0))
         if let group = pns.activeShootGroup {
-            let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-            pns.addShootToNote(targetNote: pnsNote, group: group, completion: {
-                let dailyScore = NoteScorer.shared.getLocalDailyScore(noteId: pnsNote.id, daysAgo: 0)
-                XCTAssertEqual(dailyScore?.captureToCount, 1)
-                XCTAssertEqual(dailyScore?.addedBidiLinkToCount, 0)
-                XCTAssertEqual(dailyScore?.visitCount, 0)
+            pns.addShootToNote(targetNote: pnsNote, group: group)
+            let dailyScore = NoteScorer.shared.getLocalDailyScore(noteId: pnsNote.id, daysAgo: 0)
+            XCTAssertEqual(dailyScore?.captureToCount, 1)
+            XCTAssertEqual(dailyScore?.addedBidiLinkToCount, 0)
+            XCTAssertEqual(dailyScore?.visitCount, 0)
 
-                XCTAssertEqual(self.scorer.updateCalls.count, 2)
-                let call = self.scorer.updateCalls[0]
-                XCTAssertEqual(call.id, pnsNote.id)
-                XCTAssertEqual(call.scoreValue, 1.0)
-                XCTAssertEqual(call.eventType, FrecencyEventType.notePointAndShoot)
-                XCTAssertEqual(call.paramKey, FrecencyParamKey.note30d0)
-                expectation.fulfill()
-            })
-            wait(for: [expectation], timeout: 10.0)
+            XCTAssertEqual(self.scorer.updateCalls.count, 2)
+            let call = self.scorer.updateCalls[0]
+            XCTAssertEqual(call.id, pnsNote.id)
+            XCTAssertEqual(call.scoreValue, 1.0)
+            XCTAssertEqual(call.eventType, FrecencyEventType.notePointAndShoot)
+            XCTAssertEqual(call.paramKey, FrecencyParamKey.note30d0)
         }
     }
 }

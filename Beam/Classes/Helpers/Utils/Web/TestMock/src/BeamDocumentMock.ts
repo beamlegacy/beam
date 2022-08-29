@@ -38,6 +38,41 @@ export const BeamDocumentMockDefaults = {
   }
 }
 
+export class BeamTreeWalker implements TreeWalker {
+  currentNode: Node
+  filter: NodeFilter
+  root: Node
+  whatToShow: number
+  constructor(root, whatToShow, filter ) {
+    this.root = root
+    this.currentNode = root
+    this.whatToShow = whatToShow
+    this.filter = filter
+  }
+  firstChild(): Node {
+    return this.currentNode.firstChild
+  }
+  lastChild(): Node {
+    return this.currentNode.lastChild
+  }
+  nextNode(): Node {
+    return this.currentNode.nextSibling
+  }
+  nextSibling(): Node {
+    return this.currentNode.nextSibling
+  }
+  parentNode(): Node {
+    return this.currentNode.parentNode
+  }
+  previousNode(): Node {
+    return this.currentNode.previousSibling
+  }
+  previousSibling(): Node {
+    return this.currentNode.previousSibling
+  }
+
+}
+
 export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
   /**
    * @type {HTMLHtmlElement}
@@ -60,8 +95,8 @@ export class BeamDocumentMock extends BeamNodeMock implements BeamDocument {
     this.childNodes = [new BeamNodeMock("#text", 3)]
     Object.assign(this, attributes)
   }
-  createTreeWalker(root: BeamNode, whatToShow?: number, filter?: NodeFilter, expandEntityReferences?: boolean): TreeWalker {
-    throw new Error("Method not implemented.")
+  createTreeWalker(root: BeamNode, whatToShow?: number, filter?: NodeFilter, _expandEntityReferences?: boolean): TreeWalker {
+    return new BeamTreeWalker(root, whatToShow, filter)
   }
   createTextNode(data: string): Text {
     throw new Error("Method not implemented.")

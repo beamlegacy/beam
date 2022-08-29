@@ -23,11 +23,11 @@ class PointAndShootCreateTargetTest: PointAndShootTest {
         let rect = NSRect(x: 0, y: 0, width: 10, height: 20)
         let href = "https://testPNS.online"
         let animated = false
-        let html = "<p>writing paragraphs</p>"
+        let elements = [BeamElement("writing paragraphs")]
         let mouseLocation = NSPoint(x: 3, y: 15)
 
         self.pns.mouseLocation = mouseLocation
-        let target = self.pns.createTarget(id, rect, html, href, animated)
+        let target = self.pns.createTarget(id, rect, elements, href, animated)
 
         XCTAssertEqual(target.mouseLocation, mouseLocation)
     }
@@ -37,11 +37,11 @@ class PointAndShootCreateTargetTest: PointAndShootTest {
         let rect = NSRect(x: 0, y: 0, width: 10, height: 20)
         let href = "https://testPNS.online"
         let animated = false
-        let html = "<p>writing paragraphs</p>"
+        let elements = [BeamElement("writing paragraphs")]
         let mouseLocation = NSPoint(x: 300, y: 1000)
 
         self.pns.mouseLocation = mouseLocation
-        let target = self.pns.createTarget(id, rect, html, href, animated)
+        let target = self.pns.createTarget(id, rect, elements, href, animated)
 
         XCTAssertEqual(target.mouseLocation, NSPoint(x: 10, y: 20))
     }
