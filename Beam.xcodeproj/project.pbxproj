@@ -492,6 +492,8 @@
 		666DE4E5289DA4C7008CB8E0 /* MarkdownExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666DE4DF289DA4C7008CB8E0 /* MarkdownExporter.swift */; };
 		666DE4E7289DA5C7008CB8E0 /* MarkdownExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 666DE4E6289DA5C7008CB8E0 /* MarkdownExportTests.swift */; };
 		66A815C22876D1A3005A8499 /* ContentViewMenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */; };
+		66C9179928B38DD5007B4636 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = 66C9179828B38DD5007B4636 /* Markdown */; };
+		66C917A028B38E4F007B4636 /* MarkdownImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C9179F28B38E4F007B4636 /* MarkdownImporter.swift */; };
 		66D77CA128351612004D03E9 /* NSMenu+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D77CA028351612004D03E9 /* NSMenu+Beam.swift */; };
 		66E618E928635B5100D06A15 /* WebKitManualDownloadProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */; };
 		66F9AEBE283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */; };
@@ -2179,6 +2181,7 @@
 		666DE4DF289DA4C7008CB8E0 /* MarkdownExporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkdownExporter.swift; sourceTree = "<group>"; };
 		666DE4E6289DA5C7008CB8E0 /* MarkdownExportTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkdownExportTests.swift; sourceTree = "<group>"; };
 		66A815BC2876D1A3005A8499 /* ContentViewMenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentViewMenuItem.swift; sourceTree = "<group>"; };
+		66C9179F28B38E4F007B4636 /* MarkdownImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownImporter.swift; sourceTree = "<group>"; };
 		66D77CA028351612004D03E9 /* NSMenu+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMenu+Beam.swift"; sourceTree = "<group>"; };
 		66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebKitManualDownloadProxy.swift; sourceTree = "<group>"; };
 		66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseOverAndSelectionMessageHandler.swift; sourceTree = "<group>"; };
@@ -3506,6 +3509,7 @@
 				878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */,
 				33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
+				66C9179928B38DD5007B4636 /* Markdown in Frameworks */,
 				873528C127354295005E7CBC /* INI in Frameworks */,
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
 				33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */,
@@ -4464,6 +4468,7 @@
 				418171BB2581107C00317ED8 /* Lexer.swift */,
 				418171BC2581107C00317ED8 /* Parser.swift */,
 				666DE4DF289DA4C7008CB8E0 /* MarkdownExporter.swift */,
+				66C9179F28B38E4F007B4636 /* MarkdownImporter.swift */,
 				96E4CF71258E59F400D6DE22 /* BeamTextVisitor.swift */,
 			);
 			path = Markdown;
@@ -8293,6 +8298,7 @@
 				0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */,
 				BFEA487C286A1519007A73BD /* AsyncHTTPClient */,
 				8A7AA041289960A700B271E2 /* FaviconFinder */,
+				66C9179828B38DD5007B4636 /* Markdown */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -8435,6 +8441,7 @@
 				0564F51127E8BC6600F969CA /* XCRemoteSwiftPackageReference "JJLISO8601DateFormatter" */,
 				BFEA487B286A1519007A73BD /* XCRemoteSwiftPackageReference "async-http-client" */,
 				8A7AA040289960A700B271E2 /* XCRemoteSwiftPackageReference "FaviconFinder" */,
+				66C9179728B38DD4007B4636 /* XCRemoteSwiftPackageReference "swift-markdown" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -9736,6 +9743,7 @@
 				A0C7D120283636D1002EDF4C /* BeamTableCellTwoTextFieldView.swift in Sources */,
 				A5614804287C5EC4005F921A /* SplashScreenWindow.swift in Sources */,
 				DA5C63F1274D0873001F7CEF /* AppDelegate+LinkDB.swift in Sources */,
+				66C917A028B38E4F007B4636 /* MarkdownImporter.swift in Sources */,
 				A05D81692828D5950082455D /* DropDownButton.swift in Sources */,
 				BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */,
 				A52596E9273EB8AC004B27E4 /* OnboardingImportsView.swift in Sources */,
@@ -12312,6 +12320,14 @@
 				kind = branch;
 			};
 		};
+		66C9179728B38DD4007B4636 /* XCRemoteSwiftPackageReference "swift-markdown" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-markdown.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		873528BF27354295005E7CBC /* XCRemoteSwiftPackageReference "ini" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bouke/ini.git";
@@ -12443,6 +12459,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */;
 			productName = OAuthSwift;
+		};
+		66C9179828B38DD5007B4636 /* Markdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 66C9179728B38DD4007B4636 /* XCRemoteSwiftPackageReference "swift-markdown" */;
+			productName = Markdown;
 		};
 		873528C027354295005E7CBC /* INI */ = {
 			isa = XCSwiftPackageProductDependency;

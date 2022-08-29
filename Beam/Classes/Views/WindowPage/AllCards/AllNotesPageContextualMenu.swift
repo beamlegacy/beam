@@ -126,6 +126,11 @@ final class AllNotesPageContextualMenu {
         ))
         importMenu.addItem(.separator())
         importMenu.addItem(NSMenuItem(
+            title: "Markdown file...",
+            action: #selector(markdownImport),
+            keyEquivalent: ""
+        ))
+        importMenu.addItem(NSMenuItem(
             title: "Roam file...",
             action: #selector(roamImport),
             keyEquivalent: ""
@@ -176,6 +181,10 @@ final class AllNotesPageContextualMenu {
                 finalizeAllMenuItems(subItems)
             }
         }
+    }
+
+    @objc private func markdownImport() {
+        AppDelegate.main.importMarkdown(self)
     }
 
     @objc private func roamImport() {
