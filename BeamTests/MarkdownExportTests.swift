@@ -7,14 +7,15 @@ final class MarkdownExportTests: XCTestCase {
     func testEmptyNoteExport() throws {
         let note = try BeamNote(title: "An empty note")
         XCTAssert(note.isEntireNoteEmpty())
-        XCTAssertThrowsError(try MarkdownExporter.export(of: note))
+        let export = MarkdownExporter.export(of: note)
+        XCTAssertTrue(export.contents.isEmpty)
     }
 
     func testSimpleNoteExport() throws {
         let note = try BeamNote(title: "Simple note")
         note.addChild(BeamElement("Some content"))
 
-        let export = try MarkdownExporter.export(of: note)
+        let export = MarkdownExporter.export(of: note)
         XCTAssertFalse(export.contents.isEmpty)
         XCTAssertEqual(export.contents, "Some content")
 
@@ -48,7 +49,7 @@ final class MarkdownExportTests: XCTestCase {
 
         note.addChild(list)
 
-        let export2 = try MarkdownExporter.export(of: note)
+        let export2 = MarkdownExporter.export(of: note)
         XCTAssertFalse(export2.contents.isEmpty)
         XCTAssertEqual(
             export2.contents,
@@ -75,7 +76,7 @@ final class MarkdownExportTests: XCTestCase {
 
         let note = try XCTUnwrap(BeamNote.fetch(title: "Capture"))
 
-        let export = try MarkdownExporter.export(of: note)
+        let export = MarkdownExporter.export(of: note)
         XCTAssertFalse(export.contents.isEmpty)
         XCTAssertEqual(
             export.contents,
