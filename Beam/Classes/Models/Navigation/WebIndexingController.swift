@@ -34,9 +34,7 @@ class WebIndexingController {
 
         self.indexingQueue.async { [weak self] in
             var finalTabInfo = tabIndexingInfo
-            let htmlNoteAdapter = HtmlNoteAdapter(url)
-            finalTabInfo.cleanedTextContentForClustering = htmlNoteAdapter.convertForClustering(html: readabilityResult.content)
-
+            finalTabInfo.cleanedTextContentForClustering = readabilityResult.textContentForClustering
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 self.signpost.begin("indexTab")

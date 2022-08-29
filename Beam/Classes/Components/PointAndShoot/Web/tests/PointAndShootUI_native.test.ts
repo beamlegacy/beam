@@ -156,7 +156,7 @@ test("test shootBounds payload", () => {
   expect(pointRect.y).toEqual(block.offsetTop)
   expect(pointRect.width).toEqual(mostRightChild.offsetLeft + mostRightChild.width - mostLeftChild.offsetLeft)
   expect(pointRect.height).toEqual(34 - mostTopChild.offsetTop)
-  expect(payload.html).toEqual("<p><b>MEAN</b> (<a href=\"/wiki/MongoDB\">MongoDB</a></p>")
+  expect(payload.beamElements).toMatchInlineSnapshot("undefined")
 })
 
 test("exclude shootBounds payload with empty html and text", () => {
@@ -853,65 +853,5 @@ describe("overflow / clipping handling", () => {
     parent.style.setProperty("clip-path", "none")
     const { rect: area2 } = pnsNativeUI.elementBounds(parent)
     expect(area2).toMatchObject(expected)
-  })
-})
-
-describe("parseElementBasedOnStyles", () => {
-  const element = new BeamHTMLElementMock("div")
-  const { native } = pointAndShootTestBed()
-
-  beforeEach(() => {
-    element.offsetLeft = 10
-    element.offsetTop = 10
-    element.width = 100
-    element.height = 100
-    element.style = new CSSStyleDeclaration()
-  })
-
-  test("background: url('logo.png'); should convert element to img tag", () => {
-    element.style.setProperty("background", "url('logo.png')")
-
-    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, native.win)
-    expect(parsedElement.tagName).toBe("img")
-    expect(parsedElement.getAttribute("src")).toBe("logo.png")
-  })
-
-
-  test("background: url('logo.png') no-repeat center center; should convert element to img tag", () => {
-    element.style.setProperty("background", "url('logo.png') no-repeat center center")
-
-    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, native.win)
-    expect(parsedElement.tagName).toBe("img")
-    expect(parsedElement.getAttribute("src")).toBe("logo.png")
-  })
-
-  test("background-image: url(data:image:gif;base64.....); style should convert to img tag", () => {
-    element.style.setProperty("background", "url(data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7)")
-
-    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, native.win)
-    expect(parsedElement.tagName).toBe("img")
-    expect(parsedElement.getAttribute("src")).toBe("data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7")
-  })
-
-
-  test("background: rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box; style should not convert", () => {
-    element.style.setProperty("background", "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box")
-
-    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, native.win)
-    expect(parsedElement.tagName).toBe("div")
-  })
-
-  test("background-image: none; style should not convert", () => {
-    element.style.setProperty("background-image", "none")
-
-    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, native.win)
-    expect(parsedElement.tagName).toBe("div")
-  })
-
-  test("'background-image: linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)' style should not convert", () => {
-    element.style.setProperty("background", "linear-gradient(to left, #333, #333 50%, #eee 75%, #333 75%)")
-
-    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, native.win)
-    expect(parsedElement.tagName).toBe("div")
   })
 })

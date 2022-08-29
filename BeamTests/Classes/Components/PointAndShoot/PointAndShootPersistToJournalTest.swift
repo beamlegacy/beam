@@ -29,7 +29,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>paragraph1</p>",
+            beamElements: [BeamElement("paragraph1")],
             animated: false
         )
         // Point
@@ -42,45 +42,10 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
 
         // Add shoot to note
         let group2 = PointAndShoot.ShootGroup(id: "id", targets: [paragraphTarget], text: "placeholder string", href: page.url!.absoluteString, shapeCache: .init())
-        let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-        self.pns.addShootToNote(targetNote: page.activeNote, group: group2, completion: {
-            XCTAssertEqual(self.pns.collectedGroups.count, 1)
-            XCTAssertEqual(self.pns.collectedGroups.first?.targets.count, 1)
-            XCTAssertEqual(self.pns.collectedGroups.first?.targets.first?.html, paragraphTarget.html)
-            expectation.fulfill()
-        })
-        wait(for: [expectation], timeout: 10.0)
-    }
-
-    func testShootToNoteEmptyHTML() throws {
-        guard let page = self.testPage else {
-            XCTFail("test page not found")
-            return
-        }
-        let paragraphTarget = PointAndShoot.Target(
-            id: UUID().uuidString,
-            rect: NSRect(x: 101, y: 102, width: 301, height: 302),
-            mouseLocation: NSPoint(x: 201, y: 202),
-            html: """
-
-            """,
-            animated: false
-        )
-
-        // Add shoot to note
-        let group2 = PointAndShoot.ShootGroup(
-            id: "id",
-            targets: [paragraphTarget],
-            text: "",
-            href: "https://welcometour.beamapp.co/capture/",
-            shapeCache: .init()
-        )
-        let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-        self.pns.addShootToNote(targetNote: page.activeNote, group: group2, completion: {
-            XCTAssertEqual(self.pns.collectedGroups.count, 0)
-            expectation.fulfill()
-        })
-        wait(for: [expectation], timeout: 10.0)
+        self.pns.addShootToNote(targetNote: page.activeNote, group: group2)
+        XCTAssertEqual(self.pns.collectedGroups.count, 1)
+        XCTAssertEqual(self.pns.collectedGroups.first?.targets.count, 1)
+        XCTAssertEqual(self.pns.collectedGroups.first?.targets.first?.beamElements, paragraphTarget.beamElements)
     }
 
     func testTwoShootsToTwoDifferentCards() throws {
@@ -93,7 +58,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>paragraph1</p>",
+            beamElements: [BeamElement("paragraph1")],
             animated: false
         )
         // Point
@@ -106,19 +71,15 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
 
         // Add shoot to note
         let group = PointAndShoot.ShootGroup(id: "id", targets: [paragraphTarget], text: "placeholder string", href: page.url!.absoluteString, shapeCache: .init())
-        let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-        self.pns.addShootToNote(targetNote: page.activeNote, group: group, completion: {
-            XCTAssertEqual(self.pns.collectedGroups.count, 1)
-            expectation.fulfill()
-        })
-        wait(for: [expectation], timeout: 10.0)
+        self.pns.addShootToNote(targetNote: page.activeNote, group: group)
+        XCTAssertEqual(self.pns.collectedGroups.count, 1)
 
         // Add Paragraph 2 to Note 2
         let paragraphTarget2: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>paragraph2</p>",
+            beamElements: [BeamElement("paragraph2")],
             animated: false
         )
         // Point
@@ -131,12 +92,8 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
 
         // Add shoot to note
         let group2 = PointAndShoot.ShootGroup(id: "id", targets: [paragraphTarget2], text: "placeholder string", href: page.url!.absoluteString, shapeCache: .init())
-        let expectation2 = XCTestExpectation(description: "point and shoot addShootToNote")
-        self.pns.addShootToNote(targetNote: page.activeNote, group: group2, completion: {
-            XCTAssertEqual(self.pns.collectedGroups.count, 2)
-            expectation2.fulfill()
-        })
-        wait(for: [expectation2], timeout: 10.0)
+        self.pns.addShootToNote(targetNote: page.activeNote, group: group2)
+        XCTAssertEqual(self.pns.collectedGroups.count, 2)
     }
 
     func testAddingToNotExistingNote() throws {
@@ -148,7 +105,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>paragraph1</p>",
+            beamElements: [BeamElement("paragraph1")],
             animated: false
         )
         // Point
@@ -168,14 +125,10 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
 
         // Try to add to note existent note
         let group = PointAndShoot.ShootGroup(id: "id", targets: [paragraphTarget], text: "placeholder string", href: page.url!.absoluteString, shapeCache: .init())
-        let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-        self.pns.addShootToNote(targetNote: try BeamNote(title: "fake non existent note title"), group: group, completion: {
-            // Expect it to still work.
-            XCTAssertEqual(self.pns.collectedGroups.count, 1)
-            XCTAssertEqual(self.pns.collectedGroups.first?.targets.count, 1)
-            XCTAssertEqual(self.pns.collectedGroups.first?.targets.first?.html, paragraphTarget.html)
-            expectation.fulfill()
-        })
-        wait(for: [expectation], timeout: 10.0)
+        self.pns.addShootToNote(targetNote: try BeamNote(title: "fake non existent note title"), group: group)
+        // Expect it to still work.
+        XCTAssertEqual(self.pns.collectedGroups.count, 1)
+        XCTAssertEqual(self.pns.collectedGroups.first?.targets.count, 1)
+        XCTAssertEqual(self.pns.collectedGroups.first?.targets.first?.beamElements, paragraphTarget.beamElements)
     }
 }

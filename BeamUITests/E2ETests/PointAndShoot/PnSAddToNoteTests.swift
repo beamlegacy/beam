@@ -192,23 +192,10 @@ class PnSAddToNoteTests: BaseTest {
             webView.openDestinationNote()
             XCTAssertTrue(waitForCountValueEqual(timeout: noteView.implicitWaitTimeout, expectedNumber: 1, elementQuery: noteView.getImageNotesElementsQuery()), "Image note didn't appear within \(noteView.implicitWaitTimeout) seconds")
         }
-        //Blocked by https://linear.app/beamapp/issue/BE-4180/empty-node-item-is-added-to-a-note-when-capturing-svg-with-no-height
-        /*step ("THEN SVG image without weight and height is succeffully captured"){
-            let itemToCollect = webView.image("nowidthheightsvgimage")
-            pnsView.addToTodayNote(itemToCollect)
-            noteView = webView.openDestinationNote()
-            XCTAssertTrue(waitForCountValueEqual(timeout: noteView!.implicitWaitTimeout, expectedNumber: 2, elementQuery: noteView.getImageNotesElementsQuery()), "Image note didn't appear within \(noteView.implicitWaitTimeout) seconds")
-        }*/
-        
-        step ("THEN partially SVG image is failed to be captured"){
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            let itemToCollect = webView.image("partialsvgimage")
-            _ = itemToCollect.waitForExistence(timeout: pnsView.minimumWaitTimeout)
-            XCTAssertTrue(pnsView.addToTodayNote(itemToCollect).getSendBugReportButtonElement().waitForExistence(timeout: pnsView.minimumWaitTimeout))
-        }
     }
 
-    func testFailedToCollect() {
+    // When example content found that triggers this condition enable UItest: https://linear.app/beamapp/issue/BE-5203/find-failed-to-collect-example-for-ui-test
+    /*func testFailedToCollect() {
         testrailId("C1063")
         // If this test is flakey, make sure browsing collect is disabled first
         step ("When the journal is first loaded the note is empty by default"){
@@ -233,7 +220,7 @@ class PnSAddToNoteTests: BaseTest {
             XCTAssertEqual(noteNodes.count, 1)
             XCTAssertTrue(noteNodes[0].getStringValue() == emptyString || noteNodes[0].getStringValue() == "Media Player Test Page") //CI specific issue handling
         }
-    }
+    }*/
     
     func testCollectFullPage() {
         testrailId("C1064")
@@ -266,12 +253,12 @@ class PnSAddToNoteTests: BaseTest {
         let helper = BeamUITestsHelper(journalView.app)
         let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
         let parentElement = pnsView.staticText(searchText).firstMatch
-        
+
         step ("GIVEN I load a test webpage"){
             uiMenu.resizeWindowLandscape()
             uiMenu.loadUITestPage1()
         }
-        
+
         step ("When I click and drag between start and end of full text"){
             webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
         }
@@ -281,14 +268,14 @@ class PnSAddToNoteTests: BaseTest {
             pnsView.pressOptionButtonFor(seconds: 1)
             XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
         }
-        
+
         step ("Then I see Shoot Frame Selection on scroll up and down"){
             webView.scrollDown()
             XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
             webView.scrollUp()
             XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
         }
-        
+
         testrailId("C1142")
         step ("And I see Shoot Frame Selection remained after zoom in"){
             pnsView.zoomIn(numberOfTimes: 3)
@@ -312,6 +299,7 @@ class PnSAddToNoteTests: BaseTest {
             XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(0))
         }
     }
+
     
     func testFramePositionPlacementOnPoint() {
         testrailId("C927")
@@ -348,7 +336,15 @@ class PnSAddToNoteTests: BaseTest {
                     pnsView.zoomOut(numberOfTimes: 3)
                     XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
                 }
+        
+            // Scroll page
+            /*step (""){
             
+        }("TBD")
+            webView.scrollDown()
+            pnsView.assertFramePositions(searchText: searchText, identifier: identifierForPositionsAssertion)*/
+            
+            // Resize window
                 step ("And point Frame is available after resizing"){
                     uiMenu.resizeWindowPortrait()
                     center!.hover()

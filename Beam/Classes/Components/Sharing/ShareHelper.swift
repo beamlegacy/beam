@@ -12,32 +12,30 @@ import Combine
 class ShareHelper {
 
     private let baseURL: URL?
-    private let htmlNoteAdapter: HtmlNoteAdapter?
     private let openWebURL: (URL) -> Void
     private var imageCancellables = Set<AnyCancellable>()
     private let pasteboard: NSPasteboard
 
-    init(_ baseURL: URL? = nil, htmlNoteAdapter: HtmlNoteAdapter? = nil, pasteboard: NSPasteboard = .general, handleOpenURL: @escaping (URL) -> Void) {
+    init(_ baseURL: URL? = nil, pasteboard: NSPasteboard = .general, handleOpenURL: @escaping (URL) -> Void) {
         self.baseURL = baseURL
-        self.htmlNoteAdapter = htmlNoteAdapter
         self.openWebURL = handleOpenURL
         self.pasteboard = pasteboard
     }
 
-    func shareContent(_ html: String, originURL: URL, service: ShareService) async {
+    func shareContent(_ elements: [BeamElement], originURL: URL, service: ShareService) async {
         switch service {
         case .copy:
-            if html.isEmpty {
+            if elements.isEmpty {
                 await setContentToPasteboard(ReadShareableContent(text: originURL.absoluteString))
-            } else if let content = await getShareableContent(from: html) {
-                await setContentToPasteboard(content)
+            } else if let shareContent = getShareableContent(from: elements) {
+                await setContentToPasteboard(shareContent)
             } else {
                 Logger.shared.logError("Unable to get any content to share", category: .pointAndShoot)
             }
         default:
-            if html.isEmpty, let url = service.buildURL(with: nil, url: originURL) {
+            if elements.isEmpty, let url = service.buildURL(with: nil, url: originURL) {
                 await handleURL(url)
-            } else if let content = await getShareableContent(from: html),
+            } else if let content = getShareableContent(from: elements),
                       let url = service.buildURL(with: content.text, url: content.url ?? originURL) {
                 await handleURL(url)
             } else {
@@ -60,17 +58,7 @@ class ShareHelper {
         var elements: [BeamElement]?
     }
 
-    private func getShareableContent(from html: String) async -> ReadShareableContent? {
-        let elements: [BeamElement] = await withCheckedContinuation { continuation in
-            guard let htmlNoteAdapter = htmlNoteAdapter else {
-                continuation.resume(returning: [])
-                return
-            }
-            htmlNoteAdapter.convert(html: html) { (beamElements: [BeamElement]) in
-                continuation.resume(returning: beamElements)
-            }
-        }
-
+    private func getShareableContent(from elements: [BeamElement]) -> ReadShareableContent? {
         guard elements.count > 0 else { return nil }
         var texts: [String] = []
         var url: URL?
@@ -125,8 +113,8 @@ class ShareHelper {
     }
 
     private func getImageFromElementKind(_ elementKind: ElementKind) -> NSImage? {
-        guard case let .image(imageID, _, _) = elementKind, let htmlNoteAdapter = htmlNoteAdapter,
-           let imageRecord = try? htmlNoteAdapter.visitor.fileStorage?.fetch(uid: imageID) else {
+        guard case let .image(imageID, _, _) = elementKind,
+              let imageRecord = try? BeamFileDBManager.shared?.fetch(uid: imageID) else {
             return nil
         }
         return NSImage(data: imageRecord.data)
