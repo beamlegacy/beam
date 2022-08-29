@@ -2199,10 +2199,28 @@ Readability.prototype = {
       dir: this._articleDir,
       content: this._serializer(articleContent),
       textContent: textContent,
+      textContentForClustering: this.textContentForClustering(articleContent),
       length: textContent.length,
       excerpt: metadata.excerpt,
       siteName: metadata.siteName || this._articleSiteName
     }
+  },
+
+
+  textContentForClustering: function (articleContent) {
+    const alternateCleanedText = []
+
+    const paragraphs = Array.from(articleContent.querySelectorAll("p"))
+
+    paragraphs.forEach(paragraph => {
+      const myText = paragraph.textContent.trim()
+
+      if (!alternateCleanedText.includes(myText)) {
+        alternateCleanedText.push(myText)
+      }
+    })
+
+    return alternateCleanedText
   }
 }
 

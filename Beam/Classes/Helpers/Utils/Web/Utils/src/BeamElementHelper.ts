@@ -86,69 +86,6 @@ export class BeamElementHelper {
   }
 
   /**
-   * If element is background image, convert element to image element
-   *
-   * @static
-   * @param {BeamElement} element
-   * @param {BeamWindow<any>} win
-   * @return {*}  {BeamHTMLElement}
-   * @memberof BeamElementHelper
-   */
-  static parseBackgroundImageToImageElement(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
-    const backgroundImageURL = this.getBackgroundImageURL(element, win)
-    if (!backgroundImageURL) {
-      return null
-    }
-
-    const img = win.document.createElement("img")
-    img.setAttribute("src", backgroundImageURL)
-    return img
-  }
-
-  /**
-   * Converts an element src with srcset to an img element with the currentSrc as src.
-   *
-   * @static
-   * @param {BeamElement} element
-   * @param {BeamWindow<any>} win
-   * @return {*}  {BeamHTMLElement}
-   * @memberof BeamElementHelper
-   */
-  static parseImageForSrcset(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
-    const hasSrcset = Boolean(element.srcset)
-    const currentSrc = element.currentSrc
-    if (!hasSrcset || !currentSrc) {
-      return null
-    }
-
-    const img = win.document.createElement("img")
-    img.setAttribute("src", currentSrc)
-    return img
-  }
-
-  /**
-   * If element has anchor tag as parent, wrap element in anchor tag
-   *
-   * @static
-   * @param {BeamElement} element
-   * @param {BeamWindow<any>} win
-   * @return {*}  {BeamHTMLElement}
-   * @memberof BeamElementHelper
-   */
-  static wrapElementInAnchor(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
-    const parentOfType = BeamElementHelper.hasParentOfType(element, "A")
-    
-    if (!parentOfType) {
-      return null
-    }
-
-    const elementClode = element.cloneNode(true)
-    const wrapper = win.document.createElement("a")
-    wrapper.setAttribute("href", parentOfType.href)
-    wrapper.appendChild(elementClode)
-    return wrapper
-  }
-  /**
    * Returns parent of node type. Maximum allowed recursive depth is 10
    *
    * @static
@@ -184,26 +121,11 @@ export class BeamElementHelper {
       // parse the element for embedding.
       const embedElement = embedHelper.parseElementForEmbed(element)
       if (embedElement) {
+        console.log("isEmbeddable")
         return embedElement
       }
     }
 
-    const convertedToImage = BeamElementHelper.parseBackgroundImageToImageElement(element, win)
-    if (convertedToImage) {
-      return convertedToImage
-    }
-
-    const parsedForSRCSET = BeamElementHelper.parseImageForSrcset(element, win)
-    if (parsedForSRCSET) {
-      return parsedForSRCSET
-    }
-
-    const wrappedInAnchor = BeamElementHelper.wrapElementInAnchor(element, win)
-    
-    if (wrappedInAnchor) {
-      return wrappedInAnchor
-    }
-    
     return element as BeamHTMLElement
   }
 

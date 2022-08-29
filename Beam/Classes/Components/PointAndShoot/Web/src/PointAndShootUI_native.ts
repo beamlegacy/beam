@@ -13,6 +13,9 @@ import {
 } from "@beam/native-beamtypes"
 import {BeamElementHelper, BeamRectHelper, BeamEmbedHelper, PointAndShootHelper} from "@beam/native-utils"
 import {dequal as isDeepEqual} from "dequal"
+import { BeamStew } from "@beamgroup/beamstew"
+import { Options } from "@beamgroup/beamstew/dist/src/ParserTypes"
+import { JsonBeamElement } from "@beamgroup/beamstew/dist/src/lib/BeamElement"
 
 export class PointAndShootUI_native implements PointAndShootUI {
   native
@@ -57,18 +60,19 @@ export class PointAndShootUI_native implements PointAndShootUI {
 
     const targets = shootTargets.map(({ id, element }) => {
       const {element: boundsElement, rect} = this.elementBounds(element)
+      const elements = this.toJsonBeamElements(boundsElement)
       return { 
         id, 
-        rect, 
-        html: this.getHtml(boundsElement),
+        rect,
+        elements: JSON.stringify(elements),
         text: (<BeamHTMLElement>boundsElement).innerText ?? ""
       }
     }).filter(target => {
-      const hasEmptyHTML = target.html.trim().length == 0
+      const hasNoBeamElements = target.elements.length == 0
       const hasEmptyText = target.text.trim().length == 0
       // When no rect is found or
       // When no html and text is found
-      if (Boolean(target.rect) == false || (hasEmptyHTML && hasEmptyText)) {
+      if (Boolean(target.rect) == false || (hasNoBeamElements && hasEmptyText)) {
         // Remove group from swift
         this.native.sendMessage("dismissShootGroup", { id: target.id })
       }
@@ -88,10 +92,15 @@ export class PointAndShootUI_native implements PointAndShootUI {
   }
 
   selectPayload = {}
-  private getHtml(element: BeamHTMLElement | BeamElement): string {
+  private toJsonBeamElements(element: BeamHTMLElement | BeamElement): JsonBeamElement[] {
     const { win } = this.native
-    const parsedElement = BeamElementHelper.parseElementBasedOnStyles(element, win)
-    return parsedElement.outerHTML
+    const options: Options = {
+      embedRegex: new RegExp("__EMBEDPATTERN__")
+    }
+    // TODO: Move parseElementBasedOnStyles into parser lib.
+    const toParseElement = BeamElementHelper.parseElementBasedOnStyles(element, win)
+    const results = new BeamStew(win, options).parse(toParseElement as any)
+    return results
   }
 
   selectBounds(rangeGroups: BeamRangeGroup[]): void {
@@ -158,7 +167,6 @@ export class PointAndShootUI_native implements PointAndShootUI {
         // add each rect to the targets array
         return {
           id: `${id}-${rectIndex}`,
-          html: "",
           rect: {
             x: rangeRect.x,
             y: rangeRect.y,
@@ -169,7 +177,8 @@ export class PointAndShootUI_native implements PointAndShootUI {
       })
 
       const rangeContents = range.cloneContents()
-      rects.push({ id, rectData, html: this.rangeToHtml(range), text: rangeContents.textContent })
+      const elements = this.rangeToJsonBeamElements(range)
+      rects.push({ id, rectData, elements: JSON.stringify(elements), text: rangeContents.textContent })
     })
     
     const payload = { select: rects }
@@ -191,12 +200,16 @@ export class PointAndShootUI_native implements PointAndShootUI {
     this.native.sendMessage("isTypingOnWebView", { isTypingOnWebView })
   }
 
-  private rangeToHtml(range: BeamRange) {
-    return Array.prototype.reduce.call(
-      range.cloneContents().childNodes,
-      (result, node) => result + (node.outerHTML || node.nodeValue),
-      ""
-    )
+  private rangeToJsonBeamElements(range: BeamRange): JsonBeamElement[] {
+    const { win } = this.native
+    const options: Options = {
+      embedRegex: new RegExp("__EMBEDPATTERN__")
+    }
+
+    const templateEl = win.document.createElement("template")
+    templateEl.appendChild(range.cloneContents())
+    const elements = new BeamStew(win, options).parse(templateEl)
+    return elements
   }
 
   /**

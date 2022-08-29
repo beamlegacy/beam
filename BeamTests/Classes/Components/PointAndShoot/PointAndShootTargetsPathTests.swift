@@ -27,7 +27,7 @@ class PointAndShootTargetsPathTests: PointAndShootTest {
                     height: 20
                 ),
                 mouseLocation: NSPoint(x: 0, y: 0),
-                html: "<p></p>",
+                beamElements: [BeamElement("")],
                 animated: false
             )
             targets.append(target)

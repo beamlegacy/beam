@@ -23,7 +23,7 @@ class PointAndShootPointingTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         // Point

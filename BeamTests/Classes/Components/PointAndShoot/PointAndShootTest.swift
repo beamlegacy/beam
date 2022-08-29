@@ -71,16 +71,32 @@ class DownloadManagerMock: DownloadManager {
     func clearAllFileDownloads() {}
     func clearFileDownload(_ download: DownloadItem) -> DownloadItem? { return nil }
 
-    func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping ((Data, String)?) -> Void) {
+    func downloadImages(_ urls: [URL], pageUrl: URL, completion: @escaping ([DownloadManagerResult]) -> Void) {
+        let headers = ["Referer": pageUrl.absoluteString]
+        self.downloadURLs(urls, headers: headers) { results in
+            let filteredResults: [DownloadManagerResult] = results.compactMap({ result in
+                guard case .binary(let data, _, _) = result,
+                      data.count > 0 else {
+                    Logger.shared.logError("Failed downloading Image from \(urls)", category: .pointAndShoot)
+                    return nil
+                }
+                return result
+            })
+            completion(filteredResults)
+        }
+    }
+
+
+    func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping (DownloadManagerResult?) -> Void) {
         let headers = ["Referer": pageUrl.absoluteString]
         self.downloadURL(src, headers: headers) { result in
-            guard case .binary(let data, let mimeType, _) = result,
+            guard case .binary(let data, _, _) = result,
                   data.count > 0 else {
                 Logger.shared.logError("Failed downloading Image from \(src)", category: .pointAndShoot)
                 completion(nil)
                 return
             }
-            completion((data, mimeType))
+            completion(result)
         }
     }
     func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
@@ -146,7 +162,7 @@ class PointAndShootTest: XCTestCase {
                     height: faker.number.randomInt()
                 ),
                 mouseLocation: NSPoint(x: faker.number.randomInt(), y: faker.number.randomInt()),
-                html: "<p>\(faker.hobbit.quote())</p>",
+                beamElements: [BeamElement(faker.hobbit.quote())],
                 animated: false
             )
             targets.append(target)

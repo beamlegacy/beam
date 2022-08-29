@@ -66,7 +66,7 @@ extension TabGroupingManager: BeamDocumentSource {
             _ = webView.load(URLRequest(url: url))
         }
         Task {
-            await shareHelper.shareContent("", originURL: url, service: shareService)
+            await shareHelper.shareContent([], originURL: url, service: shareService)
         }
     }
 
