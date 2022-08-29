@@ -20,7 +20,7 @@ export class PNSWindowMock extends BeamWindowMock<MessageHandlers> {
 
   pns: PointAndShoot
 
-  constructor(doc: BeamDocumentMock = new BeamDocumentMock(), location: BeamLocation = new BeamLocationMock()) {
+  constructor(doc: BeamDocumentMock = new BeamDocumentMock(), location: BeamLocation = new BeamLocationMock({ href: "http://www.example.com"})) {
     super(doc, location)
   }
 

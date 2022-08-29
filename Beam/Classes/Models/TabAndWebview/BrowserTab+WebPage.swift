@@ -177,7 +177,6 @@ extension BrowserTab: WebPage {
                     id: UUID().uuidString,
                     rect: self?.webView.frame ?? .zero,
                     mouseLocation: mouseLocation,
-                    html: "",
                     animated: true
                 )
 

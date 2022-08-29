@@ -89,17 +89,31 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         }
     }
 
-    func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping ((Data, String)?) -> Void) {
+    func downloadImage(_ url: URL, pageUrl: URL, completion: @escaping (DownloadManagerResult?) -> Void) {
         let headers = ["Referer": pageUrl.absoluteString]
-        self.downloadURLs([src], headers: headers) { results in
-            if let result = results.first {
-                guard case .binary(let data, let mimeType, _) = result,
-                      data.count > 0 else {
-                    completion(nil)
-                    return
+        self.downloadURLs([url], headers: headers) { results in
+            let downloadedResults: [DownloadManagerResult] = results.compactMap({ result in
+                guard case .binary(let data, _, _) = result, data.count > 0 else {
+                    return nil
                 }
-                completion((data, mimeType))
-            }
+                return result
+            })
+
+            completion(downloadedResults.first)
+        }
+    }
+
+    func downloadImages(_ urls: [URL], pageUrl: URL, completion: @escaping ([DownloadManagerResult]) -> Void) {
+        let headers = ["Referer": pageUrl.absoluteString]
+        self.downloadURLs(urls, headers: headers) { results in
+            let downloadedResults: [DownloadManagerResult] = results.compactMap({ result in
+                guard case .binary(let data, _, _) = result, data.count > 0 else {
+                    return nil
+                }
+                return result
+            })
+
+            completion(downloadedResults)
         }
     }
 

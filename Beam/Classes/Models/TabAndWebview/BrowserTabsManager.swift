@@ -7,7 +7,6 @@
 
 import Foundation
 import Combine
-import SwiftSoup
 import BeamCore
 
 protocol BrowserTabsManagerDelegate: AnyObject {

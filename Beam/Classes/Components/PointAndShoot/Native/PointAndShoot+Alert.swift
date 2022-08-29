@@ -13,11 +13,10 @@ extension PointAndShoot {
     /// Triggers an alert modal to report collect failing
     /// - Parameters:
     ///   - group: ShootGroup to be collected
-    ///   - elements: Array of collected BeamElements
     ///   - message: optional message to provide additional information
-    func showAlert(_ group: ShootGroup, _ elements: [BeamElement], _ message: String = "", completion: @escaping () -> Void) {
+    func showAlert(_ group: ShootGroup, _ message: String = "", completion: @escaping () -> Void) {
         guard PreferencesManager.showsCollectFeedbackAlert else {
-            self.sendFeedback(group, elements, message)
+            self.sendFeedback(group, message)
             completion()
             return
         }
@@ -55,7 +54,7 @@ extension PointAndShoot {
 
             if response == .OK {
                 // When .OK user consents to sending feedback.
-                self.sendFeedback(group, elements, message)
+                self.sendFeedback(group, message)
                 PreferencesManager.isCollectFeedbackEnabled = true
             } else {
                 // else don't send feedback
@@ -66,18 +65,14 @@ extension PointAndShoot {
         }
     }
 
-    func generateReport(_ group: ShootGroup, _ elements: [BeamElement], _ message: String = "") -> String {
+    func generateReport(_ group: ShootGroup, _ message: String = "") -> String {
+        let elements = group.beamElements()
         return """
 
         ## ShootGroup
          - href: \(group.href)
          - noteInfo: \(group.noteInfo)
          - numberOfElements: \(group.numberOfElements)
-
-        ## HTML
-        ```Html
-        \(group.html())
-        ```
 
         ## [BeamElement]
         \(elements.count) elements collected
@@ -90,7 +85,7 @@ extension PointAndShoot {
         """
     }
 
-    func sendFeedback(_ group: ShootGroup, _ elements: [BeamElement], _ message: String = "") {
+    func sendFeedback(_ group: ShootGroup, _ message: String = "") {
         guard Configuration.env != .test else { return }
         guard PreferencesManager.isCollectFeedbackEnabled else { return }
         var host = group.href
@@ -99,7 +94,7 @@ extension PointAndShoot {
         }
 
         let title = "Point and Shoot failed on: \(host)"
-        let report = self.generateReport(group, elements, message)
+        let report = self.generateReport(group, message)
         let eventId = SentrySDK.capture(message: title + report)
         let userFeedback = UserFeedback(eventId: eventId)
         userFeedback.comments = "no comments submitted..."

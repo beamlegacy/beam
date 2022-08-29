@@ -24,7 +24,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             id: id,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         var group = PointAndShoot.ShootGroup(id: "point-uuid", targets: [initialTarget], text: "placeholder text", href: "https://pnshref.co", shapeCache: .init())
@@ -33,7 +33,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             id: id,
             rect: NSRect(x: 345601, y: 10802, width: 301, height: 302),
             mouseLocation: NSPoint(x: 212301, y: 999902),
-            html: "<p>wow such paragraph</p>",
+            beamElements: [BeamElement("wow such paragraph")],
             animated: false
         )
 
@@ -48,7 +48,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             id: id,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         var group = PointAndShoot.ShootGroup(id: "point-uuid", targets: [initialTarget], text: "placeholder text", href: "https://pnshref.co", shapeCache: .init())
@@ -57,7 +57,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             id: id,
             rect: NSRect(x: 345601, y: 10802, width: 301, height: 302),
             mouseLocation: NSPoint(x: 212301, y: 999902),
-            html: "<p>wow such paragraph</p>",
+            beamElements: [BeamElement("wow such paragraph")],
             animated: false
         )
 
@@ -74,7 +74,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             id: id,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         var group = PointAndShoot.ShootGroup(id: "point-uuid", targets: [initialTarget], text: "placeholder text", href: "https://pnshref.co", shapeCache: .init())
@@ -83,7 +83,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 345601, y: 10802, width: 301, height: 302),
             mouseLocation: NSPoint(x: 212301, y: 999902),
-            html: "<p>wow such paragraph</p>",
+            beamElements: [BeamElement("wow such paragraph")],
             animated: false
         )
 
@@ -100,7 +100,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             id: id,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         var group = PointAndShoot.ShootGroup(id: "point-uuid", targets: [initialTarget], text: "placeholder text", href: "https://pnshref.co", shapeCache: .init())
@@ -109,7 +109,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
             id: id,
             rect: NSRect(x: 345601, y: 10802, width: 301, height: 302),
             mouseLocation: NSPoint(x: 212301, y: 999902),
-            html: "<p>wow such paragraph</p>",
+            beamElements: [BeamElement("wow such paragraph")],
             animated: false
         )
 
@@ -118,7 +118,7 @@ class PointAndShootShootGroupTest: PointAndShootTest {
         let updatedTarget = group.targets[0]
 
         // matching ids should not update the html
-        XCTAssertEqual(updatedTarget.html, initialTarget.html)
+        XCTAssertEqual(updatedTarget.beamElements, initialTarget.beamElements)
     }
 
 }
