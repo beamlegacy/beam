@@ -186,6 +186,38 @@ extension AppDelegate {
 
     // MARK: Markdown
 
+    @IBAction func importMarkdown(_ sender: Any) {
+        let openPanel = NSOpenPanel()
+        openPanel.allowsMultipleSelection = true
+        openPanel.canChooseDirectories = false
+        openPanel.canCreateDirectories = false
+        openPanel.canChooseFiles = true
+        openPanel.allowedContentTypes = [BeamUniformTypeIdentifiers.plainTextType]
+        // TODO: i18n
+        openPanel.title = loc("Choose your Markdown file")
+        openPanel.begin { [weak openPanel] result in
+            guard result == .OK, let selectedURLs = openPanel?.urls else { return }
+
+            let importer = MarkdownImporter()
+
+            var failedImports: UInt = .zero
+
+            for url in selectedURLs {
+                do {
+                    try importer.import(contents: url)
+                } catch {
+                    Logger.shared.logError("Error importing to Markdown: \(error)", category: .general)
+                    failedImports += 1
+                }
+            }
+
+            if failedImports != .zero {
+                let errorMessage = loc("Failed to import \(failedImports) \(failedImports > 1 ? "notes" : "note").")
+                UserAlert.showError(message: errorMessage)
+            }
+        }
+    }
+
     @IBAction func exportToMarkdown(_ sender: Any) {
         exportNotesToMarkdown([])
     }
