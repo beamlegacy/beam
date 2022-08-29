@@ -20,6 +20,10 @@
     "name": "@beam/native-collect"
   },
   {
+    "location": "Beam/Classes/Components/Readability/Web",
+    "name": "@beam/native-readability"
+  },
+  {
     "location": "Beam/Classes/Helpers/Utils/Web/BeamTypes",
     "name": "@beam/native-beamtypes"
   },

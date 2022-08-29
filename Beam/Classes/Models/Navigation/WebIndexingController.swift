@@ -167,7 +167,7 @@ extension WebIndexingController {
             delayedRead.cancel(sendFirstRead: true)
             delayedReadOperations.removeValue(forKey: tabID)
         }
-        Readability.read(webView) { [weak self] result in
+        Readability.read(tab) { [weak self] result in
             switch result {
             case let .failure(error):
                 Logger.shared.logError("Error while indexing navigation: \(error)", category: .webIndexing)
@@ -184,7 +184,7 @@ extension WebIndexingController {
                     // In the meantime, if the tab receives another navigation, or the webView changes URL,
                     // we cancel the task and just use whatever we had at first read.
                     guard let self = self else { return }
-                    let delayedReadOperation = DelayedReadWebViewOperation(url: url, webView: webView, delay: self.betterContentReadDelay,
+                    let delayedReadOperation = DelayedReadWebViewOperation(url: url, tab: tab, delay: self.betterContentReadDelay,
                                                                            firstRead: read, finishBlock: finishBlock)
                     self.delayedReadOperations[tabID] = delayedReadOperation
                     delayedReadOperation.start()
@@ -220,17 +220,17 @@ private final class DelayedReadWebViewOperation: Operation {
     private let url: URL
     private let firstRead: Readability?
     private let finishBlock: (Readability?) -> Void
-    private weak var webView: WKWebView?
+    private weak var tab: BrowserTab?
     private let delay: TimeInterval
 
     override var isAsynchronous: Bool {
         true
     }
 
-    init(url: URL, webView: WKWebView, delay: TimeInterval, firstRead: Readability?, finishBlock: @escaping (Readability?) -> Void) {
+    init(url: URL, tab: BrowserTab, delay: TimeInterval, firstRead: Readability?, finishBlock: @escaping (Readability?) -> Void) {
         self.url = url
         self.firstRead = firstRead
-        self.webView = webView
+        self.tab = tab
         self.delay = delay
         self.finishBlock = finishBlock
         super.init()
@@ -256,17 +256,17 @@ private final class DelayedReadWebViewOperation: Operation {
     override func main() {
         guard !isFinished else { return }
         hasFinishedAlready = true
-        guard !isCancelled, let webView = webView, webView.url == url else {
+        guard !isCancelled, let tab = tab, tab.webView.url == url else {
             callFinishBlock(with: firstRead)
             return
         }
-        Readability.read(webView) { [weak self] result2 in
+        Readability.read(tab) { [weak self] result2 in
             var readabilityResultToUse = self?.firstRead
             switch result2 {
             case let .failure(error):
                 Logger.shared.logError("Error while indexing web page on 2nd read: \(error), fallback to first read", category: .webIndexing)
             case let .success(read2):
-                if read2 != self?.firstRead, let webViewURL = webView.url, webViewURL == self?.url {
+                if read2 != self?.firstRead, let webViewURL = tab.webView.url, webViewURL == self?.url {
                     readabilityResultToUse = read2
                 }
             }
