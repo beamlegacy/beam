@@ -5,6 +5,8 @@ enum BeamUniformTypeIdentifiers {
 
     static let passwordsExportType: UTType = .commaSeparatedText
 
+    static let plainTextType: UTType = .plainText
+
     private static let supportedSuperTypes: [UTType] = [
         .audiovisualContent,
         .image,
