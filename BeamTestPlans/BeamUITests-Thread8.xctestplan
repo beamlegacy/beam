@@ -107,9 +107,15 @@
         "SearchOnNoteTests",
         "SearchOnNoteTests\/testSearchResultsCounter()",
         "SearchOnNoteTests\/testSearchViewAppearace()",
+        "SearchOnPDFTests",
+        "SearchOnWebTests",
+        "SignInAutocompleteTests",
+        "SignOutTests",
+        "SignUpAutocompleteTests",
+        "SigninTests",
+        "SlashMenuTests",
+        "SyncTests",
         "TabGroupCaptureToANoteMenuTests",
-        "TabGroupInOmniboxTests",
-        "TabGroupSharingFromNoteTests",
         "TabGroupSharingTests"
       ],
       "target" : {
