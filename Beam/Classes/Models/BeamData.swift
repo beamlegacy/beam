@@ -842,10 +842,14 @@ enum BeamDataError: Error {
 
 // MARK: - Tab Grouping
 extension BeamData: TabGroupingManagerDelegate {
-    func allOpenTabsForTabGroupingManager(_ tabGroupingManager: TabGroupingManager) -> [BrowserTab] {
+    func allOpenTabsForTabGroupingManager(_ tabGroupingManager: TabGroupingManager, inGroup: TabGroup? = nil) -> [BrowserTab] {
         let tabsManagers = AppDelegate.main.windows.map { $0.state.browserTabsManager }
         return tabsManagers.reduce(into: [BrowserTab]()) { partialResult, tabsManager in
-            partialResult.append(contentsOf: tabsManager.tabs)
+            if let inGroup = inGroup {
+                partialResult.append(contentsOf: tabsManager.tabs(inGroup: inGroup))
+            } else {
+                partialResult.append(contentsOf: tabsManager.tabs)
+            }
         }
     }
 }

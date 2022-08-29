@@ -21,7 +21,7 @@ class TabGroupingManagerTests: XCTestCase {
     private var tabGroupingDelegate = TestTabGroupingDelegate()
     class TestTabGroupingDelegate: TabGroupingManagerDelegate {
         fileprivate var tabs: [BrowserTab] = []
-        func allOpenTabsForTabGroupingManager(_ tabGroupingManager: TabGroupingManager) -> [BrowserTab] {
+        func allOpenTabsForTabGroupingManager(_ tabGroupingManager: TabGroupingManager, inGroup: TabGroup?) -> [BrowserTab] {
             tabs
         }
     }

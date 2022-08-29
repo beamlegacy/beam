@@ -602,7 +602,7 @@ extension BrowserTabsManager {
         return clusteringTabs + forcedTabs
     }
 
-    private func tabs(inGroup group: TabGroup) -> [BrowserTab] {
+    func tabs(inGroup group: TabGroup) -> [BrowserTab] {
         let tabsIDs = tabsIds(inGroup: group)
         return tabs.filter { tabsIDs.contains($0.id) }
     }
