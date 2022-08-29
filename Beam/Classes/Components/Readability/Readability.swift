@@ -21,6 +21,7 @@ struct Readability: Codable, Equatable {
 
     var siteName: String = ""
     var textContent: String = ""
+    var textContentForClustering: [String] = []
     var dir: Direction = .ltr
     var title: String = ""
     var htmlTitle: String = ""
@@ -46,6 +47,7 @@ struct Readability: Codable, Equatable {
                 var read = Readability()
                 read.siteName = str(r["siteName"])
                 read.textContent = str(r["textContent"])
+                read.textContentForClustering = strArray(r["textContentForClustering"])
                 read.dir = str(r["dir"]) == "ltor" ? .ltr : .rtl
                 read.title = str(r["title"])
                 read.metaTitle = str(r["metaTitle"])
@@ -70,6 +72,10 @@ struct Readability: Codable, Equatable {
                 getResults(.failure(.unknown))
             }
         }
+    }
+
+    private static func strArray(_ k: Any?) -> [String] {
+        k as? [String] ?? []
     }
 
     private static func str(_ k: Any?) -> String {

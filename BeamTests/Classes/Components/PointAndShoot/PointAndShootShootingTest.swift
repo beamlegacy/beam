@@ -25,7 +25,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
 
@@ -40,7 +40,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         // Point
@@ -56,7 +56,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: self.pns.mouseLocation,
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         // Point
@@ -73,7 +73,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: self.pns.mouseLocation,
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         // Point
@@ -94,7 +94,7 @@ class PointAndShootShootingTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: self.pns.mouseLocation,
-            html: "<p>Pointed text</p>",
+            beamElements: [BeamElement("Pointed text")],
             animated: false
         )
         let url = "https://pnsTest.co"
@@ -113,13 +113,9 @@ class PointAndShootShootingTest: PointAndShootTest {
         }
 
         if let group = self.pns.activeShootGroup {
-            let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
-            self.pns.addShootToNote(targetNote: testPage.activeNote, group: group, completion: {
-                XCTAssertEqual(self.testPage?.events.count, 2)
-                XCTAssertEqual(self.testPage?.events[1], "addContent \(url)")
-                expectation.fulfill()
-            })
-            wait(for: [expectation], timeout: 10.0)
+            self.pns.addShootToNote(targetNote: testPage.activeNote, group: group)
+            XCTAssertEqual(self.testPage?.events.count, 2)
+            XCTAssertEqual(self.testPage?.events[1], "addContent \(url)")
         }
     }
 }

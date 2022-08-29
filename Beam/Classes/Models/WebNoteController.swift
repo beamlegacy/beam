@@ -58,6 +58,12 @@ class WebNoteController: Encodable, Decodable {
         BeamData.shared.todaysNote
     }
 
+    // Checks preferences to allow embedding of content
+    private var allowConvertToEmbed: Bool {
+        PreferencesManager.embedContentPreference == PreferencesEmbedOptions.always.id ||
+        PreferencesManager.embedContentPreference == PreferencesEmbedOptions.only.id
+    }
+
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Inits
@@ -280,8 +286,7 @@ extension WebNoteController {
         for link in first.outLinks {
             if let url = URL(string: link) {
                 let canEmbed = EmbedContentBuilder().canBuildEmbed(for: url)
-                let disabledConvertingLinksToEmbed = HtmlVisitor.allowConvertToEmbed == false
-                if canEmbed && disabledConvertingLinksToEmbed {
+                if canEmbed && (allowConvertToEmbed == false) {
                     return false
                 }
             }

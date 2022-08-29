@@ -22,7 +22,7 @@ class PointAndShootTargetTest: PointAndShootTest {
         id: UUID().uuidString,
         rect: NSRect(x: 101, y: 102, width: 301, height: 302),
         mouseLocation: NSPoint(x: 201, y: 202),
-        html: "<h1>Target</h1>",
+        beamElements: [BeamElement("Target")],
         animated: false
     )
 
@@ -96,7 +96,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         // translateAndScaleTarget shouldn't change the location of the windowFrame.
@@ -131,7 +131,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         // translateAndScaleTarget shouldn't change the location of the windowFrame.
@@ -146,7 +146,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 201, y: 202 - scrollDeltaWindow, width: 301, height: 302),
             mouseLocation: NSPoint(x: 301, y: 215),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         XCTAssertNotNil(translatedTarget)
@@ -178,7 +178,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         XCTAssertNil(translatedWindowTarget)
@@ -198,7 +198,7 @@ class PointAndShootTargetTest: PointAndShootTest {
                 height: 302
             ),
             mouseLocation: NSPoint(x: 201  + iFrame.x, y: 202 + iFrame.y - scrollDeltaFrame),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         XCTAssertNotNil(translatedTarget)
@@ -232,7 +232,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         // translateAndScaleTarget shouldn't change the location of the windowFrame.
@@ -254,7 +254,7 @@ class PointAndShootTargetTest: PointAndShootTest {
                 height: 302
             ),
             mouseLocation: NSPoint(x: 201 + iFrame.x, y: 202 + iFrame.y - scrollDeltaWindow - scrollDeltaFrame),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         XCTAssertNotNil(translatedTarget)
@@ -283,7 +283,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101 + iFrame.x, y: 102 + iFrame.y, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201 + iFrame.x, y: 202 + iFrame.y),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         XCTAssertNotNil(translatedTarget)
@@ -316,7 +316,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 301, y: 302, width: 301, height: 302),
             mouseLocation: NSPoint(x: 401, y: 402),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         XCTAssertNotNil(translatedTarget)
@@ -358,7 +358,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         let translatedTarget_iFrameA = self.pns.translateAndScaleTargetIfNeeded(target_iFrameA, iFrameA.href)
@@ -366,7 +366,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 201, y: 202, width: 301, height: 302),
             mouseLocation: NSPoint(x: 301, y: 302),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         XCTAssertNotNil(translatedTarget_iFrameA)
@@ -378,7 +378,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
             mouseLocation: NSPoint(x: 201, y: 202),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         let translatedTarget_iFrameC = self.pns.translateAndScaleTargetIfNeeded(target_iFrameC, iFrameC.href)
@@ -386,7 +386,7 @@ class PointAndShootTargetTest: PointAndShootTest {
             id: UUID().uuidString,
             rect: NSRect(x: 301, y: 302, width: 301, height: 302),
             mouseLocation: NSPoint(x: 401, y: 402),
-            html: "<h1>Target</h1>",
+            beamElements: [BeamElement("Target")],
             animated: false
         )
         XCTAssertNotNil(translatedTarget_iFrameC)

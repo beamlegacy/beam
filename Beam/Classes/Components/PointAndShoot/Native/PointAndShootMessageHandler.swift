@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+import CloudKit
 
 enum PointAndShootMessages: String, CaseIterable {
     case pointAndShoot_pointBounds
@@ -59,11 +60,13 @@ class PointAndShootMessageHandler: SimpleBeamMessageHandler {
 
                 for bounds in selectBounds {
                     if let id = bounds["id"] as? String,
-                       let html = bounds["html"] as? String,
+                       let json = bounds["elements"] as? String,
+                       // Note: Image BeamElements contain a placeholder source UUID because the file isn't downloaded yet
+                       let beamElements = try? JSONDecoder().decode([BeamElement].self, from: json.data(using: .utf8)!),
                        let text = bounds["text"] as? String,
                        let targetData = bounds["rectData"] as? [[String: AnyObject]] {
 
-                        if let targets = selectBoundsToTargets(targetData, webPage, href, html, animated: false) {
+                        if let targets = selectBoundsToTargets(targetData, webPage, href, beamElements, animated: false) {
                             pointAndShoot.select(id, targets, text, href)
                         }
                     }
@@ -95,19 +98,22 @@ class PointAndShootMessageHandler: SimpleBeamMessageHandler {
     }
 
     func pointBoundsToTargets(_ bounds: [String: AnyObject], _ webPage: WebPage, _ href: String, animated: Bool) -> PointAndShoot.Target? {
+        let rectObject = bounds["rect"] as AnyObject
+        let json = bounds["elements"] as? String ?? ""
+
         guard let pointAndShoot = webPage.pointAndShoot,
               let id = bounds["id"] as? String else {
             Logger.shared.logDebug("Bounds payload can't be unwrapped")
             return nil
         }
 
-        let rectObject = bounds["rect"] as AnyObject
-        let html = bounds["html"] as? String ?? ""
+        // Note: Image BeamElements contain a placeholder source UUID because the file isn't downloaded yet
+        let beamElements = try? JSONDecoder().decode([BeamElement].self, from: json.data(using: .utf8)!)
         let rect = jsToRect(jsArea: rectObject)
-        return pointAndShoot.createTarget(id, rect, html, href, animated)
+        return pointAndShoot.createTarget(id, rect, beamElements ?? [], href, animated)
     }
 
-    func selectBoundsToTargets(_ bounds: [[String: AnyObject]], _ webPage: WebPage, _ href: String, _ html: String, animated: Bool) -> [PointAndShoot.Target]? {
+    func selectBoundsToTargets(_ bounds: [[String: AnyObject]], _ webPage: WebPage, _ href: String, _ beamElements: [BeamElement], animated: Bool) -> [PointAndShoot.Target]? {
         guard let pointAndShoot = webPage.pointAndShoot else {
             Logger.shared.logDebug("Bounds payload can't be unwrapped")
             return nil
@@ -117,7 +123,7 @@ class PointAndShootMessageHandler: SimpleBeamMessageHandler {
             let rectObject = element["rect"] as AnyObject
             let rect = jsToRect(jsArea: rectObject)
             if let id = element["id"] as? String {
-                return pointAndShoot.createTarget(id, rect, html, href, animated)
+                return pointAndShoot.createTarget(id, rect, beamElements, href, animated)
             }
             return nil
         }

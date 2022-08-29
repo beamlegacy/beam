@@ -48,6 +48,7 @@
     "@beam/native-beamtypes": "1.0.0",
     "@beam/native-testmock": "1.0.0",
     "@beam/native-utils": "1.0.0",
+    "@beamgroup/beamstew": "2.1.0",
     "debounce": "^1.2.1",
     "dequal": "^2.0.2"
   }

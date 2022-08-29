@@ -1,6 +1,5 @@
 import Foundation
 import BeamCore
-import SwiftSoup
 
 struct PointAndShootError: LocalizedError {
     var errorDescription: String?
@@ -145,7 +144,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         }
 
         // Dismiss group when we won't we creating or updating any ShootGroup
-        let hasContent = !target.html.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !text.isEmpty
+        let hasContent = !target.beamElements.isEmpty || !text.isEmpty
         guard (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil, hasContent else {
             dismissShootGroup(id: groupId, href: href)
             return
@@ -291,64 +290,86 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     ///   - withSourceBullet: If shoot should be inserted underneath a source bullet
     ///   - completion:
     ///   - noteText: optional text to add underneath the shoot quote
-    func addShootToNote(targetNote: BeamNote, withNote noteText: String? = nil, group: ShootGroup, withSourceBullet: Bool = true, completion: @escaping () -> Void) {
+    func addShootToNote(targetNote: BeamNote, withNote noteText: String? = nil, group: ShootGroup, withSourceBullet: Bool = true) {
+        let hasContent = !group.beamElements().isEmpty || !group.text.isEmpty
+
         guard let page = self.page, let sourceUrl = page.url else {
             Logger.shared.logError("Expected webpage to be defined when adding shoot to note", category: .pointAndShoot)
-            return completion()
+            return
+        }
+        guard hasContent || group.fullPageCollect else {
+            Logger.shared.logError("Expected either beamElements or text content to be defined when adding shoot to note", category: .pointAndShoot)
+            return
         }
 
         // Make group mutable
         var shootGroup = group
-        // Convert html to BeamText
-        let html = shootGroup.html()
-        let hasContent = !html.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !shootGroup.text.isEmpty
-        guard hasContent || shootGroup.fullPageCollect else {
-            Logger.shared.logError("Expected either html or text content to be defined when adding shoot to note", category: .pointAndShoot)
-            return completion()
+
+        // Add source url to bullets
+        guard let elements = downloadShootGroupImages(group: shootGroup) else {
+            return
         }
-        let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page?.downloadManager, page.fileStorage)
-        htmlNoteAdapter.convert(html: html) { [self] (beamElements: [BeamElement]) in
-            // exit early when failing to collect correctly
-            // When the shootGroup contains html but no beamElements, show alert
-            if beamElements.isEmpty && !html.isEmpty {
-                self.showAlert(shootGroup, beamElements, "failed to collect html elements", completion: {
-                    shootGroup.setConfirmation(.failure)
-                    self.showShootConfirmation(group: shootGroup)
-                    completion()
-                })
-                return
-            }
 
-            let elements = beamElements.map({ element -> BeamElement in
-                element.query = page.originalQuery
-
-                guard element.kind == .bullet else { return element }
-                element.text.addAttributes([.source(SourceMetadata(origin: .remote(sourceUrl), title: page.title))], to: element.text.wholeRange)
-                return element
+        if elements.isEmpty && !shootGroup.fullPageCollect {
+            self.showAlert(shootGroup, "failed to collect html elements", completion: {
+                shootGroup.setConfirmation(.failure)
+                self.showShootConfirmation(group: shootGroup)
             })
-            // Update shootgroup information
-            shootGroup.numberOfElements = elements.count
-            shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
-            // Set Destination note to the current note
-            page.setDestinationNote(targetNote, rootElement: targetNote)
-
-            // Append NoteText last collected element
-            if let noteText = noteText, !noteText.isEmpty, let lastElement = elements.last {
-                let note = self.createNote(noteText)
-                lastElement.addChild(note)
-            }
-
-            // Add collected elements to Note. Optionally add with source bullet
-            page.addContent(content: elements, with: withSourceBullet ? sourceUrl : nil, reason: .pointandshoot)
-
-            // Add sourceUrl to note sources
-            self.updateScores(targetNote: targetNote)
-
-            // Show confirmation UI
-            shootGroup.setConfirmation(.success)
-            self.showShootConfirmation(group: shootGroup)
-            completion()
+            return
         }
+
+        // Update shootgroup information
+        shootGroup.numberOfElements = elements.count
+        shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
+        // Set Destination note to the current note
+        page.setDestinationNote(targetNote, rootElement: targetNote)
+
+        // Append NoteText last collected element
+        if let noteText = noteText, !noteText.isEmpty, let lastElement = elements.last {
+            let note = self.createNote(noteText)
+            lastElement.addChild(note)
+        }
+
+        // Add collected elements to Note. Optionally add with source bullet
+        page.addContent(content: elements, with: withSourceBullet ? sourceUrl : nil, reason: .pointandshoot)
+
+        // Add sourceUrl to note sources
+        self.updateScores(targetNote: targetNote)
+
+        // Show confirmation UI
+        shootGroup.setConfirmation(.success)
+        showShootConfirmation(group: shootGroup)
+    }
+
+
+    static func imageSize(data: Data, type: String, htmlSize: CGSize?) -> CGSize? {
+        switch type {
+        case "image/svg+xml":
+            return htmlSize
+        default:
+            guard let image = NSImage(data: data), let rep = image.representations.first else {
+                Logger.shared.logError("Unable to get image size from an image of type \(type) using NSImage", category: .pointAndShoot)
+                return htmlSize
+            }
+            return CGSize(width: rep.pixelsWide, height: rep.pixelsHigh)
+        }
+    }
+
+    /// Gets a base64 image from a src string
+    /// `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAoGCBYTExcVFRUYGBcZGxsaGhoaG....`
+    /// - Parameter src: full data src string
+    /// - Returns: returns base64 string and mimeType, returns nil if data can't be parsed correctly
+    func getBase64(_ src: String) -> (base64: Data, mimeType: String)? {
+        let array = src.split(separator: ",").map(String.init)
+        guard array.count == 2,
+              let firstItem = array.first,
+              let secondItem = array.last,
+              let base64 = Data(base64Encoded: secondItem) else {
+            return nil
+        }
+
+        let mimeType = firstItem.replacingOccurrences(of: "data:", with: "", options: [.anchored])
+        return (base64, mimeType)
     }
 
     func addSocialTitleToNote(noteController: WebNoteController, note: BeamNote, sourceUrl: URL, shootGroup: ShootGroup) {
@@ -374,12 +395,16 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     func shareShootToService(group: ShootGroup, service: ShareService) {
         guard let page = self.page, let sourceUrl = page.url else { return }
         Task { @MainActor in
-            let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, page.downloadManager, page.fileStorage)
-            let helper = ShareHelper(sourceUrl, htmlNoteAdapter: htmlNoteAdapter) { [weak self] url in
+            let helper = ShareHelper(sourceUrl) { [weak self] url in
                 let webView = self?.page?.createNewWindow(URLRequest(url: url), page.webView.configuration, windowFeatures: ShareWindowFeatures(for: service), setCurrent: true)
                 _ = webView?.load(URLRequest(url: url))
             }
-            await helper.shareContent(group.html(), originURL: sourceUrl, service: service)
+
+            guard let elements = downloadShootGroupImages(group: group) else {
+                return
+            }
+
+            await helper.shareContent(elements, originURL: sourceUrl, service: service)
             if service != .copy {
                 cancelShoot()
             }
@@ -439,6 +464,67 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         )
         // Update daily note score
         NoteScorer.shared.incrementCaptureToCount(noteId: targetNote.id)
+    }
+
+    private func downloadShootGroupImages(group: ShootGroup) -> [BeamElement]? {
+        guard let page = self.page, let sourceUrl = page.url else {
+            Logger.shared.logError("Expected webpage to be defined when adding shoot to note", category: .pointAndShoot)
+            return nil
+        }
+
+        return group.beamElements().map({ topLevelElement -> BeamElement in
+            var allElements = [topLevelElement]
+            allElements.append(contentsOf: topLevelElement.flatElements)
+
+            for element in allElements {
+                // Set query to original page query
+                element.query = page.originalQuery
+
+                if element.kind == .bullet {
+                    element.text.addAttributes([.source(SourceMetadata(origin: .remote(sourceUrl), title: page.title))], to: element.text.wholeRange)
+                } else if case .image(_, let sourceMetadata, var displayInfo) = element.kind {
+                    guard let originalContent = sourceMetadata?.originalContent else {
+                        break
+                    }
+
+                    // Handle image source when it contains URL
+                    if let imageUrl = URL(string: originalContent) {
+                        page.downloadManager?.downloadImages([imageUrl], pageUrl: sourceUrl, completion: { results in
+                            guard let result = results.first else { return }
+                            if case .binary(let data, let mimeType, let actualUrl) = result,
+                               let fileID = try? BeamFileDBManager.shared?.insert(name: actualUrl.lastPathComponent, data: data, type: mimeType) {
+                                if let image = NSImage(data: data), let rep = image.representations.first {
+                                    displayInfo = MediaDisplayInfos(height: rep.pixelsHigh, width: rep.pixelsWide, displayRatio: displayInfo.displayRatio)
+                                }
+
+                                element.kind = .image(fileID, origin: sourceMetadata, displayInfos: displayInfo)
+
+                            }
+                        })
+
+                        // Handle image source when it contains base64
+                    } else if let (base64, mimeType) = getBase64(originalContent) {
+                        let fileName = UUID().uuidString
+                        if let fileID = try? BeamFileDBManager.shared?.insert(name: fileName, data: base64, type: mimeType) {
+                            // try? BeamFileDBManager.shared?.addReference(fromNote: targetNote.id, element: element.id, to: fileID)
+                            element.kind = .image(fileID, origin: sourceMetadata, displayInfos: displayInfo)
+                        }
+
+                        // Handle image source when it contains SVG
+                    } else if originalContent.starts(with: "<svg") {
+                        let fileName = UUID().uuidString
+                        let mimeType = "image/svg+xml"
+
+                        if let fileID = try? BeamFileDBManager.shared?.insert(name: fileName, data: originalContent.asData, type: mimeType) {
+                            // try? BeamFileDBManager.shared?.addReference(fromNote: targetNote.id, element: element.id, to: fileID)
+                            element.kind = .image(fileID, origin: sourceMetadata, displayInfos: displayInfo)
+                        }
+                    }
+                }
+            }
+
+            return topLevelElement
+        })
     }
 
     /// Clears all stored Point and Shoot session data

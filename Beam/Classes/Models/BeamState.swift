@@ -8,7 +8,6 @@
 import Foundation
 import Combine
 import WebKit
-import SwiftSoup
 import BeamCore
 import Sentry
 
