@@ -59,9 +59,11 @@ struct Readability: Codable, Equatable {
 
                 //let t1 = now.distance(to: BeamDate.now) - t0
                 //Logger.shared.logDebug("Extraction time: \(t0)s / indexing \(t1)s")
-            } else if res is NSNull {
+            } else if res is NSNull, let title = webView.title {
                 // readability script sometimes doesn't find anything.
-                getResults(.success(nil))
+                var read = Readability()
+                read.title = title
+                getResults(.success(read))
             } else if let e = err {
                 getResults(.failure(.javascript(e)))
             } else {
