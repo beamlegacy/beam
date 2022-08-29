@@ -14,6 +14,7 @@ struct AdvancedPreferencesMisc: View {
     @State private var includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBox
     @State private var enableOmnibeams = PreferencesManager.enableOmnibeams
     @State private var showClusteringSettingsMenu = PreferencesManager.showClusteringSettingsMenu
+    @State private var enableFallbackReadabilityParser = PreferencesManager.enableFallbackReadabilityParser
 
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {
@@ -41,6 +42,12 @@ struct AdvancedPreferencesMisc: View {
                 Text("Clustering Settings menu")
             } content: {
                 EnableClusteringSettingsCheckbox
+            }
+            Settings.Row(hasDivider: true) {
+                Text("Readability Fallback Parser")
+            } content: {
+                EnableFallbackReadabilityParser
+                Settings.SubtitleLabel("On sites where Readability can't find any parsable content, the fallback parser will grab the text content from a short list of html elements and description meta tags")
             }
             Settings.Row {
                 Text("Collect Feedback:")
@@ -102,6 +109,17 @@ struct AdvancedPreferencesMisc: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onChange(of: showClusteringSettingsMenu) {
                 PreferencesManager.showClusteringSettingsMenu = $0
+            }
+    }
+
+    private var EnableFallbackReadabilityParser: some View {
+        return Toggle(isOn: $enableFallbackReadabilityParser) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onChange(of: enableFallbackReadabilityParser) {
+                PreferencesManager.enableFallbackReadabilityParser = $0
             }
     }
 
