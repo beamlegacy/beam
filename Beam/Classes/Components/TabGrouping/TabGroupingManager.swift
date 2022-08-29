@@ -18,7 +18,7 @@ struct TabForcedGroup {
 }
 
 protocol TabGroupingManagerDelegate: AnyObject {
-    func allOpenTabsForTabGroupingManager(_ tabGroupingManager: TabGroupingManager) -> [BrowserTab]
+    func allOpenTabsForTabGroupingManager(_ tabGroupingManager: TabGroupingManager, inGroup: TabGroup?) -> [BrowserTab]
 }
 
 class TabGroupingManager {
@@ -150,8 +150,8 @@ extension TabGroupingManager {
         Logger.shared.logInfo("Tab Group '\(group.title ?? "\(group.id)")' \(group.collapsed ? "collapsed" : "expanded")", category: .tabGrouping)
     }
 
-    func allOpenTabs() -> [BrowserTab] {
-        delegate?.allOpenTabsForTabGroupingManager(self) ?? []
+    func allOpenTabs(inGroup: TabGroup? = nil) -> [BrowserTab] {
+        delegate?.allOpenTabsForTabGroupingManager(self, inGroup: inGroup) ?? []
     }
 
     @MainActor
