@@ -99,4 +99,31 @@ class RightClickTabMenuTests: BaseTest {
         }
     }
     
+    func testRefreshTab() {
+        testrailId("C1073")
+        
+        let testPage = UITestPagePasswordManager()
+        let fakeData = "Fake Data"
+        step("GIVEN I open a web page"){
+            launchApp().waitForJournalViewToLoad()
+            uiMenu.loadUITestPagePassword()
+            XCTAssertTrue(testPage.isPasswordPageOpened())
+        }
+
+        step("WHEN I enter data in page"){
+            testPage.clickInputField(.username).typeSlowly(fakeData, everyNChar: 2)
+        }
+
+        step("AND I refresh tab"){
+            XCTAssertEqual(testPage.getInputValue(.username), fakeData)
+            webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.refreshTab)
+            XCTAssertTrue(webView.waitForWebViewToLoad())
+        }
+        
+        step("THEN tab is correctly refreshed"){
+            XCTAssertEqual(webView.getNumberOfTabs(), 1) // no new tab created
+            XCTAssertTrue(testPage.isPasswordPageOpened())
+            XCTAssertEqual(testPage.getInputValue(.username), emptyString)
+        }
+    }
 }
