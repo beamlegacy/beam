@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 extension PointAndShoot {
     /// A group of blocks that can be associated to a Note as a whole and at once.
@@ -46,11 +47,12 @@ extension PointAndShoot {
         var showRect: Bool
         /// ShootGroup is used for a full page collect, defaults to false
         var fullPageCollect: Bool
-        func html() -> String {
-            targets.reduce("", {
-                $1.html.count > $0.count ? $1.html : $0
+        func beamElements() -> [BeamElement] {
+            targets.reduce([], {
+                $1.beamElements
             })
         }
+
         /// Plain text string of the targeted content
         var text: String
         private(set) var groupPath: CGPath = CGPath(rect: .zero, transform: nil)

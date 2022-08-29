@@ -103,7 +103,13 @@ class ImageNode: ResizableNode {
         }
 
         imageName = imageRecord.name
-        imageSourceURL = URL(string: self.element.text.text)
+
+        if case .image(_, origin: let sourceMetadata, displayInfos: _) = self.element.kind,
+           case .remote(let url) = sourceMetadata?.origin {
+            imageSourceURL = url
+        } else {
+            imageSourceURL = URL(string: self.element.text.text)
+        }
 
         contentsPadding = NSEdgeInsets(top: 0, left: contentsPadding.left + 4, bottom: isCollapsed ? 2 : 14, right: 4)
 

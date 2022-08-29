@@ -17,6 +17,10 @@ public enum SourceMetadataError: Error {
 /// referencing the page url of where it's collected.
 public struct SourceMetadata: Codable, Equatable, Hashable {
     public var origin: OriginalLocation?
+    /// originalContent is a optional string that can contain the value of `<img src=""`
+    /// used during html parsing to store the image url, base64 string or <svg> string.
+    /// This is then used to download and store the image content.
+    public var originalContent: String?
     public var title: String?
 
     /// Type of source origin. For example external urls and local notes.
