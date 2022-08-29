@@ -92,29 +92,16 @@ private extension BeamNoteMarkdownExport {
 /// A Markdown exporter, with a single endpoint allowing to export a note to a Markdown document.
 enum MarkdownExporter {
 
-    /// Errors thrown when interacting with the ``MarkdownExporter``.
-    enum Error: Swift.Error {
-        /// Note cannot be exported since it's empty.
-        case emptyNote
-    }
-
     /// Exports a ``BeamNote`` to a ``BeamNoteMarkdownExport``.
-    /// - Parameters:
-    ///   - note: a  ``BeamNote`` instance.
-    ///   - forceFetchIfEmpty: try to fetch the note if the passed instance is empty, `false` by default.
+    /// - Parameter note: a  ``BeamNote`` instance.
     /// - Returns: A Markdown export if it succeeds, throws with appropriate otherwise.
-    static func export(of note: BeamNote, forceFetchIfEmpty: Bool = false) throws -> BeamNoteMarkdownExport {
+    static func export(of note: BeamNote) -> BeamNoteMarkdownExport {
         let noteToExport: BeamNote
-        if note.isEntireNoteEmpty() {
-            guard forceFetchIfEmpty, let fetchedNote = BeamNote.fetch(id: note.id, keepInMemory: false), !fetchedNote.isEntireNoteEmpty()
-            else {
-                throw Error.emptyNote
-            }
+        if note.isEntireNoteEmpty(), let fetchedNote = BeamNote.fetch(id: note.id, keepInMemory: false) {
             noteToExport = fetchedNote
         } else {
             noteToExport = note
         }
-        // We have a non-empty note, let's build the Markdown contents
         var document = BeamNoteMarkdownExport(title: noteToExport.title)
         for (content, attachments) in noteToExport.children.compactMap({ Self.content(for: $0, filenamePrefix: noteToExport.title) }) {
             document.append(content)
