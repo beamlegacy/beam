@@ -129,13 +129,8 @@ extension AppDelegate {
 
             func export(note: BeamNote, isExportingAllNotes: Bool = false) {
                 do {
-                    let export = try MarkdownExporter.export(of: note, forceFetchIfEmpty: true)
+                    let export = MarkdownExporter.export(of: note)
                     try export.write(to: selectedURL)
-                } catch MarkdownExporter.Error.emptyNote {
-                    Logger.shared.logError("Error exporting empty note \(note) to Markdown", category: .general)
-                    guard !isExportingAllNotes else { return }
-                    // incrementing failedCount note for errorAlerts  only if we're not exporting all notes
-                    failedCount += 1
                 } catch {
                     Logger.shared.logError("Error exporting \(note) to Markdown: \(error)", category: .general)
                     failedCount += 1
