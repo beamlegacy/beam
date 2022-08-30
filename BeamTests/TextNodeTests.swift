@@ -726,13 +726,13 @@ class TextNodeTests: XCTestCase, BeamDocumentSource {
         defer { reset() }
         let node = try createNodeWithInternalLink()
 
-        XCTAssertEqual(node.internalLinkAt(index: 15), UUID.null)
-        XCTAssertNil(node.internalLinkAt(index: 12))
-        XCTAssertNil(node.internalLinkAt(index: 29))
+        XCTAssertEqual(node.internalLink(at: 15), UUID.null)
+        XCTAssertNil(node.internalLink(at: 12))
+        XCTAssertNil(node.internalLink(at: 29))
 
-        XCTAssertTrue(node.internalLinkRangeAt(index: 15)?.attributes.contains { $0.isInternalLink } ?? false)
-        XCTAssertNil(node.internalLinkRangeAt(index: 12))
-        XCTAssertNil(node.internalLinkRangeAt(index: 29))
+        XCTAssertTrue(node.internalLinkRange(at: 15)?.attributes.contains { $0.isInternalLink } ?? false)
+        XCTAssertNil(node.internalLinkRange(at: 12))
+        XCTAssertNil(node.internalLinkRange(at: 29))
 
         BeamNote.clearFetchedNotes()
     }

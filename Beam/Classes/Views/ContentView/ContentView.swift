@@ -12,8 +12,6 @@ struct ContentView: View {
     @EnvironmentObject var windowInfo: BeamWindowInfo
 
     @State private var contentIsScrolled = false
-    
-    @State var sideNoteWidth: CGFloat = 500
     @State private var previousDragChangeTime: Date?
 
     private var isToolbarAboveContent: Bool {
@@ -63,21 +61,32 @@ struct ContentView: View {
     @ViewBuilder var sideNoteSeparator: some View {
         if state.sideNote != nil {
             Rectangle()
-                .frame(width: 4)
+                .frame(width: 3)
                 .foregroundColor(.clear)
-                .cursorOverride(.resizeLeftRight)
-                .gesture(DragGesture().onChanged { value in
-                    // This is a basic throttling mecanism to prevent to many relayout during the resize.
-                    // Too many relayout seems to cause a loop inside AttributedGraph's code
-                    if let previousDragChangeTime = previousDragChangeTime,
-                        value.time.timeIntervalSince(previousDragChangeTime) < 0.01 {
-                        return
-                    }
-                    previousDragChangeTime = value.time
-                    let newWidth = sideNoteWidth - value.translation.width
-                    sideNoteWidth = newWidth.clamp(400, maxWidthForSplitView)
-                })
+                .overlay(sideNoteSeparatorOverlay, alignment: .center)
         }
+    }
+
+    @ViewBuilder private var sideNoteSeparatorOverlay: some View {
+        Rectangle()
+            .foregroundColor(.clear)
+            .ignoresSafeArea()
+            .frame(width: 10)
+            .cursorOverride(.resizeLeftRight)
+            .background(ClickCatchingView(onRightTap: { event in
+                presentSplitViewContextMenu(at: event.locationInWindow)
+            }))
+            .gesture(DragGesture().onChanged { value in
+                // This is a basic throttling mecanism to prevent to many relayout during the resize.
+                // Too many relayout seems to cause a loop inside AttributedGraph's code
+                if let previousDragChangeTime = previousDragChangeTime,
+                   value.time.timeIntervalSince(previousDragChangeTime) < 0.01 {
+                    return
+                }
+                previousDragChangeTime = value.time
+                let newWidth = state.sideNoteWidth - value.translation.width
+                state.sideNoteWidth = newWidth.clamp(400, maxWidthForSplitView)
+            })
     }
 
     private var maxWidthForSplitView: CGFloat {
@@ -88,6 +97,9 @@ struct ContentView: View {
         return min(currentWindowWidth - minWidth, 800)
     }
 
+    //This disable the radius in split view for now, as they break the display of the NoteView after pivoting from the web
+    let enableRadius = false
+    
     var body: some View {
         ZStack {
             HStack(spacing: 0) {
@@ -95,17 +107,19 @@ struct ContentView: View {
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
                     .frame(minWidth: 800)
                     .background(BeamColor.Generic.background.swiftUI)
+                    .if(enableRadius, transform: { $0.cornerRadius(8) })
                     .edgesIgnoringSafeArea(.top)
                     .zIndex(0)
+                    .animation(.easeInOut(duration:0.2), value: state.sideNote)
                 sideNoteSeparator
+                    .transition(.opacity.animation(.easeInOut(duration: 0.2)))
+                    .animation(.easeInOut(duration: 0.2), value: state.sideNote)
                 sideNote
-                    .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
-                    .frame(width: sideNoteWidth)
+                    .transition(sideNoteTransition)
+                    .frame(width: state.sideNoteWidth)
                     .background(BeamColor.Generic.background.swiftUI)
                     .zIndex(0)
-                    .cornerRadius(10)
-                    .padding(.trailing, 4)
-                    .padding(.vertical, 4)
+                    .if(enableRadius, transform: { $0.cornerRadius(8) })
                     .edgesIgnoringSafeArea(.top)
             }
             OverlayViewCenter(viewModel: state.overlayViewModel)
@@ -115,6 +129,11 @@ struct ContentView: View {
         .environment(\.isMainWindow, windowInfo.windowIsMain)
         .environment(\.isCompactWindow, windowInfo.windowIsCompact)
         .environment(\.windowFrame, windowInfo.windowFrame)
+    }
+
+    private var sideNoteTransition: AnyTransition {
+        AnyTransition.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.2).delay(0.1)),
+                                 removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
     }
 
     private var shouldDisplayBottomBar: Bool {
@@ -127,6 +146,30 @@ struct ContentView: View {
         default:
             return true
         }
+    }
+
+    private func presentSplitViewContextMenu(at position: CGPoint) {
+        let menu = NSMenu()
+
+        let sizeControls = SplitViewSizeControlView(state: state) { [weak menu] in
+            menu?.cancelTracking()
+        }
+        let menuSizeControl = ContentViewMenuItem(title: NSLocalizedString("Resize Split View", comment: ""),
+                                                  contentView: { sizeControls })
+
+        menu.addItem(menuSizeControl)
+        menu.addItem(.fullWidthSeparator())
+        menu.addItem(withTitle: NSLocalizedString("Detach Side Note", comment: "")) { item in
+            guard let sideNote = state.sideNote else { return }
+            state.openNoteInMiniEditor(id: sideNote.id)
+            state.sideNote = nil
+        }
+
+        menu.addItem(withTitle: NSLocalizedString("Close Side Note", comment: "")) { item in
+            state.sideNote = nil
+        }
+
+        menu.popUp(positioning: nil, at: position, in: windowInfo.window?.contentView)
     }
 }
 
