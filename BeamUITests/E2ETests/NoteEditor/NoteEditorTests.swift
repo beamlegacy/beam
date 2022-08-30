@@ -144,6 +144,109 @@ class NoteEditorTests: BaseTest {
         }
     }
     
+    func testBulletFoldUnfold() {
+        testrailId("C952")
+        launchAppAndOpenFirstNote()
+
+        step("Given I create note with indented content") {
+            noteTestView.waitForTodayNoteViewToLoad()
+            noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
+            noteTestView.typeKeyboardKey(.return)
+            noteTestView.typeKeyboardKey(.tab)
+            noteTestView.app.typeText("row2")
+            noteTestView.typeKeyboardKey(.return)
+            noteTestView.typeKeyboardKey(.tab)
+            noteTestView.app.typeText("row3")
+            noteTestView.typeKeyboardKey(.return, 3)
+            noteTestView.app.typeText("row4")
+        }
+        
+        step("When I fold secondary bullet with shortcut") {
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
+            noteTestView.typeKeyboardKey(.upArrow, 2)
+            shortcutHelper.shortcutActionInvoke(action: .foldBullet)
+        }
+        
+        step("Then secondary bullet is fold") {
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
+        }
+        
+        step("When I fold main bullet with shortcut") {
+            noteTestView.typeKeyboardKey(.upArrow)
+            shortcutHelper.shortcutActionInvoke(action: .foldBullet)
+        }
+        
+        step("Then main bullet is fold") {
+            XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertFalse(noteTestView.isIndentationTriangleDisplayed(nodeIndex: 1))
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 2)
+        }
+        
+        step("When I unfold main bullet with shortcut") {
+            shortcutHelper.shortcutActionInvoke(action: .unfoldBullet)
+        }
+        
+        step("Then main bullet is unfold") {
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
+        }
+        
+        step("When I unfold secondary bullet with shortcut") {
+            noteTestView.typeKeyboardKey(.downArrow)
+            shortcutHelper.shortcutActionInvoke(action: .unfoldBullet)
+        }
+        
+        step("Then all bullets are unfold") {
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
+        }
+        
+        step("When I fold secondary bullet with click action") {
+            noteTestView.getIndentationTriangleAtNode(nodeIndex: 1).clickInTheMiddle()
+        }
+        
+        step("Then secondary bullet is fold") {
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
+        }
+        
+        step("When I fold main bullet with click action") {
+            noteTestView.getIndentationTriangleAtNode(nodeIndex: 0).clickInTheMiddle()
+        }
+        
+        step("Then main bullet is fold") {
+            XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertFalse(noteTestView.isIndentationTriangleDisplayed(nodeIndex: 1))
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 2)
+        }
+        
+        step("When I unfold main bullet with click action") {
+            noteTestView.getIndentationTriangleAtNode(nodeIndex: 0).clickInTheMiddle()
+        }
+        
+        step("Then main bullet is unfold") {
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
+        }
+        
+        step("When I unfold secondary bullet with click action") {
+            noteTestView.getIndentationTriangleAtNode(nodeIndex: 1).clickInTheMiddle()
+        }
+        
+        step("Then all bullets are unfold") {
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
+        }
+
+    }
+    
     func testTextNodeIndentationLevels() {
         testrailId("C803, C951")
         launchAppAndOpenFirstNote()
