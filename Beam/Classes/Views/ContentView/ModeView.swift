@@ -89,6 +89,7 @@ struct ModeView: View {
             .onDisappear {
                 state.stopShowingOmniboxInJournal()
             }
+            .animation(.easeInOut(duration: 0.2), value: state.sideNote)
             .animation(nil)
             .transition(.noteContentTransition(transitionModel: transitionModel))
             .accessibility(identifier: "journalView")

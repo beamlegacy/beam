@@ -79,6 +79,14 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         EmbedContentBuilder().canBuildEmbed(for: url)
     }
 
+    func showInternalLinkContextMenu(at mousePosition: CGPoint, for noteId: UUID) {
+        guard let note = BeamNote.fetch(id: noteId), let state = state else { return }
+
+        let menu = NSMenu()
+        note.configureNoteContextualMenu(menu, for: note, state: state)
+        menu.popUp(positioning: nil, at: mousePosition, in: self)
+    }
+
     // MARK: Mouse Events
     public override func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)

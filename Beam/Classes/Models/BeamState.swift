@@ -99,7 +99,15 @@ import Sentry
     @Published var destinationCardNameSelectedRange: Range<Int>?
     var keepDestinationNote = false
 
-    @Published var sideNote: BeamNote?
+    @Published var sideNote: BeamNote? {
+        didSet {
+            guard sideNote != oldValue else { return }
+            if let window = associatedWindow as? BeamWindow {
+                window.setHostingViewConstraints()
+            }
+        }
+    }
+    @Published var sideNoteWidth: CGFloat = 500
 
     var associatedWindow: NSWindow? {
         AppDelegate.main.windows.first { $0.state === self }
@@ -252,13 +260,26 @@ import Sentry
         }
     }
 
-    @discardableResult func openNoteInMiniEditor(id: UUID) -> Bool {
+    /// Open the note with the provided id in the new MiniEditorPanel, using the provided frame, or an automatic placement if no frame is provided
+    /// - Parameters:
+    ///   - id: The is of the note to open
+    ///   - frame: The frame of the panel. If no frame is provided, the panel will be located and sized based on the current BeamWindow's frame
+    /// - Returns: True if we asked the MiniEditorPanel to open. False otherwise.
+    @discardableResult func openNoteInMiniEditor(id: UUID, frame: CGRect? = nil) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
         guard let note = BeamNote.fetch(id: id), let window = associatedWindow as? BeamWindow else {
             return false
         }
 
-        MiniEditorPanel.presentMiniEditor(from: window, with: note)
+        var desiredFrame = frame
+        if desiredFrame == nil, let windowFrame = associatedWindow?.frame {
+            let currentWidth = sideNoteWidth
+            let leftPartWidth = windowFrame.size.width - currentWidth
+            let sideWindowFrame = CGRect(x: windowFrame.minX + leftPartWidth, y: windowFrame.minY, width: currentWidth, height: windowFrame.height).offsetBy(dx: 20, dy: -20)
+            desiredFrame = sideWindowFrame
+        }
+
+        MiniEditorPanel.presentMiniEditor(with: note, from: window, frame: desiredFrame)
         stopFocusOmnibox()
         return true
     }
@@ -732,6 +753,7 @@ import Sentry
         case allNotesMode
         case allNotesSortDescriptor
         case showDailyNotes
+        case sideNote
     }
 
     required public init(from decoder: Decoder) throws {
@@ -791,6 +813,10 @@ import Sentry
             }
         }
 
+        if let sideNoteId = try? container.decode(UUID.self, forKey: .sideNote) {
+            sideNote = BeamNote.fetch(id: sideNoteId)
+        }
+
         setup(data: data)
 
         if PreferencesManager.defaultWindowMode == .webTabs && hasBrowserTabs {
@@ -839,6 +865,10 @@ import Sentry
 
         try container.encode(Array(tabGroups), forKey: .tabGroups)
         try container.encode(tabGroupIDs, forKey: .tabGroupIDs)
+
+        if let sideNote = sideNote {
+            try container.encode(sideNote.id, forKey: .sideNote)
+        }
     }
 
     func setup(data: BeamData) {

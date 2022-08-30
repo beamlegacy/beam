@@ -15,6 +15,14 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
     var windowInfo: BeamWindowInfo = BeamWindowInfo()
     var data: BeamData
 
+    private let composedWindowMargin: CGFloat = 3.0
+    private var isComposed: Bool {
+        state.sideNote != nil
+    }
+
+    private var hostingView: NSView?
+    private var hostingViewConstraints: [NSLayoutConstraint] = []
+
     override var title: String {
         didSet {
             // Changing the title reset the standard window buttons
@@ -82,26 +90,59 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
 
         let hostingView = BeamHostingView(rootView: mainView)
         hostingView.frame = contentRect
+        hostingView.layer?.cornerRadius = 8
+        hostingView.layer?.cornerCurve = .continuous
+        hostingView.layer?.masksToBounds = true
 
         hostingView.translatesAutoresizingMaskIntoConstraints = false
 
-        self.contentView = NSView(frame: contentRect)
+        self.hostingView = hostingView
+
+        let visualEffect = NSVisualEffectView()
+        visualEffect.blendingMode = .behindWindow
+        visualEffect.state = .active
+        visualEffect.material = .hudWindow
+        contentView = visualEffect
+
+        let mercuryView = BeamWindowBackgroundView()
+
+        self.contentView?.addSubviewWithConstraintsOnEachSide(subView: mercuryView)
         self.contentView?.addSubview(hostingView)
+
         self.isMovableByWindowBackground = false
 
-        guard let contentView = contentView else { return }
-
-        NSLayoutConstraint.activate([
-            hostingView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            hostingView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            hostingView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            hostingView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-        ])
+        setHostingViewConstraints()
 
         registerForDraggedTypes([.fileURL])
 
         // Adding the window item to the app's windowsMenu with prefilled title if any
         NSApp.addWindowsItem(self, title: title ?? "Beam", filename: false)
+    }
+
+    func setHostingViewConstraints() {
+        guard let contentView = contentView, let hostingView = hostingView else { return }
+
+        let neededMargin = isComposed ? composedWindowMargin : 0
+
+        if hostingViewConstraints.isEmpty {
+            hostingViewConstraints = [hostingView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: neededMargin),
+                                      hostingView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -neededMargin),
+                                      hostingView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: neededMargin),
+                                      hostingView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -neededMargin)
+            ]
+            NSLayoutConstraint.activate(hostingViewConstraints)
+        } else {
+            for c in hostingViewConstraints {
+                let isBottomOrTrailing = c.secondAnchor == contentView.bottomAnchor || c.secondAnchor == contentView.trailingAnchor
+                c.constant = isBottomOrTrailing ? -neededMargin : neededMargin
+            }
+
+            NSAnimationContext.runAnimationGroup({context in
+                context.duration = 0.3
+                context.allowsImplicitAnimation = true
+                contentView.layoutSubtreeIfNeeded()
+            }, completionHandler:nil)
+        }
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -478,5 +519,36 @@ extension BeamWindow {
         guard let titlebarAccessoryView = titlebarAccessoryViewControllers.first else { return }
         titlebarAccessoryView.isHidden.toggle()
         self.state.isFullScreen.toggle()
+    }
+}
+
+class BeamWindowBackgroundView: NSView {
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        configureAppearance()
+    }
+
+    init() {
+        super.init(frame: .zero)
+        configureAppearance()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func configureAppearance() {
+        self.wantsLayer = true
+        self.layer?.opacity = 0.8
+        NSApp.effectiveAppearance.performAsCurrentDrawingAppearance {
+            self.layer?.backgroundColor = BeamColor.Mercury.cgColor
+        }
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        NSApp.effectiveAppearance.performAsCurrentDrawingAppearance {
+            self.layer?.backgroundColor = BeamColor.Mercury.cgColor
+        }
     }
 }
