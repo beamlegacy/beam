@@ -15,13 +15,14 @@ protocol TabsExternalDropDelegateHandler {
 }
 
 /// Replacement for SwiftUI DropDelegate
-/// to inject geometry proxy and expose only what's necessary
+/// to inject geometry proxy and expose only what's necessary.
+/// Used for any kind of item, tab or tabGroup.
 class TabsExternalDropDelegate: DropDelegate {
     private let handler: TabsExternalDropDelegateHandler
     private let containerGeometry: GeometryProxy
     var startLocation: CGPoint = .zero
     private var dropPerformed = false
-    private let supportedTypes = [UTType.beamBrowserTab]
+    private let supportedTypes = [UTType.beamBrowserTab, UTType.beamTabGroup]
 
     init(withHandler handler: TabsExternalDropDelegateHandler, containerGeometry: GeometryProxy) {
         self.handler = handler
@@ -30,6 +31,10 @@ class TabsExternalDropDelegate: DropDelegate {
 
     private func dropInfoIsSupported(_ info: DropInfo) -> Bool {
         info.hasItemsConforming(to: supportedTypes)
+    }
+
+    private func dropInfoIsTabGroup(_ info: DropInfo) -> Bool {
+        info.hasItemsConforming(to: [UTType.beamTabGroup])
     }
 
     private func triggerHapticFeedback() {
