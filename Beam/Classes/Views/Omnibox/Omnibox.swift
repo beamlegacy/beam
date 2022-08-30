@@ -61,6 +61,7 @@ struct Omnibox: View {
                     HStack(spacing: BeamSpacing._180) {
                         OmniboxSearchField(isEditing: isEditingBinding,
                                            modifierFlagsPressed: $modifierFlagsPressed)
+                        .animation(.easeInOut(duration: 0.2), value: state.sideNote)
                         .animation(nil)
                         .frame(height: Self.defaultHeight)
                         .frame(maxWidth: .infinity)
