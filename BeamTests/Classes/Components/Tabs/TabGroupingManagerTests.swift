@@ -11,7 +11,8 @@ import XCTest
 
 class TabGroupingManagerTests: XCTestCase {
 
-    var sut: TabGroupingManager = TabGroupingManager()
+    var sut: TabGroupingManager = TabGroupingManager(passwordManager: BeamData.shared.passwordManager,
+                                                     browsingTreeStoreManager: BeamData.shared.browsingTreeStoreManager)
     let state = BeamState()
 
     private var clusters = [[ClusteringManager.PageID]]()

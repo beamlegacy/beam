@@ -72,12 +72,13 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     var navigationBasedPageGroups = [[UUID]]()
     var similarities = [UUID: [UUID: Double]]()
     var notesChangedByUserInSession = [UUID]()
-    let frecencyFetcher = LinkStoreFrecencyUrlStorage()
+    let frecencyFetcher: LinkStoreFrecencyUrlStorage
     var openBrowsing = AllBrowsingTreesOpenInTabs()
     public var continueToNotes = [UUID]()
     public var continueToPage: PageID?
 
-    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources, tabGroupingManager: TabGroupingManager?) {
+    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources, tabGroupingManager: TabGroupingManager?, objectManager: BeamObjectManager) {
+        self.frecencyFetcher = LinkStoreFrecencyUrlStorage(objectManager: objectManager)
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text

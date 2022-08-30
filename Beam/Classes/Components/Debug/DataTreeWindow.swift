@@ -18,7 +18,7 @@ class DataTreeWindow: NSWindow, NSWindowDelegate {
                    defer: false)
         title = "Data Tree"
 
-        let dataTreeView = DataTreeView(treeRoot: AccountTreeNode(parent: nil, BeamData.shared.currentAccount!))
+        let dataTreeView = DataTreeView(treeRoot: AccountTreeNode(parent: nil, AppData.shared.currentAccount!))
         contentView = BeamHostingView(rootView: dataTreeView)
         isMovableByWindowBackground = false
         delegate = self

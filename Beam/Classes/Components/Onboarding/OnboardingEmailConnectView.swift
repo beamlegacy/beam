@@ -241,7 +241,7 @@ struct OnboardingEmailConnectView: View {
         isPasswordEditing = false
         loadingState = .signinin
         updateButtonState()
-        BeamData.shared.currentAccount?.signIn(email: emailField, password: passwordField, runFirstSync: false) { result in
+        AppData.shared.currentAccount?.signIn(email: emailField, password: passwordField, runFirstSync: false) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .failure(let error):
@@ -261,7 +261,7 @@ struct OnboardingEmailConnectView: View {
                     updateButtonState()
 
                     Task {
-                        if let pkStatus = try? await PrivateKeySignatureManager.shared.distantKeyStatus(), pkStatus == .none {
+                        if let pkStatus = try? await BeamData.shared.privateKeySignatureManager.distantKeyStatus(), pkStatus == .none {
                             // We do this to show the saveEncyptionView, user probably reset his account
                             onboardingManager.userDidSignUp = true
                         }
@@ -296,7 +296,7 @@ struct OnboardingEmailConnectView: View {
     private func createAccount() {
         guard areCredentialsValid, loadingState == nil else { return }
         loadingState = .signinup
-        BeamData.shared.currentAccount?.signUp(emailField, passwordField) { result in
+        AppData.shared.currentAccount?.signUp(emailField, passwordField) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .failure(let error):
@@ -328,7 +328,7 @@ struct OnboardingEmailConnectView: View {
             errorState = .invalidEmail
             return
         }
-        BeamData.shared.currentAccount?.forgotPassword(email: email) { result in
+        AppData.shared.currentAccount?.forgotPassword(email: email) { result in
             switch result {
             case .failure(let error):
                 forgotPasswordTooltip = LocalizedStringKey(error.localizedDescription)

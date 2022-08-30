@@ -15,15 +15,18 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
 
     static var id = UUID()
     static var name = "TabGroupingStoreManager"
-    static var shared: TabGroupingStoreManager? { BeamData.shared.tabGroupingDBManager }
 
     override var tableNames: [String] { [TabGroupBeamObject.databaseTableName] }
 
     weak var holder: BeamManagerOwner?
+    let objectManager: BeamObjectManager
 
-    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
+        self.objectManager = objectManager
         try super.init(store: store)
+
+        registerOnBeamObjectManager(objectManager)
     }
 
     enum GroupUpdateOrigin {
@@ -212,9 +215,9 @@ extension TabGroupingStoreManager: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ groups: [TabGroupBeamObject], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
-                try await self?.saveOnBeamObjectsAPI(groups)
+                try await saveOnBeamObjectsAPI(groups)
                 Logger.shared.logDebug("Saved tab groups on the BeamObject API", category: .tabGrouping)
                 networkCompletion?(.success(true))
             } catch {
@@ -225,9 +228,9 @@ extension TabGroupingStoreManager: BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ group: TabGroupBeamObject, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
-                try await self?.saveOnBeamObjectAPI(group)
+                try await saveOnBeamObjectAPI(group)
                 Logger.shared.logDebug("Saved tab group on the BeamObject API", category: .tabGrouping)
                 networkCompletion?(.success(true))
             } catch {
@@ -361,6 +364,6 @@ extension BeamManagerOwner {
 
 extension BeamData {
     var tabGroupingDBManager: TabGroupingStoreManager? {
-        currentAccount?.tabGroupingDBManager
+        AppData.shared.currentAccount?.tabGroupingDBManager
     }
 }

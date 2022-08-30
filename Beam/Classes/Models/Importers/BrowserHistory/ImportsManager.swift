@@ -68,7 +68,8 @@ public class ImportsManager: NSObject, ObservableObject {
 
     func startBrowserHistoryImport(from importer: BrowserHistoryImporter) {
         let id = UUID()
-        let batchImporter = BatchHistoryImporter(sourceBrowser: importer.sourceBrowser)
+        let batchImporter = BatchHistoryImporter(sourceBrowser: importer.sourceBrowser,
+                                                 browsingTreeStoreManager: BeamData.shared.browsingTreeStoreManager)
         do {
             var receivedCount = 0
             let timer = BeamTimer()
@@ -125,7 +126,7 @@ public class ImportsManager: NSObject, ObservableObject {
                 }, receiveValue: { record in
                     if let hostname = record.item.url.minimizedHost, let password = String(data: record.item.password, encoding: .utf8) {
                         Logger.shared.logDebug("[\(record.itemCount)] Saving password for \(record.item.username) at \(record.item.url)", category: .browserImport)
-                        if PasswordManager.shared.save(hostname: hostname, username: record.item.username, password: password) == nil {
+                        if BeamData.shared.passwordManager.save(hostname: hostname, username: record.item.username, password: password) == nil {
                             Logger.shared.logError("Failed to save password for \(record.item.username) at \(record.item.url)", category: .browserImport)
                         } else {
                             importedCount += 1

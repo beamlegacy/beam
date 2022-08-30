@@ -13,7 +13,7 @@ class BeamDataFolderTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        dataFolderStr = BeamData.dataFolder(fileName: "")
+        dataFolderStr = AppData.shared.dataFolder(fileName: "")
 
         let homeFolder = FileManager.default.homeDirectoryForCurrentUser
         dataFolderStr = homeFolder.path
@@ -26,6 +26,6 @@ class BeamDataFolderTests: XCTestCase {
     }
 
     func testDataFolder() {
-        XCTAssertEqual(BeamData.dataFolder(fileName: ""), "\(dataFolderStr)/", "DataFolder Path is wrong")
+        XCTAssertEqual(AppData.shared.dataFolder(fileName: ""), "\(dataFolderStr)/", "DataFolder Path is wrong")
     }
 }

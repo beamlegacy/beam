@@ -10,8 +10,8 @@ import BeamCore
 
 class SettingsWindowController: NSWindowController, NSToolbarDelegate {
     private static let toolbarIdentifier = "SettingsWindow-Toolbar"
-    var settingsController: SettingsController?
-    var settingsTab: [SettingTab]
+    let settingsController: SettingsController
+    let settingsTab: [SettingTab]
 
     var toolbarItemIdentifier: [NSToolbarItem.Identifier] {
         settingsTab.map({ NSToolbarItem.Identifier($0.label) })
@@ -22,8 +22,8 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
 
         self.settingsTab = settingsTab
 
-        let settingsController = SettingsController()
-        settingsController.configure(settingsTab: self.settingsTab)
+        settingsController = SettingsController()
+        settingsController.configure(settingsTab: settingsTab)
 
         let window = NSWindow(contentViewController: settingsController)
         window.titleVisibility = .visible
@@ -41,7 +41,6 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
 
         window.toolbarStyle = .preference
         window.toolbar = toolbar
-        self.settingsController = settingsController
     }
 
     required init?(coder: NSCoder) {
@@ -57,12 +56,12 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
         if let tab = tab {
             select(item: NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier(rawValue: tab.label)))
         } else {
-            window?.title = loc(settingsController?.selectedTab?.label ?? "", comment: "Preferences Window Title")
+            window?.title = loc(settingsController.selectedTab?.label ?? "", comment: "Preferences Window Title")
         }
     }
 
     func select(item: NSToolbarItem) {
-        self.settingsController?.selectItem(item.itemIdentifier.rawValue)
+        settingsController.selectItem(item.itemIdentifier.rawValue)
         window?.toolbar?.selectedItemIdentifier = item.itemIdentifier
     }
 
@@ -74,7 +73,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
     // MARK: - NSToolbarDelegate
 
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
-        guard let tab = SettingTab.settingTab(for: itemIdentifier.rawValue) else { return nil }
+        guard let tab = settingsController.tab(for: itemIdentifier.rawValue) else { return nil }
         let item = NSToolbarItem(itemIdentifier: itemIdentifier)
         item.label = itemIdentifier.rawValue
         item.image = NSImage(named: tab.imageName)!

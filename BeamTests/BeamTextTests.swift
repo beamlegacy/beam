@@ -25,7 +25,7 @@ class BeamTextTests: XCTestCase, BeamDocumentSource {
 
     override class func setUp() {
         // To prevent saving on the API side
-        BeamData.shared.currentAccount?.logout()
+        AppData.shared.currentAccount?.logout()
         Configuration.networkEnabled = false
         BeamNote.idForNoteNamed = { _ in
             return UUID.null

@@ -168,6 +168,7 @@ protocol BeamFileStorage {
 }
 
 class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoImportDisabler {
+    let objectManager: BeamObjectManager
     var changedObjects: [UUID: BeamFileRecord] = [:]
     let objectQueue = BeamObjectQueue<BeamFileRecord>()
     static var id = UUID()
@@ -186,10 +187,13 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
 
     var grdbStore: GRDBStore
 
-    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
+        self.objectManager = objectManager
         self.grdbStore = store
         try super.init(store: store)
+
+        registerOnBeamObjectManager(objectManager)
     }
 
     override func prepareMigration(migrator: inout DatabaseMigrator) throws {

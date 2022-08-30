@@ -16,6 +16,8 @@ import GRDB
 class BeamAccountInitialStateTest: XCTestCase, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
+    let objectManager = BeamData.shared.objectManager
+
     override func setUpWithError() throws {
         BeamDate.freeze("2021-03-19T12:21:03Z")
 
@@ -29,7 +31,7 @@ class BeamAccountInitialStateTest: XCTestCase, BeamDocumentSource {
 
     func testAfterSignupLater() throws {
         // we have the good number of managers
-        XCTAssertEqual(BeamObjectManager.managerOrder.count, BeamObjectManager.managerInstances.count, "Wrong number of registered managers!")
+        XCTAssertEqual(objectManager.managerOrder.count, objectManager.managerInstances.count, "Wrong number of registered managers!")
 
         // we have the daily note
         guard BeamNote.fetch(journalDate: BeamDate.now) != nil else {
@@ -67,7 +69,7 @@ class BeamAccountInitialStateTest: XCTestCase, BeamDocumentSource {
         for window in AppDelegate.main.windows {
             window.state.closeAllTabs(closePinnedTabs: true)
         }
-        BeamData.shared.currentAccount?.logout()
+        AppData.shared.currentAccount?.logout()
         AppDelegate.main.deleteAllLocalData()
     }
 

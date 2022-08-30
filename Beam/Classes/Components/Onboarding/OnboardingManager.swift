@@ -131,7 +131,7 @@ class OnboardingManager: ObservableObject {
     func backToPreviousStep() {
         guard let previous = stepsHistory.popLast() else { return }
         if [.emailConnect, .welcome].contains(previous.type) {
-            BeamData.shared.currentAccount?.logoutIfNeeded()
+            AppData.shared.currentAccount?.logoutIfNeeded()
         }
         actions = []
         currentStepIsFromHistory = true
@@ -145,7 +145,7 @@ class OnboardingManager: ObservableObject {
         if let nextStep = nextStep ?? stepAfter(step: previous) {
             currentStep = nextStep
             viewIsLoading = false
-            if AuthenticationManager.shared.isAuthenticated && BeamData.shared.currentAccount?.state == .signedIn {
+            if AuthenticationManager.shared.isAuthenticated && AppData.shared.currentAccount?.state == .signedIn {
                 stepsHistory.removeAll()
             } else {
                 stepsHistory.append(previous)
@@ -197,7 +197,7 @@ class OnboardingManager: ObservableObject {
 
     private func onboardingDidStart() {
         AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
-            if isAuthenticated && BeamData.shared.currentAccount?.state == .signedIn {
+            if isAuthenticated && AppData.shared.currentAccount?.state == .signedIn {
                 self?.stepsHistory.removeAll()
             }
         }.store(in: &cancellables)
@@ -218,12 +218,12 @@ class OnboardingManager: ObservableObject {
     }
 
     private func userHasPasswordsData() -> Bool {
-        PasswordManager.shared.count() > 0
+        BeamData.shared.passwordManager.count() > 0
     }
 
     func checkForPrivateKey(completionHandler: @escaping (OnboardingStep?) -> Void, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         Task { @MainActor in
-            if let currentAccount = BeamData.shared.currentAccount {
+            if let currentAccount = AppData.shared.currentAccount {
                 switch await currentAccount.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
                 case .signedIn:
                     completionHandler(nil)

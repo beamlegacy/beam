@@ -26,7 +26,7 @@ class BeamDocumentCollectionTest: XCTestCase, BeamDocumentSource {
         try store.erase()
         account = try BeamAccount(id: UUID(), email: "test@beamapp.co", name: "testAccount", path: nil)
         database = BeamDatabase(account: account, id: UUID(), name: "testDB")
-        documentCollection = try BeamDocumentCollection(holder: database, store: store)
+        documentCollection = try BeamDocumentCollection(holder: database, objectManager: account.objectManager, store: store)
         try store.migrate()
     }
 

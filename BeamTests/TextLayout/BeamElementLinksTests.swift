@@ -14,11 +14,11 @@ class BeamElementLinks: XCTestCase {
 
     override func setUpWithError() throws {
         BeamTestsHelper.logout()
-        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+        try AppData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
     override func tearDownWithError() throws {
-        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+        try AppData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
     func testLink1() throws {

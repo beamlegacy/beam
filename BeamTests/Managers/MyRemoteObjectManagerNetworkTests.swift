@@ -13,6 +13,12 @@ private func checksum(_ object: MyRemoteObject) throws -> String? {
 }
 
 class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
+    static let objectManager: BeamObjectManager = {
+        let manager = BeamData.shared.objectManager
+        manager.disableSendingObjects = false
+        return manager
+    }()
+
     private class func objectForUUID(_ uuid: String) -> MyRemoteObject? {
         Array(MyRemoteObjectManager.store.values).first(where: { $0.beamObjectId.uuidString.lowercased() == uuid })
     }
@@ -213,6 +219,8 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
 }
 
 class MyRemoteObjectManagerNetworkTests: QuickSpec {
+    let objectManager = BeamData.shared.objectManager
+
     override func spec() {
         var sut: MyRemoteObjectManager!
         let beamObjectHelper = BeamObjectTestsHelper()
@@ -222,18 +230,18 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
         beforeEach {
             BeamDate.freeze(fixedDate)
 
-            sut = MyRemoteObjectManager()
+            sut = MyRemoteObjectManager(objectManager: self.objectManager)
             BeamTestsHelper.logout()
 
             APIRequest.networkCallFiles = []
             beamHelper.beginNetworkRecording()
             BeamURLSession.shouldNotBeVinyled = true
 
-            BeamObjectManager.disableSendingObjects = false
+            self.objectManager.disableSendingObjects = false
             BeamTestsHelper.login()
 
-            BeamObjectManager.unregisterAll()
-            sut.registerOnBeamObjectManager()
+            self.objectManager.unregisterAll()
+            sut.registerOnBeamObjectManager(self.objectManager)
 
             try? MyRemoteObjectManager.deleteAll()
             try? BeamObjectChecksum.deleteAll()
@@ -252,7 +260,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
         }
 
         afterSuite {
-            BeamObjectManager.unregister(objectType: .myRemoteObject)
+            self.objectManager.unregister(objectType: .myRemoteObject)
         }
 
         describe("refreshFromBeamObjectAPI()") {
@@ -429,12 +437,12 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         beforeEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = true
                             Configuration.beamObjectDataOnSeparateCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                         }
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with async") {
@@ -479,12 +487,12 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         beforeEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = true
                             Configuration.beamObjectDataOnSeparateCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                         }
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with async") {
@@ -549,7 +557,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
 
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
@@ -576,7 +584,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with async") {
@@ -646,7 +654,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
 
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
@@ -673,7 +681,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with async") {
@@ -751,7 +759,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
 
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
@@ -789,7 +797,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with async") {
@@ -874,7 +882,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
 
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
@@ -912,7 +920,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with async") {
@@ -1000,7 +1008,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
 
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
@@ -1042,7 +1050,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with async") {
@@ -1138,7 +1146,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
 
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
@@ -1180,7 +1188,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with async") {
@@ -1275,13 +1283,13 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                         }
 
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with async") {
@@ -1337,13 +1345,13 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                         }
 
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with async") {
@@ -1430,13 +1438,13 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         beforeEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = true
                             Configuration.beamObjectDataOnSeparateCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                         }
 
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration2
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         asyncIt("doesn't generate conflicts") {
@@ -1523,7 +1531,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
                             object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
@@ -1547,7 +1555,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with async") {
@@ -1624,7 +1632,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
                             object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
@@ -1648,7 +1656,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with async") {
@@ -1723,7 +1731,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
 
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
@@ -1754,7 +1762,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with async") {
@@ -1841,7 +1849,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
                             object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
@@ -1871,7 +1879,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with async") {
@@ -1960,7 +1968,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
                             object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
@@ -1993,7 +2001,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with async") {
@@ -2087,7 +2095,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         asyncBeforeEach { _ in
                             Configuration.beamObjectDirectCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                             await self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
 
                             object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
@@ -2120,7 +2128,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with async") {
@@ -2203,13 +2211,13 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         beforeEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = true
                             Configuration.beamObjectDataOnSeparateCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                         }
 
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration2
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectAPI with async") {
@@ -2262,13 +2270,13 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         beforeEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = true
                             Configuration.beamObjectDataOnSeparateCall = true
-                            BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.objectManager.uploadTypeForTests = .directUpload
                         }
 
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             Configuration.beamObjectDataOnSeparateCall = beforeConfiguration2
-                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                            self.objectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectAPI with async") {
@@ -2352,7 +2360,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                             asyncBeforeEach { _ in
                                 Configuration.beamObjectDirectCall = true
-                                BeamObjectManager.uploadTypeForTests = .directUpload
+                                self.objectManager.uploadTypeForTests = .directUpload
 
                                 await beamObjectHelper.saveOnAPIWithDirectUploadAndSaveChecksum(object)
 
@@ -2368,7 +2376,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             afterEach {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                                 Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                                BeamObjectManager.uploadTypeForTests = .multipartUpload
+                                self.objectManager.uploadTypeForTests = .multipartUpload
                             }
 
                             itBehavesLike("saveOnBeamObjectAPI with async") {
@@ -2427,7 +2435,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                             asyncBeforeEach { _ in
                                 Configuration.beamObjectDirectCall = true
-                                BeamObjectManager.uploadTypeForTests = .directUpload
+                                self.objectManager.uploadTypeForTests = .directUpload
 
                                 await beamObjectHelper.saveOnAPIWithDirectUploadAndSaveChecksum(object)
 
@@ -2443,7 +2451,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             afterEach {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
                                 Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-                                BeamObjectManager.uploadTypeForTests = .multipartUpload
+                                self.objectManager.uploadTypeForTests = .multipartUpload
                             }
 
                             itBehavesLike("saveOnBeamObjectAPI with async") {

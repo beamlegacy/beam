@@ -20,14 +20,16 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
     var testNote: BeamNote?
     var testNoteDocument: BeamDocument!
 
+    let objectManager = BeamData.shared.objectManager
+
     override func setUpWithError() throws {
-        BeamData.shared.currentAccount?.logout() // will force clean up data
+        AppData.shared.currentAccount?.logout() // will force clean up data
 
         BeamTestsHelper.logout()
         BeamDate.freeze("2022-04-18T06:00:03Z")
         APIRequest.networkCallFiles = []
         beamTestHelper.beginNetworkRecording(test: self)
-        BeamObjectManager.disableSendingObjects = true
+        objectManager.disableSendingObjects = true
 
         LoggerRecorder.shared.reset()
 
@@ -37,7 +39,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
         // Setup CoreData
         coreDataManager.setupWithoutMigration()
 
-        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+        try AppData.shared.clearAllAccountsAndSetupDefaultAccount()
 
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
