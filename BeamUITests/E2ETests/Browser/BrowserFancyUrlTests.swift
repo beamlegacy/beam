@@ -27,7 +27,7 @@ class BrowserFancyUrlTests: BaseTest {
         for urlToTest in urlsToTest {
             step("Given I open \(urlToTest) web page"){
                 journalView.openWebsite(urlToTest)
-                _ = webView.waitForWebViewToLoad()
+                webView.waitForWebViewToLoad()
             }
             step("Then Google is not launching a search"){
                 shortcutHelper.shortcutActionInvoke(action: .openLocation)
