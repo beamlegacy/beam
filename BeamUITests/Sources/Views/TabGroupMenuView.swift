@@ -157,9 +157,15 @@ class TabGroupMenuView: BaseView {
     }
     
     func isTabGroupLinkInPasteboard() -> Bool {
-        let regex = try! NSRegularExpression(pattern: "https://staging-web-server.ew.r.appspot.com/.*/.*")
+        let regex = try! NSRegularExpression(pattern: "https://" + BaseTest().stagingEnvironmentServerAddress + "/.*/.*")
         let pasteboardContent = NSPasteboard.general.pasteboardItems?.first?.string(forType: NSPasteboard.PasteboardType.string)
         let range = NSRange(location: 0, length: pasteboardContent!.utf16.count)
         return regex.firstMatch(in: pasteboardContent!, options: [], range: range) != nil
+    }
+    
+    func isMatchingFullURL(_ URLtoMatch: String) -> Bool {
+        let regex = try! NSRegularExpression(pattern: "https://" + BaseTest().stagingEnvironmentServerAddress + "/.*/tabgroup/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.*")
+        let range = NSRange(location: 0, length: URLtoMatch.utf16.count)
+        return regex.firstMatch(in: URLtoMatch, options: [], range: range) != nil
     }
 }
