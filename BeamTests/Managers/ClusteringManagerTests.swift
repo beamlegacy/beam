@@ -19,12 +19,15 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
     var informations: [TabIndexingInfo]!
     var notes: [BeamNote]!
 
+    let objectManager = BeamData.shared.objectManager
+
     override func setUp() {
         sessionLinkRanker = SessionLinkRanker()
         activeSources = ActiveSources()
-        tabGroupingManager = TabGroupingManager()
+        tabGroupingManager = TabGroupingManager(passwordManager: BeamData.shared.passwordManager,
+                                                browsingTreeStoreManager: BeamData.shared.browsingTreeStoreManager)
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4,
-                                              sessionId: UUID(), activeSources: activeSources, tabGroupingManager: tabGroupingManager)
+                                              sessionId: UUID(), activeSources: activeSources, tabGroupingManager: tabGroupingManager, objectManager: objectManager)
 
         for _ in 0...3 {
             pageIDs.append(UUID())

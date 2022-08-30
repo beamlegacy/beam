@@ -10,7 +10,7 @@ extension AppDelegate {
     func deleteAllLocalData() {
         // Clustering Orphaned file
         do {
-            try data.clusteringOrphanedUrlManager.clear()
+            try data.currentAccount?.data.clusteringOrphanedUrlManager.clear()
         } catch {
             Logger.shared.logError("Could not delete Clustering Orphaned file", category: .general)
         }
@@ -32,18 +32,20 @@ extension AppDelegate {
         FaviconProvider.shared.clear()
 
         // Cookies && Cache
-        data.clearCookiesAndCache()
+        data.currentAccount?.data.clearCookiesAndCache()
 
         // BeamFile
         BeamFileDBManager.shared?.deleteAll(includedRemote: false) { _ in }
         // Link Store
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         //Contacts
-        ContactsManager.shared.deleteAll(includedRemote: false) { _ in }
+        data.currentAccount?.data.contactsManager.deleteAll(includedRemote: false) { _ in }
         // Passwords
-        PasswordManager.shared.deleteAll(includedRemote: false) { _ in }
+        data.currentAccount?.data.passwordManager.deleteAll(includedRemote: false) { _ in }
         // Note Frecency
-        GRDBNoteFrecencyStorage().deleteAll(includedRemote: false) { _ in }
+        if let objectManager = data.currentAccount?.data.objectManager {
+            GRDBNoteFrecencyStorage(objectManager: objectManager).deleteAll(includedRemote: false) { _ in }
+        }
         // BeamObject Coredata Checksum
         do {
             try BeamObjectChecksum.deleteAll()
@@ -56,7 +58,7 @@ extension AppDelegate {
 
         // GRDB
         do {
-            try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+            try data.clearAllAccountsAndSetupDefaultAccount()
         } catch {
             Logger.shared.logError("Could not delete GRDB Databases", category: .general)
         }
@@ -69,11 +71,11 @@ extension AppDelegate {
     func deleteDocumentsAndDatabases(includedRemote: Bool) {
         // Documents and Databases
         BeamNote.clearFetchedNotes()
-        guard let databases = BeamData.shared.currentAccount?.allDatabases else {
+        guard let account = data.currentAccount else {
             return
         }
 
-        for db in databases {
+        for db in account.allDatabases {
             db.clear()
         }
 
@@ -83,10 +85,10 @@ extension AppDelegate {
         }
         AppDelegate.main.windows = []
         self.deleteSessionData()
-        self.data.deleteJournal()
-        self.data.onboardingManager.forceDisplayOnboarding()
-        self.data.onboardingManager.delegate = self
-        self.data.onboardingManager.presentOnboardingWindow()
+        account.data.deleteJournal()
+        account.data.onboardingManager.forceDisplayOnboarding()
+        account.data.onboardingManager.delegate = self
+        account.data.onboardingManager.presentOnboardingWindow()
     }
 
     @IBAction func exportNotes(_ sender: Any) {
@@ -236,6 +238,6 @@ extension AppDelegate {
     public func checkAndRepairLinkDBIfNeeded() {
         guard Self.lastLinkDBIntegrityCheck == nil || Self.lastLinkDBIntegrityCheck?.timeIntervalSinceNow ?? 0 < -86400 else { return }
         Self.lastLinkDBIntegrityCheck = BeamDate.now
-        BeamData.shared.checkAndRepairDB()
+        data.checkAndRepairDB()
     }
 }

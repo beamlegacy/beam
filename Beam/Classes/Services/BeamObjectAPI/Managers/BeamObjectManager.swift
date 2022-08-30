@@ -62,31 +62,32 @@ enum BeamObjectObjectSynchronizationStatus: CustomStringConvertible {
     }
 }
 
-class BeamObjectManager {
-    static var managerOrder: [BeamObjectObjectType] = []
-    static var managerInstances: [BeamObjectObjectType: BeamObjectManagerDelegateProtocol] = [:]
-    static var translators: [BeamObjectObjectType: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
-    static var uploadTypeForTests: BeamObjectRequestUploadType?
-    internal static var disableSendingObjects = true
-    internal static var fullSyncRunning = ManagedAtomic<Bool>(false)
+public final class BeamObjectManager {
+    var managerOrder: [BeamObjectObjectType] = []
+    var managerInstances: [BeamObjectObjectType: BeamObjectManagerDelegateProtocol] = [:]
+    var translators: [BeamObjectObjectType: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
+    var uploadTypeForTests: BeamObjectRequestUploadType?
+    var disableSendingObjects = true
+    var fullSyncRunning = ManagedAtomic<Bool>(false)
 
-    internal static var synchronizationStatusSubject = CurrentValueSubject<BeamObjectObjectSynchronizationStatus, Never>(.notStarted)
-    public static var synchronizationStatusPublisher: AnyPublisher<BeamObjectObjectSynchronizationStatus, Never> {
-        Self.synchronizationStatusSubject.eraseToAnyPublisher()
+    var synchronizationStatusSubject = CurrentValueSubject<BeamObjectObjectSynchronizationStatus, Never>(.notStarted)
+    var synchronizationStatus: BeamObjectObjectSynchronizationStatus {
+        get {
+            synchronizationStatusSubject.value
+        }
+        set {
+            synchronizationStatusSubject.value = newValue
+        }
     }
-    internal static func synchronizationStatusUpdated(_ status: BeamObjectObjectSynchronizationStatus) {
-        Self.synchronizationStatusSubject.send(status)
-    }
-    private(set) static var synchronizationStatus: BeamObjectObjectSynchronizationStatus = .notStarted
 
     #if DEBUG
-    static var networkRequests: [APIRequest] = []
+    var networkRequests: [APIRequest] = []
     #endif
 
     var webSocketRequest: APIWebSocketRequest?
-    internal var websocketRetryDelay = 0
+    var websocketRetryDelay = 0
 
-    static func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
+    func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
         managerInstances[object.beamObjectType] = manager
 
         /*
@@ -182,28 +183,17 @@ class BeamObjectManager {
         }
     }
 
-    static func unregister(objectType: BeamObjectObjectType) {
+    func unregister(objectType: BeamObjectObjectType) {
         managerInstances.removeValue(forKey: objectType)
     }
 
-    static func unregisterAll() {
+    func unregisterAll() {
         managerInstances = [:]
         translators = [:]
     }
 
-    static func setup() {
+    func setup() {
         let treeSyncEnabled = Configuration.browsingTreeApiSyncEnabled
-        // Add any manager using BeamObjects here
-        BeamData.shared.registerWithBeamObjectManager()
-        PasswordManager.shared.registerOnBeamObjectManager()
-        TabGroupingStoreManager.shared?.registerOnBeamObjectManager()
-        if treeSyncEnabled {
-            BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
-        }
-        BeamLinkDB.shared.registerOnBeamObjectManager()
-        ContactsManager.shared.registerOnBeamObjectManager()
-        GRDBNoteFrecencyStorage().registerOnBeamObjectManager()
-        PrivateKeySignatureManager.shared.registerOnBeamObjectManager()
 
         /*
          Not yet used: In what order should we proceed when receiving new objects? We might have objects with
@@ -221,9 +211,7 @@ class BeamObjectManager {
         }
     }
 
-    var conflictPolicyForSave: BeamObjectConflictResolution = .replace
-
-    internal func filteredObjects(_ beamObjects: [BeamObject]) -> [BeamObjectObjectType: [BeamObject]] {
+    func filteredObjects(_ beamObjects: [BeamObject]) -> [BeamObjectObjectType: [BeamObject]] {
         let filteredObjects: [BeamObjectObjectType: [BeamObject]] = beamObjects.reduce(into: [:]) { result, object in
             if let beamObjectType = BeamObjectObjectType.fromString(value: object.beamObjectType) {
                 result[beamObjectType] = result[beamObjectType] ?? []
@@ -237,7 +225,7 @@ class BeamObjectManager {
         return filteredObjects
     }
 
-    internal func parseObjectChecksums(_ objects: [BeamObject]) -> [BeamObject] {
+    func parseObjectChecksums(_ objects: [BeamObject]) -> [BeamObject] {
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objects)
 
         let changedObjects = objects.filter {
@@ -247,7 +235,7 @@ class BeamObjectManager {
         return changedObjects
     }
 
-    internal func parseFilteredObjects(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws {
+    func parseFilteredObjects(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws {
         var objectsInErrors: Set<String> = Set()
 
         var errors: [Error] = []
@@ -266,21 +254,21 @@ class BeamObjectManager {
          */
 
         let sortedObjects = filteredObjects.sorted(by: {
-            if let firstIndex = Self.managerOrder.firstIndex(of: $0.0), let secondIndex = Self.managerOrder.firstIndex(of: $1.0) {
+            if let firstIndex = managerOrder.firstIndex(of: $0.0), let secondIndex = managerOrder.firstIndex(of: $1.0) {
                 return firstIndex < secondIndex
             }
             return true
         })
 
         for (key, objects) in sortedObjects {
-            guard let managerInstance = Self.managerInstances[key] else {
-                Logger.shared.logDebug("**managerInstance for \(key) not found** keys: \(Self.managerInstances.keys)",
+            guard let managerInstance = managerInstances[key] else {
+                Logger.shared.logDebug("**managerInstance for \(key) not found** keys: \(managerInstances.keys)",
                                        category: .beamObject)
                 continue
             }
 
-            guard let translator = Self.translators[key] else {
-                Logger.shared.logDebug("**translator for \(key) not found** keys: \(Self.translators.keys)",
+            guard let translator = translators[key] else {
+                Logger.shared.logDebug("**translator for \(key) not found** keys: \(translators.keys)",
                                        category: .beamObject)
                 continue
             }
@@ -329,7 +317,7 @@ class BeamObjectManager {
         }
     }
 
-    internal func extractGoodObjects<T: BeamObjectProtocol>(_ objects: [T],
+    func extractGoodObjects<T: BeamObjectProtocol>(_ objects: [T],
                                                             _ conflictedObject: T) -> [T] {
         // Set `checksum` on the objects who were saved successfully as this will be used later
         objects.compactMap {
@@ -339,7 +327,7 @@ class BeamObjectManager {
         }
     }
 
-    internal func extractGoodObjects<T: BeamObjectProtocol>(_ objects: [T],
+    func extractGoodObjects<T: BeamObjectProtocol>(_ objects: [T],
                                                             _ objectErrorIds: [String],
                                                             _ remoteBeamObjects: [BeamObject]) -> [T] {
         // Set `checksum` on the objects who were saved successfully as this will be used later
@@ -350,7 +338,7 @@ class BeamObjectManager {
         }
     }
 
-    internal func beamObjectsToObjects<T: BeamObjectProtocol>(_ beamObjects: [BeamObject]) throws -> [T] {
+    func beamObjectsToObjects<T: BeamObjectProtocol>(_ beamObjects: [BeamObject]) throws -> [T] {
         var errors: [Error] = []
         let remoteObjects: [T] = try beamObjects.compactMap { beamObject in
             // Check if you have the same IDs for 2 different object types
@@ -375,8 +363,7 @@ class BeamObjectManager {
         return remoteObjects
     }
 
-    internal func manageConflict<T: BeamObjectProtocol>(_ object: T,
-                                                        _ remoteObject: T) -> T {
+    func manageConflict<T: BeamObjectProtocol>(_ object: T, _ remoteObject: T) -> T {
         var result = object
 
         // Fetch the most recent
@@ -387,8 +374,7 @@ class BeamObjectManager {
         return result
     }
 
-    internal func manageConflict(_ object: BeamObject,
-                                 _ remoteObject: BeamObject) -> BeamObject {
+    func manageConflict(_ object: BeamObject, _ remoteObject: BeamObject) -> BeamObject {
         var result = object
 
         if let objectUpdatedAt = object.updatedAt,

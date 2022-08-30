@@ -299,7 +299,7 @@ extension NoteHeaderView {
 
         // MARK: - TabGroup
         func setTabGroups(with tabGroupIds: [UUID]) {
-            guard let storeManager = TabGroupingStoreManager.shared else { return }
+            guard let storeManager = state?.data.tabGroupingDBManager else { return }
             let tabs = storeManager.fetch(byIds: tabGroupIds)
             self.tabGroupObjects = tabs
         }

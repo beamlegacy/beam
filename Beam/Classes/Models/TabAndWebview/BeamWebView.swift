@@ -88,7 +88,7 @@ class BeamWebView: WKWebView {
         #if TEST || DEBUG
             Self.aliveWebViewsCount -= 1
         #endif
-        #if DEBUG
+        #if DEBUG && !TEST
             SoundEffectPlayer.shared.playWebViewDeinitSound()
         #endif
         guard let monitor = monitor else { return }

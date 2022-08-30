@@ -12,7 +12,8 @@ class TabGroupingManagerURLGroupsManipulationsTests: XCTestCase {
     private var pageIDs: [ClusteringManager.PageID] = []
 
     override func setUp() {
-        updater = TabGroupingManager()
+        updater = TabGroupingManager(passwordManager: BeamData.shared.passwordManager,
+                                     browsingTreeStoreManager: BeamData.shared.browsingTreeStoreManager)
         for _ in 0...6 {
             pageIDs.append(UUID())
         }

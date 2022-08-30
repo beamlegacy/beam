@@ -106,7 +106,7 @@ struct PasswordEditView: View {
         guard !hostname.isEmpty, !username.isEmpty, !newPassword.isEmpty else { return }
         let validHostname = hostname.validUrl()
         if validHostname.isValid {
-            PasswordManager.shared.save(entry: editType == .update ? entry : nil, hostname: hostname, username: username, password: newPassword)
+            BeamData.shared.passwordManager.save(entry: editType == .update ? entry : nil, hostname: hostname, username: username, password: newPassword)
             dismiss()
             onSave?()
         } else {

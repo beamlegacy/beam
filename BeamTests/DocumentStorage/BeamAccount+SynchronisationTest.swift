@@ -255,7 +255,7 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         for window in AppDelegate.main.windows {
             window.state.closeAllTabs(closePinnedTabs: true)
         }
-        BeamData.shared.currentAccount?.logout()
+        AppData.shared.currentAccount?.logout()
         AppDelegate.main.deleteAllLocalData()
     }
 
@@ -280,7 +280,7 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
 
 
     private func runFullSync() {
-        guard let currentAccount = BeamData.shared.currentAccount else {
+        guard let currentAccount = AppData.shared.currentAccount else {
             XCTFail("Cannot get currentAccount")
             return
         }

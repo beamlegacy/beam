@@ -294,9 +294,13 @@ extension BeamAccount {
         }
 
         guard AuthenticationManager.shared.isAuthenticated else { return state }
+
+        let privateKeySignatureManager = data.privateKeySignatureManager
+
         var pkStatus = PrivateKeySignatureManager.DistantKeyStatus.invalid
+
         do {
-            pkStatus = try await PrivateKeySignatureManager.shared.distantKeyStatus()
+            pkStatus = try await privateKeySignatureManager.distantKeyStatus()
         } catch {
             Logger.shared.logError("Couldn't check the private key status: \(error)", category: .privateKeySignature)
             return state
@@ -351,7 +355,7 @@ extension BeamAccount {
                             Logger.shared.logInfo("New private key from user: \(textField.stringValue)", category: .privateKeySignature)
                             try EncryptionManager.shared.replacePrivateKey(for: Persistence.emailOrRaiseError(), with: pk)
                             // Check the validity of the private key with the object on server:
-                            let newStatus = try await PrivateKeySignatureManager.shared.distantKeyStatus()
+                            let newStatus = try await privateKeySignatureManager.distantKeyStatus()
                             validPrivateKey = newStatus == .valid
                             Logger.shared.logInfo("New private key status: \(newStatus), valid = \(validPrivateKey)")
                         } catch {
@@ -379,7 +383,7 @@ extension BeamAccount {
             do {
                 let request = BeamObjectRequest()
                 let signatures = try await request.fetchAllObjectPrivateKeySignatures()
-                let localSignature = (try? PrivateKeySignatureManager.shared.privateKeySignature.signature.SHA256()) ?? "invalid"
+                let localSignature = (try? privateKeySignatureManager.privateKeySignature.signature.SHA256()) ?? "invalid"
                 canUploadPrivateKey = signatures.isEmpty || signatures.contains(localSignature)
             } catch {
                 canUploadPrivateKey = false
@@ -391,7 +395,7 @@ extension BeamAccount {
             }
 
             do {
-                try await PrivateKeySignatureManager.shared.saveOnNetwork(PrivateKeySignatureManager.shared.privateKeySignature)
+                try await privateKeySignatureManager.saveOnNetwork(privateKeySignatureManager.privateKeySignature)
                 self.moveToSignedIn()
             } catch {
                 Logger.shared.logError("Unable to save private key signature on network: \(error)", category: .privateKeySignature)
@@ -404,7 +408,7 @@ extension BeamAccount {
         Task { @MainActor in
             if await checkPrivateKey(useBuiltinPrivateKeyUI: useBuiltinPrivateKeyUI) == .signedIn {
                 // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-                AppDelegate.main.beamObjectManager.liveSync { (firstCall, _) in
+                data.objectManager.liveSync { (firstCall, _) in
                     Task { @MainActor in
                         do {
                             _ = try await AppDelegate.main.getUserInfosAsync()
@@ -413,7 +417,7 @@ extension BeamAccount {
                         }
 
                         do {
-                            _ = try await AppDelegate.main.syncDataWithBeamObject { _ in
+                            _ = try AppDelegate.main.syncDataWithBeamObject { _ in
                                 guard firstCall == true else { return }
                                 syncCompletion?(.success(true))
                             }

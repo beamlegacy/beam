@@ -54,6 +54,11 @@ public class BeamDatabase: CustomStringConvertible, Codable, Identifiable, Equat
 
     var grdbStore: GRDBStore!
 
+    public var objectManager: BeamObjectManager {
+        // It's not clear how to get rid of this forced unwrap, it seems like `account` should not be an optional.
+        account!.objectManager
+    }
+
     public var beamObjectId: UUID {
         get { id }
         set { id = newValue }

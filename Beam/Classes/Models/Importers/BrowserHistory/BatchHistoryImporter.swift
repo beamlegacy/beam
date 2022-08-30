@@ -30,14 +30,16 @@ class BatchHistoryImporter {
     var maxDate = Date.distantPast
     let timer = BeamTimer()
     let browsingTree: BrowsingTree
-    let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: LinkStoreFrecencyUrlStorage())
+    let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: LinkStoreFrecencyUrlStorage(objectManager: BeamData.shared.objectManager))
     let sourceBrowser: BrowserType
     let localLinkStore = LinkStore(linkManager: InMemoryLinkManager())
+    let browsingTreeStoreManager: BrowsingTreeStoreManager
 
-    init(sourceBrowser: BrowserType, batchSize: Int = 10_000) {
+    init(sourceBrowser: BrowserType, batchSize: Int = 10_000, browsingTreeStoreManager: BrowsingTreeStoreManager) {
         self.sourceBrowser = sourceBrowser
         self.browsingTree = BrowsingTree(.historyImport(sourceBrowser: sourceBrowser), linkStore: localLinkStore)
         self.batchSize = batchSize
+        self.browsingTreeStoreManager = browsingTreeStoreManager
     }
 
     private func saveBatch() {
@@ -74,7 +76,7 @@ class BatchHistoryImporter {
         }
         timer.record(stepName: "treeSave") {
             do {
-                try BrowsingTreeStoreManager.shared.save(browsingTree: browsingTree)
+                try browsingTreeStoreManager.save(browsingTree: browsingTree)
             } catch {
                 Logger.shared.logError("Couldn't save tree: \(error)", category: .browserImport)
                 onError()

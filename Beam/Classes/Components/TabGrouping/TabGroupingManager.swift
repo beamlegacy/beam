@@ -22,7 +22,6 @@ protocol TabGroupingManagerDelegate: AnyObject {
 }
 
 class TabGroupingManager {
-
     typealias PageID = ClusteringManager.PageID
     typealias PageGroupDictionary = [PageID: TabGroup]
     private let myQueue = DispatchQueue(label: "tabGroupingManagerQueue")
@@ -35,9 +34,12 @@ class TabGroupingManager {
         subjectForDeletedGroup.eraseToAnyPublisher()
     }
     private var subjectForDeletedGroup = PassthroughSubject<TabGroup, Never>()
-    private var storeManager: TabGroupingStoreManager? {
+    var storeManager: TabGroupingStoreManager? {
         BeamData.shared.tabGroupingDBManager
     }
+
+    let passwordManager: PasswordManager
+    let browsingTreeStoreManager: BrowsingTreeStoreManager
 
     /// Page associated to a manual group because Clustering found some grouping with pages inside a manual group.
     private var temporaryInManualPageGroups = PageGroupDictionary()
@@ -50,6 +52,11 @@ class TabGroupingManager {
     /// The UI might want to temporarily force a tab in or out a group, independently of its page.
     /// Either for temporary UI states (opening a new tab in group). Or while we're waiting for Clustering to update.
     private(set) var forcedTabsGroup = [BrowserTab.TabID: TabForcedGroup]()
+
+    init(passwordManager: PasswordManager, browsingTreeStoreManager: BrowsingTreeStoreManager) {
+        self.passwordManager = passwordManager
+        self.browsingTreeStoreManager = browsingTreeStoreManager
+    }
 
     func existingGroup(forGroupID: TabGroup.GroupID) -> TabGroup? {
         builtPagesGroups.values.first { $0.id == forGroupID }

@@ -12,6 +12,13 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
     static var beeper: CrossTargetBeeper?
+
+    private weak var account: BeamAccount?
+
+    init(account: BeamAccount) {
+        self.account = account
+    }
+
     func executeCommand(_ command: UITestMenuAvailableCommands) {
         switch command {
         case .destroyDB: destroyDatabase()
@@ -91,7 +98,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         for window in AppDelegate.main.windows {
             window.state.closeAllTabs(closePinnedTabs: true)
         }
-        BeamData.shared.currentAccount?.logout()
+        AppData.shared.currentAccount?.logout()
         AppDelegate.main.deleteAllLocalData()
     }
 
@@ -145,7 +152,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         PinnedBrowserTabsManager().savePinnedTabs(tabs: [])
         ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }
         KeychainDailyNoteScoreStore.shared.clear()
-        try? BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+        try? AppData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
     private func urlForTestPage(identifier: String) -> URL? {
@@ -228,10 +235,10 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
             Logger.shared.logInfo($0, category: .autoUpdate)
         }
         appDel.window?.state.objectWillChange.send()
-        appDel.data.versionChecker = checker
+        appDel.data.currentAccount?.data.versionChecker = checker
 
         Task {
-            await appDel.data.versionChecker.performUpdateIfAvailable()
+            await appDel.data.currentAccount?.data.versionChecker.performUpdateIfAvailable()
         }
     }
 
@@ -253,12 +260,14 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     }
 
     private func addPageToHistory(url: String, aliasUrl: String? = nil, title: String) {
+        guard let linkDB = account?.data.linkDB else { return }
+
         _ = IndexDocument(source: url, title: title, contents: title)
         let id: UUID = {
             if let alias = aliasUrl {
-                return BeamLinkDB.shared.visitId(alias, title: title, content: title, destination: url)
+                return linkDB.visitId(alias, title: title, content: title, destination: url)
             }
-            return BeamLinkDB.shared.visitId(url, title: title, content: title)
+            return linkDB.visitId(url, title: title, content: title)
         }()
         let frecency = FrecencyUrlRecord(urlId: id, lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
         try? BeamData.shared.urlHistoryManager?.saveFrecencyUrl(frecency)
@@ -271,7 +280,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         let password = Configuration.testAccountPassword
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
-        BeamData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
+        AppData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
             if case .failure(let error) = result {
                 fatalError(error.localizedDescription)
             }
@@ -290,20 +299,20 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         let username = "\(emailComponents[0])_\(randomString)".replacingOccurrences(of: "+", with: "_").substring(from: 0, to: 30)
         let password = Configuration.testAccountPassword
 
-        BeamData.shared.currentAccount?.signUp(email, password) { result in
+        AppData.shared.currentAccount?.signUp(email, password) { result in
             if case .failure(let error) = result {
                 DispatchQueue.main.async {
                     self.showAlert("Cannot sign up", "Cannot sign up with \(email): \(error.localizedDescription)")
                 }
                 return
             }
-            BeamData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: false, completionHandler: { result in
+            AppData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: false, completionHandler: { result in
                 if case .failure(let error) = result {
                     DispatchQueue.main.async {
                         self.showAlert("Cannot sign in", "Cannot sign in with \(email): \(error.localizedDescription)")
                     }
                 } else {
-                    BeamData.shared.currentAccount?.setUsername(username: username) { result in
+                    AppData.shared.currentAccount?.setUsername(username: username) { result in
                         DispatchQueue.main.async {
                             switch result {
                             case .failure(let error):
@@ -325,7 +334,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
                                 NSPasteboard.general.clearContents()
                                 NSPasteboard.general.setString(email, forType: .string)
 
-                                BeamData.shared.currentAccount?.runFirstSync(useBuiltinPrivateKeyUI: false)
+                                AppData.shared.currentAccount?.runFirstSync(useBuiltinPrivateKeyUI: false)
                             }
                         }
                     }
@@ -367,7 +376,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     }
 
     private func clearPasswordsDatabase() {
-        PasswordManager.shared.deleteAll(includedRemote: false)
+        account?.data.passwordManager.deleteAll(includedRemote: false)
     }
 
     private func clearCreditCardsDatabase() {
@@ -415,7 +424,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     }
 
     private func deleteRemoteAccount() {
-        BeamData.shared.currentAccount?.deleteAccount { result in
+        AppData.shared.currentAccount?.deleteAccount { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Error while deleting account: \(error)", category: .accountManager)

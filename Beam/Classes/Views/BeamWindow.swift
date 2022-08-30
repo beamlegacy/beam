@@ -11,9 +11,18 @@ import SwiftUI
 import BeamCore
 
 class BeamWindow: NSWindow, NSDraggingDestination, Codable {
-    var state: BeamState
+    enum Error: Swift.Error {
+        case missingAccount(UUID)
+    }
+
+    let account: BeamAccount
+    let state: BeamState
+
+    var data: BeamData {
+        account.data
+    }
+
     var windowInfo: BeamWindowInfo = BeamWindowInfo()
-    var data: BeamData
 
     private let composedWindowMargin: CGFloat = 3.0
     private var isComposed: Bool {
@@ -48,14 +57,14 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
     private var trafficLightLeftMargin: CGFloat = 20
     private(set) var touchBarController: TouchBarController?
 
-    init(contentRect: NSRect, data: BeamData, state: BeamState? = nil, title: String? = nil, isIncognito: Bool = false, minimumSize: CGSize? = nil) {
-        self.data = data
+    init(contentRect: NSRect, account: BeamAccount, state: BeamState? = nil, title: String? = nil, isIncognito: Bool = false, minimumSize: CGSize? = nil) {
+        self.account = account
         self.state = state ?? BeamState(incognito: isIncognito)
-
-        try? data.setupJournal(firstSetup: true)
 
         super.init(contentRect: contentRect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView],
                    backing: .buffered, defer: false)
+
+        try? data.setupJournal(firstSetup: true)
 
         windowInfo.window = self
 
@@ -148,15 +157,23 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
     private enum CodingKeys: String, CodingKey {
         case contentRect
         case state
+        case account
     }
 
     convenience required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let contentRect = try container.decode(NSRect.self, forKey: .contentRect)
         let state = try container.decode(BeamState.self, forKey: .state)
+        let accountID = try container.decodeIfPresent(UUID.self, forKey: .account)
+
+        let account = accountID.flatMap({ AppData.shared.account(for: $0) }) ?? AppData.shared.currentAccount
+
+        guard let account = account else {
+            throw Error.missingAccount(accountID ?? UUID.null)
+        }
 
         self.init(contentRect: contentRect,
-                  data: BeamData.shared,
+                  account: account,
                   state: state,
                   minimumSize: AppDelegate.defaultWindowMinimumSize)
     }
@@ -167,6 +184,7 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(contentRect, forKey: .contentRect)
         try container.encode(state, forKey: .state)
+        try container.encode(account.id, forKey: .account)
     }
 
     func showHelpAndFeedbackMenuView() {

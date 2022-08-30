@@ -100,7 +100,9 @@ class PasswordManagerMenuViewModel: ObservableObject {
     private var otherPasswordsDialog: PopoverWindow?
     private var subscribers = Set<AnyCancellable>()
 
-    init(host: URL, credentialsBuilder: PasswordManagerCredentialsBuilder, userInfoStore: UserInformationsStore, options: PasswordManagerMenuOptions) {
+    private let passwordManager: PasswordManager
+
+    init(host: URL, credentialsBuilder: PasswordManagerCredentialsBuilder, userInfoStore: UserInformationsStore, options: PasswordManagerMenuOptions, passwordManager: PasswordManager) {
         self.host = host
         self.minimizedHost = host.minimizedHost ?? host.urlStringWithoutScheme
         self.options = options
@@ -109,12 +111,15 @@ class PasswordManagerMenuViewModel: ObservableObject {
         self.entriesForHost = []
         self.autofillMenuItems = []
         self.otherMenuItems = []
-        self.otherPasswordsViewModel = PasswordListViewModel()
+        self.passwordManager = passwordManager
+        self.otherPasswordsViewModel = PasswordListViewModel(passwordManager: passwordManager)
+
         if options.suggestNewPassword {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()
             passwordGeneratorViewModel.delegate = self
             self.passwordGeneratorViewModel = passwordGeneratorViewModel
         }
+
         self.loadEntries()
         self.updateDisplay()
     }
@@ -191,7 +196,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
             if let bestEntry = credentialsBuilder.suggestedEntry() {
                 self.entriesForHost = [bestEntry]
             } else {
-                self.entriesForHost = PasswordManager.shared.entries(for: minimizedHost, options: .fuzzy)
+                self.entriesForHost = passwordManager.entries(for: minimizedHost, options: .fuzzy)
             }
         }
     }

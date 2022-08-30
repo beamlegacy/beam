@@ -24,7 +24,7 @@ class RecentsManager: ObservableObject {
         try? self.fetchRecents()
         self.setupObserver()
 
-        BeamData.shared.$currentDatabase
+        BeamData.shared.currentDatabaseChanged
             .sink { [weak self] _ in
                 try? self?.fetchRecents()
             }

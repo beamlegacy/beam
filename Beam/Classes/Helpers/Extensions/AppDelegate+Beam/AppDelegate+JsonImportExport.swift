@@ -12,7 +12,7 @@ extension AppDelegate {
             defer { openPanel?.close() }
 
             guard result == .OK, let selectedPath = openPanel?.url?.path,
-                  let ids = try? self.data.currentDocumentCollection?.fetchIds(filters: [.userFacingNotes])
+                  let ids = try? self.data.currentAccount?.data.currentDocumentCollection?.fetchIds(filters: [.userFacingNotes])
             else { return }
 
             let baseURL = URL(fileURLWithPath: selectedPath)
@@ -137,7 +137,7 @@ extension AppDelegate {
                 }
             }
 
-            if selectedNotes.isEmpty, let allNotesIDs = try? self.data.currentDocumentCollection?.fetchIds(filters: []) {
+            if selectedNotes.isEmpty, let allNotesIDs = try? self.data.currentAccount?.data.currentDocumentCollection?.fetchIds(filters: []) {
                 for note in allNotesIDs.compactMap({ BeamNote.fetch(id: $0, keepInMemory: false) }) {
                     export(note: note, isExportingAllNotes: true)
                 }

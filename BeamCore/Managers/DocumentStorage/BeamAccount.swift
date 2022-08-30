@@ -39,7 +39,6 @@ public struct BeamDeletedAccount: Equatable, Hashable {
 
 /// An account contains the user's meta data (name, id, etc) as well as a set of document collections.
 public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner, BeamDocumentSource {
-
     @Published public private(set) var id: UUID
     @Published public private(set) var email: String
     @Published public private(set) var name: String
@@ -48,6 +47,19 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
     @Published public private(set) var databases: [UUID: BeamDatabase] = [:]
     @Published public private(set) var allDatabases: [BeamDatabase] = []
+
+    private var synchronizationTask: Task<Void, Error>?
+    private var synchronizationSubject = PassthroughSubject<Bool, Never>()
+    private(set) var isSynchronizationRunning = false
+
+    var isSynchronizationRunningPublisher: AnyPublisher<Bool, Never> {
+        synchronizationSubject.eraseToAnyPublisher()
+    }
+
+    public var objectManager: BeamObjectManager {
+        data.objectManager
+    }
+
     public var defaultDatabase: BeamDatabase {
         return getOrCreateDefaultDatabase()
     }
@@ -65,6 +77,8 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
     let userSessionRequest = UserSessionRequest()
     let userInfoRequest = UserInfoRequest()
+
+    let data = BeamData.shared
 
     public internal(set) var state = ConnectionState.signedOff
     public enum ConnectionState {
@@ -93,6 +107,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
         grdbStore = GRDBStore(writer: db)
 
         try loadManagers(grdbStore)
+
         if migrate {
             try grdbStore.migrate()
         }
@@ -104,9 +119,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
         DispatchQueue.main.async {
             do {
-                if let data = AppDelegate.main.data {
-                    try data.reindexFileReferences()
-                }
+                try self.data.reindexFileReferences()
             } catch {
                 Logger.shared.logError("Error while reindexing all file references: \(error)", category: .fileDB)
             }
@@ -146,6 +159,10 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     public func unloadDatabase(_ id: UUID) throws {
         guard let database = databases[id] else { throw BeamAccountError.databaseDoesntExist }
         try database.unload()
+    }
+
+    func setCurrentDatabase(_ database: BeamDatabase) throws {
+        try data.setCurrentDatabase(database)
     }
 
     @discardableResult
@@ -204,6 +221,10 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
             accountWillBeCreated()
         }
         try FileManager.default.createDirectory(at: URL(fileURLWithPath: path), withIntermediateDirectories: true)
+    }
+
+    func setupManagers() {
+        
     }
 
     public func save() throws {
@@ -284,8 +305,8 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     private static var syncDisabled = false
     public func setupSync() {
         guard !syncSetup, !Self.syncDisabled else { return }
-        databaseSynchroniser = BeamDatabaseSynchronizer(account: self)
-        documentSynchroniser = BeamDocumentSynchronizer(account: self)
+        databaseSynchroniser = BeamDatabaseSynchronizer(account: self, objectManager: data.objectManager)
+        documentSynchroniser = BeamDocumentSynchronizer(account: self, objectManager: data.objectManager)
         syncSetup = true
     }
 
@@ -298,14 +319,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
         Persistence.Sync.BeamObjects.last_received_at = nil
         Persistence.Sync.BeamObjects.last_updated_at = nil
     }
-}
-
-extension BeamAccount {
-    func registerOnBeamObjectManager() {
-        databaseSynchroniser?.registerOnBeamObjectManager()
-        documentSynchroniser?.registerOnBeamObjectManager()
-        BeamFileDBManager.shared?.registerOnBeamObjectManager()
-    }
 
     public func checkAndRepairIntegrity() {
         grdbStore.checkAndRepairIntegrity()
@@ -313,9 +326,7 @@ extension BeamAccount {
             database.checkAndRepairIntegrity()
         }
     }
-}
 
-extension BeamAccount {
     static func loadAccounts(from url: URL, stopAtFirst: Bool = false) -> [BeamAccount] {
         guard let urls = try? FileManager().contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles]) else {
             Logger.shared.logError("Unable to finds potential accounts from \(url)", category: .accountManager)
@@ -339,5 +350,119 @@ extension BeamAccount {
 
     static func hasValidAccount(in url: URL) -> Bool {
         !loadAccounts(from: url, stopAtFirst: true).isEmpty
+    }
+
+    // MARK: - Private Key Check
+    @MainActor
+    func checkPrivateKey() async {
+        if await checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
+            data.objectManager.liveSync { (_, _) in
+                Task { @MainActor in
+                    do {
+                        _ = try self.syncDataWithBeamObject()
+                    } catch {
+                        Logger.shared.logError("Error while syncing data: \(error)", category: .document)
+                    }
+                    self.data.updateNoteCount()
+                }
+            }
+        } else {
+            logoutIfNeeded()
+        }
+    }
+
+    // MARK: - Web sockets
+    func disconnectWebSockets() {
+        data.objectManager.disconnectLiveSync()
+    }
+
+    // MARK: - Database
+    @MainActor
+    func syncDataWithBeamObject(force: Bool = false,
+                                showAlert: Bool = true,
+                                _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws -> Bool {
+        guard Configuration.env != .test,
+              AuthenticationManager.shared.isAuthenticated,
+              Configuration.networkEnabled else {
+            completionHandler?(.success(false))
+            return false
+        }
+
+        guard isSynchronizationRunning == false else {
+            Logger.shared.logDebug("syncTask already running", category: .beamObjectNetwork)
+            completionHandler?(.success(false))
+            return false
+        }
+        isSynchronizationRunning = true
+        synchronizationIsRunningDidUpdate()
+
+        synchronizationTask = launchSynchronizationTask(force, showAlert, completionHandler)
+
+        return true
+    }
+
+    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool, _ completionHandler: ((Result<Bool, Error>) -> Void)?) -> Task<Void, Error> {
+        Task { @MainActor in
+            defer {
+                DispatchQueue.main.async {
+                    self.synchronizationTaskDidStop()
+                }
+            }
+
+            let localTimer = Date()
+            let initialDBs = Set(allDatabases)
+            Logger.shared.logInfo("syncAllFromAPI calling", category: .sync)
+            do {
+                try await data.objectManager.syncAllFromAPI(force: force, prepareBeforeSaveAll: {
+                    self.mergeAllDatabases(initialDBs: initialDBs)
+                })
+            } catch {
+                Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
+                                      category: .sync,
+                                      localTimer: localTimer)
+                completionHandler?(.failure(error))
+                return
+            }
+
+            Logger.shared.logInfo("syncAllFromAPI called",
+                                  category: .sync,
+                                  localTimer: localTimer)
+            completionHandler?(.success(true))
+        }
+    }
+
+    public func stopSynchronization() {
+        if let task = synchronizationTask {
+            task.cancel()
+        }
+    }
+
+    @MainActor
+    private func synchronizationTaskDidStop() {
+        Logger.shared.logInfo("synchronizationTaskDidStop", category: .beamObjectNetwork)
+        synchronizationTask = nil
+        isSynchronizationRunning = false
+        synchronizationIsRunningDidUpdate()
+    }
+
+    private func synchronizationIsRunningDidUpdate() {
+        synchronizationSubject.send(isSynchronizationRunning)
+    }
+
+    private func indexAllNotes() {
+        DispatchQueue.main.async {
+            BeamNote.indexAllNotes(interactive: false)
+        }
+    }
+
+    private func deleteEmptyDatabases(showAlert: Bool = true,
+                                      _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+        do {
+            try deleteEmptyDatabases()
+            completionHandler?(.success(true))
+        } catch {
+            Logger.shared.logInfo("deleteEmptyDatabases failed: \(error)", category: .database)
+            completionHandler?(.failure(error))
+        }
     }
 }

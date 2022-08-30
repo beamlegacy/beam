@@ -44,7 +44,7 @@ struct OtherPasswordModal: View {
             } onDoubleTap: { row in
                 do {
                     let entry = viewModel.filteredPasswordEntries[row]
-                    let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
+                    let password = try BeamData.shared.passwordManager.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
                     editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
                 } catch {
                     alertMessage = .init(error: error)
@@ -147,7 +147,10 @@ fileprivate extension Sequence where Element == (offset: Int, element: PasswordT
 
 struct OtherPasswordModal_Previews: PreviewProvider {
     static var previews: some View {
-        OtherPasswordModal(viewModel: PasswordListViewModel(), onFill: { _ in }, onRemove: { _ in }, onDismiss: {})
+        OtherPasswordModal(viewModel: PasswordListViewModel(passwordManager: PasswordManager(objectManager: BeamObjectManager())),
+                           onFill: { _ in },
+                           onRemove: { _ in },
+                           onDismiss: {})
 
     }
 }

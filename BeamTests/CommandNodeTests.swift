@@ -271,7 +271,7 @@ class CommandNodeTests: QuickSpec, BeamDocumentSource {
     private func setupTree() throws -> BeamNote {
         BeamTestsHelper.logout()
 
-        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+        try AppData.shared.clearAllAccountsAndSetupDefaultAccount()
         BeamNote.clearFetchedNotes()
         let note = try BeamNote.fetchOrCreate(self, title: "TestCommands")
 
