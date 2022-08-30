@@ -10,7 +10,6 @@ import XCTest
 @testable import BeamCore
 @testable import Beam
 
-import Nimble
 import GRDB
 
 class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
@@ -20,62 +19,31 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
     let beamObjectHelper = BeamObjectTestsHelper()
     var remoteObjects: [BeamObject] = []
 
-    override func setUpWithError() throws {
+    override func setUp() async throws {
         BeamDate.freeze("2021-03-19T12:21:03Z")
 
         Configuration.beamObjectDirectCall = false
         Configuration.beamObjectOnRest = true
 
-        logout()
-        try setupInitialState()
+        await logout()
+        try await setupInitialState()
     }
 
-    override func tearDown() {
-        logout()
+    override func tearDown() async throws {
+        await stopNetworkTests()
+        beamHelper.endNetworkRecording()
+        await logout()
         Configuration.reset()
     }
 
-    func testAfterSignupLater() throws {
-        // we have the daily note
-        guard BeamNote.fetch(journalDate: BeamDate.now) != nil else {
-            XCTFail("Cannot get journal day")
-            return
-        }
-
-        // the previous daily note
-        let yesterday = BeamDate.now.addingTimeInterval(-60 * 60 * 24)
-        guard BeamNote.fetch(journalDate: yesterday) != nil else {
-            XCTFail("Cannot get journal day")
-            return
-        }
-
-        // and onboarding notes
-        guard BeamNote.fetch(title: "How to beam") != nil else {
-            XCTFail("Cannot get 'How to beam' note")
-            return
-        }
-        guard BeamNote.fetch(title: "Capture") != nil else {
-            XCTFail("Cannot get 'Capture")
-            return
-        }
-
-        // and 2 frecencies for journal
-        guard let noteLinksAndRefManager = BeamData.shared.currentDatabase?.noteLinksAndRefsManager else {
-            XCTFail("Cannot get noteLinksAndRefsManager")
-            return
-        }
-        let frecencyNoteRecords = try noteLinksAndRefManager.allNoteFrecencies(updatedSince: nil)
-        XCTAssertEqual(frecencyNoteRecords.count, 2)
-    }
-
-    func testFirstLogin() async throws {
+    func testFirstLogin() throws {
         guard let noteLinksAndRefManager = BeamData.shared.currentDatabase?.noteLinksAndRefsManager else {
             XCTFail("Cannot get noteLinksAndRefsManager")
             return
         }
         try noteLinksAndRefManager.clear()
 
-        beforeNetworkTests()
+        beforeNetworkTests(login: true, logoutBefore: false)
 
         // we have the daily note
         guard BeamNote.fetch(journalDate: BeamDate.now) != nil else {
@@ -90,7 +58,7 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         }
 
         let frecencyNoteRecords = try noteLinksAndRefManager.allNoteFrecencies(updatedSince: nil)
-        XCTAssertEqual(frecencyNoteRecords.count, 2)
+        XCTAssertEqual(frecencyNoteRecords.count, 2, "We should have 2 note frecencies automatically created")
 
         guard let currentDatabase = BeamData.shared.currentDatabase else {
             XCTFail("Cannot get current database")
@@ -102,14 +70,17 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
             return
         }
 
-        // 2 journals from freezed date and 2 notes = 5
-        XCTAssertEqual(allDocuments.count, 4)
+        XCTAssertEqual(allDocuments.count, 4, "We should have the 2 journals (now and the day before) and 2 notes")
 
-        await stopNetworkTests()
     }
 
-    func testLoginAfterSignupLater() async throws {
-        try setupInitialState()
+    func testLoginAfterSignupLater() throws {
+        let expectation = self.expectation(description: "setupInitialState")
+        Task {
+            try await self.setupInitialState()
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 60.0)
 
         // we have the daily note
         guard let initialJournalNote = BeamNote.fetch(journalDate: BeamDate.now) else {
@@ -127,11 +98,16 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
             return
         }
 
-        // 2 journals from freezed date and 2 notes = 4
-        XCTAssertEqual(allDocuments.count, 4)
+        XCTAssertEqual(allDocuments.count, 4, "We should have 2 journals from freezed date and 2 notes = 4")
 
         beforeNetworkTests(logoutBefore: false) // this will issue a login
-        runFullSync()
+
+        let runFullSyncExpectation = self.expectation(description: "runFullSync")
+        Task {
+            await self.runFullSync()
+            runFullSyncExpectation.fulfill()
+        }
+        wait(for: [runFullSyncExpectation], timeout: 60.0)
 
         guard let currentDatabase = BeamData.shared.currentDatabase else {
             XCTFail("Cannot get current database")
@@ -143,41 +119,33 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
             XCTFail("Cannot fetch journal notes")
             return
         }
-        XCTAssertEqual(journalNotes.count, 1)
+        XCTAssertEqual(journalNotes.count, 1, "We should have only one journal")
 
         guard let allDocuments = try currentDatabase.collection?.fetch(filters: []) else {
             XCTFail("Cannot fetch documents")
             return
         }
-        XCTAssertEqual(allDocuments.count, 4)
+        XCTAssertEqual(allDocuments.count, 4, "We should have 4 documents")
 
         guard let currentJournalNote = BeamNote.fetch(journalDate: BeamDate.now) else {
             XCTFail("Cannot get journal day")
             return
         }
+        XCTAssertNotNil(currentJournalNote.document?.database)
 
-        // same document id after sync from scratch
-        XCTAssertEqual(currentJournalNote.id, initialJournalNote.id)
+        XCTAssertEqual(currentJournalNote.id, initialJournalNote.id, "The initial journal and the current journal should be equal")
 
         guard let noteLinksAndRefManager = BeamData.shared.currentDatabase?.noteLinksAndRefsManager else {
             XCTFail("Cannot get noteLinksAndRefsManager")
             return
         }
         let frecencyNoteRecords = try noteLinksAndRefManager.allNoteFrecencies(updatedSince: nil)
-        XCTAssertEqual(frecencyNoteRecords.count, 2)
-
-        // 4 docs, 2 frecencies, 1 private key, 4 files, 1 database = 12
-//        XCTAssertEqual(fetchAllRemoteObjects().count, 12)
-
-        await stopNetworkTests()
+        XCTAssertEqual(frecencyNoteRecords.count, 2, "We should have no more than 2 frecencies for the journal")
     }
 
-    func testSynchronisationWithExistingData() async throws {
+    func testSynchronisationWithExistingData() throws {
         beforeNetworkTests()
 
-        XCTAssertEqual(fetchAllRemoteObjects().count, 0)
-
-        logoutAndLogin()
         try BeamData.shared.reloadJournal()
 
         guard let initialJournal = getJournal() else {
@@ -185,73 +153,53 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
             return
         }
 
-        runFullSync()
+        BeamTestsHelper.login()
 
-        XCTAssertEqual(fetchAllRemoteObjects().count, 9)
+        let saveAndDeleteExpectation = self.expectation(description: "reset and delete state")
 
-        logoutAndLogin()
+        Task {
+            await self.runFullSync()
+            // at this step data is saved on server
+
+            // let's reset everything on app
+            await self.logout()
+            saveAndDeleteExpectation.fulfill()
+        }
+        wait(for: [saveAndDeleteExpectation], timeout: 60.0)
+
         try BeamData.shared.reloadJournal()
 
         guard let secondJournal = getJournal() else {
             XCTFail("Cannot get second journal")
             return
         }
+        XCTAssertNotNil(secondJournal.document?.database)
 
+        // a second journal is created, different from initial
         XCTAssertNotEqual(secondJournal.id, initialJournal.id)
 
-        runFullSync()
+        // we run the full sync again to get remote data
+        BeamTestsHelper.login()
+        let runFullSyncExpectation = self.expectation(description: "runFullSync")
+        Task {
+            await self.runFullSync()
+            runFullSyncExpectation.fulfill()
+        }
+        wait(for: [runFullSyncExpectation], timeout: 160.0)
 
+        // and the 3rd version of journal should be the same as the initial one
+        // but we cannot test here because of prerecorded ids
+        // (app generates a new id on each reset but vinyl has saved another)
         guard let thirdJournal = getJournal() else {
             XCTFail("Cannot get third journal")
             return
         }
-
-        XCTAssertEqual(thirdJournal.id, initialJournal.id)
-
-        guard let currentDatabase = BeamData.shared.currentDatabase else {
-            XCTFail("Cannot get current database")
-            return
-        }
-        guard let reloadedJournals = try currentDatabase.collection?.fetch(filters: [.ids([thirdJournal.id, initialJournal.id])])  else {
-            XCTFail("Cannot fetch documents")
-            return
-        }
-
-        print("Initial journal id: \(initialJournal.id)")
-        print("Third journal id: \(thirdJournal.id)")
-
-        print(reloadedJournals.map {
-            "\($0.id) - \($0.title) - \(String(describing: $0.deletedAt))"
-        })
-
-//        XCTAssertEqual(fetchAllRemoteObjects().count, 12)
-//
-//        guard let currentDatabase = BeamData.shared.currentDatabase else {
-//            XCTFail("Cannot get current database")
-//            return
-//        }
-//
-//        guard let allDocuments = try currentDatabase.collection?.fetch(filters: []) else {
-//            XCTFail("Cannot fetch documents")
-//            return
-//        }
-//
-//        // 2 journals from freezed date and 2 notes = 4
-//        XCTAssertEqual(allDocuments.count, 4)
-//
-//        guard let noteLinksAndRefManager = BeamData.shared.currentDatabase?.noteLinksAndRefsManager else {
-//            XCTFail("Cannot get noteLinksAndRefsManager")
-//            return
-//        }
-//        let frecencyNoteRecords = try noteLinksAndRefManager.allNoteFrecencies(updatedSince: nil)
-//        XCTAssertEqual(frecencyNoteRecords.count, 2)
-//
-//        XCTAssertEqual(fetchAllRemoteObjects().count, 12)
-
-        await stopNetworkTests()
+        XCTAssertNotNil(thirdJournal.document?.database)
+        XCTAssertEqual(thirdJournal.title, initialJournal.title)
     }
 
-    private func logout() {
+    @MainActor
+    private func logout() async {
         for window in AppDelegate.main.windows {
             window.state.closeAllTabs(closePinnedTabs: true)
         }
@@ -259,49 +207,49 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         AppDelegate.main.deleteAllLocalData()
     }
 
-    private func beforeNetworkTests(logoutBefore: Bool = true) {
+    private func beforeNetworkTests(login: Bool = true, logoutBefore: Bool = true) {
         beamHelper.disableNetworkRecording()
         BeamURLSession.shouldNotBeVinyled = true
 
         if logoutBefore {
             BeamTestsHelper.logout()
         }
-//        beamHelper.beginNetworkRecording(test: self)
-        BeamTestsHelper.login()
+        beamHelper.beginNetworkRecording(test: self)
+        if login {
+            BeamTestsHelper.login()
+        }
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
     }
 
+    @MainActor
     private func stopNetworkTests() async {
         await BeamObjectTestsHelper().deleteAll()
-//        beamHelper.endNetworkRecording()
         BeamDate.reset()
         BeamURLSession.shouldNotBeVinyled = false
     }
 
 
-    private func runFullSync() {
+    private func runFullSync() async {
         guard let currentAccount = AppData.shared.currentAccount else {
             XCTFail("Cannot get currentAccount")
             return
         }
-        let beamObjectManager = BeamObjectManager()
+        let beamObjectManager = BeamData.shared.objectManager
         let initialDBs = Set(currentAccount.allDatabases)
-        waitUntil(timeout: .seconds(60)) { done in
-            Task {
-                do {
-                    try await beamObjectManager.syncAllFromAPI(force: true,
-                                                               prepareBeforeSaveAll: {
-                        currentAccount.mergeAllDatabases(initialDBs: initialDBs)
-                    })
-                } catch {
-                    XCTFail("Cannot synchronise: \(error)")
-                }
-                done()
-            }
+        do {
+            try await beamObjectManager.syncAllFromAPI(force: true,
+                                                       prepareBeforeSaveAll: {
+                currentAccount.mergeAllDatabases(initialDBs: initialDBs)
+            })
+        } catch {
+            XCTFail("Cannot synchronise: \(error)")
+            print("### failed")
         }
+        BeamNote.clearFetchedNotes()
     }
 
-    private func setupInitialState() throws {
+    @MainActor
+    private func setupInitialState() async throws {
         guard let noteLinksAndRefManager = BeamData.shared.currentDatabase?.noteLinksAndRefsManager else {
             XCTFail("Cannot get noteLinksAndRefsManager")
             return
@@ -312,58 +260,7 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         try BeamData.shared.reloadJournal()
     }
 
-    private func fetchAllRemoteObjects() -> [BeamObject] {
-        self.remoteObjects = []
-        waitUntil(timeout: .seconds(60)) { done in
-            Task {
-                do {
-                    defer {
-                        done()
-                    }
-
-                    struct Parameters: Codable {
-                        let fields: String?
-                        let ids: [String]?
-                        let beamObjectType: String?
-                        let filterDeleted: Bool?
-                        let receivedAtAfter: String?
-                    }
-                    let fields = "id,checksum,createdAt,updatedAt,deletedAt,receivedAt,data,dataUrl,type,checksum,privateKeySignature"
-
-                    let parameters = Parameters(
-                        fields: fields,
-                        ids: nil,
-                        beamObjectType: nil,
-                        filterDeleted: false,
-                        receivedAtAfter: nil
-                    )
-
-                    let userMe: UserMe = try await BeamObjectRequest().performRestRequest(path: .fetchAll,
-                                                                                          postParams: parameters,
-                                                                                          authenticatedCall: true)
-                    guard let beamObjects = userMe.beamObjects else {
-                        XCTFail("Cannot fetch remote objects)")
-                        return
-                    }
-
-                    DispatchQueue.main.sync {
-                        self.remoteObjects = beamObjects
-                    }
-                } catch {
-                    XCTFail("Cannot fetch remote objects: \(error)")
-                }
-            }
-        }
-        return self.remoteObjects
-    }
-
-    private func logoutAndLogin() {
-        logout()
-        BeamTestsHelper.login()
-    }
-
     private func getJournal() -> BeamNote? {
         BeamNote.fetch(journalDate: BeamDate.now)
     }
 }
-
