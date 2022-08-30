@@ -75,7 +75,8 @@ public struct BeamDocument {
                 version: BeamVersion,
                 isPublic: Bool,
                 journalDate: Int64,
-                tabGroupId: UUID? = nil) {
+                tabGroupId: UUID? = nil,
+                isEmpty: Bool) {
         self.id = id
         self.source = source.sourceId
         self.database = database
@@ -90,6 +91,7 @@ public struct BeamDocument {
         self.isPublic = isPublic
         self.journalDate = journalDate
         self.tabGroupId = tabGroupId
+        self.isEmpty = isEmpty
     }
 
     public var uuidString: String {
@@ -100,21 +102,7 @@ public struct BeamDocument {
         "\(title) {\(id)} v\(version)\(deletedAt != nil ? " [DELETED]" : "")"
     }
 
-    public var isEmpty: Bool {
-        do {
-            let beamNote = try BeamNote.instanciateNote(self,
-                                                        keepInMemory: false,
-                                                        decodeChildren: true)
-            return beamNote.isEntireNoteEmpty()
-        } catch {
-            Logger.shared.logError("Can't decode Document \(titleAndId): \(error.localizedDescription)",
-                                   category: .document)
-            Logger.shared.logError("data size: \(data.count), data: \(data.asString ?? "-")",
-                                   category: .document)
-        }
-
-        return false
-    }
+    public var isEmpty: Bool
 
     public func copy() -> BeamDocument {
         BeamDocument(document: self)
@@ -145,6 +133,7 @@ public extension BeamDocument {
         case isPublic
         case version
         case formatVersion
+        case isEmpty
     }
 
     init(from decoder: Decoder) throws {
@@ -189,6 +178,8 @@ public extension BeamDocument {
             documentType = .note
             Logger.shared.logError("Can't decode \(documentTypeAsString)", category: .document)
         }
+
+        self.isEmpty = (try? container.decodeIfPresent(Bool.self, forKey: .isEmpty)) ?? false
     }
 
     func encode(to encoder: Encoder) throws {
@@ -226,6 +217,7 @@ public extension BeamDocument {
         try container.encode(version, forKey: .version)
 
         try container.encode(Self.formatVersion, forKey: .formatVersion)
+        try container.encode(self.isEmpty, forKey: .isEmpty)
     }
 }
 
@@ -245,6 +237,7 @@ public extension BeamDocument {
         self.isPublic = document.isPublic
         self.journalDate = document.journalDate
         self.tabGroupId = document.tabGroupId
+        self.isEmpty = document.isEmpty
     }
 }
 
@@ -264,7 +257,8 @@ extension BeamDocument: Equatable {
         lhs.updatedAt.intValue == rhs.updatedAt.intValue &&
         lhs.deletedAt?.intValue == rhs.deletedAt?.intValue &&
         lhs.journalDate == rhs.journalDate &&
-        lhs.tabGroupId == rhs.tabGroupId
+        lhs.tabGroupId == rhs.tabGroupId &&
+        lhs.isEmpty == rhs.isEmpty
     }
 }
 
@@ -282,6 +276,7 @@ extension BeamDocument: Hashable {
         hasher.combine(isPublic)
         hasher.combine(journalDate)
         hasher.combine(tabGroupId)
+        hasher.combine(isEmpty)
     }
 }
 
@@ -318,7 +313,7 @@ extension BeamVersion: DatabaseValueConvertible {
 
 extension BeamDocument: TableRecord {
     public enum Columns: String, ColumnExpression {
-        case id, source, title, createdAt, updatedAt, data, documentType, version, isPublic, journalDate, tabGroupId
+        case id, source, title, createdAt, updatedAt, data, documentType, version, isPublic, journalDate, tabGroupId, isEmpty
     }
 }
 
@@ -361,6 +356,11 @@ extension BeamDocument: FetchableRecord {
         isPublic = row[Columns.isPublic]
         journalDate = row[Columns.journalDate]
         tabGroupId = row[Columns.tabGroupId]
+        isEmpty = false
+        let _isEmpty = row[Columns.isEmpty]
+        if let empty = (_isEmpty as? Int64) {
+            self.isEmpty = empty != 0
+        }
     }
 }
 
@@ -379,6 +379,7 @@ extension BeamDocument: MutablePersistableRecord {
         container[Columns.isPublic] = isPublic
         container[Columns.journalDate] = journalDate
         container[Columns.tabGroupId] = tabGroupId
+        container[Columns.isEmpty] = isEmpty
     }
 }
 

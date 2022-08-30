@@ -30,6 +30,7 @@ public enum DocumentFilter {
     case updatedSince(Date)
     case updatedBetween(Date, Date)
     case isPublic(Bool)
+    case isEmpty(Bool)
 
     case limit(Int, offset: Int?)
 }
@@ -113,6 +114,32 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
             try db.alter(table: BeamDocument.databaseTableName) { table in
                 table.add(column: "tabGroupId", .blob)
             }
+        }
+
+        migrator.registerMigration("BeamDocumentCollection.isEmpty") { db in
+            try db.alter(table: BeamDocument.databaseTableName) { table in
+                table.add(column: "isEmpty", .boolean).defaults(to: false)
+            }
+
+            try? Self.fetchRequest(filters: [], sortingKey: nil)
+                .fetchAll(db)
+                .forEach({ document in
+                    var document = document
+                    document.source = "BeamDocumentColletionMigrator"
+                    try document.updateChanges(db, with: { document in
+                        do {
+                            let beamNote = try BeamNote.instanciateNote(document,
+                                                                        keepInMemory: false,
+                                                                        decodeChildren: true)
+                            document.isEmpty = beamNote.isEntireNoteEmpty()
+                        } catch {
+                            Logger.shared.logError("Can't decode Document \(document.titleAndId): \(error.localizedDescription)",
+                                                   category: .document)
+                            Logger.shared.logError("data size: \(document.data.count), data: \(document.data.asString ?? "-")",
+                                                   category: .document)
+                        }
+                    })
+                })
         }
     }
 
@@ -294,6 +321,10 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                 request = request.limit(limit, offset: offset)
             case let .isPublic(isPublic):
                 request = request.filter(BeamDocument.Columns.isPublic == isPublic)
+
+            case let .isEmpty(isEmpty):
+                request = request.filter(BeamDocument.Columns.isEmpty == isEmpty)
+
             }
         }
 
@@ -360,7 +391,8 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                                     version: note.version,
                                     isPublic: note.publicationStatus.isPublic,
                                     journalDate: JournalDateConverter.toInt(from: note.type.journalDateString ?? "0"),
-                                    tabGroupId: note.type.tabGroupId
+                                    tabGroupId: note.type.tabGroupId,
+                                    isEmpty: note.isEntireNoteEmpty()
         )
 
         try checkValidations(document)

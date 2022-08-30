@@ -100,7 +100,18 @@ struct LegacyDataImporter: BeamDocumentSource {
                                 _ = try account.loadDatabase(database.id)
                             }
                             if deletedAt == nil, let data = data {
-                                let document = BeamDocument(id: id, source: self, database: database, title: name, createdAt: createdAt, updatedAt: updatedAt, data: data, documentType: DocumentType(rawValue: type)!, version: BeamVersion(), isPublic: isPublic != 0, journalDate: journalDay)
+                                let decoder = JSONDecoder()
+                                decoder.userInfo[BeamNote.maxDepth] = 1
+                                var isEmpty = false
+                                do {
+                                    let note = try decoder.decode(BeamNote.self, from: data)
+                                    isEmpty = note.isEntireNoteEmpty()
+                                } catch {
+                                    // no short cut here, we can't decode the note, let's assume it's not empty
+                                    Logger.shared.logError("Unable to check for emptyness of imported note: \(error)", category: .database)
+                                }
+                                let document = BeamDocument(id: id, source: self, database: database, title: name, createdAt: createdAt, updatedAt: updatedAt, data: data, documentType: DocumentType(rawValue: type)!, version: BeamVersion(), isPublic: isPublic != 0, journalDate: journalDay,
+                                isEmpty: isEmpty)
                                 _ = try database.collection?.save(self, document, indexDocument: false)
                             }
                         }
