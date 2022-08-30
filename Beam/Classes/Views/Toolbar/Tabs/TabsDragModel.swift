@@ -37,14 +37,25 @@ class TabsDragModel: ObservableObject {
     private var spaceBetweenSections: CGFloat = 0
     private var allItems: [TabsListItem] = []
     private var itemsCount: Int = 0
+    private var activeItemIndexAtStart: Int?
     private var initialPinnedItemsCount: Int = 0
     private var singleTabCenteringAdjustment: CGFloat = 0
+    private var unlistedDraggedItemWidth: CGFloat?
 
+    var isDragging: Bool {
+        draggingOverIndex != nil
+    }
+    var isDraggingUnlistedItem: Bool {
+        isDragging && isHandlingUnlistedItem
+    }
+    private var isHandlingUnlistedItem: Bool {
+        unlistedDraggedItemWidth != nil
+    }
     var unpinnedItemsCount: Int {
         itemsCount - initialPinnedItemsCount
     }
     var widthForDraggedItem: CGFloat {
-        (draggingOverPins ? pinnedItemWidth : activeItemWidth) - spaceBetweenItems
+        isDraggingUnlistedItem ? (unlistedDraggedItemWidth ?? 0) : (draggingOverPins ? pinnedItemWidth : activeItemWidth) - spaceBetweenItems
     }
     var widthForDraggingSpacer: CGFloat {
         widthForDraggedItem
@@ -54,9 +65,19 @@ class TabsDragModel: ObservableObject {
         return dragStartIndex < initialPinnedItemsCount
     }
 
+    private var draggedItemCanBePinned: Bool {
+        !isHandlingUnlistedItem
+    }
+
+    private var draggedItemCanBeGrouped: Bool {
+        !isHandlingUnlistedItem
+    }
+
     private var pinnedItemsCountDuringDrag: Int {
         var count = initialPinnedItemsCount
-        if dragStartedFromPinnedItem && !draggingOverPins {
+        if !draggedItemCanBePinned {
+            // can't have been changed
+        } else if dragStartedFromPinnedItem && !draggingOverPins {
             count -= 1
         } else if !dragStartedFromPinnedItem && draggingOverPins {
             count += 1
@@ -91,11 +112,11 @@ class TabsDragModel: ObservableObject {
     }
 
     func prepareForDrag(gestureValue: TabGestureValue, scrollContentOffset: CGFloat,
-                        currentItemIndex: Int, sections: TabsListItemsSections, singleTabCenteringAdjustment: CGFloat = 0,
+                        currentItemIndex: Int?, sections: TabsListItemsSections, singleTabCenteringAdjustment: CGFloat = 0,
                         widthProvider: TabsListWidthProvider) {
-
         self.allItems = sections.allItems
         self.itemsCount = sections.allItems.count
+        self.activeItemIndexAtStart = currentItemIndex
         self.initialPinnedItemsCount = sections.pinnedItems.count
         self.widthProvider = widthProvider
         self.pinnedItemWidth = widthProvider.width(forItem: nil, selected: false, pinned: true)
@@ -111,10 +132,14 @@ class TabsDragModel: ObservableObject {
         if !draggingOverPins {
             locationX += scrollContentOffset
         }
-        var targetIndex = itemIndex(atLocation: locationX, activeItemIndex: currentItemIndex) // guessed start index
-        targetIndex = targetIndex.clamp(0, itemsCount - 1)
+        var targetIndex = itemIndex(atLocation: locationX, activeItemIndex: currentItemIndex ?? 0) // guessed start index
+        targetIndex = clampedIndex(targetIndex) ?? targetIndex
         dragStartItemOrigin = itemMinX(atIndex: targetIndex)
         self.dragStartIndex = targetIndex
+    }
+
+    func prepareForDraggingUnlistedItem(ofWidth width: CGFloat) {
+        unlistedDraggedItemWidth = width
     }
 
     func frameForItemAtIndex(_ index: Int) -> CGRect {
@@ -128,12 +153,14 @@ class TabsDragModel: ObservableObject {
         widthProvider = nil
         activeItemWidth = 0
         pinnedItemWidth = 0
+        unlistedDraggedItemWidth = nil
         draggingOverPins = false
         draggingOverIndex = nil
         dragStartIndex = nil
         dragStartScrollOffset = 0
         allItems = []
         itemsCount = 0
+        activeItemIndexAtStart = nil
         initialPinnedItemsCount = 0
     }
 
@@ -162,6 +189,7 @@ class TabsDragModel: ObservableObject {
         return minX
     }
 
+    /// Determines the offset to apply to the dragged tab
     private func calculateNewOffsetXOnDrag(fromGesture gestureValue: TabGestureValue, scrollContentOffset: CGFloat) -> (x: CGFloat, isNowOverPins: Bool) {
         let locationX = gestureValue.location.x
         let startLocationX = gestureValue.startLocation.x
@@ -175,29 +203,35 @@ class TabsDragModel: ObservableObject {
         let minOffsetXBeforePinning = pinnedItemsMaxX + pinnedItemWidth - spaceBetweenSections
         let minOverlap: CGFloat = 10
         var isNowOverPins = draggingOverPins
-        if !dragStartedFromPinnedItem {
-            isNowOverPins = locationX <= minOffsetXBeforePinning
-            if unpinnedItemsCount > 1 && offsetX < (pinnedItemsMaxX - minOverlap) && locationX > minOffsetXBeforePinning {
-                // resistance to convert a tab to a pinned tab.
-                offsetX = pinnedItemsMaxX - minOverlap
-            } else if locationX < minOffsetXBeforePinning {
-                let locationInItem = startLocationX - currentItemOrigin
-                if locationInItem > pinnedItemWidth {
-                    offsetX += locationInItem - pinnedItemWidth/2
+        if draggedItemCanBePinned {
+            if !dragStartedFromPinnedItem {
+                isNowOverPins = locationX <= minOffsetXBeforePinning
+                if unpinnedItemsCount > 1 && offsetX < (pinnedItemsMaxX - minOverlap) && locationX > minOffsetXBeforePinning {
+                    // resistance to convert a tab to a pinned tab.
+                    offsetX = pinnedItemsMaxX - minOverlap
+                } else if locationX < minOffsetXBeforePinning {
+                    let locationInItem = startLocationX - currentItemOrigin
+                    if locationInItem > pinnedItemWidth {
+                        offsetX += locationInItem - pinnedItemWidth/2
+                    }
+                }
+            } else if dragStartedFromPinnedItem {
+                isNowOverPins = locationX <= pinnedItemsMaxX
+                if !isNowOverPins {
+                    offsetX -= pinnedItemWidth
                 }
             }
-        } else if dragStartedFromPinnedItem {
-            isNowOverPins = locationX <= pinnedItemsMaxX
-            if !isNowOverPins {
-                offsetX -= pinnedItemWidth
-            }
+        } else {
+            isNowOverPins = false
+            offsetX = max(offsetX, minOffsetXBeforePinning)
         }
         return (offsetX, isNowOverPins)
     }
 
-    /// This methods determine the targeted Tab Group depending on the location
+    /// Determines the targeted Tab Group depending on the location
     /// Allowing things like moving a tab out of a group by reaching the trailing half of the last tab of the group.
     private func calculateDraggingOverGroup(_ draggingOverIndex: Int, dragStartIndex: Int, offsetX: CGFloat) -> TabGroup? {
+        guard draggedItemCanBeGrouped else { return nil }
         let itemFrame = frameForItemAtIndex(draggingOverIndex)
         let items = allItems
         guard draggingOverIndex < items.count else { return nil }
@@ -230,6 +264,55 @@ class TabsDragModel: ObservableObject {
         return group
     }
 
+    private func clampedIndex(_ index: Int?) -> Int? {
+        index?.clamp(draggedItemCanBePinned ? 0 : pinnedItemsCountDuringDrag,
+                     itemsCount - (isDraggingUnlistedItem ? 0 : 1))
+    }
+
+    /// Determines over which item index the dragging is being performed
+    /// - Returns: `nil` if we're still dragging over the same index.
+    private func calculateNewDraggingOverIndex(fromGesture gestureValue: TabGestureValue,
+                                               draggingOverIndex: Int, dragStartIndex: Int,
+                                               isOverPins: Bool, scrollContentOffset: CGFloat) -> Int? {
+        var newDragIndex: Int?
+        if isOverPins {
+            let locX = gestureValue.location.x
+            if dragStartIndex < initialPinnedItemsCount && locX > pinnedItemWidth * CGFloat(initialPinnedItemsCount) {
+                newDragIndex = initialPinnedItemsCount - 1
+            } else {
+                newDragIndex = Int((locX / pinnedItemWidth).rounded(.down))
+            }
+        } else {
+            let hoveredItemIndex = min(draggingOverIndex, itemsCount - 1)
+            var thresholdMinX = itemMinX(atIndex: hoveredItemIndex) // Left
+            var thresholdMaxX = thresholdMinX // Right
+            if isDraggingUnlistedItem, let widthProvider = widthProvider {
+                let hoveredItemWidth = widthProvider.width(forItemAtIndex: hoveredItemIndex, selected: hoveredItemIndex == activeItemIndexAtStart, pinned: false)
+                if unpinnedItemsCount == 1 {
+                    if draggingOverIndex == itemsCount {
+                        thresholdMaxX += hoveredItemWidth
+                        thresholdMinX += (hoveredItemWidth / 2)
+                    } else {
+                        thresholdMaxX += (hoveredItemWidth / 2)
+                    }
+                } else {
+                    thresholdMaxX += hoveredItemWidth
+                }
+            } else {
+                thresholdMaxX += widthForDraggedItem
+            }
+
+            let gestureX = gestureValue.location.x + scrollContentOffset
+            if gestureX < thresholdMinX {
+                newDragIndex = draggingOverIndex - 1
+            } else if gestureX > thresholdMaxX {
+                newDragIndex = draggingOverIndex + 1
+            }
+            newDragIndex = clampedIndex(newDragIndex)
+        }
+        return newDragIndex
+    }
+
     func dragGestureChanged(gestureValue: TabGestureValue, scrollContentOffset: CGFloat, containerGeometry: GeometryProxy) {
 
         let scrollContentOffset = dragStartScrollOffset // somehow reorder tabs sends wrong content offset. we don't support scrolling happening while dragging for now.
@@ -242,39 +325,27 @@ class TabsDragModel: ObservableObject {
             }
         }
         let minX: CGFloat = unpinnedItemsCount == 1 && !draggingOverPins ? -60 : 0
-        let offset = CGPoint(x: offsetX.clamp(minX, containerGeometry.size.width - activeItemWidth), y: gestureValue.location.y)
+        let offset = CGPoint(x: offsetX.clamp(minX, containerGeometry.size.width - widthForDraggedItem), y: gestureValue.location.y)
 
         var newDragIndex: Int?
-        var shouldAnimateIndexMove = false
+        let shouldAnimateIndexMove = self.draggingOverIndex != nil
         if let draggingOverIndex = self.draggingOverIndex {
-            shouldAnimateIndexMove = true
+            newDragIndex = calculateNewDraggingOverIndex(fromGesture: gestureValue,
+                                                         draggingOverIndex: draggingOverIndex,
+                                                         dragStartIndex: dragStartIndex,
+                                                         isOverPins: isNowOverPins,
+                                                         scrollContentOffset: scrollContentOffset)
             if isNowOverPins {
-                let locX = gestureValue.location.x
-                if dragStartIndex < initialPinnedItemsCount && locX > pinnedItemWidth * CGFloat(initialPinnedItemsCount) {
-                    newDragIndex = initialPinnedItemsCount - 1
-                } else {
-                    newDragIndex = Int((locX / pinnedItemWidth).rounded(.down))
-                }
                 self.draggingOverGroup = nil
-            } else {
-                let thresholdMinX = itemMinX(atIndex: draggingOverIndex) // Left
-                let thresholdMaxX = thresholdMinX + activeItemWidth // Right
+            } else if let idx = newDragIndex ?? self.draggingOverIndex {
                 let gestureX = gestureValue.location.x + scrollContentOffset
-                if gestureX < thresholdMinX {
-                    newDragIndex = draggingOverIndex - 1
-                } else if gestureX > thresholdMaxX {
-                    newDragIndex = draggingOverIndex + 1
-                }
-                newDragIndex = newDragIndex?.clamp(0, itemsCount - 1)
-                if let idx = newDragIndex ?? self.draggingOverIndex {
-                    self.draggingOverGroup = calculateDraggingOverGroup(idx, dragStartIndex: dragStartIndex, offsetX: gestureX)
-                }
+                self.draggingOverGroup = calculateDraggingOverGroup(idx, dragStartIndex: dragStartIndex, offsetX: gestureX)
             }
         } else {
             newDragIndex = dragStartIndex
         }
 
-        if let idx = newDragIndex?.clamp(0, itemsCount - 1) {
+        if let idx = clampedIndex(newDragIndex) {
             if shouldAnimateIndexMove {
                 withAnimation(BeamAnimation.easeInOut(duration: 0.2)) {
                     self.draggingOverIndex = idx

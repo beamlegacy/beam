@@ -91,7 +91,7 @@ class BrowserTabsPreferencesTests: BaseTest {
         let expectedCheckboxTitle = "Group tabs automatically"
         let tabGroupMenu = TabGroupMenuView()
         
-        step("WHEN I disable Auto Group Tab checkbox that has title: \(expectedCheckboxTitle)") {
+        step("WHEN I enable Auto Group Tab checkbox that has title: \(expectedCheckboxTitle)") {
             XCTAssertEqual(browserPref.getAutoGroupTabsCheckbox().title, expectedCheckboxTitle)
             if !browserPref.getAutoGroupTabsCheckbox().isSettingEnabled() {
                 browserPref.getAutoGroupTabsCheckbox().tapInTheMiddle()
@@ -119,6 +119,7 @@ class BrowserTabsPreferencesTests: BaseTest {
                 browserPref.getAutoGroupTabsCheckbox().tapInTheMiddle()
             }
             shortcutHelper.shortcutActionInvoke(action: .close)
+            launchApp()
         }
         
         step("WHEN I open multiple time the same tab") {
