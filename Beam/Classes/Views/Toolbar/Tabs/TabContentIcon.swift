@@ -70,6 +70,8 @@ extension TabView {
                 .simultaneousGesture(TapGesture().onEnded {
                     action?()
                 })
+                // Fixes Lottie rendering issues.
+                .id(name)
         }
     }
 }
