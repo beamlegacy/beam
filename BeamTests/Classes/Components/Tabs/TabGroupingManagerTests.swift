@@ -130,7 +130,11 @@ class TabGroupingManagerTests: XCTestCase {
         clusters = [ [pageIds[4], pageIds[5], pageIds[6]], [pageIds[0]] ]
         await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
         XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1)
-        XCTAssertNil(sut.builtPagesGroups[tab1.pageId])
+        guard let tab1PageId = tab1.pageId else {
+            XCTFail("Tab doesn't have a pageId")
+            return
+        }
+        XCTAssertNil(sut.builtPagesGroups[tab1PageId])
     }
 
     func testBuildTabGroupsWith1ManualGroup1Cluster() async {
