@@ -367,6 +367,11 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     public static let recursiveCoding = CodingUserInfoKey(rawValue: "recursiveCoding")!
+    public static let maxDepth = CodingUserInfoKey(rawValue: "maxDepth")!
+    private static let depth = CodingUserInfoKey(rawValue: "depth")!
+    private class DecodingDepth {
+        var depth: Int = 0
+    }
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -414,9 +419,14 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     public required init(from decoder: Decoder) throws {
+        let depth = decoder.userInfo[Self.depth] as? DecodingDepth
+        let originalDepth = depth?.depth
         defer {
             changePropagationEnabled = true
             warmingUp = false
+            if let originalDepth = originalDepth {
+                depth?.depth = originalDepth
+            }
         }
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let recursive = decoder.userInfo[Self.recursiveCoding] as? Bool ?? true
@@ -439,6 +449,14 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
 
         if recursive, container.contains(.children) {
+            if let maxDepth = decoder.userInfo[Self.maxDepth] as? Int, let originalDepth = originalDepth
+            {
+                if originalDepth >= maxDepth {
+                    return
+                }
+                depth?.depth = originalDepth + 1
+            }
+
             children = try container.decode([BeamElement].self, forKey: .children)
             for child in children {
                 child.parent = self
