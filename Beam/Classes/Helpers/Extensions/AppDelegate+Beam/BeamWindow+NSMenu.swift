@@ -119,7 +119,7 @@ extension BeamWindow {
 
     @IBAction func muteCurrentTab(_ sender: Any?) {
         if let currentTabIsPlaying = state.browserTabsManager.currentTab?.mediaPlayerController?.isPlaying, currentTabIsPlaying {
-            state.browserTabsManager.currentTab?.mediaPlayerController?.isMuted = true
+            state.browserTabsManager.currentTab?.mediaPlayerController?.setMuted(true)
         }
     }
 
@@ -131,7 +131,7 @@ extension BeamWindow {
     @IBAction func muteOtherTabs(_ sender: Any?) {
         for tab in state.browserTabsManager.tabs where tab != state.browserTabsManager.currentTab {
             if let tabIsPlaying = tab.mediaPlayerController?.isPlaying, tabIsPlaying {
-                tab.mediaPlayerController?.isMuted = true
+                tab.mediaPlayerController?.setMuted(true)
             }
         }
     }

@@ -9,11 +9,10 @@ import SwiftUI
 
 struct TabAudioView: View {
     @ObservedObject var tab: BrowserTab
-    var action: (() -> Void)?
+    @State var lottieName = "tabs-media_mute"
+    @State var lottiePlaying = false
 
-    private var audioIsPlaying: Bool {
-        tab.mediaPlayerController?.isPlaying == true
-    }
+    var action: (() -> Void)?
 
     private var audioIsMuted: Bool {
         tab.mediaPlayerController?.isMuted == true
@@ -24,7 +23,12 @@ struct TabAudioView: View {
     }
 
     var body: some View {
-        TabView.TabContentIcon(name: audioIsMuted ? "tabs-media_muted" : "tabs-media", action: action)
+        TabView.TabContentLottieIcon(name: lottieName,
+                                     playing: lottiePlaying,
+                                     action: action,
+                                     onAnimationCompleted: {
+            updateLottie(muted: audioIsMuted, playing: false)
+        })
         .accessibility(identifier: "browserTabMediaIndicator")
         .contextMenu {
             Button("\(audioIsMuted ? "Unmute" : "Mute") this tab") {
@@ -37,5 +41,18 @@ struct TabAudioView: View {
                 }
             }
         }
+        .onChange(of: audioIsMuted) { [audioIsMuted] _ in
+            if !lottiePlaying {
+                updateLottie(muted: audioIsMuted, playing: true)
+            }
+        }
+        .onAppear {
+            updateLottie(muted: audioIsMuted, playing: false)
+        }
     }
+
+    private func updateLottie(muted: Bool, playing: Bool) {
+        lottieName = muted ? "tabs-media_unmute" : "tabs-media_mute"
+        lottiePlaying = playing
     }
+}

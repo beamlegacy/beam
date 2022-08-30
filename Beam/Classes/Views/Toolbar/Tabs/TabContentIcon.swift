@@ -36,4 +36,40 @@ extension TabView {
                 })
         }
     }
+
+    struct TabContentLottieIcon: View {
+        var name: String
+        var playing: Bool
+        var width: CGFloat = 16
+        var color = BeamColor.AlphaGray
+        var hoveredColor = BeamColor.Corduroy
+        var pressedColor = BeamColor.Niobium
+        var action: (() -> Void)?
+        var onAnimationCompleted: () -> Void
+
+        @State private var isHovering = false
+        @State private var isPressed = false
+
+        private var foregroundColor: NSColor {
+            if isPressed {
+                return pressedColor.nsColor
+            } else if isHovering {
+                return hoveredColor.nsColor
+            }
+            return color.nsColor
+        }
+        var body: some View {
+            LottieView(name: name,
+                       playing: playing,
+                       color: foregroundColor,
+                       loopMode: .playOnce,
+                       completion: onAnimationCompleted)
+                .frame(width: width)
+                .onHover { isHovering = $0 }
+                .onTouchDown { isPressed = $0 }
+                .simultaneousGesture(TapGesture().onEnded {
+                    action?()
+                })
+        }
+    }
 }
