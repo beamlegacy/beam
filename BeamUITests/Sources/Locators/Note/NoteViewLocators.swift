@@ -32,6 +32,8 @@ enum NoteViewLocators {
         case linksSection = "LinksSection"
         case referencesSection = "ReferencesSection"
         case linkButton = "link-reference-button"
+        case linkRefExpandButton = "linksSection_arrow"
+        case linkRefNoteExpandButton = "refNote_arrow"
         case linkAllButton = "link-all-references-button"
         case deleteNoteButton = "editor-delete"
         case publishNoteButton = "NoteHeaderPublishButton"
