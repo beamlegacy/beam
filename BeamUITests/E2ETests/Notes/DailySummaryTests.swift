@@ -96,8 +96,9 @@ class DailySummaryTests: BaseTest {
         
         verifyDailySummaryOpenNote()
 
+        testrailId("C822")
         step("When I go back to Journal"){
-            shortcutHelper.shortcutActionInvoke(action: .showJournal)
+            noteView.clickHomeIcon()
         }
         
         verifyDailySummaryOpenLink()
@@ -105,10 +106,6 @@ class DailySummaryTests: BaseTest {
     
     func testNoBulletDragDropAllowedOnDailySummary() {
         testrailId("C804")
-        step("When I open Journal"){
-            shortcutHelper.shortcutActionInvoke(action: .showJournal)
-        }
-        
         step("And I populate today's note with one text node") {
             journalView.typeInNoteNodeByIndex(noteIndex: 0, text: dummyText,  needsActivation: true)
         }
@@ -127,10 +124,6 @@ class DailySummaryTests: BaseTest {
     
     func testDailySummaryCannotBeDeleted() {
         testrailId("C804")
-        step("When I open Journal"){
-            shortcutHelper.shortcutActionInvoke(action: .showJournal)
-        }
-        
         step("And I populate today's note with one text node") {
             journalView.typeInNoteNodeByIndex(noteIndex: 0, text: dummyText,  needsActivation: true)
             journalView.typeKeyboardKey(.enter)

@@ -10,9 +10,11 @@ import XCTest
 
 class OmniBoxTestView: BaseView {
     
-    func focusOmniBoxSearchField(forCurrenTab: Bool = false) {
+    @discardableResult
+    func focusOmniBoxSearchField(forCurrenTab: Bool = false) -> OmniBoxTestView {
         shortcutHelper.shortcutActionInvoke(action: forCurrenTab ? .openLocation : .newTab)
         _ = getOmniBoxSearchField().waitForExistence(timeout: BaseTest.maximumWaitTimeout)
+        return self
     }
 
     func getOmniBoxSearchField() -> XCUIElement {

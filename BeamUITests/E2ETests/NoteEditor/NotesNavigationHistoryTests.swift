@@ -67,6 +67,12 @@ class NotesNavigationHistoryTests: BaseTest {
             self.assertTodayNoteIsOpened()
         }
         
+        testrailId("C827")
+        step("THEN I can open Journal using Journal Top bar option") {
+            noteView.button(ToolbarLocators.Buttons.noteSwitcherJournal.accessibilityIdentifier).hoverAndTapInTheMiddle()
+            self.assertJournalIsOpened()
+        }
+        
         //CMD+left/right arrow assertions to be implemented once BE-4244 is fixed
     }
     
