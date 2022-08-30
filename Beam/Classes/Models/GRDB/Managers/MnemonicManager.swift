@@ -15,7 +15,7 @@ class MnemonicManager: GRDBHandler, BeamManager {
 
     static var name = "MnemonicManager"
 
-    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
         try super.init(store: store)
     }
@@ -67,6 +67,6 @@ extension BeamManagerOwner {
 
 extension BeamData {
     var mnemonicManager: MnemonicManager? {
-        currentAccount?.mnemonicManager
+        AppData.shared.currentAccount?.mnemonicManager
     }
 }

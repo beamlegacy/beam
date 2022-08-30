@@ -92,7 +92,7 @@ struct AdvancedPreferencesNetwork: View {
                     Task { @MainActor in
                          do {
                              try BeamObjectChecksum.deleteAll();
-                             _ = try await AppDelegate.main.syncDataWithBeamObject(force: true)
+                             _ = try AppDelegate.main.syncDataWithBeamObject(force: true)
                          } catch {
                              Logger.shared.logError("Error while syncing data: \(error)", category: .document)
                          }
@@ -105,7 +105,7 @@ struct AdvancedPreferencesNetwork: View {
 
                 Button(action: {
                     do {
-                        try BeamData.shared.currentAccount?.documentSynchroniser?.forceReceiveAll()
+                        try AppData.shared.currentAccount?.documentSynchroniser?.forceReceiveAll()
                     } catch {
                         Logger.shared.logError("Error while force recieve all document: \(error)", category: .document)
                     }

@@ -126,7 +126,7 @@ class PointAndShootTest: XCTestCase {
 
     func initTestBed() {
         let userInfoStore = MockUserInformationsStore()
-        let testPasswordOverlayController = WebAutofillController(userInfoStore: userInfoStore)
+        let testPasswordOverlayController = WebAutofillController(passwordManager: BeamData.shared.passwordManager, userInfoStore: userInfoStore)
         let testBrowsingScorer = BrowsingScorerMock()
 
         let testFileStorage = FileStorageMock()

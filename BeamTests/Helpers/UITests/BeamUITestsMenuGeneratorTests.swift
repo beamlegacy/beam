@@ -5,7 +5,7 @@ import Nimble
 @testable import Beam
 
 class BeamUITestsMenuGeneratorTests: QuickSpec {
-    var sut: BeamUITestsMenuGenerator = BeamUITestsMenuGenerator()
+    var sut: BeamUITestsMenuGenerator = BeamUITestsMenuGenerator(account: AppData.shared.currentAccount!)
 
     override func spec() {
         beforeEach {

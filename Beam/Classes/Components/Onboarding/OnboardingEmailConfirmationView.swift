@@ -121,7 +121,7 @@ struct OnboardingEmailConfirmationView: View {
         errorState = nil
         loadingState = .signinin
         updateActions()
-        BeamData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: false) { result in
+        AppData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: false) { result in
             DispatchQueue.main.async {
                 updateActions()
                 switch result {
@@ -168,7 +168,7 @@ struct OnboardingEmailConfirmationView: View {
             return
         }
         errorState = nil
-        BeamData.shared.currentAccount?.resendVerificationEmail(email: email) { result in
+        AppData.shared.currentAccount?.resendVerificationEmail(email: email) { result in
             switch result {
             case .failure(let error):
                 emailConfirmationTooltip = LocalizedStringKey(error.localizedDescription)

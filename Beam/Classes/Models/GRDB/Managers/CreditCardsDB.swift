@@ -154,7 +154,7 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
     static let tableName = "creditCardRecord"
     var grdbStore: GRDBStore
 
-    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
         self.grdbStore = store
 
@@ -348,6 +348,6 @@ extension BeamManagerOwner {
 
 extension BeamData {
     var creditCardsDB: CreditCardsDB? {
-        currentAccount?.creditCardsDB
+        AppData.shared.currentAccount?.creditCardsDB
     }
 }

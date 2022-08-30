@@ -57,14 +57,14 @@ class BrowserImportManagerTest: XCTestCase {
     }
 
     override func setUpWithError() throws {
-        try BrowsingTreeStoreManager.shared.clearBrowsingTrees()
+        try BeamData.shared.browsingTreeStoreManager.clearBrowsingTrees()
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
         Persistence.cleanUp()
     }
 
     override func tearDownWithError() throws {
-        try BrowsingTreeStoreManager.shared.clearBrowsingTrees()
+        try BeamData.shared.browsingTreeStoreManager.clearBrowsingTrees()
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
         Persistence.cleanUp()
@@ -78,8 +78,8 @@ class BrowserImportManagerTest: XCTestCase {
         //wait for import completion
         expect(manager.isImporting).toEventually(beFalse())
         //expects one tree to be saved
-        XCTAssertEqual(BrowsingTreeStoreManager.shared.countBrowsingTrees, 1)
-        let treeRecord = try BrowsingTreeStoreManager.shared.allObjects(updatedSince: nil)[0]
+        XCTAssertEqual(BeamData.shared.browsingTreeStoreManager.countBrowsingTrees, 1)
+        let treeRecord = try BeamData.shared.browsingTreeStoreManager.allObjects(updatedSince: nil)[0]
         let flattenedData = try XCTUnwrap(treeRecord.flattenedData)
         //with right tree origin
         let tree = try XCTUnwrap(BrowsingTree(flattenedTree: flattenedData))
@@ -117,14 +117,14 @@ class BrowserImportManagerTest: XCTestCase {
     }
 
     func testBatchImporter() throws {
-        let batchImporter = BatchHistoryImporter(sourceBrowser: .firefox, batchSize: 2)
+        let batchImporter = BatchHistoryImporter(sourceBrowser: .firefox, batchSize: 2, browsingTreeStoreManager: BeamData.shared.browsingTreeStoreManager)
         for i in 0..<3 {
             batchImporter.add(item: FakeHistoryItem(secondsFromReference: Double(i), title: nil, urlString: "http://www.site.com/\(i)"))
         }
         batchImporter.finalize {}
         //expects one tree to be saved
-        XCTAssertEqual(BrowsingTreeStoreManager.shared.countBrowsingTrees, 1)
-        let treeRecord = try BrowsingTreeStoreManager.shared.allObjects(updatedSince: nil)[0]
+        XCTAssertEqual(BeamData.shared.browsingTreeStoreManager.countBrowsingTrees, 1)
+        let treeRecord = try BeamData.shared.browsingTreeStoreManager.allObjects(updatedSince: nil)[0]
         let flattenedData = try XCTUnwrap(treeRecord.flattenedData)
         //with right tree origin
         let tree = try XCTUnwrap(BrowsingTree(flattenedTree: flattenedData))

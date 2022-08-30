@@ -22,11 +22,11 @@ class BeamNote_BeamDocumentTests: QuickSpec, BeamDocumentSource {
 
         beforeEach {
             BeamTestsHelper.logout()
-            try! BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+            try! AppData.shared.clearAllAccountsAndSetupDefaultAccount()
         }
 
         afterEach {
-            try! BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+            try! AppData.shared.clearAllAccountsAndSetupDefaultAccount()
         }
 
         describe(".availableTitle()") {

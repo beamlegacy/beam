@@ -59,7 +59,7 @@ class PinnedNotesManager: ObservableObject {
                 }
             }.store(in: &scope)
 
-        BeamData.shared.$currentDatabase
+        BeamData.shared.currentDatabaseChanged
             .sink { [weak self] db in
                 self?.pinnedNotes.removeAll(where: { document in
                     document.databaseId != db?.id

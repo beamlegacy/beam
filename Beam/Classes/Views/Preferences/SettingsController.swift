@@ -24,6 +24,10 @@ final class SettingsController: NSViewController {
         selectedTab = firstTab
     }
 
+    func tab(for identifier: String) -> SettingTab? {
+        return settingsTab.first(where: { $0.label == identifier })
+    }
+
     func selectItem(_ item: String) {
         let selectedItem = settingsTab.first { $0.label == item }
         guard let selectedView = selectedItem?.view, selectedItem != selectedTab else { return }

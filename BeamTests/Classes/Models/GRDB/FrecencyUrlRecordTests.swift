@@ -8,7 +8,7 @@ import XCTest
 class FrecencyUrlRecordTests: XCTestCase {
     func testSave() throws {
         let store = GRDBStore(writer: DatabaseQueue())
-        let db = try UrlHistoryManager(holder: nil, store: store)
+        let db = try UrlHistoryManager(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate()
 
         // Check subsequent record save: primary keys are `urlId` and `frecencyKey`.
@@ -37,7 +37,7 @@ class FrecencyUrlRecordTests: XCTestCase {
     }
     func testFetchNanSortScore() throws {
         let store = GRDBStore(writer: DatabaseQueue())
-        let db = try UrlHistoryManager(holder: nil, store: store)
+        let db = try UrlHistoryManager(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate()
 
         let id = UUID()
@@ -50,7 +50,7 @@ class FrecencyUrlRecordTests: XCTestCase {
 
     func testGetMany() throws {
         let store = GRDBStore(writer: DatabaseQueue())
-        let db = try UrlHistoryManager(holder: nil, store: store)
+        let db = try UrlHistoryManager(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate()
 
         let urlIds = (0...2).map { _ in UUID() }

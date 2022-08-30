@@ -14,6 +14,7 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
     var changedObjects: [UUID: BeamDocument] = [:]
     let objectQueue = BeamObjectQueue<BeamDocument>()
 
+    let objectManager: BeamObjectManager
     static var beamObjectType = BeamObjectObjectType.document
     static var sourceId: String { "\(Self.self)" }
 
@@ -37,9 +38,11 @@ class BeamDocumentSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
         set { disableSyncLock.write { self._disableSync = newValue } }
     }
 
-    init(account: BeamAccount) {
+    init(account: BeamAccount, objectManager: BeamObjectManager) {
         self.account = account
+        self.objectManager = objectManager
 
+        registerOnBeamObjectManager(objectManager)
         setupObservers()
     }
 

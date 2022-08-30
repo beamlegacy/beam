@@ -133,13 +133,13 @@ struct OnboardingWelcomeView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
             error = nil
         }
-        BeamData.shared.currentAccount?.logoutIfNeeded()
+        AppData.shared.currentAccount?.logoutIfNeeded()
     }
 
     private func onSigninDone() {
         Task {
             guard AuthenticationManager.shared.isAuthenticated else { return }
-            if let pkStatus = try? await PrivateKeySignatureManager.shared.distantKeyStatus(), pkStatus == .none {
+            if let pkStatus = try? await BeamData.shared.privateKeySignatureManager.distantKeyStatus(), pkStatus == .none {
                 // We do this to show the saveEncyptionView, user probably register his account with Google
                 onboardingManager.userDidSignUp = true
             }

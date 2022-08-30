@@ -16,7 +16,7 @@ class BeamTestsHelper {
     func beginNetworkRecording(test: XCTestCase? = nil) {
         guard Configuration.networkStubs else { return }
 
-        BeamObjectManager.clearNetworkCalls()
+        BeamData.shared.objectManager.clearNetworkCalls()
 
         testName = test?.name ?? QuickSpec.current.name // ?? testName
 
@@ -68,7 +68,7 @@ class BeamTestsHelper {
 
         BeamURLSession.reset()
 
-        BeamObjectManager.clearNetworkCalls()
+        BeamData.shared.objectManager.clearNetworkCalls()
     }
 
     static let encoder = JSONEncoder()
@@ -125,7 +125,7 @@ class BeamTestsHelper {
     static func login() {
         guard !AuthenticationManager.shared.isAuthenticated else { return }
 
-        let accountManager = BeamData.shared.currentAccount!
+        let accountManager = AppData.shared.currentAccount!
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
 
@@ -155,8 +155,8 @@ class BeamTestsHelper {
     }
 
     static func logout() {
-        BeamObjectManager.clearNetworkCalls()
+        BeamData.shared.objectManager.clearNetworkCalls()
         guard AuthenticationManager.shared.isAuthenticated else { return }
-        BeamData.shared.currentAccount!.logout()
+        AppData.shared.currentAccount!.logout()
     }
 }
