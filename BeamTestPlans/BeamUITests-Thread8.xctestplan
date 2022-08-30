@@ -25,6 +25,7 @@
         "AdvancedSignInPasswordAutofillTests",
         "AdvancedSignUpPasswordAutofillTests",
         "AllNotesDeleteTests",
+        "AllNotesExportImportTests",
         "AllNotesPublishProfileTests",
         "AllNotesPublishProfileTests\/testCreatePublishedAndUnpublishNote()",
         "AllNotesPublishProfileTests\/testCreatePublishedOnProfileNoteAndRemoveFromProfileNote()",
