@@ -17,11 +17,14 @@ class SlashMenuTests: BaseTest {
     let yearToSelect = "2025"
     let textToFormat = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
     
+    override func setUp(){
+        noteTestView = launchAppAndOpenFirstNote()
+    }
+    
     func testDatePickerNoteCreation() {
         testrailId("C782")
         let localDateFormat = "\(dayToSelect) \(monthToSelect) \(yearToSelect)"
         let ciDateFormat = "\(monthToSelect) \(dayToSelect), \(yearToSelect)"
-        noteTestView = launchAppAndOpenFirstNote()
         
         let contextMenuView = noteTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
 
@@ -48,7 +51,6 @@ class SlashMenuTests: BaseTest {
         testrailId("C790")
         let row1Text = "row 1"
         let row2Text = "row 2"
-        noteTestView = launchAppAndOpenFirstNote()
         
         step("Given I populate 2 notes accordingly with texts: \(row1Text) & \(row2Text)"){
             noteTestView
@@ -77,8 +79,6 @@ class SlashMenuTests: BaseTest {
     func testCheckBoxCreationMovementDeletion() {
         testrailId("C781")
         
-        noteTestView = launchAppAndOpenFirstNote()
-
         step("Then I can successfuly create a checkbox using a shortcut") {
             noteTestView.waitForTodayNoteViewToLoad()
             noteTestView.createCheckboxAtNote(1)
@@ -142,7 +142,6 @@ class SlashMenuTests: BaseTest {
     func testSlashMenuTextFormatShortcutsApplying() {
         testrailId("C783, C784, C785, C786, C787, C788, C953")
         step("GIVEN I type text in first note") {
-            noteTestView = launchAppAndOpenFirstNote()
             noteTestView.app.typeText(textToFormat)
         }
         
@@ -159,6 +158,27 @@ class SlashMenuTests: BaseTest {
                 noteTestView.shortcutHelper.shortcutActionInvokeRepeatedly(action: .undo, numberOfTimes: 3)
                 }
             }
+        }
+    }
+    
+    func testSlashMenuNoteCreation() {
+        testrailId("C780")
+        let noteNameToBeCreated = "NoteCreation"
+
+        step("Given I create note through slash menu"){
+            noteTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier).clickSlashMenuItem(item: .noteItem)
+            noteTestView.app.typeText(noteNameToBeCreated)
+            noteTestView.typeKeyboardKey(.enter)
+        }
+        
+        step("Then note is successfully created and accessible via BiDi link"){
+            noteTestView.openBiDiLink(0)
+            XCTAssertTrue(noteTestView.getNoteTitle() == noteNameToBeCreated)
+        }
+        
+        step("And note with \(noteNameToBeCreated) name appears in All notes menu list"){
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            XCTAssertTrue(AllNotesTestView().isNoteNameAvailable(noteNameToBeCreated))
         }
     }
 }
