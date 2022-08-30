@@ -48,6 +48,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
     }
     
     func testShareTabGroupMenu() throws {
+        try XCTSkipIf(true, "Skip while we have a stable public api for tab groups")
         testrailId("C1165, C1166, C1167, C1168, C1169, C1170")
         createTabGroupOnStaging()
         
@@ -95,6 +96,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
     }
     
     func testShareTabGroupCopyUrl() throws {
+        try XCTSkipIf(true, "Skip while we have a stable public api for tab groups")
         testrailId("C1171, C1170")
         createTabGroupOnStaging()
         
