@@ -52,7 +52,7 @@ final class AllNotesPageViewModel: ObservableObject, Identifiable {
             }
             .store(in: &databaseObservers)
 
-        BeamData.shared.$currentDatabase
+        BeamData.shared.currentDatabaseChanged
             .sink { [weak self] _ in
                 self?.refreshAllNotes()
             }

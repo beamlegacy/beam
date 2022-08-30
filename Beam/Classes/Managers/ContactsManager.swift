@@ -23,10 +23,14 @@ class ContactsManager {
     var changedObjects: [UUID: ContactRecord] = [:]
     let objectQueue = BeamObjectQueue<ContactRecord>()
     
-    static let shared = ContactsManager()
     private var contactsDB: ContactsDB? { BeamData.shared.contactsDB }
 
-    init() {
+    let objectManager: BeamObjectManager
+
+    init(objectManager: BeamObjectManager) {
+        self.objectManager = objectManager
+
+        registerOnBeamObjectManager(objectManager)
     }
 
     // MARK: Fetch
@@ -196,9 +200,9 @@ extension ContactsManager: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ contacts: [ContactRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
-                try await self?.saveOnBeamObjectsAPI(contacts)
+                try await saveOnBeamObjectsAPI(contacts)
                 Logger.shared.logDebug("Saved contacts on the BeamObject API", category: .contactsDB)
                 networkCompletion?(.success(true))
             } catch {
@@ -209,9 +213,9 @@ extension ContactsManager: BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ contact: ContactRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
-                try await self?.saveOnBeamObjectAPI(contact)
+                try await saveOnBeamObjectAPI(contact)
                 Logger.shared.logDebug("Saved contact on the BeamObject API", category: .contactsDB)
                 networkCompletion?(.success(true))
             } catch {

@@ -167,7 +167,8 @@ import UniformTypeIdentifiers
     }
 
     lazy var webAutofillController: WebAutofillController? = {
-        let controller = WebAutofillController(userInfoStore: MockUserInformationsStore.shared)
+        guard let state = state else { return nil }
+        let controller = WebAutofillController(passwordManager: state.data.passwordManager, userInfoStore: MockUserInformationsStore.shared)
         controller.page = self
         return controller
     }()
@@ -191,6 +192,7 @@ import UniformTypeIdentifiers
     var webPositions: WebPositions
 
     var numberOfLinksOpenedInANewTab: Int = 0
+
     // End WebPage Properties
 
     // MARK: - Init
@@ -283,7 +285,7 @@ import UniformTypeIdentifiers
             return BrowsingTree(
                 origin,
                 linkStore: LinkStore.shared,
-                frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
+                frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage(objectManager: BeamData.shared.objectManager)),
                 domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
                 dailyScoreStore: GRDBDailyUrlScoreStore()
             )
@@ -321,7 +323,7 @@ import UniformTypeIdentifiers
 
         let tree: BrowsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
         tree.set(
-            frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
+            frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage(objectManager: BeamData.shared.objectManager)),
             domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
             dailyScoreStore: GRDBDailyUrlScoreStore()
         )
@@ -707,9 +709,9 @@ import UniformTypeIdentifiers
         guard let state = state, !state.isIncognito else { return }
         let appSessionId = state.data.sessionId
         if grouped {
-            BrowsingTreeStoreManager.shared.groupSave(browsingTree: self.browsingTree, appSessionId: appSessionId)
+            state.data.browsingTreeStoreManager.groupSave(browsingTree: self.browsingTree, appSessionId: appSessionId)
         } else {
-            BrowsingTreeStoreManager.shared.save(browsingTree: self.browsingTree, appSessionId: appSessionId) {}
+            state.data.browsingTreeStoreManager.save(browsingTree: self.browsingTree, appSessionId: appSessionId) {}
         }
     }
 

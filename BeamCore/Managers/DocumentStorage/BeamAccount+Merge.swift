@@ -171,7 +171,7 @@ extension BeamAccount {
         }
         Logger.shared.logInfo("Moving the following frecencies: \(frecencies.map { $0.id })", category: .sync)
 
-        try GRDBNoteFrecencyStorage(db: destinationManager).receivedObjects(frecencies)
+        try GRDBNoteFrecencyStorage(db: destinationManager, objectManager: data.objectManager).receivedObjects(frecencies)
 
         // remove from original source
         try sourceManager.clearNoteFrecencies()

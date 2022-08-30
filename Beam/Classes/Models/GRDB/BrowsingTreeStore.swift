@@ -149,6 +149,8 @@ protocol BrowsingTreeStoreProtocol {
 }
 
 class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
+    let objectManager: BeamObjectManager
+
     var changedObjects: [UUID : BrowsingTreeRecord] = [:]
     let objectQueue = BeamObjectQueue<BrowsingTreeRecord>()
     let providedDb: BrowsingTreeDBManager?
@@ -161,12 +163,16 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     }
     public var treeProcessingCompleted = false
     public let group = DispatchGroup()
-    static let shared = BrowsingTreeStoreManager()
     let groupTimeOut: Double = 2
     let treeProcessor = BrowsingTreeProcessor()
 
-    init(db providedDb: BrowsingTreeDBManager? = nil) {
-        self.providedDb = providedDb
+    init(db: BrowsingTreeDBManager? = nil, objectManager: BeamObjectManager) {
+        self.objectManager = objectManager
+        self.providedDb = db
+
+        if Configuration.browsingTreeApiSyncEnabled {
+            registerOnBeamObjectManager(objectManager)
+        }
     }
 
     func process(tree: BrowsingTree) {
@@ -265,7 +271,7 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
         Logger.shared.logInfo("Deleting browsing trees from API", category: .browsingTreeNetwork)
         Task {
             do {
-                try await BrowsingTreeStoreManager.shared.deleteAllFromBeamObjectAPI()
+                try await deleteAllFromBeamObjectAPI()
                 completion?(.success(true))
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .database)
@@ -316,11 +322,10 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ record: BrowsingTreeRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
                 let localTimer = Date()
-                try await self?.saveOnBeamObjectAPI(record)
+                try await saveOnBeamObjectAPI(record)
                 Logger.shared.logDebug("Saved tree \(record.rootId) on the BeamObject API",
                                        category: .fileNetwork,
                                        localTimer: localTimer)
@@ -334,10 +339,10 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ records: [BrowsingTreeRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
                 let localTimer = Date()
-                try await self?.saveOnBeamObjectsAPI(records)
+                try await saveOnBeamObjectsAPI(records)
                 Logger.shared.logDebug("Saved \(records.count) trees on the BeamObject API",
                                        category: .fileNetwork,
                                        localTimer: localTimer)
@@ -394,7 +399,7 @@ extension BrowsingTreeStoreManager {
         //remote cleanup
         Task {
             do {
-                try await BrowsingTreeStoreManager.shared.deleteFromBeamObjectAPI(objects: legacyObjects)
+                try await deleteFromBeamObjectAPI(objects: legacyObjects)
                 Logger.shared.logInfo("Successfully deleted \(legacyObjects.count) legacy tree(s) from API", category: .browsingTreeNetwork)
                 completion?(.success(true))
             } catch {

@@ -140,7 +140,7 @@ class ContactsDB: GRDBHandler, BeamManager, LegacyAutoImportDisabler {
     weak var holder: BeamManagerOwner?
     override var tableNames: [String] { [ContactsDB.tableName] }
 
-    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
         try super.init(store: store)
     }
@@ -321,6 +321,6 @@ extension BeamManagerOwner {
 
 extension BeamData {
     var contactsDB: ContactsDB? {
-        currentAccount?.contactsDB
+        AppData.shared.currentAccount?.contactsDB
     }
 }

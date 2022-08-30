@@ -10,10 +10,15 @@ import Combine
 
 // Minimal manager
 class MyRemoteObjectManager {
+    let objectManager: BeamObjectManager
     var changedObjects: [UUID: MyRemoteObject] = [:]
     let objectQueue = BeamObjectQueue<MyRemoteObject>()
     static var receivedMyRemoteObjects: [MyRemoteObject] = []
     static var store: [UUID: MyRemoteObject] = [:]
+
+    init(objectManager: BeamObjectManager) {
+        self.objectManager = objectManager
+    }
 }
 
 extension MyRemoteObjectManager: BeamObjectManagerDelegate {

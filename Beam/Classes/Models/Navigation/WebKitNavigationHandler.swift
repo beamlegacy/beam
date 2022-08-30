@@ -140,7 +140,7 @@ extension WebKitNavigationHandler {
                 let credential = URLCredential(user: username, password: password, persistence: .forSession)
                 completionHandler(.useCredential, credential)
                 if savePassword && (!password.isEmpty || !username.isEmpty) {
-                    PasswordManager.shared.save(hostname: challenge.protectionSpace.host, username: username, password: password)
+                    BeamData.shared.passwordManager.save(hostname: challenge.protectionSpace.host, username: username, password: password)
                 }
                 self?.page?.authenticationViewModel = nil
 
@@ -151,7 +151,7 @@ extension WebKitNavigationHandler {
             })
 
             if challenge.previousFailureCount == 0 {
-                PasswordManager.shared.credentials(for: challenge.protectionSpace.host) { credentials in
+                BeamData.shared.passwordManager.credentials(for: challenge.protectionSpace.host) { credentials in
                     if let firstCredential = credentials.first,
                        let decrypted = try? EncryptionManager.shared.decryptString(firstCredential.password, EncryptionManager.shared.localPrivateKey()),
                        !decrypted.isEmpty || !firstCredential.username.isEmpty {

@@ -43,7 +43,7 @@ extension AppDelegate {
         switch file.kind {
         case .download:
             do {
-                try self.data.downloadManager.downloadFile(from: try BeamDownloadDocument(openingFile: file))
+                try self.data.currentAccount?.data.downloadManager.downloadFile(from: try BeamDownloadDocument(openingFile: file))
             } catch {
                 Logger.shared.logError("Can't open Download Document from disk", category: .downloader)
                 return false

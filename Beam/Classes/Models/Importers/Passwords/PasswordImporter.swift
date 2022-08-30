@@ -81,7 +81,7 @@ enum PasswordImporter {
         var importedCount = 0
         for record in parser {
             if let entry = decoder.decode(record) {
-                PasswordManager.shared.save(hostname: entry.hostname, username: entry.username, password: entry.password)
+                BeamData.shared.passwordManager.save(hostname: entry.hostname, username: entry.username, password: entry.password)
                 importedCount += 1
             }
         }
@@ -92,11 +92,11 @@ enum PasswordImporter {
         let serialQueue = DispatchQueue(label: "exportPasswordsQueue", target: .userInitiated)
 
         serialQueue.async {
-            let allEntries = PasswordManager.shared.fetchAll()
+            let allEntries = BeamData.shared.passwordManager.fetchAll()
             var csvString = "\("URL"),\("Username"),\("Password")\n"
             var failedEntries: [PasswordManagerEntry] = []
             for entry in allEntries {
-                if let passwordStr = try? PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false) {
+                if let passwordStr = try? BeamData.shared.passwordManager.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false) {
                     let row = encodeToCSV(entry: entry, password: passwordStr)
                     csvString.append("\(row)\n")
                 } else {

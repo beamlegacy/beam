@@ -150,8 +150,13 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
     private(set) var batchSaveOnApiCompleted = false
     private(set) var softDeleteCompleted = false
 
-    init(db providedDb: BeamNoteLinksAndRefsManager? = nil) {
+    let objectManager: BeamObjectManager
+
+    init(db providedDb: BeamNoteLinksAndRefsManager? = nil, objectManager: BeamObjectManager) {
         self.providedDb = providedDb
+        self.objectManager = objectManager
+
+        registerOnBeamObjectManager(objectManager)
     }
 
     func resetApiSaveLimiter() {
@@ -326,9 +331,9 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ frecencies: [FrecencyNoteRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
-                try await self?.saveOnBeamObjectsAPI(frecencies)
+                try await saveOnBeamObjectsAPI(frecencies)
                 Logger.shared.logDebug("Saved note frecencies on the BeamObject API",
                                        category: .frecencyNetwork)
                 networkCompletion?(.success(true))
@@ -341,9 +346,9 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ frecency: FrecencyNoteRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
-                try await self?.saveOnBeamObjectAPI(frecency)
+                try await saveOnBeamObjectAPI(frecency)
                 Logger.shared.logDebug("Saved note frecency on the BeamObject API",
                                        category: .frecencyNetwork)
                 networkCompletion?(.success(true))

@@ -11,22 +11,22 @@ import BeamCore
 import Combine
 
 class BetaPreferencesViewModel: ObservableObject {
-    @Published var isSynchronizationRunning = AppDelegate.main.isSynchronizationRunning
+    @Published var isSynchronizationRunning = AppData.shared.currentAccount!.isSynchronizationRunning
     @Published var isloggedIn = AuthenticationManager.shared.isLoggedIn
     @Published var synchronizationStatus: BeamObjectObjectSynchronizationStatus = .notStarted
 
     private var scope = Set<AnyCancellable>()
 
-    init() {
+    init(objectManager: BeamObjectManager) {
         AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] _ in
             self?.isloggedIn = AuthenticationManager.shared.isLoggedIn
         }.store(in: &scope)
 
-        AppDelegate.main.isSynchronizationRunningPublisher.receive(on: DispatchQueue.main).sink { [weak self] isSynchronizationRunning in
+        AppData.shared.currentAccount!.isSynchronizationRunningPublisher.receive(on: DispatchQueue.main).sink { [weak self] isSynchronizationRunning in
             self?.isSynchronizationRunning = isSynchronizationRunning
         }.store(in: &scope)
 
-        BeamObjectManager.synchronizationStatusPublisher.receive(on: DispatchQueue.main).sink { [weak self] synchronizationStatus in
+        objectManager.synchronizationStatusSubject.receive(on: DispatchQueue.main).sink { [weak self] synchronizationStatus in
             self?.synchronizationStatus = synchronizationStatus
         }.store(in: &scope)
     }
@@ -41,7 +41,7 @@ struct BetaPreferencesView: View, BeamDocumentSource {
 
     @State private var selectedDatabase = BeamData.shared.currentDatabase
     var databases: [BeamDatabase] {
-        BeamData.shared.currentAccount?.allDatabases ?? []
+        AppData.shared.currentAccount?.allDatabases ?? []
     }
 
     @State var showDebugSection = PreferencesManager.showDebugSection
@@ -90,7 +90,7 @@ struct BetaPreferencesView: View, BeamDocumentSource {
                 Task { @MainActor in
                     do {
                         try BeamObjectChecksum.deleteAll();
-                        _ = try await AppDelegate.main.syncDataWithBeamObject(force: true)
+                        _ = try AppDelegate.main.syncDataWithBeamObject(force: true)
                     } catch {
                         Logger.shared.logError("Error while syncing data: \(error)", category: .document)
                     }
@@ -103,7 +103,7 @@ struct BetaPreferencesView: View, BeamDocumentSource {
             .disabled(loading)
 
             Button(action: {
-                AppDelegate.main.stopSynchronization()
+                AppData.shared.currentAccount?.stopSynchronization()
             }, label: {
                 Text("Stop synchronization")
                     .frame(maxWidth: 180)
@@ -118,7 +118,7 @@ struct BetaPreferencesView: View, BeamDocumentSource {
             Button(action: {
                 DispatchQueue.global(qos: .userInteractive).async {
                     do {
-                        try BeamData.shared.currentAccount?.deleteEmptyDatabases()
+                        try AppData.shared.currentAccount?.deleteEmptyDatabases()
                         AppDelegate.showMessage("Empty databases deleted")
                     } catch {
                         DispatchQueue.main.async {
@@ -194,6 +194,6 @@ struct BetaPreferencesView: View, BeamDocumentSource {
 
 struct BetaPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        BetaPreferencesView(viewModel: BetaPreferencesViewModel())
+        BetaPreferencesView(viewModel: BetaPreferencesViewModel(objectManager: BeamObjectManager()))
     }
 }

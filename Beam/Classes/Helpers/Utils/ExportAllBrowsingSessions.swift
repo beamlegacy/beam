@@ -8,10 +8,8 @@
 import Foundation
 import BeamCore
 
-func export_all_browsing_sessions(to url: URL?) {
+func export_all_browsing_sessions(_ treeManager: BrowsingTreeStoreManager, to url: URL?) {
     guard let url = url else { return }
-
-    let treeManager = BrowsingTreeStoreManager.shared
 
     guard let sessions = try? treeManager.getAllBrowsingTrees() else {
         Logger.shared.logError("Could not fetch browsing sessions", category: .web)

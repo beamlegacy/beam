@@ -67,7 +67,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
 
     public override var tableNames: [String] { [BeamDocument.databaseTableName] }
 
-    public required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
+    public required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
         try super.init(store: store)
     }

@@ -13,6 +13,8 @@ class BeamObjectsRequests: QuickSpec {
         let beamObjectHelper = BeamObjectTestsHelper()
         var sut: BeamObjectRequest!
 
+        let objectManager = BeamData.shared.objectManager
+
         beforeEach {
             sut = BeamObjectRequest()
             Configuration.reset()
@@ -25,7 +27,7 @@ class BeamObjectsRequests: QuickSpec {
             beamHelper.beginNetworkRecording()
 
             BeamTestsHelper.login()
-            MyRemoteObjectManager().registerOnBeamObjectManager()
+            MyRemoteObjectManager(objectManager: objectManager).registerOnBeamObjectManager(objectManager)
         }
 
         asyncAfterEach { _ in
@@ -38,7 +40,7 @@ class BeamObjectsRequests: QuickSpec {
         }
 
         afterSuite {
-            BeamObjectManager.unregister(objectType: .myRemoteObject)
+            objectManager.unregister(objectType: .myRemoteObject)
         }
 
         context("with async") {

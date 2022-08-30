@@ -110,7 +110,7 @@ struct MeetingModalView: View {
                                         BoxedTextFieldView(title: "Email Address", text: Binding<String>(
                                             get: { attendee.email },
                                             set: {
-                                                if let noteId = ContactsManager.shared.note(for: $0),
+                                                if let noteId = BeamData.shared.contactsManager.note(for: $0),
                                                    let name = BeamNote.fetch(id: noteId)?.title {
                                                         viewModel.attendees[index].name = name
                                                 }
@@ -131,14 +131,14 @@ struct MeetingModalView: View {
                                         BoxedTextFieldView(title: "Name", text: Binding<String>(
                                             get: {
                                                 // Return note title (name) if email already in ContactDB
-                                                guard let noteId = ContactsManager.shared.note(for: attendee.email),
+                                                guard let noteId = BeamData.shared.contactsManager.note(for: attendee.email),
                                                       let name = BeamNote.fetch(id: noteId)?.title, viewModel.attendees.count > index else { return attendee.name }
                                                 viewModel.attendees[index].name = name
                                                 return name
                                             },
                                             set: {
                                                 // Search for existing Note with contact
-                                                viewModel.attendees[index].name = ContactsManager.shared.search(for: $0)
+                                                viewModel.attendees[index].name = BeamData.shared.contactsManager.search(for: $0)
                                             }),
                                                            isEditing: Binding<Bool>(
                                                             get: { focusedField == .attendeeName(attendee.id) },
@@ -301,7 +301,7 @@ extension MeetingModalView {
         }
 
         private func saveContacts(for attendee: Meeting.Attendee, and attendeeNote: BeamNote) {
-            guard let contactRecord = ContactsManager.shared.save(email: attendee.email, to: attendeeNote.id, networkCompletion: { _ in }) else { return }
+            guard let contactRecord = BeamData.shared.contactsManager.save(email: attendee.email, to: attendeeNote.id, networkCompletion: { _ in }) else { return }
             attendeeNote.contactId = contactRecord.uuid
             _ = attendeeNote.save(self)
         }

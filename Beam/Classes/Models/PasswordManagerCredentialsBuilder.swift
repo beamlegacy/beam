@@ -48,7 +48,7 @@ final class PasswordManagerCredentialsBuilder {
     private var passwordField: FieldContents = .none
     private var isDirty = false
 
-    init(passwordManager: PasswordManager = .shared) {
+    init(passwordManager: PasswordManager) {
         self.passwordManager = passwordManager
     }
 

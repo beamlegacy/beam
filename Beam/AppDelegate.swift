@@ -56,24 +56,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var panels: [BeamNote: MiniEditorPanel] = [:]
 
-    var data: BeamData!
+    var didFinishLaunching = false
+
+    let data = AppData.shared
+
     var cancellableScope = Set<AnyCancellable>()
     var importCancellables = Set<AnyCancellable>()
 
     static let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
     static let defaultWindowSize = CGSize(width: 1024, height: 768)
-    public private(set) lazy var beamObjectManager = BeamObjectManager()
 
     private let networkMonitor = NetworkMonitor()
     @Published public private(set) var isNetworkReachable: Bool = false
-
-    private var synchronizationTask: Task<Void, Error>?
-    private var synchronizationSubject = PassthroughSubject<Bool, Never>()
-    private(set) var isSynchronizationRunning = false
-
-    var isSynchronizationRunningPublisher: AnyPublisher<Bool, Never> {
-        synchronizationSubject.eraseToAnyPublisher()
-    }
 
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
@@ -91,10 +85,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        defer { didFinishLaunching = true }
+
         splashScreenWindow?.close()
         splashScreenWindow = nil
 
-        data = BeamData()
+        migrateLegacyData()
+
+        // Importing legacy data may fail so make sure the pinned tabs are ok anyway:
+        data.currentAccount?.data.resetPinnedTabs()
+
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
         if Configuration.env.rawValue == "$(ENV)" || Configuration.Sentry.key == "$(SENTRY_KEY)", !isSwiftUIPreview {
             fatalError("The ENV wasn't detected properly, please run `direnv allow` and restart your build. (Should only happen in SwiftUI Previews)")
@@ -120,13 +120,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Setup localPrivateKey
         EncryptionManager.shared.localPrivateKey()
         //TODO: - Remove when everyone has its local links data moved from old db to grdb
-        BeamObjectManager.setup()
+        data.setup()
 
         if deleteAllLocalDataAtStartup {
             self.deleteAllLocalData()
         }
         DispatchQueue.database.async {
-            BrowsingTreeStoreManager.shared.softDelete(olderThan: 60, maxRows: 20_000)
+            self.data.softDeleteBrowsingTreeStore()
             GRDBDailyUrlScoreStore(daysToKeep: Configuration.DailyUrlStats.daysToKeep).cleanup()
             NoteScorer.shared.cleanup()
         }
@@ -149,7 +149,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         #if DEBUG
-        self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
+        if let account = data.currentAccount {
+            self.beamUIMenuGenerator = BeamUITestsMenuGenerator(account: account)
+        }
         prepareMenuForTestEnv()
 
         // In test mode, we want to start fresh without auth tokens as they may have expired
@@ -194,104 +196,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Private Key Check
     @MainActor
     func checkPrivateKey() async {
-        if let account = data.currentAccount {
-            if await account.checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
-                beamObjectManager.liveSync { (_, _) in
-                    Task { @MainActor in
-                        do {
-                            _ = try await self.syncDataWithBeamObject()
-                        } catch {
-                            Logger.shared.logError("Error while syncing data: \(error)", category: .document)
-                        }
-                        self.data.updateNoteCount()
-                    }
-                }
-            } else {
-                account.logoutIfNeeded()
-            }
-        }
+        await data.currentAccount?.checkPrivateKey()
     }
 
     // MARK: - Web sockets
     func disconnectWebSockets() {
-        beamObjectManager.disconnectLiveSync()
+        data.currentAccount?.disconnectWebSockets()
     }
 
     // MARK: - Database
     @MainActor
     func syncDataWithBeamObject(force: Bool = false,
                                 showAlert: Bool = true,
-                                _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) async throws -> Bool {
-        guard Configuration.env != .test,
-              AuthenticationManager.shared.isAuthenticated,
-              Configuration.networkEnabled else {
-            completionHandler?(.success(false))
-            return false
-        }
-
-        guard isSynchronizationRunning == false else {
-            Logger.shared.logDebug("syncTask already running", category: .beamObjectNetwork)
-            completionHandler?(.success(false))
-            return false
-        }
-        isSynchronizationRunning = true
-        synchronizationIsRunningDidUpdate()
-
-        synchronizationTask = launchSynchronizationTask(force, showAlert, completionHandler)
-
-        return true
-    }
-
-    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool, _ completionHandler: ((Result<Bool, Error>) -> Void)?) -> Task<Void, Error> {
-        Task { @MainActor in
-            defer {
-                DispatchQueue.main.async {
-                    self.synchronizationTaskDidStop()
-                }
-            }
-
-            let localTimer = Date()
-            guard let currentAccount = data.currentAccount else {
-                completionHandler?(.success(false))
-                return
-            }
-            let initialDBs = Set(currentAccount.allDatabases)
-            Logger.shared.logInfo("syncAllFromAPI calling", category: .sync)
-            do {
-                try await beamObjectManager.syncAllFromAPI(force: force, prepareBeforeSaveAll: {
-                    currentAccount.mergeAllDatabases(initialDBs: initialDBs)
-                })
-            } catch {
-                Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
-                                      category: .sync,
-                                      localTimer: localTimer)
-                completionHandler?(.failure(error))
-                return
-            }
-
-            Logger.shared.logInfo("syncAllFromAPI called",
-                                  category: .sync,
-                                  localTimer: localTimer)
-            completionHandler?(.success(true))
-        }
-    }
-
-    public func stopSynchronization() {
-        if let task = synchronizationTask {
-            task.cancel()
-        }
-    }
-    
-    @MainActor
-    private func synchronizationTaskDidStop() {
-        Logger.shared.logInfo("synchronizationTaskDidStop", category: .beamObjectNetwork)
-        synchronizationTask = nil
-        isSynchronizationRunning = false
-        synchronizationIsRunningDidUpdate()
-    }
-
-    private func synchronizationIsRunningDidUpdate() {
-        synchronizationSubject.send(isSynchronizationRunning)
+                                _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws -> Bool {
+        guard let account = data.currentAccount else { return false }
+        return try account.syncDataWithBeamObject(force: force, showAlert: showAlert, completionHandler)
     }
 
     private func indexAllNotes() {
@@ -377,15 +296,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @discardableResult
     func createWindow(frame: NSRect?, title: String? = nil, isIncognito: Bool = false, becomeMain: Bool = true) -> BeamWindow? {
-        guard !data.onboardingManager.needsToDisplayOnboard else {
-            data.onboardingManager.delegate = self
-            data.onboardingManager.presentOnboardingWindow()
+        guard let account = data.currentAccount else { return nil }
+        guard !account.data.onboardingManager.needsToDisplayOnboard else {
+            account.data.onboardingManager.delegate = self
+            account.data.onboardingManager.presentOnboardingWindow()
             return nil
         }
         // Create the window and set the content view.
         let window = BeamWindow(
             contentRect: frame ?? CGRect(origin: .zero, size: Self.defaultWindowSize),
-            data: data,
+            account: account,
             title: title,
             isIncognito: isIncognito,
             minimumSize: frame?.size ?? Self.defaultWindowMinimumSize)
@@ -422,7 +342,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var canRestoreSession = false
 
     private func restoreSessionAtLaunch() -> Bool {
-        let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
+        let sessionURL = URL(fileURLWithPath: data.dataFolder(fileName: "session.data"))
         canRestoreSession = FileManager.default.fileExists(atPath: sessionURL.path)
 
         guard canRestoreSession,
@@ -445,7 +365,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         do {
             let session = try PropertyListEncoder().encode(windows)
-            let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
+            let sessionURL = URL(fileURLWithPath: data.dataFolder(fileName: "session.data"))
             try session.write(to: sessionURL, options: .atomic)
             canRestoreSession = true
             return true
@@ -459,7 +379,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func reopenAllWindowsFromLastSession() -> Bool {
         guard canRestoreSession else { return false }
         do {
-            let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
+            let sessionURL = URL(fileURLWithPath: data.dataFolder(fileName: "session.data"))
             let data = try Data(contentsOf: sessionURL)
             let windows = try PropertyListDecoder().decode([BeamWindow].self, from: data)
             for window in windows {
@@ -476,12 +396,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func deleteSessionData() {
-        let sessionURL = URL(fileURLWithPath: BeamData.dataFolder(fileName: "session.data"))
+        let sessionURL = URL(fileURLWithPath: data.dataFolder(fileName: "session.data"))
         try? FileManager.default.removeItem(at: sessionURL)
     }
 
     // MARK: - Tabs
     func applicationWillTerminate(_ aNotification: Notification) {
+        guard let data = data.currentAccount?.data else { return }
+
         guard !skipTerminateMethods else { return }
         // Insert code here to tear down your application
         do {
@@ -496,7 +418,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag && data != nil {
+        if !flag && didFinishLaunching {
             createWindow(frame: nil)
         }
 
@@ -516,7 +438,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             BeamAccount.enableSync()
         }
 
-        if !BeamAccount.hasValidAccount(in: BeamData.accountsPath) {
+        if !BeamAccount.hasValidAccount(in: data.accountsPath) {
             splashScreenWindow = SplashScreenWindow()
             splashScreenWindow?.presentWindow()
 
@@ -527,7 +449,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let account: BeamAccount
             let database: BeamDatabase
             do {
-                account = try BeamData.createDefaultAccount()
+                account = try data.createDefaultAccount()
                 database = try account.loadDatabase(account.defaultDatabaseId)
             } catch {
                 Logger.shared.logError("Cannot migrate legacy data creating a default account failed: \(error)", category: .accountManager)
@@ -540,7 +462,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             do {
-                try importer.importAllFrom(path: BeamData.dataFolder)
+                try importer.importAllFrom(path: data.dataFolder())
             } catch {
                 Logger.shared.logError("Error during legacy data migration: \(error)", category: .accountManager)
             }
@@ -590,8 +512,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         BeamVersion.setupLocalDevice(Persistence.Device.id)
         BeamData.registerDefaultManagers()
 
-        migrateLegacyData()
-
+        do {
+            try data.loadAccounts()
+            try data.setupCurrentAccount()
+        } catch {
+            Logger.shared.logError("Unable to setup accounts: \(error)", category: .accountManager)
+        }
+        
         CoreDataManager.shared.setup()
 
         Logger.shared.logDebug("-------------------------( applicationLaunching )-------------------------",
@@ -660,8 +587,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         data.currentAccount?.logoutIfNeeded()
         data.saveData()
 
-        _ = self.data.browsingTreeSender?.groupWait()
-        _ = BrowsingTreeStoreManager.shared.groupWait()
+        _ = data.currentAccount?.data.browsingTreeSender?.groupWait()
+        _ = data.currentAccount?.data.browsingTreeStoreManager.groupWait()
         // Save changes in the application's managed object context before the application terminates.
         let context = CoreDataManager.shared.mainContext
 
@@ -682,7 +609,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        let runningDownloads = data.downloadManager.downloadList.runningDownloads
+        let runningDownloads = data.currentAccount?.data.downloadManager.downloadList.runningDownloads ?? []
         if !runningDownloads.isEmpty {
             let alert = buildAlertForDownloadInProgress(runningDownloads)
             let answer = alert.runModal()
@@ -691,7 +618,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        if data.importsManager.isImporting, cancelQuitAlertForImports() == true {
+        if data.currentAccount?.data.importsManager.isImporting ?? false, cancelQuitAlertForImports() == true {
             return .terminateCancel
         }
 
@@ -722,7 +649,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         //More explanations here: https://www.thecave.com/2015/08/10/dispatch-async-to-main-queue-doesnt-work-with-modal-window-on-mac-os-x
         fullSyncOnQuitStatus = .ongoing
         Task { @MainActor in
-            _ = try await syncDataWithBeamObject(force: false, showAlert: false)
+            _ = try syncDataWithBeamObject(force: false, showAlert: false)
             Logger.shared.logDebug("Full sync finished. Asking again to quit, without full sync")
             self.fullSyncOnQuitStatus = .done
             NSApp.terminate(nil)
@@ -774,7 +701,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     lazy var privateSettingsWindowController = SettingsWindowController(settingsTab: SettingTab.privateSettings)
 
     @IBAction private func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
-        guard !data.onboardingManager.needsToDisplayOnboard else { return }
+        guard let account = data.currentAccount else { return }
+        guard !account.data.onboardingManager.needsToDisplayOnboard else { return }
         settingsWindowController.show()
     }
 
@@ -787,7 +715,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction private func advancedPreferencesMenuItemActionHandler(_ sender: NSMenuItem) {
-        guard !data.onboardingManager.needsToDisplayOnboard else { return }
+        guard let account = data.currentAccount else { return }
+        guard !account.data.onboardingManager.needsToDisplayOnboard else { return }
         privateSettingsWindowController.show()
     }
 

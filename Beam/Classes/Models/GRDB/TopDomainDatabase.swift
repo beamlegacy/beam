@@ -25,7 +25,7 @@ struct TopDomainDatabase {
 
     private static func makeShared() -> TopDomainDatabase {
         do {
-            let path = BeamData.dataFolder(fileName: "top_domains.db")
+            let path = AppData.shared.dataFolder(fileName: "top_domains.db")
             let dbPool = try DatabasePool(path: path)
 
             return try TopDomainDatabase(dbPool)
