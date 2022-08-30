@@ -9266,7 +9266,6 @@
 				DAAFF670283B86C4007305B4 /* AutocompleteManager+Logging.swift in Sources */,
 				DAC803F22850968B00D15371 /* UrlStatsDBManager.swift in Sources */,
 				8749F3372893DF5B00098600 /* KeyEventHijacker.swift in Sources */,
-				DAAFF670283B86C4007305B4 /* AutocompleteManager+Logging.swift in Sources */,
 				9670B8FB285011A800BEC4A0 /* AppDelegate+DataTree.swift in Sources */,
 				A5A2D52F27393730003D0925 /* AnimatedGradient.swift in Sources */,
 				A53F8A5A27C4A74E000D168D /* AvailableShortcut.swift in Sources */,
