@@ -57,6 +57,11 @@ class AllNotesTestView: BaseView {
         return self
     }
     
+    func allNotesImportExportCallFor(firstMenu: AllNotesViewLocators.MenuItems, secondMenu: AllNotesViewLocators.MenuItems) {
+        triggerAllNotesMenuOptionAction(firstMenu)
+        menuItem(secondMenu.accessibilityIdentifier).hoverAndTapInTheMiddle()
+    }
+    
     @discardableResult
     func triggerSingleNoteMenuOptionAction(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
         app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
@@ -70,6 +75,12 @@ class AllNotesTestView: BaseView {
         getNotesNamesElements()[index].hover()
         singleNoteMenu.hover()
         singleNoteMenu.clickOnExistence()
+        return self
+    }
+    
+    @discardableResult
+    func selectAllRows() -> AllNotesTestView {
+        app.windows.scrollViews.tables.groups.children(matching: .button).element(boundBy: 0).hoverAndTapInTheMiddle()
         return self
     }
     
