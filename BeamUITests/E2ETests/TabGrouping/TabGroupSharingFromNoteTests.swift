@@ -62,7 +62,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
                         .clickTabGroupMenu(.tabGroupShareGroup)
                         .shareTabGroupAction(windowTitle)
                         .waitForWebViewToLoad()
-                    XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.maximumWaitTimeout, expectedNumber: 2, query: getNumberOfWindows()), "Second window wasn't opened during \(BaseTest.implicitWaitTimeout) seconds timeout")
+                    XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.maximumWaitTimeout, expectedNumber: 2, query: getNumberOfWindows()), "Second window wasn't opened during \(BaseTest.maximumWaitTimeout) seconds timeout")
                     XCTAssertTrue(
                         webView.isWindowOpenedWithContaining(title: windowTitle) ||
                         webView.isWindowOpenedWithContaining(title: windowTitle, isLowercased: true)
@@ -111,10 +111,21 @@ class TabGroupSharingFromNoteTests: BaseTest {
                 .shareTabGroupAction(copyLinkAction)
         }
         
-        step("Then tab group link is copied to pasteboard") {
+        step("Then short tab group link is copied to pasteboard") {
             XCTAssertTrue(webView.staticText(TabGroupMenuViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
             XCTAssertEqual(getNumberOfPasteboardItem(), 1)
             XCTAssertTrue(tabGroupMenu.isTabGroupLinkInPasteboard())
+        }
+        
+        step("And short link URL redirect to full link URL") {
+            let omniboxTestView = OmniBoxTestView()
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
+            shortcutHelper.shortcutActionInvoke(action: .paste)
+            webView.typeKeyboardKey(.enter)
+            webView.waitForWebViewToLoad()
+            shortcutHelper.shortcutActionInvoke(action: .openLocation)
+            _ = omniboxTestView.getOmniBoxSearchField().waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+            XCTAssertTrue(tabGroupMenu.isMatchingFullURL(omniboxTestView.getSearchFieldValue()))
         }
     }
 }
