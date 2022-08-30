@@ -11,6 +11,7 @@ import XCTest
 class NoteCreationTests: BaseTest {
     
     let noteNameToBeCreated = "NoteCreation"
+    let otherNoteNameToBeCreated = "OtherNoteCreation"
     let noteView = NoteTestView()
     var journalView: JournalTestView!
     var allNotesView: AllNotesTestView!
@@ -66,11 +67,14 @@ class NoteCreationTests: BaseTest {
             journalView.textView(NoteViewLocators.TextFields.textNode.accessibilityIdentifier).firstMatch.clickOnExistence()
             journalView.app.typeText("@" + noteNameToBeCreated)
             journalView.typeKeyboardKey(.enter)
+            journalView.app.typeText("[[" + otherNoteNameToBeCreated)
+            journalView.typeKeyboardKey(.enter)
         }
 
         step("Then note with \(noteNameToBeCreated) name appears in All notes menu list"){
             let allNotesMenu = journalView.openAllNotesMenu()
             XCTAssertTrue(allNotesMenu.isNoteNameAvailable(noteNameToBeCreated))
+            XCTAssertTrue(allNotesMenu.isNoteNameAvailable(otherNoteNameToBeCreated))
         }
     }
     
