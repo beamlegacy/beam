@@ -12,6 +12,7 @@ enum HelpViewLocators {
     enum StaticTexts: String, CaseIterable, UIElement  {
         case shortcuts = "Shortcuts"
         case feature = "Feature Request"
+        case twitter = "Follow @getonbeam"
         case bug = "Report a bug"
         case menuTitle = "Help & Feedback"
         case closeShortcuts = "Done"

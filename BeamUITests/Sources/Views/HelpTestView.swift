@@ -35,6 +35,12 @@ class HelpTestView: BaseView {
         return WebTestView()
     }
     
+    @discardableResult
+    func openTwitterAccount() -> WebTestView {
+        staticText(HelpViewLocators.StaticTexts.twitter.accessibilityIdentifier).clickOnExistence()
+        return WebTestView()
+    }
+    
     func getCmdLabel() -> XCUIElement {
         return image(HelpViewLocators.Images.cmdLabel.accessibilityIdentifier)
     }
