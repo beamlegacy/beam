@@ -22,4 +22,22 @@ class AboutPreferencesTestView: PreferencesBaseView {
         return self
     }
     
+    @discardableResult
+    func clickFollowTwitterButton() -> AboutPreferencesTestView {
+        button(AboutPreferencesViewLocators.Buttons.followTwitterButton.accessibilityIdentifier).clickOnHittable()
+        return self
+    }
+    
+    @discardableResult
+    func clickTermsOfServiceHyperlink() -> AboutPreferencesTestView {
+        staticText(AboutPreferencesViewLocators.StaticTexts.termsOfServicesHyperlink.accessibilityIdentifier).hoverAndTapInTheMiddle()
+        return self
+    }
+    
+    @discardableResult
+    func clickPrivacyPolicyHyperlink() -> AboutPreferencesTestView {
+        staticText(AboutPreferencesViewLocators.StaticTexts.privacyPolicyHyperlink.accessibilityIdentifier).hoverAndTapInTheMiddle()
+        return self
+    }
+    
 }
