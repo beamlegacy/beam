@@ -675,6 +675,8 @@ public class TextNode: ElementNode {
             // default right click behavior: select word
 
             let (linkRange, _) = linkRangeAt(point: mouseInfo.position)
+            let internalLink = internalLink(at: mouseInfo.position)
+            let internalLinkFrame = internalLinkRangeAndFrame(at: mouseInfo.position).1
             if let linkRange = linkRange {
                 // open link right menu
                 focus(position: linkRange.end)
@@ -682,6 +684,10 @@ public class TextNode: ElementNode {
                 root?.selectedTextRange = selectRange
                 cursor = .arrow
                 editor.showLinkFormatterForSelection(mousePosition: mouseInfo.position, showMenu: true)
+            } else if let internalLink = internalLink, let linkFrame = internalLinkFrame {
+                focus(position: clickPos)
+                let menuPosition = CGPoint(x: mouseInfo.position.x + self.offsetInDocument.x - 10, y: linkFrame.maxY + self.offsetInDocument.y + 7)
+                editor.showInternalLinkContextMenu(at: menuPosition, for: internalLink)
             } else {
                 guard allowSelection else { return true }
                 focus(position: clickPos)
@@ -710,7 +716,7 @@ public class TextNode: ElementNode {
                 return true
             }
 
-            if let link = internalLinkAt(point: mouseInfo.position) {
+            if let link = internalLink(at: mouseInfo.position) {
                 editor.openCard(link, nil, nil)
                 return true
             }
@@ -727,7 +733,7 @@ public class TextNode: ElementNode {
         let mouseHasChangedTextPosition = lastHoverMouseInfo?.position != mouseInfo.position
         if mouseHasChangedTextPosition && isMouseInContentFrame {
             let link = linkAt(point: mouseInfo.position)
-            let internalLink = internalLinkRangeAt(point: mouseInfo.position)
+            let (internalLink, _) = internalLinkRangeAndFrame(at: mouseInfo.position)
 
             if link != nil {
                 let (linkRange, linkFrame) = linkRangeAt(point: mouseInfo.position)
@@ -1083,13 +1089,13 @@ public class TextNode: ElementNode {
         }
     }
 
-    public func internalLinkAt(point: NSPoint) -> UUID? {
+    public func internalLink(at point: NSPoint) -> UUID? {
         guard let pos = indexAt(point: point) else { return nil }
-        return internalLinkAt(index: pos)
+        return internalLink(at: pos)
     }
 
-    public func internalLinkAt(index: Int) -> UUID? {
-        guard let range = internalLinkRangeAt(index: index) else { return nil }
+    public func internalLink(at index: Int) -> UUID? {
+        guard let range = internalLinkRange(at: index) else { return nil }
         for attr in range.attributes {
             switch attr {
             case .internalLink(let value):
@@ -1127,19 +1133,28 @@ public class TextNode: ElementNode {
         return hasLink ? range : nil
     }
 
-    public func internalLinkRangeAt(point: NSPoint) -> BeamText.Range? {
-        guard let textFrame = textFrame else { return nil }
+    public func internalLinkRangeAndFrame(at point: CGPoint) -> (BeamText.Range?, CGRect?) {
+        guard let textFrame = textFrame else { return (nil, nil) }
         let line = lineAt(point: point)
-        guard line >= 0, !textFrame.lines.isEmpty else { return nil }
+        guard line >= 0, !textFrame.lines.isEmpty else { return (nil, nil) }
         let l = textFrame.lines[line]
         let point = NSPoint(x: point.x - contentsPadding.left, y: point.y - contentsPadding.top)
-        guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return nil } // don't find links outside the line
+        guard l.frame.minX <= point.x && l.frame.maxX >= point.x else { return (nil, nil) } // don't find links outside the line
         let displayIndex = l.stringIndexFor(position: point)
         let pos = min(displayIndex, attributedString.length - 1)
-        return internalLinkRangeAt(index: pos)
+        guard let range = internalLinkRange(at: pos) else { return (nil, nil) }
+
+        let start = range.position
+        let end = range.end
+        let startOffset = offsetAt(index: start)
+        let endOffset = offsetAt(index: end)
+
+        let linkFrame = NSRect(x: startOffset, y: l.frame.minY, width: endOffset - startOffset, height: l.frame.height).offsetBy(dx: contentsPadding.left, dy: contentsPadding.top)
+
+        return (range, linkFrame)
     }
 
-    public func internalLinkRangeAt(index: Int) -> BeamText.Range? {
+    public func internalLinkRange(at index: Int) -> BeamText.Range? {
         let range = elementText.rangeAt(position: index)
         let hasInternalLink = range.attributes.contains { $0.isInternalLink }
         return hasInternalLink ? range : nil

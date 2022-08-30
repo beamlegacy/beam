@@ -139,6 +139,7 @@
 		3355997426CBDDC900F52C23 /* SearchInContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997326CBDDC900F52C23 /* SearchInContentView.swift */; };
 		3355997626CBE0AE00F52C23 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997526CBE0AE00F52C23 /* SearchViewModel.swift */; };
 		335CBA9127CF617A005FE658 /* MouseCursorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335CBA9027CF617A005FE658 /* MouseCursorManager.swift */; };
+		336B0D5928B4E534004C009B /* SplitViewSizeControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 336B0D5828B4E534004C009B /* SplitViewSizeControlView.swift */; };
 		33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
 		337F31B028352845002854BC /* SidebarListSectionTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337F31AF28352845002854BC /* SidebarListSectionTitle.swift */; };
 		337F31B728357CB3002854BC /* UsernameBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337F31B628357CB3002854BC /* UsernameBadgeView.swift */; };
@@ -1780,6 +1781,7 @@
 		3355997326CBDDC900F52C23 /* SearchInContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInContentView.swift; sourceTree = "<group>"; };
 		3355997526CBE0AE00F52C23 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		335CBA9027CF617A005FE658 /* MouseCursorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseCursorManager.swift; sourceTree = "<group>"; };
+		336B0D5828B4E534004C009B /* SplitViewSizeControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewSizeControlView.swift; sourceTree = "<group>"; };
 		337F31AF28352845002854BC /* SidebarListSectionTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarListSectionTitle.swift; sourceTree = "<group>"; };
 		337F31B628357CB3002854BC /* UsernameBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameBadgeView.swift; sourceTree = "<group>"; };
 		337F31B828358770002854BC /* SidebarFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarFooterView.swift; sourceTree = "<group>"; };
@@ -3871,6 +3873,15 @@
 			path = Search;
 			sourceTree = "<group>";
 		};
+		336B0D5228B4E511004C009B /* SplitView & Side Window */ = {
+			isa = PBXGroup;
+			children = (
+				33CC156B28660F9E008A82D9 /* MiniEditorPanel.swift */,
+				336B0D5828B4E534004C009B /* SplitViewSizeControlView.swift */,
+			);
+			path = "SplitView & Side Window";
+			sourceTree = "<group>";
+		};
 		339D193026AED9B2006DE745 /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
@@ -4388,8 +4399,8 @@
 				A54936B0260B71FE00EF7622 /* BottomToolbar */,
 				370794C627D7AA0300D2768B /* PDFDocumentView */,
 				3312202D2809736D006A5EA1 /* Update */,
+				336B0D5228B4E511004C009B /* SplitView & Side Window */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
-				33CC156B28660F9E008A82D9 /* MiniEditorPanel.swift */,
 				A58F0100282E58E000221DB0 /* BeamHostingView.swift */,
 				8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */,
 				52ECE01D272970260010E223 /* UserAlert.swift */,
@@ -9467,6 +9478,7 @@
 				52842D522715B3F40099602C /* FilesList.swift in Sources */,
 				375D83C8278D6ACE0064C246 /* WebViewStatusBar.swift in Sources */,
 				87AD4BF4286A530C0058F8BE /* PasswordEncryptionManager.swift in Sources */,
+				336B0D5928B4E534004C009B /* SplitViewSizeControlView.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
 				52842D572715D2620099602C /* FileRow.swift in Sources */,
 				A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */,

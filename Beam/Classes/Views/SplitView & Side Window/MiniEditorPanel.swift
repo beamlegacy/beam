@@ -22,11 +22,13 @@ class MiniEditorPanel: NSPanel {
     static let minimumPanelWidth: CGFloat = 550
     static let maximumPanelWidth: CGFloat = 614
 
+    private let enableWindowDocking = false
+
     static func dockedPanelOrigin(from mainWindowFrame: NSRect) -> CGPoint {
         CGPoint(x: mainWindowFrame.origin.x + mainWindowFrame.width + 5, y: mainWindowFrame.origin.y)
     }
 
-    static func presentMiniEditor(from window: BeamWindow, with note: BeamNote, at frame: CGRect? = nil) {
+    static func presentMiniEditor(with note: BeamNote, from window: BeamWindow, frame: CGRect? = nil) {
         guard Configuration.branchType == .develop else { return }
 
         let state = window.state
@@ -54,7 +56,7 @@ class MiniEditorPanel: NSPanel {
         self.note = note
         self.data = state.data
         self.state = state
-        super.init(contentRect: rect, styleMask: [.fullSizeContentView, .borderless], backing: .buffered, defer: false)
+        super.init(contentRect: rect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView], backing: .buffered, defer: false)
 
         self.title = note.title
 
@@ -64,13 +66,13 @@ class MiniEditorPanel: NSPanel {
             .environmentObject(windowInfo)
             .environmentObject(state.browserTabsManager)
             .cornerRadius(10)
+            .ignoresSafeArea()
 
         let hostingView = NSHostingView(rootView: mainView)
         self.contentView = hostingView
-
         self.isReleasedWhenClosed = false
-        self.isOpaque = false
-        self.backgroundColor = .clear
+        self.titlebarAppearsTransparent = true
+        self.titleVisibility = .hidden
 
         AppDelegate.main.panels[note] = self
 
@@ -81,6 +83,7 @@ class MiniEditorPanel: NSPanel {
     }
 
     func reDock() {
+        guard enableWindowDocking else { return }
         guard let mainWindow = state.associatedWindow as? BeamWindow else { return }
         let position = MiniEditorPanel.dockedPanelOrigin(from: mainWindow.frame)
         let rect = CGRect(origin: position, size: CGSize(width: Self.panelWidth(for: mainWindow), height: mainWindow.frame.height))
@@ -98,6 +101,7 @@ class MiniEditorPanel: NSPanel {
     }
 
     func unDock() {
+        guard enableWindowDocking else { return }
         parent?.removeChildWindow(self)
         if PreferencesManager.isHapticFeedbackOn {
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
@@ -112,16 +116,12 @@ class MiniEditorPanel: NSPanel {
     override func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
         isMouseDown = true
-
-        if allowsWindowDragging(with: event) {
-            performDrag(with: event)
-        }
     }
 
     override func mouseUp(with event: NSEvent) {
         super.mouseUp(with: event)
 
-        if isCloseToMainWindow() && wasJustDragged {
+        if isCloseToMainWindow() && wasJustDragged && enableWindowDocking {
             reDock()
         }
         self.wasJustDragged = false
@@ -183,11 +183,7 @@ extension MiniEditorPanel: NSWindowDelegate {
 
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
         let minSize = AppDelegate.defaultWindowMinimumSize
-        return CGSize(width: frameSize.width.clamp(Self.minimumPanelWidth, Self.maximumPanelWidth), height: max(frameSize.height, minSize.height + 51))
-    }
-
-    fileprivate func allowsWindowDragging(with event: NSEvent) -> Bool {
-        event.locationInWindow.flippedPointToTopLeftOrigin(in: self).y < 40
+        return CGSize(width: max(frameSize.width, Self.minimumPanelWidth), height: max(frameSize.height, minSize.height + 51))
     }
 }
 
@@ -200,46 +196,81 @@ struct MiniEditor: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var windowInfo: BeamWindowInfo
 
+    @State private var showTitle: Bool = false
+    @State private var contentIsScrolled = false
+
+    private var titleHideVerticalOffset: CGFloat {
+        isInWindow ? 135 : 111
+    }
+    private var toolbarHeight: CGFloat {
+        isInWindow ? 28 : 52
+    }
+
     var body: some View {
         ZStack(alignment: .top) {
             GeometryReader { proxy in
-                NoteView(note: note, containerGeometry: proxy, topInset: 0, leadingPercentage: 0, centerText: false)
-                HStack {
-                    ButtonLabel(icon: "tabs-side_close", customStyle: buttonStyle) {
-                        if let window = window {
-                            window.close()
-                        } else {
-                            state.sideNote = nil
-                        }
-                    }
+                NoteView(note: note, containerGeometry: proxy, topInset: 0, leadingPercentage: 0, centerText: false) { offset in
+                    showTitle = offset.y > titleHideVerticalOffset ? true : false
+                    let isScrolled = offset.y > NoteView.topSpacingBeforeTitle - toolbarHeight
+                    contentIsScrolled = isScrolled
+                }
+                HStack(spacing: 8) {
                     Spacer()
-                    if let window = window, window.parent == nil {
-                        Button("Re-Dock") {
-                            window.reDock()
-                        }
-                    }
-                    if let window = windowInfo.window as? BeamWindow {
+                    if let _ = windowInfo.window as? BeamWindow {
                         ButtonLabel(icon: "tabs-side_detach", customStyle: buttonStyle) {
-                            let frame = proxy.frame(in: .global)
-                            MiniEditorPanel.presentMiniEditor(from: window, with: note, at: window.convertToScreen(frame).offsetBy(dx: 20, dy: -20))
+                            state.openNoteInMiniEditor(id: note.id)
                             state.sideNote = nil
-                        }
+                        }.frame(width: 12, height: 12)
                     } else if let window = windowInfo.window as? MiniEditorPanel {
                         ButtonLabel(icon: "tabs-side_openmain", customStyle: buttonStyle) {
                             state.sideNote = note
                             window.close()
-                        }
+                        }.frame(width: 12, height: 12)
+                    }
+                    if !isInWindow {
+                        ButtonLabel(icon: "tabs-side_close", customStyle: buttonStyle) {
+                            state.sideNote = nil
+                        }.frame(width: 12, height: 12)
                     }
                 }
-                .padding(10)
-                .background(VisualEffectView(material: .headerView))
+                .padding(.trailing, isInWindow ? 8 : 20)
+                .frame(height: toolbarHeight)
+                .overlay(titleView)
+                .background(VisualEffectView(material: .headerView)
+                                .overlay(blurOverlay)
+                                .opacity(contentIsScrolled || !windowInfo.windowIsMain ? 1 : 0))
             }
         }
         .background(BeamColor.Generic.background.swiftUI)
-        .cornerRadius(10)
+    }
+
+    @ViewBuilder private var titleView: some View {
+        if showTitle {
+            Text(note.title)
+                .transition(.opacity.animation(.easeInOut))
+                .font(isInWindow ? Font.system(size: 13, weight: .bold, design: .default) : BeamFont.regular(size: 11).swiftUI)
+                .foregroundColor(BeamColor.Niobium.swiftUI)
+        }
+    }
+
+    private var isInWindow: Bool {
+        window != nil
     }
 
     private var buttonStyle: ButtonLabelStyle {
         ButtonLabelStyle(iconSize: 12, activeBackgroundColor: .clear)
+    }
+
+    private let overlayOpacity = PreferencesManager.editorToolbarOverlayOpacity
+    private var blurOverlay: some View {
+        VStack(spacing: 0) {
+            if windowInfo.windowIsMain {
+                BeamColor.Generic.background.swiftUI.opacity(overlayOpacity)
+                Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparator)
+            } else {
+                BeamColor.ToolBar.backgroundInactiveWindow.swiftUI
+                Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparatorInactiveWindow)
+            }
+        }
     }
 }
