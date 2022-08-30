@@ -54,11 +54,11 @@ class WebAutofillController: NSObject, WebPageRelated {
         currentOverlay?.hasVisibleInterface == true
     }
 
-    init(passwordManager: PasswordManager = .shared, creditCardManager: CreditCardAutofillManager = .shared, userInfoStore: UserInformationsStore) {
+    init(passwordManager: PasswordManager, creditCardManager: CreditCardAutofillManager = .shared, userInfoStore: UserInformationsStore) {
         self.passwordManager = passwordManager
         self.creditCardManager = creditCardManager
         self.userInfoStore = userInfoStore
-        credentialsBuilder = PasswordManagerCredentialsBuilder()
+        credentialsBuilder = PasswordManagerCredentialsBuilder(passwordManager: passwordManager)
         creditCardBuilder = CreditCardAutofillBuilder()
         encoder = JSONEncoder()
         decoder = BeamJSONDecoder()
@@ -279,7 +279,7 @@ class WebAutofillController: NSObject, WebPageRelated {
     private func autofillMenuHasSignificantContents(autofillGroup: WebAutofillGroup, menuOptions: PasswordManagerMenuOptions?) -> Bool {
         if autofillGroup.action == .payment { return true }
         guard let menuOptions = menuOptions, let minimizedHost = getPageHost() else { return false }
-        return menuOptions.suggestNewPassword || credentialsBuilder.suggestedEntry() != nil || !PasswordManager.shared.entries(for: minimizedHost, options: .fuzzy).isEmpty
+        return menuOptions.suggestNewPassword || credentialsBuilder.suggestedEntry() != nil || !passwordManager.entries(for: minimizedHost, options: .fuzzy).isEmpty
     }
 
     private func showWebFieldAutofillMenu(for elementId: String, inGroup autofillGroup: WebAutofillGroup, frameInfo: WKFrameInfo?) {
@@ -344,7 +344,7 @@ class WebAutofillController: NSObject, WebPageRelated {
     }
 
     private func passwordManagerViewModel(for host: URL, options: PasswordManagerMenuOptions) -> PasswordManagerMenuViewModel {
-        let viewModel = PasswordManagerMenuViewModel(host: host, credentialsBuilder: credentialsBuilder, userInfoStore: userInfoStore, options: options)
+        let viewModel = PasswordManagerMenuViewModel(host: host, credentialsBuilder: credentialsBuilder, userInfoStore: userInfoStore, options: options, passwordManager: passwordManager)
         viewModel.delegate = self
         return viewModel
     }

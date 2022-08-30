@@ -8,35 +8,37 @@ import GRDB
 class BeamLinkDBTests: XCTestCase {
     let beamHelper = BeamTestsHelper()
     let beamObjectHelper = BeamObjectTestsHelper()
+    let linkDB = BeamData.shared.linkDB
+    let objectManager = BeamData.shared.objectManager
 
     override func tearDown() {
         super.tearDown()
-        BeamLinkDB.shared.deleteAll(includedRemote: false)
+        linkDB.deleteAll(includedRemote: false)
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
     }
 
     func testDomain() throws {
         //not a domain case
         let url0 = "http://123.fr/yourdestiny.html"
-        let id0 = BeamLinkDB.shared.getOrCreateId(for: url0, title: nil, content: nil, destination: nil)
-        var isDomain = BeamLinkDB.shared.isDomain(id: id0)
+        let id0 = linkDB.getOrCreateId(for: url0, title: nil, content: nil, destination: nil)
+        var isDomain = linkDB.isDomain(id: id0)
         XCTAssertFalse(isDomain)
-        var domainId = try XCTUnwrap(BeamLinkDB.shared.getDomainId(id: id0))
-        var domainLink = try XCTUnwrap(BeamLinkDB.shared.linkFor(id: domainId))
+        var domainId = try XCTUnwrap(linkDB.getDomainId(id: id0))
+        var domainLink = try XCTUnwrap(linkDB.linkFor(id: domainId))
         XCTAssertEqual(domainLink.url, "http://123.fr/")
 
         //domain case
         let url1 = "http://depannage.com"
-        let id1 = BeamLinkDB.shared.getOrCreateId(for: url1, title: nil, content: nil, destination: nil)
-        isDomain = BeamLinkDB.shared.isDomain(id: id1)
+        let id1 = linkDB.getOrCreateId(for: url1, title: nil, content: nil, destination: nil)
+        isDomain = linkDB.isDomain(id: id1)
         XCTAssert(isDomain)
-        domainId = try XCTUnwrap(BeamLinkDB.shared.getDomainId(id: id1))
-        domainLink = try XCTUnwrap(BeamLinkDB.shared.linkFor(id: domainId))
+        domainId = try XCTUnwrap(linkDB.getDomainId(id: id1))
+        domainLink = try XCTUnwrap(linkDB.linkFor(id: domainId))
         XCTAssertEqual(domainLink.url, "http://depannage.com/")
 
         //no existing id case
-        XCTAssertFalse(BeamLinkDB.shared.isDomain(id: UUID()))
-        XCTAssertNil(BeamLinkDB.shared.getDomainId(id: UUID()))
+        XCTAssertFalse(linkDB.isDomain(id: UUID()))
+        XCTAssertNil(linkDB.getDomainId(id: UUID()))
     }
 
     func testTopFrecenciesMatching() throws {
@@ -50,7 +52,7 @@ class BeamLinkDBTests: XCTestCase {
             destinationLink,
         ]
         let store = GRDBStore(writer: DatabaseQueue())
-        let db = try UrlHistoryManager(holder: nil, store: store)
+        let db = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
         try store.migrate()
 
         try db.insert(links: links)
@@ -70,12 +72,12 @@ class BeamLinkDBTests: XCTestCase {
         let creationDate = BeamDate.now
         let dbQueue = DatabaseQueue()
         let store = GRDBStore(writer: dbQueue)
-        let inMemoryGrdb = try UrlHistoryManager(holder: nil, store: store)
+        let inMemoryGrdb = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
         try store.migrate(upTo: "flattenBrowsingTrees")
 
         //insertion of separated link and frecency records
         let urls = ["http://abc.com", "http://def.fr"]
-        let linkStore = BeamLinkDB(overridenManager: inMemoryGrdb)
+        let linkStore = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
         let ids = urls.map { _ in UUID() }
         try zip(urls, ids).forEach { (url, id) in
             try dbQueue.write { db in
@@ -118,8 +120,8 @@ class BeamLinkDBTests: XCTestCase {
     func testReceivedLinkFrecencyOverwrite() throws {
         let dbQueue = DatabaseQueue()
         let store = GRDBStore(writer: dbQueue)
-        let inMemoryGrdb = try UrlHistoryManager(holder: nil, store: store)
-        let db = BeamLinkDB(overridenManager: inMemoryGrdb)
+        let inMemoryGrdb = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
+        let db = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
         try store.migrate()
         let now = BeamDate.now
         let urls = ["http://coucou.fr", "http://hello.fr"]
@@ -150,9 +152,9 @@ class BeamLinkDBTests: XCTestCase {
     func testFrecencyStore() throws {
         let dbQueue = DatabaseQueue()
         let store = GRDBStore(writer: dbQueue)
-        let inMemoryGrdb = try UrlHistoryManager(holder: nil, store: store)
-        let linkstore = BeamLinkDB(overridenManager: inMemoryGrdb)
-        let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb)
+        let inMemoryGrdb = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
+        let linkstore = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
+        let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb, objectManager: objectManager)
         try store.migrate()
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let t0 = BeamDate.now
@@ -214,8 +216,8 @@ class BeamLinkDBTests: XCTestCase {
 
     func testConflictManagement() throws {
         let store = GRDBStore(writer: DatabaseQueue())
-        let db = try UrlHistoryManager(holder: nil, store: store)
-        let linkstore = BeamLinkDB(overridenManager: db)
+        let db = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
+        let linkstore = BeamLinkDB(objectManager: objectManager, overridenManager: db)
         try store.migrate()
         let now = BeamDate.now
         let remoteLink = Link(
@@ -248,7 +250,7 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertEqual(postConflictLink.title, "Alphabet")
     }
     func testTitleNotReplacedByEmpty() throws {
-        let linkstore = BeamLinkDB()
+        let linkstore = BeamLinkDB(objectManager: objectManager)
 
         var link = linkstore.visit("http://site.cool/page", title: "A page", content: nil, destination: nil)
         link = linkstore.visit("http://site.cool/page", title: nil, content: nil, destination: nil)

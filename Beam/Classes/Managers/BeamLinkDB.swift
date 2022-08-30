@@ -119,11 +119,12 @@ struct LinkWithFrecency: FetchableRecord {
 }
 
 public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
+    let objectManager: BeamObjectManager
+
     var changedObjects: [UUID : Link] = [:]
     let objectQueue = BeamObjectQueue<Link>()
     
     static let tableName = "link"
-    static var shared = BeamLinkDB()
     static var uploadType: BeamObjectRequestUploadType {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
@@ -133,8 +134,11 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
         overridenManager ?? BeamData.shared.urlHistoryManager
     }
 
-    init(overridenManager: UrlHistoryManager? = nil) {
+    init(objectManager: BeamObjectManager, overridenManager: UrlHistoryManager? = nil) {
+        self.objectManager = objectManager
         self.overridenManager = overridenManager
+
+        registerOnBeamObjectManager(objectManager)
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
@@ -271,11 +275,10 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
                 let localTimer = Date()
-                try await self?.saveOnBeamObjectsAPI(links)
+                try await saveOnBeamObjectsAPI(links)
                 Logger.shared.logDebug("Saved \(links.count) links on the BeamObject API",
                                        category: .linkNetwork,
                                        localTimer: localTimer)
@@ -294,10 +297,10 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
         Logger.shared.logDebug("Will save links \(links) on the BeamObject API",
                                category: .linkNetwork)
 
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
                 let localTimer = Date()
-                try await self?.saveOnBeamObjectsAPI(links)
+                try await saveOnBeamObjectsAPI(links)
                 Logger.shared.logDebug("Saved links \(links) on the BeamObject API",
                                        category: .linkNetwork,
                                        localTimer: localTimer)
@@ -315,11 +318,11 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
 
         Logger.shared.logDebug("Will save link \(link.url) [\(link.id)] on the BeamObject API",
                                category: .linkNetwork)
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
                 let localTimer = Date()
 
-                try await self?.saveOnBeamObjectAPI(link)
+                try await saveOnBeamObjectAPI(link)
                 Logger.shared.logDebug("Saved link \(link.url) [\(link.id)] on the BeamObject API",
                                        category: .linkNetwork,
                                        localTimer: localTimer)

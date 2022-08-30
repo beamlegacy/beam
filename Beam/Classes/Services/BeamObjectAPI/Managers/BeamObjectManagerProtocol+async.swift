@@ -2,7 +2,8 @@ import Foundation
 import BeamCore
 
 extension BeamObjectManagerDelegate {
-    func saveAllOnBeamObjectApi(force: Bool = false, progress: ((Float) async -> Void)? = nil) async throws -> (Int, Date?) {
+    func saveAllOnBeamObjectApi(force: Bool = false,
+                                progress: ((Float) -> Void)? = nil) async throws -> (Int, Date?) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -40,7 +41,7 @@ extension BeamObjectManagerDelegate {
             objects = []
 
             let percentage = Float(savedCount) / Float(objectsToSave.count) * 100.0
-            await progress?(percentage)
+            progress?(percentage)
         }
 
         for object in objectsToSave {
@@ -58,7 +59,7 @@ extension BeamObjectManagerDelegate {
         if objects.count > 0 {
             try await save()
         } else {
-            await progress?(100)
+            progress?(100)
         }
 
         Logger.shared.logDebug("\(Self.BeamObjectType.beamObjectType.rawValue) manager returned \(savedCount) objects",
@@ -83,18 +84,18 @@ extension BeamObjectManagerDelegate {
         }
     }
 
-    private func _saveOnBeamObjectsAPI(_ objects: [BeamObjectType], force: Bool, deep: Int) async throws -> [BeamObjectType] {
+    private func _saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
+                                       force: Bool,
+                                       deep: Int) async throws -> [BeamObjectType] {
         guard deep < 3 else {
             throw BeamObjectManagerDelegateError.nestedTooDeep
         }
 
-        let objectManager = BeamObjectManager()
-        objectManager.conflictPolicyForSave = Self.conflictPolicy
-
         do {
             return try await objectManager.saveToAPI(objects,
-                                                     force: force,
-                                                     requestUploadType: Self.uploadType)
+                                               force: force,
+                                               requestUploadType: Self.uploadType,
+                                               conflictPolicy: Self.conflictPolicy)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
             return try await saveOnBeamObjectsAPIError(objects: objects,
@@ -110,7 +111,7 @@ extension BeamObjectManagerDelegate {
                                category: .beamObjectNetwork)
 
         if case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error {
-            return try await self.manageInvalidChecksum(error, deep)
+            return try await self.manageInvalidChecksum(error, deep: deep)
         }
 
         // We don't manage anything else than `BeamObjectManagerError.multipleErrors`
@@ -126,8 +127,6 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
-        let objectManager = BeamObjectManager()
-
         try await objectManager.delete(object: object)
 
         return true
@@ -140,7 +139,6 @@ extension BeamObjectManagerDelegate {
         }
 
         var errors: [Error] = []
-        let objectManager = BeamObjectManager()
 
         for object in objects {
             do {
@@ -162,8 +160,6 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
-        let objectManager = BeamObjectManager()
-
         try await objectManager.deleteAll(BeamObjectType.beamObjectType)
         return true
     }
@@ -176,11 +172,9 @@ extension BeamObjectManagerDelegate {
         }
         
         return try await objectQueue.addOperation(for: [object]) { _ in
-            let objectManager = BeamObjectManager()
-
             guard !forced else {
                 do {
-                    let remoteObject = try await objectManager.fetchObject(object)
+                    let remoteObject = try await self.objectManager.fetchObject(object)
                     return [remoteObject]
                 } catch {
                     if case APIRequestError.notFound = error {
@@ -191,14 +185,14 @@ extension BeamObjectManagerDelegate {
             }
 
             do {
-                let remoteChecksum = try await objectManager.fetchObjectChecksum(object)
+                let remoteChecksum = try await self.objectManager.fetchObjectChecksum(object)
                 let beamObject = try BeamObject(object)
 
                 guard let remoteChecksum = remoteChecksum, remoteChecksum != beamObject.dataChecksum else {
                     return []
                 }
 
-                let remoteObject = try await objectManager.fetchObject(object)
+                let remoteObject = try await self.objectManager.fetchObject(object)
                 return [remoteObject]
             } catch {
                 if case APIRequestError.notFound = error {
@@ -215,8 +209,6 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
-        let objectManager = BeamObjectManager()
-
         return try await objectManager.fetchAllObjects(raisePrivateKeyError: raisePrivateKeyError)
     }
 
@@ -229,7 +221,7 @@ extension BeamObjectManagerDelegate {
         Logger.shared.logDebug("saveOnBeamObjectAPI called. Object \(object.beamObjectId), type: \(type(of: object).beamObjectType)",
                                category: .beamObjectNetwork)
 
-        let fullSyncRunning = BeamObjectManager.fullSyncRunning.load(ordering: .acquiring)
+        let fullSyncRunning = objectManager.fullSyncRunning.load(ordering: .acquiring)
         if fullSyncRunning {
             addChangedObject(object)
             return
@@ -237,9 +229,7 @@ extension BeamObjectManagerDelegate {
 
         try await objectQueue.addOperation(for: [object]) { _ in
             do {
-                let objectManager = BeamObjectManager()
-                objectManager.conflictPolicyForSave = Self.conflictPolicy
-                _ = try await objectManager.saveToAPI(object, force: force, requestUploadType: Self.uploadType)
+                _ = try await self.objectManager.saveToAPI(object, force: force, requestUploadType: Self.uploadType, conflictPolicy: Self.conflictPolicy)
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
                 _ = try await self.saveOnBeamObjectAPIError(object: object, error: error)
@@ -248,12 +238,13 @@ extension BeamObjectManagerDelegate {
         }
     }
 
-    internal func saveOnBeamObjectAPIError(object: BeamObjectType, error: Error) async throws -> BeamObjectType {
+    internal func saveOnBeamObjectAPIError(object: BeamObjectType,
+                                           error: Error) async throws -> BeamObjectType {
         guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum = error else {
             throw error
         }
 
-        let objects = try await self.manageInvalidChecksum(error, 0)
+        let objects = try await self.manageInvalidChecksum(error, deep: 0)
         guard let newObject = objects.first, objects.count == 1 else {
             throw BeamObjectManagerDelegateError.runtimeError("Had more than one object back")
         }
@@ -261,7 +252,7 @@ extension BeamObjectManagerDelegate {
     }
 
     internal func manageInvalidChecksum(_ error: Error,
-                                        _ deep: Int) async throws -> [BeamObjectType] {
+                                        deep: Int) async throws -> [BeamObjectType] {
         // Early return except for checksum issues.
         guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects,
                                                                                 let goodObjects,

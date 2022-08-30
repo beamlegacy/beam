@@ -9,6 +9,8 @@ import Foundation
 import BeamCore
 
 public protocol BeamManagerOwner: AnyObject {
+    var objectManager: BeamObjectManager { get }
+
     func loadManagers(_ store: GRDBStore) throws
     func unloadManagers()
     func manager<T: BeamManager>(_ managerType: T.Type) throws -> T
@@ -39,7 +41,7 @@ public extension BeamManagerOwner {
     func loadManagers(_ store: GRDBStore) throws {
         for managerType in Self.registeredManagers {
             do {
-                managers[managerType.id] = try managerType.load(self, store: store)
+                managers[managerType.id] = try managerType.load(self, objectManager: objectManager, store: store)
             } catch {
                 Logger.shared.logError("Unable to init manager \(managerType) from \(self) with store \(store)", category: .database)
             }

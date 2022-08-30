@@ -50,11 +50,11 @@ extension PrivateKeySignature: BeamObjectProtocol {
 }
 
 class PrivateKeySignatureManager: BeamObjectManagerDelegate {
+    let objectManager: BeamObjectManager
+
     var changedObjects: [UUID: PrivateKeySignature] = [:]
     let objectQueue = BeamObjectQueue<PrivateKeySignature>()
     
-    static var shared = PrivateKeySignatureManager()
-
     internal static var conflictPolicy: BeamObjectConflictResolution = .replace
     static var uploadType: BeamObjectRequestUploadType {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
@@ -65,6 +65,12 @@ class PrivateKeySignatureManager: BeamObjectManagerDelegate {
         case valid
         case invalid
         case none
+    }
+
+    init(objectManager: BeamObjectManager) {
+        self.objectManager = objectManager
+
+        registerOnBeamObjectManager(objectManager)
     }
 
     func distantKeyStatus() async throws -> DistantKeyStatus {

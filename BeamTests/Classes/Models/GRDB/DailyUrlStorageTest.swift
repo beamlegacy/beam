@@ -10,13 +10,14 @@ import XCTest
 @testable import Beam
 
 class DailyUrlStorageTest: XCTestCase {
+    let objectManager = BeamObjectManager()
     var urlStatsDb: UrlStatsDBManager!
     var urlHistoryDb: UrlHistoryManager!
 
     override func setUpWithError() throws {
         let store = GRDBStore.empty()
         urlStatsDb = try UrlStatsDBManager(store: store)
-        urlHistoryDb = try UrlHistoryManager(store: store)
+        urlHistoryDb = try UrlHistoryManager(objectManager: objectManager, store: store)
         try store.migrate()
     }
 
@@ -112,7 +113,7 @@ class DailyUrlStorageTest: XCTestCase {
             "http://here.com/",
             "http://here.com/#or_there"
         ]
-        let linkStore = LinkStore(linkManager: BeamLinkDB(overridenManager: urlHistoryDb))
+        let linkStore = LinkStore(linkManager: BeamLinkDB(objectManager: BeamObjectManager(), overridenManager: urlHistoryDb))
         let storage = GRDBDailyUrlScoreStore(db: urlStatsDb, daysToKeep: 1)
         let urlIds = urls.map { linkStore.getOrCreateId(for: $0) }
         
@@ -132,7 +133,7 @@ class DailyUrlStorageTest: XCTestCase {
         BeamDate.reset()
     }
     func testGetRepeatingUrlsSpeed() throws {
-        let linkStore = LinkStore(linkManager: BeamLinkDB(overridenManager: urlHistoryDb))
+        let linkStore = LinkStore(linkManager: BeamLinkDB(objectManager: BeamObjectManager(), overridenManager: urlHistoryDb))
 
         for siteIndex in 0...99 {
             for fragmentIndex in 0...99 {
@@ -156,7 +157,7 @@ class DailyUrlStorageTest: XCTestCase {
         ]
 
         let params = DailySummaryUrlParams(minReadingTime: 0, minTextAmount: 0, maxRepeatTimeFrame: 5, maxRepeat: 2)
-        let linkStore = LinkStore(linkManager: BeamLinkDB(overridenManager: urlHistoryDb))
+        let linkStore = LinkStore(linkManager: BeamLinkDB(objectManager: BeamObjectManager(), overridenManager: urlHistoryDb))
         let urlIds = urls.map { linkStore.getOrCreateId(for: $0) }
         let store = GRDBDailyUrlScoreStore(db: urlStatsDb, daysToKeep: 10)
         let scorer = DailyUrlScorer(store: store, params: params, linkStore: linkStore)

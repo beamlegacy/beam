@@ -12,7 +12,7 @@ import Combine
 class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
     var changedObjects: [UUID: BeamDatabase] = [:]
     let objectQueue = BeamObjectQueue<BeamDatabase>()
-
+    let objectManager: BeamObjectManager
     static var beamObjectType = BeamObjectObjectType.database
     public static var sourceId: String { "\(Self.self)" }
     weak public private(set) var account: BeamAccount?
@@ -21,9 +21,11 @@ class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
 
     private var scope = Set<AnyCancellable>()
 
-    init(account: BeamAccount) {
+    init(account: BeamAccount, objectManager: BeamObjectManager) {
         self.account = account
+        self.objectManager = objectManager
 
+        registerOnBeamObjectManager(objectManager)
         setupObservers()
     }
 
@@ -77,10 +79,11 @@ class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
         BeamDatabase.databaseSaved
             .filter { [weak self] in $0.account === self?.account && $0.source != self?.sourceId }
             .sink { [weak self] database in
-                Task.init { [weak self] in
+                guard let self = self else { return }
+                Task {
                     do {
                         Logger.shared.logError("Previous checksum for \(database) is: \(String(describing: database.previousChecksum))", category: .database)
-                        try await self?.saveOnBeamObjectAPI(database)
+                        try await self.saveOnBeamObjectAPI(database)
                     } catch {
                         Logger.shared.logError("Failed to send database \(database) to remote sync: \(error)", category: .database)
                     }
@@ -90,7 +93,8 @@ class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
         BeamDatabase.databaseDeleted
             .filter { [weak self] in $0.account === self?.account && $0.source != self?.sourceId }
             .sink { [weak self] deletedDatabase in
-                Task.init { [weak self] in
+                guard let self = self else { return }
+                Task {
                     let database = deletedDatabase.database
                     Logger.shared.logError("Previous checksum for \(database) is? \(String(describing: database.previousChecksum))", category: .database)
                     if database.hasBeenSyncedOnce {
@@ -99,7 +103,7 @@ class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
                             try BeamObjectChecksum.deletePreviousChecksum(object: database)
                             database.deletedAt = BeamDate.now
                             database.updatedAt = BeamDate.now
-                            try await self?.saveOnBeamObjectAPI(database)
+                            try await self.saveOnBeamObjectAPI(database)
                         } catch {
                             Logger.shared.logError("Failed to send database \(database) to remote sync? \(error)", category: .database)
                         }

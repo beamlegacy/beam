@@ -21,7 +21,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
 
     public override var tableNames: [String] { ["BeamElementRecord", "BidirectionalLink", "BeamNoteIndexingRecord", "FrecencyNoteRecord"] }
 
-    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
         try super.init(store: store)
     }

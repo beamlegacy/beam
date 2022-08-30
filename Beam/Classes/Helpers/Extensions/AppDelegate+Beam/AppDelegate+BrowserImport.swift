@@ -64,14 +64,14 @@ extension AppDelegate {
     }
 
     private func importHistory(using importer: BrowserHistoryImporter) {
-        data.importsManager.startBrowserHistoryImport(from: importer)
+        data.currentAccount?.data.importsManager.startBrowserHistoryImport(from: importer)
     }
 
     private func importPasswords(using importer: BrowserPasswordImporter) {
-        data.importsManager.startBrowserPasswordImport(from: importer)
+        data.currentAccount?.data.importsManager.startBrowserPasswordImport(from: importer)
     }
 
     private func importPasswords(from csvFile: URL) {
-        data.importsManager.startBrowserPasswordImport(from: csvFile)
+        data.currentAccount?.data.importsManager.startBrowserPasswordImport(from: csvFile)
     }
 }

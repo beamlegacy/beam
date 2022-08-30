@@ -2,7 +2,7 @@ import Foundation
 import CommonCrypto
 import BeamCore
 
-class BeamObjectRequest: APIRequest {
+final class BeamObjectRequest: APIRequest {
     override var route: String { "\(Configuration.beamObjectsApiHostname)/graphql" }
 
     override init() {
@@ -14,7 +14,7 @@ class BeamObjectRequest: APIRequest {
                 // We store all requests in order to be able to cancel them
                 // before recording calls with Vinyl during tests
                 // (see BeamTestsHelper)
-                BeamObjectManager.networkRequests.append(self)
+                BeamData.shared.objectManager.networkRequests.append(self)
             }
         }
         #endif
@@ -34,7 +34,7 @@ class BeamObjectRequest: APIRequest {
         let beamObjectType: String?
     }
 
-    class FetchBeamObject: BeamObject, Errorable, APIResponseCodingKeyProtocol {
+    final class FetchBeamObject: BeamObject, Errorable, APIResponseCodingKeyProtocol {
         static let codingKey = "beamObject"
         let errors: [UserErrorData]? = nil
     }
@@ -50,7 +50,7 @@ class BeamObjectRequest: APIRequest {
         }
     }
 
-    class DeleteBeamObject: UpdateBeamObject { }
+    final class DeleteBeamObject: UpdateBeamObject { }
 
     struct UpdateBeamObjects: Codable, Errorable {
         let beamObjects: [BeamObject]?
@@ -93,7 +93,7 @@ class BeamObjectRequest: APIRequest {
         let before: String?
     }
 
-    internal func saveBeamObjectParameters(_ beamObject: BeamObject) throws -> UpdateBeamObject {
+    func saveBeamObjectParameters(_ beamObject: BeamObject) throws -> UpdateBeamObject {
         try beamObject.encrypt()
 
         #if DEBUG
@@ -103,7 +103,7 @@ class BeamObjectRequest: APIRequest {
         #endif
     }
 
-    internal func saveBeamObjectsParameters(_ beamObjects: [BeamObject]) throws -> UpdateBeamObjects {
+    func saveBeamObjectsParameters(_ beamObjects: [BeamObject]) throws -> UpdateBeamObjects {
         let result: [BeamObject] = try beamObjects.map {
             try $0.encrypt()
             return $0
@@ -131,7 +131,7 @@ class BeamObjectRequest: APIRequest {
         let beamObjectMetadata: BeamObjectUploadParameters
     }
 
-    internal func prepareBeamObjectsParameters(_ beamObjects: [BeamObject]) throws -> PrepareBeamObjectsUploadParameters {
+    func prepareBeamObjectsParameters(_ beamObjects: [BeamObject]) throws -> PrepareBeamObjectsUploadParameters {
         let encryptedBeamObjects: [BeamObjectUploadParameters] = beamObjects.compactMap {
             guard let data = $0.data else { return nil }
 
@@ -144,7 +144,7 @@ class BeamObjectRequest: APIRequest {
         return PrepareBeamObjectsUploadParameters(beamObjectsMetadata: encryptedBeamObjects)
     }
 
-    internal func prepareBeamObjectParameters(_ beamObject: BeamObject) throws -> PrepareBeamObjectUploadParameters {
+    func prepareBeamObjectParameters(_ beamObject: BeamObject) throws -> PrepareBeamObjectUploadParameters {
         guard let data = beamObject.data else { throw BeamObjectRequestError.noData }
 
         let parameter = BeamObjectUploadParameters(id: beamObject.id,

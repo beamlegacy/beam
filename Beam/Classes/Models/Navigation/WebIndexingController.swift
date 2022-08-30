@@ -87,7 +87,7 @@ class WebIndexingController {
         let destinationURL = requestedURL.isDomain ? (currentURL.domain ?? currentURL) : currentURL
 
         let link = LinkStore.shared.visit(urlToIndex, title: title, content: nil, destination: destinationURL.absoluteString)
-        ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage())
+        ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage(objectManager: BeamData.shared.objectManager))
             .update(id: link.id, value: 1.0, eventType: .webDomainIncrement, date: BeamDate.now, paramKey: .webVisit30d0)
     }
 

@@ -77,7 +77,8 @@ public extension BeamNote {
         owner as? BeamDatabase
     }
 
-    static var defaultCollection: BeamDocumentCollection? { BeamData.shared.currentDocumentCollection
+    static var defaultCollection: BeamDocumentCollection? {
+        BeamData.shared.currentDocumentCollection
     }
 
     private var noteLinksAndRefsManager: BeamNoteLinksAndRefsManager? {
@@ -728,14 +729,14 @@ extension BeamNote: BeamNoteDocument {
         get {
             var element: BeamElement?
             DispatchQueue.mainSync {
-                element = BeamData.shared?.lastChangedElement
+                element = BeamData.shared.lastChangedElement
             }
             return element
         }
         set {
             guard changePropagationEnabled else { return }
             DispatchQueue.main.async {
-                BeamData.shared?.lastChangedElement = newValue
+                BeamData.shared.lastChangedElement = newValue
             }
         }
     }

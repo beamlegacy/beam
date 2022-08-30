@@ -9,6 +9,7 @@ import Combine
 @testable import BeamCore
 
 class BeamObjectManagerNetworkTests: QuickSpec {
+
     override func spec() {
         var sut: BeamObjectManager!
         let beamObjectHelper = BeamObjectTestsHelper()
@@ -23,16 +24,16 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             APIRequest.networkCallFiles = []
 
-            sut = BeamObjectManager()
+            sut = BeamData.shared.objectManager
             BeamTestsHelper.logout()
 
             beamHelper.beginNetworkRecording()
 
-            BeamObjectManager.disableSendingObjects = false
+            sut.disableSendingObjects = false
             BeamTestsHelper.login()
 
-            BeamObjectManager.unregisterAll()
-            MyRemoteObjectManager().registerOnBeamObjectManager()
+            sut.unregisterAll()
+            MyRemoteObjectManager(objectManager: sut).registerOnBeamObjectManager(sut)
 
             MyRemoteObjectManager.store.removeAll()
 
@@ -57,7 +58,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
         }
 
         afterSuite {
-            BeamObjectManager.unregister(objectType: .myRemoteObject)
+            sut.unregister(objectType: .myRemoteObject)
         }
 
         describe("fetchAllFromAPI()") {
@@ -292,7 +293,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                         do {
                             returnedObjects = try await self.waitFor {
-                                try await sut.saveToAPI(objects)
+                                try await sut.saveToAPI(objects, conflictPolicy: .replace)
                             }
                         } catch {
                             fail(error.localizedDescription)
@@ -318,7 +319,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                         do {
                             try await self.waitFor {
-                                try await sut.saveToAPI(beamObjects)
+                                try await sut.saveToAPI(beamObjects, conflictPolicy: .replace)
                             }
                         } catch {
                             fail(error.localizedDescription)
@@ -348,7 +349,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                             do {
                                 returnedObjects = try await self.waitFor {
-                                    try await sut.saveToAPI(objects)
+                                    try await sut.saveToAPI(objects, conflictPolicy: .replace)
                                 }
                             } catch {
                                 fail(error.localizedDescription)
@@ -377,7 +378,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                             do {
                                 try await self.waitFor {
-                                    try await sut.saveToAPI(beamObjects)
+                                    try await sut.saveToAPI(beamObjects, conflictPolicy: .replace)
                                 }
                             } catch {
                                 fail(error.localizedDescription)
@@ -414,7 +415,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     returnedObjects = try await self.waitFor {
-                                        try await sut.saveToAPI(objects)
+                                        try await sut.saveToAPI(objects, conflictPolicy: .replace)
                                     }
                                 } catch {
                                     fail(error.localizedDescription)
@@ -453,7 +454,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(beamObjects)
+                                        try await sut.saveToAPI(beamObjects, conflictPolicy: .replace)
                                     }
                                 } catch {
                                     fail(error.localizedDescription)
@@ -474,8 +475,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                         }
 
                         context("with manual conflict management") {
-                            beforeEach { sut.conflictPolicyForSave = .fetchRemoteAndError }
-
                             asyncIt("raise error and return remote object") {
                                 let networkCalls = APIRequest.callsCount
 
@@ -486,7 +485,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(beamObjects)
+                                        try await sut.saveToAPI(beamObjects, conflictPolicy: .fetchRemoteAndError)
                                     }
                                 } catch {
                                     switch error as! BeamObjectManagerObjectError<MyRemoteObject> {
@@ -529,7 +528,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(beamObjects)
+                                        try await sut.saveToAPI(beamObjects, conflictPolicy: .fetchRemoteAndError)
                                     }
                                 } catch {
                                     switch error as! BeamObjectManagerError {
@@ -575,8 +574,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                             }
 
                             context("with automatic conflict management") {
-                                beforeEach { sut.conflictPolicyForSave = .replace }
-
                                 asyncIt("updates object") {
 
                                     let networkCalls = APIRequest.callsCount
@@ -585,7 +582,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                     do {
                                         try await self.waitFor {
-                                            try await sut.saveToAPI(objects)
+                                            try await sut.saveToAPI(objects, conflictPolicy: .replace)
                                         }
                                     } catch {
                                         fail(error.localizedDescription)
@@ -618,7 +615,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                     do {
                                         try await self.waitFor {
-                                            try await sut.saveToAPI(beamObjects)
+                                            try await sut.saveToAPI(beamObjects, conflictPolicy: .replace)
                                         }
                                     } catch {
                                         fail(error.localizedDescription)
@@ -640,8 +637,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                             context("with manual conflict management") {
                                 beforeEach {
-                                    sut.conflictPolicyForSave = .fetchRemoteAndError
-
                                     object.title = "fake"
                                     object2.title = "fake"
 
@@ -659,7 +654,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                     do {
                                         try await self.waitFor {
-                                            try await sut.saveToAPI(beamObjects)
+                                            try await sut.saveToAPI(beamObjects, conflictPolicy: .fetchRemoteAndError)
                                         }
                                     } catch {
                                         switch error as! BeamObjectManagerObjectError<MyRemoteObject> {
@@ -699,7 +694,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                     do {
                                         try await self.waitFor {
-                                            try await sut.saveToAPI(beamObjects)
+                                            try await sut.saveToAPI(beamObjects, conflictPolicy: .fetchRemoteAndError)
                                         }
                                     } catch {
                                         switch error as! BeamObjectManagerError {
@@ -779,7 +774,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                         do {
                             returnedObject = try await self.waitFor {
-                                try await sut.saveToAPI(object)
+                                try await sut.saveToAPI(object, conflictPolicy: .replace)
                             }
                         } catch {
                             fail(error.localizedDescription)
@@ -801,7 +796,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                         do {
                             try await self.waitFor {
-                                try await sut.saveToAPI(beamObject)
+                                try await sut.saveToAPI(beamObject, conflictPolicy: .replace)
                             }
                         } catch {
                             fail(error.localizedDescription)
@@ -836,7 +831,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                             do {
                                 returnedObject = try await self.waitFor {
-                                    try await sut.saveToAPI(object)
+                                    try await sut.saveToAPI(object, conflictPolicy: .replace)
                                 }
                             } catch {
                                 fail(error.localizedDescription)
@@ -859,7 +854,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                             do {
                                 try await self.waitFor {
-                                    try await sut.saveToAPI(beamObject)
+                                    try await sut.saveToAPI(beamObject, conflictPolicy: .replace)
                                 }
                             } catch {
                                 fail(error.localizedDescription)
@@ -882,15 +877,13 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                         }
 
                         context("with automatic conflict management") {
-                            beforeEach { sut.conflictPolicyForSave = .replace }
-
                             asyncIt("updates object") {
                                 let networkCalls = APIRequest.callsCount
                                 var returnedObject: MyRemoteObject?
 
                                 do {
                                     returnedObject = try await self.waitFor {
-                                        try await sut.saveToAPI(object)
+                                        try await sut.saveToAPI(object, conflictPolicy: .replace)
                                     }
                                 } catch {
                                     fail(error.localizedDescription)
@@ -913,7 +906,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(beamObject)
+                                        try await sut.saveToAPI(beamObject, conflictPolicy: .replace)
                                     }
                                 } catch {
                                     fail(error.localizedDescription)
@@ -931,8 +924,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                         }
 
                         context("with manual conflict management") {
-                            beforeEach { sut.conflictPolicyForSave = .fetchRemoteAndError }
-
                             asyncIt("raise error and return remote object") {
                                 let networkCalls = APIRequest.callsCount
 
@@ -942,7 +933,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(object)
+                                        try await sut.saveToAPI(object, conflictPolicy: .fetchRemoteAndError)
                                     }
                                 } catch {
                                     switch error as! BeamObjectManagerObjectError<MyRemoteObject> {
@@ -971,7 +962,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(beamObject)
+                                        try await sut.saveToAPI(beamObject, conflictPolicy: .fetchRemoteAndError)
                                     }
                                 } catch {
                                     switch error as! BeamObjectManagerError {
@@ -1005,14 +996,12 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                         }
 
                         context("with automatic conflict management") {
-                            beforeEach { sut.conflictPolicyForSave = .replace }
-
                             asyncIt("updates object") {
                                 let networkCalls = APIRequest.callsCount
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(object)
+                                        try await sut.saveToAPI(object, conflictPolicy: .replace)
                                     }
                                 } catch {
                                     fail(error.localizedDescription)
@@ -1035,7 +1024,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(beamObject)
+                                        try await sut.saveToAPI(beamObject, conflictPolicy: .replace)
                                     }
                                 } catch {
                                     fail(error.localizedDescription)
@@ -1050,8 +1039,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                         }
 
                         context("with manual conflict management") {
-                            beforeEach { sut.conflictPolicyForSave = .fetchRemoteAndError }
-
                             asyncIt("raise error and return remote object") {
                                 let networkCalls = APIRequest.callsCount
 
@@ -1061,7 +1048,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(object)
+                                        try await sut.saveToAPI(object, conflictPolicy: .fetchRemoteAndError)
                                     }
                                 } catch {
                                     switch error as! BeamObjectManagerObjectError<MyRemoteObject> {
@@ -1090,7 +1077,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 do {
                                     try await self.waitFor {
-                                        try await sut.saveToAPI(beamObject)
+                                        try await sut.saveToAPI(beamObject, conflictPolicy: .fetchRemoteAndError)
                                     }
                                 } catch {
                                     switch error as! BeamObjectManagerError {
@@ -1139,7 +1126,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                     asyncIt("does not saves new object and throw error") {
                         do {
                             try await self.waitFor {
-                                try await sut.saveToAPI(object)
+                                try await sut.saveToAPI(object, conflictPolicy: .replace)
                             }
                         } catch {
                             expect(error).to(matchError(BeamObject.BeamObjectError.noEmail))
