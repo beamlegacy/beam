@@ -15,6 +15,10 @@ class LinksTests: BaseTest {
     
     var noteView: NoteTestView!
     
+    override func setUp() {
+        noteView = createNotesAndLinkThem()
+    }
+    
     private func createNotesAndLinkThem() -> NoteTestView {
         let journalView = launchApp()
         step("Given I create 2 notes"){
@@ -30,10 +34,8 @@ class LinksTests: BaseTest {
     }
     
     func testCreateNoteLink() {
-        testrailId("C791")
-        noteView = createNotesAndLinkThem()
-        
-        testrailId("C797")
+        testrailId("C791, C797")
+
         step("Then Note with links is correctly created"){
             noteView.waitForNoteTitleToBeVisible()
             noteView.waitForNoteViewToLoad()
@@ -54,12 +56,55 @@ class LinksTests: BaseTest {
             XCTAssertEqual(noteView.getLinksNamesNumber(), 1)
             XCTAssertEqual(noteView.getLinkContentByIndex(0), noteName1 + " ")
         }
-
     }
     
+    func testExpandCollapseNoteLink() {
+        testrailId("C805")
+        
+        let expandedIconLabel = "disclosure triangle opened"
+        let collapsedIconLabel = "disclosure triangle closed"
+        
+        step("Then Links section is correctly expanded"){
+            noteView.waitForNoteTitleToBeVisible()
+            noteView.waitForNoteViewToLoad()
+            XCTAssertEqual(noteView.getLinksRefExpandButtonCount(), 1)
+            XCTAssertEqual(noteView.getLinksNoteRefExpandButtonCount(), 1)
+
+            XCTAssertEqual(noteView.getLinkRefExpandedStatus(0), expandedIconLabel)
+            XCTAssertEqual(noteView.getLinkNoteRefExpandedStatus(0), expandedIconLabel)
+        }
+        
+        step("When I collapse Ref Note section in Links"){
+            noteView.getLinksNoteRefExpandButton()[0].clickInTheMiddle()
+        }
+        
+        step("Then Ref Note section in Links is collapsed"){
+            XCTAssertEqual(noteView.getLinkNoteRefExpandedStatus(0), collapsedIconLabel)
+            XCTAssertEqual(noteView.getLinkRefExpandedStatus(0), expandedIconLabel)
+        }
+        
+        step("When I collapse Links section"){
+            noteView.getLinksRefExpandButton()[0].clickInTheMiddle()
+        }
+        
+        step("Then Links section is collapsed"){
+            XCTAssertEqual(noteView.getLinkRefExpandedStatus(0), collapsedIconLabel)
+            XCTAssertEqual(noteView.getLinksNamesNumber(), 0)
+        }
+        
+        step("When I navigate on Beam notes"){
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            shortcutHelper.shortcutActionInvoke(action: .browserHistoryBack)
+        }
+        
+        step("Then Links section collapse status is saved"){
+            XCTAssertEqual(noteView.getLinkRefExpandedStatus(0), expandedIconLabel) // to set to noteCollapsedIconLabel once BE-5375 is fixed
+            XCTAssertEqual(noteView.getLinksNamesNumber(), 1) // to set to 0 once BE-5375 is fixed
+        }
+    }
+
     func testNoteLinkDeletion() {
         testrailId("C792")
-        noteView = createNotesAndLinkThem()
         
         step("When I delete the link between \(noteName2) and \(noteName1)"){
             noteView.getFirstLinksContentElement().tapInTheMiddle()
@@ -123,7 +168,6 @@ class LinksTests: BaseTest {
         testrailId("C1041")
         let textToType = " some text"
         let renamingErrorHandling = " Some Text"
-        noteView = createNotesAndLinkThem()
         
         step("When I change \(noteName1) name to \(noteName1)\(textToType)"){
             noteView.makeNoteTitleEditable().typeText(textToType)
@@ -161,7 +205,7 @@ class LinksTests: BaseTest {
     
     func testLinksSectionBreadcrumbs() throws {
         testrailId("C799")
-        noteView = createNotesAndLinkThem()
+
         let additionalNote = "Level1"
         let editedValue = "Level0"
 
