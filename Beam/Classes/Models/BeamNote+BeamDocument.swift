@@ -50,7 +50,8 @@ public extension BeamNote {
                             version: version,
                             isPublic: publicationStatus.isPublic,
                             journalDate: JournalDateConverter.toInt(from: type.journalDateString ?? "0"),
-                            tabGroupId: type.tabGroupId
+                            tabGroupId: type.tabGroupId,
+                            isEmpty: isEntireNoteEmpty()
         )
     }
 
