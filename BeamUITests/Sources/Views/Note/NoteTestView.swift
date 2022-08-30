@@ -200,6 +200,38 @@ class NoteTestView: TextEditorContextTestView {
         return self.getNotesExpandButtons()[noteIndex]
     }
     
+    func getLinksRefExpandButton() -> [XCUIElement] {
+        return app.windows.disclosureTriangles.matching(identifier:  NoteViewLocators.Buttons.linkRefExpandButton.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    func getLinksRefExpandButtonCount() -> Int {
+        return self.getLinksRefExpandButton().count
+    }
+    
+    func getLinkRefExpandButtonByIndex(noteIndex: Int) -> XCUIElement {
+        return self.getLinksRefExpandButton()[noteIndex]
+    }
+    
+    func getLinkRefExpandedStatus(_ index: Int) -> String {
+        return self.getLinksRefExpandButton()[index].label
+    }
+    
+    func getLinksNoteRefExpandButton() -> [XCUIElement] {
+        return app.windows.disclosureTriangles.matching(identifier:  NoteViewLocators.Buttons.linkRefNoteExpandButton.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    func getLinksNoteRefExpandButtonCount() -> Int {
+        return self.getLinksNoteRefExpandButton().count
+    }
+    
+    func getLinkNoteRefExpandButtonByIndex(noteIndex: Int) -> XCUIElement {
+        return self.getLinksNoteRefExpandButton()[noteIndex]
+    }
+    
+    func getLinkNoteRefExpandedStatus(_ index: Int) -> String {
+        return self.getLinksNoteRefExpandButton()[index].label
+    }
+    
     @discardableResult
     func clickNoteExpandButtonByIndex(noteIndex: Int) -> NoteTestView {
         self.getNoteExpandButtonByIndex(noteIndex: noteIndex).coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.1)).tap()
