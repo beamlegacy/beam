@@ -49,6 +49,10 @@ class NoteTestView: TextEditorContextTestView {
         return getIndentationTriangleAtNode(nodeIndex: nodeIndex).label.hasSuffix(" opened")
     }
     
+    func isIndentationTriangleDisplayed(nodeIndex: Int) -> Bool {
+        return getIndentationTriangleAtNode(nodeIndex: nodeIndex).exists
+    }
+    
     func isIndentationTriangleClosed(nodeIndex: Int) -> Bool {
         return getIndentationTriangleAtNode(nodeIndex: nodeIndex).label.hasSuffix(" closed")
     }
