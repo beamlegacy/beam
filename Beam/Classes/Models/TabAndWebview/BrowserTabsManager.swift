@@ -437,8 +437,8 @@ extension BrowserTabsManager {
         }
         if destinationGroup != movedItem.group {
             moveTabToGroup(tab.id, group: destinationGroup)
-        } else if let destinationGroup = destinationGroup {
-            tabGroupingManager.pageWasMovedInsideSameGroup(pageId: tab.pageId, group: destinationGroup)
+        } else if let destinationGroup = destinationGroup, let pageId = tab.pageId {
+            tabGroupingManager.pageWasMovedInsideSameGroup(pageId: pageId, group: destinationGroup)
         }
     }
 
@@ -755,8 +755,15 @@ extension BrowserTabsManager {
 }
 
 extension BrowserTab {
-    var pageId: ClusteringManager.PageID {
-        browsingTree.current.link
+    var pageId: ClusteringManager.PageID? {
+        let currentLink = browsingTree.current.link
+        guard currentLink != Link.missing.id else {
+            if let url = url ?? preloadUrl {
+                return Link(url: url.absoluteString, title: title, content: nil).id
+            }
+            return nil
+        }
+        return currentLink
     }
 }
 
