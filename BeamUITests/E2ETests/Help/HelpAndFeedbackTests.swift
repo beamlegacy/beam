@@ -12,14 +12,26 @@ class HelpAndFeedbackTests: BaseTest {
     
     var helpView: HelpTestView!
     var journalView: JournalTestView!
+    var tabIndex = 0
     
     override func setUp() {
         journalView = launchApp()
         uiMenu.resizeSquare1000()
     }
     
+    private func assertCorrectTabIsOpened(_ expectedUrl: String) {
+        step ("THEN I see \(expectedUrl) URL opened") {
+            let tabToAssert = tabIndex
+            tabIndex += 1
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), tabIndex)
+            let tabURL = webView.getTabUrlAtIndex(index: tabToAssert)
+            XCTAssertTrue(tabURL.hasPrefix(expectedUrl), "Actual web url is \(tabURL)")
+        }
+    }
+    
     func testHelpAndFeedbackAppearance() {
         let expectedCannyLink = "beamapp.canny.io"
+        let expectedTwitterTabTitle = "twitter.com/getonbeam"
         var menuTitle: XCUIElement?
         
         step("Given I open help menu"){
@@ -44,12 +56,7 @@ class HelpAndFeedbackTests: BaseTest {
         step("When I open Bug report"){
             journalView.openHelpMenu().openBugReport()
         }
-
-        step("Then a tab with \(expectedCannyLink) is opened"){
-            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
-            let firstTabURL = webView.getTabUrlAtIndex(index: 0)
-            XCTAssertTrue(firstTabURL.hasPrefix(expectedCannyLink), "Actual web url is \(firstTabURL)")
-        }
+        assertCorrectTabIsOpened(expectedCannyLink)
         
         testrailId("C705")
         step("When I open Feature request"){
@@ -57,13 +64,14 @@ class HelpAndFeedbackTests: BaseTest {
             omnibox.navigateToNoteViaPivotButton()
             journalView.openHelpMenu().openFeatureRequest()
         }
+        assertCorrectTabIsOpened(expectedCannyLink)
 
-        step("Then a tab with \(expectedCannyLink) is opened"){
-            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
-            let secondTabURL = webView.getTabUrlAtIndex(index: 1)
-            XCTAssertTrue(secondTabURL.hasPrefix(expectedCannyLink), "Actual web url is \(secondTabURL)")
+        testrailId("C707")
+        step("When I open Beam twitter account"){
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            journalView.openHelpMenu().openTwitterAccount()
         }
-
+        assertCorrectTabIsOpened(expectedTwitterTabTitle)
     }
     
     func testHelpShortcutsView() {
