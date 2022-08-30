@@ -130,10 +130,13 @@ class OmniboxViewTests: BaseTest {
         // In all note
         step("When I open omnibox in all notes"){
             journalView.openAllNotesMenu()
-            omniboxView.focusOmniBoxSearchField()
         }
 
+        testrailId("C820")
         step("Then suggestions contains the correct actions"){
+            XCTAssertTrue(AllNotesTestView()
+                .clickOmniboxIcon()
+                .getOmniBoxSearchField().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertEqual(results.count, 5)
             XCTAssertEqual(results.element(boundBy: 2).getStringValue(), noteATitle) // Note A is last
             XCTAssertEqual(results.element(boundBy: 3).getStringValue(), OmniboxLocators.Labels.journal.accessibilityIdentifier)
