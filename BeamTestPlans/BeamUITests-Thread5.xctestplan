@@ -62,6 +62,7 @@
         "AllCardsDeleteTests",
         "AllCardsViewTests",
         "AllNotesDeleteTests",
+        "AllNotesExportImportTests",
         "AllNotesPublishProfileTests",
         "AllNotesPublishProfileTests\/testCreatePublishedAndUnpublishNote()",
         "AllNotesPublishProfileTests\/testCreatePublishedOnProfileNoteAndRemoveFromProfileNote()",
