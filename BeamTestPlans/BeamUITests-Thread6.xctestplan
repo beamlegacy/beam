@@ -67,6 +67,7 @@
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination4()",
         "AllCardsDeleteTests",
         "AllNotesDeleteTests",
+        "AllNotesExportImportTests",
         "AllNotesPublishProfileTests",
         "AllNotesPublishProfileTests\/testCreatePublishedAndUnpublishNote()",
         "AllNotesPublishProfileTests\/testCreatePublishedOnProfileNoteAndRemoveFromProfileNote()",
