@@ -1264,7 +1264,7 @@
 		B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */; };
 		B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76F26F4501E0074ACCA /* PnSTestView.swift */; };
 		B52744CD270B03730045805F /* SearchOnNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52744CC270B03730045805F /* SearchOnNoteTests.swift */; };
-		B52C147D27FF051800D67EE5 /* ReportBugFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C147C27FF051800D67EE5 /* ReportBugFeatureTests.swift */; };
+		B52C147D27FF051800D67EE5 /* AboutPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C147C27FF051800D67EE5 /* AboutPreferencesTests.swift */; };
 		B52C147F27FF05D700D67EE5 /* AboutPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C147E27FF05D700D67EE5 /* AboutPreferencesTestView.swift */; };
 		B52C148127FF068000D67EE5 /* AboutPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C148027FF068000D67EE5 /* AboutPreferencesViewLocators.swift */; };
 		B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */; };
@@ -3231,7 +3231,7 @@
 		B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSViewLocators.swift; sourceTree = "<group>"; };
 		B51DC76F26F4501E0074ACCA /* PnSTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSTestView.swift; sourceTree = "<group>"; };
 		B52744CC270B03730045805F /* SearchOnNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOnNoteTests.swift; sourceTree = "<group>"; };
-		B52C147C27FF051800D67EE5 /* ReportBugFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportBugFeatureTests.swift; sourceTree = "<group>"; };
+		B52C147C27FF051800D67EE5 /* AboutPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPreferencesTests.swift; sourceTree = "<group>"; };
 		B52C147E27FF05D700D67EE5 /* AboutPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPreferencesTestView.swift; sourceTree = "<group>"; };
 		B52C148027FF068000D67EE5 /* AboutPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabViewTests.swift; sourceTree = "<group>"; };
@@ -7650,7 +7650,7 @@
 		B52C147627FF04EE00D67EE5 /* About */ = {
 			isa = PBXGroup;
 			children = (
-				B52C147C27FF051800D67EE5 /* ReportBugFeatureTests.swift */,
+				B52C147C27FF051800D67EE5 /* AboutPreferencesTests.swift */,
 			);
 			path = About;
 			sourceTree = "<group>";
@@ -10142,7 +10142,7 @@
 				B5FAE2FC270ECFA600EAC8A3 /* ShortcutsHelper.swift in Sources */,
 				B57A9B3626AB07B8002C954D /* UIElement.swift in Sources */,
 				D71D7491282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift in Sources */,
-				B52C147D27FF051800D67EE5 /* ReportBugFeatureTests.swift in Sources */,
+				B52C147D27FF051800D67EE5 /* AboutPreferencesTests.swift in Sources */,
 				B5FB3A2027E8C32800037FD5 /* OnboardingImportDataViewLocators.swift in Sources */,
 				A36F2A342864A0F500B0F971 /* BrowserTabsPreferencesTests.swift in Sources */,
 				D77A5AAD287EB43B00652727 /* TabGroupNameTests.swift in Sources */,
