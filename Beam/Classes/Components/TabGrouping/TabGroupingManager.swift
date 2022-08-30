@@ -61,7 +61,7 @@ class TabGroupingManager {
         if inGroup == nil && outOfGroup == nil {
             forcedTabsGroup.removeValue(forKey: tab.id)
         }
-        let pageId = tab.pageId
+        guard let pageId = tab.pageId else { return }
         if let inGroup = inGroup {
             builtPagesGroups[pageId] = inGroup
         }
@@ -283,12 +283,12 @@ extension TabGroupingManager {
         var manualPageGroups = [PageID: TabGroup]()
         var forcedOutOfGroup = [PageID: TabGroup]()
         forcedTabsGroup.forEach { (tabId, value) in
-            guard let tab = allOpenTabs.first(where: { $0.id == tabId }) else { return }
+            guard let tab = allOpenTabs.first(where: { $0.id == tabId }), let pageId = tab.pageId else { return }
             if let inGroup = value.inGroup {
-                manualPageGroups[tab.pageId] = inGroup
+                manualPageGroups[pageId] = inGroup
             }
             if let outGroup = value.outOfGroup {
-                forcedOutOfGroup[tab.pageId] = outGroup
+                forcedOutOfGroup[pageId] = outGroup
             }
         }
         return (manualPageGroups, forcedOutOfGroup)

@@ -10,8 +10,12 @@ import AppKit
 
 struct ExternalDraggingSession {
     var draggedObject: Any?
-    var draggingSource: NSDraggingSource
+    var draggingSource: ExternalDraggingSource
     var draggingItem: NSDraggingItem?
     var draggingSession: NSDraggingSession?
     var dropHandledByBeamUI = false
+}
+
+protocol ExternalDraggingSource: NSDraggingSource {
+    func endDraggingItem()
 }
