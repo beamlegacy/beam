@@ -1253,6 +1253,7 @@
 		A5FE1615264AD64900B7526D /* CardSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* CardSwitcher.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		A5FF15FD2888332B0089D76E /* DeviceAuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FF15FC2888332B0089D76E /* DeviceAuthenticationManager.swift */; };
+		B500F2CB28BE2AD6006EC39F /* AllNotesExportImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B500F2CA28BE2AD6006EC39F /* AllNotesExportImportTests.swift */; };
 		B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */; };
 		B5056A8F26F88AB000FFD2A2 /* HelpTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */; };
 		B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */; };
@@ -3220,6 +3221,7 @@
 		A5FE1614264AD64900B7526D /* CardSwitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSwitcher.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		A5FF15FC2888332B0089D76E /* DeviceAuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAuthenticationManager.swift; sourceTree = "<group>"; };
+		B500F2CA28BE2AD6006EC39F /* AllNotesExportImportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesExportImportTests.swift; sourceTree = "<group>"; };
 		B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackTests.swift; sourceTree = "<group>"; };
 		B5056A8E26F88AB000FFD2A2 /* HelpTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpTestView.swift; sourceTree = "<group>"; };
 		B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewLocators.swift; sourceTree = "<group>"; };
@@ -7693,6 +7695,7 @@
 				B557156426FAF1BA00F6C9D4 /* AllNotesDeleteTests.swift */,
 				A3FB63502859CBA500CFE363 /* AllNotesSortingTests.swift */,
 				A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */,
+				B500F2CA28BE2AD6006EC39F /* AllNotesExportImportTests.swift */,
 			);
 			path = AllNotesMenu;
 			sourceTree = "<group>";
@@ -10039,6 +10042,7 @@
 				B5F845E126F8CC9C00B15209 /* ReferencesTests.swift in Sources */,
 				B5E8011226AEB7C100C8BD61 /* WaitHelper.swift in Sources */,
 				B551F3C526BD10AD00B72D27 /* AppWebsiteTestView.swift in Sources */,
+				B500F2CB28BE2AD6006EC39F /* AllNotesExportImportTests.swift in Sources */,
 				A311436D280D2ADE00BB74F4 /* DialogTestView.swift in Sources */,
 				A38D1A29284A11B6007EBB25 /* Equalable.swift in Sources */,
 				B5EB9A6A26C25FB8004C798A /* OmniboxDestinationTests.swift in Sources */,

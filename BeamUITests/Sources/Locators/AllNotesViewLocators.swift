@@ -42,6 +42,15 @@ enum AllNotesViewLocators {
     
     enum MenuItems: String, CaseIterable, UIElement {
         case deleteNotes = "deleteNotes"
+        case importNotes = "Import"
+        case exportNotes = "Export"
+        case importJSON = "importFromJSON"
+        case importBackup = "backupImport"
+        case importMarkdown = "markdownImport"
+        case importRoam = "roamImport"
+        case exportBackup = "databaseExport"
+        case exportMarkdown = "exportNotesToMarkdown"
+        case exportSingleNote = "exportNotesToBeamNote"
         case pinNote = "pin"
         case unpinNote = "unpin"
         case publish = "makePublic"
