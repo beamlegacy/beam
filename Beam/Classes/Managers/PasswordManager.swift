@@ -37,8 +37,6 @@ final class PasswordManager {
         }
     }
 
-    static let shared = PasswordManager()
-
     var changePublisher: AnyPublisher<Void, Never> {
         changeSubject.eraseToAnyPublisher()
     }
@@ -48,10 +46,17 @@ final class PasswordManager {
     private var passwordsDB: PasswordStore? { overridePasswordDB ?? BeamData.shared.passwordDB }
     private var changeSubject: PassthroughSubject<Void, Never>
 
-    init(overridePasswordDB: PasswordStore? = nil, hostLookup: HostnameCanonicalizer = .shared) {
+    let objectManager: BeamObjectManager
+
+    init(overridePasswordDB: PasswordStore? = nil,
+         hostLookup: HostnameCanonicalizer = .shared,
+         objectManager: BeamObjectManager) {
         self.overridePasswordDB = overridePasswordDB
         self.hostnameCanonicalizer = hostLookup
         self.changeSubject = PassthroughSubject<Void, Never>()
+        self.objectManager = objectManager
+
+        registerOnBeamObjectManager(objectManager)
     }
 
     private func passwordManagerEntries(for passwordsRecord: [LocalPasswordRecord]) -> [PasswordManagerEntry] {
@@ -374,9 +379,9 @@ extension PasswordManager: BeamObjectManagerDelegate {
         if networkPasswords.count != passwords.count {
             EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - networkPasswords.count)/\(passwords.count)"))
         }
-        Task.detached(priority: .userInitiated) { [weak self] in
+        Task.detached(priority: .userInitiated) { [self] in
             do {
-                try await self?.saveOnBeamObjectsAPI(networkPasswords)
+                try await saveOnBeamObjectsAPI(networkPasswords)
                 Logger.shared.logDebug("Saved passwords on the BeamObject API",
                                        category: .passwordNetwork)
                 networkCompletion?(.success(true))
@@ -391,9 +396,9 @@ extension PasswordManager: BeamObjectManagerDelegate {
     private func saveOnNetwork(_ password: LocalPasswordRecord, _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) {
         do {
             let networkPassword = try PasswordEncryptionManager.reEncryptBeforeSend(password)
-            Task.detached(priority: .userInitiated) { [weak self] in
+            Task.detached(priority: .userInitiated) { [self] in
                 do {
-                    try await self?.saveOnBeamObjectAPI(networkPassword)
+                    try await saveOnBeamObjectAPI(networkPassword)
                     Logger.shared.logDebug("Saved password on the BeamObject API",
                                            category: .passwordNetwork)
                     networkCompletion?(.success(true))

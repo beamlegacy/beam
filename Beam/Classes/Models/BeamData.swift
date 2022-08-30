@@ -11,7 +11,9 @@ import AutoUpdate
 import ZIPFoundation
 
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, BeamDocumentSource {
-    public private(set) static var shared: BeamData!
+    // Will be removed for multi-account, do not use!
+    static let shared = BeamData()
+
     public static var sourceId: String { "\(Self.self)" }
     var _todaysNote: BeamNote?
     var todaysNote: BeamNote {
@@ -41,13 +43,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
 
     let cookieManager: CookiesManager
 
-    @Published public private(set) var accounts = [BeamAccount]()
-    @Published public private(set) var currentAccount: BeamAccount?
-    @Published public private(set) var currentDatabase: BeamDatabase?
-    @Published public var currentDocumentCollection: BeamDocumentCollection?
+    let currentDatabaseChanged = PassthroughSubject<BeamDatabase?, Never>()
+    public weak var currentDatabase: BeamDatabase?
+    public weak var currentDocumentCollection: BeamDocumentCollection?
 
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
-    var importsManager: ImportsManager = ImportsManager()
+    let importsManager: ImportsManager = ImportsManager()
     lazy var calendarManager: CalendarManager = {
         let cm = CalendarManager()
         observeCalendarManager(cm)
@@ -63,7 +64,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     var checkForUpdateCancellable: AnyCancellable?
     let sessionId = UUID()
     var browsingTreeSender: BrowsingTreeSender?
-    var noteFrecencyScorer: FrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
+    var noteFrecencyScorer: FrecencyScorer
     var versionChecker: VersionChecker
     lazy var onboardingManager = OnboardingManager(analyticsCollector: analyticsCollector)
     private var pinnedTabsManager = PinnedBrowserTabsManager()
@@ -73,6 +74,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     let signpost = SignPost("BeamData")
     let analyticsCollector = AnalyticsCollector()
 
+    // TODO: Move to account specific location.
     static var dataFolder: String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
 
@@ -92,6 +94,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         return localDirectory
     }
 
+    // TODO: Move to account specific location.
     static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
 
@@ -139,15 +142,30 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     static var idToTitle: [UUID: String] = [:]
     static var titleToId: [String: UUID] = [:]
 
+    let objectManager = BeamObjectManager()
+    let contactsManager: ContactsManager
+    let passwordManager: PasswordManager
+    let privateKeySignatureManager: PrivateKeySignatureManager
+    let browsingTreeStoreManager: BrowsingTreeStoreManager
+    let linkDB: BeamLinkDB
+
     override init() {
-        LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
+        self.contactsManager = ContactsManager(objectManager: objectManager)
+        self.passwordManager = PasswordManager(objectManager: objectManager)
+        self.privateKeySignatureManager = PrivateKeySignatureManager(objectManager: objectManager)
+        self.browsingTreeStoreManager = BrowsingTreeStoreManager(objectManager: objectManager)
+        self.linkDB = BeamLinkDB(objectManager: objectManager)
+
+        self.noteFrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage(objectManager: objectManager))
+
+        LinkStore.shared = LinkStore(linkManager: linkDB)
         NoteScorer.shared = NoteScorer(dailyStorage: KeychainDailyNoteScoreStore.shared)
 
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         sessionExporter = ClusteringSessionExporter()
-        tabGroupingManager = TabGroupingManager()
+        tabGroupingManager = TabGroupingManager(passwordManager: passwordManager, browsingTreeStoreManager: browsingTreeStoreManager)
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId,
-                                              activeSources: activeSources, tabGroupingManager: tabGroupingManager)
+                                              activeSources: activeSources, tabGroupingManager: tabGroupingManager, objectManager: objectManager)
         noteAutoSaveService = NoteAutoSaveService()
         cookieManager = CookiesManager()
         versionChecker = Self.createVersionChecker()
@@ -160,7 +178,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
         super.init()
-        Self.shared = self
 
         BeamNote.idForNoteNamed = { [weak self] title in
             guard let collection = self?.currentDocumentCollection,
@@ -182,18 +199,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         configureAutoUpdate()
 
         analyticsCollector.add(backend: FirebaseAnalyticsBackend())
-
-        // Importing legacy data may fail so make sure the pinned tabs are ok anyway:
-        defer {
-            resetPinnedTabs()
-        }
-
-        do {
-            try loadAccounts()
-            try setupCurrentAccount()
-        } catch {
-            Logger.shared.logError("Unable to setup accounts: \(error)", category: .accountManager)
-        }
     }
 
     private func setupSubscribers() {
@@ -292,7 +297,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
 
     func saveData() {
         noteAutoSaveService.saveNotes()
-        try? saveAccounts()
     }
 
     @objc func calendarDayDidChange(notification: Notification) {
@@ -423,7 +427,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
             archiveName = "\(name) v.\(version)_\(build) data backup"
         }
 
-        try? fileManager.zipItem(at: URL(fileURLWithPath: Self.dataFolder(fileName: "")), to: downloadFolder.appendingPathComponent("\(archiveName).zip"), compressionMethod: .deflate)
+        try? fileManager.zipItem(at: URL(fileURLWithPath: dataFolder(fileName: "")), to: downloadFolder.appendingPathComponent("\(archiveName).zip"), compressionMethod: .deflate)
     }
 }
 
@@ -660,33 +664,13 @@ extension BeamData {
 
 // MARK: BeamAccount + BeamDatabase support
 extension BeamData {
-    func addAccount(_ account: BeamAccount, setCurrent: Bool) throws {
-        guard !accounts.contains(where: { $0.id != account.id }) else { return }
-        accounts.append(account)
-        if setCurrent {
-            try setCurrentAccount(account)
-        }
-    }
-
-    func setCurrentAccount(_ account: BeamAccount, database: BeamDatabase? = nil) throws {
-        let database = database ?? account.defaultDatabase
-        guard database.account == account else { throw BeamDataError.databaseAccountMismatch }
-        if currentAccount != account {
-            currentAccount = account
-        }
-        try setCurrentDatabase(database)
-        AuthenticationManager.shared.account = currentAccount
-        Persistence.Account.currentAccountId = account.id
-    }
-
     func setCurrentDatabase(_ database: BeamDatabase) throws {
         guard currentDatabase != database else { return }
         guard let db = try database.account?.loadDatabase(database.id) else { throw BeamDataError.databaseNotFound }
         currentDatabase = db
         currentDocumentCollection = db.collection
         Persistence.Account.currentDatabaseId = db.id
-
-        registerWithBeamObjectManager()
+        currentDatabaseChanged.send(db)
 
         BeamNote.clearFetchedNotes()
 
@@ -699,119 +683,6 @@ extension BeamData {
                     window.state.navigateToJournal(note: nil, clearNavigation: true)
                 }
             }
-        }
-    }
-
-    func saveAccounts() throws {
-        for account in accounts {
-            try account.save()
-        }
-    }
-
-    private func setupDefaultAccount() throws {
-        assert(accounts.isEmpty)
-        try addAccount(try Self.createDefaultAccount(), setCurrent: true)
-    }
-
-    public static func createDefaultAccount() throws -> BeamAccount {
-        let path = URL(fileURLWithPath: Self.dataFolder(fileName: Self.accountsFilename))
-        let accountName = "Local"
-        let id = UUID()
-        let accountPath = path.appendingPathComponent("account-" + id.uuidString)
-        let p = accountPath.path
-        let account = try BeamAccount(id: id, email: "", name: accountName, path: p)
-        account.getOrCreateDefaultDatabase()
-
-        try account.save()
-
-        return account
-    }
-
-    public func setupCurrentAccount() throws {
-        guard !accounts.isEmpty else {
-            try setupDefaultAccount()
-            return
-        }
-
-        guard let accountId = Persistence.Account.currentAccountId ?? accounts.first?.id else { throw BeamDataError.currentAccountNotSet }
-        guard let dbId = Persistence.Account.currentDatabaseId ?? accounts.first?.defaultDatabaseId else { throw BeamDataError.currentDatabaseNotSet }
-
-        guard let account = accounts.first(where: { $0.id == accountId }) ?? accounts.first else {
-            throw BeamDataError.accountNotFound
-        }
-
-        let database = (try? account.loadDatabase(dbId)) ?? account.defaultDatabase
-        try setCurrentAccount(account, database: database)
-    }
-
-    static var accountsPath: URL {
-        URL(fileURLWithPath: Self.dataFolder(fileName: Self.accountsFilename))
-    }
-
-    private func loadAccounts() throws {
-        let path = Self.accountsPath
-        Logger.shared.logInfo("Init accounts from \(path)")
-
-        BeamAccount.loadAccounts(from: path).forEach { account in
-            do {
-                try addAccount(account, setCurrent: false)
-            } catch {
-                Logger.shared.logError("Unable to add account \(account): \(error)", category: .accountManager)
-            }
-        }
-    }
-
-    private func loadAccount(url: URL) throws {
-        try addAccount(BeamAccount.load(fromFolder: url.path), setCurrent: false)
-    }
-
-    private static var accountsFilename: String {
-        var suffix = "-\(Configuration.env)"
-        if let jobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
-            Logger.shared.logDebug("Using Gitlab CI Job ID for GRDB sqlite file: \(jobId)", category: .search)
-
-            suffix += "-\(jobId)"
-        }
-
-        return "Accounts\(suffix)"
-    }
-
-    public func registerWithBeamObjectManager() {
-        // TODO: This will have to be changed a lot when we go multi account!
-        currentAccount?.registerOnBeamObjectManager()
-    }
-
-    public func clearAllAccounts() throws {
-        try accounts.forEach {
-            try $0.delete(self)
-        }
-
-        let url = URL(fileURLWithPath: BeamData.dataFolder(fileName: Self.accountsFilename))
-        guard FileManager.default.fileExists(atPath: url.path) else { return }
-        accounts = []
-        currentAccount = nil
-        currentDatabase = nil
-        currentDocumentCollection = nil
-
-        try FileManager.default.removeItem(at: url)
-        saveData()
-    }
-
-    public func clearAllAccountsAndSetupDefaultAccount() throws {
-        try clearAllAccounts()
-        try setupCurrentAccount()
-        BeamObjectManager.setup()
-
-        if let account = BeamData.shared.currentAccount {
-            guard let db = BeamData.shared.currentAccount?.getOrCreateDefaultDatabase() else { return }
-            try? BeamData.shared.setCurrentAccount(account, database: db)
-        }
-        saveData()
-    }
-
-    public func checkAndRepairDB() {
-        for account in accounts {
-            account.checkAndRepairIntegrity()
         }
     }
 

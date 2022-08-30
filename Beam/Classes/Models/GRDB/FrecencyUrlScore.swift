@@ -111,8 +111,8 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
 class LinkStoreFrecencyUrlStorage: FrecencyStorage {
     let linkDB: BeamLinkDB
 
-    init(overridenManager: UrlHistoryManager? = nil) {
-        linkDB = BeamLinkDB(overridenManager: overridenManager)
+    init(overridenManager: UrlHistoryManager? = nil, objectManager: BeamObjectManager) {
+        linkDB = BeamLinkDB(objectManager: objectManager, overridenManager: overridenManager)
     }
     func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         guard paramKey == .webVisit30d0,

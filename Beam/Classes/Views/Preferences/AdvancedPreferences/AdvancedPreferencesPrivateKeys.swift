@@ -213,7 +213,7 @@ struct AdvancedPreferencesPrivateKeys: View {
 
     private func verifyPasswords() {
         do {
-            let sanityDigest = try PasswordManager.shared.sanityDigest()
+            let sanityDigest = try BeamData.shared.passwordManager.sanityDigest()
             passwordSanityReport = sanityDigest.description
         } catch {
             passwordSanityReport = error.localizedDescription

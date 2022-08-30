@@ -156,7 +156,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
 
     static let tableName = "passwordRecord"
 
-    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
         self.grdbStore = store
         try super.init(store: store)
@@ -450,6 +450,6 @@ extension BeamManagerOwner {
 
 extension BeamData {
     var passwordDB: PasswordsDB? {
-        currentAccount?.passwordDB
+        AppData.shared.currentAccount?.passwordDB
     }
 }

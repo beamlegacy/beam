@@ -8,18 +8,19 @@ protocol BeamObjectManagerDelegateProtocol {
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
     // it will call this method
-    func saveAllOnBeamObjectApi(force: Bool, progress: ((Float) async -> Void)?) async throws -> (Int, Date?)
+    func saveAllOnBeamObjectApi(force: Bool, progress: ((Float) -> Void)?) async throws -> (Int, Date?)
 }
 
 protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
     associatedtype BeamObjectType: BeamObjectProtocol
     static var uploadType: BeamObjectRequestUploadType { get }
 
+    var objectManager: BeamObjectManager { get }
     var changedObjects: [UUID: BeamObjectType] { get set }
 
     var objectQueue: BeamObjectQueue<BeamObjectType> { get }
 
-    func registerOnBeamObjectManager()
+    func registerOnBeamObjectManager(_ objectManager: BeamObjectManager)
 
     /// When new objects have been received and should be stored locally by the manager
     func receivedObjects(_ objects: [BeamObjectType]) throws
@@ -63,7 +64,7 @@ extension BeamObjectManagerDelegate {
         // Note: we want to be able to "force" a certain type during tests
         #if DEBUG
         if EnvironmentVariables.env == "test" {
-            if let uploadTypeForTests = BeamObjectManager.uploadTypeForTests {
+            if let uploadTypeForTests = BeamData.shared.objectManager.uploadTypeForTests {
                 return uploadTypeForTests
             }
         }
@@ -72,8 +73,8 @@ extension BeamObjectManagerDelegate {
         return Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
 
-    func registerOnBeamObjectManager() {
-        BeamObjectManager.register(self, object: BeamObjectType.self)
+    func registerOnBeamObjectManager(_ objectManager: BeamObjectManager) {
+        objectManager.register(self, object: BeamObjectType.self)
     }
 
     func parse<T: BeamObjectProtocol>(objects: [T]) throws {

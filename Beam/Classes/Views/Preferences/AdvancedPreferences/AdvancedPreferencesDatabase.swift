@@ -15,7 +15,7 @@ struct AdvancedPreferencesDatabase: View {
     @State private var newDatabaseTitle = ""
     @State private var selectedDatabase = BeamData.shared.currentDatabase
     var databases: [BeamDatabase] {
-        BeamData.shared.currentAccount?.allDatabases ?? []
+        AppData.shared.currentAccount?.allDatabases ?? []
     }
 
     var body: some View {
@@ -43,7 +43,7 @@ struct AdvancedPreferencesDatabase: View {
                 Button(action: {
                     DispatchQueue.userInitiated.async {
                         do {
-                            try BeamData.shared.currentAccount?.deleteEmptyDatabases()
+                            try AppData.shared.currentAccount?.deleteEmptyDatabases()
                             AppDelegate.showMessage("Empty databases deleted")
                         } catch {
                             DispatchQueue.main.async {
@@ -79,12 +79,12 @@ struct AdvancedPreferencesDatabase: View {
     }
 
     private func startObservers() {
-        BeamData.shared.$currentDatabase
+        BeamData.shared.currentDatabaseChanged
             .sink { _ in
                 selectedDatabase = BeamData.shared.currentDatabase
             }
             .store(in: &cancellables)
-        BeamData.shared.currentAccount?.$allDatabases
+        AppData.shared.currentAccount?.$allDatabases
             .sink { _ in
                 selectedDatabase = BeamData.shared.currentDatabase
             }

@@ -25,7 +25,7 @@ class BrowsingTreeStoreTest: XCTestCase {
     }
 
     func testTreeProcessTrigger() throws {
-        let store = try XCTUnwrap(BrowsingTreeStoreManager())
+        let store = try XCTUnwrap(BrowsingTreeStoreManager(objectManager: BeamObjectManager()))
 
         let tree = BrowsingTree(nil)
         tree.navigateTo(url: "http://hello", title: nil, startReading: false, isLinkActivation: false)
@@ -65,7 +65,7 @@ class BrowsingTreeStoreTest: XCTestCase {
     }
 
     func testSaveFetchLocal() throws {
-        let store = try XCTUnwrap(BrowsingTreeStoreManager())
+        let store = try XCTUnwrap(BrowsingTreeStoreManager(objectManager: BeamObjectManager()))
         let tree = BrowsingTree(nil)
         let rootId = try XCTUnwrap(tree.rootId)
         try store.save(browsingTree: tree)
@@ -77,7 +77,7 @@ class BrowsingTreeStoreTest: XCTestCase {
 
     func testRemoteFlattening() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
-        let store = try XCTUnwrap(BrowsingTreeStoreManager())
+        let store = try XCTUnwrap(BrowsingTreeStoreManager(objectManager: BeamObjectManager()))
         let tree0 = BrowsingTree(nil)
         let rootId = try XCTUnwrap(tree0.rootId)
         let rootCreatedAt = try XCTUnwrap(tree0.root.events.first?.date)
@@ -104,7 +104,7 @@ class BrowsingTreeStoreTest: XCTestCase {
 
     func testSoftDelete() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
-        let store = try XCTUnwrap(BrowsingTreeStoreManager())
+        let store = try XCTUnwrap(BrowsingTreeStoreManager(objectManager: BeamObjectManager()))
 
         //absolute date based soft deletion
         let tree0 = BrowsingTree(nil)

@@ -16,14 +16,14 @@ class NoteIndexingTests: XCTestCase, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
     override func setUpWithError() throws {
         BeamTestsHelper.logout()
-        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+        try AppData.shared.clearAllAccountsAndSetupDefaultAccount()
 
         expect(try BeamData.shared.noteLinksAndRefsManager?.countBidirectionalLinks()) == 0
         expect(try BeamData.shared.noteLinksAndRefsManager?.countIndexedElements()) == 0
     }
 
     override func tearDownWithError() throws {
-        try BeamData.shared.clearAllAccountsAndSetupDefaultAccount()
+        try AppData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 
     func testReferencesAndLinks() throws {

@@ -36,7 +36,7 @@ final class PasswordListViewModel: ObservableObject {
         }
     }
 
-    private var passwordManager: PasswordManager
+    let passwordManager: PasswordManager
     private var allPasswordEntries: [PasswordManagerEntry] = []
     private var allPasswordTableViewItems: [PasswordTableViewItem] = []
     private var filteredIndices: [Int] = []
@@ -70,7 +70,7 @@ final class PasswordListViewModel: ObservableObject {
         filteredIndices.map { allPasswordTableViewItems[$0] }
     }
 
-    init(passwordManager: PasswordManager = .shared) {
+    init(passwordManager: PasswordManager) {
         self.passwordManager = passwordManager
         refresh()
         passwordManager.changePublisher

@@ -4,11 +4,11 @@ import BeamCore
 
 extension AppDelegate {
     func startDisplayingBrowserImportCompletions() {
-        data.importsManager.errorPublisher
+        data.currentAccount?.data.importsManager.errorPublisher
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: self.showError)
             .store(in: &importCancellables)
-        data.importsManager.successPublisher
+        data.currentAccount?.data.importsManager.successPublisher
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: self.showSuccess)
             .store(in: &importCancellables)

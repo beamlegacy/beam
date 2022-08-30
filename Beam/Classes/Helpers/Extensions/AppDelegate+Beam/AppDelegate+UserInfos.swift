@@ -18,7 +18,7 @@ extension AppDelegate {
                   completionHandler?(.success(false))
                   return
               }
-        BeamData.shared.currentAccount?.getUserInfos { _ in
+        AppData.shared.currentAccount?.getUserInfos { _ in
             completionHandler?(.success(true))
         }
     }
@@ -33,7 +33,7 @@ extension AppDelegate {
               Configuration.networkEnabled else {
                   return false
               }
-        try await BeamData.shared.currentAccount?.getUserInfosAsync()
+        try await AppData.shared.currentAccount?.getUserInfosAsync()
         return true
     }
 }

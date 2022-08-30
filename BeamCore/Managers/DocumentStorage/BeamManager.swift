@@ -15,18 +15,18 @@ public protocol BeamManager: AnyObject {
     /// The holder must be weak to prevent a retain cycle!
     var holder: BeamManagerOwner? { get }
 
-    static func load(_ holder: BeamManagerOwner, store: GRDBStore) throws -> Self
+    static func load(_ holder: BeamManagerOwner, objectManager: BeamObjectManager, store: GRDBStore) throws -> Self
     func unload() throws
     func postMigrationSetup() throws
 
-    init(holder: BeamManagerOwner?, store: GRDBStore) throws
+    init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws
 }
 
 public extension BeamManager {
     var managerName: String { Self.name }
 
-    static func load(_ holder: BeamManagerOwner, store: GRDBStore) throws -> Self {
-        try Self(holder: holder, store: store)
+    static func load(_ holder: BeamManagerOwner, objectManager: BeamObjectManager, store: GRDBStore) throws -> Self {
+        try Self(holder: holder, objectManager: objectManager, store: store)
     }
 
     func postMigrationSetup() throws {

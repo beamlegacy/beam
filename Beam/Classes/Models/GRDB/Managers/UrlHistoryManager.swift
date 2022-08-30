@@ -15,7 +15,7 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
 
     static var name = "UrlHistoryManager"
 
-    required init(holder: BeamManagerOwner? = nil, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner? = nil, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
         try super.init(store: store)
     }
@@ -370,6 +370,6 @@ extension BeamManagerOwner {
 
 extension BeamData {
     var urlHistoryManager: UrlHistoryManager? {
-        currentAccount?.urlHistoryManager
+        AppData.shared.currentAccount?.urlHistoryManager
     }
 }

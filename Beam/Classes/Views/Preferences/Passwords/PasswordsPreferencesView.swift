@@ -63,7 +63,7 @@ struct PasswordsPreferencesView: View {
 
 struct PasswordsPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(), creditCardsViewModel: CreditCardListViewModel())
+        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordManager: PasswordManager(objectManager: BeamObjectManager())), creditCardsViewModel: CreditCardListViewModel())
     }
 }
 
@@ -164,7 +164,7 @@ struct Passwords: View {
             } onDoubleTap: { row in
                 let entry = passwordsViewModel.filteredPasswordEntries[row]
                 do {
-                    let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
+                    let password = try passwordsViewModel.passwordManager.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
                     editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
                 } catch {
                     alertMessage = .init(error: error)
@@ -203,7 +203,7 @@ struct Passwords: View {
             Button {
                 if let entry = passwordsViewModel.selectedEntries.first {
                     do {
-                        let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
+                        let password = try passwordsViewModel.passwordManager.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
                         editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
                     } catch {
                         alertMessage = .init(error: error)
@@ -278,7 +278,7 @@ struct Passwords: View {
         alert.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else { return }
             for entry in passwordsViewModel.selectedEntries {
-                PasswordManager.shared.markDeleted(hostname: entry.minimizedHost, for: entry.username)
+                passwordsViewModel.passwordManager.markDeleted(hostname: entry.minimizedHost, for: entry.username)
             }
             if passwordsViewModel.filteredPasswordEntries.count == passwordsViewModel.selectedEntries.count && !searchString.isEmpty {
                 searchString.removeAll()

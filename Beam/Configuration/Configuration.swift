@@ -162,7 +162,7 @@ struct Configuration {
         set {
             if newValue != apiHostname {
                 UserDefaults.standard.set(newValue, forKey: apiHostnameKey)
-                BeamData.shared.currentAccount?.logout()
+                AppData.shared.currentAccount?.logout()
             }
         }
     }
@@ -204,7 +204,7 @@ struct Configuration {
                 if newValue {
                     Task { @MainActor in
                         do {
-                            _ = try await AppDelegate.main.syncDataWithBeamObject()
+                            _ = try AppDelegate.main.syncDataWithBeamObject()
                         } catch {
                             Logger.shared.logError("Error while syncing data: \(error)", category: .document)
                         }
@@ -319,7 +319,7 @@ struct Configuration {
         UserDefaults.standard.removeObject(forKey: websocketEnabledKey)
 
         // Logout
-        BeamData.shared.currentAccount?.logout()
+        AppData.shared.currentAccount?.logout()
     }
 
     static func setAPIEndPointsToStaging() {

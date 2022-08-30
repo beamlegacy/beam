@@ -220,7 +220,7 @@ class CoreDataManager {
 
     static func storeURLFromEnv() -> URL? {
         guard let name = filenameFromEnv() else { return nil }
-        let coreDataFileName = BeamData.dataFolder(fileName: name)
+        let coreDataFileName = AppData.shared.dataFolder(fileName: name)
         return URL(fileURLWithPath: coreDataFileName)
     }
 

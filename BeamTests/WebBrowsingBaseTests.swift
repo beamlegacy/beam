@@ -36,13 +36,13 @@ class WebBrowsingBaseTests: XCTestCase {
     }
 
     override func setUp() {
-        BeamObjectManager.disableSendingObjects = true
+        state = BeamState()
+        state.data = BeamData()
+        state.data.objectManager.disableSendingObjects = true
 
         linkStore.deleteAll(includedRemote: false, nil)
         webView = WKWebView()
 
-        state = BeamState()
-        state.data = BeamData()
         mockIndexingDelegate = MockWebIndexingDelegate()
         state.webIndexingController?.delegate = mockIndexingDelegate
         state.webIndexingController?.betterContentReadDelay = 0.2
