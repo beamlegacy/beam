@@ -113,7 +113,11 @@ final class TabsListWidthProvider {
         var fixedWidthUsed: CGFloat = 0
         computedFixedWidths.values.forEach { fixedWidthUsed += ($0 + separatorWidth) }
         fixedWidthUsed += widthForAllPinnedItems(pinnedItemsCount: pinnedItemsCount)
-        return containerSize.width - fixedWidthUsed
+        var availableWidth = containerSize.width - fixedWidthUsed
+        if let dragModel = dragModel, dragModel.isDraggingUnlistedItem {
+            availableWidth -= dragModel.widthForDraggedItem
+        }
+        return availableWidth
     }
 
     func widthForAllPinnedItems(pinnedItemsCount: Int, includeSpaceBetweenPinnedAndOther: Bool = true) -> CGFloat {
@@ -141,10 +145,12 @@ final class TabsListWidthProvider {
             return defaultPinnedWidth
         }
         var pinnedItemsCount = pinnedItemsCount
-        if dragModel?.draggingOverPins == true && !currentItemIsPinned {
-            pinnedItemsCount += 1
-        } else if dragModel?.draggingOverIndex != nil && dragModel?.draggingOverPins != true && currentItemIsPinned {
-            pinnedItemsCount -= 1
+        if dragModel?.isDraggingUnlistedItem == false {
+            if dragModel?.draggingOverPins == true && !currentItemIsPinned {
+                pinnedItemsCount += 1
+            } else if dragModel?.draggingOverIndex != nil && dragModel?.draggingOverPins != true && currentItemIsPinned {
+                pinnedItemsCount -= 1
+            }
         }
         let dynamicItemsCount = itemsCount - computedFixedWidths.count - pinnedItemsCount
         let availableWidth = availableWidthForUnpinneds(pinnedItemsCount: pinnedItemsCount)

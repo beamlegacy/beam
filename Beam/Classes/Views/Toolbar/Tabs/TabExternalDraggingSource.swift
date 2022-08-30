@@ -75,7 +75,7 @@ protocol TabExternalDraggingSourceDelegate: AnyObject {
     func tabExternalDragSessionEnded()
 }
 
-class TabExternalDraggingSource: NSObject {
+final class TabExternalDraggingSource: NSObject {
 
     private weak var state: BeamState?
     private weak var delegate: TabExternalDraggingSourceDelegate?
@@ -146,7 +146,7 @@ class TabExternalDraggingSource: NSObject {
     }
 }
 
-extension TabExternalDraggingSource: NSDraggingSource {
+extension TabExternalDraggingSource: ExternalDraggingSource {
 
     func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
         .move
