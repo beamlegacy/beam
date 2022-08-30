@@ -219,4 +219,16 @@ class BaseView {
     func isWindowOpenedWithContaining(title: String, isLowercased: Bool = false) -> Bool {
         return app.windows.matching(NSPredicate(format: "title CONTAINS '\(isLowercased ? title.lowercased() : title)'")).element.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
+    
+    @discardableResult
+    func clickHomeIcon() -> JournalTestView {
+        button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).hoverAndTapInTheMiddle()
+        return JournalTestView()
+    }
+    
+    @discardableResult
+    func clickOmniboxIcon() -> OmniBoxTestView {
+        button(WebViewLocators.Buttons.openOmnibox.accessibilityIdentifier).hoverAndTapInTheMiddle()
+        return OmniBoxTestView()
+    }
 }

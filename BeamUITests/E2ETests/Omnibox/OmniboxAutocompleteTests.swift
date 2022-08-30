@@ -68,6 +68,7 @@ class OmniboxAutocompleteTests: BaseTest {
         step("When I press ESC key 2nd time"){
             omniboxView.typeKeyboardKey(.escape)
         }
+        
         step("Then the journal omnibox is still here"){
             XCTAssertTrue(omniboxView.getOmniBoxSearchField().exists)
             XCTAssertEqual(omniboxView.getAutocompleteResults().count, 0)
@@ -86,9 +87,15 @@ class OmniboxAutocompleteTests: BaseTest {
         step("Then browser tab bar appears"){
             XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
+        
+        testrailId("C820")
+        step("THEN omnibox search field appears on Omnibox icon click") {
+            XCTAssertTrue(webView
+                .clickOmniboxIcon()
+                .getOmniBoxSearchField().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+        }
 
         step("When I type: \(partiallyTypedSearchText)"){
-            omniboxView.focusOmniBoxSearchField()
             omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
         }
 

@@ -436,12 +436,10 @@ class PnSAddToNoteTests: BaseTest {
         step("WHEN I collect a text to Today's note") {
             pnsView.addToTodayNote(textToPoint)
         }
-        
-        step("WHEN I switch to Journal") {
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-        }
 
+        testrailId("C821")
         step("THEN I switch to Journal") {
+            webView.clickHomeIcon()
             XCTAssertTrue(journalView.isTextNodeDisplayed(matchingValue: prefix + linkText))
             XCTAssertEqual(journalView.getNoteNodesForVisiblePart().count, 2)
             XCTAssertTrue(linkElement.waitForExistence(timeout: BaseTest.minimumWaitTimeout))

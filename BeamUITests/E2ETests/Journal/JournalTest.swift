@@ -31,7 +31,6 @@ class JournalTest: BaseTest {
 
         step("Then I still have Journal opened on the app start"){
             XCTAssertTrue(journalView.getScrollViewElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-
         }
     }
     
