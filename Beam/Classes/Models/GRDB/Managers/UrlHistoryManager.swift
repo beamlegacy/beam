@@ -59,7 +59,57 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
                 t.column("frecencyKey")
                 t.primaryKey(["urlId", "frecencyKey"])
             }
+        }
+        migrator.registerMigration("linkAliasesCleanup") { db in
+            let now = BeamDate.now
+            let youtubeAliasesQuery: SQLRequest<Link> = """
+        SELECT
+            l.id,
+            l.createdAt,
+            l.updatedAt,
+            l.url,
+            l.title,
+            l.content,
+            l.frecencyVisitLastAccessAt,
+            l.frecencyVisitScore,
+            l.frecencyVisitSortScore
+        FROM link AS l
+        JOIN link AS d ON l.destination = d.id
+        WHERE
+            l.url LIKE 'https://www.youtube.com/%'
+            AND d.url LIKE 'https://www.youtube.com/%'
+        """
 
+            let youtubeAliases = try Link.fetchAll(db, youtubeAliasesQuery)
+            for var alias in youtubeAliases {
+                alias.destination = nil
+                alias.updatedAt = now
+                try alias.save(db)
+            }
+
+            let gmailAliasesQuery: SQLRequest<Link> = """
+        SELECT
+            l.id,
+            l.createdAt,
+            l.updatedAt,
+            l.url,
+            l.title,
+            l.content,
+            l.frecencyVisitLastAccessAt,
+            l.frecencyVisitScore,
+            l.frecencyVisitSortScore
+        FROM link AS l
+        JOIN link AS d ON l.destination = d.id
+        WHERE
+            l.url != 'http://gmail.com/'
+            AND d.url LIKE 'https://mail.google.com/%'
+        """
+            let gmailAliases = try Link.fetchAll(db, gmailAliasesQuery)
+            for var alias in gmailAliases {
+                alias.destination = nil
+                alias.updatedAt = now
+                try alias.save(db)
+            }
         }
     }
 
