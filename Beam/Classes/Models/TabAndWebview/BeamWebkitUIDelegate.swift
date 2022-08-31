@@ -7,6 +7,7 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         // Assigning it to an optional to check if we have a value
         // see: https://linear.app/beamapp/issue/BE-4279/exc-breakpoint-exception-6-code-2765529536-subcode-8
+        page?.webViewNavigationHandler?.webView(webView, didCreateANewWebViewFor: navigationAction)
         let optionalRequest: URLRequest? = navigationAction.request
         guard let request = optionalRequest else {
             Logger.shared.logError("Expected createWebViewWith to have a NavigationAction with URLRequest", category: .web)
