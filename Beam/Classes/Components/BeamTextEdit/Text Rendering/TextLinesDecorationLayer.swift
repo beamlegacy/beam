@@ -21,6 +21,7 @@ class TextLinesDecorationLayer: CALayer {
             CATransaction.disableAnimations {
                 self.frame = rect
             }
+            self.setNeedsLayout()
         }
     }
 
