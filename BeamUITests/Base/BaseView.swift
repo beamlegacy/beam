@@ -70,6 +70,10 @@ class BaseView {
         return app.windows.groups[element]
     }
     
+    func webView(_ element: String) -> XCUIElement {
+        return app.windows.webViews[element]
+    }
+    
     func image(_ element: String) -> XCUIElement {
         return app.windows.images[element]
     }
