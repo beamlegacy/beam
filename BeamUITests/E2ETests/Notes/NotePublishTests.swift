@@ -33,6 +33,7 @@ class NotePublishTests: BaseTest {
             allNotesView = AllNotesTestView()
         }
         
+        testrailId("C738")
         step("Then I see a label with instructions to publish note and redirected to Onboarding view on click") {
             allNotesView.getPublishInstructionsLabel().clickOnExistence()
             XCTAssertTrue(OnboardingLandingTestView().isOnboardingPageOpened())
