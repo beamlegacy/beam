@@ -62,10 +62,10 @@ class BrowserTabsPreferencesTests: BaseTest {
         
         step("THEN I CAN successfully switch the tabs using shortcuts") {
             shortcutHelper.invokeCMDKey("1")
-            XCTAssertTrue(waitFor(PredicateFormat.isSelected.rawValue, webView.getTabByIndex(index: 0), BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(webView.getTabByIndex(index: 0).isSelected)
             webView.getTabByIndex(index: 3).tapInTheMiddle()
             shortcutHelper.invokeCMDKey("3")
-            XCTAssertTrue(waitFor(PredicateFormat.isSelected.rawValue, webView.getTabByIndex(index: 2), BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(webView.getTabByIndex(index: 2).isSelected)
         }
         
         step("WHEN I disable Switch tabs checkbox") {
@@ -80,9 +80,11 @@ class BrowserTabsPreferencesTests: BaseTest {
             XCTAssertTrue(webView.waitForWebViewToLoad())
             webView.getTabByIndex(index: 0).tapInTheMiddle()
             shortcutHelper.invokeCMDKey("2")
-            XCTAssertFalse(waitFor(PredicateFormat.isSelected.rawValue, webView.getTabByIndex(index: 3), BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(webView.getTabByIndex(index: 0).isSelected)
+            XCTAssertFalse(webView.getTabByIndex(index: 3).isSelected)
             shortcutHelper.invokeCMDKey("4")
-            XCTAssertFalse(waitFor(PredicateFormat.isSelected.rawValue, webView.getTabByIndex(index: 3), BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(webView.getTabByIndex(index: 0).isSelected)
+            XCTAssertFalse(webView.getTabByIndex(index: 3).isSelected)
         }
     }
     
