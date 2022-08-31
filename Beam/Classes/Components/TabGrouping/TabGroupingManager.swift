@@ -107,10 +107,12 @@ extension TabGroupingManager {
 
     /// creates a copy of the tab group beam object as is, and save it into DB.
     func copyForSharing(_ group: TabGroup) -> TabGroup {
-        guard let copy = storeManager?.makeLockedCopy(group) else {
-             return copyForNoteInsertion(group)
+        if let copy = storeManager?.makeLockedCopy(group) {
+            return copy
+        } else if group.title?.isEmpty != false, let existingCopy = storeManager?.fetch(copiesOfGroup: group.id).first {
+            return TabGroup(id: existingCopy.id, pageIds: group.pageIds, title: group.title, color: group.color, isLocked: true, parentGroup: group.id)
         }
-        return copy
+        return copyForNoteInsertion(group)
     }
 
     func renameGroup(_ group: TabGroup, title: String) {
@@ -175,7 +177,7 @@ extension TabGroupingManager {
         }
 
         // 2. if tab group was shared. Delete the corresponding shared Note.
-        if let sharedNote = fetchTabGroupNote(for: group), let collection = BeamData.shared.currentDocumentCollection {
+        if let (sharedNote, _) = fetchTabGroupNote(for: group), let collection = BeamData.shared.currentDocumentCollection {
             let cmdManager = CommandManagerAsync<BeamDocumentCollection>()
             cmdManager.deleteDocuments(ids: [sharedNote.id], in: collection)
         }
