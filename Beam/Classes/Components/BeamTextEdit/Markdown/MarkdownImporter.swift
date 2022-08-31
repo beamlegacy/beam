@@ -12,17 +12,7 @@ struct MarkdownImporter: BeamDocumentSource {
         Self.sourceId
     }
 
-    /// Errors thrown when interacting with the ``MarkdownImporter``.
-    enum Error: LocalizedError {
-        case alreadyExists
-
-        var errorDescription: String? {
-            switch self {
-            case .alreadyExists:
-                return "A note with this title already exists."
-            }
-        }
-    }
+    private static let defaultingName: String = "Markdown Import"
 
     /// Imports the contents located at the specified URL and saves if wanted.
     /// - Parameters:
@@ -30,22 +20,10 @@ struct MarkdownImporter: BeamDocumentSource {
     ///   - saving: a boolean indicating if you want to save it, defaults to `true`.
     /// - Returns: the `BeamNote` for later processing.
     @discardableResult
-    func `import`(contents: URL, saving: Bool = true) throws -> BeamNote {
+    func `import`(documentURL: URL, saving: Bool = true) throws -> BeamNote {
         // Creating the markdown document
-        let document = try Markdown.Document(parsing: contents)
-        // Creating the note
-        let title = contents.deletingPathExtension().lastPathComponent
-        guard BeamNote.fetch(title: title) == nil else {
-            throw Error.alreadyExists
-        }
-        let note = try BeamNote.fetchOrCreate(self, title: title)
-        // Let's visit the document and retrieve the root element
-        var visitor = BeamNoteVisitor(baseURL: contents)
-        let element = visitor.visitDocument(document)
-        // Prettifying the children of the root element
-        element.prettify()
-        // Stealing those for the note
-        note.children = element.children
+        let contents = try String(contentsOf: documentURL)
+        let note = try process(markdown: contents, title: documentURL.deletingPathExtension().lastPathComponent, baseURL: documentURL)
         if saving {
             // For every image elements, let's add it to the BeamFileDBManager
             for imageElement in note.imageElements() {
@@ -56,6 +34,54 @@ struct MarkdownImporter: BeamDocumentSource {
             _ = note.save(self)
         }
         return note
+    }
+
+    private func process(markdown: String, title: String, baseURL: URL) throws -> BeamNote {
+        let preformatted = preformat(contents: markdown)
+        let document = Markdown.Document(parsing: preformatted)
+        // Creating the note
+        let title = availableNoteName(with: title)
+        let note: BeamNote
+        do {
+            note = try BeamNote.fetchOrCreate(self, title: title)
+        } catch BeamNoteError.invalidTitle {
+            let defaultTitle = availableNoteName(with: Self.defaultingName)
+            note = try BeamNote.fetchOrCreate(self, title: defaultTitle)
+        }
+        // Let's visit the document and retrieve the root element
+        var visitor = BeamNoteVisitor(baseURL: baseURL)
+        let element = visitor.visitDocument(document)
+        // Prettifying the children of the root element
+        element.prettify()
+        // Stealing those for the note
+        note.children = element.children
+        return note
+    }
+
+    private func availableNoteName(with startingName: String) -> String {
+        var finalName: String = startingName
+        var tries: UInt = 1
+        while BeamNote.fetch(title: finalName) != nil {
+            tries += 1
+            finalName = "\(startingName) (\(tries))"
+        }
+        return finalName
+    }
+
+    private func preformat(contents: String) -> String {
+        // since with swift-markdown, it seems that the line breaks we add to exported notes (representing empty nodes)
+        // are parsed as HTMLBlocks markup elements and include their surrounding content if it doesn't contain spaces
+        // (but we didn't want to include them in the export since it adds too much extra spaces)
+        return contents.replacingOccurrences(of: "<br>", with: "\n<br>\n")
+    }
+}
+
+// MARK: - Testing
+
+extension MarkdownImporter {
+    /// **Only use this for testing.**
+    func _import(markdown: String) throws -> BeamNote {
+        return try process(markdown: markdown, title: "Testing", baseURL: URL(fileURLWithPath: "/"))
     }
 }
 
@@ -84,8 +110,7 @@ private struct BeamNoteVisitor: MarkupVisitor {
         let root = BeamElement()
         for markup in document.children {
             let visited = visit(markup)
-            // if we have visited a list, let's add its children to the root directly
-            if visited.text.isEmpty, visited.children.count > 1 {
+            if markup is Markdown.Paragraph, visited.children.count > 1 {
                 root.addChildren(visited.children)
             } else {
                 root.addChild(visited)
@@ -98,13 +123,30 @@ private struct BeamNoteVisitor: MarkupVisitor {
         let root = BeamElement()
         for markup in paragraph.inlineChildren {
             let visited = visit(markup)
-            if visited.imageElements().isEmpty {
-                root.text.append(visited.text)
-            } else {
-                root.addChild(visited)
+            if markup is Text, visited.text.isEmpty {
+                // i've seen some cases with empty Text markups, resulting in empty BeamElements that we don't want
+                // whereas we want empty BeamElements for LineBreaks
+                continue
             }
+            root.addChild(visited)
         }
-        return root.children.count == 1 ? root.children[0] : root
+        let childrenCount = root.children.count
+        if childrenCount == 1 {
+            return root.children[0]
+        } else if childrenCount > 1 {
+            let newChildren: [BeamElement] = root.children.reduce(into: []) { partialResult, newElement in
+                if partialResult.isEmpty || newElement.text.isEmpty || !newElement.imageElements().isEmpty {
+                    partialResult.append(newElement)
+                } else {
+                    partialResult.last?.text.append(newElement.text)
+                }
+            }
+            root.children = newChildren
+            return root.children.count == 1 ? root.children[0] : root
+        } else {
+            // This case shouldn't happen ? Otherwise it meant that the paragraph was empty...
+            return root
+        }
     }
 
     mutating func visitUnorderedList(_ unorderedList: Markdown.UnorderedList) -> BeamElement {
@@ -113,7 +155,7 @@ private struct BeamNoteVisitor: MarkupVisitor {
             let visited = visit(markup)
             visited.bubbleUp(into: root)
         }
-        return root.children.count == 1 ? root.children[0] : root
+        return root
     }
 
     mutating func visitListItem(_ listItem: Markdown.ListItem) -> BeamElement {
@@ -149,7 +191,7 @@ private struct BeamNoteVisitor: MarkupVisitor {
 
     mutating func visitImage(_ image: Markdown.Image) -> BeamElement {
         let imageTitle = image.title ?? ""
-        let imageSource = image.source ?? ""
+        let imageSource = image.source?.removingPercentEncoding ?? image.source ?? ""
 
         let title = imageTitle.isEmpty ? image.plainText : imageTitle
         let url = URL(fileURLWithPath: imageSource, relativeTo: baseURL)
@@ -158,9 +200,10 @@ private struct BeamNoteVisitor: MarkupVisitor {
 
         if let data = try? Data(contentsOf: url), let image = NSImage(contentsOf: url) {
             do {
-                let uid = try fileManager!.insert(name: url.lastPathComponent, data: data)
-                let displayInfos = MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width))
-                element.kind = .image(uid, displayInfos: displayInfos)
+                if let uid = try fileManager?.insert(name: url.lastPathComponent, data: data) {
+                    let displayInfos = MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width))
+                    element.kind = .image(uid, displayInfos: displayInfos)
+                }
             } catch {
                 Logger.shared.logError("Unable to insert image in FileDB \(error)", category: .fileDB)
             }
@@ -169,16 +212,26 @@ private struct BeamNoteVisitor: MarkupVisitor {
         return element
     }
 
+    mutating func visitHTMLBlock(_ html: Markdown.HTMLBlock) -> BeamElement {
+        if html.rawHTML == "<br>" || html.rawHTML == "<br>\n" {
+            return BeamElement()
+        } else {
+            return BeamElement(html.rawHTML)
+        }
+    }
+
+    func visitLineBreak(_ lineBreak: Markdown.LineBreak) -> BeamElement {
+        return BeamElement()
+    }
 }
 
 // MARK: - Helpers
 
 private extension BeamElement {
     func prettify() {
-        for element in flatElements where element.text.isEmpty {
-            let childrenCount = element.children.count
-            if childrenCount > 1, let previousSibbling = element.previousSibbling() {
-                previousSibbling.addChildren(element.children)
+        for element in flatElements where element.text.isEmpty && element.children.count >= 1 {
+            if let sibblingReceiver = element.previousNonEmptySibbling {
+                sibblingReceiver.addChildren(element.children)
                 element.parent?.removeChild(element)
             }
         }
@@ -199,5 +252,13 @@ private extension BeamElement {
     var bubbledUpElements: [BeamElement]? {
         guard text.isEmpty, children.count >= 1 else { return nil }
         return children.count == 1 ? [children[0]] : children
+    }
+
+    var previousNonEmptySibbling: BeamElement? {
+        var previous = previousSibbling()
+        while previous?.text.isEmpty == true {
+            previous = previousSibbling()
+        }
+        return previous
     }
 }
