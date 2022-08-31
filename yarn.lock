@@ -1641,41 +1641,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@beam/native-readability@workspace:Beam/Classes/Components/Readability/Web":
-  version: 0.0.0-use.local
-  resolution: "@beam/native-readability@workspace:Beam/Classes/Components/Readability/Web"
-  dependencies:
-    "@beam/native-beamtypes": 1.0.0
-    "@beam/native-testmock": 1.0.0
-    "@beam/native-utils": 1.0.0
-    "@mozilla/readability": ^0.4.2
-    "@types/jest": ^27.4.1
-    "@types/node": ^16.11.7
-    "@typescript-eslint/eslint-plugin": ^5.16.0
-    "@typescript-eslint/parser": ^5.16.0
-    css-loader: ^6.7.1
-    debounce: ^1.2.1
-    dequal: ^2.0.2
-    eslint: ^8.11.0
-    eslint-formatter-gitlab: ^3.0.0
-    identity-obj-proxy: ^3.0.0
-    jest: ^27.5.1
-    jest-junit: ^13.0.0
-    jest-measure: ^0.0.14
-    pnp-webpack-plugin: ^1.7.0
-    sass: 1.43.4
-    sass-loader: ^12.6.0
-    source-map-loader: ^3.0.1
-    style-loader: ^3.3.1
-    terser-webpack-plugin: ^5.3.1
-    ts-jest: ^27.1.3
-    ts-loader: ^9.2.8
-    typescript: ^4.6.2
-    webpack: ^5.70.0
-    webpack-cli: ^4.9.2
-  languageName: unknown
-  linkType: soft
-
 "@beam/native-searchwebpage@workspace:Beam/Classes/Views/Search/SearchWebPage/Web":
   version: 0.0.0-use.local
   resolution: "@beam/native-searchwebpage@workspace:Beam/Classes/Views/Search/SearchWebPage/Web"
@@ -2102,13 +2067,6 @@ __metadata:
     "@jridgewell/resolve-uri": ^3.0.3
     "@jridgewell/sourcemap-codec": ^1.4.10
   checksum: ab8bce84bbbc8c34f3ba8325ed926f8f2d3098983c10442a80c55764c4eb6e47d5b92d8ff20a0dd868c3e76a3535651fd8a0138182c290dbfc8396195685c37b
-  languageName: node
-  linkType: hard
-
-"@mozilla/readability@npm:^0.4.2":
-  version: 0.4.2
-  resolution: "@mozilla/readability@npm:0.4.2"
-  checksum: daeeb1d68ea12a9a2027a932c64bd862f7d0a4d21571cb474883f803a5424dfda792724181822983367cd6f833c6d32b56436ed20cacd990bd6f20585405ada0
   languageName: node
   linkType: hard
 

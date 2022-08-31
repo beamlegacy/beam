@@ -81,7 +81,6 @@ import UniformTypeIdentifiers
 
     private static func handlers(isIncognito: Bool) -> [SimpleBeamMessageHandler] {
         var handlers = [
-            ReadabilityMessageHandler(),
             WebPositionsMessageHandler(),
             PointAndShootMessageHandler(),
             JSNavigationMessageHandler(),
