@@ -21,7 +21,7 @@
 
 - (void)_setAddsVisitedLinks:(BOOL)addsVisitedLinks;
 
-- (void)_getMainResourceDataWithCompletionHandler:(void (^_Nonnull)(NSData * _Nonnull, NSError * _Nonnull))completionHandler;
+- (void)_getMainResourceDataWithCompletionHandler:(void (^_Nonnull)(NSData * _Nullable, NSError * _Nullable))completionHandler;
 
 -(CGFloat)_topContentInset;
 -(void)_setTopContentInset:(CGFloat)inset;
