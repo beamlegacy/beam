@@ -118,6 +118,8 @@ class NavigationHandlerMock: WebViewNavigationHandler {
         }
         events.append("navigatedTo \(url) \(replace)")
     }
+
+    func webView(_ webView: WKWebView, didCreateANewWebViewFor navigationAction: WKNavigationAction) {}
 }
 
 class PointAndShootTest: XCTestCase {
