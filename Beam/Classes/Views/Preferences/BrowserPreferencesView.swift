@@ -278,19 +278,21 @@ struct TabsSection: View {
         Group {
             Toggle(isOn: $enableTabGrouping) {
                 Text("Group tabs automatically")
-            }.accessibilityIdentifier("group-tabs-checkbox")
-                .toggleStyle(CheckboxToggleStyle())
-                .onChange(of: enableTabGrouping, perform: {
-                    PreferencesManager.enableTabGrouping = $0
-                })
+            }
+            .accessibilityIdentifier("group-tabs-checkbox")
+            .toggleStyle(CheckboxToggleStyle())
+            .onChange(of: enableTabGrouping, perform: {
+                PreferencesManager.enableTabGrouping = $0
+            })
 
             Toggle(isOn: $cmdClickOpenTab) {
                 Text("⌘-click opens a link in a new tab")
-            }.accessibilityIdentifier("cmd-click-checkbox")
-                .toggleStyle(CheckboxToggleStyle())
-                .onChange(of: cmdClickOpenTab, perform: {
-                    PreferencesManager.cmdClickOpenTab = $0
-                })
+            }
+            .accessibilityIdentifier("cmd-click-checkbox")
+            .toggleStyle(CheckboxToggleStyle())
+            .onChange(of: cmdClickOpenTab, perform: {
+                PreferencesManager.cmdClickOpenTab = $0
+            })
 
     //        Toggle(isOn: $newTabWindowMakeActive) {
     //            Text("When a new tab or window opens, make it active")
@@ -298,11 +300,12 @@ struct TabsSection: View {
 
             Toggle(isOn: $cmdNumberSwitchTabs) {
                 Text("Use ⌘1 to ⌘9 to switch tabs")
-            }.accessibilityIdentifier("switch-tabs-checkbox")
-                .toggleStyle(CheckboxToggleStyle())
-                .onChange(of: cmdNumberSwitchTabs, perform: {
-                    PreferencesManager.cmdNumberSwitchTabs = $0
-                })
+            }
+            .accessibilityIdentifier("switch-tabs-checkbox")
+            .toggleStyle(CheckboxToggleStyle())
+            .onChange(of: cmdNumberSwitchTabs, perform: {
+                PreferencesManager.cmdNumberSwitchTabs = $0
+            })
 
     //        Toggle(isOn: $showWebsiteIconTab) {
     //            Text("Show website icons in tabs")
