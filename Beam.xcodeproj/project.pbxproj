@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		022843362617C4C3001C062E /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
 		0325628E26051D3B006513E4 /* RBZip.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624A26051D3A006513E4 /* RBZip.m */; };
 		0325628F26051D3B006513E4 /* RBSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624B26051D3A006513E4 /* RBSQLite.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624D26051D3A006513E4 /* RBCodeSignature.m */; };
@@ -503,6 +504,16 @@
 		66F9AEC1283E215100C28EE3 /* MouseOverAndSelectionUI.d.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA4283E215100C28EE3 /* MouseOverAndSelectionUI.d.ts */; };
 		66F9AEC2283E215100C28EE3 /* MouseOverAndSelectionUI_native.d.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA5283E215100C28EE3 /* MouseOverAndSelectionUI_native.d.ts */; };
 		66F9AEC3283E215100C28EE3 /* MouseOverAndSelectionUI_web.d.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA6283E215100C28EE3 /* MouseOverAndSelectionUI_web.d.ts */; };
+		66F9AEC4283E215100C28EE3 /* jest.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA7283E215100C28EE3 /* jest.config.js */; };
+		66F9AEC5283E215100C28EE3 /* MouseOverAndSelectionUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA9283E215100C28EE3 /* MouseOverAndSelectionUIMock.ts */; };
+		66F9AEC6283E215100C28EE3 /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEAA283E215100C28EE3 /* webpack.config.js */; };
+		66F9AEC7283E215100C28EE3 /* package.json in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEAB283E215100C28EE3 /* package.json */; };
+		66F9AED0283E215100C28EE3 /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEB7283E215100C28EE3 /* tsconfig.json */; };
+		66F9AED1283E215100C28EE3 /* MouseOverAndSelectionUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEB9283E215100C28EE3 /* MouseOverAndSelectionUI_native.ts */; };
+		66F9AED2283E215100C28EE3 /* index.js in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBA283E215100C28EE3 /* index.js */; };
+		66F9AED3283E215100C28EE3 /* MouseOverAndSelectionUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBB283E215100C28EE3 /* MouseOverAndSelectionUI.ts */; };
+		66F9AED4283E215100C28EE3 /* MouseOverAndSelection.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBC283E215100C28EE3 /* MouseOverAndSelection.ts */; };
+		66F9AED5283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEBD283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts */; };
 		6E096B922890282E009E1760 /* DispatchQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E096B8B2890215D009E1760 /* DispatchQueue.swift */; };
 		6E351C7028BD175A00B55B64 /* tabs-media_unmute.json in Resources */ = {isa = PBXBuildFile; fileRef = 6E351C6F28BD175A00B55B64 /* tabs-media_unmute.json */; };
 		6E42097A28942F79007F72EB /* NSLocking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E42097928942F79007F72EB /* NSLocking.swift */; };
@@ -657,8 +668,6 @@
 		8AD38F992768AC8F003D6B48 /* CGSize+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD38F982768AC8F003D6B48 /* CGSize+Beam.swift */; };
 		8AD9DEBE26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */; };
 		8ADD060A27296E00004C3EC9 /* WebPositionsMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ADD060927296E00004C3EC9 /* WebPositionsMessageHandler.swift */; };
-		8ADFE33E28BCE17200ECE223 /* ReadabilityMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ADFE32F28BCE17200ECE223 /* ReadabilityMessageHandler.swift */; };
-		8ADFE35128BCE5C200ECE223 /* Readability_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8ADFE34B28BCE5C200ECE223 /* Readability_prod.js */; };
 		8AE3EA7D27F330050010A42C /* EmbedNode.css in Resources */ = {isa = PBXBuildFile; fileRef = 8A27DC5B27EDC7A50044A9A2 /* EmbedNode.css */; };
 		8AE3EA9127F36D5E0010A42C /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8ABCB0EE27EC84690091B396 /* audio.mp3 */; };
 		8AE3EA9227F36D5E0010A42C /* UITests-3.html in Resources */ = {isa = PBXBuildFile; fileRef = 8ABCB0E927EC84690091B396 /* UITests-3.html */; };
@@ -1994,6 +2003,7 @@
 		418172A825811A3A00317ED8 /* BeamTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextField.swift; sourceTree = "<group>"; };
 		418172A925811A3A00317ED8 /* BeamTextFieldView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextFieldView.swift; sourceTree = "<group>"; };
 		418172D525811B8700317ED8 /* RoundRectButtonStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundRectButtonStyle.swift; sourceTree = "<group>"; };
+		418172FD25811DB200317ED8 /* Readability.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Readability.js; sourceTree = "<group>"; };
 		4181731625811E1800317ED8 /* CursorMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorMovement.swift; sourceTree = "<group>"; };
 		4181732C25811E9800317ED8 /* Icon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Icon.swift; sourceTree = "<group>"; };
 		4181733125811F4800317ED8 /* KeyCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCode.swift; sourceTree = "<group>"; };
@@ -2614,19 +2624,6 @@
 		8AD38F982768AC8F003D6B48 /* CGSize+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGSize+Beam.swift"; sourceTree = "<group>"; };
 		8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootOffsetWithAnimation.swift; sourceTree = "<group>"; };
 		8ADD060927296E00004C3EC9 /* WebPositionsMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPositionsMessageHandler.swift; sourceTree = "<group>"; };
-		8ADFE32F28BCE17200ECE223 /* ReadabilityMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadabilityMessageHandler.swift; sourceTree = "<group>"; };
-		8ADFE33128BCE17200ECE223 /* jest.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jest.config.js; sourceTree = "<group>"; };
-		8ADFE33328BCE17200ECE223 /* ReadabilityUIMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadabilityUIMock.ts; sourceTree = "<group>"; };
-		8ADFE33428BCE17200ECE223 /* webpack.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = webpack.config.js; sourceTree = "<group>"; };
-		8ADFE33528BCE17200ECE223 /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
-		8ADFE33628BCE17200ECE223 /* tsconfig.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = tsconfig.json; sourceTree = "<group>"; };
-		8ADFE33A28BCE17200ECE223 /* index.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
-		8ADFE33C28BCE17200ECE223 /* Readability.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Readability.ts; sourceTree = "<group>"; };
-		8ADFE34B28BCE5C200ECE223 /* Readability_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Readability_prod.js; sourceTree = "<group>"; };
-		8ADFE34D28BCE5C200ECE223 /* ReadabilityUI_web.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadabilityUI_web.d.ts; sourceTree = "<group>"; };
-		8ADFE34E28BCE5C200ECE223 /* ReadabilityUI_native.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadabilityUI_native.d.ts; sourceTree = "<group>"; };
-		8ADFE34F28BCE5C200ECE223 /* ReadabilityUI.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadabilityUI.d.ts; sourceTree = "<group>"; };
-		8ADFE35028BCE5C200ECE223 /* Readability.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Readability.d.ts; sourceTree = "<group>"; };
 		8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootFrameOffset.swift; sourceTree = "<group>"; };
 		8AEF148F27F1C8D100A27C1B /* WebSearchMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSearchMessageHandler.swift; sourceTree = "<group>"; };
 		8AEF149227F1C8D100A27C1B /* SearchWebPage_prod.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = SearchWebPage_prod.js; sourceTree = "<group>"; };
@@ -4626,7 +4623,7 @@
 				A5B5323B27034DA2007FC8B8 /* OverlayViewCenter */,
 				A5D8A6D826724E2600CEC37E /* Password */,
 				BAA679587D9259686224D133 /* PointAndShoot */,
-				8ADFE32D28BCE17200ECE223 /* Readability */,
+				8A035C5427E9F1D5007CA0FB /* Readability */,
 				A0FB59BD2809D068001A1850 /* Summary */,
 				A043B7FC26593A4800E267E5 /* TabGrouping */,
 				A57BFEC02615B4AC00CFB646 /* TableView */,
@@ -5476,6 +5473,15 @@
 			name = Packages;
 			sourceTree = "<group>";
 		};
+		8A035C5427E9F1D5007CA0FB /* Readability */ = {
+			isa = PBXGroup;
+			children = (
+				418172FD25811DB200317ED8 /* Readability.js */,
+				4181718B2581107C00317ED8 /* Readability.swift */,
+			);
+			path = Readability;
+			sourceTree = "<group>";
+		};
 		8A035C5B27E9F2CE007CA0FB /* BeamWebViewConfiguration */ = {
 			isa = PBXGroup;
 			children = (
@@ -6269,76 +6275,6 @@
 				8A27DC7C27EDC7E60044A9A2 /* webpack.config.js */,
 			);
 			path = Web;
-			sourceTree = "<group>";
-		};
-		8ADFE32D28BCE17200ECE223 /* Readability */ = {
-			isa = PBXGroup;
-			children = (
-				8ADFE32E28BCE17200ECE223 /* Native */,
-				8ADFE33028BCE17200ECE223 /* Web */,
-			);
-			name = Readability;
-			path = Beam/Classes/Components/Readability;
-			sourceTree = SOURCE_ROOT;
-		};
-		8ADFE32E28BCE17200ECE223 /* Native */ = {
-			isa = PBXGroup;
-			children = (
-				4181718B2581107C00317ED8 /* Readability.swift */,
-				8ADFE32F28BCE17200ECE223 /* ReadabilityMessageHandler.swift */,
-			);
-			path = Native;
-			sourceTree = "<group>";
-		};
-		8ADFE33028BCE17200ECE223 /* Web */ = {
-			isa = PBXGroup;
-			children = (
-				8ADFE34A28BCE5C200ECE223 /* dist */,
-				8ADFE33128BCE17200ECE223 /* jest.config.js */,
-				8ADFE33228BCE17200ECE223 /* tests */,
-				8ADFE33428BCE17200ECE223 /* webpack.config.js */,
-				8ADFE33528BCE17200ECE223 /* package.json */,
-				8ADFE33628BCE17200ECE223 /* tsconfig.json */,
-				8ADFE33728BCE17200ECE223 /* src */,
-			);
-			path = Web;
-			sourceTree = "<group>";
-		};
-		8ADFE33228BCE17200ECE223 /* tests */ = {
-			isa = PBXGroup;
-			children = (
-				8ADFE33328BCE17200ECE223 /* ReadabilityUIMock.ts */,
-			);
-			path = tests;
-			sourceTree = "<group>";
-		};
-		8ADFE33728BCE17200ECE223 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				8ADFE33A28BCE17200ECE223 /* index.js */,
-				8ADFE33C28BCE17200ECE223 /* Readability.ts */,
-			);
-			path = src;
-			sourceTree = "<group>";
-		};
-		8ADFE34A28BCE5C200ECE223 /* dist */ = {
-			isa = PBXGroup;
-			children = (
-				8ADFE34B28BCE5C200ECE223 /* Readability_prod.js */,
-				8ADFE34C28BCE5C200ECE223 /* src */,
-			);
-			path = dist;
-			sourceTree = "<group>";
-		};
-		8ADFE34C28BCE5C200ECE223 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				8ADFE34D28BCE5C200ECE223 /* ReadabilityUI_web.d.ts */,
-				8ADFE34E28BCE5C200ECE223 /* ReadabilityUI_native.d.ts */,
-				8ADFE34F28BCE5C200ECE223 /* ReadabilityUI.d.ts */,
-				8ADFE35028BCE5C200ECE223 /* Readability.d.ts */,
-			);
-			path = src;
 			sourceTree = "<group>";
 		};
 		8AEF148D27F1C8D100A27C1B /* SearchWebPage */ = {
@@ -8630,8 +8566,10 @@
 				8ABFD6A12791D82B001E35DE /* collect.aif in Resources */,
 				8A27DCA527EDC8CA0044A9A2 /* WebPositions_prod.js in Resources */,
 				8ABCB11527EC849B0091B396 /* PointAndShoot_prod.js in Resources */,
+				66F9AED0283E215100C28EE3 /* tsconfig.json in Resources */,
 				5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */,
 				52F78D2F27884699007A9F53 /* prepare_beam_object.graphql in Resources */,
+				022843362617C4C3001C062E /* Readability.js in Resources */,
 				8AE3EA9927F36D5E0010A42C /* UITests-Alerts.html in Resources */,
 				8AE3EA9527F36D5E0010A42C /* UITests-Password.html in Resources */,
 				A07B03EE279AF1D200D14C45 /* Inter-LightItalic.otf in Resources */,
@@ -8643,15 +8581,19 @@
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				8AE3EA9727F36D5E0010A42C /* Beam.css in Resources */,
+				66F9AED1283E215100C28EE3 /* MouseOverAndSelectionUI_native.ts in Resources */,
 				032562AB26051D3B006513E4 /* Info.plist in Resources */,
 				A5A3BB2928083C2D00D7B4C5 /* nav-pivot_tab_increment.json in Resources */,
 				A07B03F0279AF1D200D14C45 /* Inter-Light.otf in Resources */,
 				8AE3EA9327F36D5E0010A42C /* UITests-4.html in Resources */,
 				66F9AEBF283E215100C28EE3 /* MouseOverAndSelection_prod.js in Resources */,
+				66F9AEC5283E215100C28EE3 /* MouseOverAndSelectionUIMock.ts in Resources */,
 				A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */,
 				0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */,
 				A3D421322837B0F0002DB9A4 /* UITests-SVG.html in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
+				66F9AEC6283E215100C28EE3 /* webpack.config.js in Resources */,
+				66F9AED3283E215100C28EE3 /* MouseOverAndSelectionUI.ts in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				8AE3EA9A27F36D5E0010A42C /* UITests-Playground.html in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
@@ -8681,17 +8623,19 @@
 				A5347A6A2763B53A006EEF8C /* nav-pivot_web.json in Resources */,
 				52F78D2827872F55007A9F53 /* prepare_beam_objects.graphql in Resources */,
 				A07B03EF279AF1D200D14C45 /* Inter-BoldItalic.otf in Resources */,
-				8ADFE35128BCE5C200ECE223 /* Readability_prod.js in Resources */,
+				66F9AED5283E215100C28EE3 /* MouseOverAndSelectionUI_web.ts in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				3303E10326FA22D300E175AC /* user_infos.graphql in Resources */,
 				05C105C727EDEFC9007226CA /* paginated_beam_object_checksums.graphql in Resources */,
 				5224CD702685FFDD00D4179E /* beam_objects.graphql in Resources */,
 				8A27DCA227EDC8CA0044A9A2 /* Navigation_prod.js in Resources */,
+				66F9AEC7283E215100C28EE3 /* package.json in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
 				A52A559027592E9A002D0C99 /* Inter-Regular.otf in Resources */,
 				A5BAD85527BF533900B9AFF3 /* begin_record.caf in Resources */,
 				872F658B27F1C36A005475B8 /* canonical-hostnames.json in Resources */,
 				8AEF14CD27F1D1D200A27C1B /* MediaPlayer_prod.js in Resources */,
+				66F9AED2283E215100C28EE3 /* index.js in Resources */,
 				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
 				A5C661A627A1A57200727ACB /* editor-delete.json in Resources */,
 				33551D2727FC6F4600598164 /* nav-pivot_incognito.json in Resources */,
@@ -8707,6 +8651,7 @@
 				051710E527EAF93500E3C7A2 /* page_info_fragment.graphql in Resources */,
 				051710DE27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql in Resources */,
 				52EA56D9274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql in Resources */,
+				66F9AEC4283E215100C28EE3 /* jest.config.js in Resources */,
 				8AE3EA9B27F36D5E0010A42C /* video.mov in Resources */,
 				52EA56D5274F8FA400F092C8 /* beam_objects_data_url.graphql in Resources */,
 				8AE3EA9227F36D5E0010A42C /* UITests-3.html in Resources */,
@@ -8726,6 +8671,7 @@
 				33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */,
 				A07B03F1279AF1D200D14C45 /* Inter-SemiBoldItalic.otf in Resources */,
 				A52A559627592EB7002D0C99 /* Inter-MediumItalic.otf in Resources */,
+				66F9AED4283E215100C28EE3 /* MouseOverAndSelection.ts in Resources */,
 				52EA56D7274F8FDC00F092C8 /* subscription_beam_objects_updated_data_url.graphql in Resources */,
 				8AEF14AE27F1C8ED00A27C1B /* SearchWebPage_prod.js in Resources */,
 				6E351C7028BD175A00B55B64 /* tabs-media_unmute.json in Resources */,
@@ -9228,7 +9174,6 @@
 				3312203428097382006A5EA1 /* UpdatePanel.swift in Sources */,
 				3318B42A28528101002ACA34 /* EditorTabGroupView.swift in Sources */,
 				5241E5E926F89AE700B08F69 /* UserSessionRequest+async.swift in Sources */,
-				8ADFE33E28BCE17200ECE223 /* ReadabilityMessageHandler.swift in Sources */,
 				A0CB5AEA268B231400D1EF02 /* NotesPreferencesView.swift in Sources */,
 				873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */,
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,

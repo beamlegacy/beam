@@ -58,7 +58,7 @@ class WebIndexingControllerTests: XCTestCase {
 
     func testTabDidNavigateShouldNotWait() throws {
         let url = URL(string: "http://abc.com/page")!
-        loadPage(title: "Test page", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ac pulvinar tortor. Proin convallis at urna egestas vehicula. Sed ac fermentum ligula, vitae gravida urna. Praesent molestie tincidunt nisl, vel sollicitudin nibh condimentum id. Nulla nec lacinia sapien. Nulla tincidunt diam vitae tincidunt mattis. Nam elementum nibh sed turpis scelerisque accumsan. Suspendisse vel accumsan sem. Mauris nisi ex, fringilla sit amet vestibulum sit amet, molestie id massa. Maecenas consectetur tellus quis auctor interdum. Proin hendrerit erat sit amet ultrices pretium. ")
+        loadPage(title: "Test page", content: "cool content")
         
         let indexExpection = expectation(description: "Test page should index")
         let delegate = FakeWebIndexControllerDelegate(expectations: [indexExpection])
@@ -69,13 +69,13 @@ class WebIndexingControllerTests: XCTestCase {
         XCTAssertEqual(currentNode?.score.textAmount, 0)
         wait(for: [indexExpection], timeout: 2)
         XCTAssertEqual(currentNode?.title, "Test page")
-        XCTAssertEqual(currentNode?.score.textAmount, 577)
+        XCTAssertEqual(currentNode?.score.textAmount, 21)
     }
 
     func testTabDidNavigateShouldWaitUninterupted() throws {
         let url = URL(string: "http://abc.com/page")!
         let url2 = URL(string: "http://abc.com/page2")!
-        loadPage(title: "Test page", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ac pulvinar tortor. Proin convallis at urna egestas vehicula. Sed ac fermentum ligula, vitae gravida urna. Praesent molestie tincidunt nisl, vel sollicitudin nibh condimentum id. Nulla nec lacinia sapien. Nulla tincidunt diam vitae tincidunt mattis. Nam elementum nibh sed turpis scelerisque accumsan. Suspendisse vel accumsan sem. Mauris nisi ex, fringilla sit amet vestibulum sit amet, molestie id massa. Maecenas consectetur tellus quis auctor interdum. Proin hendrerit erat sit amet ultrices pretium. ")
+        loadPage(title: "Test page", content: "cool content")
 
         let indexExpectation = expectation(description: "Test page should index")
         let indexExpectation2 = expectation(description: "Test page 2 should index")
@@ -92,9 +92,9 @@ class WebIndexingControllerTests: XCTestCase {
 
         wait(for: [indexExpectation], timeout: 2) //here we wait for 1st indexing to complete
         XCTAssertEqual(node0.title, "Test page")
-        XCTAssertEqual(node0.score.textAmount, 577)
+        XCTAssertEqual(node0.score.textAmount, 21)
 
-        loadPage(title: "Test page 2", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ac pulvinar tortor. Proin convallis at urna egestas vehicula. Sed ac fermentum ligula, vitae gravida urna. Praesent molestie tincidunt nisl, vel sollicitudin nibh condimentum id. Nulla nec lacinia sapien. Nulla tincidunt diam vitae tincidunt mattis. Nam elementum nibh sed turpis scelerisque accumsan. Suspendisse vel accumsan sem. Mauris nisi ex, fringilla sit amet vestibulum sit amet, molestie id massa. Maecenas consectetur tellus quis auctor interdum. Proin hendrerit erat sit amet ultrices pretium. ")
+        loadPage(title: "Test page 2", content: "super cool content")
         sut.tabDidNavigate(tab, toURL: url2, originalRequestedURL: nil, shouldWaitForBetterContent: false, isLinkActivation: false, currentTab: nil)
         let node1 = try XCTUnwrap(node0.children[0])
         XCTAssertEqual(node1.url, "http://abc.com/page2")
@@ -102,7 +102,7 @@ class WebIndexingControllerTests: XCTestCase {
 
         wait(for: [indexExpectation2], timeout: 2)
         XCTAssertEqual(node1.title, "Test page 2")
-        XCTAssertEqual(node1.score.textAmount, 577)
+        XCTAssertEqual(node1.score.textAmount, 27)
     }
 
     func testTabDidNavigateShouldWaitInterupted() throws {
@@ -115,7 +115,7 @@ class WebIndexingControllerTests: XCTestCase {
         sut.delegate = delegate
 
         sut.betterContentReadDelay = 10_000 //here 1st indexing won't wait for delay and will be interrupted by second one
-        loadPage(title: "Test page", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ac pulvinar tortor. Proin convallis at urna egestas vehicula. Sed ac fermentum ligula, vitae gravida urna. Praesent molestie tincidunt nisl, vel sollicitudin nibh condimentum id. Nulla nec lacinia sapien. Nulla tincidunt diam vitae tincidunt mattis. Nam elementum nibh sed turpis scelerisque accumsan. Suspendisse vel accumsan sem. Mauris nisi ex, fringilla sit amet vestibulum sit amet, molestie id massa. Maecenas consectetur tellus quis auctor interdum. Proin hendrerit erat sit amet ultrices pretium.")
+        loadPage(title: "Test page", content: "cool content")
         sut.tabDidNavigate(tab, toURL: url, originalRequestedURL: nil, shouldWaitForBetterContent: true, isLinkActivation: false, currentTab: nil)
 
         let root =  try XCTUnwrap(tab.browsingTree.root)
@@ -123,7 +123,7 @@ class WebIndexingControllerTests: XCTestCase {
         XCTAssertEqual(node0.url, "http://abc.com/page")
         XCTAssertEqual(node0.score.textAmount, 0)
 
-        loadPage(title: "Test page 2", content: "super cool content Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi ac pulvinar tortor. Proin convallis at urna egestas vehicula. Sed ac fermentum ligula, vitae gravida urna. Praesent molestie tincidunt nisl, vel sollicitudin nibh condimentum id. Nulla nec lacinia sapien. Nulla tincidunt diam vitae tincidunt mattis. Nam elementum nibh sed turpis scelerisque accumsan. Suspendisse vel accumsan sem. Mauris nisi ex, fringilla sit amet vestibulum sit amet, molestie id massa. Maecenas consectetur tellus quis auctor interdum. Proin hendrerit erat sit amet ultrices pretium. ")
+        loadPage(title: "Test page 2", content: "super cool content")
         sut.tabDidNavigate(tab, toURL: url2, originalRequestedURL: nil, shouldWaitForBetterContent: false, isLinkActivation: false, currentTab: nil)
         let node1 = try XCTUnwrap(node0.children[0])
         XCTAssertEqual(node1.url, "http://abc.com/page2")
@@ -132,8 +132,8 @@ class WebIndexingControllerTests: XCTestCase {
 
         XCTAssertEqual(node0.title, "Test page")
         XCTAssertEqual(node1.title, "Test page 2")
-        XCTAssertEqual(node0.score.textAmount, 576)
-        XCTAssertEqual(node1.score.textAmount, 596)
+        XCTAssertEqual(node0.score.textAmount, 21)
+        XCTAssertEqual(node1.score.textAmount, 27)
     }
 }
 
