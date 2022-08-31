@@ -35,8 +35,14 @@ if [ "$LAST_DEVELOP_COMMIT" != "$RELEASE_COMMIT" ]; then
     curl -sS -X POST -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/merge_requests/$ORIGINAL_MR_IID/notes?body=MR%20cherry%20picked%20%21$MR_IID"
 
     # Auto Merge MR when it is possible to set up the flag
+    NEXT_WAIT_TIME=0
     until $(curl -sS --fail --output /dev/null --silent -X PUT -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/merge_requests/${MR_IID}/merge?merge_when_pipeline_succeeds=true"); do
         printf '.'
         sleep 2
+        let NEXT_WAIT_TIME=NEXT_WAIT_TIME+1
+        # timeout 80 sec - should be enough
+        if [[ $NEXT_WAIT_TIME -eq 40 ]]; then
+            exit 1
+        fi
     done
 fi
