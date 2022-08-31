@@ -36,9 +36,8 @@ extension TabGroupingManager: BeamDocumentSource {
             }
             group.status = .sharing
             let (note, groupCopy) = try fetchOrCreateTabGroupNote(for: group)
-            let openedTabs = allOpenTabs(inGroup: group)
             Task { @MainActor in
-                await storeManager?.groupDidUpdate(groupCopy, origin: .sharing, openTabs: openedTabs)
+                await saveGroupToDBIfNeeded(groupCopy)
                 BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true) { [weak self] result in
                     group.status = .default
                     guard case .success = result, let url = BeamNoteSharingUtils.getPublicLink(for: note) else {
@@ -59,6 +58,13 @@ extension TabGroupingManager: BeamDocumentSource {
             completion?(.failure(shareError))
             return false
         }
+    }
+
+    @MainActor
+    private func saveGroupToDBIfNeeded(_ group: TabGroup) async {
+        guard storeManager?.fetch(byIds: [group.id]).first == nil else { return }
+        let openedTabs = allOpenTabs(inGroup: group)
+        await storeManager?.groupDidUpdate(group, origin: .sharing, updatePagesWithOpenedTabs: openedTabs)
     }
 
     private func handleShareGroupService(forURL url: URL, with shareService: ShareService) {
