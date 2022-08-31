@@ -33,6 +33,7 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
         case clustering
         case userGroupMetadataChange
         case userGroupReordering
+        case sharing
     }
 
     override func clear() throws {
