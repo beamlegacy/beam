@@ -382,6 +382,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             data.onboardingManager.presentOnboardingWindow()
             return nil
         }
+
+        // Center window on first run.
+        let centerWindow = (frame == nil) &&
+                           windows.isEmpty &&
+                           (UserDefaults.standard.value(forKey: "NSWindow Frame BeamWindow") == nil)
+
         // Create the window and set the content view.
         let window = BeamWindow(
             contentRect: frame ?? CGRect(origin: .zero, size: Self.defaultWindowSize),
@@ -389,14 +395,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             title: title,
             isIncognito: isIncognito,
             minimumSize: frame?.size ?? Self.defaultWindowMinimumSize)
-        if frame == nil && windows.count == 0 {
+        if centerWindow {
             window.center()
-        } else {
-            if var origin = self.window?.frame.origin {
-                origin.x += 20
-                origin.y -= 20
-                window.setFrameOrigin(origin)
-            }
+        } else if var origin = self.window?.frame.origin {
+            // This isn't exactly the right behavior, we should probably move to `NSWindowController.shouldCascadeWindows`.
+            origin.x += 20
+            origin.y -= 20
+            window.setFrameOrigin(origin)
         }
         if becomeMain {
             window.makeKeyAndOrderFront(nil)
