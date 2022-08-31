@@ -176,6 +176,7 @@ class TabGroupInOmniboxTests: BaseTest {
     }
     
     func testShareTabGroup() throws {
+        try XCTSkipIf(true, "Skip while we have a stable public api for tab groups")
         testrailId("C1163")
         step("Given I capture an unnamed tab group") {
             setupStaging(withRandomAccount: true)
