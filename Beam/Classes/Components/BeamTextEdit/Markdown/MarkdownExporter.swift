@@ -63,7 +63,7 @@ private extension BeamNoteMarkdownExport {
     ///   - shouldPrettify: whether it should gives some space around headings, `true` by default.
     mutating func append(_ markdown: String) {
         if !contents.isEmpty {
-            appendNewlines(count: 2)
+            appendNewlines(count: 1)
         }
         contents.append(markdown)
     }
@@ -127,11 +127,12 @@ private extension MarkdownExporter {
     static func content(for child: BeamElement, filenamePrefix: String, level: Int = .zero) -> MarkdownContent? {
         switch child.kind {
         case .bullet where child.children.isEmpty:
-            guard !child.text.isEmpty else { return nil }
-            return (render(child.text.markdown, deepLevel: level), [])
+            guard !child.text.isEmpty else { return (.markdownHtmlLinebreak, []) }
+            let content = level == .zero ? (child.text.markdown + .markdownContentLinebreak) : child.text.markdown
+            return (render(content, deepLevel: level), [])
 
         case .bullet:
-            guard !child.text.isEmpty else { return nil }
+            guard !child.text.isEmpty else { return (.markdownHtmlLinebreak, []) }
             let subContent = child.children.reduce(into: (String.empty, [])) { partialResult, element in
                 Self.content(for: element, filenamePrefix: filenamePrefix, level: level+1).map {
                     partialResult = (partialResult.0 + $0.0, partialResult.1 + $0.1)
@@ -139,24 +140,26 @@ private extension MarkdownExporter {
             }
             let headerContent = render(child.text.markdown, deepLevel: level)
             let finalHeaderContent = level == .zero ? (headerContent + .newline) : headerContent
-            return (finalHeaderContent + subContent.0, subContent.1)
+            let listContent = level == .zero ? (subContent.0 + .newline) : subContent.0
+            return (finalHeaderContent + listContent, subContent.1)
 
         case .heading(let headingLevel) where child.children.isEmpty:
             let heading = child.text.text
-            guard !heading.isEmpty else { return nil }
-            return (render(headingify(heading, headingLevel: headingLevel), deepLevel: level), [])
+            guard !heading.isEmpty else { return (.markdownHtmlLinebreak, []) }
+            return (render(headingify(heading, headingLevel: headingLevel).surround(with: .newline), deepLevel: level), [])
 
         case .heading(let headingLevel):
             let heading = child.text.text
-            guard !heading.isEmpty else { return nil }
+            guard !heading.isEmpty else { return (.markdownHtmlLinebreak, []) }
             let subContent = child.children.reduce(into: (String.empty, [])) { partialResult, element in
                 Self.content(for: element, filenamePrefix: filenamePrefix, level: level+1).map {
                     partialResult = (partialResult.0 + $0.0, partialResult.1 + $0.1)
                 }
             }
             let headerContent = render(headingify(heading, headingLevel: headingLevel), deepLevel: level)
-            let finalHeaderContent = level == .zero ? (headerContent + .newline) : headerContent
-            return (finalHeaderContent + subContent.0, subContent.1)
+            let finalHeaderContent = level == .zero ? (headerContent.surround(with: .newline)) : headerContent
+            let listContent = level == .zero ? (subContent.0 + .newline) : subContent.0
+            return (finalHeaderContent + listContent, subContent.1)
 
         case .check(let checked):
             return (render(checkify(child.text.markdown, checked: checked), deepLevel: level), [])
@@ -175,7 +178,8 @@ private extension MarkdownExporter {
                 return nil
             }
             let sanitizedFilename = file.sanitizedFilename(withSanitizedPrefix: filenamePrefix.sanitized)
-            return (render("![\(file.name)](\(sanitizedFilename))", deepLevel: level), [file])
+            let percentEncodedFilename = sanitizedFilename.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? sanitizedFilename
+            return (render("![\(file.name)](\(percentEncodedFilename))", deepLevel: level), [file])
 
         default:
             return nil
@@ -287,6 +291,14 @@ private extension String {
 
     static var markdownDivider: String {
         "---"
+    }
+
+    static var markdownContentLinebreak: String {
+        "  "
+    }
+
+    static var markdownHtmlLinebreak: String {
+        "<br>"
     }
 
     static var empty: String {

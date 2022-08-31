@@ -29,3 +29,8 @@ enum BeamUniformTypeIdentifiers {
     }
 
 }
+
+extension BeamUniformTypeIdentifiers {
+    /// Markdown file extension (there are no provided Markdown UTType yet)
+    static let markdownExtension: String = "md"
+}
