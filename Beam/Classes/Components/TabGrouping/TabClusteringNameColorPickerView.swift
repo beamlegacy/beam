@@ -9,7 +9,9 @@ import SwiftUI
 
 struct TabClusteringNameColorPickerView: View {
     @State var groupName: String = ""
-    @State var selectedColor: TabGroupingColor.DesignColor = .red {
+    var initialColor: TabGroupingColor
+
+    @State private var selectedDesignColor: TabGroupingColor.DesignColor? {
         didSet {
             onChange?((groupName, selectedTabGroupingColor))
         }
@@ -22,7 +24,11 @@ struct TabClusteringNameColorPickerView: View {
 
     private let colors = TabGroupingColor.DesignColor.allCases
     private var selectedTabGroupingColor: TabGroupingColor? {
-        TabGroupingColor(designColor: selectedColor)
+        TabGroupingColor(designColor: selectedDesignColor)
+    }
+
+    private var textFieldTintColor: NSColor {
+        selectedDesignColor?.color.nsColor ?? initialColor.mainColor?.nsColor ?? TabGroupingColor.DesignColor.red.color.nsColor
     }
 
     private struct ColorPickerItem: View {
@@ -30,16 +36,17 @@ struct TabClusteringNameColorPickerView: View {
         var selected = false
 
         private let size: CGFloat = 16
+        private let padding: CGFloat = 1
         private let strokeWidth: CGFloat = 1.5
         var body: some View {
             ZStack {
                 Circle()
-                    .stroke(color, lineWidth: strokeWidth)
-                    .frame(width: size - strokeWidth/2, height: size - strokeWidth/2)
+                    .strokeBorder(color, lineWidth: strokeWidth)
                     .opacity(selected ? 1 : 0)
+                    .padding(padding)
                 Circle()
                     .fill(color)
-                    .padding(selected ? 3 : 0)
+                    .padding(selected ? 4 : padding)
             }
             .frame(width: size, height: size)
         }
@@ -48,7 +55,7 @@ struct TabClusteringNameColorPickerView: View {
     private var colorPicker: some View {
         HStack(spacing: 0) {
             ForEach(colors) { color in
-                let selected = color == selectedColor
+                let selected = color == selectedDesignColor
                 if isPickingColor || selected {
                     ZStack {
                         ColorPickerItem(color: color.color.swiftUI, selected: selected && isPickingColor)
@@ -56,26 +63,41 @@ struct TabClusteringNameColorPickerView: View {
                     .frame(maxWidth: .infinity)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        selectedColor = color
+                        selectedDesignColor = color
                         isPickingColor.toggle()
                     }
                 }
             }
+            if !isPickingColor && selectedDesignColor == nil, let initialColor = initialColor.mainColor?.swiftUI {
+                ZStack {
+                    ColorPickerItem(color: initialColor, selected: false)
+                }
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    isPickingColor.toggle()
+                }
+            }
         }
         .animation(BeamAnimation.easingBounce(duration: 0.2), value: isPickingColor)
+        .onAppear {
+            if let initialDesignColor = initialColor.designColor {
+                selectedDesignColor = initialDesignColor
+            }
+        }
     }
 
     var body: some View {
         HStack {
             if !isPickingColor {
-                let nscolor = selectedColor.color.nsColor
+                let tintColor = textFieldTintColor
                 BeamTextField(text: $groupName, isEditing: $isEditing,
                               placeholder: "Name this group",
                               font: BeamFont.regular(size: 13).nsFont,
                               textColor: BeamColor.Generic.text.nsColor,
                               placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                              selectedRangeColor: nscolor.withAlphaComponent(0.14),
-                              caretColor: nscolor,
+                              selectedRangeColor: tintColor.withAlphaComponent(0.14),
+                              caretColor: tintColor,
                               caretWidth: 2.0,
                               onCommit: { _ in
                     onChange?((groupName, selectedTabGroupingColor))
@@ -101,7 +123,7 @@ struct TabClusteringNameColorPickerView: View {
 
 struct TabClusteringNameColorPickerView_Previews: PreviewProvider {
     static var previews: some View {
-        TabClusteringNameColorPickerView()
+        TabClusteringNameColorPickerView(initialColor: TabGroupingColor(designColor: .cyan))
             .frame(width: 230, height: 24)
             .background(BeamColor.Generic.background.swiftUI)
             .padding()

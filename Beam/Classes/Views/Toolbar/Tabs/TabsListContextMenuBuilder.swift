@@ -335,7 +335,7 @@ extension TabsListContextMenuBuilder {
     private func buildNameAndColorPickerItem(in menu: NSMenu, forGroup group: TabGroup) -> ContentViewMenuItem<TabClusteringNameColorPickerView> {
         let nameAndColorView = TabClusteringNameColorPickerView(
             groupName: group.title ?? "",
-            selectedColor: group.color?.designColor ?? .red,
+            initialColor: group.color ?? TabGroupingColor(designColor: .red),
             onChange: { [weak self] newValues in
                 if group.title != newValues.name {
                     self?.state?.browserTabsManager.renameGroup(group, title: newValues.name)

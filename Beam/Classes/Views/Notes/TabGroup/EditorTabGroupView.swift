@@ -176,7 +176,7 @@ struct EditorTabGroupView: View {
 
         let nameAndColorView = TabClusteringNameColorPickerView(
             groupName: tabGroup.title ?? "",
-            selectedColor: tabGroup.color?.designColor ?? .red,
+            initialColor: tabGroup.color ?? TabGroupingColor(designColor: .red),
             onChange: { [weak state] newValues in
                 if tabGroup.title != newValues.name {
                     tabGroup.title = newValues.name
