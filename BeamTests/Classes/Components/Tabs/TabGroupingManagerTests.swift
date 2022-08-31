@@ -236,8 +236,11 @@ class TabGroupingManagerTests: XCTestCase {
         let groupBO = TabGroupingStoreManager.convertGroupToBeamObject(group, pages: pages)
         store?.save(groups: [groupBO])
 
-        let note = try sut.fetchOrCreateTabGroupNote(for: group)
+        let (note, newGroup) = try sut.fetchOrCreateTabGroupNote(for: group)
         XCTAssertNotNil(note)
+        XCTAssertNotEqual(group, newGroup)
+        XCTAssertEqual(newGroup.title, group.title)
+        XCTAssertEqual(newGroup.pageIds, group.pageIds)
 
         // A locked copy has been created
         let groupCopies = store?.fetch(copiesOfGroup: group.id)
@@ -256,15 +259,19 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertEqual(note.type, BeamNoteType.tabGroup(groupCopy.id))
 
         // I can now fetch that tab group note with both groups
-        XCTAssertEqual(sut.fetchTabGroupNote(for: group), note)
-        XCTAssertEqual(sut.fetchTabGroupNote(for: groupCopy), note)
+        XCTAssertEqual(sut.fetchTabGroupNote(for: group)?.0, note)
+        XCTAssertEqual(sut.fetchTabGroupNote(for: group)?.1, groupCopy)
+        XCTAssertEqual(sut.fetchTabGroupNote(for: groupCopy)?.0, note)
+        XCTAssertEqual(sut.fetchTabGroupNote(for: groupCopy)?.1, groupCopy)
 
 
         // calling again doesn't create new copy or group
-        let note2ndCall = try sut.fetchOrCreateTabGroupNote(for: group)
+        let (note2ndCall, group2ndCall) = try sut.fetchOrCreateTabGroupNote(for: group)
         XCTAssertEqual(note2ndCall, note)
-        let noteFromGroupCopy = try sut.fetchOrCreateTabGroupNote(for: groupCopy)
+        XCTAssertEqual(group2ndCall, newGroup)
+        let (noteFromGroupCopy, groupFromGroupCopy) = try sut.fetchOrCreateTabGroupNote(for: groupCopy)
         XCTAssertEqual(noteFromGroupCopy, note)
+        XCTAssertEqual(groupFromGroupCopy, groupCopy)
         XCTAssertEqual(store?.fetch(copiesOfGroup: group.id).count, 1)
         XCTAssertEqual(store?.fetch(copiesOfGroup: groupCopy.id).count, 0)
 

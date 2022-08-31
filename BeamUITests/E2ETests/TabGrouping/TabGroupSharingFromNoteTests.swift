@@ -46,6 +46,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
     }
     
     func testShareTabGroupMenu() throws {
+        try XCTSkipIf(true, "Skip while we have a stable public api for tab groups")
         testrailId("C1165, C1166, C1167, C1168, C1169, C1170")
         step("Given I have a captured group in a note being logged in") {
             setupStaging(withRandomAccount: true)
@@ -98,6 +99,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
     }
     
     func testShareTabGroupCopyUrl() throws {
+        try XCTSkipIf(true, "Skip while we have a stable public api for tab groups")
         testrailId("C1171, C1170")
         step("Given I have a captured group in a note being logged in") {
             setupStaging(withRandomAccount: true)
