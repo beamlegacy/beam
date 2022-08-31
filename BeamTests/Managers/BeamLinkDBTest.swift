@@ -261,6 +261,81 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertEqual(link.title, "Another page")
 
     }
+    func testYoutubeAliasesCleanup() throws {
+        BeamDate.freeze("2001-01-01T12:21:03Z")
+        let t0 = BeamDate.now
+        let grdbStore = GRDBStore.empty()
+        let urlHistoryManager = try UrlHistoryManager(objectManager: BeamObjectManager(),store: grdbStore)
+        try grdbStore.migrate(upTo: "createUrlHistoryManager")
+        let youtubeLink = urlHistoryManager.visit(url: "https://www.youtube.com/abc", content: nil, destination: nil)
+        let otherLink = urlHistoryManager.visit(url: "https://www.somewhere.else/abc", content: nil, destination: youtubeLink.url)
+        let aliasToErase = urlHistoryManager.visit(url: "https://www.youtube.com/def", content: nil, destination: youtubeLink.url)
+        let aliasToKeep = urlHistoryManager.visit(url: "https://www.youtube.com/ght", content: nil, destination: otherLink.url)
+
+        BeamDate.travel(24 * 60 * 60)
+        let t1 = BeamDate.now
+        try grdbStore.migrate(upTo: "linkAliasesCleanup")
+
+        //not an alias: untouched
+        let postCleanupYoutubeLink = try XCTUnwrap(urlHistoryManager.linkFor(id: youtubeLink.id))
+        XCTAssertNil(postCleanupYoutubeLink.destination)
+        XCTAssertEqual(postCleanupYoutubeLink.updatedAt, t0)
+
+        //not a youtube link: untouched
+        let postCleanupOtherLink = try XCTUnwrap(urlHistoryManager.linkFor(id: otherLink.id))
+        XCTAssertEqual(postCleanupOtherLink.destination, youtubeLink.id)
+        XCTAssertEqual(postCleanupOtherLink.updatedAt, t0)
+
+        //youtube to youtube alias: cleaned
+        let postCleanupAliasToErase = try XCTUnwrap(urlHistoryManager.linkFor(id: aliasToErase.id))
+        XCTAssertNil(postCleanupAliasToErase.destination)
+        XCTAssertEqual(postCleanupAliasToErase.updatedAt, t1)
+
+        //youtube to somewhere else: untouched
+        let postCleanupAliasToKeep = try XCTUnwrap(urlHistoryManager.linkFor(id: aliasToKeep.id))
+        XCTAssertEqual(postCleanupAliasToKeep.destination, otherLink.id)
+        XCTAssertEqual(postCleanupAliasToKeep.updatedAt, t0)
+
+        BeamDate.reset()
+    }
+
+    func testGmailAliasesCleanup() throws {
+        BeamDate.freeze("2001-01-01T12:21:03Z")
+        let t0 = BeamDate.now
+        let grdbStore = GRDBStore.empty()
+        let urlHistoryManager = try UrlHistoryManager(objectManager: BeamObjectManager(),store: grdbStore)
+        try grdbStore.migrate(upTo: "createUrlHistoryManager")
+        let gmailLink = urlHistoryManager.visit(url: "https://mail.google.com/abc", content: nil, destination: nil)
+        let aliasToErase = urlHistoryManager.visit(url: "https://www.some.thing/truc", content: nil, destination: gmailLink.url)
+        let aliasToKeep = urlHistoryManager.visit(url: "http://gmail.com/", content: nil, destination: gmailLink.url)
+        let otherAliasToKeep = urlHistoryManager.visit(url: "https://www.some.thing/truc2", content: nil, destination: aliasToErase.url)
+
+        BeamDate.travel(24 * 60 * 60)
+        let t1 = BeamDate.now
+        try grdbStore.migrate(upTo: "linkAliasesCleanup")
+
+        //not an alias: untouched
+        let postCleanupGmailLink = try XCTUnwrap(urlHistoryManager.linkFor(id: gmailLink.id))
+        XCTAssertNil(postCleanupGmailLink.destination)
+        XCTAssertEqual(postCleanupGmailLink.updatedAt, t0)
+
+        //somewhere else to gmail alias: cleaned
+        let postCleanupAliasToErase = try XCTUnwrap(urlHistoryManager.linkFor(id: aliasToErase.id))
+        XCTAssertNil(postCleanupAliasToErase.destination)
+        XCTAssertEqual(postCleanupAliasToErase.updatedAt, t1)
+
+        //gmail to gmail else: untouched
+        let postCleanupAliasToKeep = try XCTUnwrap(urlHistoryManager.linkFor(id: aliasToKeep.id))
+        XCTAssertEqual(postCleanupAliasToKeep.destination, gmailLink.id)
+        XCTAssertEqual(postCleanupAliasToKeep.updatedAt, t0)
+
+        //no gmail to not gmail: untouched
+        let postCleanupotherAliasToKeep = try XCTUnwrap(urlHistoryManager.linkFor(id: otherAliasToKeep.id))
+        XCTAssertEqual(postCleanupotherAliasToKeep.destination, aliasToErase.id)
+        XCTAssertEqual(postCleanupotherAliasToKeep.updatedAt, t0)
+
+        BeamDate.reset()
+    }
 
     private func beforeNetworkTests() {
         // Need to freeze date to compare objects, as `createdAt` would be different from the network stubs we get
