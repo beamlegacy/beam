@@ -235,7 +235,7 @@ struct MiniEditor: View {
                 }
                 .padding(.trailing, isInWindow ? 8 : 20)
                 .frame(height: toolbarHeight)
-                .overlay(titleView)
+                .overlay(titleView(width: proxy.size.width))
                 .background(VisualEffectView(material: .headerView)
                                 .overlay(blurOverlay)
                                 .opacity(contentIsScrolled || !windowInfo.windowIsMain ? 1 : 0))
@@ -244,12 +244,14 @@ struct MiniEditor: View {
         .background(BeamColor.Generic.background.swiftUI)
     }
 
-    @ViewBuilder private var titleView: some View {
+    @ViewBuilder private func titleView(width: CGFloat) -> some View {
         if showTitle {
             Text(note.title)
+                .lineLimit(1)
                 .transition(.opacity.animation(.easeInOut))
                 .font(isInWindow ? Font.system(size: 13, weight: .bold, design: .default) : BeamFont.regular(size: 11).swiftUI)
                 .foregroundColor(BeamColor.Niobium.swiftUI)
+                .frame(maxWidth: width - 150)
         }
     }
 
