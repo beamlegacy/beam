@@ -76,6 +76,12 @@ class SignOutTests: BaseTest {
             let tablesContainingResult = currentTestTable.containsRows(defaultNotes.rows)
             XCTAssertTrue(tablesContainingResult.0, tablesContainingResult.1)*/
         }
+        
+        testrailId("C737, C738")
+        step("THEN I see correct Table title and Profile link as a signed out user") {
+            XCTAssertTrue(allNotes.staticText("All Notes").exists)
+            XCTAssertEqual(allNotes.getSignUpToPublishHyperlinkElement().getStringValue(), "Sign up to publish your notes")            
+        }
 
     }
     
