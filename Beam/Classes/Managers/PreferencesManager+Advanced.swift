@@ -24,7 +24,6 @@ extension PreferencesManager {
     private static let includeHistoryContentsInOmniBoxKey = "includeHistoryContentsInOmniBox"
     private static let enableOmnibeamsKey = "enableOmnibeams"
     private static let enableDailySummaryKey = "enableDailySummary"
-    private static let enableFallbackReadabilityParserKey = "enableFallbackReadabilityParser"
 }
 
 // MARK: - Default Values
@@ -46,7 +45,6 @@ extension PreferencesManager {
     static let includeHistoryContentsInOmniBoxDefault = false
     static let enableOmnibeamsDefault = false
     private static let enableDailySummaryDefault: Bool = Configuration.branchType == .develop
-    private static let enableFallbackReadabilityParserDefault: Bool = false
 }
 
 extension PreferencesManager {
@@ -55,9 +53,6 @@ extension PreferencesManager {
 
     @UserDefault(key: showClusteringSettingsMenuKey, defaultValue: showClusteringSettingsMenuDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showClusteringSettingsMenu: Bool
-
-    @UserDefault(key: enableFallbackReadabilityParserKey, defaultValue: enableFallbackReadabilityParserDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
-    static var enableFallbackReadabilityParser: Bool
 
     @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showDebugSection: Bool
