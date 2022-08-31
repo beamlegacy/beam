@@ -47,7 +47,7 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
     /// This makes a safety net where the user would not loose pages when closing tabs.
     /// - Returns: whether or not we decided to save the group
     @discardableResult
-    func groupDidUpdate(_ group: TabGroup, origin: GroupUpdateOrigin, openTabs: [BrowserTab]) async  -> Bool {
+    func groupDidUpdate(_ group: TabGroup, origin: GroupUpdateOrigin, updatePagesWithOpenedTabs openedTabs: [BrowserTab]?) async -> Bool {
         guard group.shouldBePersisted && group.title?.isEmpty == false else { return false }
 
         let existingValue = fetch(byIds: [group.id]).first
@@ -59,22 +59,20 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
             }
         }
 
-        sortPageIdsInGroup(group, withOpenTabs: openTabs)
-
-        let tabs: [(BrowserTab, UUID) ] = group.pageIds.compactMap { id -> (BrowserTab, UUID)? in
-            guard let tab = openTabs.first(where: { $0.browsingTree.current.link == id }), tab.url != nil else { return nil }
-            return (tab, id)
-        }
-
-        let screenshots = group.isLocked ? await screenshots(for: tabs) : [:]
-
-        let pages = tabs.compactMap { (tab, id) -> TabGroupBeamObject.PageInfo? in
-            guard let url = tab.url else { return nil }
-            var snapshotData: Data?
-            if let snapshot = screenshots[tab], snapshot.isValid {
-                snapshotData = snapshot.jpegRepresentation
+        let pages: [TabGroupBeamObject.PageInfo]
+        if let openedTabs = openedTabs, !openedTabs.isEmpty {
+            pages = await buildPagesInfos(for: group, with: openedTabs)
+        } else {
+            let existingPages = existingValue?.pages
+            pages = group.pageIds.compactMap { id in
+                if let existingPage = existingPages?.first(where: { $0.id == id }) {
+                    return existingPage
+                }
+                if let link = LinkStore.linkFor(id), let url = URL(string: link.url) {
+                    return TabGroupBeamObject.PageInfo(id: id, url: url, title: link.title ?? link.url)
+                }
+                return nil
             }
-            return TabGroupBeamObject.PageInfo(id: id, url: url, title: tab.title, snapshot: snapshotData)
         }
 
         let object = Self.convertGroupToBeamObject(group, pages: pages)
@@ -88,6 +86,26 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
             }
         }
         return true
+    }
+
+    private func buildPagesInfos(for group: TabGroup, with openedTabs: [BrowserTab]) async -> [TabGroupBeamObject.PageInfo] {
+        sortPageIdsInGroup(group, withOpenTabs: openedTabs)
+
+        let tabs: [(BrowserTab, UUID) ] = group.pageIds.compactMap { id -> (BrowserTab, UUID)? in
+            guard let tab = openedTabs.first(where: { $0.browsingTree.current.link == id }), tab.url != nil else { return nil }
+            return (tab, id)
+        }
+
+        let screenshots = group.isLocked ? await screenshots(for: tabs) : [:]
+
+        return tabs.compactMap { (tab, id) -> TabGroupBeamObject.PageInfo? in
+            guard let url = tab.url else { return nil }
+            var snapshotData: Data?
+            if let snapshot = screenshots[tab], snapshot.isValid {
+                snapshotData = snapshot.jpegRepresentation
+            }
+            return TabGroupBeamObject.PageInfo(id: id, url: url, title: tab.title, snapshot: snapshotData)
+        }
     }
 
     func deleteGroup(_ group: TabGroup, deleteParentIfRelevant: Bool = false) {

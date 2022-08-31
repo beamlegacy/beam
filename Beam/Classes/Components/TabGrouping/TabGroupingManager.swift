@@ -227,20 +227,20 @@ extension TabGroupingManager {
 
     private func groupDidChangeMetadata(_ group: TabGroup) {
         Task { @MainActor in
-            await storeManager?.groupDidUpdate(group, origin: .userGroupMetadataChange, openTabs: allOpenTabs())
+            await storeManager?.groupDidUpdate(group, origin: .userGroupMetadataChange, updatePagesWithOpenedTabs: allOpenTabs())
         }
     }
 
     private func groupDidChangeContent(_ group: TabGroup, fromUser: Bool) {
         Task { @MainActor in
-            await storeManager?.groupDidUpdate(group, origin: fromUser ? .userGroupReordering : .clustering, openTabs: allOpenTabs())
+            await storeManager?.groupDidUpdate(group, origin: fromUser ? .userGroupReordering : .clustering, updatePagesWithOpenedTabs: allOpenTabs())
         }
     }
 
     private func groupsWereUpdatedByClustering(_ groups: Set<TabGroup>) {
         groups.forEach { group in
             Task { @MainActor in
-                await storeManager?.groupDidUpdate(group, origin: .clustering, openTabs: allOpenTabs())
+                await storeManager?.groupDidUpdate(group, origin: .clustering, updatePagesWithOpenedTabs: allOpenTabs())
             }
         }
     }
