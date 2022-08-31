@@ -50,10 +50,30 @@ class AllNotesViewTests: BaseTest {
         noteView.waitForNoteViewToLoad()
     }
     
-    func testCardRenamingApplyingInAllNotes() {
+    func testAllNotesTableViewHeaderForSignedAccount() {
+        testrailId("C737, C738")
+        let expectedUsername = self.getCredentials()?.username
+        let profileHyperlink = allNotesView.getProfileHyperlinkElement(username: expectedUsername!)
         
+        step ("THEN I see correct Table title and Profile link as a signed in user") {
+            shortcutHelper.shortcutActionInvoke(action: .close)
+            allNotesView.waitForAllNotesViewToLoad()
+            XCTAssertTrue(allNotesView.staticText(expectedUsername!).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(profileHyperlink.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        
+        step("THEN User's Profile is opened on profile hyperlink click") {
+            profileHyperlink.hoverAndTapInTheMiddle()
+            webView.waitForWebViewToLoad()
+            webView.activateSearchFieldFromTab(index: 1)
+            let tabURL = webView.getTabUrlAtIndex(index: 1)
+            XCTAssertEqual(tabURL, profileHyperlink.getStringValue())
+        }
+    }
+    
+    func testNoteRenamingAppliedInAllNotes() {
+        testrailId("C1180")
         let noteName = "Capture"
-        
         step ("WHEN I rename the note") {
             let noteView = allNotesView.openNoteByName(noteTitle: noteName)
             noteView.waitForNoteViewToLoad()

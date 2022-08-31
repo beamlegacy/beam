@@ -225,6 +225,14 @@ class AllNotesTestView: BaseView {
         return integerValue
     }
     
+    func getProfileHyperlinkElement(username: String) -> XCUIElement {
+        return staticText("\(BaseTest().stagingEnvironmentServerAddress)/\(username)")
+    }
+    
+    func getSignUpToPublishHyperlinkElement() -> XCUIElement {
+        return staticText(AllNotesViewLocators.StaticTexts.publishInstruction.accessibilityIdentifier)
+    }
+    
     func waitForPublishingProcessToStartAndFinishFor(_ noteName: String) -> Bool {
         let publishStatusElement = textField("Publishing '\(noteName)'...")
         _ = publishStatusElement.waitForExistence(timeout: implicitWaitTimeout)
