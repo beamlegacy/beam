@@ -194,7 +194,7 @@ extension AppDelegate {
         openPanel.canChooseDirectories = false
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
-        openPanel.allowedContentTypes = [BeamUniformTypeIdentifiers.plainTextType]
+        openPanel.allowedFileTypes = [BeamUniformTypeIdentifiers.markdownExtension]
         // TODO: i18n
         openPanel.title = loc("Choose your Markdown file")
         openPanel.begin { [weak openPanel] result in
@@ -206,7 +206,7 @@ extension AppDelegate {
 
             for url in selectedURLs {
                 do {
-                    try importer.import(contents: url)
+                    try importer.import(documentURL: url)
                 } catch {
                     Logger.shared.logError("Error importing to Markdown: \(error)", category: .general)
                     failedImports += 1

@@ -17,7 +17,7 @@ final class MarkdownExportTests: XCTestCase {
 
         let export = MarkdownExporter.export(of: note)
         XCTAssertFalse(export.contents.isEmpty)
-        XCTAssertEqual(export.contents, "Some content")
+        XCTAssertEqual(export.contents, "Some content  ")
 
         note.addChild(BeamElement(BeamText("Some text in bold", attributes: [.strong])))
         note.addChild(BeamElement(BeamText("Some text in italic", attributes: [.emphasis])))
@@ -54,19 +54,24 @@ final class MarkdownExportTests: XCTestCase {
         XCTAssertEqual(
             export2.contents,
             """
-            Some content\n
-            **Some text in bold**\n
-            *Some text in italic*\n
-            ~~Some strikethrough text~~\n
-            [Some link](https://beamapp.co)\n
-            # Some big heading\n
-            ## Some smaller heading\n
-            Some list\n
+            Some content  
+            **Some text in bold**  
+            *Some text in italic*  
+            ~~Some strikethrough text~~  
+            [Some link](https://beamapp.co)  
+
+            # Some big heading
+
+
+            ## Some smaller heading
+
+            Some list
+
               * Some element
               * Some other element
                 * Some sub element
                 * Some other sub element
-              * Some final element
+              * Some final element\n
             """
         )
     }
@@ -87,7 +92,9 @@ final class MarkdownExportTests: XCTestCase {
               * Select text and press **⌥ OPTION** to capture the text snippet
               * Press **⌘S or ⌥S** to capture a whole page
 
-            Below are a few examples:
+            <br>
+            Below are a few examples:  
+            <br>
 
             ## Text
 
@@ -95,19 +102,28 @@ final class MarkdownExportTests: XCTestCase {
 
               * Our tools define our relationship with the world. Web browsers have framed our cognitive behavior to such an extent we don’t question it anymore. Can thinking be reduced to a search box with no memory or context? What is left of the thousands hours you spent on the web
 
+            <br>
+
             ## Images
 
               * ![cpt-0.jpg](Capture_cpt-0.jpg)
+
+            <br>
 
             ## Videos
 
               * [https://www.youtube.com/watch?v=3fNf4eoj8jc](https://www.youtube.com/watch?v=3fNf4eoj8jc)
 
+            <br>
+
             ## Tweets
 
               * [https://twitter.com/elonmusk/status/1483631831748685835](https://twitter.com/elonmusk/status/1483631831748685835)
 
-            And much more: Figma boards, Soundcloud, Spotify, Sketchfab...
+            <br>
+            And much more: Figma boards, Soundcloud, Spotify, Sketchfab...  
+            <br>
+            <br>
             """
         )
     }
