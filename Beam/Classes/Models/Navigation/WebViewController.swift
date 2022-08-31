@@ -230,6 +230,9 @@ protocol WebViewNavigationHandler: AnyObject {
     /// the webView reached a new url.
     /// It started to receive content but is not finished yet
     func webView(_ webView: WKWebView, didFinishNavigationToURL url: URL, source: WebViewControllerNavigationSource)
+
+    /// the webView requested to open a new webView or window
+    func webView(_ webView: WKWebView, didCreateANewWebViewFor navigationAction: WKNavigationAction)
 }
 
 extension WebViewController: WebViewNavigationHandler {
@@ -382,5 +385,12 @@ extension WebViewController: WebViewNavigationHandler {
             return .navigateToPageSameParent
         }
         return .navigateToPage
+    }
+
+    func webView(_ webView: WKWebView, didCreateANewWebViewFor navigationAction: WKNavigationAction) {
+        if requestedURL == navigationAction.request.url {
+            requestedURL = nil
+            lastNavigationFinished = nil
+        }
     }
 }

@@ -1,0 +1,20 @@
+<html>
+
+<head>
+<title>New Tab</title>
+<script>
+    function jsLink() {
+ window.open("http://lvh.me:{{ params.port }}", "_self");
+}
+</script>
+
+<body>
+<h1>New Tab</h1>
+
+<ul>
+<li><a id="sign_in" href="http://signin.form.lvh.me:{{ params.port }}" target="_blank">Sign in</a></li>
+<li onclick="jsLink();" id="back_home">Back to Root</li>
+</ul>
+</body>
+
+</html>
