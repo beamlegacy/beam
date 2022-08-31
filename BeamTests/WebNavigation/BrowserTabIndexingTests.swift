@@ -205,4 +205,37 @@ class BrowserTabIndexingTests: WebBrowsingBaseTests {
         let resultLinkForFinalUrl = linkStore.getLinks(matchingUrl: finalUrl.absoluteString).values.first
         XCTAssertNil(resultLinkForFinalUrl?.destination)
     }
+
+    private func activateLinkById(id: String) {
+        let clickExpectation = expectation(description: "click on \(id)")
+        tab.webView.evaluateJavaScript("document.getElementById('\(id)').click();") { (_, _) in
+            clickExpectation.fulfill()
+        }
+        wait(for: [clickExpectation], timeout: 1)
+    }
+
+    func testNoAliasingWhenNewTab() throws {
+        let indexExpectations = (0...2).map { i in expectation(description: "index \(i)") }
+        var indexExpectation = indexExpectations[0]
+        mockIndexingDelegate?.onIndexingFinished = { _ in
+            indexExpectation.fulfill()
+        }
+        let url0 = "http://lvh.me:\(Configuration.MockHttpServer.port)/redirection/new_tab"
+        tab.load(request: URLRequest(url: URL(string: url0)!))
+        wait(for: [indexExpectation], timeout: 1)
+
+        //opens in a new tab
+        indexExpectation = indexExpectations[1]
+        activateLinkById(id: "sign_in")
+        wait(for: [indexExpectation], timeout: 1)
+
+        //then click on a link of url0
+        indexExpectation = indexExpectations[2]
+        activateLinkById(id: "back_home")
+        wait(for: [indexExpectation], timeout: 1)
+
+        //no alias from sign_in to back_home should be created
+        let link = try XCTUnwrap(linkStore.getLinks(matchingUrl: "http://signin.form.lvh.me:\(Configuration.MockHttpServer.port)").values.first)
+        XCTAssertNil(link.destination)
+    }
 }
