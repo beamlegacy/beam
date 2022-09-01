@@ -20,10 +20,10 @@ class TabGroupDragTabTests: BaseTest {
         }
     }
     
-    func testTabGroupDragTabOutside() throws {
+    func testTabGroupDragTabOutside() {
         testrailId("C1052")
         step("When I drag tab outside of the group") {
-            webView.dragTabOutOfTheGroup(tabIndex: 3)
+            webView.dragTabToOmniboxIconArea(tabIndex: 3)
         }
         
         step("Then tabs are ungrouped") {
@@ -33,7 +33,7 @@ class TabGroupDragTabTests: BaseTest {
         }
     }
     
-    func testTabGroupDragTabInside() throws {
+    func testTabGroupDragTabInside() {
         testrailId("C977")
         step("When I open a new tab after group was formed") {
             uiMenu.loadUITestPagePassword() // loading a page that is not auto grouped
