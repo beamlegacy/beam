@@ -1139,6 +1139,7 @@
 		A552DF2925F0E22B00570C85 /* DestinationNotePickerBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */; };
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A55760822665501000DEE86C /* TableViewColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55760812665501000DEE86C /* TableViewColumn.swift */; };
+		A558578828C0E08300382BFF /* WKNavigationAction+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A558578728C0E08300382BFF /* WKNavigationAction+Beam.swift */; };
 		A55A019427DF49BF002403D5 /* BeamTableCellLottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */; };
 		A55C98BD2805F60200717D3E /* ShareHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98BC2805F60200717D3E /* ShareHelper.swift */; };
 		A55C98C52806FB5F00717D3E /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98C42806FB5F00717D3E /* ShareService.swift */; };
@@ -3100,6 +3101,7 @@
 		A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePickerBackground.swift; sourceTree = "<group>"; };
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A55760812665501000DEE86C /* TableViewColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewColumn.swift; sourceTree = "<group>"; };
+		A558578728C0E08300382BFF /* WKNavigationAction+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKNavigationAction+Beam.swift"; sourceTree = "<group>"; };
 		A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTableCellLottieView.swift; sourceTree = "<group>"; };
 		A55C98BC2805F60200717D3E /* ShareHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHelper.swift; sourceTree = "<group>"; };
 		A55C98C42806FB5F00717D3E /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
@@ -4385,6 +4387,7 @@
 				8AD2631626F3A8C50074D673 /* TimeInterval+Beam.swift */,
 				378751F027AA9B5000DDDC9E /* NSUserInterfaceItemIdentifier+Beam.swift */,
 				8A34EAE227C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift */,
+				A558578728C0E08300382BFF /* WKNavigationAction+Beam.swift */,
 				37520B0E27EAA43800A1C20B /* BeamElement+DisplaySizePreferencesStorage.swift */,
 				3779AC5E27FC5503006A6473 /* AnimationView+Beam.swift */,
 				66D77CA028351612004D03E9 /* NSMenu+Beam.swift */,
@@ -9314,6 +9317,7 @@
 				375D83BC278D636D0064C246 /* ScriptMessageBodyDecodable.swift in Sources */,
 				A55760822665501000DEE86C /* TableViewColumn.swift in Sources */,
 				9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */,
+				A558578828C0E08300382BFF /* WKNavigationAction+Beam.swift in Sources */,
 				877888D9269C743F00D703F0 /* CSVParser.swift in Sources */,
 				96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */,
 				8784956927C6D31F00195C62 /* WebFieldClassifiers.swift in Sources */,
