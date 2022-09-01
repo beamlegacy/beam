@@ -82,7 +82,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
         
         step("When I copy link of tab to share tab group without being logged in") {
             clearPasteboard() // clear content of pasteboard
-            tabGroupMenu.shareTabGroupAction("Copy Link")
+            tabGroupMenu.shareTabGroupAction(copyLinkShareAction)
         }
         
         step("Then I get the connect alert message") {
@@ -100,7 +100,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
         
         step("When I copy link of tab to share tab group") {
             clearPasteboard() // clear content of pasteboard
-            tabGroupMenu.shareTabGroupAction("Copy Link")
+            tabGroupMenu.shareTabGroupAction(copyLinkShareAction)
         }
         
         step("Then tab group link is copied to pasteboard") {
