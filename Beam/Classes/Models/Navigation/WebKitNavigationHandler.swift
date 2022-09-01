@@ -236,17 +236,6 @@ extension WebKitNavigationHandler {
 // MARK: - Helpers
 extension WebKitNavigationHandler {
 
-    /// Utility to determine if the Command Key was used during a navigation action
-    /// - Parameter action: The Navigation Action
-    /// - Returns: true if Command was used
-    private func isNavigationWithCommandKey(_ action: WKNavigationAction) -> Bool {
-        return action.modifierFlags.contains(.command) || NSEvent.modifierFlags.contains(.command)
-    }
-
-    private func isNavigationWithMiddleMouseDown(_ action: WKNavigationAction) -> Bool {
-        return action.buttonNumber == 4
-    }
-
     /// Handles opening the page in a new tab
     /// - Parameter navigationAction: The NavigationAction to decide if a new tab should be opened
     /// - Returns: True if a new tab is created, false if not
@@ -256,13 +245,13 @@ extension WebKitNavigationHandler {
         let optionalRequest: URLRequest? = navigationAction.request
         if let page = page, let request = optionalRequest, let targetURL = request.url,
            navigationAction.navigationType == .linkActivated,
-           isNavigationWithCommandKey(navigationAction) || page.shouldNavigateInANewTab(url: targetURL) || isNavigationWithMiddleMouseDown(navigationAction) {
-            let setCurent = (isNavigationWithCommandKey(navigationAction) || isNavigationWithMiddleMouseDown(navigationAction)) ? false : true
+           navigationAction.shouldBePerformedInBackground || page.shouldNavigateInANewTab(url: targetURL) {
+            let setCurrent = !navigationAction.shouldBePerformedInBackground
             if PreferencesManager.cmdClickOpenTab {
                 _ = page.createNewTab(
                     request,
                     nil,
-                    setCurrent: setCurent,
+                    setCurrent: setCurrent,
                     rect: page.frame
                 )
             } else {
