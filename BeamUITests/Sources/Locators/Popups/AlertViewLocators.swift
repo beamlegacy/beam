@@ -33,7 +33,8 @@ enum AlertViewLocators {
         case forgetTabGroupTitle = "Forget tab group"
         case forgetTabGroupBody = "Are you sure you want to forget the tab group “%tabGroupName%”? Forgotten tab groups cannot be recovered."
         case deleteTabGroupTitle = "Delete tab group"
-        case deleteTabGroupBody = "Are you sure you want to delete the tab group “%tabGroupName%” saved in “%noteTitle%”?\nDeleted tab groups cannot be recovered."
+        case deleteCapturedTabGroupBody = "Are you sure you want to delete the tab group “%tabGroupName%” saved in “%noteTitle%”?\nDeleted tab groups cannot be recovered."
+        case deleteNotCapturedTabGroupBody = "Are you sure you want to delete the shared tab group “%tabGroupName%”?\nDeleted tab groups cannot be recovered."
     }
     
     enum Checkboxes: String, CaseIterable, UIElement {
