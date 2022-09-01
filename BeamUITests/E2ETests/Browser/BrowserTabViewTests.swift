@@ -55,7 +55,6 @@ class BrowserTabViewTests: BaseTest {
             XCTAssertTrue(waitFor( PredicateFormat.exists.rawValue, journalView.getScrollViewElement()))
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 0)
         }
-        
     }
     
     func testOpenLinkInNewTab() { // BE-3783: crash when opening a tab with CMD+Click
@@ -70,6 +69,41 @@ class BrowserTabViewTests: BaseTest {
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 2)
         }
-        
     }
+    
+    func testDragAndDropBrowserTabs() {
+        testrailId("C972")
+        let tabTitlesAfterDragAndDrop = [
+            uiTestPageTwo,
+            uiTestPageThree,
+            uiTestPageOne
+        ]
+        
+        step("GIVEN I open another web page"){
+            //uiMenu.resizeWindowLandscape() required for the step to merge windows
+            uiMenu.loadUITestPage2()
+            uiMenu.loadUITestPage3()
+        }
+
+        step("THEN the tabs order is successfully changed on drag'n'drop"){
+            webView.dragTabToOmniboxIconArea(tabIndex: 0)
+            XCTAssertTrue(webView.areTabsInCorrectOrder(tabs: tabTitlesAfterDragAndDrop))
+        }
+        
+        step("THEN new window is opened when drag'n'drop a tap outside the tab bar"){
+            webView.dragAndDropTabToElement(tabIndex: 2, elementToDragTo: webView.webView(tabTitlesAfterDragAndDrop[2]))
+            XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: getNumberOfWindows()), "Second window wasn't opened during \(BaseTest.implicitWaitTimeout) seconds timeout")
+            XCTAssertEqual(self.getNumberOfTabInWindowIndex(index: 0), 1)
+            XCTAssertEqual(self.getNumberOfTabInWindowIndex(index: 1), 2)
+        }
+        
+        //Merge windows steps is too flaky, commented out to be ran locally if needed
+        /*step("THEN tab is successfully dragged back to initial window") {
+            uiMenu.resizeWindowPortrait()
+            webView.dragAndDropTabToElement(tabIndex: 0, elementToDragTo: webView.app.windows[tabTitlesAfterDragAndDrop[0]].groups.matching(identifier: tabTitlesAfterDragAndDrop[0]).firstMatch)
+            XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 1, query: getNumberOfWindows()), "Second window wasn't closed during \(BaseTest.implicitWaitTimeout) seconds timeout")
+            XCTAssertEqual(webView.getNumberOfTabs(), 3)
+        }*/
+    }
+    
 }
