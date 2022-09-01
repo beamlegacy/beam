@@ -35,12 +35,6 @@ class ClusteringManager: ObservableObject {
         }
     }
 
-    enum InitialiseNotes {
-        case zeroPagesAdded
-        case onePageAdded
-        case twoOrMorePagesAdded
-    }
-
     var clusteredPagesId: [[PageID]] = [[]] {
         didSet {
             transformToClusteredPages()
@@ -55,7 +49,6 @@ class ClusteringManager: ObservableObject {
         }
     }
     var sendRanking = false
-    var initialiseNotes = false
     var ranker: SessionLinkRanker
     var activeSources: ActiveSources
     let noteToAdd = PassthroughSubject<BeamNote, Never>()
@@ -78,7 +71,7 @@ class ClusteringManager: ObservableObject {
     var openBrowsing = AllBrowsingTreesOpenInTabs()
     public var continueToNotes = [UUID]()
     public var continueToPage: PageID?
-
+    private var resultProcessQueue = DispatchQueue(label: "ClusteringManagerResultProcessing", target: .userInitiated)
     // swiftlint:disable:next function_body_length
     init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources, tabGroupingManager: TabGroupingManager?, objectManager: BeamObjectManager, forcedClusteringType: ClusteringType? = nil) {
         self.frecencyFetcher = LinkStoreFrecencyUrlStorage(objectManager: objectManager)
@@ -174,12 +167,7 @@ class ClusteringManager: ObservableObject {
                     Logger.shared.logError("Error while updating page in the cluster for \(pageToUpdate): \(error)", category: .clustering)
                 }
             case .success(let result):
-                self.similarities = result.similarities
-                self.clusteredPagesId = result.pageGroups
-                self.clusteredNotesId = result.noteGroups
-                self.initialiseNotes = result.legacyFlag == .addNotes
-                self.sendRanking = result.legacyFlag == .sendRanking
-                self.logForClustering(result: result.pageGroups, changeCandidate: false)
+                self.updateClustersWithResult(result, changeCandidate: false)
             }
         }
     }
@@ -228,12 +216,7 @@ class ClusteringManager: ObservableObject {
                     Logger.shared.logError("Error while adding note to cluster for \(clusteringNote): \(error)", category: .clustering)
                 }
             case .success(let result):
-                self.similarities = result.similarities
-                self.clusteredPagesId = result.pageGroups
-                self.clusteredNotesId = result.noteGroups
-                self.initialiseNotes = result.legacyFlag == .addNotes
-                self.sendRanking = result.legacyFlag == .sendRanking
-                self.logForClustering(result: result.pageGroups, changeCandidate: false)
+                self.updateClustersWithResult(result, changeCandidate: false)
             }
         }
     }
@@ -245,9 +228,7 @@ class ClusteringManager: ObservableObject {
             case .failure(let error):
                 Logger.shared.logError("\(error)", category: .clustering)
             case .success(let result):
-                self.clusteredPagesId = result.pageGroups
-                self.clusteredNotesId = result.noteGroups
-                self.similarities = result.similarities
+                self.updateClustersWithResult(result, changeCandidate: false)
             }
         }
     }
@@ -264,14 +245,19 @@ class ClusteringManager: ObservableObject {
             case .failure(let error):
                 Logger.shared.logError("Error while changing candidate to cluster for: \(error)", category: .clustering)
             case .success(let result):
-                self.similarities = result.similarities
-                self.clusteredPagesId = result.pageGroups
-                self.clusteredNotesId = result.noteGroups
-                self.initialiseNotes = result.legacyFlag == .addNotes
-                self.sendRanking = result.legacyFlag == .sendRanking
-                self.logForClustering(result: result.pageGroups, changeCandidate: true)
+                self.updateClustersWithResult(result, changeCandidate: true)
             }
         }
+    }
+
+    private func updateClustersWithResult(_ result: ClusteringResultValue, changeCandidate: Bool) {
+        resultProcessQueue.async {
+            self.similarities = result.similarities
+            self.clusteredPagesId = result.pageGroups
+            self.clusteredNotesId = result.noteGroups
+            self.sendRanking = result.legacyFlag == .sendRanking
+        }
+        self.logForClustering(result: result.pageGroups, changeCandidate: changeCandidate)
     }
 
     private func reorganizeGroups(clusters: [[UUID]]) -> [[UUID]] {
@@ -294,11 +280,14 @@ class ClusteringManager: ObservableObject {
     }
 
     private func transformToClusteredNotes() {
-        self.clusteredNotes = self.clusteredNotesId.compactMap({ cluster in
+        let clusteredNotes = self.clusteredNotesId.compactMap({ cluster in
             return cluster.map { noteUuid in
                 return BeamNote.titleForNoteId(noteUuid)
             }
         })
+        DispatchQueue.main.async {
+            self.clusteredNotes = clusteredNotes
+        }
     }
 
     private func updateTabGroupsWithOpenPages() {
@@ -453,14 +442,10 @@ extension ClusteringManager: ClusteringManagerProtocol {
                     Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): \(error)", category: .clustering)
                 }
             case .success(let result):
-                self.similarities = result.similarities
-                self.clusteredPagesId = result.pageGroups
-                self.clusteredNotesId = result.noteGroups
-                self.initialiseNotes = result.legacyFlag == .addNotes
-                self.sendRanking = result.legacyFlag == .sendRanking                
-                self.logForClustering(result: result.pageGroups, changeCandidate: false)
+                self.updateClustersWithResult(result, changeCandidate: false)
                 // After adding the second page, add notes from previous sessions
-                if self.initialiseNotes {
+                let initialiseNotes = result.legacyFlag == .addNotes
+                if initialiseNotes {
                     guard let collection = BeamData.shared.currentDocumentCollection else {
                         Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): no current document collection", category: .clustering)
                         return
