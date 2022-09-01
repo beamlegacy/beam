@@ -22,4 +22,12 @@ class DialogTestView: BaseView{
         _ = app.staticTexts[ AlertViewLocators.StaticTexts.connectBeam.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return app.staticTexts[ AlertViewLocators.StaticTexts.connectDescriptionTabGroups.accessibilityIdentifier].exists && app.staticTexts[ AlertViewLocators.StaticTexts.connectBeam.accessibilityIdentifier].exists
     }
+    
+    func isForgetTabGroupAlertDisplayed(tabGroupName: String) -> Bool {
+        _ = app.staticTexts[ AlertViewLocators.StaticTexts.forgetTabGroupTitle.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        let bodyString = AlertViewLocators.StaticTexts.forgetTabGroupBody.accessibilityIdentifier
+        let newString = bodyString.replacingOccurrences(of: "%tabGroupName%", with: tabGroupName, options: .literal, range: nil)
+
+        return app.staticTexts[newString].exists && app.staticTexts[ AlertViewLocators.StaticTexts.forgetTabGroupTitle.accessibilityIdentifier].exists
+    }
 }

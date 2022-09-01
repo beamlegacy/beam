@@ -12,10 +12,11 @@ class TabGroupInOmniboxTests: BaseTest {
     
     let tabGroupMenu = TabGroupMenuView()
     let omniboxView = OmniBoxTestView()
+    let dialogView = DialogTestView()
     let openAllTabsLabel = "Open All Tabs"
     let shareGroup = "Share Tab Group"
     let deleteGroup = "Delete Tab Group"
-    let tabGroupUnamedSuffix = " & 3 more"
+    let tabGroupUnnamedSuffix = " & 3 more"
     let tabGroupNamed = "Test1"
 
     private func createAndCaptureTabGroup (named: Bool){
@@ -50,16 +51,16 @@ class TabGroupInOmniboxTests: BaseTest {
         
         step("Then tab group is displayed in omnibox") {
             omniboxView.searchInOmniBox("Point", false)
-            XCTAssertEqual(omniboxView.getAutocompleteResults().firstMatch.getStringValue(), uiTestPageOne + tabGroupUnamedSuffix)
+            XCTAssertEqual(omniboxView.getAutocompleteResults().firstMatch.getStringValue(), uiTestPageOne + tabGroupUnnamedSuffix)
         }
         
         step("When I click on tab group") {
-            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnamedSuffix)
+            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnnamedSuffix)
         }
         
         step("Then tab group details are displayed") {
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: autocompleteResults.count))
-            XCTAssertEqual(omniboxView.getOmniBoxSearchField().placeholderValue, uiTestPageOne + tabGroupUnamedSuffix)
+            XCTAssertEqual(omniboxView.getOmniBoxSearchField().placeholderValue, uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertEqual(omniboxView.getAutocompleteResults().count, autocompleteResults.count)
             XCTAssertTrue(omniboxView.areAutocompleteResultsInCorrectOrder(results: autocompleteResults))
         }
@@ -69,7 +70,7 @@ class TabGroupInOmniboxTests: BaseTest {
         }
         
         step("Then omnibox is displayed with search autocomplete results") {
-            XCTAssertEqual(omniboxView.getAutocompleteResults().firstMatch.getStringValue(), uiTestPageOne + tabGroupUnamedSuffix)
+            XCTAssertEqual(omniboxView.getAutocompleteResults().firstMatch.getStringValue(), uiTestPageOne + tabGroupUnnamedSuffix)
         }
         
         step("When I press Enter") {
@@ -78,7 +79,7 @@ class TabGroupInOmniboxTests: BaseTest {
         
         step("Then tab group details are displayed") {
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: autocompleteResults.count))
-            XCTAssertEqual(omniboxView.getOmniBoxSearchField().placeholderValue, uiTestPageOne + tabGroupUnamedSuffix)
+            XCTAssertEqual(omniboxView.getOmniBoxSearchField().placeholderValue, uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertEqual(omniboxView.getAutocompleteResults().count, autocompleteResults.count)
             XCTAssertTrue(omniboxView.areAutocompleteResultsInCorrectOrder(results: autocompleteResults))
         }
@@ -101,7 +102,7 @@ class TabGroupInOmniboxTests: BaseTest {
         
         step("When I reopen all tabs") {
             omniboxView.searchInOmniBox("Point", false)
-            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnamedSuffix)
+            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
             omniboxView.getAutocompleteResults().firstMatch.clickInTheMiddle()
         }
@@ -113,7 +114,7 @@ class TabGroupInOmniboxTests: BaseTest {
         }
         
         step("And tab group name is correct") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), uiTestPageOne + tabGroupUnamedSuffix)
+            XCTAssertEqual(tabGroupMenu.getTabGroupName(), uiTestPageOne + tabGroupUnnamedSuffix)
         }
     }
     
@@ -127,7 +128,7 @@ class TabGroupInOmniboxTests: BaseTest {
         
         step("When I open one tab") {
             omniboxView.searchInOmniBox("Point", false)
-            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnamedSuffix)
+            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
             omniboxView.getAutocompleteResults().element(boundBy: 1).clickInTheMiddle()
         }
@@ -155,7 +156,6 @@ class TabGroupInOmniboxTests: BaseTest {
     
     func testShareTabGroupNotLogged() throws {
         testrailId("C1171, C1163")
-        let dialogView = DialogTestView()
 
         step("Given I capture an unnamed tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
@@ -165,7 +165,7 @@ class TabGroupInOmniboxTests: BaseTest {
         
         step("When I share tab group") {
             omniboxView.searchInOmniBox("Point", false)
-            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnamedSuffix)
+            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
             omniboxView.shareTabGroup()
         }
@@ -189,7 +189,7 @@ class TabGroupInOmniboxTests: BaseTest {
         step("When I share tab group") {
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             omniboxView.searchInOmniBox("Point", false)
-            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnamedSuffix)
+            omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
             omniboxView.shareTabGroup()
         }
@@ -199,4 +199,53 @@ class TabGroupInOmniboxTests: BaseTest {
             XCTAssertTrue(tabGroupMenu.isTabGroupLinkInPasteboard())
         }
     }
+    
+    func testForgetTabGroup() throws {
+        testrailId("C1173")
+        step("Given I create an unnamed tab group") {
+            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
+            uiMenu.createTabGroupNamed()
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+        }
+        
+        step("When I open tab group in omnibox") {
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
+            omniboxView.searchInOmniBox(tabGroupNamed, false)
+            omniboxView.selectAutocompleteResult(autocompleteResult: tabGroupNamed)
+            XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
+        }
+        
+        step("Then I have the option to forget the tab group") {
+            XCTAssertTrue(omniboxView.isAutocompleteResultDisplayed(autocompleteResult: OmniboxLocators.Labels.forgetTabGroup.accessibilityIdentifier))
+        }
+        
+        step("When I click to forget tab group") {
+            omniboxView.forgetTabGroup()
+        }
+        
+        step("Then confirmation pop up is displayed") {
+            XCTAssertTrue(dialogView.isForgetTabGroupAlertDisplayed(tabGroupName: tabGroupNamed))
+        }
+        
+        step("When I cancel to forget tab group") {
+            dialogView.getButton(locator: .cancelButton).tapInTheMiddle()
+        }
+        
+        step("Then tab group is not forgotten") {
+            XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
+        }
+        
+        step("When I forget tab group") {
+            omniboxView.forgetTabGroup()
+            dialogView.getButton(locator: .forgetButton).tapInTheMiddle()
+        }
+        
+        step("Then tab group is forgotten") {
+            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
+            omniboxView.searchInOmniBox(tabGroupNamed, false)
+            XCTAssertFalse(omniboxView.isTabGroupResultDisplayed(tabGroupName: tabGroupNamed))
+        }
+    }
+    
 }
