@@ -122,9 +122,19 @@ class OmniBoxTestView: BaseView {
     }
     
     @discardableResult
-    func selectAutocompleteResult(autocompleteResult: String) -> OmniBoxTestView{
+    func selectAutocompleteResult(autocompleteResult: String) -> OmniBoxTestView {
         getAutocompleteResults().matching(NSPredicate(format: "value == '\(autocompleteResult)'")).firstMatch.clickInTheMiddle()
         return self
+    }
+    
+    @discardableResult
+    func isAutocompleteResultDisplayed(autocompleteResult: String) -> Bool {
+        return getAutocompleteResults().matching(NSPredicate(format: "value == '\(autocompleteResult)'")).firstMatch.exists
+    }
+    
+    @discardableResult
+    func isTabGroupResultDisplayed(tabGroupName: String) -> Bool {
+        return getAutocompleteResults().matching(NSPredicate(format: "label == 'tabGroup' && value == '\(tabGroupName)'")).firstMatch.exists
     }
     
     func getAutocompleteIdentifierFor(domainURL: String) -> String {
@@ -146,6 +156,12 @@ class OmniBoxTestView: BaseView {
     @discardableResult
     func shareTabGroup() -> NoteTestView {
         app.links.matching(NSPredicate(format: "identifier CONTAINS '\(OmniboxLocators.Labels.shareTabGroup.accessibilityIdentifier)'")).firstMatch.clickInTheMiddle()
+        return NoteTestView()
+    }
+    
+    @discardableResult
+    func forgetTabGroup() -> NoteTestView {
+        app.links.matching(NSPredicate(format: "identifier CONTAINS '\(OmniboxLocators.Labels.forgetTabGroup.accessibilityIdentifier)'")).firstMatch.clickInTheMiddle()
         return NoteTestView()
     }
 
