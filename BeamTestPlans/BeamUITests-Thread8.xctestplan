@@ -118,6 +118,7 @@
         "SlashMenuTests",
         "SyncTests",
         "TabGroupCaptureToANoteMenuTests",
+        "TabGroupCaptureToANoteTests",
         "TabGroupSharingTests"
       ],
       "target" : {
