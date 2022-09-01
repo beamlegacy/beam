@@ -206,6 +206,8 @@ class TabGroupInOmniboxTests: BaseTest {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             uiMenu.createTabGroupNamed()
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            webView.waitForWebViewToLoad()
+            tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
         }
         
         step("When I open tab group in omnibox") {

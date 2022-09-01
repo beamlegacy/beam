@@ -183,6 +183,7 @@
         "TabGroupCaptureToANoteMenuTests",
         "TabGroupCaptureToANoteTests",
         "TabGroupCloseTests",
+        "TabGroupDeleteFromOmniboxTests",
         "TabGroupDragTabTests",
         "TabGroupInOmniboxTests",
         "TabGroupManualTests",

@@ -156,6 +156,13 @@ class TabGroupMenuView: BaseView {
         return WebTestView()
     }
     
+    @discardableResult
+    func deleteTabGroupFromNoteAction() -> NoteTestView {
+        // hover first item to not dismiss the menu
+        app.menuItems[TabGroupMenuViewLocators.MenuItems.tabGroupDeleteGroup.accessibilityIdentifier].hoverAndTapInTheMiddle()
+        return NoteTestView()
+    }
+    
     func isTabGroupLinkInPasteboard() -> Bool {
         let regex = try! NSRegularExpression(pattern: "https://" + BaseTest().stagingEnvironmentServerAddress + "/.*/.*")
         let pasteboardContent = NSPasteboard.general.pasteboardItems?.first?.string(forType: NSPasteboard.PasteboardType.string)
