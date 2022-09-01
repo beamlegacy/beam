@@ -14,7 +14,6 @@ class TabGroupSharingFromNoteTests: BaseTest {
     let allNotesView = AllNotesTestView()
     let dialogView = DialogTestView()
     let noteView = NoteTestView()
-    let copyLinkAction = "Copy Link"
     let shareWithTwitterAction = "Twitter"
     
     func testShareTabGroupMenuNotLogged() throws {
@@ -86,7 +85,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
         step("When I copy link to share tab group without being logged in") {
             clearPasteboard() // clear content of pasteboard
             noteView.openTabGroupMenu(index: 0)
-                .shareTabGroupAction(copyLinkAction)
+                .shareTabGroupAction(copyLinkShareAction)
         }
         
         step("Then I get the connect alert message") {
@@ -109,7 +108,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
         step("When I copy link of tab to share tab group") {
             clearPasteboard() // clear content of pasteboard
             noteView.openTabGroupMenu(index: 0)
-                .shareTabGroupAction(copyLinkAction)
+                .shareTabGroupAction(copyLinkShareAction)
         }
         
         step("Then short tab group link is copied to pasteboard") {
