@@ -163,7 +163,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
 
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         sessionExporter = ClusteringSessionExporter()
-        tabGroupingManager = TabGroupingManager(passwordManager: passwordManager, browsingTreeStoreManager: browsingTreeStoreManager)
+        tabGroupingManager = TabGroupingManager()
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId,
                                               activeSources: activeSources, tabGroupingManager: tabGroupingManager, objectManager: objectManager)
         noteAutoSaveService = NoteAutoSaveService()

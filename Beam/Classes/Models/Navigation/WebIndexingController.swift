@@ -24,6 +24,9 @@ class WebIndexingController {
     /// the delay before re-reading the page for better content
     var betterContentReadDelay: TimeInterval = 4
 
+    /// Can be disabled to fasten tests unrelated to clustering.
+    var sendNavigationToClustering = true
+
     weak var delegate: WebIndexControllerDelegate?
 
     init(clusteringManager: ClusteringManagerProtocol) {
@@ -31,7 +34,7 @@ class WebIndexingController {
     }
 
     private func appendToClustering(url: URL, tabIndexingInfo: TabIndexingInfo, readabilityResult: Readability) {
-
+        guard sendNavigationToClustering else { return }
         self.indexingQueue.async { [weak self] in
             var finalTabInfo = tabIndexingInfo
             finalTabInfo.cleanedTextContentForClustering = readabilityResult.textContentForClustering
@@ -45,13 +48,21 @@ class WebIndexingController {
                 (currentId, parentId) = self.clusteringManager.getIdAndParent(tabToIndex: finalTabInfo)
                 guard let id = currentId else { return }
 
-                self.clusteringManager.addPage(id: id, parentId: parentId, value: finalTabInfo)
+                if self.clusteringManager.typeInUse.shouldRemovePageBeforeAddingNewOne {
+                    // Remove the previous page of the current tab before to add the new page.
+                    if let lastChildren = finalTabInfo.currentTabTree?.current.children.last, finalTabInfo.isBackwardNavigation {
+                        self.clusteringManager.removePage(pageId: lastChildren.link, tabId: finalTabInfo.tabId)
+                    } else if let parentId = parentId, finalTabInfo.tabTree?.current.hasParentInOtherTab != true {
+                        self.clusteringManager.removePage(pageId: parentId, tabId: finalTabInfo.tabId)
+                    }
+                }
+                self.clusteringManager.addPage(id: id, tabId: finalTabInfo.tabId, parentId: parentId, value: finalTabInfo)
             }
         }
     }
 
     private func indexNavigation(to url: URL, tabIndexingInfo: TabIndexingInfo, read: Readability? = nil,
-                                 browsingTree: BrowsingTree, isLinkActivation: Bool, startReading: Bool) {
+                                 browsingTree: BrowsingTree, startReading: Bool) {
 
         let title = tabIndexingInfo.document.title
         indexAliasURLIfNeeded(requestedURL: tabIndexingInfo.requestedURL, currentURL: url, title: title)
@@ -115,6 +126,7 @@ class WebIndexingController {
 
 struct TabIndexingInfo {
     let url: URL
+    let tabId: UUID
     private(set) var requestedURL: URL?
     private(set) var shouldBeIndexed: Bool = true
     fileprivate(set) var tabTree: BrowsingTree?
@@ -124,6 +136,7 @@ struct TabIndexingInfo {
     fileprivate(set) var textContent: String = ""
     fileprivate(set) var cleanedTextContentForClustering: [String] = []
     private(set) var isPinnedTab: Bool = false
+    private(set) var isBackwardNavigation: Bool = false
 }
 
 // MARK: - Public Methods
@@ -132,7 +145,8 @@ extension WebIndexingController {
     // MARK: Navigation events
 
     func tabDidNavigate(_ tab: BrowserTab, toURL url: URL, originalRequestedURL: URL?,
-                        shouldWaitForBetterContent: Bool, isLinkActivation: Bool, keepSameParent: Bool = false,
+                        shouldWaitForBetterContent: Bool, isLinkActivation: Bool,
+                        backwardNavigation: Bool = false, keepSameParent: Bool = false,
                         currentTab: BrowserTab?) {
 
         let webView = tab.webView
@@ -145,14 +159,15 @@ extension WebIndexingController {
 
         let indexDocument = IndexDocument(source: url.absoluteString, title: fallbackTitle ?? "", contents: "")
 
-        var tabIndexingInfo = TabIndexingInfo(url: url,
+        var tabIndexingInfo = TabIndexingInfo(url: url, tabId: tabID,
                                               requestedURL: shouldIndexUserRequestedURL ? originalRequestedURL : nil,
                                               shouldBeIndexed: tab.responseStatusCode == 200,
                                               tabTree: browsingTree.deepCopy(),
                                               currentTabTree: currentTabBrowsingTree?.deepCopy(),
                                               previousTabTree: previousTabBrowsingTree?.deepCopy(),
                                               document: indexDocument,
-                                              isPinnedTab: tab.isPinned)
+                                              isPinnedTab: tab.isPinned,
+                                              isBackwardNavigation: backwardNavigation)
 
         previousTabBrowsingTree = nil
         if keepSameParent { browsingTree.goBack(startReading: false) }
@@ -161,7 +176,7 @@ extension WebIndexingController {
         let finishBlock: (Readability?) -> Void = { [weak self] readabilityResultToUse in
             tabIndexingInfo = self?.updateTabIndexingInfo(tabIndexingInfo, withReadabilityResult: readabilityResultToUse) ?? tabIndexingInfo
             self?.indexNavigation(to: url, tabIndexingInfo: tabIndexingInfo, read: readabilityResultToUse,
-                                  browsingTree: browsingTree, isLinkActivation: isLinkActivation, startReading: startReading)
+                                  browsingTree: browsingTree, startReading: startReading)
         }
         if let delayedRead = delayedReadOperations[tabID] {
             delayedRead.cancel(sendFirstRead: true)
@@ -199,10 +214,13 @@ extension WebIndexingController {
     }
 
     func tabDidClose(_ tab: BrowserTab) {
-        let tabID = tab.id
-        if let delayedRead = delayedReadOperations[tabID] {
+        let tabId = tab.id
+        if let delayedRead = delayedReadOperations[tabId] {
             delayedRead.cancel(sendFirstRead: true)
-            delayedReadOperations.removeValue(forKey: tabID)
+            delayedReadOperations.removeValue(forKey: tabId)
+        }
+        if let pageId = tab.pageId {
+            clusteringManager.removePage(pageId: pageId, tabId: tabId)
         }
     }
 }

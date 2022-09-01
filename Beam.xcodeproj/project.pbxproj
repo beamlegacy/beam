@@ -116,6 +116,7 @@
 		3320D92B283D0D5D002A2CA4 /* PinnedNotesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3320D92A283D0D5D002A2CA4 /* PinnedNotesManager.swift */; };
 		332AB2F026FE17D6007717D8 /* AppDelegate+UserInfos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */; };
 		332AB2F626FE2461007717D8 /* PublishNoteAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332AB2F526FE2461007717D8 /* PublishNoteAPITests.swift */; };
+		332CE707288955C5007E585A /* ClusteringBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332CE706288955C5007E585A /* ClusteringBridge.swift */; };
 		3330D7CB265E466D008C9E20 /* ToolbarDownloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7CA265E466D008C9E20 /* ToolbarDownloadButton.swift */; };
 		3330D7CD265E95E0008C9E20 /* LinearProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */; };
 		33353EBC26F0EAA300063078 /* HelpAndFeedbackMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EBB26F0EAA300063078 /* HelpAndFeedbackMenuView.swift */; };
@@ -1773,6 +1774,7 @@
 		3320D92A283D0D5D002A2CA4 /* PinnedNotesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedNotesManager.swift; sourceTree = "<group>"; };
 		332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+UserInfos.swift"; sourceTree = "<group>"; };
 		332AB2F526FE2461007717D8 /* PublishNoteAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishNoteAPITests.swift; sourceTree = "<group>"; };
+		332CE706288955C5007E585A /* ClusteringBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringBridge.swift; sourceTree = "<group>"; };
 		3330D7CA265E466D008C9E20 /* ToolbarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarDownloadButton.swift; sourceTree = "<group>"; };
 		3330D7CC265E95E0008C9E20 /* LinearProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinearProgressView.swift; sourceTree = "<group>"; };
 		33353EBB26F0EAA300063078 /* HelpAndFeedbackMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackMenuView.swift; sourceTree = "<group>"; };
@@ -6880,6 +6882,7 @@
 			isa = PBXGroup;
 			children = (
 				A0A4301526655993003A3C08 /* ClusteringManager.swift */,
+				332CE706288955C5007E585A /* ClusteringBridge.swift */,
 				A5B68434287DE9FE00213BD7 /* TabGroup.swift */,
 				4E0556E027B4004E00B4A42F /* TabGroupingManager.swift */,
 				A5FD982A2890153900842673 /* TabGroupingManager+Notes.swift */,
@@ -8301,6 +8304,7 @@
 				3390376A26529BD700089E25 /* Sign AutoUpdate XPC */,
 				A0C83F12276E408400DD29FB /* Embed BeamHelper Tool */,
 				870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */,
+				332CE7142889B023007E585A /* Remove SmartClustering model in beta */,
 			);
 			buildRules = (
 			);
@@ -8719,6 +8723,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		332CE7142889B023007E585A /* Remove SmartClustering model in beta */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Remove SmartClustering model in beta";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "scripts/delete_smart_clustering_model.sh\n";
+			showEnvVarsInLog = 0;
+		};
 		3390376A26529BD700089E25 /* Sign AutoUpdate XPC */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 8;
@@ -9131,6 +9154,7 @@
 				A56BAF5826B937CE0006F8D5 /* NoteEditFocusedState.swift in Sources */,
 				8AF4F7D3275A67960081B6B5 /* EmbedContent.swift in Sources */,
 				A0E9B0FB2666A80600FC99A5 /* TabGroupingSettingsTitleBarView.swift in Sources */,
+				332CE707288955C5007E585A /* ClusteringBridge.swift in Sources */,
 				96CCDF3528491DF80052444E /* BeamNote+BeamDocument.swift in Sources */,
 				A0C7D11E283636B8002EDF4C /* BeamTableCellIconAndTextView.swift in Sources */,
 				A567157125F66F8600B46110 /* StyledText.swift in Sources */,
@@ -12304,7 +12328,7 @@
 			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
 			requirement = {
 				kind = revision;
-				revision = 79f6b36e259379f1a9ac6c2ca79e30ac6cb7edeb;
+				revision = 757f0ae0279b73feb589a4dae3012bda26ddf9ed;
 			};
 		};
 		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
