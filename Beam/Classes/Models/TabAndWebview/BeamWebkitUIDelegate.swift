@@ -37,7 +37,8 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
             }
         }
         Logger.shared.logInfo("Creating new webview tab for \(request)", category: .web)
-        let newTab = self.page?.createNewTab(request, configuration, setCurrent: true, rect: windowFeatures.toRect())
+        let setCurrent = !navigationAction.shouldBePerformedInBackground || !PreferencesManager.cmdClickOpenTab
+        let newTab = self.page?.createNewTab(request, configuration, setCurrent: setCurrent, rect: windowFeatures.toRect())
         guard let newWebView = newTab?.webView else {
             fatalError("should have webview")
         }
