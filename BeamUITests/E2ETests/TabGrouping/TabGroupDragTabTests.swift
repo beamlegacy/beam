@@ -35,8 +35,8 @@ class TabGroupDragTabTests: BaseTest {
     
     func testTabGroupDragTabInside() throws {
         testrailId("C977")
-        step("When I open a new tab") {
-            uiMenu.loadUITestPageMedia()
+        step("When I open a new tab after group was formed") {
+            uiMenu.loadUITestPagePassword() // loading a page that is not auto grouped
         }
         
         step("Then tab is outside of the group") {

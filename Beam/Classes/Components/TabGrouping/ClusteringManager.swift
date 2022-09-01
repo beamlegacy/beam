@@ -12,12 +12,14 @@ import Clustering
 import Fakery
 
 protocol ClusteringManagerProtocol {
+    var typeInUse: ClusteringType { get }
     func getIdAndParent(tabToIndex: TabIndexingInfo) -> (UUID?, UUID?)
-    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?)
-    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?)
+    func addPage(id: UUID, tabId: UUID, parentId: UUID?, value: TabIndexingInfo?)
+    func addPage(id: UUID, tabId: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?)
+    func removePage(pageId: UUID, tabId: UUID)
 }
 
-class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
+class ClusteringManager: ObservableObject {
 
     /// An UUID generated from a web page URL
     typealias PageID = UUID
@@ -64,8 +66,8 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     @Published var weightNavigation: Double
     @Published var weightText: Double
     @Published var weightEntities: Double
+    private var clusteringBridge: ClusteringBridge
     private var tabsInfo: [TabIndexingInfo] = []
-    private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
     weak private(set) var tabGroupingManager: TabGroupingManager?
     var sessionId: UUID
@@ -77,7 +79,8 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     public var continueToNotes = [UUID]()
     public var continueToPage: PageID?
 
-    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources, tabGroupingManager: TabGroupingManager?, objectManager: BeamObjectManager) {
+    // swiftlint:disable:next function_body_length
+    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources, tabGroupingManager: TabGroupingManager?, objectManager: BeamObjectManager, forcedClusteringType: ClusteringType? = nil) {
         self.frecencyFetcher = LinkStoreFrecencyUrlStorage(objectManager: objectManager)
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
@@ -85,13 +88,24 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         self.weightEntities = entities
         self.activeSources = activeSources
         self.tabGroupingManager = tabGroupingManager
-        self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities, noteContentThreshold: 100)
+        let clusteringType = forcedClusteringType ?? ClusteringType.current
+        self.clusteringBridge = clusteringType.buildBridge(selectedTabGroupingCandidate: candidate,
+                                                           weightNavigation: navigation,
+                                                           weightText: text,
+                                                           weightEntities: entities)
         self.ranker = ranker
         self.sessionId = sessionId
         setupObservers()
         #if DEBUG
         setupDebugObservers()
         #endif
+    }
+
+    func changeClusteringType(_ type: ClusteringType) {
+        self.clusteringBridge = type.buildBridge(selectedTabGroupingCandidate: selectedTabGroupingCandidate,
+                                                 weightNavigation: weightNavigation,
+                                                 weightText: weightText,
+                                                 weightEntities: weightEntities)
     }
 
     private func setupObservers() {
@@ -103,28 +117,28 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     }
 
     private func setupDebugObservers() {
-        $selectedTabGroupingCandidate.sink { value in
+        $selectedTabGroupingCandidate.dropFirst().sink { value in
             self.change(candidate: value,
                         weightNavigation: self.weightNavigation,
                         weightText: self.weightText,
                         weightEntities: self.weightEntities)
         }.store(in: &scope)
 
-        $weightNavigation.sink { value in
+        $weightNavigation.dropFirst().sink { value in
             self.change(candidate: self.selectedTabGroupingCandidate,
                         weightNavigation: value,
                         weightText: self.weightText,
                         weightEntities: self.weightEntities)
         }.store(in: &scope)
 
-        $weightText.sink { value in
+        $weightText.dropFirst().sink { value in
             self.change(candidate: self.selectedTabGroupingCandidate,
                         weightNavigation: self.weightNavigation,
                         weightText: value,
                         weightEntities: self.weightEntities)
         }.store(in: &scope)
 
-        $weightEntities.sink { value in
+        $weightEntities.dropFirst().sink { value in
             self.change(candidate: self.selectedTabGroupingCandidate,
                         weightNavigation: self.weightNavigation,
                         weightText: self.weightText,
@@ -141,163 +155,20 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         return nil
     }
 
-    func getIdAndParent(tabToIndex: TabIndexingInfo) -> (UUID?, UUID?) {
-        guard tabToIndex.isPinnedTab == false else {
-            return (nil, nil)
-        }
-        let id = tabToIndex.tabTree?.current.link
-        var parentId: UUID?
-        var parentTimeStamp = Date.distantPast
-        // Check the case where a link is opened from a note
-        switch tabToIndex.tabTree?.origin {
-        case .linkFromNote(let noteName):
-            if let noteName = noteName, let root = tabToIndex.tabTree?.root,
-               tabToIndex.tabTree?.current.parent?.id == root.id,
-               let id = id,
-               let note = BeamNote.fetch(title: noteName) {
-                if note.type == .note {
-                    self.addNote(note: note)
-                }
-                return (id, nil)
-            }
-        default:
-            break
-        }
-        // When not opening a link from a note, start with the case of opening a link in a new tab
-        if let currentTabId = tabToIndex.currentTabTree?.current.link,
-           currentTabId != id, // The tab to be added is not the active one
-           let parentOpenId = tabToIndex.currentTabTree?.current.link,
-           let current = tabToIndex.currentTabTree?.current.events.last?.type,
-           current == .openLinkInNewTab { // The last event of the active tab is to open a link in a new tab
-            parentId = parentOpenId
-        } else { // A simple link opening in the same tab
-            if let parent = tabToIndex.tabTree?.current.parent,
-               let lastEventType = parent.events.last?.type,
-               lastEventType == .navigateToLink { // TODO: Consider adding  || lastEventType == .exitForward || lastEventType == .exitBackward
-                parentId = parent.link
-                parentTimeStamp = parent.events.last?.date ?? Date.distantPast
-            } else if let parent = tabToIndex.tabTree?.current.parent,
-                      let root = tabToIndex.tabTree?.root,
-                      parent.id == root.id,
-                      let previousTabTree = tabToIndex.previousTabTree,
-                      let lastEventTypePreviousTree = previousTabTree.current.events.last?.type,
-                      lastEventTypePreviousTree == .openLinkInNewTab {
-                parentId = previousTabTree.current.link
-                parentTimeStamp = previousTabTree.current.events.last?.date ?? parentTimeStamp
-            }
-            if let children = tabToIndex.tabTree?.current.children {
-                for child in children {
-                    if let lastEventType = child.events.last?.type,
-                       let lastEventTime = child.events.last?.date,
-                       lastEventType == .exitBackward,
-                       lastEventTime > parentTimeStamp {
-                        parentTimeStamp = lastEventTime
-                        parentId = child.link
-                    }
-                }
-            }
-        }
-        // The following is only here in order to save groups based on navigation, remove before release:
-        if let id = id,
-           self.findPageGroupForID(pageId: id, pageGroups: self.navigationBasedPageGroups) == nil {
-            if let parentId = parentId,
-               let group = self.findPageGroupForID(pageId: parentId, pageGroups: self.navigationBasedPageGroups) {
-                self.navigationBasedPageGroups[group].append(id)
-            } else {
-                self.navigationBasedPageGroups.append([id])
-            }
-        }
-        return (id, parentId)
-    }
-
-    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?) {
-        addPage(id: id, parentId: parentId, value: value, newContent: nil)
-    }
-
-    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?) {
-        var pageToAdd: Page?
-        if let value = value {
-            pageToAdd = Page(id: id, parentId: parentId, url: value.url, title: value.document.title, originalContent: value.cleanedTextContentForClustering)
-            tabsInfo.append(value)
-        } else if let newContent = newContent {
-            pageToAdd = Page(id: id, parentId: nil, title: nil, cleanedContent: newContent)
-            // TODO: Should we bother changing the content in tabsInfo?
-        }
-        isClustering = true
-        var ranking: [UUID]?
-        if self.sendRanking {
-            ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
-        }
-        var replaceContent = false
-        if let pageToAdd = pageToAdd {
-            if newContent != nil {
-                replaceContent = true
-            }
-            cluster.add(page: pageToAdd, ranking: ranking, activeSources: Array(Set(activeSources.urls)), replaceContent: replaceContent) { result in
-                DispatchQueue.main.async {
-                    self.isClustering = false
-                }
-                switch result {
-                case .failure(let error):
-                    self.isClustering = false
-                    if error as? Cluster.AdditionError == .skippingToNextAddition {
-                        Logger.shared.logInfo("Skipping to next addition before performing the final clustering")
-                    } else if error as? Cluster.AdditionError == .abortingAdditionDuringClustering {
-                        Logger.shared.logInfo("Aborting addition temporarility as to not hinder ongoing clustering process")
-                    } else {
-                        Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): \(error)", category: .clustering)
-                    }
-                case .success(let result):
-                    self.similarities = result.similarities
-                    self.clusteredPagesId = result.pageGroups
-                    self.clusteredNotesId = result.noteGroups
-                    if result.flag == .sendRanking {
-                        self.sendRanking = true
-                        self.initialiseNotes = false
-                    } else if result.flag == .addNotes {
-                        self.initialiseNotes = true
-                        self.sendRanking = false
-                    } else {
-                        self.initialiseNotes = false
-                        self.sendRanking = false
-                    }
-                    self.logForClustering(result: result.pageGroups, changeCandidate: false)
-                    // After adding the second page, add notes from previous sessions
-                    if self.initialiseNotes {
-                        guard let collection = BeamData.shared.currentDocumentCollection else {
-                            Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): no current document collection", category: .clustering)
-                            return
-                        }
-                        do {
-                            let notes = try collection.fetch(filters: [.limit(10, offset: 0), .type(.note)], sortingKey: .updatedAt(false))
-                                .compactMap({
-                                    BeamNote.fetch(id: $0.id)
-                                })
-                            for note in notes {
-                                self.addNote(note: note, addToNextSummary: false)
-                            }
-                        } catch {
-                            Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): unable to fetch 10 documents", category: .clustering)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     func shouldBeWithAndApart(pageId: PageID, beWith: [PageID], beApart: [PageID]) {
-        let pageToUpdate = Page(id: pageId, beWith: beWith, beApart: beApart)
+        guard typeInUse == .legacy else { return }
+        let pageToUpdate = Page(id: pageId, tabId: UUID(), beWith: beWith, beApart: beApart)
         isClustering = true
-        cluster.add(page: pageToUpdate, ranking: nil) { result in
+        clusteringBridge.add(textualItem: pageToUpdate.toTextualItem(), ranking: nil) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
             switch result {
             case .failure(let error):
                 self.isClustering = false
-                if error as? Cluster.AdditionError == .skippingToNextAddition {
+                if error as? LegacyClustering.AdditionError == .skippingToNextAddition {
                     Logger.shared.logInfo("Skipping to next addition before performing the final clustering")
-                } else if error as? Cluster.AdditionError == .abortingAdditionDuringClustering {
+                } else if error as? LegacyClustering.AdditionError == .abortingAdditionDuringClustering {
                     Logger.shared.logInfo("Aborting addition temporarility as to not hinder ongoing clustering process")
                 } else {
                     Logger.shared.logError("Error while updating page in the cluster for \(pageToUpdate): \(error)", category: .clustering)
@@ -306,16 +177,8 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
                 self.similarities = result.similarities
                 self.clusteredPagesId = result.pageGroups
                 self.clusteredNotesId = result.noteGroups
-                if result.flag == .sendRanking {
-                    self.sendRanking = true
-                    self.initialiseNotes = false
-                } else if result.flag == .addNotes {
-                    self.initialiseNotes = true
-                    self.sendRanking = false
-                } else {
-                    self.initialiseNotes = false
-                    self.sendRanking = false
-                }
+                self.initialiseNotes = result.legacyFlag == .addNotes
+                self.sendRanking = result.legacyFlag == .sendRanking
                 self.logForClustering(result: result.pageGroups, changeCandidate: false)
             }
         }
@@ -349,17 +212,17 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         if self.sendRanking {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
-        self.cluster.add(note: clusteringNote, ranking: ranking, activeSources: Array(Set(activeSources.urls))) { result in
+        clusteringBridge.add(textualItem: clusteringNote.toTextualItem(), ranking: ranking, activeSources: Array(Set(activeSources.urls))) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
             switch result {
             case .failure(let error):
-                if error as? Cluster.AdditionError == .notEnoughTextInNote {
+                if error as? LegacyClustering.AdditionError == .notEnoughTextInNote {
                     Logger.shared.logInfo("Note ignored by the clustering process due to insufficient content. Suggestions can still be made for the note.")
-                } else if error as? Cluster.AdditionError == .skippingToNextAddition {
+                } else if error as? LegacyClustering.AdditionError == .skippingToNextAddition {
                     Logger.shared.logInfo("Skipping to next addition before performing the final clustering")
-                } else if error as? Cluster.AdditionError == .abortingAdditionDuringClustering {
+                } else if error as? LegacyClustering.AdditionError == .abortingAdditionDuringClustering {
                     Logger.shared.logInfo("Aborting addition temporarility as to not hinder ongoing clustering process")
                 } else {
                     Logger.shared.logError("Error while adding note to cluster for \(clusteringNote): \(error)", category: .clustering)
@@ -368,28 +231,32 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
                 self.similarities = result.similarities
                 self.clusteredPagesId = result.pageGroups
                 self.clusteredNotesId = result.noteGroups
-                if result.flag == .sendRanking {
-                    self.sendRanking = true
-                    self.initialiseNotes = false
-                } else if result.flag == .addNotes {
-                    self.initialiseNotes = true
-                    self.sendRanking = false
-                } else {
-                    self.initialiseNotes = false
-                    self.sendRanking = false
-                }
+                self.initialiseNotes = result.legacyFlag == .addNotes
+                self.sendRanking = result.legacyFlag == .sendRanking
                 self.logForClustering(result: result.pageGroups, changeCandidate: false)
             }
         }
     }
 
     func removeNote(noteId: UUID) {
-        cluster.removeNote(noteId: noteId)
+        clusteringBridge.removeTextualItem(textualItemUUID: noteId, textualItemTabId: noteId) { [weak self] result in
+            guard let self = self, self.clusteringBridge.type == .smart else { return }
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("\(error)", category: .clustering)
+            case .success(let result):
+                self.clusteredPagesId = result.pageGroups
+                self.clusteredNotesId = result.noteGroups
+                self.similarities = result.similarities
+            }
+        }
     }
 
     func change(candidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double) {
         isClustering = true
-        cluster.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities, activeSources: Array(Set(activeSources.urls))) { result in
+        clusteringBridge.changeCandidate(to: candidate, withWeightNavigation: weightNavigation,
+                                         weightText: weightText, weightEntities: weightEntities,
+                                         activeSources: Array(Set(activeSources.urls))) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
@@ -400,16 +267,8 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
                 self.similarities = result.similarities
                 self.clusteredPagesId = result.pageGroups
                 self.clusteredNotesId = result.noteGroups
-                if result.flag == .sendRanking {
-                    self.sendRanking = true
-                    self.initialiseNotes = false
-                } else if result.flag == .addNotes {
-                    self.initialiseNotes = true
-                    self.sendRanking = false
-                } else {
-                    self.initialiseNotes = false
-                    self.sendRanking = false
-                }
+                self.initialiseNotes = result.legacyFlag == .addNotes
+                self.sendRanking = result.legacyFlag == .sendRanking
                 self.logForClustering(result: result.pageGroups, changeCandidate: true)
             }
         }
@@ -451,12 +310,25 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     private func logForClustering(result: [[UUID]], changeCandidate: Bool) {
         var resultDescription = "\(result)"
         #if DEBUG
-        let groupsDescriptions = result.map { group -> String in
-            guard !group.isEmpty else { return "[]" }
-            let links = LinkStore.shared.getLinks(for: group).map { URL(string: $1.url)!.urlStringByRemovingUnnecessaryCharacters }
-            return "\(links)"
+        var grps = [String]()
+
+        for cluster in result {
+            var grp = [String]()
+
+            for uuid in cluster {
+                if let linkStoreURL = LinkStore.shared.linkFor(id: uuid)?.url {
+                    grp.append(URL(string: linkStoreURL)!.urlStringByRemovingUnnecessaryCharacters)
+                }
+            }
+
+            if grp.isEmpty {
+                grps.append("[]")
+            } else {
+                grps.append("\(grp)")
+            }
         }
-        resultDescription = "[\(groupsDescriptions.joined(separator: ", "))]"
+
+        resultDescription = "[\(grps.joined(separator: ", "))]"
         #endif
         if changeCandidate {
             Logger.shared.logDebug("Result provided by ClusteringFramework from changing to candidate \(self.selectedTabGroupingCandidate) with Nav \(self.weightNavigation), Text \(self.weightText), Entities \(self.weightEntities) for result: \(resultDescription)", category: .clustering)
@@ -464,6 +336,179 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
             Logger.shared.logDebug("Result provided by ClusteringFramework for adding a page with candidate\(self.selectedTabGroupingCandidate): \(resultDescription)", category: .clustering)
         }
 
+    }
+}
+
+extension ClusteringManager: ClusteringManagerProtocol {
+    var typeInUse: ClusteringType {
+        clusteringBridge.type
+    }
+
+    func getIdAndParent(tabToIndex: TabIndexingInfo) -> (UUID?, UUID?) {
+        guard tabToIndex.isPinnedTab == false else {
+            return (nil, nil)
+        }
+        let id = tabToIndex.tabTree?.current.link
+        var parentId: UUID?
+        var parentTimeStamp = Date.distantPast
+        // Check the case where a link is opened from a note
+        switch tabToIndex.tabTree?.origin {
+        case .linkFromNote(let noteName):
+            if let noteName = noteName, let root = tabToIndex.tabTree?.root,
+               tabToIndex.tabTree?.current.parent?.id == root.id,
+               let id = id,
+               let note = BeamNote.fetch(title: noteName) {
+                if note.type == .note {
+                    self.addNote(note: note)
+                }
+                return (id, nil)
+            }
+        default:
+            break
+        }
+        // When not opening a link from a note, start with the case of opening a link in a new tab
+        if let currentTabId = tabToIndex.currentTabTree?.current.link,
+           currentTabId != id, // The tab to be added is not the active one
+           let parentOpenId = tabToIndex.currentTabTree?.current.link,
+           let current = tabToIndex.currentTabTree?.current.events.last?.type,
+           current == .openLinkInNewTab { // The last event of the active tab is to open a link in a new tab
+            parentId = parentOpenId
+        } else { // A simple link opening in the same tab
+            if let parent = tabToIndex.tabTree?.current.parent,
+               let lastEventType = parent.events.last?.type,
+               lastEventType == .navigateToLink ||
+                lastEventType == .exitForward ||
+                lastEventType == .exitBackward {
+                parentId = parent.link
+                parentTimeStamp = parent.events.last?.date ?? Date.distantPast
+            } else if let parent = tabToIndex.tabTree?.current.parent,
+                      let root = tabToIndex.tabTree?.root,
+                      parent.id == root.id,
+                      let previousTabTree = tabToIndex.previousTabTree,
+                      let lastEventTypePreviousTree = previousTabTree.current.events.last?.type,
+                      lastEventTypePreviousTree == .openLinkInNewTab {
+                parentId = previousTabTree.current.link
+                parentTimeStamp = previousTabTree.current.events.last?.date ?? parentTimeStamp
+            }
+            if let children = tabToIndex.tabTree?.current.children {
+                for child in children {
+                    if let lastEventType = child.events.last?.type,
+                       let lastEventTime = child.events.last?.date,
+                       lastEventType == .exitBackward,
+                       lastEventTime > parentTimeStamp {
+                        parentTimeStamp = lastEventTime
+                        parentId = child.link
+                    }
+                }
+            }
+        }
+        // The following is only here in order to save groups based on navigation, remove before release:
+        if let id = id,
+           self.findPageGroupForID(pageId: id, pageGroups: self.navigationBasedPageGroups) == nil {
+            if let parentId = parentId,
+               let group = self.findPageGroupForID(pageId: parentId, pageGroups: self.navigationBasedPageGroups) {
+                self.navigationBasedPageGroups[group].append(id)
+            } else {
+                self.navigationBasedPageGroups.append([id])
+            }
+        }
+        return (id, parentId)
+    }
+
+    func addPage(id: UUID, tabId: UUID, parentId: UUID?, value: TabIndexingInfo?) {
+        addPage(id: id, tabId: tabId, parentId: parentId, value: value, newContent: nil)
+    }
+
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
+    func addPage(id: UUID, tabId: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?) {
+        var pageToAdd: Page?
+        if let value = value {
+            pageToAdd = Page(id: id, tabId: tabId, parentId: parentId, url: value.url, title: value.document.title, originalContent: value.cleanedTextContentForClustering)
+            tabsInfo.append(value)
+        } else if let newContent = newContent {
+            pageToAdd = Page(id: id, tabId: tabId, parentId: nil, title: nil, cleanedContent: newContent)
+            // TODO: Should we bother changing the content in tabsInfo?
+        }
+        isClustering = true
+        var ranking: [UUID]?
+        if self.sendRanking {
+            ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
+        }
+        let replaceContent = newContent != nil
+        guard let pageToAdd = pageToAdd else { return }
+
+        clusteringBridge.add(textualItem: pageToAdd.toTextualItem(), ranking: ranking,
+                             activeSources: Array(Set(activeSources.urls)), replaceContent: replaceContent) { result in
+            DispatchQueue.main.async {
+                self.isClustering = false
+            }
+            switch result {
+            case .failure(let error):
+                self.isClustering = false
+                if error as? LegacyClustering.AdditionError == .skippingToNextAddition {
+                    Logger.shared.logInfo("Skipping to next addition before performing the final clustering")
+                } else if error as? LegacyClustering.AdditionError == .abortingAdditionDuringClustering {
+                    Logger.shared.logInfo("Aborting addition temporarility as to not hinder ongoing clustering process")
+                } else {
+                    Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): \(error)", category: .clustering)
+                }
+            case .success(let result):
+                self.similarities = result.similarities
+                self.clusteredPagesId = result.pageGroups
+                self.clusteredNotesId = result.noteGroups
+                self.initialiseNotes = result.legacyFlag == .addNotes
+                self.sendRanking = result.legacyFlag == .sendRanking                
+                self.logForClustering(result: result.pageGroups, changeCandidate: false)
+                // After adding the second page, add notes from previous sessions
+                if self.initialiseNotes {
+                    guard let collection = BeamData.shared.currentDocumentCollection else {
+                        Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): no current document collection", category: .clustering)
+                        return
+                    }
+                    do {
+                        let notes = try collection.fetch(filters: [.limit(10, offset: 0), .type(.note)], sortingKey: .updatedAt(false))
+                            .compactMap({
+                                BeamNote.fetch(id: $0.id)
+                            })
+                        for note in notes {
+                            self.addNote(note: note, addToNextSummary: false)
+                        }
+                    } catch {
+                        Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): unable to fetch 10 documents", category: .clustering)
+                    }
+                }
+            }
+        }
+    }
+
+    func removePage(pageId: PageID, tabId: UUID) {
+        clusteringBridge.removeTextualItem(textualItemUUID: pageId, textualItemTabId: tabId) { [weak self] result in
+            guard let self = self, self.typeInUse == .smart else { return }
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("\(error)", category: .clustering)
+            case .success(let result):
+                self.clusteredPagesId = result.pageGroups
+                self.clusteredNotesId = result.noteGroups
+                self.similarities = result.similarities
+            }
+        }
+    }
+
+}
+
+// MARK: - Feedback Export
+extension ClusteringManager {
+
+    private func getExportInformationForId(_ id: UUID, link: Link?) -> InformationForId {
+        var informationForId = self.clusteringBridge.getExportInformationForId(id: id)
+        guard typeInUse == .smart, let link = link else {
+            return informationForId
+        }
+        // While Smart Clustering supports informationForId, we fill it manually
+        informationForId.title = informationForId.title ?? link.title
+        informationForId.cleanedContent = informationForId.cleanedContent ?? link.content
+        return informationForId
     }
 
     public func getOrphanedUrlGroups(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: ActiveSources) -> [[UUID]] {
@@ -479,8 +524,9 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         let savedAt = BeamDate.now
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
-                let url = LinkStore.linkFor(urlId)?.url
-                let informationForId = self.cluster.getExportInformationForId(id: urlId)
+                let link = LinkStore.linkFor(urlId)
+                let url = link?.url
+                let informationForId = self.getExportInformationForId(urlId, link: link)
                 orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
@@ -491,8 +537,9 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         let savedAt = BeamDate.now
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
-                let url = LinkStore.linkFor(urlId)?.url
-                let informationForId = self.cluster.getExportInformationForId(id: urlId)
+                let link = LinkStore.linkFor(urlId)
+                let url = link?.url
+                let informationForId = self.getExportInformationForId(urlId, link: link)
                 orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
@@ -503,12 +550,13 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         for group in self.clusteredPagesId.enumerated() {
             let notesInGroup = self.clusteredNotesId[group.offset]
             for noteId in notesInGroup {
-                let informationForId = self.cluster.getExportInformationForId(id: noteId)
+                let informationForId = self.getExportInformationForId(noteId, link: nil)
                 sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, tabColouringGroupId: nil, userCorrectionGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, id: noteId, parentId: nil))
             }
             for urlId in group.element {
-                let url = LinkStore.linkFor(urlId)?.url
-                let informationForId = self.cluster.getExportInformationForId(id: urlId)
+                let link = LinkStore.linkFor(urlId)
+                let url = link?.url
+                let informationForId = self.getExportInformationForId(urlId, link: link)
                 let isOpenAtExport = self.openBrowsing.allOpenBrowsingPages.contains(urlId)
                 let correctionGroupId = correctedPages?[urlId]
 
