@@ -103,9 +103,10 @@ class ClusteringSessionExporter {
         let writer = CsvRowsWriter(header: AnyUrl.header, rows: self.urls)
         do {
             try writer.overWrite(to: destination)
+            let clusteringVersion = ClusteringType.current.versionRepresentation
             if let gcsManager = gcsManager,
                let email = Persistence.Authentication.email,
-               let filename = (email + "/" + destination.lastPathComponent).addingPercentEncoding(withAllowedCharacters: .alphanumerics) {
+               let filename = ("\(clusteringVersion)/\(email)/" + destination.lastPathComponent).addingPercentEncoding(withAllowedCharacters: .alphanumerics) {
                 Task {
                     do {
                         _ = try await gcsManager.uploadFile(filename: filename, path: destination)

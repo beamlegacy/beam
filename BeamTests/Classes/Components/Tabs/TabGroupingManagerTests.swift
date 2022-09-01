@@ -11,8 +11,7 @@ import XCTest
 
 class TabGroupingManagerTests: XCTestCase {
 
-    var sut: TabGroupingManager = TabGroupingManager(passwordManager: BeamData.shared.passwordManager,
-                                                     browsingTreeStoreManager: BeamData.shared.browsingTreeStoreManager)
+    var sut: TabGroupingManager = TabGroupingManager()
     let state = BeamState()
 
     private var clusters = [[ClusteringManager.PageID]]()
@@ -31,6 +30,13 @@ class TabGroupingManagerTests: XCTestCase {
         sut.delegate = tabGroupingDelegate
     }
 
+    // Each tests that uses automatic clustering (updateAutomaticClustering called)
+    // should be perfomed with both clustering types
+    func setUpWithClusteringType(_ type: ClusteringType) {
+        sut.clusteringManager?.changeClusteringType(type)
+        XCTAssertEqual(sut.clusteringManager?.typeInUse, type)
+    }
+
     private var store: TabGroupingStoreManager? {
         BeamData.shared.tabGroupingDBManager
     }
@@ -39,6 +45,7 @@ class TabGroupingManagerTests: XCTestCase {
         for _ in 0...6 {
             pageIds.append(UUID())
         }
+
         openPages = [ pageIds[0], pageIds[1], pageIds[4], pageIds[5], pageIds[6] ]
     }
 
@@ -70,13 +77,22 @@ class TabGroupingManagerTests: XCTestCase {
         }
     }
 
-    func testBuildTabGroupsWith1Cluster() async {
+    // MARK: -
+    func testBuildTabGroupsWith1Cluster_legacy() async {
+        setUpWithClusteringType(.legacy)
+        await _testBuildTabGroupsWith1Cluster()
+    }
+    func testBuildTabGroupsWith1Cluster_smart() async {
+        setUpWithClusteringType(.smart)
+        await _testBuildTabGroupsWith1Cluster()
+    }
+    func _testBuildTabGroupsWith1Cluster() async {
         setupDefaultOpenPages()
         setupClusters()
         await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
         XCTAssertEqual(sut.builtPagesGroups.count, 3)
         XCTAssertEqual(sut.builtPagesGroups[pageIds[4]], sut.builtPagesGroups[pageIds[6]])
-        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1) // only one group was created
+        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1) // only one group was created for legacy clustering
         let group = sut.builtPagesGroups[pageIds[4]]
         XCTAssertEqual(group?.pageIds.count, 3) // pageIds[3] is not opened
         XCTAssertEqual(group?.pageIds.contains(pageIds[4]), true)
@@ -84,11 +100,20 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertEqual(group?.pageIds.contains(pageIds[6]), true)
     }
 
-    func testBuildTabGroupsWith1ClusterIsReused() async {
+    // MARK: -
+    func testBuildTabGroupsWith1ClusterIsReused_legacy() async {
+        setUpWithClusteringType(.legacy)
+        await _testBuildTabGroupsWith1Cluster()
+    }
+    func testBuildTabGroupsWith1ClusterIsReused_smart() async {
+        setUpWithClusteringType(.smart)
+        await _testBuildTabGroupsWith1ClusterIsReused()
+    }
+    func _testBuildTabGroupsWith1ClusterIsReused() async {
         setupDefaultOpenPages()
         setupClusters()
         await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
-        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1) // only one group was created
+        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1) // only one group was created for legacy clustering
         let group = sut.builtPagesGroups.values.first
         XCTAssertEqual(group?.pageIds.count, 3) // pageIds[3] is not opened
         group?.changeTitle("Renamed Group")
@@ -96,15 +121,26 @@ class TabGroupingManagerTests: XCTestCase {
         // redo a clustering update
         await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
         XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1)
-        XCTAssertEqual(sut.builtPagesGroups.values.first, group) // group is still the same
-        XCTAssertEqual(sut.builtPagesGroups.values.first?.title, "Renamed Group")
+
+        let groups = Array(sut.builtPagesGroups.values)
+        XCTAssertEqual(groups.last?.id, group?.id) // group is still the same
+        XCTAssertEqual(groups.last?.title, "Renamed Group")
     }
 
-    func testBuildTabGroupsAddRemovePageToClusterGroup() async {
+    // MARK: -
+    func testBuildTabGroupsAddRemovePageToClusterGroup_legacy() async {
+        setUpWithClusteringType(.legacy)
+        await _testBuildTabGroupsAddRemovePageToClusterGroup()
+    }
+    func testBuildTabGroupsAddRemovePageToClusterGroup_smart() async {
+        setUpWithClusteringType(.smart)
+        await _testBuildTabGroupsAddRemovePageToClusterGroup()
+    }
+    func _testBuildTabGroupsAddRemovePageToClusterGroup() async {
         setupDefaultOpenPages()
         clusters = [ [pageIds[4], pageIds[5], pageIds[6]], [pageIds[0]] ]
         await sut.updateAutomaticClustering(urlGroups: clusters, openPages: openPages)
-        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1) // only one group was created
+        XCTAssertEqual(Set(sut.builtPagesGroups.values).count, 1)
         let group = sut.builtPagesGroups.values.first
         XCTAssertEqual(group?.pageIds.count, 3)
 
@@ -138,7 +174,16 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertNil(sut.builtPagesGroups[tab1PageId])
     }
 
-    func testBuildTabGroupsWith1ManualGroup1Cluster() async {
+    // MARK: -
+    func testBuildTabGroupsWith1ManualGroup1Cluster_legacy() async {
+        setUpWithClusteringType(.legacy)
+        await _testBuildTabGroupsWith1ManualGroup1Cluster()
+    }
+    func testBuildTabGroupsWith1ManualGroup1Cluster_smart() async {
+        setUpWithClusteringType(.smart)
+        await _testBuildTabGroupsWith1ManualGroup1Cluster()
+    }
+    func _testBuildTabGroupsWith1ManualGroup1Cluster() async {
         setupDefaultOpenPages()
         setupClusters()
         await setupManualGroup()
@@ -161,7 +206,16 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertEqual(automaticCroup?.pageIds.contains(pageIds[6]), true)
     }
 
-    func testBuildTabGroupsMoveWholeClusterToManualGroup() async {
+    // MARK: -
+    func testBuildTabGroupsMoveWholeClusterToManualGroup_legacy() async {
+        setUpWithClusteringType(.legacy)
+        await _testBuildTabGroupsMoveWholeClusterToManualGroup()
+    }
+    func testBuildTabGroupsMoveWholeClusterToManualGroup_smart() async {
+        setUpWithClusteringType(.smart)
+        await _testBuildTabGroupsMoveWholeClusterToManualGroup()
+    }
+    func _testBuildTabGroupsMoveWholeClusterToManualGroup() async {
         setupDefaultOpenPages()
         await setupManualGroup()
         clusters = [
@@ -184,7 +238,16 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertEqual(manualGRoup?.pageIds.contains(pageIds[6]), true)
     }
 
-    func testForcedOutOfGroup() async {
+    // MARK: -
+    func testForcedOutOfGroup_legacy() async {
+        setUpWithClusteringType(.legacy)
+        await _testForcedOutOfGroup()
+    }
+    func testForcedOutOfGroup_smart() async {
+        setUpWithClusteringType(.smart)
+        await _testForcedOutOfGroup()
+    }
+    func _testForcedOutOfGroup() async {
         setupDefaultOpenPages()
         clusters = [
             [pageIds[0], pageIds[1]],
@@ -230,6 +293,7 @@ class TabGroupingManagerTests: XCTestCase {
         XCTAssertEqual(sut.builtPagesGroups[pageIds[4]], page1Group)
     }
 
+    // MARK: -
     func testFetchOrCreateTabGroupNote() throws {
         let group = TabGroup(pageIds: [UUID(), UUID()], title: "Group A")
         let pages = group.pageIds.map { TabGroupBeamObject.PageInfo(id: $0, url: URL(string: "beamapp.co")!, title: $0.uuidString) }
