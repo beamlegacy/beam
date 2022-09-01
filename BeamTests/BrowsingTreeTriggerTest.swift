@@ -90,7 +90,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
 
     func testJsBackwardForward() {
         let url = "http://localhost:\(Configuration.MockHttpServer.port)/"
-        let indexExpectations = (0...2).map { expectation(description: "page indexing \($0)") }
+        let indexExpectations = (0...4).map { expectation(description: "page indexing \($0)") }
         var expectationIndex = 0
         mockIndexingDelegate?.onIndexingFinished = { _ in
             indexExpectations[expectationIndex].fulfill()
@@ -114,7 +114,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         tab.goForward()
         expect(self.tab.browsingTree.currentLink).toEventually(equal(url + "?page=2"))
         XCTAssertEqual(tab.browsingTree.current.parent?.events.last?.type, .exitForward)
-
+        wait(for: [indexExpectations[3], indexExpectations[4]], timeout: 1, enforceOrder: true)
     }
 
     func testSwitchTo() {

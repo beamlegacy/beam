@@ -37,9 +37,9 @@ class TabGroupingManager {
     var storeManager: TabGroupingStoreManager? {
         BeamData.shared.tabGroupingDBManager
     }
-
-    let passwordManager: PasswordManager
-    let browsingTreeStoreManager: BrowsingTreeStoreManager
+    var clusteringManager: ClusteringManager? {
+        BeamData.shared.clusteringManager
+    }
 
     /// Page associated to a manual group because Clustering found some grouping with pages inside a manual group.
     private var temporaryInManualPageGroups = PageGroupDictionary()
@@ -52,11 +52,6 @@ class TabGroupingManager {
     /// The UI might want to temporarily force a tab in or out a group, independently of its page.
     /// Either for temporary UI states (opening a new tab in group). Or while we're waiting for Clustering to update.
     private(set) var forcedTabsGroup = [BrowserTab.TabID: TabForcedGroup]()
-
-    init(passwordManager: PasswordManager, browsingTreeStoreManager: BrowsingTreeStoreManager) {
-        self.passwordManager = passwordManager
-        self.browsingTreeStoreManager = browsingTreeStoreManager
-    }
 
     func existingGroup(forGroupID: TabGroup.GroupID) -> TabGroup? {
         builtPagesGroups.values.first { $0.id == forGroupID }
@@ -259,7 +254,7 @@ extension TabGroupingManager {
 
     func removeSingles(urlGroups: [[ClusteringManager.PageID]], openTabs: [BrowserTab]) -> [[ClusteringManager.PageID]] {
         var urlGroups = urlGroups
-        if urlGroups.count == 1 {
+        if urlGroups.count == 1 && clusteringManager?.typeInUse.producesSingleGroupWithAllPages == true {
             // we have one group with all tabs in it, let's split into groups of 1 page
             urlGroups = urlGroups.first?.map { [$0] } ?? []
         }

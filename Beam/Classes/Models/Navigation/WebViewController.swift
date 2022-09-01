@@ -29,6 +29,7 @@ struct WebViewNavigationDescription {
     let requestedURL: URL?
     let time: Date = BeamDate.now
     let keepSameParent: Bool
+    let isBackwardNavigation: Bool
 }
 
 protocol WebViewControllerDelegate: AnyObject {
@@ -188,6 +189,7 @@ class WebViewController {
 
     // MARK: - Navigation handling
     private var previousBackForwardUrlTriplet: BackForwardURLTriplet?
+    private var lastActionIsBackwardNavigation: Bool = false
     fileprivate func handleBackForwardAction(navigationAction: WKNavigationAction) {
         guard let webView = navigationAction.targetFrame?.webView ?? navigationAction.sourceFrame.webView else {
             fatalError("Should emit handleBackForwardAction() from a webview")
@@ -197,6 +199,7 @@ class WebViewController {
             delegate?.webViewController(self, willMoveInHistory: true)
         case .historyBackward:
             delegate?.webViewController(self, willMoveInHistory: false)
+            self.lastActionIsBackwardNavigation = true
         default:
             return
         }
@@ -270,6 +273,7 @@ extension WebViewController: WebViewNavigationHandler {
     }
 
     func webView(_ webView: WKWebView, willPerformNavigationAction action: WKNavigationAction) {
+        self.lastActionIsBackwardNavigation = false
         switch action.navigationType {
         case .other:
             // this is a redirect, we keep the requested url as is to update its title once the actual destination is reached
@@ -303,14 +307,15 @@ extension WebViewController: WebViewNavigationHandler {
         //on drive.google.com hitting back triggers a replaceState
         //so we need compare backForwardList evolution to disambiguate between goForward, navigateTo and goBack
         var keepSameParent = false
+        var isBackForwardJSNavigation = false
         if case .javascript(event: let JSevent) = source {
             switch getNavigationDirection(webView: webView) {
             case .historyBackward:
                 delegate?.webViewController(self, willMoveInHistory: false)
-                return
+                isBackForwardJSNavigation = true
             case .historyForward:
                 delegate?.webViewController(self, willMoveInHistory: true)
-                return
+                isBackForwardJSNavigation = true
             case .navigateToPageSameParent:
                 keepSameParent = true
             default:
@@ -324,8 +329,8 @@ extension WebViewController: WebViewNavigationHandler {
         }
 
         // If the webview is loading, we should not index the content.
-        // We will be called by the webView delegate at the end of the loadin
-        guard !webView.isLoading else { return }
+        // We will be called by the webView delegate at the end of the loading
+        guard !webView.isLoading || isBackForwardJSNavigation else { return }
 
         // Only register navigation if the page was successfully loaded
         guard self.page?.responseStatusCode == 200 else { return }
@@ -348,9 +353,11 @@ extension WebViewController: WebViewNavigationHandler {
             requestedURL = previousNav.requestedURL
         }
         let description = WebViewNavigationDescription(url: url, source: source, isLinkActivation: isLinkActivation,
-                                                       requestedURL: requestedURL, keepSameParent: keepSameParent)
+                                                       requestedURL: requestedURL, keepSameParent: keepSameParent,
+                                                       isBackwardNavigation: lastActionIsBackwardNavigation)
         lastNavigationFinished = description
         lastNavigationWasTriggeredByBeamUI = false
+        lastActionIsBackwardNavigation = false
         previousBackForwardUrlTriplet = BackForwardURLTriplet(list: webView.backForwardList)
 
         self.requestedURL = nil
