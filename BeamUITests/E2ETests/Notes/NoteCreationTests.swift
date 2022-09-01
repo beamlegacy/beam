@@ -13,8 +13,8 @@ class NoteCreationTests: BaseTest {
     let noteNameToBeCreated = "NoteCreation"
     let otherNoteNameToBeCreated = "OtherNoteCreation"
     let noteView = NoteTestView()
+    let allNotesView = AllNotesTestView()
     var journalView: JournalTestView!
-    var allNotesView: AllNotesTestView!
     
     override func setUp() {
         journalView = launchApp()
@@ -28,7 +28,7 @@ class NoteCreationTests: BaseTest {
         let numberOfNotesBeforeAdding = journalView.openAllNotesMenu().getNumberOfNotes()
         
         step("When I create a note from All Notes view"){
-            allNotesView = AllNotesTestView().addNewPrivateNote(noteNameToBeCreated)
+            allNotesView.addNewPrivateNote(noteNameToBeCreated)
             var timeout = 5 //temp solution while looking for an elegant way to wait
             repeat {
                 if numberOfNotesBeforeAdding != allNotesView.getNumberOfNotes() {
@@ -123,6 +123,45 @@ class NoteCreationTests: BaseTest {
         step("Then I can sucessfully create a note") {
             XCTAssertTrue(noteView.waitForNoteViewToLoad())
             XCTAssertEqual(noteView.getNoteTitle(), noteNameToBeCreated)
+        }
+    }
+    
+    func testCreateNoteUsingTextEditorKeywords() {
+        testrailId("C1181")
+        let keywords = ["YESterday", "today", "tOmorrow"]
+        var index = -1
+        var expectedNotesTitles = [String]()
+        
+        keywords.forEach { _ in
+            expectedNotesTitles.append(DateHelper().getDateString(daysDifferenceFromToday: index, .noteViewTitle))
+        }
+        index = 0
+        
+        step("WHEN I create BiDi links using keywords:\(keywords.joined(separator: ","))") {
+            keywords.forEach {
+                journalView.typeInNoteNodeByIndex(noteIndex: index, text: "@\($0)", needsActivation: true)
+                journalView.typeKeyboardKey(.enter, 2)
+                index+=1
+            }
+            index = 0
+        }
+        
+        step("THEN the note titles are correctly displayed in the text nodes") {
+            for title in expectedNotesTitles {
+                if (index == 1) { //to be removed once BE-5424 is fixed to assert all notes titles
+                    XCTAssertEqual(noteView.getNoteNodeValueByIndex(index), title)
+                }
+            }
+            index = 0
+        }
+        
+        step("THEN Yesterday's and Tomorrow's notes are created, today's one remains by default") {
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotesView.waitForAllNotesViewToLoad()
+            XCTAssertEqual(allNotesView.getNumberOfNotes(), 3)
+            for title in expectedNotesTitles {
+                XCTAssertTrue(allNotesView.isNoteNameAvailable(title))
+            }
         }
     }
     
