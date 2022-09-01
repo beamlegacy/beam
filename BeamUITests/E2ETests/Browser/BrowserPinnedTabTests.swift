@@ -173,4 +173,25 @@ class BrowserPinnedTabTests: BaseTest {
             XCTAssertEqual(webView.getNumberOfUnpinnedTabs(wait: true), 0)
         }
     }
+    
+    func testPinUnpinTabsViaDragAndDrop() {
+        testrailId("C971")
+        step("GIVEN I open second web page"){
+            uiMenu.loadUITestPage2()
+        }
+        
+        step("THEN the tab is pinned if I drag it to a Pin notes section"){
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
+            webView.dragTabToHomeIconArea(tabIndex: 1)
+            XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfUnpinnedTabs(), 1)
+        }
+        
+        step("THEN the tab is unpinned if I drag it out of Pin notes section"){
+            webView.dragTabToOmniboxIconArea(tabIndex: 0)
+            XCTAssertEqual(webView.getNumberOfPinnedTabs(), 0)
+            XCTAssertEqual(webView.getNumberOfUnpinnedTabs(), 2)
+        }
+    }
+
 }
