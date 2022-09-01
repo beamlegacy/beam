@@ -14,6 +14,7 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
     var tabGroupingManager: TabGroupingManager!
     var clusteringManager: ClusteringManager!
 
+    var tabIDs: [UUID] = []
     var pageIDs: [UUID] = []
     var documents: [IndexDocument]!
     var informations: [TabIndexingInfo]!
@@ -24,13 +25,16 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
     override func setUp() {
         sessionLinkRanker = SessionLinkRanker()
         activeSources = ActiveSources()
-        tabGroupingManager = TabGroupingManager(passwordManager: BeamData.shared.passwordManager,
-                                                browsingTreeStoreManager: BeamData.shared.browsingTreeStoreManager)
+        tabGroupingManager = TabGroupingManager()
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4,
-                                              sessionId: UUID(), activeSources: activeSources, tabGroupingManager: tabGroupingManager, objectManager: objectManager)
+                                              sessionId: UUID(), activeSources: activeSources,
+                                              tabGroupingManager: tabGroupingManager,
+                                              objectManager: objectManager,
+                                              forcedClusteringType: .legacy)
 
         for _ in 0...3 {
             pageIDs.append(UUID())
+            tabIDs.append(UUID())
         }
         documents = [
             IndexDocument(id: self.pageIDs[0], title: "Roger Federer"),
@@ -39,10 +43,10 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
             IndexDocument(id: self.pageIDs[3], title: "Richard Gasquet")
         ]
         informations = [
-            TabIndexingInfo(url: URL(string: "http://www.rogerfederer.com")!, document: documents[0], textContent: "Roger Federer is the best tennis player ever", cleanedTextContentForClustering: ["Roger Federer is the best tennis player ever"]),
-            TabIndexingInfo(url: URL(string: "https://rafaelnadal.com/en/")!, document: documents[1], textContent: "Rafael Nadal is also pretty good", cleanedTextContentForClustering: ["Rafael Nadal is also pretty good"]),
-            TabIndexingInfo(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: ["Not you"]),
-            TabIndexingInfo(url: URL(string: "http://www.richardgasquet.net")!, document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: ["Richard Gasquet has a wonderful one-handed backhand"])
+            TabIndexingInfo(url: URL(string: "http://www.rogerfederer.com")!, tabId: tabIDs[0], document: documents[0], textContent: "Roger Federer is the best tennis player ever", cleanedTextContentForClustering: ["Roger Federer is the best tennis player ever"]),
+            TabIndexingInfo(url: URL(string: "https://rafaelnadal.com/en/")!, tabId: tabIDs[1], document: documents[1], textContent: "Rafael Nadal is also pretty good", cleanedTextContentForClustering: ["Rafael Nadal is also pretty good"]),
+            TabIndexingInfo(url: URL(string: "https://novakdjokovic.com/en/")!, tabId: tabIDs[2], document: documents[2], textContent: "Not you", cleanedTextContentForClustering: ["Not you"]),
+            TabIndexingInfo(url: URL(string: "http://www.richardgasquet.net")!, tabId: tabIDs[3], document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: ["Richard Gasquet has a wonderful one-handed backhand"])
         ]
         notes = [
             try! BeamNote(title: "Tennis"),
@@ -61,10 +65,10 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
 
     /// Test that adding pages and then notes works correctly
     func testAddPagesThenNotes() throws {
-        clusteringManager.addPage(id: documents[0].id, parentId: nil, value: informations[0])
+        clusteringManager.addPage(id: documents[0].id, tabId: tabIDs[0], parentId: nil, value: informations[0])
         expect(self.clusteringManager.clusteredPagesId).toEventually(equal([[self.pageIDs[0]]]))
 
-        clusteringManager.addPage(id: documents[1].id, parentId: nil, value: informations[1])
+        clusteringManager.addPage(id: documents[1].id, tabId: tabIDs[1], parentId: nil, value: informations[1])
         expect(self.clusteringManager.clusteredPagesId).toEventually(equal([[self.pageIDs[0],self.pageIDs[1]]]) || contain([self.pageIDs[1]]))
 
         clusteringManager.addNote(note: notes[0])
@@ -74,7 +78,7 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
         expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[1].id]) || contain([notes[0].id, notes[1].id]))
         expect(self.clusteringManager.clusteredPagesId).toEventually(contain([self.pageIDs[0],self.pageIDs[1]]) || contain([self.pageIDs[1]]))
 
-        clusteringManager.addPage(id: documents[2].id, parentId: nil, value: informations[2])
+        clusteringManager.addPage(id: documents[2].id, tabId: tabIDs[2], parentId: nil, value: informations[2])
         expect(self.clusteringManager.clusteredPagesId).toEventually(contain([self.pageIDs[0], self.pageIDs[1], self.pageIDs[2]]) || contain([self.pageIDs[2]]) || contain([self.pageIDs[0], self.pageIDs[2]]) || contain([self.pageIDs[1], self.pageIDs[2]]))
     }
 
@@ -90,10 +94,10 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
         clusteringManager.addNote(note: notes[3])
         expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[1].id]) || contain([notes[0].id, notes[1].id]))
 
-        clusteringManager.addPage(id: documents[0].id, parentId: nil, value: informations[0])
+        clusteringManager.addPage(id: documents[0].id, tabId: tabIDs[0], parentId: nil, value: informations[0])
         expect(self.clusteringManager.clusteredPagesId).toEventually(contain([self.pageIDs[0]]))
 
-        clusteringManager.addPage(id: documents[1].id, parentId: nil, value: informations[1])
+        clusteringManager.addPage(id: documents[1].id, tabId: tabIDs[1], parentId: nil, value: informations[1])
         expect(self.clusteringManager.clusteredPagesId).toEventually(contain([self.pageIDs[0],self.pageIDs[1]]) || contain([self.pageIDs[1]]))
 
         clusteringManager.addNote(note: notes[2])
@@ -103,7 +107,7 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
     private func swapInfo(at index: Int, tabTree: BrowsingTree, parentBrowsingNode: BrowsingNode?, currentTabTree: BrowsingTree?) {
         let oldInfo = informations[index]
 
-        let newInfo = TabIndexingInfo(url: oldInfo.url,
+        let newInfo = TabIndexingInfo(url: oldInfo.url, tabId: oldInfo.tabId,
                                       requestedURL: oldInfo.requestedURL,
                                       shouldBeIndexed: oldInfo.shouldBeIndexed,
                                       tabTree: tabTree,
@@ -203,14 +207,14 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
     }
 
     func testShouldBeWithAndApart() throws {
-        clusteringManager.addPage(id: documents[0].id, parentId: nil, value: informations[0])
-        clusteringManager.addPage(id: documents[1].id, parentId: nil, value: informations[1])
-        clusteringManager.addPage(id: documents[2].id, parentId: nil, value: informations[2])
-        clusteringManager.addPage(id: documents[3].id, parentId: nil, value: informations[3])
+        try XCTSkipIf(clusteringManager.typeInUse != .legacy, "New clustering returns different results")
+        clusteringManager.addPage(id: documents[0].id, tabId: tabIDs[0], parentId: nil, value: informations[0])
+        clusteringManager.addPage(id: documents[1].id, tabId: tabIDs[1], parentId: nil, value: informations[1])
+        clusteringManager.addPage(id: documents[2].id, tabId: tabIDs[2], parentId: nil, value: informations[2])
+        clusteringManager.addPage(id: documents[3].id, tabId: tabIDs[3], parentId: nil, value: informations[3])
 
         clusteringManager.shouldBeWithAndApart(pageId: documents[0].id, beWith: [documents[1].id], beApart: [documents[2].id, documents[3].id])
         clusteringManager.shouldBeWithAndApart(pageId: documents[2].id, beWith: [documents[3].id], beApart: [documents[0].id, documents[1].id])
         expect(self.clusteringManager.clusteredPagesId).toEventually(equal([[self.pageIDs[0],self.pageIDs[1]], [self.pageIDs[2], self.pageIDs[3]]]))
-
     }
 }

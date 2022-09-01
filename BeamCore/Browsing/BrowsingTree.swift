@@ -225,8 +225,14 @@ public class BrowsingNode: ObservableObject, Codable {
     public var url: String {
         linkStore.linkFor(id: link)?.url ?? Link.missing.url
     }
+    public var hasParentInOtherTab: Bool {
+        guard parent?.id != nil && parent?.id == tree?.root?.id else { return false }
+        if case .browsingNode = tree.origin { return true }
+        return false
+    }
     private var isForeground: Bool = false
     private var lastStartReading: Date?
+
     var linkStore: LinkStore
 
     private func readingTimeSinceLastEvent(date: Date) -> CFTimeInterval {

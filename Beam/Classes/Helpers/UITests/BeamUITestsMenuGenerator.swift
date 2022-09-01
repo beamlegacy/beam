@@ -540,22 +540,26 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
 extension BeamUITestsMenuGenerator {
     private func createTabGroup(named: Bool) {
         guard let tabsManager = AppDelegate.main.window?.state.browserTabsManager else { return }
+
+        // to make sure it doesn't slow down other interactions, we prepare the clusteringManager right away
+        tabsManager.tabGroupingManager.clusteringManager?.removePage(pageId: UUID(), tabId: UUID())
+
         let pagesToOpen = ["1", "2", "3", "4"]
         let tabs = pagesToOpen.compactMap { identifier in
             loadUITestsPage(identifier: identifier, setCurrent: false)
         }
 
-        var title: String?
+        let group = tabsManager.tabGroupingManager.createNewGroup()
         if named {
             let existingGroups = Set(tabsManager.tabGroupingManager.builtPagesGroups.values)
             var index = 1
-            title = "Test\(index)"
+            var title = "Test\(index)"
             while existingGroups.contains(where: { $0.title == title }) {
                 index += 1
                 title = "Test\(index)"
             }
+            tabsManager.renameGroup(group, title: title)
         }
-        let group = TabGroup(pageIds: [], title: title)
         tabs.forEach { tab in
             tabsManager.moveTabToGroup(tab.id, group: group)
         }

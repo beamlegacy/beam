@@ -22,6 +22,12 @@ class WebBrowsingBaseTests: XCTestCase {
     let destinationPageTitle = "Redirection Destination"
     let jsDestinationPageTitle = "Redirected to destination"
     let defaultTimeout: TimeInterval = 2
+    var sendNavigationToClustering: Bool {
+        false
+    }
+    var betterContentReadDelay: TimeInterval {
+        0.2
+    }
 
     var linkStore: LinkStore {
         LinkStore.shared
@@ -46,6 +52,7 @@ class WebBrowsingBaseTests: XCTestCase {
         mockIndexingDelegate = MockWebIndexingDelegate()
         state.webIndexingController?.delegate = mockIndexingDelegate
         state.webIndexingController?.betterContentReadDelay = 0.2
+        state.webIndexingController?.sendNavigationToClustering = sendNavigationToClustering
         tab = BrowserTab(state: state, browsingTreeOrigin: .searchBar(query: "http", referringRootId: nil), originMode: .web, note: nil)
 
         destinationURL = redirectURL(for: .none)
