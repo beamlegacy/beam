@@ -30,4 +30,14 @@ class DialogTestView: BaseView{
 
         return app.staticTexts[newString].exists && app.staticTexts[ AlertViewLocators.StaticTexts.forgetTabGroupTitle.accessibilityIdentifier].exists
     }
+    
+    func isDeleteTabGroupAlertDisplayed(tabGroupName: String, noteTitle: String) -> Bool {
+        _ = app.staticTexts[ AlertViewLocators.StaticTexts.deleteTabGroupTitle.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        let bodyString = AlertViewLocators.StaticTexts.deleteTabGroupBody.accessibilityIdentifier
+        let newString = bodyString.replacingOccurrences(of: "%tabGroupName%", with: tabGroupName, options: .literal, range: nil)
+            .replacingOccurrences(of: "%noteTitle%", with: noteTitle, options: .literal, range: nil)
+
+
+        return app.staticTexts[newString].exists && app.staticTexts[ AlertViewLocators.StaticTexts.deleteTabGroupTitle.accessibilityIdentifier].exists
+    }
 }

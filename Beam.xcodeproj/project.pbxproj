@@ -1433,6 +1433,7 @@
 		D7858BCF283BC4E000D0336A /* AutoFillCCViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BCE283BC4E000D0336A /* AutoFillCCViewLocators.swift */; };
 		D7858BD1283BDAB500D0336A /* CreditCardSaveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BD0283BDAB500D0336A /* CreditCardSaveTests.swift */; };
 		D7858BD3283CBC5A00D0336A /* BaseCreditCardTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BD2283CBC5A00D0336A /* BaseCreditCardTest.swift */; };
+		D79394B028C0A0BA00AEADA1 /* TabGroupDeleteFromOmniboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79394AF28C0A0BA00AEADA1 /* TabGroupDeleteFromOmniboxTests.swift */; };
 		D7C98FD3284F4044001E057C /* TodayNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C98FD2284F4044001E057C /* TodayNoteTests.swift */; };
 		D7CC5971289970350036A02B /* TabGroupManualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CC5970289970350036A02B /* TabGroupManualTests.swift */; };
 		D7D6F00C2849DF7E00C3EE7F /* TrackersBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F00B2849DF7E00C3EE7F /* TrackersBlockerTests.swift */; };
@@ -3396,6 +3397,7 @@
 		D7858BCE283BC4E000D0336A /* AutoFillCCViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFillCCViewLocators.swift; sourceTree = "<group>"; };
 		D7858BD0283BDAB500D0336A /* CreditCardSaveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardSaveTests.swift; sourceTree = "<group>"; };
 		D7858BD2283CBC5A00D0336A /* BaseCreditCardTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCreditCardTest.swift; sourceTree = "<group>"; };
+		D79394AF28C0A0BA00AEADA1 /* TabGroupDeleteFromOmniboxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupDeleteFromOmniboxTests.swift; sourceTree = "<group>"; };
 		D7C98FD2284F4044001E057C /* TodayNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayNoteTests.swift; sourceTree = "<group>"; };
 		D7CC5970289970350036A02B /* TabGroupManualTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupManualTests.swift; sourceTree = "<group>"; };
 		D7D6F00B2849DF7E00C3EE7F /* TrackersBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersBlockerTests.swift; sourceTree = "<group>"; };
@@ -8141,6 +8143,7 @@
 				D73C598328ABA9B2004D41DF /* TabGroupCaptureToANoteMenuTests.swift */,
 				D75AA9C828B4AD8300E495D9 /* TabGroupSharingFromBrowserTests.swift */,
 				D75AA9CF28B4C59F00E495D9 /* TabGroupSharingFromNoteTests.swift */,
+				D79394AF28C0A0BA00AEADA1 /* TabGroupDeleteFromOmniboxTests.swift */,
 			);
 			path = TabGrouping;
 			sourceTree = "<group>";
@@ -10107,6 +10110,7 @@
 				B5FAE2E7270DDD6C00EAC8A3 /* AlertTestView.swift in Sources */,
 				B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */,
 				D7D6F00C2849DF7E00C3EE7F /* TrackersBlockerTests.swift in Sources */,
+				D79394B028C0A0BA00AEADA1 /* TabGroupDeleteFromOmniboxTests.swift in Sources */,
 				A38D1A27284A10F3007EBB25 /* RowAllNotesTestTable.swift in Sources */,
 				D71D7488282B9E9200D8D6F5 /* AllowListPreferencesTests.swift in Sources */,
 				B5984C9D27031F7E00192B5F /* AutofillPasswordViewLocators.swift in Sources */,
