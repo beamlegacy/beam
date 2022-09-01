@@ -187,6 +187,7 @@
         "TabGroupCaptureToANoteTests",
         "TabGroupCloseTests",
         "TabGroupDeleteFromOmniboxTests",
+        "TabGroupDeleteTests",
         "TabGroupDragTabTests",
         "TabGroupInOmniboxTests",
         "TabGroupManualTests",
