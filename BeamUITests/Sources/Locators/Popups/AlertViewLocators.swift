@@ -19,6 +19,7 @@ enum AlertViewLocators {
         case savePasswordButton = "Save Password"
         case saveCCButton = "Save Credit Card"
         case signOutButton = "Sign Out"
+        case forgetButton = "Forget"
     }
     
     enum StaticTexts: String, CaseIterable, UIElement {
@@ -29,6 +30,8 @@ enum AlertViewLocators {
         case fivePinnedNotesMax = "You can only have 5 pinned notes.\nUnpin some notes to pin new ones."
         case signOutConfirmation = "Are you sure you want to sign out?"
         case deleteDBConfirmation = "Are you sure you want to delete all your graphs?"
+        case forgetTabGroupTitle = "Forget tab group"
+        case forgetTabGroupBody = "Are you sure you want to forget the tab group “%tabGroupName%”? Forgotten tab groups cannot be recovered."
     }
     
     enum Checkboxes: String, CaseIterable, UIElement {
