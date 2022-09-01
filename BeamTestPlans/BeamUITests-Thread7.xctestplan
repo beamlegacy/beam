@@ -202,7 +202,6 @@
         "SignInSucessfullyTests",
         "SlashMenuTests\/testDatePickerCardCreation()",
         "TabGroupCaptureToANote",
-        "TabGroupCaptureToANoteMenuTests",
         "TabGroupCaptureToANoteTests",
         "TabGroupCloseTests",
         "TabGroupDragTabTests",

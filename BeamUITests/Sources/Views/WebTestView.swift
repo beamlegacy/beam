@@ -225,8 +225,25 @@ class WebTestView: BaseView {
     }
     
     @discardableResult
-    func dragTabOutOfTheGroup(tabIndex: Int) -> WebTestView {
-        self.getTabByIndex(index: tabIndex).clickForDurationThenDragToInTheMiddle(forDuration: self.defaultPressDurationSeconds, thenDragTo: self.button(WebViewLocators.Buttons.openOmnibox.accessibilityIdentifier))
+    func dragTabToOmniboxIconArea(tabIndex: Int) -> WebTestView {
+        dragAndDropTabToElement(tabIndex: tabIndex, elementToDragTo: button(WebViewLocators.Buttons.openOmnibox.accessibilityIdentifier))
+        return self
+    }
+    
+    @discardableResult
+    func dragTabToHomeIconArea(tabIndex: Int) -> WebTestView {
+        dragAndDropTabToElement(tabIndex: tabIndex, elementToDragTo: button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier))
+        return self
+    }
+    
+    @discardableResult
+    func dragTabToWebNoteSwithcerIcon(tabIndex: Int) -> WebTestView {
+        dragAndDropTabToElement(tabIndex: tabIndex, elementToDragTo: button(ToolbarLocators.Buttons.openNoteButton.accessibilityIdentifier))
+    }
+    
+    @discardableResult
+    func dragAndDropTabToElement(tabIndex: Int, elementToDragTo: XCUIElement) -> WebTestView {
+        self.getTabByIndex(index: tabIndex).clickForDurationThenDragToInTheMiddle(forDuration: self.defaultPressDurationSeconds, thenDragTo: elementToDragTo)
         return self
     }
     
