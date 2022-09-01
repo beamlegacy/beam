@@ -22,7 +22,6 @@ class BaseTest: XCTestCase {
     let emptyString = ""
     let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
     let uiTestModeLaunchArgument = "XCUITest"
-    let correctEmailCamelCase = "qA+automAtiontest@beamapp.co"
     let incorrectEmail = "qa+automationtest@beamappa.co"
     let incorrectPassword = "Incorrect1"
     let username = "AutomationTestSignin"
@@ -34,6 +33,8 @@ class BaseTest: XCTestCase {
     let uiTestPageTwo = "Point And Shoot Test Fixture I-Beam"
     let uiTestPageThree = "Point And Shoot Test Fixture Cursor"
     let uiTestPageFour = "Point And Shoot Test Fixture Background image"
+    
+    let copyLinkShareAction = "Copy Link"
     
     let uiMenu = UITestsMenuBar()
     let shortcutHelper = ShortcutsHelper()
