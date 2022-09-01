@@ -9,9 +9,11 @@ import XCTest
 @testable import Beam
 
 private class FakeClusteringManager: ClusteringManagerProtocol {
+    var typeInUse: ClusteringType { .smart }
     func getIdAndParent(tabToIndex: TabIndexingInfo) -> (UUID?, UUID?) { (nil, nil) }
-    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?) { }
-    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?) { }
+    func addPage(id: UUID, tabId: UUID, parentId: UUID?, value: TabIndexingInfo?) { }
+    func addPage(id: UUID, tabId: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String? = nil) { }
+    func removePage(pageId: UUID, tabId: UUID) { }
 }
 
 private class FakeWebIndexControllerDelegate: WebIndexControllerDelegate {

@@ -69,7 +69,7 @@
         "repositoryURL": "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git",
         "state": {
           "branch": null,
-          "revision": "79f6b36e259379f1a9ac6c2ca79e30ac6cb7edeb",
+          "revision": "757f0ae0279b73feb589a4dae3012bda26ddf9ed",
           "version": null
         }
       },
@@ -80,15 +80,6 @@
           "branch": null,
           "revision": "80ada1f753b0d53d9b57c465936a7c4169375002",
           "version": "3.7.4"
-        }
-      },
-      {
-        "package": "CodableCSV",
-        "repositoryURL": "https://github.com/dehesa/CodableCSV.git",
-        "state": {
-          "branch": null,
-          "revision": "99ace2cfdfbc19108b529c021005fb57a460e715",
-          "version": "0.6.7"
         }
       },
       {

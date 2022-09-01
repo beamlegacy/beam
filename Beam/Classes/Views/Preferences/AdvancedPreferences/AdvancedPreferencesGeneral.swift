@@ -15,6 +15,11 @@ struct AdvancedPreferencesGeneral: View {
     @State private var useSidebar = PreferencesManager.useSidebar
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
     @State private var loggedIn: Bool = AuthenticationManager.shared.isAuthenticated
+    @State private var clusteringV2Enabled: Bool = PreferencesManager.enableClusteringV2
+
+    private var isClusteringV2Supported: Bool {
+        ClusteringType.smart.isSupported
+    }
 
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {
@@ -47,6 +52,13 @@ struct AdvancedPreferencesGeneral: View {
                 CrashButton
                 CopyAccessToken
                 ResetOnboarding
+            }
+            if isClusteringV2Supported {
+                Settings.Row {
+                    Text("Clustering")
+                } content: {
+                    clusteringSelector
+                }
             }
             Settings.Row {
                 Text("Use sidebar")
@@ -110,6 +122,20 @@ struct AdvancedPreferencesGeneral: View {
         }, label: {
             Text(String(describing: stateRestorationEnabled)).frame(minWidth: 100)
         })
+    }
+
+    private var clusteringSelector: some View {
+        return VStack(alignment: .leading) {
+                Toggle(isOn: $clusteringV2Enabled) {
+                Text("Enable Clustering V2")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onChange(of: clusteringV2Enabled) {
+                    PreferencesManager.enableClusteringV2 = $0
+                }
+            Settings.SubtitleLabel("Requires restart")
+        }
     }
 }
 
