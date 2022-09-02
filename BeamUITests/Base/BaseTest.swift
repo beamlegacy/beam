@@ -37,6 +37,7 @@ class BaseTest: XCTestCase {
     let copyLinkShareAction = "Copy Link"
     
     let uiMenu = UITestsMenuBar()
+    let hiddenCommand = HiddenCommandHelper()
     let shortcutHelper = ShortcutsHelper()
     let mockPage = MockHTTPWebPages()
     let passwordManagerHelper = PasswordManagerHelper()
@@ -152,9 +153,13 @@ class BaseTest: XCTestCase {
     }
     
     @discardableResult
-    func openFirstNoteInAllNotesList() -> NoteTestView {
-        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-        return AllNotesTestView().openFirstNote()
+    func openTodayNote() -> NoteTestView {
+        hiddenCommand.openTodayNote()
+    }
+
+    @discardableResult
+    func openNoteByTitle(_ title: String) -> NoteTestView {
+        hiddenCommand.openNote(title: title)
     }
 
     func terminateAppInstance() {
@@ -168,10 +173,11 @@ class BaseTest: XCTestCase {
     }
     
     @discardableResult
-    func launchAppAndOpenFirstNote() -> NoteTestView {
+    func launchAppAndOpenTodayNote() -> NoteTestView {
         launchApp()
-        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-        return AllNotesTestView().openFirstNote()
+        let noteView = openTodayNote()
+        noteView.waitForNoteViewToLoad()
+        return noteView
     }
     
     func isBigSurOS() -> Bool {
@@ -237,14 +243,11 @@ class BaseTest: XCTestCase {
 
     func captureGroupToNoteAndOpenNote() {
         let tabGroupMenu = TabGroupMenuView()
-        let allNotesView = AllNotesTestView()
         
         tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
         tabGroupMenu.captureTabGroup(index: 0)
         tabGroupMenu.closeTabGroup(index: 0)
-        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-        allNotesView.waitForAllNotesViewToLoad()
-        allNotesView.openFirstNote()
+        openTodayNote()
     }
 
     func testrailId(_ id: String) {

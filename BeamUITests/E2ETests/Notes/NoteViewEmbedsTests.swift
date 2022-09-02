@@ -87,9 +87,8 @@ class NoteViewEmbedsTests: BaseTest {
     func _testEmbedVideoMediaControl(expectedWebViewCount: Int) {
         
         step("Given open today's note"){
-            noteView = journalView
-                .openAllNotesMenu()
-                .openFirstNote()
+            noteView = openTodayNote()
+            noteView.waitForNoteViewToLoad()
         }
 
         step("When I type a video url"){

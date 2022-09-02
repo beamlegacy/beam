@@ -148,10 +148,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logWarning("REST API HOSTNAME is \(Configuration.restApiHostname)", category: .general)
         }
 
-        #if DEBUG
-        if let account = data.currentAccount {
-            self.beamUIMenuGenerator = BeamUITestsMenuGenerator(account: account)
-        }
+        #if DEBUG        
         prepareMenuForTestEnv()
 
         // In test mode, we want to start fresh without auth tokens as they may have expired

@@ -14,13 +14,11 @@ class TabGroupCaptureToANoteTests: BaseTest {
     let noteView = NoteTestView()
     let allNotesView = AllNotesTestView()
     
-    private func verifyTabGroupCapturedInNote (tabGroupName: String, noteName: String? = nil, indexOfTabGroup: Int = 0){
-        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-        allNotesView.waitForAllNotesViewToLoad()
-        if noteName != nil {
-            allNotesView.openNoteByName(noteTitle: noteName!)
+    private func verifyTabGroupCapturedInNote (tabGroupName: String, noteName: String? = nil, indexOfTabGroup: Int = 0){        
+        if let noteName = noteName {
+            openNoteByTitle(noteName)
         } else {
-            allNotesView.openFirstNote()
+            openTodayNote()
         }
         XCTAssertTrue(noteView.isTabGroupDisplayed(index: indexOfTabGroup))
         XCTAssertEqual(noteView.getTabGroupElementName(index: indexOfTabGroup), tabGroupName)

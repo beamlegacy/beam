@@ -29,12 +29,13 @@ class NotesNavigationHistoryTests: BaseTest {
     func testNotesNavigationHistory() {
         testrailId("C825, C826")
         launchApp()
-        
+
         testrailId("C828")
         step("GIVEN I open All notes and default note") {
-            noteView = openFirstNoteInAllNotesList()
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            noteView = AllNotesTestView().openFirstNote()
         }
-        
+
         step("THEN forward button is disabled and All Notes opened on Back button click"){
             XCTAssertFalse(noteView.button(WebViewLocators.Buttons.goForwardButton.accessibilityIdentifier).exists)
             noteView.button(WebViewLocators.Buttons.goBackButton.accessibilityIdentifier).tapInTheMiddle()
