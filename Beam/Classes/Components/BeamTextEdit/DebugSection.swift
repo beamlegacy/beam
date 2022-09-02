@@ -67,16 +67,6 @@ class DebugSection: Widget {
 
         updateLayerVisibility()
 
-        note.$saving.sink { [weak self] val in
-            let value = val.load(ordering: .relaxed)
-            guard let self = self else { return }
-            let deadline = value ? DispatchTime.now() : DispatchTime.now() + 0.5
-            DispatchQueue.main.asyncAfter(deadline: deadline) {
-                self.savingLayer.string = value ? "saving" : ""
-                self.savingLayer.frame = CGRect(origin: self.savingLayer.frame.origin, size: self.savingLayer.preferredFrameSize())
-            }
-        }.store(in: &scope)
-
         note.$updateAttempts.sink { [weak self] value in
             guard let self = self else { return }
             self.updateAttemptsLayer.string = "update attemps: \(value)"
