@@ -8,15 +8,30 @@ struct BeamUITestsMenuGeneratorSource: BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 }
 
-class BeamUITestsMenuGenerator: BeamDocumentSource {
+class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     static var sourceId: String { "\(Self.self)" }
 
-    static var beeper: CrossTargetBeeper?
-
+    private(set) var beeper: CrossTargetNotificationCenterBeeper
+    private var hiddenIdentifiersBuilder: CrossTargetHiddenNotificationsBuilder
     private weak var account: BeamAccount?
 
     init(account: BeamAccount) {
+        self.beeper = CrossTargetNotificationCenterBeeper()
         self.account = account
+        self.hiddenIdentifiersBuilder = .init(data: account.data, beeper: beeper)
+        self.beeper.delegate = self
+    }
+
+    private var dismissBeeperStatusWork: DispatchWorkItem?
+    func beeperWasCalled(with identifier: String) {
+        guard let item = NSApp.mainMenu?.items.first(where: { $0.identifier == AppDelegate.beeperStatusIdentifier }) else { return }
+        dismissBeeperStatusWork?.cancel()
+        item.submenu?.title = "\"\(identifier)\""
+        let workItem = DispatchWorkItem {
+            item.submenu?.title = ""
+        }
+        dismissBeeperStatusWork = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: workItem)
     }
 
     func executeCommand(_ command: UITestMenuAvailableCommands) {
@@ -505,14 +520,14 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
         }
     }
 
-    var noteCount = 1
+    private var createNote = 1
     @discardableResult
     private func createNote(open: Bool = false) -> BeamNote {
-        let note = try! BeamNote(title: "Test\(noteCount)")
+        let note = try! BeamNote(title: "Test\(createNote)")
         note.type = .note
         note.owner = BeamData.shared.currentDatabase
         _ = note.save(self)
-        noteCount += 1
+        createNote += 1
         if open {
             self.open(note: note)
         }
@@ -531,8 +546,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource {
     }
 
     private func open(note: BeamNote) {
-        AppDelegate.main.window?.state.mode = .note
-        AppDelegate.main.window?.state.currentNote = note
+        AppDelegate.main.window?.state.navigateToNote(note)
     }
 }
 

@@ -1140,6 +1140,8 @@
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A55760822665501000DEE86C /* TableViewColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55760812665501000DEE86C /* TableViewColumn.swift */; };
 		A558578828C0E08300382BFF /* WKNavigationAction+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A558578728C0E08300382BFF /* WKNavigationAction+Beam.swift */; };
+		A558577A28C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A558577928C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift */; };
+		A558578328C026CD00382BFF /* HiddenCommandHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A558578128C026CD00382BFF /* HiddenCommandHelper.swift */; };
 		A55A019427DF49BF002403D5 /* BeamTableCellLottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */; };
 		A55C98BD2805F60200717D3E /* ShareHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98BC2805F60200717D3E /* ShareHelper.swift */; };
 		A55C98C52806FB5F00717D3E /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98C42806FB5F00717D3E /* ShareService.swift */; };
@@ -3102,6 +3104,8 @@
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A55760812665501000DEE86C /* TableViewColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewColumn.swift; sourceTree = "<group>"; };
 		A558578728C0E08300382BFF /* WKNavigationAction+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKNavigationAction+Beam.swift"; sourceTree = "<group>"; };
+		A558577928C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetHiddenNotificationsBuilder.swift; sourceTree = "<group>"; };
+		A558578128C026CD00382BFF /* HiddenCommandHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenCommandHelper.swift; sourceTree = "<group>"; };
 		A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTableCellLottieView.swift; sourceTree = "<group>"; };
 		A55C98BC2805F60200717D3E /* ShareHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHelper.swift; sourceTree = "<group>"; };
 		A55C98C42806FB5F00717D3E /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
@@ -4941,6 +4945,7 @@
 				5273C66C25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift */,
 				52FC002225E4244200ABECB0 /* MenuAvailableCommands.swift */,
 				D77D4788282269640006847A /* CrossTargetBeeper.swift */,
+				A558577928C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift */,
 			);
 			path = UITests;
 			sourceTree = "<group>";
@@ -7721,6 +7726,7 @@
 				B5DC1FB426B928CA00A4C94B /* DateHelper.swift */,
 				B50E1C9826FCC8AD00E767AE /* PasswordManagerHelper.swift */,
 				B5FAE2FB270ECFA600EAC8A3 /* ShortcutsHelper.swift */,
+				A558578128C026CD00382BFF /* HiddenCommandHelper.swift */,
 				B5FAE2FD270ED71700EAC8A3 /* PreferencesBaseView.swift */,
 				D7858BD2283CBC5A00D0336A /* BaseCreditCardTest.swift */,
 				A35DE6872847808100C697D9 /* BaseRow.swift */,
@@ -9231,6 +9237,7 @@
 				524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */,
 				A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */,
 				5298EB0526272D400033862C /* NSManagedObjectModel+Extension.swift in Sources */,
+				A558577A28C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift in Sources */,
 				418172042581107C00317ED8 /* TemporaryFile.swift in Sources */,
 				A0125A0426DE333500590CB5 /* CloseTab.swift in Sources */,
 				9623ABBD26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift in Sources */,
@@ -10179,6 +10186,7 @@
 				A3E7B4C027AC462E0074C9BB /* PasswordPreferencesTests.swift in Sources */,
 				B5FB3A1E27E8C18400037FD5 /* SignInTests.swift in Sources */,
 				D7D6F031284E2CE900C3EE7F /* AddLinkView.swift in Sources */,
+				A558578328C026CD00382BFF /* HiddenCommandHelper.swift in Sources */,
 				A315D570282B98F000579362 /* CreditCardsTests.swift in Sources */,
 				B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */,
 				B5FAE304270EE16800EAC8A3 /* AccountTestView.swift in Sources */,
