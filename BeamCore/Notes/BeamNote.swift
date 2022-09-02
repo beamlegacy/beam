@@ -6,7 +6,6 @@
 
 import Foundation
 import Combine
-import Atomics
 import UUIDKit
 
 public protocol BeamDocumentSource {
@@ -157,7 +156,6 @@ public class BeamNote: BeamElement {
     }
     public var databaseId: UUID? { owner?.id }
     public weak var owner: BeamOwner?
-    @Published public var saving = ManagedAtomic<Bool>(false)
     @Published public var updateAttempts: Int = 0
     @Published public var updates: Int = 0
     public var contactId: UUID? { didSet { change(.meta) } }
@@ -407,8 +405,6 @@ public class BeamNote: BeamElement {
         }
     }
 
-    public var pendingSave = ManagedAtomic<Int>(0)
-
     public static func appendToFetchedNotes(_ note: BeamNote) {
         fetchedLock.writeLock()
         defer { fetchedLock.writeUnlock() }
@@ -560,7 +556,6 @@ public class BeamNote: BeamElement {
         self.browsingSessionIds = other.browsingSessionIds
         self.version = other.version
         self.owner = other.owner
-        self.saving = other.saving
         self.updateAttempts = other.updateAttempts
         self.updates = other.updates
         self.contactId = other.contactId
