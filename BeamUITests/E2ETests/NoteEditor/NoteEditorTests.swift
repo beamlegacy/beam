@@ -116,9 +116,7 @@ class NoteEditorTests: BaseTest {
         testrailId("C810")
         step("Given I open a note") {
             launchApp()
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            AllNotesTestView().waitForAllNotesViewToLoad()
-            AllNotesTestView().openFirstNote()
+            openTodayNote()
         }
         
         step("Given I type a URL in text editor"){
@@ -146,7 +144,7 @@ class NoteEditorTests: BaseTest {
     
     func testBulletFoldUnfold() {
         testrailId("C952")
-        launchAppAndOpenFirstNote()
+        launchAppAndOpenTodayNote()
 
         step("Given I create note with indented content") {
             noteTestView.waitForTodayNoteViewToLoad()
@@ -249,7 +247,7 @@ class NoteEditorTests: BaseTest {
     
     func testTextNodeIndentationLevels() {
         testrailId("C803, C951")
-        launchAppAndOpenFirstNote()
+        launchAppAndOpenTodayNote()
         
         step("Given I create indentation levels") {
             noteTestView.waitForNoteViewToLoad()
@@ -367,7 +365,7 @@ class NoteEditorTests: BaseTest {
         let textAppended = " Updated"
         let expectedBiDiLink = textToAddLink + textAppended
         
-        launchAppAndOpenFirstNote()
+        launchAppAndOpenTodayNote()
         
         step("Given I add text in a note") {
             noteTestView.waitForNoteViewToLoad()

@@ -23,7 +23,7 @@ class TextEditorContextViewTests: BaseTest {
         let noteName = String(textToType[index...])
         
         step("Given open today's note"){
-            noteView = launchAppAndOpenFirstNote()
+            noteView = launchAppAndOpenTodayNote()
         }
         
         step("When I create a bidi link out of typed text: \(textToType)"){
@@ -92,7 +92,7 @@ class TextEditorContextViewTests: BaseTest {
         let expectedTabURL = "google.com/"
         
         step("Given open today's note"){
-            noteView = launchAppAndOpenFirstNote()
+            noteView = launchAppAndOpenTodayNote()
         }
 
         //create an empty link
@@ -134,7 +134,7 @@ class TextEditorContextViewTests: BaseTest {
         testrailId("779, 778, 775, 774")
         let text = "THE_text 2 TE$t"
         step("Given open today's note"){
-            noteView = launchAppAndOpenFirstNote()
+            noteView = launchAppAndOpenTodayNote()
         }
 
         step("When I type: \(text)"){

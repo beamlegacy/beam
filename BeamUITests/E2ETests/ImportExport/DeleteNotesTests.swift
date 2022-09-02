@@ -31,8 +31,7 @@ class DeleteNotesTests: BaseTest {
         let expectedNumberOfNotesAfterClearingDB = 1
         launchApp()
         step("Given I populate the app with random notes"){
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            allNotes.openFirstNote()
+            openTodayNote()
             uiMenu.insertTextInCurrentNote()
             uiMenu.create10Notes()
         }
