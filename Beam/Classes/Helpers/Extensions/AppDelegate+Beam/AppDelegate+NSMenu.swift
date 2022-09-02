@@ -223,6 +223,7 @@ extension AppDelegate {
     private static let collectPageToCardAlternateItemIdentifier = NSUserInterfaceItemIdentifier("collect_page_alternate")
     private static let sidebarItemIdentifier = NSUserInterfaceItemIdentifier("toggle_sidebar")
     private static let togglePinNoteIdentifier = NSUserInterfaceItemIdentifier("toggle_pin_note")
+    static let beeperStatusIdentifier = NSUserInterfaceItemIdentifier("beeper_status")
 }
 
 // MARK: - Custom Item Validation

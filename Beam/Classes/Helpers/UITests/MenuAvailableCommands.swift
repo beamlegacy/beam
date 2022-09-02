@@ -50,6 +50,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     // Notes
     case populateDBWithJournal = "Populate Journal"
     case insertTextInCurrentNote = "Insert Text in Current Note"
+    case separatorInNotesA
     case create100Notes = "Create 100 Random Notes"
     case create100NormalNotes = "Create 100 Normal Notes"
     case create100JournalNotes = "Create 100 Journal Notes"
@@ -57,6 +58,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case create10NormalNotes = "Create 10 Normal Notes"
     case create10JournalNotes = "Create 10 Journal Notes"
     case createFakeDailySummary = "Create Fake Daily Summary"
+    case separatorInNotesB
     case createNote = "Create Note"
     case createAndOpenNote = "Create and Open Note"
     case createPublishedNote = "Create Published Note"
@@ -104,7 +106,8 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .webTabs
         case .populateDBWithJournal, .insertTextInCurrentNote,
                 .create100Notes, .create100NormalNotes, .create100JournalNotes, .create10Notes, .create10NormalNotes, .create10JournalNotes,
-                .createFakeDailySummary, .createNote, .createAndOpenNote, .createPublishedNote, .createAndOpenPublishedNote:
+                .createFakeDailySummary, .createNote, .createAndOpenNote, .createPublishedNote, .createAndOpenPublishedNote,
+                .separatorInNotesA, .separatorInNotesB:
             return .notes
         case .create1000Links, .create10000Links, .create50000Links:
             return .links
@@ -147,4 +150,13 @@ public enum UITestMenuGroup: String, CaseIterable {
     case resizeWindow = "Resize Window"
     case remoteServer = "Remote server"
     case preferences = "Preferences"
+}
+
+public enum UITestsHiddenMenuAvailableCommands: String, CaseIterable {
+    case openTodayNote
+    case openNotePrefix = "OpenNote-"
+
+    static func openNoteIdentifier(title: String) -> String {
+        UITestsHiddenMenuAvailableCommands.openNotePrefix.rawValue + title
+    }
 }

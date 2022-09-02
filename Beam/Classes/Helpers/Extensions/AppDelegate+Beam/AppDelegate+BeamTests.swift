@@ -8,9 +8,13 @@
 import Foundation
 
 extension AppDelegate {
+
     #if DEBUG
     func prepareMenuForTestEnv() {
-        BeamUITestsMenuGenerator.beeper = CrossTargetNotificationCenterBeeper()
+        if let account = data.currentAccount {
+            beamUIMenuGenerator = BeamUITestsMenuGenerator(account: account)
+        }
+        let beeper = beamUIMenuGenerator.beeper
         let prepareBeam = NSMenuItem()
         prepareBeam.submenu = NSMenu(title: "UITests")
         var groupMenus: [UITestMenuGroup: NSMenu] = [:]
@@ -21,7 +25,7 @@ extension AppDelegate {
             if value.hasPrefix("separator") {
                 menuItem = NSMenuItem.separator()
             } else {
-                BeamUITestsMenuGenerator.beeper?.register(identifier: value) { [unowned self] in
+                beeper.register(identifier: value) { [unowned self] in
                     beamUIMenuGenerator.executeCommand(item)
                 }
                 menuItem = NSMenuItem(title: item.rawValue,
@@ -45,6 +49,11 @@ extension AppDelegate {
             parentMenu?.addItem(menuItem)
         }
         NSApp.mainMenu?.addItem(prepareBeam)
+
+        let menuBeeperItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        menuBeeperItem.submenu = NSMenu(title: "")
+        menuBeeperItem.identifier = Self.beeperStatusIdentifier
+        NSApp.mainMenu?.addItem(menuBeeperItem)
     }
 
     @objc

@@ -26,6 +26,10 @@ protocol CrossTargetBeeper {
     func unregister(identifier: String)
 }
 
+protocol CrossTargetBeeperDelegate: AnyObject {
+    func beeperWasCalled(with identifier: String)
+}
+
 // MARK: - CrossTargetNotificationCenterBeeper
 
 /// A Cross Target Center based Beeper implementation
@@ -34,6 +38,7 @@ class CrossTargetNotificationCenterBeeper: CrossTargetBeeper {
     private let crossTargetNotificationCenter: CFNotificationCenter
     private let prefix: String
     private var handlers = [String: BeepHandler]()
+    weak var delegate: CrossTargetBeeperDelegate?
 
     /// Constructs a CrossTargetNotificationCenter backed implementation of a "Beeper"
     ///
@@ -78,6 +83,7 @@ class CrossTargetNotificationCenterBeeper: CrossTargetBeeper {
 
     fileprivate func handleNotification(name: String) {
         let handlerIdentifier = identifier(from: name)
+        delegate?.beeperWasCalled(with: handlerIdentifier)
         if let handler = handlers[handlerIdentifier] {
             handler()
         }
@@ -88,7 +94,6 @@ class CrossTargetNotificationCenterBeeper: CrossTargetBeeper {
     }
 
     // MARK: - CrossTargetBeeper
-
     func beep(identifier: String) {
         let name = notificationName(from: identifier)
         CFNotificationCenterPostNotification(crossTargetNotificationCenter,
