@@ -50,7 +50,7 @@ class ReferencesSection: LinksSection {
     }
 
     override func updateInitialHeading() {
-        updateHeading(max(0, note.fastReferences.count - note.links.count)) // shouldn't be negative
+        updateHeading(note.fastReferences.count)
     }
 
     override func updateHeading(_ count: Int) {

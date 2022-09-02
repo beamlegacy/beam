@@ -59,7 +59,21 @@ public extension Linkable {
     }
 
     private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID, verifyMatch: Bool) -> [BeamNoteReference] {
-        (BeamData.shared.noteLinksAndRefsManager?.search(matchingPhrase: titleToMatch, column: BeamElementRecord.Columns.text) ?? []).compactMap { result -> BeamNoteReference? in
+        let results = BeamData.shared.noteLinksAndRefsManager?.search(matchingPhrase: titleToMatch, column: BeamElementRecord.Columns.text) ?? []
+
+        return results.compactMap { result -> BeamNoteReference? in
+            if !verifyMatch, let linkRanges = result.linkRanges?.ranges {
+                let options: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
+                let allMatchesAreLinks = result.text.ranges(of: titleToMatch, options: options).allSatisfy { range -> Bool in
+                    let lowerBound = result.text.distance(from: result.text.startIndex, to: range.lowerBound)
+                    let upperBound = result.text.distance(from: result.text.startIndex, to: range.upperBound)
+                    let range = lowerBound..<upperBound
+                    return linkRanges.contains(where: { $0.overlaps(range) })
+                }
+                if allMatchesAreLinks {
+                    return nil
+                }
+            }
             let noteRef = BeamNoteReference(noteID: result.noteId, elementID: result.uid)
             guard result.noteId != self.id else { return nil }
             guard verifyMatch else { return noteRef }

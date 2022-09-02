@@ -18,14 +18,74 @@ struct BeamElementRecord {
     var uid: String
     var noteId: String // Added noteId
     var databaseId: String
+    var linkRanges: LinkRanges
+
     static let frecency = hasOne(FrecencyNoteRecord.self, key: "frecency", using: FrecencyNoteRecord.BeamElementForeignKey)
+
+    struct LinkRanges: DatabaseValueConvertible {
+        var databaseValue: DatabaseValue {
+            var data = Data()
+            data.reserveCapacity(MemoryLayout<Int64>.stride*2*ranges.count)
+
+            for range in ranges {
+                var lowerBound = Int64(range.lowerBound)
+                var upperBound = Int64(range.upperBound)
+                withUnsafeBytes(of: &lowerBound) { buffer in
+                    data.append(contentsOf: buffer)
+                }
+                withUnsafeBytes(of: &upperBound) { buffer in
+                    data.append(contentsOf: buffer)
+                }
+            }
+
+            guard let value = DatabaseValue(value: data) else {
+                fatalError("Error while making bidilink ranges database value")
+            }
+
+            return value
+        }
+
+        static func fromDatabaseValue(_ dbValue: DatabaseValue) -> LinkRanges? {
+            guard let data = Data.fromDatabaseValue(dbValue) else {
+                return nil
+            }
+
+            let stride = MemoryLayout<Int64>.stride
+            let quotientAndRemainder = data.count.quotientAndRemainder(dividingBy: stride*2)
+
+            guard quotientAndRemainder.remainder == 0 else {
+                return nil
+            }
+
+            let ranges = (0..<quotientAndRemainder.quotient).map { index -> Range<Int> in
+                var lowerBound: Int64 = 0
+                var upperBound: Int64 = 0
+                let index = index*stride*2
+                withUnsafeMutableBytes(of: &lowerBound) { buffer in
+                    _ = data.copyBytes(to: buffer, from: index..<index+stride)
+                }
+                withUnsafeMutableBytes(of: &upperBound) { buffer in
+                    _ = data.copyBytes(to: buffer, from: index+stride..<index+stride*2)
+                }
+                return Int(lowerBound)..<Int(upperBound)
+            }
+
+            return LinkRanges(ranges)
+        }
+
+        let ranges: [Range<Int>]
+
+        init(_ ranges: [Range<Int>]) {
+            self.ranges = ranges
+        }
     }
+}
 
 // SQL generation
 extension BeamElementRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case id, title, text, uid, noteId, databaseId
+        case id, title, text, uid, noteId, databaseId, linkRanges
     }
 }
 
@@ -39,6 +99,7 @@ extension BeamElementRecord: FetchableRecord {
         uid = row[Columns.uid]
         noteId = row[Columns.noteId]
         databaseId = row[Columns.databaseId]
+        linkRanges = row[Columns.linkRanges]
     }
 }
 
@@ -52,6 +113,7 @@ extension BeamElementRecord: MutablePersistableRecord {
         container[Columns.uid] = uid
         container[Columns.noteId] = noteId
         container[Columns.databaseId] = databaseId
+        container[Columns.linkRanges] = linkRanges
     }
 
     // Update auto-incremented id upon successful insertion
