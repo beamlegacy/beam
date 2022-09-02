@@ -521,6 +521,7 @@
 		6E542C51288A8AE100DA78EA /* GIFAnimatedLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E542C50288A8AE100DA78EA /* GIFAnimatedLayer.swift */; };
 		6E8393CC287C9CC7004633BC /* AppLifecycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8393CB287C9CC7004633BC /* AppLifecycleTests.swift */; };
 		6E9699BE28B8F20400A78676 /* AppData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E9699BD28B8F20400A78676 /* AppData.swift */; };
+		6E9FB88228C24B0C00EB0138 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 6E9FB88128C24B0C00EB0138 /* Atomics */; };
 		6EC995B8287D6F8400691668 /* WindowMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC995B2287D6F8400691668 /* WindowMenu.swift */; };
 		6ED421D628BCFA99008FDE0F /* tabs-media_mute.json in Resources */ = {isa = PBXBuildFile; fileRef = 6ED421D528BCFA99008FDE0F /* tabs-media_mute.json */; };
 		6ED5E8CB287DA62F00EA7DA1 /* download-file.json in Resources */ = {isa = PBXBuildFile; fileRef = 6ED5E8CA287DA62F00EA7DA1 /* download-file.json */; };
@@ -714,7 +715,6 @@
 		961EC51725B5038E009FA322 /* ChevronButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961EC51625B5038E009FA322 /* ChevronButton.swift */; };
 		9623ABBD26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBC26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift */; };
 		9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */; };
-		9624A65727431B4200B8D012 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 9624A65627431B4200B8D012 /* Atomics */; };
 		9624A6592743212500B8D012 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 9624A6582743212500B8D012 /* Atomics */; };
 		962AC886279017FD001B7142 /* OmniboxContentDebuggerWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 962AC885279017FD001B7142 /* OmniboxContentDebuggerWindow.swift */; };
 		962AC88827901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 962AC88727901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift */; };
@@ -3491,7 +3491,6 @@
 			files = (
 				96C0F72D26FCAE6100385449 /* UUIDKit in Frameworks */,
 				A0A84FC02636FA99008F0326 /* CocoaLumberjackSwift in Frameworks */,
-				9624A65727431B4200B8D012 /* Atomics in Frameworks */,
 				96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */,
 				9684F26F270F8DDA006BF53E /* Sentry in Frameworks */,
 			);
@@ -3530,6 +3529,7 @@
 				33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
 				66C9179928B38DD5007B4636 /* Markdown in Frameworks */,
+				6E9FB88228C24B0C00EB0138 /* Atomics in Frameworks */,
 				873528C127354295005E7CBC /* INI in Frameworks */,
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
 				33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */,
@@ -8266,7 +8266,6 @@
 				96D5AE84264C01AD003AD516 /* TLDExtract */,
 				96C0F72C26FCAE6100385449 /* UUIDKit */,
 				9684F26E270F8DDA006BF53E /* Sentry */,
-				9624A65627431B4200B8D012 /* Atomics */,
 			);
 			productName = BeamCore;
 			productReference = 96319D0F2616232600D1CF31 /* BeamCore.framework */;
@@ -8338,6 +8337,7 @@
 				BFEA487C286A1519007A73BD /* AsyncHTTPClient */,
 				8A7AA041289960A700B271E2 /* FaviconFinder */,
 				66C9179828B38DD5007B4636 /* Markdown */,
+				6E9FB88128C24B0C00EB0138 /* Atomics */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -12532,6 +12532,11 @@
 			package = 66C9179728B38DD4007B4636 /* XCRemoteSwiftPackageReference "swift-markdown" */;
 			productName = Markdown;
 		};
+		6E9FB88128C24B0C00EB0138 /* Atomics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */;
+			productName = Atomics;
+		};
 		873528C027354295005E7CBC /* INI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 873528BF27354295005E7CBC /* XCRemoteSwiftPackageReference "ini" */;
@@ -12545,11 +12550,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8A7AA040289960A700B271E2 /* XCRemoteSwiftPackageReference "FaviconFinder" */;
 			productName = FaviconFinder;
-		};
-		9624A65627431B4200B8D012 /* Atomics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */;
-			productName = Atomics;
 		};
 		9624A6582743212500B8D012 /* Atomics */ = {
 			isa = XCSwiftPackageProductDependency;
