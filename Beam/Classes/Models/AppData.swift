@@ -78,6 +78,12 @@ final class AppData: ObservableObject {
 
         let database = (try? account.loadDatabase(dbId)) ?? account.defaultDatabase
         try setCurrentAccount(account, database: database)
+
+        let linksAndRefsManager = try database.manager(BeamNoteLinksAndRefsManager.self)
+
+        if linksAndRefsManager.needsPostMigrationReindexing {
+            BeamNote.indexAllNotes(interactive: false)
+        }
     }
 
     var accountsPath: URL {
