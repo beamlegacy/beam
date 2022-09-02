@@ -21,6 +21,8 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
 
     public override var tableNames: [String] { ["BeamElementRecord", "BidirectionalLink", "BeamNoteIndexingRecord", "FrecencyNoteRecord"] }
 
+    var needsPostMigrationReindexing = false
+
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.holder = holder
         try super.init(store: store)
@@ -93,6 +95,21 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
 //                    arguments: ["threshold": threshold])
 
         }
+
+        migrator.registerMigration("BeamElementRecord.linkRanges") { [weak self] db in
+            try db.drop(table: "BeamElementRecord")
+            try db.create(virtualTable: "BeamElementRecord", ifNotExists: true, using: FTS4()) { t in // or FTS3(), or FTS5()
+                t.tokenizer = .unicode61()
+                t.column("title")
+                t.column("uid")
+                t.column("text")
+                t.column("noteId")
+                t.column("databaseId")
+                t.column("linkRanges")
+            }
+
+            self?.needsPostMigrationReindexing = true
+        }
     }
 
     // MARK: - BeamNote / BeamElement
@@ -104,7 +121,10 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         let databaseId = note.databaseId?.uuidString ?? BeamData.shared.currentDatabase?.id.uuidString ?? UUID.null.uuidString
         let noteTitle = note.title
         let noteIdStr = note.id.uuidString
-        let records = note.allTextElements.map { BeamElementRecord(title: noteTitle, text: $0.text.text, uid: $0.id.uuidString, noteId: noteIdStr, databaseId: databaseId) }
+        let records = note.allTextElements.map { element -> BeamElementRecord in
+            let linkRanges = BeamElementRecord.LinkRanges(element.text.internalLinkRanges.map(\.range))
+            return BeamElementRecord(title: noteTitle, text: element.text.text, uid: element.id.uuidString, noteId: noteIdStr, databaseId: databaseId, linkRanges: linkRanges)
+        }
         let links = note.internalLinks
 
         BeamNote.indexingQueue.addOperation {
@@ -137,7 +157,8 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         do {
             try write { db in
                 try BeamElementRecord.filter(BeamElementRecord.Columns.noteId == noteId.uuidString && BeamElementRecord.Columns.uid == element.id.uuidString).deleteAll(db)
-                var record = BeamElementRecord(id: nil, title: noteTitle, text: element.text.text, uid: element.id.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? BeamData.shared.currentDatabase?.id.uuidString ?? UUID.null.uuidString)
+                let linkRanges = BeamElementRecord.LinkRanges(element.text.internalLinkRanges.map(\.range))
+                var record = BeamElementRecord(id: nil, title: noteTitle, text: element.text.text, uid: element.id.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? BeamData.shared.currentDatabase?.id.uuidString ?? UUID.null.uuidString, linkRanges: linkRanges)
                 try record.insert(db)
                 try BidirectionalLink.filter(BidirectionalLink.Columns.sourceElementId == element.id && BidirectionalLink.Columns.sourceNoteId == noteId).deleteAll(db)
             }
@@ -164,7 +185,8 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
             do {
                 try self.write { db in
                     try BeamElementRecord.filter(BeamElementRecord.Columns.noteId == noteId.uuidString && BeamElementRecord.Columns.uid == element.id.uuidString).deleteAll(db)
-                    var record = BeamElementRecord(id: nil, title: noteTitle, text: text, uid: elementId.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? BeamData.shared.currentDatabase?.id.uuidString ?? UUID.null.uuidString)
+                    let linkRanges = BeamElementRecord.LinkRanges(element.text.internalLinkRanges.map(\.range))
+                    var record = BeamElementRecord(id: nil, title: noteTitle, text: text, uid: elementId.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? BeamData.shared.currentDatabase?.id.uuidString ?? UUID.null.uuidString, linkRanges: linkRanges)
                     try record.insert(db)
                     try BidirectionalLink.filter(BidirectionalLink.Columns.sourceElementId == elementId && BidirectionalLink.Columns.sourceNoteId == noteId).deleteAll(db)
                 }
@@ -358,8 +380,9 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         var title: String
         var noteId: UUID
         var uid: UUID
-        var text: String?
+        var text: String
         var frecency: FrecencyNoteRecord?
+        var linkRanges: BeamElementRecord.LinkRanges?
     }
 
     typealias CompletionSearch = (Result<[SearchResult], Error>) -> Void
@@ -375,7 +398,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         asyncRead { (dbResult: Result<GRDB.Database, Error>) in
             do {
                 let db = try dbResult.get()
-                let results = try self.search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam, column: column)
+                let results = try self.search(db, pattern, maxResults, filter: filter, frecencyParam: frecencyParam, column: column)
                 completion(.success(results))
             } catch {
                 completion(.failure(error))
@@ -386,14 +409,13 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
     private func search(_ db: GRDB.Database,
                         _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
-                        _ includeText: Bool = false,
                         filter: SQLSpecificExpressible?,
                         frecencyParam: FrecencyParamKey?,
                         column: BeamElementRecord.Columns? = nil) throws -> [SearchResult] {
         if let frecencyParam = frecencyParam {
-            return try search(db, pattern, maxResults, includeText, filter: filter, frencencyParam: frecencyParam)
+            return try search(db, pattern, maxResults, filter: filter, frencencyParam: frecencyParam)
         } else {
-            return try search(db, pattern, maxResults, includeText, filter: filter, column: column)
+            return try search(db, pattern, maxResults, filter: filter, column: column)
         }
 
     }
@@ -414,7 +436,6 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
     private func search(_ db: GRDB.Database,
                         _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
-                        _ includeText: Bool = false,
                         filter: SQLSpecificExpressible? = nil,
                         column: BeamElementRecord.Columns? = nil) throws -> [SearchResult] {
         let databaseId = BeamData.shared.currentDatabase?.id.uuidString ?? UUID.null.uuidString
@@ -430,7 +451,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         return try query.fetchAll(db).compactMap { record in
             guard let noteId = record.noteId.uuid,
                   let uid = record.uid.uuid else { return nil }
-            return SearchResult(title: record.title, noteId: noteId, uid: uid, text: includeText ? record.text : nil)
+            return SearchResult(title: record.title, noteId: noteId, uid: uid, text: record.text, linkRanges: record.linkRanges)
         }
     }
 
@@ -448,7 +469,6 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
     private func search(_ db: GRDB.Database,
                         _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
-                        _ includeText: Bool = false,
                         filter: SQLSpecificExpressible? = nil,
                         frencencyParam: FrecencyParamKey) throws -> [SearchResult] {
 
@@ -477,7 +497,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
             let beamElement = record.beamElement
             guard let noteId = beamElement.noteId.uuid,
                   let uid = beamElement.uid.uuid else { return nil }
-            return SearchResult(title: beamElement.title, noteId: noteId, uid: uid, text: includeText ? beamElement.text : nil, frecency: record.frecency)
+            return SearchResult(title: beamElement.title, noteId: noteId, uid: uid, text: beamElement.text, frecency: record.frecency)
         }
     }
 
@@ -519,7 +539,6 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
 
     func search(matchingAllTokensIn string: String,
                 maxResults: Int? = nil,
-                includeText: Bool = false,
                 excludeElements: [UUID]? = nil,
                 frecencyParam: FrecencyParamKey? = nil,
                 column: BeamElementRecord.Columns? = nil) -> [SearchResult] {
@@ -532,7 +551,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         }
         do {
             return try self.read { db in
-                try self.search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam, column: column)
+                try self.search(db, pattern, maxResults, filter: filter, frecencyParam: frecencyParam, column: column)
             }
         } catch {
             return []
@@ -541,7 +560,6 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
 
     func search(matchingAnyTokenIn string: String,
                 maxResults: Int? = nil,
-                includeText: Bool = false,
                 excludeElements: [UUID]? = nil,
                 frecencyParam: FrecencyParamKey? = nil,
                 column: BeamElementRecord.Columns? = nil) -> [SearchResult] {
@@ -554,7 +572,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         }
         do {
             return try self.read { db in
-                try self.search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam, column: column)
+                try self.search(db, pattern, maxResults, filter: filter, frecencyParam: frecencyParam, column: column)
             }
         } catch {
             return []
@@ -562,12 +580,11 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
     }
 
     func search(allWithMaxResults maxResults: Int? = nil,
-                includeText: Bool = false,
                 frecencyParam: FrecencyParamKey? = nil,
                 column: BeamElementRecord.Columns? = nil) -> [SearchResult] {
         do {
             return try self.read { db in
-                try self.search(db, nil, maxResults, includeText, filter: nil, frecencyParam: frecencyParam, column: column)
+                try self.search(db, nil, maxResults, filter: nil, frecencyParam: frecencyParam, column: column)
             }
         } catch {
             return []
@@ -576,7 +593,6 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
 
     func search(matchingPhrase string: String,
                 maxResults: Int? = nil,
-                includeText: Bool = false,
                 frecencyParam: FrecencyParamKey? = nil,
                 column: BeamElementRecord.Columns? = nil) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingPhrase: string) else {
@@ -584,7 +600,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
         }
         do {
             return try self.read { db in
-                try self.search(db, pattern, maxResults, includeText, filter: nil, frecencyParam: frecencyParam, column: column)
+                try self.search(db, pattern, maxResults, filter: nil, frecencyParam: frecencyParam, column: column)
             }
         } catch {
             return []
