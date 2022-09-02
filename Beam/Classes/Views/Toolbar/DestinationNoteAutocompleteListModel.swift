@@ -242,12 +242,12 @@ extension DestinationNoteAutocompleteList {
         private func getSearchResultForNoteContent(text: String, itemLimit: Int) -> [AutocompleteResult] {
             var dbResults = [BeamNoteLinksAndRefsManager.SearchResult]()
             if !text.isEmpty {
-                dbResults = BeamData.shared.noteLinksAndRefsManager?.search(matchingAnyTokenIn: text, maxResults: itemLimit, includeText: true, excludeElements: excludeElements) ?? []
+                dbResults = BeamData.shared.noteLinksAndRefsManager?.search(matchingAnyTokenIn: text, maxResults: itemLimit, excludeElements: excludeElements) ?? []
             }
             var results: [AutocompleteResult] = dbResults.compactMap { r in
                 let elementId = r.uid
-                guard elementId != r.noteId, let text = r.text, !text.isEmpty else { return nil }
-                return AutocompleteResult(text: text, source: .note(noteId: r.noteId, elementId: elementId), uuid: elementId)
+                guard elementId != r.noteId, !r.text.isEmpty else { return nil }
+                return AutocompleteResult(text: r.text, source: .note(noteId: r.noteId, elementId: elementId), uuid: elementId)
             }
             if results.isEmpty {
                 let placeholderText = text.isEmpty ? "Search for a Block" : "No Results Found"
