@@ -37,7 +37,7 @@ extension TabGroupingManager: BeamDocumentSource {
             group.status = .sharing
             let (note, groupCopy) = try fetchOrCreateTabGroupNote(for: group)
             Task { @MainActor in
-                await saveGroupToDBIfNeeded(groupCopy)
+                await saveGroupToDBIfNeeded(groupCopy, copyOf: group)
                 BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true) { [weak self] result in
                     group.status = .default
                     guard case .success = result, let url = BeamNoteSharingUtils.getPublicLink(for: note) else {
@@ -61,10 +61,19 @@ extension TabGroupingManager: BeamDocumentSource {
     }
 
     @MainActor
-    private func saveGroupToDBIfNeeded(_ group: TabGroup) async {
-        guard storeManager?.fetch(byIds: [group.id]).first == nil else { return }
-        let openedTabs = allOpenTabs(inGroup: group)
-        await storeManager?.groupDidUpdate(group, origin: .sharing, updatePagesWithOpenedTabs: openedTabs)
+    private func saveGroupToDBIfNeeded(_ group: TabGroup, copyOf parentGroup: TabGroup?) async {
+        var group = group
+        let openedTabsInThisGroup = allOpenTabs(inGroup: parentGroup ?? group)
+        if storeManager?.fetch(byIds: [group.id]).first == nil || !openedTabsInThisGroup.isEmpty {
+            // first save or update the existing group
+            if let parentGroup = parentGroup, group != parentGroup {
+                group = .init(id: group.id, pageIds: parentGroup.pageIds,
+                              title: parentGroup.title?.isEmpty == false ? parentGroup.title : group.title,
+                              color: parentGroup.color ?? group.color,
+                              isLocked: group.isLocked, parentGroup: group.parentGroup)
+            }
+            await storeManager?.groupDidUpdate(group, origin: .sharing, updatePagesWithOpenedTabs: openedTabsInThisGroup)
+        }
     }
 
     private func handleShareGroupService(forURL url: URL, with shareService: ShareService) {
@@ -82,7 +91,7 @@ extension TabGroupingManager: BeamDocumentSource {
 
     /// checks if group is already shared and in a tab group note.
     func fetchTabGroupNote(for group: TabGroup) -> (BeamNote, TabGroup)? {
-        guard let groupBeamObject = storeManager?.fetch(byIds: [group.id]).first else { return nil }
+        guard storeManager?.fetch(byIds: [group.id]).first != nil else { return nil }
         var note: BeamNote?
         if group.isLocked, let groupNote = BeamNote.fetch(tabGroupId: group.id) {
             // group already has a shared note.
@@ -91,10 +100,12 @@ extension TabGroupingManager: BeamDocumentSource {
 
         var groupUsed = group
         // Check if this group already have a shared copy.
-        storeManager?.fetch(copiesOfGroup: group.id).forEach { childGroup in
-            guard note == nil, childGroup.isACopy(of: groupBeamObject) else { return }
+            storeManager?.fetch(copiesOfGroup: group.id).forEach { childGroup in
+            guard note == nil else { return }
             note = BeamNote.fetch(tabGroupId: childGroup.id)
-            groupUsed = TabGroupingStoreManager.convertBeamObjectToGroup(childGroup)
+            if note != nil {
+                groupUsed = TabGroupingStoreManager.convertBeamObjectToGroup(childGroup)
+            }
         }
         guard let note = note else { return nil }
         return (note, groupUsed)
@@ -106,7 +117,6 @@ extension TabGroupingManager: BeamDocumentSource {
         var groupUsed = result?.1 ?? group
         if result == nil {
             let frozenGroup = self.copyForSharing(group)
-            setupDefaultGroupTitleIfNeeded(forGroup: frozenGroup, copyOfGroup: group)
             groupUsed = frozenGroup
             do {
                 note = try BeamNote.fetchOrCreate(self, tabGroupId: frozenGroup.id)
@@ -140,8 +150,11 @@ extension TabGroupingManager: BeamDocumentSource {
 
     /// - Returns: true if save was successful
     func addGroup(_ group: TabGroup, toNote note: BeamNote) -> Bool {
-        let copiedGroup = self.copyForNoteInsertion(group)
-        setupDefaultGroupTitleIfNeeded(forGroup: copiedGroup, copyOfGroup: group)
+        var newTitle: String?
+        if group.title?.isEmpty != false {
+            newTitle = TabGroupingStoreManager.suggestedDefaultTitle(for: group, withTabs: allOpenTabs(inGroup: group), truncated: false)
+        }
+        let copiedGroup = self.copyForNoteInsertion(group, newTitle: newTitle)
         note.addTabGroup(copiedGroup.id)
         if note.save(self) {
             Logger.shared.logInfo("Added group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note)", category: .tabGrouping)
@@ -163,13 +176,6 @@ extension TabGroupingManager: BeamDocumentSource {
                     continuation.resume(returning: [])
                 }
             }
-        }
-    }
-
-    private func setupDefaultGroupTitleIfNeeded(forGroup group: TabGroup, copyOfGroup: TabGroup?) {
-        if group.title?.isEmpty != false  {
-            let title = TabGroupingStoreManager.suggestedDefaultTitle(for: copyOfGroup ?? group, withTabs: allOpenTabs(inGroup: copyOfGroup ?? group), truncated: false)
-            renameGroup(group, title: title)
         }
     }
 }
