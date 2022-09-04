@@ -92,7 +92,7 @@ class BrowserTabViewTests: BaseTest {
         
         step("THEN new window is opened when drag'n'drop a tap outside the tab bar"){
             webView.dragAndDropTabToElement(tabIndex: 2, elementToDragTo: webView.webView(tabTitlesAfterDragAndDrop[2]))
-            XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: getNumberOfWindows()), "Second window wasn't opened during \(BaseTest.implicitWaitTimeout) seconds timeout")
+            XCTAssertTrue(waitForQueryCountEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: getWindowsQuery()), "Second window wasn't opened during \(BaseTest.implicitWaitTimeout) seconds timeout")
             XCTAssertEqual(self.getNumberOfTabInWindowIndex(index: 0), 1)
             XCTAssertEqual(self.getNumberOfTabInWindowIndex(index: 1), 2)
         }
@@ -101,7 +101,7 @@ class BrowserTabViewTests: BaseTest {
         /*step("THEN tab is successfully dragged back to initial window") {
             uiMenu.resizeWindowPortrait()
             webView.dragAndDropTabToElement(tabIndex: 0, elementToDragTo: webView.app.windows[tabTitlesAfterDragAndDrop[0]].groups.matching(identifier: tabTitlesAfterDragAndDrop[0]).firstMatch)
-            XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 1, query: getNumberOfWindows()), "Second window wasn't closed during \(BaseTest.implicitWaitTimeout) seconds timeout")
+            XCTAssertTrue(waitForQueryCountEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 1, query: getNumberOfWindows()), "Second window wasn't closed during \(BaseTest.implicitWaitTimeout) seconds timeout")
             XCTAssertEqual(webView.getNumberOfTabs(), 3)
         }*/
     }

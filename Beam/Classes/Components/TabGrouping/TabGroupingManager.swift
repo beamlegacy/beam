@@ -94,20 +94,27 @@ class TabGroupingManager {
 extension TabGroupingManager {
 
     /// create a copy of the group, updates it with existing tabs and save it into DB.
-    func copyForNoteInsertion(_ group: TabGroup) -> TabGroup {
+    func copyForNoteInsertion(_ group: TabGroup, newTitle: String? = nil) -> TabGroup {
         let newGroup = group.copy(locked: true, discardPages: false)
+        if let newTitle = newTitle {
+            newGroup.changeTitle(newTitle)
+        }
         groupDidChangeMetadata(newGroup)
         return newGroup
     }
 
     /// creates a copy of the tab group beam object as is, and save it into DB.
     func copyForSharing(_ group: TabGroup) -> TabGroup {
-        if let copy = storeManager?.makeLockedCopy(group) {
+        var title: String = group.title ?? ""
+        if title.isEmpty {
+            title = TabGroupingStoreManager.suggestedDefaultTitle(for: group, withTabs: allOpenTabs(inGroup: group), truncated: false)
+        }
+        if let copy = storeManager?.makeLockedCopy(group, title: title) {
             return copy
         } else if group.title?.isEmpty != false, let existingCopy = storeManager?.fetch(copiesOfGroup: group.id).first {
-            return TabGroup(id: existingCopy.id, pageIds: group.pageIds, title: group.title, color: group.color, isLocked: true, parentGroup: group.id)
+            return TabGroup(id: existingCopy.id, pageIds: group.pageIds, title: title, color: group.color, isLocked: true, parentGroup: group.id)
         }
-        return copyForNoteInsertion(group)
+        return copyForNoteInsertion(group, newTitle: title)
     }
 
     func renameGroup(_ group: TabGroup, title: String) {
@@ -171,14 +178,16 @@ extension TabGroupingManager {
             note.removeTabGroup(group.id)
         }
 
+        var isSharedGroup = false
         // 2. if tab group was shared. Delete the corresponding shared Note.
         if let (sharedNote, _) = fetchTabGroupNote(for: group), let collection = BeamData.shared.currentDocumentCollection {
             let cmdManager = CommandManagerAsync<BeamDocumentCollection>()
             cmdManager.deleteDocuments(ids: [sharedNote.id], in: collection)
+            isSharedGroup = true // for shared group, we cascade delete the parent if it is a pure copy.
         }
 
         // 3. delete the group itself.
-        storeManager?.deleteGroup(group, deleteParentIfRelevant: true)
+        storeManager?.deleteGroup(group, deleteParentIfRelevant: isSharedGroup)
 
         broadcastTabGroupDeleted(group)
     }
