@@ -62,7 +62,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
                         .clickTabGroupMenu(.tabGroupShareGroup)
                         .shareTabGroupAction(windowTitle)
                         .waitForWebViewToLoad()
-                    XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.maximumWaitTimeout, expectedNumber: 2, query: getNumberOfWindows()), "Second window wasn't opened during \(BaseTest.maximumWaitTimeout) seconds timeout")
+                    XCTAssertTrue(waitForQueryCountEqual(timeout: BaseTest.maximumWaitTimeout, expectedNumber: 2, query: getWindowsQuery()), "Second window wasn't opened during \(BaseTest.maximumWaitTimeout) seconds timeout")
                     XCTAssertTrue(
                         webView.isWindowOpenedWithContaining(title: windowTitle) ||
                         webView.isWindowOpenedWithContaining(title: windowTitle, isLowercased: true)

@@ -92,7 +92,7 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
         sortPageIdsInGroup(group, withOpenTabs: openedTabs)
 
         let tabs: [(BrowserTab, UUID) ] = group.pageIds.compactMap { id -> (BrowserTab, UUID)? in
-            guard let tab = openedTabs.first(where: { $0.browsingTree.current.link == id }), tab.url != nil else { return nil }
+            guard let tab = openedTabs.first(where: { $0.pageId == id }), tab.url != nil else { return nil }
             return (tab, id)
         }
 
@@ -262,9 +262,10 @@ extension TabGroupingStoreManager: BeamObjectManagerDelegate {
 // MARK: - Database
 extension TabGroupingStoreManager {
 
-    func makeLockedCopy(_ group: TabGroup) -> TabGroup? {
+    func makeLockedCopy(_ group: TabGroup, title: String) -> TabGroup? {
         guard let beamObject = fetch(byIds: [group.id]).first else { return nil }
-        let copy = beamObject.makeLockedCopy()
+        var copy = beamObject.makeLockedCopy()
+        copy.title = title
         save(groups: [copy])
         return Self.convertBeamObjectToGroup(copy)
     }
