@@ -274,7 +274,7 @@ class NotePublishTests: BaseTest {
                 .sharePublishedNoteMenuDisplay()
                 .sharePublishedNoteAction(shareOptions[i].accId)
             _ = webView.waitForWebViewToLoad()
-            XCTAssertTrue(waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: getNumberOfWindows()), "Second window wasn't opened during \(BaseTest.implicitWaitTimeout) seconds timeout")
+            XCTAssertTrue(waitForQueryCountEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: getWindowsQuery()), "Second window wasn't opened during \(BaseTest.implicitWaitTimeout) seconds timeout")
             XCTAssertTrue(
                 noteView.isWindowOpenedWithContaining(title: shareOptions[i].name) ||
                 noteView.isWindowOpenedWithContaining(title: shareOptions[i].name, isLowercased: true)
