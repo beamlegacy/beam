@@ -227,7 +227,11 @@ class BaseTest: XCTestCase {
     }
     
     func getNumberOfWindows() -> Int {
-        return self.app.windows.count
+        getWindowsQuery().count
+    }
+
+    func getWindowsQuery() -> XCUIElementQuery {
+        self.app.windows
     }
     
     func getNumberOfTabInWindowIndex(index: Int) -> Int {

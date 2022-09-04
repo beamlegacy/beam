@@ -28,7 +28,10 @@ struct TabGroupBeamObject: Identifiable {
     var updatedAt: Date = BeamDate.now
     var deletedAt: Date?
 
-    struct PageInfo: Codable, Identifiable, Hashable, DatabaseValueConvertible {
+    struct PageInfo: Codable, Identifiable, Hashable, Equatable, DatabaseValueConvertible {
+        static public func == (lhs: PageInfo, rhs: PageInfo) -> Bool {
+            lhs.id == rhs.id
+        }
         let id: ClusteringManager.PageID
         let url: URL
         let title: String
@@ -107,7 +110,9 @@ extension TabGroupBeamObject: BeamObjectProtocol {
 
     /// checks if the other group is the parent and still have the same properties and pages.
     func isACopy(of otherGroup: TabGroupBeamObject) -> Bool {
-        self.parentGroup == otherGroup.id && self.title == otherGroup.title && self.color == otherGroup.color && self.pages == otherGroup.pages
+        self.parentGroup == otherGroup.id &&
+        (self.title == otherGroup.title || otherGroup.title?.isEmpty != false) &&
+        self.color == otherGroup.color && self.pages == otherGroup.pages
     }
 }
 
