@@ -67,8 +67,14 @@ extension TabGroupingManager: BeamDocumentSource {
         if storeManager?.fetch(byIds: [group.id]).first == nil || !openedTabsInThisGroup.isEmpty {
             // first save or update the existing group
             if let parentGroup = parentGroup, group != parentGroup {
+                var title = parentGroup.title?.isEmpty == false ? parentGroup.title : group.title
+                if title?.isEmpty != false {
+                    title = TabGroupingStoreManager.suggestedDefaultTitle(for: parentGroup,
+                                                                          withTabs: openedTabsInThisGroup,
+                                                                          truncated: false)
+                }
                 group = .init(id: group.id, pageIds: parentGroup.pageIds,
-                              title: parentGroup.title?.isEmpty == false ? parentGroup.title : group.title,
+                              title: title,
                               color: parentGroup.color ?? group.color,
                               isLocked: group.isLocked, parentGroup: group.parentGroup)
             }
