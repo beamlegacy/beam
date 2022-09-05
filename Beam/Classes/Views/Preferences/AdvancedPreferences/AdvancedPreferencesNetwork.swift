@@ -92,7 +92,7 @@ struct AdvancedPreferencesNetwork: View {
                     Task { @MainActor in
                          do {
                              try BeamObjectChecksum.deleteAll();
-                             _ = try AppDelegate.main.syncDataWithBeamObject(force: true)
+                             _ = try await AppDelegate.main.syncDataWithBeamObject(force: true)
                          } catch {
                              Logger.shared.logError("Error while syncing data: \(error)", category: .document)
                          }
