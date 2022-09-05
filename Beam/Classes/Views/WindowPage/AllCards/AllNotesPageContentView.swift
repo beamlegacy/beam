@@ -123,7 +123,6 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
         }
     }
 
-    @State private var justCopiedLink = false
     var body: some View {
         VStack(spacing: 35) {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
