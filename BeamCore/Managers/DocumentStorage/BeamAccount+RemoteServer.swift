@@ -417,10 +417,9 @@ extension BeamAccount {
                         }
 
                         do {
-                            _ = try AppDelegate.main.syncDataWithBeamObject { _ in
-                                guard firstCall == true else { return }
-                                syncCompletion?(.success(true))
-                            }
+                            _ = try await AppDelegate.main.syncDataWithBeamObject()
+                            guard firstCall == true else { return }
+                            syncCompletion?(.success(true))
                         } catch {
                             Logger.shared.logInfo("Could not launch sync data: \(error)", category: .accountManager)
                             syncCompletion?(.failure(error))

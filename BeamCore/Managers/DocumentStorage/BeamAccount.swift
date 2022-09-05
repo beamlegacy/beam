@@ -48,7 +48,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     @Published public private(set) var databases: [UUID: BeamDatabase] = [:]
     @Published public private(set) var allDatabases: [BeamDatabase] = []
 
-    private var synchronizationTask: Task<Void, Error>?
+    private var synchronizationTask: Task<Bool, Error>?
     private var synchronizationSubject = PassthroughSubject<Bool, Never>()
     private(set) var isSynchronizationRunning = false
 
@@ -389,7 +389,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
             objectManager.liveSync { (_, _) in
                 Task { @MainActor in
                     do {
-                        _ = try self.syncDataWithBeamObject()
+                        _ = try await self.syncDataWithBeamObject()
                     } catch {
                         Logger.shared.logError("Error while syncing data: \(error)", category: .document)
                     }
@@ -408,37 +408,30 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
     // MARK: - Database
     @MainActor
-    func syncDataWithBeamObject(force: Bool = false,
-                                showAlert: Bool = true,
-                                _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) throws -> Bool {
+    func syncDataWithBeamObject(force: Bool = false, showAlert: Bool = true) async throws -> Bool {
         guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
-            completionHandler?(.success(false))
             return false
         }
 
         guard isSynchronizationRunning == false else {
             Logger.shared.logDebug("syncTask already running", category: .beamObjectNetwork)
-            completionHandler?(.success(false))
             return false
         }
+
         isSynchronizationRunning = true
         synchronizationIsRunningDidUpdate()
 
-        synchronizationTask = launchSynchronizationTask(force, showAlert, completionHandler)
+        let task = launchSynchronizationTask(force, showAlert)
 
-        return true
+        synchronizationTask = task
+
+        return try await task.value
     }
 
-    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool, _ completionHandler: ((Result<Bool, Error>) -> Void)?) -> Task<Void, Error> {
+    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool) -> Task<Bool, Error> {
         Task { @MainActor in
-            defer {
-                DispatchQueue.main.async {
-                    self.synchronizationTaskDidStop()
-                }
-            }
-
             let localTimer = Date()
             let initialDBs = Set(allDatabases)
             Logger.shared.logInfo("syncAllFromAPI calling", category: .sync)
@@ -450,14 +443,15 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
                 Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
                                       category: .sync,
                                       localTimer: localTimer)
-                completionHandler?(.failure(error))
-                return
+                self.synchronizationTaskDidStop()
+                throw error
             }
 
             Logger.shared.logInfo("syncAllFromAPI called",
                                   category: .sync,
                                   localTimer: localTimer)
-            completionHandler?(.success(true))
+            self.synchronizationTaskDidStop()
+            return true
         }
     }
 
