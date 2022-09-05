@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class FocusElement: TextEditorCommand {
-    static let name: String = "FocusElement"
+    static let name: String = "Focus Element"
 
     var elementId: UUID
     var noteId: UUID

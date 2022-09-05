@@ -266,6 +266,20 @@ public class CommandManager<Context> {
         }
         return nil
     }
+
+    public var undoMenuItemTitle: String {
+        if let name = doneQueue.last?.name {
+            return NSLocalizedString("Undo \(name)", comment: "Menu Item")
+        }
+        return NSLocalizedString("Undo", comment: "Menu Item")
+    }
+
+    public var redoMenuItemTitle: String {
+        if let name = undoneQueue.last?.name {
+            return NSLocalizedString("Redo \(name)", comment: "Menu Item")
+        }
+        return NSLocalizedString("Redo", comment: "Menu Item")
+    }
 }
 
 // MARK: - Asynchronous Commands

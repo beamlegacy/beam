@@ -264,6 +264,30 @@ extension BeamWindow {
 // MARK: - NSMenuItemValidation delegate
 extension BeamWindow {
     override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-        AppDelegate.main.validateMenuItem(menuItem)
+        if menuItem.action == #selector(undo(_:)) {
+            if let undoManager = firstResponder?.undoManager, undoManager.canUndo {
+                menuItem.title = undoManager.undoMenuItemTitle
+                return true
+            }
+            if state.mode == .web && state.cmdManager.canUndo {
+                menuItem.title = state.cmdManager.undoMenuItemTitle
+                return true
+            }
+            menuItem.title = NSLocalizedString("Undo", comment: "Menu Item")
+            return false
+        }
+        if menuItem.action == #selector(redo(_:)) {
+            if let undoManager = firstResponder?.undoManager, undoManager.canRedo {
+                menuItem.title = undoManager.redoMenuItemTitle
+                return true
+            }
+            if state.mode == .web && state.cmdManager.canRedo {
+                menuItem.title = state.cmdManager.redoMenuItemTitle
+                return true
+            }
+            menuItem.title = NSLocalizedString("Redo", comment: "Menu Item")
+            return false
+        }
+        return AppDelegate.main.validateMenuItem(menuItem)
     }
 }

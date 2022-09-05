@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class FormatText: TextEditorCommand {
-    static let name: String = "FormatText"
+    static let name: String = "Format Text"
 
     var elementId: UUID
     var noteId: UUID
