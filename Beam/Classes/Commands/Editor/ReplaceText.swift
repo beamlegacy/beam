@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class ReplaceText: TextEditorCommand {
-    static let name: String = "ReplaceText"
+    static let name: String = "Replace Text"
 
     var elementId: UUID
     var noteId: UUID

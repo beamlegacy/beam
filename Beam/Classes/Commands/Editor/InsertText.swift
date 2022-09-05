@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class InsertText: TextEditorCommand {
-    static let name: String = "InsertText"
+    static let name: String = "Insert Text"
 
     var text: BeamText
     var elementId: UUID

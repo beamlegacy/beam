@@ -250,7 +250,7 @@ extension BeamTextEdit {
             }
 
             let cmdManager = mngrNode.cmdManager
-            cmdManager.beginGroup(with: "PasteElementContent")
+            cmdManager.beginGroup(with: "Paste Element")
             defer { cmdManager.endGroup() }
 
             if rootNode.state.nodeSelection != nil {
@@ -336,7 +336,7 @@ extension BeamTextEdit {
 
         do {
             let cmdManager = node.cmdManager
-            cmdManager.beginGroup(with: "PasteImageContent")
+            cmdManager.beginGroup(with: "Paste Image")
             defer { cmdManager.endGroup() }
 
             if rootNode?.state.nodeSelection != nil {
@@ -365,7 +365,7 @@ extension BeamTextEdit {
             return
         }
         let cmdManager = mngrNode.cmdManager
-        cmdManager.beginGroup(with: "PasteAttributedContent")
+        cmdManager.beginGroup(with: "Paste Text")
         guard let node = focusedWidget as? TextNode else { return }
         var lastInserted: ElementNode? = node
         let parent = node.parent as? ElementNode ?? node
@@ -432,15 +432,5 @@ extension BeamTextEdit {
             cmdManager.endGroup()
             self.enableInputDetector()
         }
-    }
-}
-
-extension BeamTextEdit: NSMenuItemValidation {
-    public func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-        guard menuItem.action == #selector(Self.pasteAsPlainText(_:)) else { return true }
-        guard let objects = NSPasteboard.general.readObjects(forClasses: supportedPasteAsPlainTextObjects) else {
-            return false
-        }
-        return !objects.isEmpty
     }
 }

@@ -900,7 +900,7 @@ public extension CALayer {
                 return
             }
 
-            node.cmdManager.beginGroup(with: "Insert line")
+            node.cmdManager.beginGroup(with: "Insert Line")
             defer {
                 node.cmdManager.endGroup()
             }
@@ -2182,7 +2182,7 @@ public extension CALayer {
 
         if !selectedNodes.isEmpty {
             var offset = 0
-            rootNode.cmdManager.beginGroup(with: "Multiple node move")
+            rootNode.cmdManager.beginGroup(with: "Move Multiple Elements")
             let shouldIncreaseIndex = !isMovedNodeSibbling(selectedNodes.first ?? movedNode, andBeforeDestinationNode: dragResult.element) || dragResult.shouldBeChild
             for node in selectedNodes {
                 rootNode.cmdManager.reparentElement(node, to: newParent, atIndex: index + offset)

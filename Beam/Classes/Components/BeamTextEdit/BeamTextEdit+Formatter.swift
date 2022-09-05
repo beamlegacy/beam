@@ -378,7 +378,7 @@ extension BeamTextEdit {
     private func changeTextFormat(with node: TextNode, kind: ElementKind, isActive: Bool) {
         guard let rootNode = rootNode else { return }
         if rootNode.state.nodeSelection != nil {
-            rootNode.note?.cmdManager.beginGroup(with: "ChangeTextFormat")
+            rootNode.note?.cmdManager.beginGroup(with: "Format Text")
             guard let nodeSelection = rootNode.state.nodeSelection else { return }
 
             nodeSelection.nodes.forEach({ node in
@@ -397,7 +397,7 @@ extension BeamTextEdit {
 
         if rootNode.state.nodeSelection != nil {
             guard let nodeSelection = rootNode.state.nodeSelection else { return }
-            rootNode.note?.cmdManager.beginGroup(with: "UpdateAttributes")
+            rootNode.note?.cmdManager.beginGroup(with: "Update Attributes")
 
             nodeSelection.nodes.forEach({ node in
                 if let node = node as? TextNode {
