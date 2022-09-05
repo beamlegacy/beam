@@ -19,6 +19,7 @@ struct NoteView: View {
     }
 
     var note: BeamNote
+    var isInMiniEditor = false
     var containerGeometry: GeometryProxy
     var onStartEditing: (() -> Void)?
     var topInset: CGFloat
@@ -85,6 +86,7 @@ struct NoteView: View {
                 showTitle: false,
                 initialFocusedState: initialFocusedState,
                 initialScrollOffset: state.lastScrollOffset[note.id],
+                isInMiniEditor: isInMiniEditor,
                 headerView: {
                     HeaderViewContainer(layoutModel: headerLayoutModel, headerViewModel: headerViewModel)
                         .frame(height: topOffset)

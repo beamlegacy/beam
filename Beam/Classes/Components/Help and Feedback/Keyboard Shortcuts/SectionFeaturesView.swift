@@ -64,6 +64,7 @@ enum SectionShortcuts: String {
 struct SectionFeaturesView: View {
 
     let section: SectionShortcuts
+    let width: CGFloat?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -74,17 +75,19 @@ struct SectionFeaturesView: View {
             Separator(horizontal: true)
                 .padding(.bottom, 9)
             ForEach(section.features, id: \.self) {
-                KeyboardFeatureView(feature: $0)
+                KeyboardFeatureView(feature: $0, width: width)
             }
-        }.frame(width: 370)
+        }.if(width != nil) {
+            $0.frame(width: width!)
+        }
     }
 }
 
 struct SectionFeaturesView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            SectionFeaturesView(section: .browser)
-            SectionFeaturesView(section: .editor)
+            SectionFeaturesView(section: .browser, width: 370)
+            SectionFeaturesView(section: .editor, width: 370)
         }
     }
 }

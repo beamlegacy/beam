@@ -103,11 +103,17 @@ import Sentry
         didSet {
             guard sideNote != oldValue else { return }
             if let window = associatedWindow as? BeamWindow {
+                let minWidthForSplitView = window.minimumWidth()
+                if window.frame.width <  minWidthForSplitView {
+                    var frame = window.frame
+                    frame.size.width = minWidthForSplitView
+                    window.setFrame(frame, display: false, animate: true)
+                }
                 window.setHostingViewConstraints()
             }
         }
     }
-    @Published var sideNoteWidth: CGFloat = 500
+    @Published var sideNoteWidth: CGFloat = 440
 
     var associatedWindow: NSWindow? {
         AppDelegate.main.windows.first { $0.state === self }

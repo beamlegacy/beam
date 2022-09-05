@@ -10,6 +10,7 @@ import SwiftUI
 struct KeyboardFeatureView: View {
 
     let feature: KeyboardFeature
+    let width: CGFloat?
 
     var body: some View {
         HStack(spacing: 6) {
@@ -30,7 +31,10 @@ struct KeyboardFeatureView: View {
                         .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
                 }
             }
-        }.frame(width: 370, height: 34)
+        }.if(width != nil) {
+            $0.frame(width: width!, height: 34)
+        }
+            .frame(height: 34)
     }
 }
 
@@ -38,7 +42,7 @@ struct KeyboardFeatureView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             ForEach(KeyboardFeature.demoFeatures, id: \.self) {
-                KeyboardFeatureView(feature: $0)
+                KeyboardFeatureView(feature: $0, width: 370)
             }
         }
         .background(Color.white)

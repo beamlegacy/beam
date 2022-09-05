@@ -85,7 +85,7 @@ struct ContentView: View {
                 }
                 previousDragChangeTime = value.time
                 let newWidth = state.sideNoteWidth - value.translation.width
-                state.sideNoteWidth = newWidth.clamp(400, maxWidthForSplitView)
+                state.sideNoteWidth = newWidth.clamp(440, maxWidthForSplitView)
             })
     }
 
@@ -94,7 +94,7 @@ struct ContentView: View {
         let currentWindowWidth = associatedWindow.frame.width
         let minWidth = AppDelegate.minimumSize(for: associatedWindow).width
 
-        return min(currentWindowWidth - minWidth, 800)
+        return currentWindowWidth - minWidth
     }
 
     //This disable the radius in split view for now, as they break the display of the NoteView after pivoting from the web
@@ -105,7 +105,7 @@ struct ContentView: View {
             HStack(spacing: 0) {
                 mainAppContent
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
-                    .frame(minWidth: 800)
+                    .frame(minWidth: AppDelegate.defaultWindowMinimumSize.width)
                     .background(BeamColor.Generic.background.swiftUI)
                     .if(enableRadius, transform: { $0.cornerRadius(8) })
                     .edgesIgnoringSafeArea(.top)
@@ -127,7 +127,7 @@ struct ContentView: View {
                 .zIndex(1)
         }
         .environment(\.isMainWindow, windowInfo.windowIsMain)
-        .environment(\.isCompactWindow, windowInfo.windowIsCompact)
+        .environment(\.isCompactContentView, windowInfo.isCompactWidth)
         .environment(\.windowFrame, windowInfo.windowFrame)
     }
 
@@ -194,7 +194,7 @@ extension EnvironmentValues {
 private struct WindowFrameEnvironmentKey: EnvironmentKey {
     static let defaultValue = CGRect.zero
 }
-private struct IsCompactWindowEnvironmentKey: EnvironmentKey {
+private struct IsCompactContentViewEnvironmentKey: EnvironmentKey {
     static let defaultValue = false
 }
 extension EnvironmentValues {
@@ -203,9 +203,9 @@ extension EnvironmentValues {
         set { self[WindowFrameEnvironmentKey.self] = newValue }
     }
 
-    var isCompactWindow: Bool {
-        get { self[IsCompactWindowEnvironmentKey.self] }
-        set { self[IsCompactWindowEnvironmentKey.self] = newValue }
+    var isCompactContentView: Bool {
+        get { self[IsCompactContentViewEnvironmentKey.self] }
+        set { self[IsCompactContentViewEnvironmentKey.self] = newValue }
     }
 }
 
