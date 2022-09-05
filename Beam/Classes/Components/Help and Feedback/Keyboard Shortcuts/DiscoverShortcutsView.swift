@@ -11,30 +11,31 @@ struct DiscoverShortcutsView: View {
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var windowInfo: BeamWindowInfo
-    @Environment(\.isCompactWindow) var isCompactWindow
+    @Environment(\.isCompactContentView) var compactDesign
 
     let sections: [SectionShortcuts] = [.browser, .editor]
 
     var body: some View {
         VStack(alignment: .trailing, spacing: compactHeight ? 20 : 40) {
-            if !compactHeight {
+            if !compactHeight || compactDesign {
                 Spacer()
             }
             ScrollView {
-                HStack(alignment: .top, spacing: isCompactWindow ? 40 : 60) {
+                DynamicStack(isVertical: compactDesign, horizontalAlignment: .center, verticalAlignment: .top, spacing: compactDesign ? 20 : 40) {
                     ForEach(sections, id: \.self) {
-                        SectionFeaturesView(section: $0)
+                        SectionFeaturesView(section: $0, width: compactDesign ? nil : 370)
                     }
-                }
+                }.padding(.horizontal)
             }
-            .frame(maxHeight: 550) // enough to fit all the shorcuts, might change over time
+            .frame(maxHeight: compactDesign ? .infinity : 550) // enough to fit all the shorcuts, might change over time
             ActionableButton(text: "Done", defaultState: .normal, variant: .primaryBlue) {
                 navigateBack()
             }
             Spacer()
         }
+        .padding(.horizontal, compactDesign ? 52 : 0)
         .animation(.default, value: compactHeight)
-        .animation(.default, value: isCompactWindow)
+        .animation(.default, value: compactDesign)
         .background(KeyEventHandlingView(handledKeyCodes: [.enter, .escape], firstResponder: true, onKeyDown: { _ in
             navigateBack()
         }))
@@ -55,5 +56,22 @@ struct DiscoverShortcutsView: View {
 struct DiscoverShortcutsView_Previews: PreviewProvider {
     static var previews: some View {
         DiscoverShortcutsView()
+    }
+}
+
+struct DynamicStack<Content: View>: View {
+
+    var isVertical = false
+    var horizontalAlignment = HorizontalAlignment.center
+    var verticalAlignment = VerticalAlignment.center
+    var spacing: CGFloat?
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        if isVertical {
+            VStack(alignment: horizontalAlignment, spacing: spacing, content: content)
+        } else {
+            HStack(alignment: verticalAlignment, spacing: spacing, content: content)
+        }
     }
 }

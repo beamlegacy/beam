@@ -125,6 +125,11 @@ struct TableView: NSViewRepresentable {
 
     private func setupColumns(in tableView: NSTableView, context: Self.Context) {
         var initialSortDescriptor: NSSortDescriptor?
+
+        for column in tableView.tableColumns {
+            tableView.removeTableColumn(column)
+        }
+
         columns.enumerated().forEach { (index, column) in
             let tableColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(column.key))
             let customHeaderCell = TableHeaderCell(textCell: column.title,
@@ -135,9 +140,8 @@ struct TableView: NSViewRepresentable {
             tableColumn.headerCell = customHeaderCell
             tableColumn.minWidth = column.width
             tableColumn.width = column.width
-            if !column.resizable {
-                tableColumn.resizingMask = .userResizingMask
-            }
+            tableColumn.resizingMask = column.resizable ? [.autoresizingMask] : [.userResizingMask]
+            tableColumn.isHidden = column.hidden
             if column.sortable {
                 var prototype = NSSortDescriptor(key: column.key,
                                                  ascending: column.sortableDefaultAscending)
@@ -177,6 +181,12 @@ struct TableView: NSViewRepresentable {
             context.coordinator.reloadData(soft: true)
             self.shouldReloadData?.wrappedValue = false
         }
+
+        if let tableView = context.coordinator.tableView, columns != context.coordinator.columns {
+            setupColumns(in: tableView, context: context)
+            self.shouldReloadData?.wrappedValue = false
+        }
+        context.coordinator.columns = columns
     }
 }
 
@@ -185,6 +195,7 @@ class TableViewCoordinator: NSObject {
     weak var tableView: NSTableView?
     var selectAllCheckBoxHeaderCell: CheckBoxTableHeaderCell?
 
+    var columns = [TableViewColumn]()
     var originalData = [TableViewItem]() {
         didSet {
             reloadDataIfPropertyChanged(newValue: originalData, oldValue: oldValue)

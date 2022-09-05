@@ -99,16 +99,16 @@ private struct HelpButtonView: View {
 
     @EnvironmentObject var state: BeamState
     @Environment(\.showHelpAction) var showHelpAction
-    @Environment(\.isCompactWindow) private var isCompactWindow
+    @Environment(\.isCompactContentView) private var isCompactContentView
     @State private var buttonFrameInGlobalCoordinates: CGRect?
     @State private var isHovering: Bool = false
     private let title = loc("Help")
 
     private var showTitle: Bool {
-        isHovering && !isCompactWindow
+        isHovering && !isCompactContentView
     }
     var body: some View {
-        ButtonLabel(showTitle ? title : nil, icon: "help-question", compactMode: isCompactWindow,
+        ButtonLabel(showTitle ? title : nil, icon: "help-question", compactMode: isCompactContentView,
                     customStyle: WindowBottomToolBar.buttonStyle(withIcon: true, withTitle: showTitle)) {
             showHelpAction()
         }
@@ -145,7 +145,7 @@ private struct BottomToolBarTrailingIconView: View {
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var noteMediaPlayerManager: NoteMediaPlayerManager
-    @Environment(\.isCompactWindow) private var isCompactWindow
+    @Environment(\.isCompactContentView) private var isCompactWindow
     @State private var isHoveringNewNote: Bool = false
 
     private let title = loc("New Note")
