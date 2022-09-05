@@ -1139,9 +1139,9 @@
 		A552DF2925F0E22B00570C85 /* DestinationNotePickerBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */; };
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A55760822665501000DEE86C /* TableViewColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55760812665501000DEE86C /* TableViewColumn.swift */; };
-		A558578828C0E08300382BFF /* WKNavigationAction+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A558578728C0E08300382BFF /* WKNavigationAction+Beam.swift */; };
 		A558577A28C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A558577928C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift */; };
 		A558578328C026CD00382BFF /* HiddenCommandHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A558578128C026CD00382BFF /* HiddenCommandHelper.swift */; };
+		A558578828C0E08300382BFF /* WKNavigationAction+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A558578728C0E08300382BFF /* WKNavigationAction+Beam.swift */; };
 		A55A019427DF49BF002403D5 /* BeamTableCellLottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */; };
 		A55C98BD2805F60200717D3E /* ShareHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98BC2805F60200717D3E /* ShareHelper.swift */; };
 		A55C98C52806FB5F00717D3E /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98C42806FB5F00717D3E /* ShareService.swift */; };
@@ -3103,9 +3103,9 @@
 		A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePickerBackground.swift; sourceTree = "<group>"; };
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A55760812665501000DEE86C /* TableViewColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewColumn.swift; sourceTree = "<group>"; };
-		A558578728C0E08300382BFF /* WKNavigationAction+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKNavigationAction+Beam.swift"; sourceTree = "<group>"; };
 		A558577928C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetHiddenNotificationsBuilder.swift; sourceTree = "<group>"; };
 		A558578128C026CD00382BFF /* HiddenCommandHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenCommandHelper.swift; sourceTree = "<group>"; };
+		A558578728C0E08300382BFF /* WKNavigationAction+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKNavigationAction+Beam.swift"; sourceTree = "<group>"; };
 		A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTableCellLottieView.swift; sourceTree = "<group>"; };
 		A55C98BC2805F60200717D3E /* ShareHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHelper.swift; sourceTree = "<group>"; };
 		A55C98C42806FB5F00717D3E /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };

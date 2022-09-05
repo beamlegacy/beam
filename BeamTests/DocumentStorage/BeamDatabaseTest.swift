@@ -20,7 +20,7 @@ class BeamDatabaseTest: XCTestCase, BeamDocumentSource {
     override func setUpWithError() throws {
         try super.setUpWithError()
         BeamDatabase.registerManager(BeamDocumentCollection.self)
-        account = try! BeamAccount(id: UUID(), email: "test@beamapp.co", name: "test", path: "test-\(UUID())")
+        account = try BeamAccount(id: UUID(), email: "test@beamapp.co", name: "test", path: "test-\(UUID())")
         database = BeamDatabase(account: account, id: UUID(), name: "testCollection")
     }
 

@@ -228,7 +228,7 @@ struct LegacyDataImporter: BeamDocumentSource {
     func importPasswordsFrom(path: String) throws {
         Logger.shared.logInfo("Import Passwords from \(path) into Account data", category: .database)
         try copyTable("passwordRecord", from: try DatabaseQueue(path: path), to: account.grdbStore.writer)
-        let before = try verifyPasswords(store: GRDBStore(writer: try DatabaseQueue(path: path)))
+        let before = try verifyPasswords(store: GRDBStore(writer: try DatabasePool(path: path)))
         let after = try verifyPasswords(store: account.grdbStore)
         if !before.isValid {
             Logger.shared.logError("Passwords DB was corrupted before migration: \(before.description)", category: .database)

@@ -10,7 +10,6 @@ import BeamCore
 
 class OnboardingNoteCreator: BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
-    static let shared = OnboardingNoteCreator()
 
     enum Note: String {
         case yesterday
@@ -39,15 +38,15 @@ class OnboardingNoteCreator: BeamDocumentSource {
         }
     }
 
-    func createOnboardingNotes() {
-        importNote(Note.capture.fileName)
-        importNote(Note.howToBeam.fileName)
+    func createOnboardingNotes(data: BeamData) {
+        importNote(beamData: data, Note.capture.fileName)
+        importNote(beamData: data, Note.howToBeam.fileName)
 
         guard let yesterday = Calendar.current.date(byAdding: DateComponents(day: -1), to: BeamDate.now) else { return }
-        importNote(Note.yesterday.fileName, forceDate: yesterday)
+        importNote(beamData: data, Note.yesterday.fileName, forceDate: yesterday)
     }
 
-    private func importNote(_ fileName: String, forceDate: Date? = nil) {
+    private func importNote(beamData: BeamData, _ fileName: String, forceDate: Date? = nil) {
         guard let path = Bundle.main.path(forResource: fileName, ofType: "json") else { return }
         let url = URL(fileURLWithPath: path)
 
@@ -64,12 +63,12 @@ class OnboardingNoteCreator: BeamDocumentSource {
         switch note.type {
         case .journal:
             if let newNote = note.deepCopy(withNewId: true, selectedElements: nil, includeFoldedChildren: true) {
-                addImages(in: newNote)
+                addImages(in: newNote, beamData: beamData)
                 guard let forceDate = forceDate else {
                     for c in newNote.children {
-                        c.parent = BeamData.shared.todaysNote
+                        c.parent = beamData.todaysNote
                     }
-                    BeamData.shared.todaysNote.children = newNote.children
+                    beamData.todaysNote.children = newNote.children
                     return
                 }
 
@@ -77,20 +76,20 @@ class OnboardingNoteCreator: BeamDocumentSource {
                 newNote.creationDate = forceDate
                 newNote.updateDate = forceDate
                 newNote.type = .journalForDate(forceDate)
-                newNote.owner = BeamData.shared.currentDatabase
+                newNote.owner = beamData.currentDatabase
                 _ = newNote.save(self)
             }
         case .note, .tabGroup:
-            addImages(in: note)
+            addImages(in: note, beamData: beamData)
             note.creationDate = BeamDate.now
             note.updateDate = BeamDate.now
-            note.owner = BeamData.shared.currentDatabase
+            note.owner = beamData.currentDatabase
             _ = note.save(self)
         }
     }
 
-    private func addImages(in note: BeamNote) {
-        guard let fileManager = BeamFileDBManager.shared else { return }
+    private func addImages(in note: BeamNote, beamData: BeamData) {
+        guard let fileManager = beamData.fileDBManager else { return }
         var imageCount: Int = 0
         for element in note.children {
             for imageElement in element.imageElements() {

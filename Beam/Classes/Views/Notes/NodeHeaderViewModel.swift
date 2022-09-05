@@ -170,7 +170,8 @@ extension NoteHeaderView {
                 publicationGroups.append("profile")
             }
 
-            BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: publicationGroups) { result in
+            guard let fileManager = state?.data.fileDBManager else { return }
+            BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: publicationGroups, fileManager: fileManager) { result in
                 DispatchQueue.main.async {
                     completion(result)
                 }
@@ -198,9 +199,9 @@ extension NoteHeaderView {
                 completion(missingRequirement)
                 return false
             }
-            if !isPublic {
+            if !isPublic, let fileManager = state?.data.fileDBManager {
                 publishState = .publishing
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true) { [weak self] result in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, fileManager: fileManager) { [weak self] result in
                     DispatchQueue.main.async {
                         guard case .success(let published) = result, published == true else {
                             self?.noteBecamePublic(false)
@@ -247,7 +248,7 @@ extension NoteHeaderView {
             alert.alertStyle = .warning
             guard let window = AppDelegate.main.window else { return }
             alert.beginSheetModal(for: window) { [weak self] response in
-                guard let self = self, let note = self.note else {
+                guard let self = self, let note = self.note, let fileManager = self.state?.data.fileDBManager else {
                     completion(missingRequirement)
                     return
                 }
@@ -257,7 +258,7 @@ extension NoteHeaderView {
                     return
                 }
                 self.publishState = .unpublishing
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false) { [weak self] result in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, fileManager: fileManager) { [weak self] result in
                     defer {
                         DispatchQueue.main.async {
                             completion(result)

@@ -21,6 +21,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
     var testNoteDocument: BeamDocument!
 
     let objectManager = BeamData.shared.objectManager
+    let fileManager = BeamData.shared.fileDBManager!
 
     override func setUpWithError() throws {
         AppData.shared.currentAccount?.logout() // will force clean up data
@@ -71,6 +72,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
         let publish = expectation(description: "note publish")
         BeamNoteSharingUtils.makeNotePublic(note,
                                             becomePublic: true,
+                                            fileManager: fileManager,
                                             completion: { result in
             switch result {
             case .success(let published):
@@ -86,7 +88,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
         XCTAssertNotNil(pubLink)
 
         let unpublish = expectation(description: "note unpublish")
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, completion: { result in
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, fileManager: fileManager, completion: { result in
             switch result {
             case .success(let published):
                 XCTAssertFalse(published)
@@ -109,7 +111,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
 
         let publish = expectation(description: "note publish")
         BeamNoteSharingUtils.makeNotePublic(note,
-                                            becomePublic: true,
+                                            becomePublic: true, fileManager: fileManager,
                                             completion: { result in
             switch result {
             case .success(let published):
@@ -126,7 +128,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
 
         let publicationGroupUpdatedToProfile = expectation(description: "note publication group updated")
         let profilePublicationGroups = ["profile"]
-        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: profilePublicationGroups) { result in
+        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: profilePublicationGroups, fileManager: fileManager) { result in
             switch result {
             case .success:
                 XCTAssertTrue(true)
@@ -141,7 +143,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
 
         let publicationGroupUpdatedToEmpty = expectation(description: "note publication group updated")
         let emptyPublicationGroups: [String] = []
-        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: emptyPublicationGroups) { result in
+        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: emptyPublicationGroups, fileManager: fileManager) { result in
             switch result {
             case .success:
                 XCTAssertTrue(true)
@@ -155,7 +157,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
         waitForExpectations(timeout: 20, handler: nil)
 
         let unpublish = expectation(description: "note unpublish")
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, completion: { result in
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, fileManager: fileManager, completion: { result in
             switch result {
             case .success(let published):
                 XCTAssertFalse(published)
@@ -179,7 +181,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
         XCTAssertFalse(AuthenticationManager.shared.isAuthenticated)
 
         let publish = expectation(description: "note publish")
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, completion: { result in
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, fileManager: fileManager, completion: { result in
             assertIsFailure(result)
             publish.fulfill()
         })
@@ -191,7 +193,7 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
         guard let note = testNote else { fatalError("We should have a test note in setUp") }
 
         let publish = expectation(description: "note publish")
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, completion: { result in
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, fileManager: fileManager, completion: { result in
             assertIsFailure(result)
             publish.fulfill()
         })

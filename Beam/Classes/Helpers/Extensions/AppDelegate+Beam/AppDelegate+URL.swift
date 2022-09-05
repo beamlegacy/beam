@@ -50,7 +50,7 @@ extension AppDelegate {
             }
         case .note:
             do {
-                let doc = try BeamNoteDocumentWrapper(openingFile: file)
+                let doc = try BeamNoteDocumentWrapper(openingFile: file, data: data.currentAccount?.data)
                 try doc.importNote()
             } catch {
                 Logger.shared.logError("Can't import note document \(file.url) from disk", category: .downloader)
@@ -58,7 +58,7 @@ extension AppDelegate {
             }
         case .noteCollection:
             do {
-                let doc = try BeamNoteCollectionWrapper(openingFile: file)
+                let doc = try BeamNoteCollectionWrapper(openingFile: file, data: data.currentAccount?.data)
                 try doc.importNotes()
             } catch {
                 Logger.shared.logError("Can't import note collection from disk \(file.url)", category: .downloader)
@@ -226,15 +226,15 @@ private extension BeamDownloadDocument {
 }
 
 private extension BeamNoteDocumentWrapper {
-    convenience init(openingFile: OpeningFile) throws {
-        try self.init(fileWrapper: try openingFile.fileWrapper)
+    convenience init(openingFile: OpeningFile, data: BeamData?) throws {
+        try self.init(fileWrapper: try openingFile.fileWrapper, data: data)
         self.fileURL = openingFile.url
     }
 }
 
 private extension BeamNoteCollectionWrapper {
-    convenience init(openingFile: OpeningFile) throws {
-        try self.init(fileWrapper: try openingFile.fileWrapper)
+    convenience init(openingFile: OpeningFile, data: BeamData?) throws {
+        try self.init(fileWrapper: try openingFile.fileWrapper, data: data)
         self.fileURL = openingFile.url
     }
 }

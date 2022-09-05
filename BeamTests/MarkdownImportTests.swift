@@ -8,13 +8,13 @@ final class MarkdownImportTests: XCTestCase {
 
     func testEmptyImport() throws {
         let markdown = ""
-        let note = try importer._import(markdown: markdown)
+        let note = try importer._import(markdown: markdown, fileManager: BeamData.shared.fileDBManager!)
         XCTAssertTrue(note.children.isEmpty)
     }
 
     func testSimpleContent() throws {
         let markdown = "Here is *some* **Markdown** content."
-        let note = try importer._import(markdown: markdown)
+        let note = try importer._import(markdown: markdown, fileManager: BeamData.shared.fileDBManager!)
         XCTAssertEqual(note.children.count, 1)
         let element = note.children[0]
         XCTAssertEqual(element.kind, .bullet)
@@ -43,7 +43,7 @@ final class MarkdownImportTests: XCTestCase {
         Element 2  
         Element 3 with *some* **more text**  
         """
-        let note = try importer._import(markdown: markdown)
+        let note = try importer._import(markdown: markdown, fileManager: BeamData.shared.fileDBManager!)
         // in the markdown string, these elements contain at the end line breaks so they're splitted into 3 elements
         // which is the markdown you'll get when you export a BeamNote with 3 children like we test below
         XCTAssertEqual(note.children.count, 3)
@@ -58,7 +58,7 @@ final class MarkdownImportTests: XCTestCase {
           * **Element 2**
           * Element 3
         """
-        let note = try importer._import(markdown: markdown)
+        let note = try importer._import(markdown: markdown, fileManager: BeamData.shared.fileDBManager!)
         XCTAssertEqual(note.children.count, 1)
         // this is imported as a single node with 3 children
         // whereas in the `testSimpleElements` test, those are imported as 3 distinct elements
@@ -77,7 +77,7 @@ final class MarkdownImportTests: XCTestCase {
             * **Sub** Element 5
           * Element 3
         """
-        let note = try importer._import(markdown: markdown)
+        let note = try importer._import(markdown: markdown, fileManager: BeamData.shared.fileDBManager!)
         XCTAssertEqual(note.children.count, 1)
         let list = note.children[0]
         XCTAssertEqual(list.children.count, 3)
@@ -104,7 +104,7 @@ final class MarkdownImportTests: XCTestCase {
             * **Sub** Element 5
           * Element 3
         """
-        let note = try importer._import(markdown: markdown)
+        let note = try importer._import(markdown: markdown, fileManager: BeamData.shared.fileDBManager!)
         XCTAssertEqual(note.children.count, 1)
         XCTAssertEqual(note.children[0].kind, .heading(1))
         XCTAssertEqual(note.children[0].text.text, "Some heading")
@@ -142,7 +142,7 @@ final class MarkdownImportTests: XCTestCase {
 
         <br>
         """
-        let note = try importer._import(markdown: markdown)
+        let note = try importer._import(markdown: markdown, fileManager: BeamData.shared.fileDBManager!)
         XCTAssertEqual(note.children.count, 7)
 
         let firstBullet = note.children[0]

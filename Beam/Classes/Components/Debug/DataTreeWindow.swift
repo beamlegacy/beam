@@ -11,7 +11,9 @@ import AppKit
 import Combine
 
 class DataTreeWindow: NSWindow, NSWindowDelegate {
-    init(contentRect: NSRect) {
+    let fileManager: BeamFileDBManager
+    init(contentRect: NSRect, fileManager: BeamFileDBManager) {
+        self.fileManager = fileManager
         super.init(contentRect: contentRect,
                    styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                    backing: .buffered,
@@ -36,8 +38,9 @@ class DataTreeWindow: NSWindow, NSWindowDelegate {
     private func observeCoredataDestroyedNotification() {
         NotificationCenter.default
             .publisher(for: .coredataDestroyed, object: nil)
-            .sink { _ in
-                self.contentView = BeamHostingView(rootView: FilesContentView())
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.contentView = BeamHostingView(rootView: FilesContentView(fileManager: self.fileManager))
             }
             .store(in: &cancellables)
     }

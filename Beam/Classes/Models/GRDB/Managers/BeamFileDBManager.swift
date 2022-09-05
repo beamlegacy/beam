@@ -177,18 +177,14 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
     static let fileSaved = PassthroughSubject<BeamFileRecord, Never>()
     static let fileDeleted = PassthroughSubject<UUID, Never>()
 
-    weak var holder: BeamManagerOwner?
+    weak var owner: BeamManagerOwner?
 
     override var tableNames: [String] { [BeamFileRecord.tableName, BeamFileRefRecord.tableName] }
-
-    static public var shared: BeamFileDBManager? {
-        BeamData.shared.fileDBManager
-    }
 
     var grdbStore: GRDBStore
 
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
-        self.holder = holder
+        self.owner = holder
         self.objectManager = objectManager
         self.grdbStore = store
         try super.init(store: store)

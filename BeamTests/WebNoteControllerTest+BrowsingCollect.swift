@@ -23,7 +23,7 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
         // Add text "lama" to start search
         searchElement = BeamElement("lama")
         note.addChild(searchElement)
-        controller = WebNoteController(note: note)
+        controller = WebNoteController(note: note, data: BeamData.shared)
     }
 
     override func tearDownWithError() throws {

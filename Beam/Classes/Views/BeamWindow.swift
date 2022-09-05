@@ -94,7 +94,7 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
             .environmentObject(data)
             .environmentObject(windowInfo)
             .environmentObject(self.state.browserTabsManager)
-            .environment(\.showHelpAction, HelpAction(showHelpAndFeedbackMenuView))
+            .environment(\.showHelpAction, HelpAction({ [weak self] in self?.showHelpAndFeedbackMenuView() }))
             .frame(minWidth: minimumSize.width, maxWidth: .infinity, minHeight: minimumSize.height, maxHeight: .infinity)
 
         let hostingView = BeamHostingView(rootView: mainView)
@@ -245,7 +245,9 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
     }
 
     private func cleanUpWindowContentBeforeClosing(terminatingApplication: Bool) {
+        self.hostingView = nil
         self.contentView = nil
+        self.initialFirstResponder = nil
 
         if !terminatingApplication {
             for tab in state.browserTabsManager.tabs {

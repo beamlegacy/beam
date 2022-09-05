@@ -395,7 +395,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     func shareShootToService(group: ShootGroup, service: ShareService) {
         guard let page = self.page, let sourceUrl = page.url else { return }
         Task { @MainActor in
-            let helper = ShareHelper(sourceUrl) { [weak self] url in
+            let helper = ShareHelper(sourceUrl, data: data) { [weak self] url in
                 let webView = self?.page?.createNewWindow(URLRequest(url: url), page.webView.configuration, windowFeatures: ShareWindowFeatures(for: service), setCurrent: true)
                 _ = webView?.load(URLRequest(url: url))
             }
@@ -492,7 +492,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
                         page.downloadManager?.downloadImages([imageUrl], pageUrl: sourceUrl, completion: { results in
                             guard let result = results.first else { return }
                             if case .binary(let data, let mimeType, let actualUrl) = result,
-                               let fileID = try? BeamFileDBManager.shared?.insert(name: actualUrl.lastPathComponent, data: data, type: mimeType) {
+                               let fileID = try? self.data.fileDBManager?.insert(name: actualUrl.lastPathComponent, data: data, type: mimeType) {
                                 if let image = NSImage(data: data), let rep = image.representations.first {
                                     displayInfo = MediaDisplayInfos(height: rep.pixelsHigh, width: rep.pixelsWide, displayRatio: displayInfo.displayRatio)
                                 }
@@ -505,8 +505,8 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
                         // Handle image source when it contains base64
                     } else if let (base64, mimeType) = getBase64(originalContent) {
                         let fileName = UUID().uuidString
-                        if let fileID = try? BeamFileDBManager.shared?.insert(name: fileName, data: base64, type: mimeType) {
-                            // try? BeamFileDBManager.shared?.addReference(fromNote: targetNote.id, element: element.id, to: fileID)
+                        if let fileID = try? self.data.fileDBManager?.insert(name: fileName, data: base64, type: mimeType) {
+                            // try? self.data.fileDBManager?.addReference(fromNote: targetNote.id, element: element.id, to: fileID)
                             element.kind = .image(fileID, origin: sourceMetadata, displayInfos: displayInfo)
                         }
 
@@ -515,8 +515,8 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
                         let fileName = UUID().uuidString
                         let mimeType = "image/svg+xml"
 
-                        if let fileID = try? BeamFileDBManager.shared?.insert(name: fileName, data: originalContent.asData, type: mimeType) {
-                            // try? BeamFileDBManager.shared?.addReference(fromNote: targetNote.id, element: element.id, to: fileID)
+                        if let fileID = try? self.data.fileDBManager?.insert(name: fileName, data: originalContent.asData, type: mimeType) {
+                            // try? self.data.fileDBManager?.addReference(fromNote: targetNote.id, element: element.id, to: fileID)
                             element.kind = .image(fileID, origin: sourceMetadata, displayInfos: displayInfo)
                         }
                     }

@@ -13,17 +13,16 @@ class SocialShareContextMenuViewModel: ContextMenuViewModel {
 
 struct SocialShareContextMenu {
     var socialShareMenuViewModel: SocialShareContextMenuViewModel
-
-    init(urlToShare: URL?, of noteTitle: String?) {
+    init(urlToShare: URL?, of noteTitle: String?, data: BeamData) {
         var items = [
             ContextMenuItem(title: "Copy URL", icon: "editor-url_link", action: {
-                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: .copy)
+                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: .copy, data: data)
             }),
             ContextMenuItem.separator()
         ]
         items.append(contentsOf: ShareService.allCases(except: [.copy]).map { service -> ContextMenuItem in
             ContextMenuItem(title: service.title, icon: service.icon, action: {
-                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: service)
+                SocialShareContextMenu.share(url: urlToShare, of: noteTitle, to: service, data: data)
             })
         })
 
@@ -35,10 +34,10 @@ struct SocialShareContextMenu {
         socialShareMenuViewModel.urlToShare = urlToShare
     }
 
-    private static func share(url: URL?, of noteTitle: String?, to service: ShareService) {
+    private static func share(url: URL?, of noteTitle: String?, to service: ShareService, data: BeamData) {
         guard let url = url else { return }
         Task { @MainActor in
-            let helper = ShareHelper { url in
+            let helper = ShareHelper(data: data) { url in
                 AppDelegate.main.openMinimalistWebWindow(url: url, title: service.title, rect: ShareWindowFeatures(for: service).toRect())
             }
             await helper.share(link: url, of: noteTitle, to: service)
