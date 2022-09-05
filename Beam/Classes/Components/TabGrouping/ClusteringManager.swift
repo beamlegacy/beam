@@ -65,7 +65,7 @@ class ClusteringManager: ObservableObject {
     weak private(set) var tabGroupingManager: TabGroupingManager?
     var sessionId: UUID
     var navigationBasedPageGroups = [[UUID]]()
-    var similarities = [UUID: [UUID: Double]]()
+    var similarities = [UUID: [UUID: Float]]()
     var notesChangedByUserInSession = [UUID]()
     var openBrowsing = AllBrowsingTreesOpenInTabs()
     public var continueToNotes = [UUID]()

@@ -8732,6 +8732,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		332CE7142889B023007E585A /* Remove SmartClustering model in beta */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -12340,7 +12341,7 @@
 			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
 			requirement = {
 				kind = revision;
-				revision = b374d870e8318b6929ebaa341681d3f892baf530;
+				revision = a15eb1abb7175ae09eba7be75bdb515928f33057;
 			};
 		};
 		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
