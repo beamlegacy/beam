@@ -35,7 +35,7 @@ class BeamNSTableView: NSTableView {
         additionalDelegate?.tableViewDidChangeEffectiveAppearance(self)
     }
 
-    private func rowAndColumngForWindowLocation(_ locationInWindow: NSPoint) -> (Int, Int)? {
+    private func rowAndColumnForWindowLocation(_ locationInWindow: NSPoint) -> (Int, Int)? {
         let localLocation = convert(locationInWindow, from: nil)
         let row = self.row(at: localLocation)
         let column = self.column(at: localLocation)
@@ -46,7 +46,7 @@ class BeamNSTableView: NSTableView {
     override func rightMouseDown(with event: NSEvent) {
         super.rightMouseDown(with: event)
         guard let additionalDelegate = additionalDelegate,
-              let (row, column) = rowAndColumngForWindowLocation(event.locationInWindow)
+              let (row, column) = rowAndColumnForWindowLocation(event.locationInWindow)
         else { return }
         additionalDelegate.tableView(self, rightMouseDownFor: row, column: column, locationInWindow: event.locationInWindow)
     }
@@ -54,7 +54,7 @@ class BeamNSTableView: NSTableView {
     override func mouseDown(with event: NSEvent) {
         var shouldPropagate = true
         if let additionalDelegate = additionalDelegate,
-              let (row, column) = rowAndColumngForWindowLocation(event.locationInWindow) {
+              let (row, column) = rowAndColumnForWindowLocation(event.locationInWindow) {
             shouldPropagate = additionalDelegate.tableView(self, mouseDownFor: row, column: column, locationInWindow: event.locationInWindow)
         }
         guard shouldPropagate else { return }
@@ -68,7 +68,7 @@ class BeamNSTableView: NSTableView {
 
     override func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)
-        guard rowAndColumngForWindowLocation(event.locationInWindow) != nil || self.isMousePoint(event.locationInWindow, in: self.frame)  else {
+        guard rowAndColumnForWindowLocation(event.locationInWindow) != nil || self.isMousePoint(event.locationInWindow, in: self.frame)  else {
             onHoverTableView?(false)
             return
         }

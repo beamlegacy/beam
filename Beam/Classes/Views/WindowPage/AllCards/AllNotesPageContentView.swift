@@ -50,27 +50,28 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                         sortable: false, resizable: false, width: 25, visibleOnlyOnRowHoverOrSelected: true),
         TableViewColumn(key: ColumnID.title.rawValue, title: loc("Title"),
                         editable: true, isLink: true,
-                        sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 360, font: BeamFont.light(size: 13).nsFont),
+                        sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 200, font: BeamFont.light(size: 13).nsFont),
         TableViewColumn(key: ColumnID.isPublic.rawValue, title: "URL", type: .IconButton, editable: false, isLink: false, sortable: true,
                         resizable: false, width: 53, font: Self.secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor),
-        TableViewColumn(key: ColumnID.words.rawValue, title: loc("Words"),
-                        width: 58, font: secondaryCellFont,
+        TableViewColumn(key: ColumnID.words.rawValue, title: loc("Words"), resizable: false,
+                        width: 58, font: Self.secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
         TableViewColumn(key: ColumnID.links.rawValue, title: loc("Links"),
-                        width: 50, font: secondaryCellFont,
+                        resizable: false,
+                        width: 50, font: Self.secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: ColumnID.updatedAt.rawValue, title: loc("Updated"),
-                        isInitialSortDescriptor: true, width: 95, font: secondaryCellFont,
+        TableViewColumn(key: ColumnID.updatedAt.rawValue, title: loc("Updated"), isInitialSortDescriptor: true,
+                        resizable: false, width: 95, font: Self.secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
-            if let date = value as? Date {
-                return AllNotesPageContentView.dateFormatter.string(from: date)
-            }
-            return ""
-        })
+                            if let date = value as? Date {
+                                return AllNotesPageContentView.dateFormatter.string(from: date)
+                            }
+                            return ""
+                        })
     ]
 
     private var cardsFilters: some View {
@@ -110,7 +111,12 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
     }
 
     private var compactWindowWidth: Bool {
-        return windowInfo.windowFrame.size.width < 1024
+        let threshold: CGFloat = 1024
+        if let window = windowInfo.window as? BeamWindow {
+            return window.estimatedContentViewWidth < threshold
+        } else {
+            return windowInfo.windowFrame.width < threshold
+        }
     }
 
     @State private var buttonFrameInGlobalCoordinates: CGRect?
@@ -193,31 +199,37 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             }
             .frame(height: 22)
             .padding(.top, 97)
-            TableView(hasSeparator: false, items: currentNotesList, columns: columns,
-                      creationRowTitle: creationRowPlaceholder,
-                      isCreationRowLoading: model.publishingNoteTitle != nil,
-                      shouldReloadData: $model.shouldReloadData,
-                      sortDescriptor: $state.allNotesSortDescriptor) { (newText, row) in
-                onEditingText(self, newText, row: row, in: currentNotesList)
-            } onSelectionChanged: { (selectedIndexes) in
-                Logger.shared.logDebug("selected: \(selectedIndexes.map { $0 })")
-                DispatchQueue.main.async {
-                    selectedRowsIndexes = selectedIndexes
+            .padding(.leading, 9)
+            GeometryReader { proxy in
+                TableView(hasSeparator: false,
+                          items: currentNotesList,
+                          columns: tableColumns(for: proxy.frame(in: .local).size.width),
+                          creationRowTitle: creationRowPlaceholder,
+                          isCreationRowLoading: model.publishingNoteTitle != nil,
+                          shouldReloadData: $model.shouldReloadData,
+                          sortDescriptor: $state.allNotesSortDescriptor) { (newText, row) in
+                    onEditingText(self, newText, row: row, in: currentNotesList)
+                } onSelectionChanged: { (selectedIndexes) in
+                    Logger.shared.logDebug("selected: \(selectedIndexes.map { $0 })")
+                    // Here we dispatch to avoid a SwiftUI state update during the current view update
+                    DispatchQueue.main.async {
+                        selectedRowsIndexes = selectedIndexes
+                    }
+                } onHover: { (hoveredIndex, frame) in
+                    let notesList = currentNotesList
+                    guard let hoveredIndex = hoveredIndex, hoveredIndex < notesList.count else {
+                        hoveredRowIndex = nil
+                        hoveredRowFrame = nil
+                        return
+                    }
+                    hoveredRowIndex = hoveredIndex
+                    hoveredRowFrame = frame
+                } onMouseDown: { (rowIndex, column) in
+                    handleMouseDown(for: rowIndex, column: column)
+                } onRightMouseDown: { (rowIndex, _, location) in
+                    let forRow = selectedRowsIndexes.contains(rowIndex) ? nil : rowIndex
+                    showGlobalContextualMenu(at: location, for: forRow)
                 }
-            } onHover: { (hoveredIndex, frame) in
-                let notesList = currentNotesList
-                guard let hoveredIndex = hoveredIndex, hoveredIndex < notesList.count else {
-                    hoveredRowIndex = nil
-                    hoveredRowFrame = nil
-                    return
-                }
-                hoveredRowIndex = hoveredIndex
-                hoveredRowFrame = frame
-            } onMouseDown: { (rowIndex, column) in
-                handleMouseDown(for: rowIndex, column: column)
-            } onRightMouseDown: { (rowIndex, _, location) in
-                let forRow = selectedRowsIndexes.contains(rowIndex) ? nil : rowIndex
-                showGlobalContextualMenu(at: location, for: forRow)
             }
             .overlay(
                 GeometryReader { geo in
@@ -230,7 +242,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                     }
                 }
             )
-            .padding(.leading, -34)
+            .padding(.leading, -25)
             .disabled(model.publishingNoteTitle != nil)
             .frame(maxHeight: .infinity)
             .background(Color.clear
@@ -242,8 +254,8 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                 .padding(.leading, -64) // shifted for hover options menu
             )
         }
-        .frame(minWidth: 616, maxWidth: 900)
-        .padding(.horizontal, compactWindowWidth ? 92 : 204)
+        .frame(minWidth: 200, maxWidth: 900)
+        .padding(.horizontal, compactWindowWidth ? 60 : 204)
         .id(model.id)
         .onChange(of: state.showDailyNotes) { newValue in
             model.setShowDailyNotes(newValue)
@@ -345,6 +357,14 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                 model.refreshAllNotes()
             }
         }
+    }
+
+    private func tableColumns(for width: CGFloat) -> [TableViewColumn] {
+        let isSmallWidth = width < 465
+        var columns = self.columns
+        columns[3].hidden = isSmallWidth
+        columns[4].hidden = isSmallWidth
+        return columns
     }
 }
 

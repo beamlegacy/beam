@@ -14,7 +14,14 @@ class BeamWindowInfo: ObservableObject {
     @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
     weak var window: NSWindow?
-    var windowIsCompact: Bool {
-        windowFrame.width <= 810
+
+    /// If the window is a BeamWindow, this refers to the ContentView, and may be different from the width from the window frame
+    var isCompactWidth: Bool {
+        let compactWidthThreshold = 830.0
+        if let window = window as? BeamWindow {
+            return window.estimatedContentViewWidth <= compactWidthThreshold
+        } else {
+            return windowFrame.width <= compactWidthThreshold
+        }
     }
 }
