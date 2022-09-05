@@ -116,7 +116,7 @@ struct OmniboxContainer: View {
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
     var containerGeometry: GeometryProxy
 
-    private let boxMinWidth: CGFloat = 600
+    private let boxMinWidth: CGFloat = 336
     private let boxDefaultWidth: CGFloat = 680
     private let boxMinX: CGFloat = 20
     private var boxMinXInToolBar: CGFloat {

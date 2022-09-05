@@ -61,7 +61,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var cancellableScope = Set<AnyCancellable>()
     var importCancellables = Set<AnyCancellable>()
 
-    static let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
+    static let defaultWindowMinimumSize = CGSize(width: 500, height: 400)
     static let defaultWindowSize = CGSize(width: 1024, height: 768)
 
     private let networkMonitor = NetworkMonitor()

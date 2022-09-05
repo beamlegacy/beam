@@ -499,7 +499,7 @@ public class TextNode: ElementNode {
         cursorLayer.shapeLayer.fillColor = cursorColor
     }
 
-    var useActionLayer = true
+    var useActionLayer = false
     func createActionLayerIfNeeded() -> Layer? {
         guard element as? ProxyElement == nil, element.kind != .dailySummary, useActionLayer else { return nil }
         if let actionLayer = layers[Self.cmdEnterLayer] {

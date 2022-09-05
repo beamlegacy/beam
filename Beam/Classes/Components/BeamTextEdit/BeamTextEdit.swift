@@ -58,6 +58,7 @@ public extension CALayer {
 
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var data: BeamData?
+    var isInMiniEditor: Bool
     public private(set) weak var state: BeamState?
 
     var cardTopSpace: CGFloat {
@@ -206,12 +207,13 @@ public extension CALayer {
     public override var wantsUpdateLayer: Bool { true }
     internal var scope = Set<AnyCancellable>()
 
-    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool, frame: CGRect? = nil, state: BeamState? = nil) {
+    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool, frame: CGRect? = nil, state: BeamState? = nil, isInMiniEditor: Bool = false) {
         self.enableDelayedInit = enableDelayedInit
         self.delayedInit = enableDelayedInit
         self.journalMode = journalMode
         self.state = state
         self.data = state?.data ?? BeamData.shared
+        self.isInMiniEditor = isInMiniEditor
 
         note = root
 
@@ -356,7 +358,7 @@ public extension CALayer {
         }
     }
 
-    var leadingPercentage: CGFloat = 50 {
+    var leadingPercentage: CGFloat = 52 {
         didSet {
             if oldValue != leadingPercentage {
                 invalidateLayout()
@@ -632,18 +634,19 @@ public extension CALayer {
                 let size = root.allVisibleTexts.reduce(0) { partialResult, element in
                     partialResult + Int(1 + element.1.text.count / 80) * fontSize
                 }
-                let result = NSSize(width: AppDelegate.defaultWindowMinimumSize.width, height: max(Self.minimumEmptyEditorHeight, CGFloat(size)))
+                let result = NSSize(width: Self.minimumEmptyEditorWidth, height: max(Self.minimumEmptyEditorHeight, CGFloat(size)))
                 return result
             }
 
-            let result = NSSize(width: AppDelegate.defaultWindowMinimumSize.width, height: Self.minimumEmptyEditorHeight)
+            let result = NSSize(width: Self.minimumEmptyEditorWidth, height: Self.minimumEmptyEditorHeight)
             return result
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
         let noteHeight = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
         let leadingGutterHeight = leadingGutterSize.height + topOffsetActual + footerHeight + cardTopSpace + cardHeaderPosY
-        realContentSize = NSSize(width: max(AppDelegate.minimumSize(for: window).width, textNodeWidth), height: max(noteHeight, leadingGutterHeight))
+        let minWidth = isInMiniEditor ?  MiniEditorPanel.minimumPanelWidth : AppDelegate.minimumSize(for: window).width
+        realContentSize = NSSize(width: max(minWidth, textNodeWidth), height: max(noteHeight, leadingGutterHeight))
         safeContentSize = realContentSize
         if !journalMode {
             safeContentSize.height = max(visibleRect.maxY, safeContentSize.height)
