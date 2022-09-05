@@ -10,6 +10,7 @@ import BeamCore
 
 public protocol BeamManagerOwner: AnyObject {
     var objectManager: BeamObjectManager { get }
+    var data: BeamData { get }
 
     func loadManagers(_ store: GRDBStore) throws
     func unloadManagers()
@@ -55,6 +56,13 @@ public extension BeamManagerOwner {
     }
 
     func unloadManagers() {
+        for manager in managers.values {
+            do {
+                try manager.unload()
+            } catch {
+                Logger.shared.logError("Unable to unload manager \(manager) from \(self)", category: .database)
+            }
+        }
         managers.removeAll()
     }
 

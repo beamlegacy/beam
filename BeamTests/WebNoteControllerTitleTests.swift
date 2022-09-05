@@ -36,7 +36,7 @@ class WebNoteControllerTitleTests: XCTestCase {
     }
 
     func testTitlePercentEncoding() async throws {
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: BeamData.shared)
         let mockFetcher = MockSocialTitleFetcher()
         mockFetcher.mockTitle = "Web%20%26%20Notes"
         SocialTitleFetcher.shared = mockFetcher

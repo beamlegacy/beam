@@ -11,7 +11,7 @@ struct FileDetail: View {
     @State private var deleted = false
     @State private var saving = false
 
-    private let fileManager = BeamFileDBManager.shared!
+    let fileManager: BeamFileDBManager
     private let formatter = ByteCountFormatter()
 
     var body: some View {
@@ -99,11 +99,11 @@ struct FileDetail: View {
                         Divider()
                         HStack {
                             Text("Reference count:").bold()
-                            let count = (try? BeamFileDBManager.shared?.referenceCount(fileId: file.id)) ?? 0
+                            let count = (try? fileManager.referenceCount(fileId: file.id)) ?? 0
                             Text("\(count)")
                             Spacer()
                         }
-                        Text( ((try? BeamFileDBManager.shared?.referencesFor(fileId: file.id)) ?? []).map({ "\($0.note?.titleAndId ?? "???") - \($0.elementID)" }).joined(separator: "\n"))
+                        Text( ((try? fileManager.referencesFor(fileId: file.id)) ?? []).map({ "\($0.note?.titleAndId ?? "???") - \($0.elementID)" }).joined(separator: "\n"))
 
                         Divider()
 
@@ -154,7 +154,7 @@ struct FileDetail: View {
         deleted = true
 
         do {
-            try BeamFileDBManager.shared?.remove(uid: file.uid)
+            try fileManager.remove(uid: file.uid)
 
             if remoteDelete {
                 Task {
@@ -176,7 +176,7 @@ struct FileDetail: View {
             file.updatedAt = BeamDate.now
 
             do {
-                try BeamFileDBManager.shared?.insert(files: [file])
+                try fileManager.insert(files: [file])
                 try await fileManager.saveOnBeamObjectAPI(file)
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
@@ -218,7 +218,7 @@ struct FileDetail: View {
 
     private var PurgeUnlinked: some View {
         Button {
-            try? BeamFileDBManager.shared?.purgeUnlinkedFiles()
+            try? fileManager.purgeUnlinkedFiles()
         } label: {
             Text("Purge unlinked files")
         }
@@ -226,7 +226,7 @@ struct FileDetail: View {
 
     private var PurgeUndo: some View {
         Button {
-            try? BeamFileDBManager.shared?.purgeUndo()
+            try? fileManager.purgeUndo()
         } label: {
             Text("Purge undo files")
         }
@@ -258,8 +258,9 @@ struct FileDetail: View {
 
 struct FileDetail_Previews: PreviewProvider {
     static var previews: some View {
-        let file = try! BeamFileDBManager.shared?.fetchRandom()
+        let fileManager = AppData.shared.currentAccount?.fileDBManager
+        let file = try! fileManager?.fetchRandom()
 
-        return FileDetail(file: file!).background(Color.white)
+        return FileDetail(file: file!, fileManager: fileManager!).background(Color.white)
     }
 }

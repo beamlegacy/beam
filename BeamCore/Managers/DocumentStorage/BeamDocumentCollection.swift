@@ -61,15 +61,15 @@ public enum BeamDocumentCollectionError: Error {
 }
 
 public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
-    weak public private(set) var holder: BeamManagerOwner?
+    weak public private(set) var owner: BeamManagerOwner?
     var database: BeamDatabase? {
-        holder as? BeamDatabase
+        owner as? BeamDatabase
     }
 
     public override var tableNames: [String] { [BeamDocument.databaseTableName] }
 
     public required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
-        self.holder = holder
+        self.owner = holder
         try super.init(store: store)
     }
 

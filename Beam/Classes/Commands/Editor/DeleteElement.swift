@@ -39,11 +39,12 @@ class DeleteElement: TextEditorCommand {
 
         if case let .image(uid, origin: _, displayInfos: _) = elementInstance.element.kind {
             do {
+                guard let beamData = context?.editor?.data else { return false }
                 // Add a fake reference so that we don't destroy the associated file too early
                 // We'll remove all fake instances when exiting (and relaunching the app)
-                try BeamFileDBManager.shared?.addReference(fromNote: UUID.null, element: UUID.null, to: uid)
+                try beamData.fileDBManager?.addReference(fromNote: UUID.null, element: UUID.null, to: uid)
                 // Remove the actual reference:
-                try BeamFileDBManager.shared?.removeReference(fromNote: noteId, element: elementId)
+                try beamData.fileDBManager?.removeReference(fromNote: noteId, element: elementId)
             } catch {
                 Logger.shared.logError("Unable to handle removal of fileId \(uid)", category: .fileDB)
             }
@@ -59,13 +60,15 @@ class DeleteElement: TextEditorCommand {
               let deletedElement = decode(data: data),
               let parentId = self.parentId,
               let indexInParent = indexInParent,
-              let parentElementInstance = getElement(for: noteId, and: parentId) else { return false }
+              let parentElementInstance = getElement(for: noteId, and: parentId)
+        else { return false }
 
         parentElementInstance.element.insert(deletedElement, at: indexInParent)
         if case let .image(uid, origin: _, displayInfos: _) = deletedElement.kind {
             // Add back the actual file reference:
             do {
-                try BeamFileDBManager.shared?.addReference(fromNote: noteId, element: elementId, to: uid)
+                guard let beamData = context?.editor?.data else { return false }
+                try beamData.fileDBManager?.addReference(fromNote: noteId, element: elementId, to: uid)
             } catch {
                 Logger.shared.logError("Unable to undo delete reference of fileId \(uid)", category: .fileDB)
             }
@@ -84,7 +87,7 @@ extension CommandManager where Context == Widget {
     }
 
     @discardableResult
-    func deleteElement(for element: BeamElement, context: Widget? = nil) -> Bool {
+    func deleteElement(for element: BeamElement, context: Widget?) -> Bool {
         guard let noteId = element.note?.id else { return false }
         let cmd = DeleteElement(elementId: element.id, of: noteId)
         return run(command: cmd, on: context)

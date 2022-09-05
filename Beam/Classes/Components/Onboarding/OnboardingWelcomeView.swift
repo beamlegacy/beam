@@ -86,7 +86,7 @@ struct OnboardingWelcomeView: View {
                 }
                 if welcoming {
                     ButtonLabel("Sign Up/In Later", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
-                        OnboardingNoteCreator.shared.createOnboardingNotes()
+                        onboardingManager.onboardingNoteCreator.createOnboardingNotes(data: BeamData.shared)
                         finish(nil)
                     }
                 }

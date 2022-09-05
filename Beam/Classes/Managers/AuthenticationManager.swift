@@ -5,7 +5,7 @@ import Combine
 
 class AuthenticationManager {
     static var shared = AuthenticationManager()
-    var account: BeamAccount?
+    weak var account: BeamAccount?
 
     // Queue is used to make sure only one refresh at a time is being called on the API
     lazy private var queue: OperationQueue = {

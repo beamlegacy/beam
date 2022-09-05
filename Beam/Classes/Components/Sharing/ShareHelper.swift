@@ -15,8 +15,10 @@ class ShareHelper {
     private let openWebURL: (URL) -> Void
     private var imageCancellables = Set<AnyCancellable>()
     private let pasteboard: NSPasteboard
+    private let data: BeamData
 
-    init(_ baseURL: URL? = nil, pasteboard: NSPasteboard = .general, handleOpenURL: @escaping (URL) -> Void) {
+    init(_ baseURL: URL? = nil, pasteboard: NSPasteboard = .general, data: BeamData, handleOpenURL: @escaping (URL) -> Void) {
+        self.data = data
         self.baseURL = baseURL
         self.openWebURL = handleOpenURL
         self.pasteboard = pasteboard
@@ -114,7 +116,7 @@ class ShareHelper {
 
     private func getImageFromElementKind(_ elementKind: ElementKind) -> NSImage? {
         guard case let .image(imageID, _, _) = elementKind,
-              let imageRecord = try? BeamFileDBManager.shared?.fetch(uid: imageID) else {
+              let imageRecord = try? data.fileDBManager?.fetch(uid: imageID) else {
             return nil
         }
         return NSImage(data: imageRecord.data)

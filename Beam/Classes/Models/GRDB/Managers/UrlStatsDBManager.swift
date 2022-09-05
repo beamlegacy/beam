@@ -15,12 +15,12 @@ private struct UrlDistinctVisitDayCount: Decodable, FetchableRecord {
 }
 
 class UrlStatsDBManager: GRDBHandler, BeamManager {
-    weak public private(set) var holder: BeamManagerOwner?
+    weak public private(set) var owner: BeamManagerOwner?
     static var id = UUID()
     static var name = "UrlStatsDBManager"
 
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
-            self.holder = holder
+            self.owner = holder
             try super.init(store: store)
         }
 

@@ -41,7 +41,7 @@ public class BeamApplication: SentryCrashExceptionApplication {
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
     class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
-
+    let data: AppData = AppData.shared
     var skipTerminateMethods = false
     var window: BeamWindow? {
         (NSApplication.shared.keyWindow as? BeamWindow) ?? (NSApplication.shared.mainWindow as? BeamWindow)
@@ -57,8 +57,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var panels: [BeamNote: MiniEditorPanel] = [:]
 
     var didFinishLaunching = false
-
-    let data = AppData.shared
 
     var cancellableScope = Set<AnyCancellable>()
     var importCancellables = Set<AnyCancellable>()
@@ -409,7 +407,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard !skipTerminateMethods else { return }
         // Insert code here to tear down your application
         do {
-            try BeamFileDBManager.shared?.purgeUndo()
+            try self.data.currentAccount?.fileDBManager?.purgeUndo()
         } catch {
             Logger.shared.logError("Unable to purge unused files: \(error)", category: .fileDB)
         }
@@ -417,6 +415,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             data.clusteringManager.saveOrphanedUrlsAtSessionClose(orphanedUrlManager: data.clusteringOrphanedUrlManager)
         }
         KeychainDailyNoteScoreStore.shared.save()
+        windows.removeAll()
+        self.data.applicationWillTerminate()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

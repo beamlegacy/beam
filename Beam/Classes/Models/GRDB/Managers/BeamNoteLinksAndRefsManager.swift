@@ -11,9 +11,9 @@ import GRDB
 import UUIDKit
 
 class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
-    weak public private(set) var holder: BeamManagerOwner?
+    weak public private(set) var owner: BeamManagerOwner?
     public var database: BeamDatabase? {
-        holder as? BeamDatabase
+        owner as? BeamDatabase
     }
 
     public static var id = UUID()
@@ -24,7 +24,7 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
     var needsPostMigrationReindexing = false
 
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
-        self.holder = holder
+        self.owner = holder
         try super.init(store: store)
     }
 
