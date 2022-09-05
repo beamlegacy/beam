@@ -35,7 +35,7 @@ extension AppDelegate {
         data.currentAccount?.data.clearCookiesAndCache()
 
         // BeamFile
-        BeamFileDBManager.shared?.deleteAll(includedRemote: false) { _ in }
+        AppData.shared.currentAccount?.fileDBManager?.deleteAll(includedRemote: false) { _ in }
         // Link Store
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         //Contacts
@@ -118,6 +118,7 @@ extension AppDelegate {
             do {
 //                try CoreDataManager.shared.backup(url)
                 let collection = BeamNoteCollectionWrapper()
+                collection.data = data.currentAccount?.data
                 try collection.write(to: url, ofType: BeamNoteCollectionWrapper.documentTypeName)
             } catch {
                 UserAlert.showError(message: "Could not export backup note collection: \(error.localizedDescription)",
@@ -143,7 +144,7 @@ extension AppDelegate {
             guard result == .OK, let url = openPanel?.url else { openPanel?.close(); return }
 
             do {
-                let noteCollection = try BeamNoteCollectionWrapper(fileWrapper: FileWrapper(url: url, options: .immediate))
+                let noteCollection = try BeamNoteCollectionWrapper(fileWrapper: FileWrapper(url: url, options: .immediate), data: self.data.currentAccount?.data)
                 try noteCollection.importNotes()
             } catch {
                 UserAlert.showError(message: "Could not import collection",
@@ -189,6 +190,7 @@ extension AppDelegate {
     // MARK: Markdown
 
     @IBAction func importMarkdown(_ sender: Any) {
+        guard let fileManager = data.currentAccount?.data.fileDBManager else { return }
         let openPanel = NSOpenPanel()
         openPanel.allowsMultipleSelection = true
         openPanel.canChooseDirectories = false
@@ -206,7 +208,7 @@ extension AppDelegate {
 
             for url in selectedURLs {
                 do {
-                    try importer.import(documentURL: url)
+                    try importer.import(documentURL: url, fileManager: fileManager)
                 } catch {
                     Logger.shared.logError("Error importing to Markdown: \(error)", category: .general)
                     failedImports += 1

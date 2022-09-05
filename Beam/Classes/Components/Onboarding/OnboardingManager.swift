@@ -53,6 +53,7 @@ class OnboardingManager: ObservableObject {
     @Published private(set) var stepsHistory = [OnboardingStep]()
 
     private let analyticsCollector: AnalyticsCollector?
+    let onboardingNoteCreator = OnboardingNoteCreator()
 
     var currentStepIsFromHistory = false
     var onlyConnect: Bool = false
@@ -209,7 +210,7 @@ class OnboardingManager: ObservableObject {
         resetOnboarding()
         delegate?.onboardingManagerDidFinish(userDidSignUp: userDidSignUp)
         if userDidSignUp {
-            OnboardingNoteCreator.shared.createOnboardingNotes()
+            onboardingNoteCreator.createOnboardingNotes(data: BeamData.shared)
         }
     }
 

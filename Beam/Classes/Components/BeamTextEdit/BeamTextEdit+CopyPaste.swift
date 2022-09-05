@@ -21,7 +21,7 @@ extension BeamTextEdit {
     }
 
     func buildStringFrom(image source: UUID) -> NSAttributedString {
-        guard let imageRecord = try? BeamFileDBManager.shared?.fetch(uid: source)
+        guard let imageRecord = try? data?.fileDBManager?.fetch(uid: source)
         else {
             Logger.shared.logError("ImageNode unable to fetch image '\(source)' from FileDB", category: .noteEditor)
             return NSAttributedString()
@@ -124,7 +124,7 @@ extension BeamTextEdit {
             sortedNodes.forEach { (node) in
                 sortedSelectedElements.append(node.element)
                 if case .image(let id, _, _) = node.element.kind {
-                    guard let imageRecord = try? BeamFileDBManager.shared?.fetch(uid: id), let image = NSImage(data: imageRecord.data) else { return }
+                    guard let imageRecord = try? data?.fileDBManager?.fetch(uid: id), let image = NSImage(data: imageRecord.data) else { return }
                     images[id] = imageRecord
                     rawImages.append(image)
                 }
@@ -287,7 +287,7 @@ extension BeamTextEdit {
                 node.cmdManager.focus(newElement, in: node)
             }
             if previousBullet.children.isEmpty, previousBullet.text.isEmpty {
-                node.cmdManager.deleteElement(for: previousBullet)
+                node.cmdManager.deleteElement(for: previousBullet, context: mngrNode)
             }
         } catch {
             Logger.shared.logError("Can't encode Cloned Note", category: .general)
@@ -295,9 +295,9 @@ extension BeamTextEdit {
     }
 
     private func importImageIfNeeded(id: UUID, elementHolder: BeamNoteDataHolder) {
-        let existingFileRecord = try? BeamFileDBManager.shared?.fetch(uid: id)
+        let existingFileRecord = try? data?.fileDBManager?.fetch(uid: id)
         guard let fileRecord = elementHolder.imageData[id], existingFileRecord == nil else { return }
-        try? BeamFileDBManager.shared?.insert(files: [fileRecord])
+        try? data?.fileDBManager?.insert(files: [fileRecord])
     }
 
     private func paste(url: URL) {
@@ -318,7 +318,7 @@ extension BeamTextEdit {
     private func paste(image: NSImage, with name: String? = nil) {
         guard let node = focusedWidget as? ElementNode,
               let parent = node.parent as? ElementNode,
-              let fileManager = BeamFileDBManager.shared
+              let fileManager = data?.fileDBManager
         else {
             Logger.shared.logError("Can't paste on a node that is not an element node", category: .noteEditor)
             return

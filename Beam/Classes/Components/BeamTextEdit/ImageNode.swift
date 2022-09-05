@@ -97,7 +97,7 @@ class ImageNode: ResizableNode {
 
     private func setupImage(width: CGFloat) {
         guard let uid = imageId else { return }
-        guard let imageRecord = try? BeamFileDBManager.shared?.fetch(uid: uid) else {
+        guard let imageRecord = try? editor?.data?.fileDBManager?.fetch(uid: uid) else {
             Logger.shared.logError("ImageNode unable to fetch image '\(uid)' from FileDB", category: .noteEditor)
             return
         }

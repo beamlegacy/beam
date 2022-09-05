@@ -66,7 +66,7 @@ extension AppDelegate {
         do {
             let filename = BeamNoteDocumentWrapper.preferredFilename(for: note, withExtension: true)
             let url = fileUrl ?? URL(fileURLWithPath: filename, relativeTo: baseURL)
-            let document = BeamNoteDocumentWrapper(note: note)
+            let document = BeamNoteDocumentWrapper(note: note, data: data.currentAccount?.data)
             try document.write(to: url, ofType: BeamNoteDocumentWrapper.fileExtension)
         } catch {
             UserAlert.showError(message: error.localizedDescription)
@@ -86,7 +86,7 @@ extension AppDelegate {
         } else {
             // try to decode and import this file
             do {
-                let noteDocument = try BeamNoteDocumentWrapper(fileWrapper: FileWrapper(url: url, options: .immediate))
+                let noteDocument = try BeamNoteDocumentWrapper(fileWrapper: FileWrapper(url: url, options: .immediate), data: data.currentAccount?.data)
                 try noteDocument.importNote()
             } catch {
                 UserAlert.showError(message: "Unable to import \(url)", error: error)
@@ -128,8 +128,9 @@ extension AppDelegate {
             var failedCount: UInt = .zero
 
             func export(note: BeamNote, isExportingAllNotes: Bool = false) {
+                guard let fileManager = self.data.currentAccount?.fileDBManager else { return }
                 do {
-                    let export = MarkdownExporter.export(of: note)
+                    let export = MarkdownExporter.export(of: note, fileManager: fileManager)
                     try export.write(to: selectedURL)
                 } catch {
                     Logger.shared.logError("Error exporting \(note) to Markdown: \(error)", category: .general)

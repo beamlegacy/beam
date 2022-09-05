@@ -11,7 +11,7 @@ import SwiftUI
 struct GutterView: View {
     var isLeading: Bool
     var leadingGutterViewType: LeadingGutterView.LeadingGutterViewType?
-    var trailingGutterViewModel: TrailingGutterView.Model?
+    weak var trailingGutterViewModel: TrailingGutterView.Model?
 
     var body: some View {
         if isLeading {

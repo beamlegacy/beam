@@ -10,6 +10,7 @@ import BeamCore
 
 /// A representation of the note document written to disk when exported by the application.
 final class BeamNoteDocumentWrapper: NSDocument {
+    var data: BeamData?
     private(set) var note: BeamNote?
 
     private struct File {
@@ -20,16 +21,17 @@ final class BeamNoteDocumentWrapper: NSDocument {
 
     private var files = [String: File]()
 
-    init(fileWrapper: FileWrapper) throws {
+    init(fileWrapper: FileWrapper, data: BeamData?) throws {
+        self.data = data
         super.init()
         try read(from: fileWrapper, ofType: Self.documentTypeName)
     }
 
-    init(note: BeamNote) {
+    init(note: BeamNote, data: BeamData?) {
         self.note = note
-
+        self.data = data
         for (fileId, _) in note.allFileElements {
-            guard let file = try? BeamFileDBManager.shared?.fetch(uid: fileId) else { continue }
+            guard let file = try? data?.fileDBManager?.fetch(uid: fileId) else { continue }
             let data = file.data
             files[fileId.uuidString] = File(id: fileId, name: file.name, data: data)
         }
@@ -108,7 +110,7 @@ final class BeamNoteDocumentWrapper: NSDocument {
         let fileElements = note.allFileElements
         if !fileElements.isEmpty {
             for file in self.files.values {
-                _ = try? BeamFileDBManager.shared?.insert(name: file.name, data: file.data)
+                _ = try? data?.fileDBManager?.insert(name: file.name, data: file.data)
             }
         }
     }

@@ -23,6 +23,7 @@ class WebNoteControllerTest: XCTestCase {
 
     var words = WordsFile()
     var note = try! BeamNote(title: "Sample note")
+    var data = BeamData.shared
 
     override func setUpWithError() throws {
         note = try BeamNote(title: "Sample note")
@@ -39,7 +40,7 @@ class WebNoteControllerTest: XCTestCase {
     }
 
     func testCreateFromNote() throws {
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         XCTAssertEqual(controller.note, note)
         XCTAssertEqual(controller.rootElement, note)
         XCTAssertEqual(controller.element, note)
@@ -52,7 +53,7 @@ class WebNoteControllerTest: XCTestCase {
         note.addChild(child2)
         let root = note.children[1]
 
-        let controller = WebNoteController(note: note, rootElement: root)
+        let controller = WebNoteController(note: note, rootElement: root, data: data)
 
         XCTAssertEqual(controller.note, note)
         XCTAssertEqual(controller.rootElement, root)
@@ -63,7 +64,7 @@ class WebNoteControllerTest: XCTestCase {
     }
 
     func testMultipleParagraphsOfSameSourceShouldNestCorrectly() async throws {
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         let sourceLink = URL(string: "https://www.example.com")!
         let paragraph1 = BeamElement("example content with a lot of words")
         let paragraph1V2 = BeamElement("example content with a lot of words")
@@ -92,7 +93,7 @@ class WebNoteControllerTest: XCTestCase {
     }
 
     func testMultipleParagraphsOfDifferentSourceShouldCreateMultipleSourceLinks() async throws {
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         let sourceLink1 = URL(string: "https://www.one.com")!
         let sourceLink2 = URL(string: "https://www.two.com")!
         let paragraph1 = BeamElement("example content with a lot of words")
@@ -134,7 +135,7 @@ class WebNoteControllerTest: XCTestCase {
         /// - <empty bullet with no content>
         let emptyBullet = BeamElement("")
         note.addChild(emptyBullet)
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         ///
         let sourceLink = URL(string: "https://www.example.com")!
         let paragraph1 = BeamElement("example content with a lot of words")
@@ -168,7 +169,7 @@ class WebNoteControllerTest: XCTestCase {
         /// - " "
         let emptyBullet = BeamElement(" ")
         note.addChild(emptyBullet)
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         ///
         let sourceLink = URL(string: "https://www.example.com")!
         let paragraph1 = BeamElement("example content with a lot of words")
@@ -200,7 +201,7 @@ class WebNoteControllerTest: XCTestCase {
         let sourceLink = URL(string: "https://www.example.com")!
         let paragraph1 = createMockParagraph()
         let paragraph2 = createMockParagraph()
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         ///
         /// 1. AddContent
         /// SourceLink
@@ -255,7 +256,7 @@ class WebNoteControllerTest: XCTestCase {
         let paragraph1 = createMockParagraph()
         let paragraph2 = createMockParagraph()
         let paragraph3 = createMockParagraph()
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         await controller.addContent(content: [paragraph1], with: sourceLink1, reason: .pointandshoot)
         await controller.addContent(content: [paragraph2], with: sourceLink2, reason: .pointandshoot)
         ///
@@ -306,7 +307,7 @@ class WebNoteControllerTest: XCTestCase {
         let updatedLinkTitle = "updated link title"
         let paragraph1 = createMockParagraph()
         let paragraph2 = createMockParagraph()
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         /// 1. AddContent (source: SourceLink1)
         /// SourceLink1
         /// - Paragraph1
@@ -338,7 +339,7 @@ class WebNoteControllerTest: XCTestCase {
         let updatedLinkTitle = "\(defaultLinkTitle) bla bla bla golang is super cool"
         let paragraph1 = createMockParagraph()
         let paragraph2 = createMockParagraph()
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         /// Usual behaviour:
         /// 1. AddContent
         /// https://go.dev/doc/
@@ -408,7 +409,7 @@ class WebNoteControllerTest: XCTestCase {
         let search = "Surfing in Scheveningen"
         let searchText = BeamElement(search)
         note.addChild(searchText)
-        let controller = WebNoteController(note: note)
+        let controller = WebNoteController(note: note, data: data)
         
         await controller.replaceSearchWithSearchLink(
             search,

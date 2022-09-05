@@ -21,7 +21,7 @@ class BeamNoteDocumentWrapperTests: XCTestCase {
 
     func testExportImportNote() {
         let note = makeNote()
-        let doc = BeamNoteDocumentWrapper(note: note)
+        let doc = BeamNoteDocumentWrapper(note: note, data: AppData.shared.currentAccount?.data)
         guard let tempFile = try? TemporaryFile(creatingTempDirectoryForFilename: "testNote") else {
             XCTFail("Error getting temp file")
             return
@@ -29,7 +29,7 @@ class BeamNoteDocumentWrapperTests: XCTestCase {
         let url = tempFile.fileURL
         XCTAssertNoThrow(try doc.write(to: url, ofType: BeamNoteDocumentWrapper.documentTypeName))
 
-        guard let importedDoc = try? BeamNoteDocumentWrapper(fileWrapper: FileWrapper(url: url, options: .immediate)) else {
+        guard let importedDoc = try? BeamNoteDocumentWrapper(fileWrapper: FileWrapper(url: url, options: .immediate), data: AppData.shared.currentAccount?.data) else {
             XCTFail("Error re-reading exported BeamNote document wrapper")
             return
         }
@@ -45,7 +45,7 @@ class BeamNoteDocumentWrapperTests: XCTestCase {
             notes[note.id] = note
         }
 
-        let doc = BeamNoteCollectionWrapper(notes: Array(notes.values))
+        let doc = BeamNoteCollectionWrapper(notes: Array(notes.values), data: AppData.shared.currentAccount!.data)
         guard let tempFile = try? TemporaryFile(creatingTempDirectoryForFilename: "testNoteCollection") else {
             XCTFail("Error getting temp file")
             return
@@ -53,7 +53,7 @@ class BeamNoteDocumentWrapperTests: XCTestCase {
         let url = tempFile.fileURL
         XCTAssertNoThrow(try doc.write(to: url, ofType: BeamNoteCollectionWrapper.documentTypeName))
 
-        guard let importedDoc = try? BeamNoteCollectionWrapper(fileWrapper: FileWrapper(url: url, options: .immediate)) else {
+        guard let importedDoc = try? BeamNoteCollectionWrapper(fileWrapper: FileWrapper(url: url, options: .immediate), data: AppData.shared.currentAccount?.data) else {
             XCTFail("Error re-reading exported BeamNote collection wrapper")
             return
         }
