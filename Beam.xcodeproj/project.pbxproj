@@ -458,7 +458,6 @@
 		52DB02642716D07900F3881D /* AppDelegate+Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DB02632716D07900F3881D /* AppDelegate+Log.swift */; };
 		52DB02662716DCE800F3881D /* LoggerRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DB02652716DCE800F3881D /* LoggerRecorder.swift */; };
 		52DD53F125F1122F004F7EC8 /* BeamExport.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 52DD53DC25F1122F004F7EC8 /* BeamExport.sqlite */; };
-		52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DF49A525E42110009A651E /* BeamUITestsHelper.swift */; };
 		52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */ = {isa = PBXBuildFile; fileRef = 52E04FD5252C7A4600AD9F56 /* writing_space.json */; };
 		52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */; };
 		52EA56CE274F8F8B00F092C8 /* beam_object_data_url.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52EA56CD274F8F8B00F092C8 /* beam_object_data_url.graphql */; };
@@ -2143,7 +2142,6 @@
 		52DB02632716D07900F3881D /* AppDelegate+Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Log.swift"; sourceTree = "<group>"; };
 		52DB02652716DCE800F3881D /* LoggerRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerRecorder.swift; sourceTree = "<group>"; };
 		52DD53DC25F1122F004F7EC8 /* BeamExport.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = BeamExport.sqlite; sourceTree = "<group>"; };
-		52DF49A525E42110009A651E /* BeamUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITestsHelper.swift; sourceTree = "<group>"; };
 		52E04FD5252C7A4600AD9F56 /* writing_space.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = writing_space.json; sourceTree = "<group>"; };
 		52E04FEC252C814D00AD9F56 /* RoamImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoamImporterTests.swift; sourceTree = "<group>"; };
 		52EA56CD274F8F8B00F092C8 /* beam_object_data_url.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = beam_object_data_url.graphql; sourceTree = "<group>"; };
@@ -5128,7 +5126,6 @@
 			isa = PBXGroup;
 			children = (
 				52A94E2625E90084004BAC93 /* Extensions */,
-				52DF49A525E42110009A651E /* BeamUITestsHelper.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -10052,7 +10049,6 @@
 				D73C597D28AB9482004D41DF /* TabGroupInOmniboxTests.swift in Sources */,
 				B5BA078926AF3E4700D31FED /* UITestsMenuBar.swift in Sources */,
 				D70E2C23288FD55400622D7F /* TabGroupOpenNewWindowTests.swift in Sources */,
-				52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */,
 				D71D7484282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift in Sources */,
 				B51C99AF2805C46400A2577E /* IncognitoModeTests.swift in Sources */,
 				D7E38CED282A93580059F60D /* AdBlockerTests.swift in Sources */,

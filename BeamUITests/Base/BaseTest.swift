@@ -265,4 +265,67 @@ class BaseTest: XCTestCase {
     func isPasteboardEmpty() -> Bool {
         return getNumberOfPasteboardItem() == 0
     }
+    
+    func moveMouseOutOfTheWay() {
+        app.windows.firstMatch.coordinate(withNormalizedOffset: .zero).hover()
+    }
+    
+    func typeAndEditHardcodedText (_ view: BaseView) -> String {
+        view.app.typeText("Typed Text at the row")
+        view.typeKeyboardKey(.leftArrow, 4)
+        shortcutHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: 4)
+        view.typeKeyboardKey(.delete)
+        
+        shortcutHelper.shortcutActionInvoke(action: .endOfLine)
+        shortcutHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: 4)
+        view.typeKeyboardKey(.delete)
+        
+        shortcutHelper.shortcutActionInvoke(action: .beginOfLine)
+        view.typeKeyboardKey(.rightArrow, 4)
+        shortcutHelper.shortcutActionInvokeRepeatedly(action: .selectOnRight, numberOfTimes: 4)
+        view.typeKeyboardKey(.space)
+        let expectedTextAfterChange = "Type xt at"
+        return expectedTextAfterChange
+    }
 }
+
+extension XCTest {
+
+    func epic(_ values: String...) {
+        label(name: "epic", values: values)
+    }
+    func feature(_ values: String...) {
+        label(name: "feature", values: values)
+    }
+    func story(_ stories: String...) {
+        label(name: "story", values: stories)
+    }
+    func label(_ name: String,_ values: [String]) {
+        label(name: name, values: values)
+    }
+    func step(_ name: String, step: () -> Void) {
+        XCTContext.runActivity(named: name) { _ in
+            step()
+        }
+    }
+    private func label(name: String, values: [String]) {
+        for value in values {
+            XCTContext.runActivity(named: "allure.label." + name + ":" + value, block: {_ in})
+        }
+    }
+}
+
+extension XCUIElementQuery: Sequence {
+    public typealias Iterator = AnyIterator<XCUIElement>
+    public func makeIterator() -> Iterator {
+        var index = UInt(0)
+        return AnyIterator {
+            guard index < self.count else { return nil }
+
+            let element = self.element(boundBy: Int(index))
+            index += 1
+            return element
+        }
+    }
+}
+
