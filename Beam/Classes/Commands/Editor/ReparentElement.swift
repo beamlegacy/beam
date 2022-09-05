@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class ReparentElement: TextEditorCommand {
-    static let name = "ReparentElement"
+    static let name = "Move Element"
     var elementId: UUID
     var newParentId: UUID
     var newIndexInParent: Int

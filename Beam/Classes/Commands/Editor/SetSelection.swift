@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class SetSelection: TextEditorCommand {
-    static let name: String = "SetSelection"
+    static let name: String = "Set Selection"
 
     var selection: Range<Int>
     var oldSelection: Range<Int>?
@@ -45,7 +45,7 @@ class SetSelection: TextEditorCommand {
 }
 
 class CancelSelection: TextEditorCommand {
-    static let name: String = "CancelSelection"
+    static let name: String = "Cancel Selection"
 
     var oldSelection: Range<Int>?
     var oldCursorPosition: Int?

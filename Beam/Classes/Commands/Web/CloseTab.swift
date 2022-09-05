@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class CloseTab: WebCommand {
-    static let name: String = "CloseTab"
+    static let name: String = "Close Tab"
 
     weak var tab: BrowserTab?
     var tabData: Data?
