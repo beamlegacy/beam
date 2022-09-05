@@ -115,12 +115,10 @@ class NoteEditorTests: BaseTest {
     func testOpenTabOnBackground() {
         testrailId("C810")
         step("Given I open a note") {
-            launchApp()
-            openTodayNote()
+            launchAppAndOpenTodayNote()
         }
         
         step("Given I type a URL in text editor"){
-            noteTestView.waitForNoteViewToLoad()
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "youtube.com ", needsActivation: true)
         }
         
@@ -147,7 +145,6 @@ class NoteEditorTests: BaseTest {
         launchAppAndOpenTodayNote()
 
         step("Given I create note with indented content") {
-            noteTestView.waitForTodayNoteViewToLoad()
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
             noteTestView.typeKeyboardKey(.return)
             noteTestView.typeKeyboardKey(.tab)
@@ -250,7 +247,6 @@ class NoteEditorTests: BaseTest {
         launchAppAndOpenTodayNote()
         
         step("Given I create indentation levels") {
-            noteTestView.waitForNoteViewToLoad()
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
             noteTestView.typeKeyboardKey(.return)
             noteTestView.typeKeyboardKey(.tab)
@@ -364,11 +360,9 @@ class NoteEditorTests: BaseTest {
         let urlAdded = "beamapp.co/"
         let textAppended = " Updated"
         let expectedBiDiLink = textToAddLink + textAppended
-        
-        launchAppAndOpenTodayNote()
-        
+                
         step("Given I add text in a note") {
-            noteTestView.waitForNoteViewToLoad()
+            launchAppAndOpenTodayNote()
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: textToAddLink,  needsActivation: true)
         }
         
