@@ -24,14 +24,13 @@ class TodayNoteTests: BaseTest {
         }
         
         step ("Then I cannot delete Today Note from All Notes") {
-            
             allNotesView.openMenuForSingleNote(0)
             XCTAssertFalse(allNotesView.isElementAvailableInSingleNoteMenu(AllNotesViewLocators.MenuItems.deleteNotes))
             allNotesView.typeKeyboardKey(.escape) // close the menu
         }
         
         step ("And I cannot delete Today Note from note view") {
-            allNotesView.openFirstNote()
+            openTodayNote()
             XCTAssertFalse(noteTestView.getDeleteNoteButton().isEnabled)
         }
     }

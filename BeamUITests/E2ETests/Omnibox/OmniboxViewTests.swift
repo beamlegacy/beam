@@ -145,8 +145,8 @@ class OmniboxViewTests: BaseTest {
 
         // In a note
         step("When I open omnibox in a note view"){
-            journalView.openNoteFromAllNotesList(noteTitleToOpen: noteATitle)
-            journalView.openNoteFromAllNotesList(noteTitleToOpen: noteBTitle)
+            openNoteByTitle(noteATitle)
+            openNoteByTitle(noteBTitle)
             omniboxView.focusOmniBoxSearchField()
         }
 
@@ -158,7 +158,7 @@ class OmniboxViewTests: BaseTest {
             XCTAssertEqual(results.element(boundBy: 3).getStringValue(), OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
             XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
             XCTAssertEqual(noteResults.count, 2)
-            journalView.openNoteFromAllNotesList(noteTitleToOpen: noteATitle)
+            openNoteByTitle(noteATitle)
         }
 
         // In Web
