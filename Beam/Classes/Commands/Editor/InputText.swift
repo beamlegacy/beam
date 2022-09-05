@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class InputText: TextEditorCommand {
-    static let name: String = "InputText"
+    static let name: String = "Typing"
 
     var insertText: InsertText
     var cancelSelection: CancelSelection

@@ -51,7 +51,7 @@ extension BeamTextEdit {
                 if pos > 0 && left == "[" {
                     if !self.selectedTextRange.isEmpty {
                         if makeInternalLinkForSelectionOrShowFormatter(for: node) != nil {
-                            cmdManager.beginGroup(with: "Internal Link Clear")
+                            cmdManager.beginGroup(with: "Clear Internal Link")
                             let selectedRangeBefore = selectedTextRange
                             cmdManager.deleteText(in: node, for: pos-1..<pos)
                             cmdManager.deleteText(in: node, for: selectedRangeBefore.upperBound-1..<selectedRangeBefore.upperBound)
@@ -64,7 +64,7 @@ extension BeamTextEdit {
                         }
                         return false
                     } else {
-                        cmdManager.beginGroup(with: "Internal Link Prepare")
+                        cmdManager.beginGroup(with: "Prepare Internal Link")
                         cmdManager.insertText(BeamText(text: "]"), in: node, at: pos)
                         cmdManager.formatText(in: node, for: nil, with: Self.formatterAutocompletingAttribute, for: pos-2..<pos+2, isActive: false)
                         cmdManager.endGroup()
@@ -159,7 +159,7 @@ extension BeamTextEdit {
         if let (linkString, range) = linkStringForPrecedingCharacters(atIndex: pos, in: node) {
             let cmdManager = rootNode.focusedCmdManager
             cmdManager.insertText(BeamText(text: " "), in: node, at: range.upperBound)
-            cmdManager.beginGroup(with: "Automatically format typed link")
+            cmdManager.beginGroup(with: "Format Typed Link")
             cmdManager.formatText(in: node, for: nil, with: .link(linkString), for: range, isActive: false)
             cmdManager.focusElement(node, cursorPosition: range.upperBound + 1)
             cmdManager.endGroup()

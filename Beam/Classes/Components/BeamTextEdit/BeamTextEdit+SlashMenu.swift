@@ -231,7 +231,7 @@ extension BeamTextEdit {
         let decoAttribute = placeholderText.ranges.first?.attributes.first
         var rangesToDelete = [BeamText.Range]()
         var rangesToClean = [BeamText.Range]()
-        node.cmdManager.beginGroup(with: "Picker placeholder cleanup")
+        node.cmdManager.beginGroup(with: "Cleanup Picker Placeholder")
         let decoRanges = node.text.ranges.filter { $0.attributes.first?.rawValue == decoAttribute?.rawValue }
         decoRanges.forEach { r in
             if decoRanges.count == 1 || r.position >= range.lowerBound && r.end < range.upperBound {
