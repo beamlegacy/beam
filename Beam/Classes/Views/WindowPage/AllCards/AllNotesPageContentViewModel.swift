@@ -245,8 +245,8 @@ class NoteTableViewItem: IconButtonTableViewItem {
             hasPopover = true
             popoverAlignment = .top
             buttonAction = { [weak self] point in
-                guard let note = note else { return }
-                if let self = self, self.hasPopover, var origin = point {
+                guard let self = self, let note = BeamNote.fetch(id: self.id) else { return }
+                if self.hasPopover, var origin = point {
                     guard let childWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: true,
                                                                                                     canBecomeMain: false,
                                                                                                     withShadow: true,
