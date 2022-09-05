@@ -22,7 +22,7 @@ extension BeamWebContextMenuItem {
             menuItem = equivalentItem
         default:
             guard let title = title else { return nil }
-            menuItem = HandlerMenuItem(title: title) { _ in
+            menuItem = HandlerMenuItem(title: title) { [unowned webView] _ in
                 guard let action = action else {
                     assertionFailure("This item shouldn't be available if there is no action available"); return
                 }
