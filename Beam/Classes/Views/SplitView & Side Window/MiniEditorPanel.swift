@@ -19,7 +19,7 @@ class MiniEditorPanel: NSPanel {
     private var moveNotificationToken: NSObjectProtocol?
     private var isMouseDown = false
 
-    static let minimumPanelWidth: CGFloat = 550
+    static let minimumPanelWidth: CGFloat = 440
     static let maximumPanelWidth: CGFloat = 614
 
     private let enableWindowDocking = false
@@ -209,7 +209,7 @@ struct MiniEditor: View {
     var body: some View {
         ZStack(alignment: .top) {
             GeometryReader { proxy in
-                NoteView(note: note, containerGeometry: proxy, topInset: 0, leadingPercentage: 0, centerText: false) { offset in
+                NoteView(note: note, isInMiniEditor: true, containerGeometry: proxy, topInset: 0, leadingPercentage: PreferencesManager.editorLeadingPercentage, centerText: false) { offset in
                     showTitle = offset.y > titleHideVerticalOffset ? true : false
                     let isScrolled = offset.y > NoteView.topSpacingBeforeTitle - toolbarHeight
                     contentIsScrolled = isScrolled
