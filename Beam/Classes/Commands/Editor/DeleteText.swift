@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class DeleteText: TextEditorCommand {
-    static let name: String = "DeleteText"
+    static let name: String = "Delete Text"
 
     var elementId: UUID
     var noteId: UUID

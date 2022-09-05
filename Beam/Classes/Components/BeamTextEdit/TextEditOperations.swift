@@ -47,7 +47,7 @@ extension TextRoot {
     func increaseNodeSelectionIndentation() {
         guard let selection = root?.state.nodeSelection else { return }
 
-        focusedCmdManager.beginGroup(with: "IncreaseIndentationGroup")
+        focusedCmdManager.beginGroup(with: "Increase Group Indentation")
         for node in selection.sortedRoots {
             _ = increaseNodeIndentation(node)
         }
@@ -57,7 +57,7 @@ extension TextRoot {
     func decreaseNodeSelectionIndentation() {
         guard let selection = root?.state.nodeSelection else { return }
 
-        focusedCmdManager.beginGroup(with: "DecreaseIndentationGroup")
+        focusedCmdManager.beginGroup(with: "Decrease Group Indentation")
         for node in selection.sortedRoots.reversed() {
             _ = decreaseNodeIndentation(node)
         }
@@ -92,7 +92,7 @@ extension TextRoot {
         cancelNodeSelection()
 
         let cmdManager = focusedCmdManager
-        cmdManager.beginGroup(with: "Delete selected nodes")
+        cmdManager.beginGroup(with: "Delete Selection")
         defer { cmdManager.endGroup() }
 
         if let prevWidget = sortedNodes.first?.previousVisibleNode(ElementNode.self) {
@@ -130,7 +130,7 @@ extension TextRoot {
         }
 
         if createEmptyNodeInPlace || (createNodeInEmptyParent && root?.element.children.isEmpty == true) {
-            cmdManager.beginGroup(with: "Insert empty element")
+            cmdManager.beginGroup(with: "Insert Empty Element")
             let newElement = BeamElement()
             cmdManager.insertElement(newElement, inNode: firstParent, afterElement: nil)
             cmdManager.focus(newElement, in: firstParent)
@@ -148,7 +148,7 @@ extension TextRoot {
         else { return }
 
         let bText = BeamText(text: str, attributes: root?.state.attributes ?? [])
-        focusedCmdManager.beginGroup(with: "Erase selection")
+        focusedCmdManager.beginGroup(with: "Erase Selection")
         defer { focusedCmdManager.endGroup() }
         focusedCmdManager.replaceText(in: node, for: selectedTextRange, with: bText)
         focusedCmdManager.cancelSelection(node)
@@ -167,7 +167,7 @@ extension TextRoot {
               let nodeParent = node.parent
         else { return }
 
-        focusedCmdManager.beginGroup(with: "Delete forward")
+        focusedCmdManager.beginGroup(with: "Delete Forward")
         defer {
             focusedCmdManager.endGroup()
         }
@@ -259,7 +259,7 @@ extension TextRoot {
         else { return }
 
         let cmdManager = focusedCmdManager
-        cmdManager.beginGroup(with: "Delete backward")
+        cmdManager.beginGroup(with: "Delete Backward")
         defer {
             cmdManager.endGroup()
         }
@@ -534,7 +534,7 @@ extension TextRoot {
         var hasCmdGroup = false
         if !range.isEmpty {
             hasCmdGroup = true
-            focusedCmdManager.beginGroup(with: "Insert replacing")
+            focusedCmdManager.beginGroup(with: "Replace")
             focusedCmdManager.deleteText(in: node, for: range)
         }
 
@@ -585,7 +585,7 @@ extension TextRoot {
             }
 
             hasCmdGroup = true
-            focusedCmdManager.beginGroup(with: "Insert replacing")
+            focusedCmdManager.beginGroup(with: "Replace")
             focusedCmdManager.deleteText(in: node, for: range)
         }
 

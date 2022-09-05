@@ -90,7 +90,7 @@ extension BeamTextEdit {
         let replacementEnd = rootNode.cursorPosition + suffix
         let linkEnd = replacementStart + title.count
         let cmdManager = rootNode.focusedCmdManager
-        cmdManager.beginGroup(with: "Note Link Insert")
+        cmdManager.beginGroup(with: "Insert Note Link")
         defer { cmdManager.endGroup() }
         cmdManager.replaceText(in: node, for: replacementStart..<replacementEnd, with: BeamText(text: title, attributes: []))
 
@@ -114,7 +114,7 @@ extension BeamTextEdit {
         else { return }
 
         let cmdManager = rootNode.focusedCmdManager
-        cmdManager.beginGroup(with: "Block Reference Insert")
+        cmdManager.beginGroup(with: "Insert Block Reference")
         defer { node.cmdManager.endGroup() }
 
         let replacementStart = range.lowerBound - prefix
