@@ -137,11 +137,11 @@ extension ContactRecord: MutablePersistableRecord {
 class ContactsDB: GRDBHandler, BeamManager, LegacyAutoImportDisabler {
     static var id = UUID()
     static var name = "ContactsDB"
-    weak var holder: BeamManagerOwner?
+    weak var owner: BeamManagerOwner?
     override var tableNames: [String] { [ContactsDB.tableName] }
 
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
-        self.holder = holder
+        self.owner = holder
         try super.init(store: store)
     }
 

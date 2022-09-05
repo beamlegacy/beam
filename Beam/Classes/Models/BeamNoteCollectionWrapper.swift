@@ -9,18 +9,24 @@ import BeamCore
 
 /// A representation of a collection of note documents written to disk when exported by the application.
 final class BeamNoteCollectionWrapper: NSDocument {
+    var data: BeamData? {
+        didSet {
+            noteDocuments.forEach { $0.data = data }
+        }
+    }
     private(set) var noteDocuments = Set<BeamNoteDocumentWrapper>()
 
-    init(fileWrapper: FileWrapper) throws {
+    init(fileWrapper: FileWrapper, data: BeamData?) throws {
         super.init()
         try read(from: fileWrapper, ofType: Self.documentTypeName)
     }
 
-    init(notes: [BeamNote]) {
+    init(notes: [BeamNote], data: BeamData?) {
         // Make sure we don't have duplicates
+        self.data = data
         let noteset = Set<BeamNote>(notes)
         for note in noteset {
-            noteDocuments.insert(BeamNoteDocumentWrapper(note: note))
+            noteDocuments.insert(BeamNoteDocumentWrapper(note: note, data: data))
         }
         super.init()
     }
@@ -29,7 +35,7 @@ final class BeamNoteCollectionWrapper: NSDocument {
         guard let collection = BeamData.shared.currentDocumentCollection else { super.init(); return }
         for id in (try? collection.fetchIds(filters: [])) ?? [] {
             guard let note = BeamNote.fetch(id: id) else { continue }
-            noteDocuments.insert(BeamNoteDocumentWrapper(note: note))
+            noteDocuments.insert(BeamNoteDocumentWrapper(note: note, data: nil))
         }
         super.init()
     }
@@ -55,7 +61,7 @@ final class BeamNoteCollectionWrapper: NSDocument {
             return
         }
         for fileWrapper in fileWrappers.values {
-            guard let docWrapper = try? BeamNoteDocumentWrapper(fileWrapper: fileWrapper) else {
+            guard let docWrapper = try? BeamNoteDocumentWrapper(fileWrapper: fileWrapper, data: data) else {
                 Logger.shared.logError("Unable to open document \(String(describing: fileWrapper.filename))", category: .document)
                 continue
             }

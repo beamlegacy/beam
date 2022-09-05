@@ -116,7 +116,7 @@ extension TextRoot {
             }
 
             // Delete Selected Element:
-            cmdManager.deleteElement(for: node.unproxyElement)
+            cmdManager.deleteElement(for: node.unproxyElement, context: self)
 
             // Yeah, this sucks, I know
             if let ref = node as? ProxyTextNode,
@@ -359,7 +359,7 @@ extension TextRoot {
                     prevNode.open = node.open
                 }
                 moveChildrenOf(node, to: prevNode)
-                cmdManager.deleteElement(for: node.element)
+                cmdManager.deleteElement(for: node.element, context: self)
                 cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
             }
         }

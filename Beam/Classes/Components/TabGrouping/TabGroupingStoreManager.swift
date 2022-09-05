@@ -18,11 +18,11 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
 
     override var tableNames: [String] { [TabGroupBeamObject.databaseTableName] }
 
-    weak var holder: BeamManagerOwner?
+    weak var owner: BeamManagerOwner?
     let objectManager: BeamObjectManager
 
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
-        self.holder = holder
+        self.owner = holder
         self.objectManager = objectManager
         try super.init(store: store)
 

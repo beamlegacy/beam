@@ -127,8 +127,8 @@ import Sentry
                 stopShowingOmniboxInJournal()
             }
 
-            if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion {
-                BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true, publicationGroups: leavingNote.publicationStatus.publicationGroups)
+            if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion, let fileManager = data.fileDBManager {
+                BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true, publicationGroups: leavingNote.publicationStatus.publicationGroups, fileManager: fileManager)
             }
 
             updateWindowTitle()
@@ -1149,7 +1149,7 @@ extension BeamState {
         if let result = fromOmniboxResult {
             autocompleteManager.autocompleteLoadingResult = result
         }
-        data.tabGroupingManager.shareGroup(group) { [weak self] result in
+        data.tabGroupingManager.shareGroup(group, state: self) { [weak self] result in
             guard let self = self else { return }
             self.autocompleteManager.autocompleteLoadingResult = nil
             switch result {

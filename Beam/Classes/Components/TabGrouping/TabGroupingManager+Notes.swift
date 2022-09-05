@@ -29,23 +29,25 @@ extension TabGroupingManager: BeamDocumentSource {
     ///
     /// - Returns: `true` if the group can be shared.
     @discardableResult
-    func shareGroup(_ group: TabGroup, shareService: ShareService = .copy, completion: ((Result<URL, TabGroupSharingError>) -> Void)?) -> Bool {
+    func shareGroup(_ group: TabGroup, shareService: ShareService = .copy, state: BeamState, completion: ((Result<URL, TabGroupSharingError>) -> Void)?) -> Bool {
         do {
-            guard BeamNoteSharingUtils.canMakePublic else {
+            guard BeamNoteSharingUtils.canMakePublic,
+                  let fileManager = state.data.fileDBManager
+            else {
                 throw TabGroupSharingError.notAuthenticated
             }
             group.status = .sharing
             let (note, groupCopy) = try fetchOrCreateTabGroupNote(for: group)
             Task { @MainActor in
                 await saveGroupToDBIfNeeded(groupCopy, copyOf: group)
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true) { [weak self] result in
+                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, fileManager: fileManager) { [weak self] result in
                     group.status = .default
                     guard case .success = result, let url = BeamNoteSharingUtils.getPublicLink(for: note) else {
                         self?.showShareGroupError(error: .publicationError, forGroup: group)
                         completion?(.failure(.publicationError))
                         return
                     }
-                    self?.handleShareGroupService(forURL: url, with: shareService)
+                    self?.handleShareGroupService(forURL: url, with: shareService, data: state.data)
                     completion?(.success(url))
                 }
             }
@@ -82,8 +84,8 @@ extension TabGroupingManager: BeamDocumentSource {
         }
     }
 
-    private func handleShareGroupService(forURL url: URL, with shareService: ShareService) {
-        let shareHelper = ShareHelper(url) { url in
+    private func handleShareGroupService(forURL url: URL, with shareService: ShareService, data: BeamData) {
+        let shareHelper = ShareHelper(url, data: data) { url in
             guard let mainState = AppDelegate.main.window?.state else { return }
             let dumTab = BrowserTab(state: mainState, browsingTreeOrigin: nil, originMode: .web, note: nil)
             let webView = dumTab.createNewWindow(URLRequest(url: url), dumTab.webView.configuration,

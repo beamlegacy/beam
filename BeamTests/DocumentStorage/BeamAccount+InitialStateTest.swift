@@ -17,6 +17,7 @@ class BeamAccountInitialStateTest: XCTestCase, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
     let objectManager = BeamData.shared.objectManager
+    let onboardingNoteCreator = OnboardingNoteCreator()
 
     override func setUpWithError() throws {
         BeamDate.freeze("2021-03-19T12:21:03Z")
@@ -80,7 +81,7 @@ class BeamAccountInitialStateTest: XCTestCase, BeamDocumentSource {
         }
         try noteLinksAndRefManager.clear()
 
-        OnboardingNoteCreator.shared.createOnboardingNotes()
+        onboardingNoteCreator.createOnboardingNotes(data: BeamData.shared)
         try BeamData.shared.reloadJournal()
     }
 }

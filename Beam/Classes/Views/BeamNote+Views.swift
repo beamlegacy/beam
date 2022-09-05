@@ -39,7 +39,8 @@ extension BeamNote {
             state.data.pinnedManager.togglePin(note)
         }
         Button(note.publicationStatus.isPublic ? "Unpublish" : "Publish") {
-            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: !note.publicationStatus.isPublic) { _ in }
+            guard let fileManager = state.data.fileDBManager else { return }
+            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: !note.publicationStatus.isPublic, fileManager: fileManager) { _ in }
         }
         Divider()
         Menu("Export") {
@@ -87,7 +88,8 @@ extension BeamNote {
             state.data.pinnedManager.togglePin(note)
         }
         menu.addItem(withTitle: note.publicationStatus.isPublic ? loc("Unpublish") : loc("Publish")) { _ in
-            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: !note.publicationStatus.isPublic) { _ in }
+            guard let fileManager = state.data.fileDBManager else { return }
+            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: !note.publicationStatus.isPublic, fileManager: fileManager) { _ in }
         }
 
         menu.addItem(.separator())

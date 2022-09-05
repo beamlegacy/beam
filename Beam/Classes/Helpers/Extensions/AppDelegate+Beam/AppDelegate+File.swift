@@ -6,7 +6,8 @@ extension AppDelegate {
             filesWindow.makeKeyAndOrderFront(window)
             return
         }
-        filesWindow = FilesWindow(contentRect: window?.frame ?? NSRect(origin: .zero, size: CGSize(width: 800, height: 600)))
+        guard let fileManager = data.currentAccount?.fileDBManager else { return }
+        filesWindow = FilesWindow(contentRect: window?.frame ?? NSRect(origin: .zero, size: CGSize(width: 800, height: 600)), fileManager: fileManager)
         filesWindow?.center()
         filesWindow?.makeKeyAndOrderFront(window)
     }

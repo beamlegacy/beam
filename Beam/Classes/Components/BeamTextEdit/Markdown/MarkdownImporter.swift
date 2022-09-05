@@ -20,15 +20,15 @@ struct MarkdownImporter: BeamDocumentSource {
     ///   - saving: a boolean indicating if you want to save it, defaults to `true`.
     /// - Returns: the `BeamNote` for later processing.
     @discardableResult
-    func `import`(documentURL: URL, saving: Bool = true) throws -> BeamNote {
+    func `import`(documentURL: URL, saving: Bool = true, fileManager: BeamFileDBManager) throws -> BeamNote {
         // Creating the markdown document
         let contents = try String(contentsOf: documentURL)
-        let note = try process(markdown: contents, title: documentURL.deletingPathExtension().lastPathComponent, baseURL: documentURL)
+        let note = try process(markdown: contents, title: documentURL.deletingPathExtension().lastPathComponent, baseURL: documentURL, fileManager: fileManager)
         if saving {
             // For every image elements, let's add it to the BeamFileDBManager
             for imageElement in note.imageElements() {
                 guard case .image(let uid, _, _) = imageElement.kind else { continue }
-                try BeamFileDBManager.shared?.addReference(fromNote: note.id, element: imageElement.id, to: uid)
+                try fileManager.addReference(fromNote: note.id, element: imageElement.id, to: uid)
             }
             // Let's finally save the document
             _ = note.save(self)
@@ -36,7 +36,7 @@ struct MarkdownImporter: BeamDocumentSource {
         return note
     }
 
-    private func process(markdown: String, title: String, baseURL: URL) throws -> BeamNote {
+    private func process(markdown: String, title: String, baseURL: URL, fileManager: BeamFileDBManager) throws -> BeamNote {
         let preformatted = preformat(contents: markdown)
         let document = Markdown.Document(parsing: preformatted)
         // Creating the note
@@ -49,7 +49,7 @@ struct MarkdownImporter: BeamDocumentSource {
             note = try BeamNote.fetchOrCreate(self, title: defaultTitle)
         }
         // Let's visit the document and retrieve the root element
-        var visitor = BeamNoteVisitor(baseURL: baseURL)
+        var visitor = BeamNoteVisitor(baseURL: baseURL, fileManager: fileManager)
         let element = visitor.visitDocument(document)
         // Prettifying the children of the root element
         element.prettify()
@@ -80,8 +80,8 @@ struct MarkdownImporter: BeamDocumentSource {
 
 extension MarkdownImporter {
     /// **Only use this for testing.**
-    func _import(markdown: String) throws -> BeamNote {
-        return try process(markdown: markdown, title: "Testing", baseURL: URL(fileURLWithPath: "/"))
+    func _import(markdown: String, fileManager: BeamFileDBManager) throws -> BeamNote {
+        return try process(markdown: markdown, title: "Testing", baseURL: URL(fileURLWithPath: "/"), fileManager: fileManager)
     }
 }
 
@@ -92,10 +92,11 @@ private struct BeamNoteVisitor: MarkupVisitor {
 
     let baseURL: URL
 
-    let fileManager = BeamFileDBManager.shared
+    let fileManager: BeamFileDBManager
 
-    init(baseURL: URL) {
+    init(baseURL: URL, fileManager: BeamFileDBManager) {
         self.baseURL = baseURL
+        self.fileManager = fileManager
     }
 
     func defaultVisit(_ markup: Markdown.Markup) -> BeamElement {
@@ -200,10 +201,9 @@ private struct BeamNoteVisitor: MarkupVisitor {
 
         if let data = try? Data(contentsOf: url), let image = NSImage(contentsOf: url) {
             do {
-                if let uid = try fileManager?.insert(name: url.lastPathComponent, data: data) {
-                    let displayInfos = MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width))
-                    element.kind = .image(uid, displayInfos: displayInfos)
-                }
+                let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
+                let displayInfos = MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width))
+                element.kind = .image(uid, displayInfos: displayInfos)
             } catch {
                 Logger.shared.logError("Unable to insert image in FileDB \(error)", category: .fileDB)
             }

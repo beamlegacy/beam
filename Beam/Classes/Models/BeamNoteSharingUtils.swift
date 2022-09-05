@@ -63,7 +63,7 @@ class BeamNoteSharingUtils {
     ///   - becomePublic: If we should publish or unpublish
     ///   - publicationGroups: The publication groups the note belongs to
     ///   - completion: The callback with the result (is note public) or the error
-    static func makeNotePublic(_ note: BeamNote, becomePublic: Bool, publicationGroups: [String]? = nil, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    static func makeNotePublic(_ note: BeamNote, becomePublic: Bool, publicationGroups: [String]? = nil, fileManager: BeamFileDBManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
 
         guard note.ongoingPublicationOperation == false else {
             completion?(.failure(BeamNoteSharingUtilsError.ongoingOperation))
@@ -81,11 +81,11 @@ class BeamNoteSharingUtils {
 
         if becomePublic {
             let tabGroups = getAssociatedTabGroups(for: note)
-            publishNote(note, tabGroups: tabGroups, publicationGroups: publicationGroups) { result in
+            publishNote(note, tabGroups: tabGroups, publicationGroups: publicationGroups, fileManager: fileManager) { result in
                 makeNotePublicHandler(note, becomePublic, result, completion)
             }
         } else {
-            unpublishNote(with: note.id, completion: { result in
+            unpublishNote(with: note.id, fileManager: fileManager, completion: { result in
                 makeNotePublicHandler(note, becomePublic, result, completion)
             })
         }
@@ -129,7 +129,7 @@ class BeamNoteSharingUtils {
 
     // MARK: - Publish on Profile
 
-    static func addToProfile(_ note: BeamNote, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    static func addToProfile(_ note: BeamNote, fileManager: BeamFileDBManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard note.publicationStatus.isPublic,
               var publicationGroups = note.publicationStatus.publicationGroups else {
             completion?(.failure(BeamNoteSharingUtilsError.missingRequirement))
@@ -139,10 +139,10 @@ class BeamNoteSharingUtils {
         if !publicationGroups.contains("profile") {
             publicationGroups.append("profile")
         }
-        Self.updatePublicationGroup(note, publicationGroups: publicationGroups, completion: completion)
+        Self.updatePublicationGroup(note, publicationGroups: publicationGroups, fileManager: fileManager, completion: completion)
     }
 
-    static func removeFromProfile(_ note: BeamNote, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    static func removeFromProfile(_ note: BeamNote, fileManager: BeamFileDBManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard note.publicationStatus.isPublic,
               var publicationGroups = note.publicationStatus.publicationGroups,
                 let idx = publicationGroups.firstIndex(where: { $0 == "profile" }) else {
@@ -151,12 +151,12 @@ class BeamNoteSharingUtils {
         }
         publicationGroups.remove(at: idx)
 
-        Self.updatePublicationGroup(note, publicationGroups: publicationGroups, completion: completion)
+        Self.updatePublicationGroup(note, publicationGroups: publicationGroups, fileManager: fileManager, completion: completion)
     }
 
     // MARK: - Update Publication Groups
 
-    static func updatePublicationGroup(_ note: BeamNote, publicationGroups: [String], completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    static func updatePublicationGroup(_ note: BeamNote, publicationGroups: [String], fileManager: BeamFileDBManager, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard note.publicationStatus.isPublic else {
             completion?(.failure(BeamNoteSharingUtilsError.cantUpdatePublicationGroup))
             return
@@ -177,7 +177,7 @@ class BeamNoteSharingUtils {
         note.ongoingPublicationOperation = true
         let tabGroups = getAssociatedTabGroups(for: note)
 
-        updatePublicationGroup(for: note, tabGroups: tabGroups, publicationGroups: publicationGroups, completion: { result in
+        updatePublicationGroup(for: note, tabGroups: tabGroups, publicationGroups: publicationGroups, fileManager: fileManager, completion: { result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let status):
@@ -204,10 +204,11 @@ class BeamNoteSharingUtils {
     static func publishNote(_ note: BeamNote,
                             tabGroups: [TabGroupBeamObject]?,
                             publicationGroups: [String]?,
+                            fileManager: BeamFileDBManager,
                             completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
         Self.publicServer.request(serverRequest: .publishNote(note: note,
                                                               tabGroups: tabGroups,
-                                                              publicationGroups: publicationGroups),
+                                                              publicationGroups: publicationGroups, fileManager: fileManager),
                                   completion: { completion($0) })
     }
 
@@ -216,7 +217,7 @@ class BeamNoteSharingUtils {
     /// - Parameters:
     ///   - noteId: The id of the note to unpublish
     ///   - completion: The callback with the resulted PublicationStatus or error
-    static func unpublishNote(with noteId: UUID, completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
+    static func unpublishNote(with noteId: UUID, fileManager: BeamFileDBManager, completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
         BeamNoteSharingUtils.publicServer.request(serverRequest: .unpublishNote(noteId: noteId), completion: { completion($0) })
     }
 
@@ -230,10 +231,11 @@ class BeamNoteSharingUtils {
     private static func updatePublicationGroup(for note: BeamNote,
                                                tabGroups: [TabGroupBeamObject]?,
                                                publicationGroups: [String],
+                                               fileManager: BeamFileDBManager,
                                                completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
         Self.publicServer.request(serverRequest: .updatePublicationGroup(note: note,
                                                                          tabGroups: tabGroups,
-                                                                         publicationGroups: publicationGroups),
+                                                                         publicationGroups: publicationGroups, fileManager: fileManager),
                                   completion: { completion($0) })
     }
 }

@@ -149,7 +149,7 @@ extension LocalPasswordRecord: MutablePersistableRecord {
 class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisabler {
     static var id = UUID()
     static var name = "PasswordDBManager"
-    weak var holder: BeamManagerOwner?
+    weak var owner: BeamManagerOwner?
     var grdbStore: GRDBStore
 
     override var tableNames: [String] { [PasswordsDB.tableName] }
@@ -157,7 +157,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
     static let tableName = "passwordRecord"
 
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
-        self.holder = holder
+        self.owner = holder
         self.grdbStore = store
         try super.init(store: store)
     }

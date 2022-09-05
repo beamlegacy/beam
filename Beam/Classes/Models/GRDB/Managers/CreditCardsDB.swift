@@ -147,7 +147,7 @@ extension CreditCardRecord {
 
 class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImportDisabler {
     static var name = "CreditCardsDB"
-    weak var holder: BeamManagerOwner?
+    weak var owner: BeamManagerOwner?
     override var tableNames: [String] { [CreditCardsDB.tableName] }
 
     static let id = UUID()
@@ -155,7 +155,7 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
     var grdbStore: GRDBStore
 
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
-        self.holder = holder
+        self.owner = holder
         self.grdbStore = store
 
         try super.init(store: store)

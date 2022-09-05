@@ -46,6 +46,8 @@ import UniformTypeIdentifiers
             tabDidChangeWindow()
         }
     }
+    var data: BeamData? { state?.data }
+
     var preloadUrl: URL?
 
     private var restoredInteractionState: Any?
@@ -156,9 +158,9 @@ import UniformTypeIdentifiers
             }
         }
     }
-    var fileStorage: BeamFileStorage? { BeamFileDBManager.shared }
+    var fileStorage: BeamFileStorage? { data?.fileDBManager }
     var downloadManager: DownloadManager? {
-        state?.data.downloadManager
+        data?.downloadManager
     }
 
     var webViewNavigationHandler: WebViewNavigationHandler? {
@@ -233,7 +235,7 @@ import UniformTypeIdentifiers
             self.contentView = NSViewContainerView(contentView: beamWebView)
         }
         browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin, isIncognito: state.isIncognito)
-        noteController = WebNoteController(note: note, rootElement: rootElement)
+        noteController = WebNoteController(note: note, rootElement: rootElement, data: state.data)
         webPositions = WebPositions(webFrames: webFrames)
         super.init()
         webPositions.delegate = self
@@ -269,7 +271,7 @@ import UniformTypeIdentifiers
         self.contentView = NSViewContainerView(contentView: beamWebView)
 
         browsingTree = Self.newBrowsingTree(origin: .pinnedTab(url: url), isIncognito: false)
-        noteController = WebNoteController(note: nil, rootElement: nil)
+        noteController = WebNoteController(note: nil, rootElement: nil, data: nil)
         webPositions = WebPositions(webFrames: webFrames)
         super.init()
         webPositions.delegate = self

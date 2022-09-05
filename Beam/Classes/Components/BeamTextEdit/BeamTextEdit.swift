@@ -211,7 +211,7 @@ public extension CALayer {
         self.delayedInit = enableDelayedInit
         self.journalMode = journalMode
         self.state = state
-        self.data = state?.data
+        self.data = state?.data ?? BeamData.shared
 
         note = root
 
@@ -2068,7 +2068,7 @@ public extension CALayer {
 
     public override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         guard let rootNode = rootNode,
-              let fileManager = BeamFileDBManager.shared
+              let fileManager = data?.fileDBManager
         else { return false }
         defer {
             updateDragIndicator(at: nil)
