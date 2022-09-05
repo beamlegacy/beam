@@ -111,8 +111,7 @@ class NoteEditTests: BaseTest {
         
         testrailId("C812")
         step("Then it has a source icon"){
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            noteView.waitForTodayNoteViewToLoad()
+            openTodayNote()
             let imageNote = noteView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
             XCTAssertTrue(noteView.button(NoteViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
@@ -138,8 +137,7 @@ class NoteEditTests: BaseTest {
         }
 
         step("Then it has a move handle"){
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            noteView.waitForNoteViewToLoad()
+            openTodayNote()
             let imageNote = noteView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
             XCTAssertTrue(noteView.handle(NoteViewLocators.Buttons.moveHandle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
