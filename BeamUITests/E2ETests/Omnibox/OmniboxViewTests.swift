@@ -114,7 +114,6 @@ class OmniboxViewTests: BaseTest {
 
     func testOmniboxDropdownItems() {
         testrailId("C1097")
-        let helper = BeamUITestsHelper(journalView.app)
         let noteATitle = "Test1"
         let noteBTitle = "Test2"
 
@@ -190,7 +189,7 @@ class OmniboxViewTests: BaseTest {
 
         // In journal
         step("When I open omnibox for the journal"){
-            helper.showJournal()
+            shortcutHelper.shortcutActionInvoke(action: .showJournal)
             journalView.waitForJournalViewToLoad()
             omniboxView.focusOmniBoxSearchField()
         }

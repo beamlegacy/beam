@@ -250,7 +250,6 @@ class PnSAddToNoteTests: BaseTest {
     
     func testFramePositionPlacementOnSelect() {
         testrailId("C927")
-        let helper = BeamUITestsHelper(journalView.app)
         let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
         let parentElement = pnsView.staticText(searchText).firstMatch
 
@@ -294,7 +293,7 @@ class PnSAddToNoteTests: BaseTest {
         }
 
         step ("And after shooting then pressing and releasing option shouldn't keep shootframe active"){
-            helper.addNote()
+            pnsView.typeKeyboardKey(.enter)
             pnsView.pressOptionButtonFor(seconds: 1)
             XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(0))
         }
