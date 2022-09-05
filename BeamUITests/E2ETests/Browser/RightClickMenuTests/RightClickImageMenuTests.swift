@@ -32,6 +32,13 @@ class RightClickImageMenuTests: BaseTest {
         }
     }
     
+    private func verifyDownloadLocatorWindow(imageName: String, imageExtension: String = ".jpg"){
+        _ = app.textFields[imageName].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        XCTAssertTrue(app.textFields[imageName].exists || app.textFields[imageName + imageExtension].exists)
+        XCTAssertTrue(app.buttons["Save"].exists)
+        XCTAssertTrue(app.buttons["Cancel"].exists)
+    }
+    
     private func verifyShareMenuForImage () {
         rightClickMenuTestView.waitForShareMenuToBeDisplayed()
         
@@ -93,7 +100,20 @@ class RightClickImageMenuTests: BaseTest {
         }
         
         step("Then image is correctly downloaded but download menu does not open") {
+        }
+        
+        step("When I open an image from raw URL") {
+            uiMenu.startMockHTTPServer()
+            shortcutHelper.shortcutActionInvoke(action: .openLocation)
+            mockPage.openMockPage(.jpgFile)
+        }
+        
+        step("Then I can save image to Downloads without crash") { // BE-5413
+            app.webViews.children(matching: .image).element.rightClick()
+            rightClickMenuTestView.clickImageMenu(.saveToDownloads)
             XCTAssertTrue(waitForDoesntExist(app.buttons[ToolbarLocators.Buttons.downloadsButton.accessibilityIdentifier]))
+            XCTAssertEqual(webView.getNumberOfTabs(), 1) // beam still opened in the tab
+            XCTAssertEqual(webView.getTabUrlAtIndex(index: 0), mockPage.getMockPageUrl(.jpgFile).replacingOccurrences(of: "http://www.", with: "")) // beam still opened in the tab
         }
     }
     
@@ -104,10 +124,20 @@ class RightClickImageMenuTests: BaseTest {
         }
         
         step("Then image download locator window is displayed") {
-            _ = app.textFields[imageName].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-            XCTAssertTrue(app.textFields[imageName].exists)
-            XCTAssertTrue(app.buttons["Save"].exists)
-            XCTAssertTrue(app.buttons["Cancel"].exists)
+            verifyDownloadLocatorWindow(imageName: imageName)
+            webView.typeKeyboardKey(.escape)
+        }
+        
+        step("When I open an image from raw URL") {
+            uiMenu.startMockHTTPServer()
+            shortcutHelper.shortcutActionInvoke(action: .openLocation)
+            mockPage.openMockPage(.jpgFile)
+        }
+        
+        step("Then image download locator window is displayed") { // BE-5413
+            app.webViews.children(matching: .image).element.rightClick()
+            rightClickMenuTestView.clickImageMenu(.saveAs)
+            verifyDownloadLocatorWindow(imageName: "slow_bart_simpson")
         }
     }
     
