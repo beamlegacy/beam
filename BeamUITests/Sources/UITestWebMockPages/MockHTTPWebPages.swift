@@ -135,6 +135,7 @@ class MockHTTPWebPages: BaseView {
         case newWindowBrowser
 
         case testPdfFile
+        case jpgFile
 
         var rawValue: String {
             let port = EnvironmentVariables.MockHttpServer.port
@@ -210,6 +211,7 @@ class MockHTTPWebPages: BaseView {
             case .newWindowBrowser: return "http://windowopen.browser.lvh.me:\(port)/"
 
             case .testPdfFile: return "http://www.lvh.me:\(port)/static/test.pdf"
+            case .jpgFile: return "http://www.lvh.me:\(port)/static/slow_bart_simpson.jpg"
             }
         }
     }
