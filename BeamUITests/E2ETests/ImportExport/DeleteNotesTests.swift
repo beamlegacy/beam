@@ -29,9 +29,8 @@ class DeleteNotesTests: BaseTest {
     private func runDeleteNoteTest(isLocalContentsTest: Bool) {
         let expectedNumberOfNotesAfterPopulatingDB = 11
         let expectedNumberOfNotesAfterClearingDB = 1
-        launchApp()
         step("Given I populate the app with random notes"){
-            openTodayNote()
+            launchAppAndOpenTodayNote()
             uiMenu.insertTextInCurrentNote()
             uiMenu.create10Notes()
         }

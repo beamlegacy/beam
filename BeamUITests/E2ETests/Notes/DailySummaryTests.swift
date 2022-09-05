@@ -71,11 +71,9 @@ class DailySummaryTests: BaseTest {
     
     func testDailySummaryInTodayNote() {
         testrailId("C804")
-        let todaysDateInNoteTitleFormat = DateHelper().getTodaysDateString(.noteViewTitle)
         
         step("When I go to Today Note"){
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            allNotes.openNoteByName(noteTitle: todaysDateInNoteTitleFormat)
+            openTodayNote()
         }
         
         verifyDailySummaryInView()
@@ -83,8 +81,7 @@ class DailySummaryTests: BaseTest {
         verifyDailySummaryOpenNote()
 
         step("When I go to Today Note"){
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            allNotes.openNoteByName(noteTitle: todaysDateInNoteTitleFormat)
+            openTodayNote()
         }
         
         verifyDailySummaryOpenLink()
