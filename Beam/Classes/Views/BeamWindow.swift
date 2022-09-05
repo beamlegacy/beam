@@ -393,6 +393,25 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable {
         }
         return true
     }
+
+    /// Return the minimum possible width for the window, taking into account the split view
+    /// - Returns: The minimum possible width
+    func minimumWidth() -> CGFloat {
+        let sideNoteOffset = state.sideNote == nil ? 0 : state.sideNoteWidth
+        return AppDelegate.minimumSize(for: self).width + sideNoteOffset
+    }
+
+    /// Returns the computed/estimated width for the contentView
+    /// If a sideNote is displayed, the UI looks like this
+    /// [composedWindowMargin(3)][contentView][middleSeparator(3)][sideNote][composedWindowMargin(3)]
+    var estimatedContentViewWidth: CGFloat {
+        if state.sideNote != nil {
+            let middleSeparator = 3.0
+            let margin = 2 * composedWindowMargin - middleSeparator
+            return windowInfo.windowFrame.width - state.sideNoteWidth - margin
+        }
+        return windowInfo.windowFrame.size.width
+    }
 }
 
 extension BeamWindow: NSWindowDelegate {
@@ -436,6 +455,14 @@ extension BeamWindow: NSWindowDelegate {
     func windowDidEndLiveResize(_ notification: Notification) {
         self.windowInfo.windowIsResizing = false
         self.setTrafficLightsLayout()
+    }
+
+    func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
+        if frameSize.width < minimumWidth() {
+            return CGSize(width: minimumWidth(), height: frameSize.height)
+        } else {
+            return frameSize
+        }
     }
 
     func windowDidResize(_ notification: Notification) {

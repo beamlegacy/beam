@@ -26,7 +26,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     var onScroll: ((CGPoint) -> Void)?
     var onSearchToggle: (SearchViewModel?) -> Void = { _ in }
 
-    var minimumWidth: CGFloat = 480
+    var minimumWidth: CGFloat = 336
     var maximumWidth: CGFloat = 1024
     var topOffset = CGFloat(28)
     var scrollViewTopInset: CGFloat = 0
@@ -36,6 +36,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     var showTitle = true
     var initialFocusedState: NoteEditFocusedState?
     var initialScrollOffset: CGFloat?
+    var isInMiniEditor: Bool = false
 
     var headerView: () -> Content
 
@@ -46,7 +47,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     }
 
     public func makeNSView(context: Context) -> NSViewType {
-        let edit = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: initialScrollOffset == nil, state: state)
+        let edit = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: initialScrollOffset == nil, state: state, isInMiniEditor: isInMiniEditor)
 
         edit.initialScrollOffset = initialScrollOffset
         updateEditorProperties(edit, context: context)

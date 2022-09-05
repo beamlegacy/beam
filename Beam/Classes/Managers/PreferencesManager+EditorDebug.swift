@@ -43,14 +43,14 @@ extension PreferencesManager {
     // Be extra carefull when changing values
     //
     static let editorIsCenteredDefault = false
-    static let editorLeadingPercentageDefault: CGFloat = 45
+    static let editorLeadingPercentageDefault: CGFloat = 52
 
     static let editorHeaderTopPaddingDefault: CGFloat = 110
     static let editorJournalTopPaddingDefault: CGFloat = 50
     static let editorCardTopPaddingDefault: CGFloat = 20
     static let editorToolbarOverlayOpacityDefault: CGFloat = 0.4
 
-    static let editorMinWidthDefault: CGFloat = 400
+    static let editorMinWidthDefault: CGFloat = 336
     static let editorMaxWidthDefault: CGFloat = 670
     static let editorParentSpacingDefault: CGFloat = 2
     static let editorChildSpacingDefault: CGFloat = 1
