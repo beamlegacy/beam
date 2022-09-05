@@ -72,7 +72,6 @@
         "BrowserPreferencesTests",
         "BrowserPreferencesTests\/testDownloadsFolderSelection()",
         "BrowserPreferencesTests\/testImportBrowserDataTrigger()",
-        "BrowserPreferencesTests\/testIncludeSearchEngineSuggestion()",
         "BrowserPreferencesTests\/testSearchEngineSelection()",
         "BrowserShortcutsTests",
         "BrowserStatusBarTests",

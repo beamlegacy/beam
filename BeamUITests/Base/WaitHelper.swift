@@ -23,6 +23,7 @@ enum PredicateFormat: String {
     case identifierEquals = "identifier == "
     case valueEquals = "value == "
     case valueContains = "value CONTAINS "
+    case labelContains = "label CONTAINS "
     case hasKeyboardFocus = "hasKeyboardFocus == true"
     case doesntHaveKeyboardFocus = "hasKeyboardFocus == false"
 }
@@ -154,6 +155,26 @@ extension WaitHelper {
     @discardableResult
     func waitForStringValueEqual(_ expectedValue: String, _ element: XCUIElement) -> Bool {
         return waitFor(PredicateFormat.valueEquals.rawValue + "'\(expectedValue)'", element)
+    }
+    
+    @discardableResult
+    func waitForStringValueContains(_ expectedValue: String, _ element: XCUIElement) -> Bool {
+        return waitFor(PredicateFormat.valueContains.rawValue + "'\(expectedValue)'", element)
+    }
+    
+    @discardableResult
+    func waitForStringValueContains(_ expectedValue: String, _ element: XCUIElement, _ timeout: TimeInterval) -> Bool {
+        return waitFor(PredicateFormat.valueContains.rawValue + "'\(expectedValue)'", element, timeout)
+    }
+    
+    @discardableResult
+    func waitForElementLabelContains(_ expectedValue: String, _ element: XCUIElement) -> Bool {
+        return waitFor(PredicateFormat.labelContains.rawValue + "'\(expectedValue)'", element)
+    }
+    
+    @discardableResult
+    func waitForElementLabelContains(_ expectedValue: String, _ element: XCUIElement, _ timeout: TimeInterval) -> Bool {
+        return waitFor(PredicateFormat.labelContains.rawValue + "'\(expectedValue)'", element, timeout)
     }
     
     @discardableResult
