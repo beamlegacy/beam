@@ -57,7 +57,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
         for windowTitle in windows {
             if windowTitle != windows[2] { //To be removed as part of BE-5195
                 step ("Then \(windowTitle) window is opened using Share option") {
-                    BeamUITestsHelper(app).moveMouseOutOfTheWay() // Move mouse to avoid displaying preview of saved tabs
+                    moveMouseOutOfTheWay() // Move mouse to avoid displaying preview of saved tabs
                     _ = noteView.openTabGroupMenu(index: 0)
                         .clickTabGroupMenu(.tabGroupShareGroup)
                         .shareTabGroupAction(windowTitle)

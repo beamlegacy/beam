@@ -15,11 +15,9 @@ class RightClickImageMenuTests: BaseTest {
     let rightClickMenuTestView = RightClickMenuTestView()
     let omniboxTestView = OmniBoxTestView()
     
-    private var helper: BeamUITestsHelper!
-
     override func setUp() {
         step("Given I open test page") {
-            helper = BeamUITestsHelper(launchApp().app)
+            launchApp()
             uiMenu.loadUITestPage2()
         }
         
@@ -64,7 +62,7 @@ class RightClickImageMenuTests: BaseTest {
         step("Then image is correctly opened in a new tab") {
             let imageTitle = imageName + " 800×476 pixels"
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
-            helper.moveMouseOutOfTheWay() // move mouse to not be on tab title
+            moveMouseOutOfTheWay() // move mouse to not be on tab title
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), uiTestPageTwo)
             waitForStringValueEqual(imageTitle, webView.getBrowserTabTitleElements()[1])
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 1), imageTitle)

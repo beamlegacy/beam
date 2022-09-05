@@ -57,7 +57,7 @@ class NoteEditorTests: BaseTest {
 
         step("Then second note displays changed text correctly"){
             journalView.typeKeyboardKey(.enter)
-            let expectedResult = BeamUITestsHelper(journalView.app).typeAndEditHardcodedText(journalView)
+            let expectedResult = typeAndEditHardcodedText(journalView)
             XCTAssertEqual(journalView.getNoteByIndex(2).getStringValue(), expectedResult)
         }
 
