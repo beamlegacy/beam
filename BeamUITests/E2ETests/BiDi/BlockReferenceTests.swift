@@ -88,8 +88,7 @@ class BlockReferenceTests: BaseTest {
         }
 
         step("Then removing block reference doesn't remove the source text"){
-            journalView.openNoteFromAllNotesList(noteTitleToOpen: noteName2)
-            let currentSourceNote = noteView.getNoteNodesForVisiblePart()[1].getStringValue()
+            let currentSourceNote = openNoteByTitle(noteName2).getNoteNodesForVisiblePart()[1].getStringValue()
             XCTAssertEqual(currentSourceNote, noteForReference!)
         }
 

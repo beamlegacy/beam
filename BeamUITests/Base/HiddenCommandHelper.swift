@@ -15,12 +15,14 @@ class HiddenCommandHelper {
     @discardableResult
     func openTodayNote() -> NoteTestView {
         beeper.beep(identifier: UITestsHiddenMenuAvailableCommands.openTodayNote.rawValue)
+        NoteTestView().waitForTodayNoteViewToLoad()
         return NoteTestView()
     }
 
     @discardableResult
     func openNote(title: String) -> NoteTestView {
         beeper.beep(identifier: UITestsHiddenMenuAvailableCommands.openNoteIdentifier(title: title))
+        NoteTestView().waitForNoteViewToLoad()
         return NoteTestView()
     }
 }

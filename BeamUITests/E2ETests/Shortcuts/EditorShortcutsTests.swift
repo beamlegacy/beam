@@ -18,7 +18,7 @@ class EditorShortcutsTests: BaseTest {
         let searchWord = "Everest"
         
         step ("Given I search for \(searchWord)"){
-            noteView = launchAppAndOpenTodayNote() //first note opened is the Today's note
+            noteView = launchAppAndOpenTodayNote()
             noteView.typeInNoteNodeByIndex(noteIndex: 0, text: searchWord)
             shortcutHelper.shortcutActionInvoke(action: .instantSearch)
         }
@@ -59,8 +59,7 @@ class EditorShortcutsTests: BaseTest {
         testrailId("C1112, C1113, C1114, C1115, C1117, C1120")
         let textToType = "This text replaces selected notes text"
         step ("Then app doesn't crash after using text edit shortcuts on empty note"){
-            launchApp()
-            noteView = openTodayNote()
+            noteView = launchAppAndOpenTodayNote()
             shortcutHelper.shortcutActionInvoke(action: .selectAll)
             shortcutHelper.shortcutActionInvoke(action: .copy)
             noteView.typeKeyboardKey(.delete)

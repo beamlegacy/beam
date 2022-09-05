@@ -207,19 +207,6 @@ class BaseView {
         return element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
     }
     
-    @discardableResult
-    func openNoteFromAllNotesList(noteTitleToOpen: String) -> NoteTestView {
-        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-        AllNotesTestView().openNoteByName(noteTitle: noteTitleToOpen)
-
-        let noteView = NoteTestView()
-// Keep this code in case we restore the recent notes topbar
-//        let noteSwitcherButton = noteView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)' AND value = '\(noteTitleToOpen)'")).firstMatch
-//        noteSwitcherButton.clickOnExistence()
-        XCTAssertTrue(noteView.waitForNoteToOpen(noteTitle: noteTitleToOpen), "\(noteTitleToOpen) note is failed to load")
-        return noteView
-    }
-    
     func isWindowOpenedWithContaining(title: String, isLowercased: Bool = false) -> Bool {
         return app.windows.matching(NSPredicate(format: "title CONTAINS '\(isLowercased ? title.lowercased() : title)'")).element.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }

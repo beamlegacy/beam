@@ -175,9 +175,7 @@ class BaseTest: XCTestCase {
     @discardableResult
     func launchAppAndOpenTodayNote() -> NoteTestView {
         launchApp()
-        let noteView = openTodayNote()
-        noteView.waitForNoteViewToLoad()
-        return noteView
+        return openTodayNote()
     }
     
     func isBigSurOS() -> Bool {

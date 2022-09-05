@@ -88,7 +88,6 @@ class NoteViewEmbedsTests: BaseTest {
         
         step("Given open today's note"){
             noteView = openTodayNote()
-            noteView.waitForNoteViewToLoad()
         }
 
         step("When I type a video url"){
