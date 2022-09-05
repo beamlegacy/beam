@@ -64,12 +64,12 @@ class BrowserPreferencesTests: BaseTest {
             omnibox.searchInOmniBox(searchWord, false)
         }
         
-        step("THEN") {
-            let searchEngineSuggestionLabel = omnibox.getAutocompleteResults().firstMatch.label
+        step("THEN omnibox autocomplete has search enging suggestion") {
+            let firstAutocompleteResult = omnibox.getAutocompleteResults().firstMatch
             if searchEngingeSuggestionEnabled {
-                XCTAssertTrue(searchEngineSuggestionLabel.contains(engine.rawValue))
+                waitForElementLabelContains(engine.rawValue, firstAutocompleteResult)
             } else {
-                XCTAssertFalse(searchEngineSuggestionLabel.contains(engine.rawValue))
+                XCTAssertFalse(waitForElementLabelContains(engine.rawValue, firstAutocompleteResult))
             } //multiple localizations handling e.g. "beam - Recherche Google"
         }
         
