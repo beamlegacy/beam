@@ -13,6 +13,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
     let tabGroupMenu = TabGroupMenuView()
     let noteView = NoteTestView()
     let allNotesView = AllNotesTestView()
+    let pnsView = PnSTestView()
     
     private func verifyTabGroupCapturedInNote (tabGroupName: String, noteName: String? = nil, indexOfTabGroup: Int = 0){        
         if let noteName = noteName {
@@ -36,6 +37,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             tabGroupMenu.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCapture)
+            pnsView.waitForCollectPopUpAppear()
             tabGroupMenu.typeKeyboardKey(.enter)
             tabGroupMenu.typeKeyboardKey(.escape)
         }
@@ -74,6 +76,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             tabGroupMenu.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCapture)
+            pnsView.waitForCollectPopUpAppear()
             tabGroupMenu.typeKeyboardKey(.enter)
             tabGroupMenu.typeKeyboardKey(.escape)
         }
