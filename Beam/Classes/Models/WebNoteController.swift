@@ -52,6 +52,8 @@ class WebNoteController: Encodable, Decodable {
         set { _element = newValue }
     }
 
+    var data: BeamData?
+
     var nested: Bool = false
 
     static private var defaultNote: BeamNote {
@@ -67,10 +69,11 @@ class WebNoteController: Encodable, Decodable {
     private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Inits
-    init(note: BeamNote?, rootElement from: BeamElement? = nil) {
+    init(note: BeamNote?, rootElement from: BeamElement? = nil, data: BeamData?) {
         self.note = note
         _rootElement = from
         _element = _rootElement
+        self.data = data
 
         setupObservers()
     }

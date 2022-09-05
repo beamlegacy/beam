@@ -18,6 +18,7 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
     let beamHelper = BeamTestsHelper()
     let beamObjectHelper = BeamObjectTestsHelper()
     var remoteObjects: [BeamObject] = []
+    let onboardingNoteCreator = OnboardingNoteCreator()
 
     override func setUp() async throws {
         BeamDate.freeze("2021-03-19T12:21:03Z")
@@ -256,7 +257,7 @@ class BeamAccountSynchronisationTest: XCTestCase, BeamDocumentSource {
         }
         try noteLinksAndRefManager.clear()
 
-        OnboardingNoteCreator.shared.createOnboardingNotes()
+        onboardingNoteCreator.createOnboardingNotes(data: BeamData.shared)
         try BeamData.shared.reloadJournal()
     }
 

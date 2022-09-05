@@ -12,21 +12,21 @@ import BeamCore
 class RestAPIServer {
 
     enum Request {
-        case publishNote(note: BeamNote, tabGroups: [TabGroupBeamObject]?, publicationGroups: [String]?)
+        case publishNote(note: BeamNote, tabGroups: [TabGroupBeamObject]?, publicationGroups: [String]?, fileManager: BeamFileDBManager)
         case unpublishNote(noteId: UUID)
-        case updatePublicationGroup(note: BeamNote, tabGroups: [TabGroupBeamObject]?, publicationGroups: [String])
+        case updatePublicationGroup(note: BeamNote, tabGroups: [TabGroupBeamObject]?, publicationGroups: [String], fileManager: BeamFileDBManager)
         case embed(url: URL)
         case providers
         case iframeProviders
 
         func bodyParameters() throws -> (Data, String)? {
             switch self {
-            case .publishNote(let note, let tabGroups, let publicationGroups):
-                return createBody(for: note, tabGroups: tabGroups, publicationGroups: publicationGroups)
+            case let .publishNote(note, tabGroups, publicationGroups, fileManager):
+                return createBody(for: note, tabGroups: tabGroups, publicationGroups: publicationGroups, fileManager: fileManager)
             case .unpublishNote, .embed, .providers, .iframeProviders:
                 return nil
-            case .updatePublicationGroup(let note, let tabGroups, let publicationGroups):
-                return createBody(for: note, tabGroups: tabGroups, publicationGroups: publicationGroups)
+            case let .updatePublicationGroup(note, tabGroups, publicationGroups, fileManager):
+                return createBody(for: note, tabGroups: tabGroups, publicationGroups: publicationGroups, fileManager: fileManager)
             }
         }
 
@@ -105,7 +105,7 @@ class RestAPIServer {
             }
         }
 
-        private func createBody(for note: BeamNote, tabGroups: [TabGroupBeamObject]?, publicationGroups: [String]?) -> (Data, String)? {
+        private func createBody(for note: BeamNote, tabGroups: [TabGroupBeamObject]?, publicationGroups: [String]?, fileManager: BeamFileDBManager) -> (Data, String)? {
             let richContent = note.richContent
 
             let publicNote = PublicNote(note: note, tabGroups: tabGroups)
@@ -116,13 +116,12 @@ class RestAPIServer {
             if richContent.isEmpty && publicationGroups == nil {
                 return (encodedNote, "application/json")
             } else {
-                guard let data = multipart(encodedPublicNote: encodedNote, richContent: richContent, publicationGroups: publicationGroups) else { return nil }
+                guard let data = multipart(fileManager: fileManager, encodedPublicNote: encodedNote, richContent: richContent, publicationGroups: publicationGroups) else { return nil }
                 return (data, "multipart/form-data; boundary=\(RestAPIServer.multipartBoundary)")
             }
         }
 
-        private func multipart(encodedPublicNote: Data, richContent: [BeamElement], publicationGroups: [String]?) -> Data? {
-            guard let fileDB = BeamFileDBManager.shared else { return nil }
+        private func multipart(fileManager: BeamFileDBManager, encodedPublicNote: Data, richContent: [BeamElement], publicationGroups: [String]?) -> Data? {
             let boundary = RestAPIServer.multipartBoundary
             let lineBreak = "\r\n"
 
@@ -133,7 +132,7 @@ class RestAPIServer {
             for content in richContent {
                 switch content.kind {
                 case .image(let fileId, _, _):
-                    if let fileRecord = try? fileDB.fetch(uid: fileId) {
+                    if let fileRecord = try? fileManager.fetch(uid: fileId) {
                         let resourceData = fileRecord.data
                         let resourcePart = createMultipartBody(data: resourceData, documentName: fileRecord.uid.uuidString, fileNameAndExtension: fileRecord.name, mimetype: fileRecord.type)
                         body.appendString(lineBreak)

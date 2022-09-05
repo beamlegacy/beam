@@ -10,7 +10,7 @@ struct FilesList: View {
     @State private var cancellable: DatabaseCancellable?
     @State private var searchText: String = ""
 
-    private let fileManager = BeamFileDBManager.shared
+    let fileManager: BeamFileDBManager
 
     var body: some View {
         NavigationView {
@@ -21,7 +21,7 @@ struct FilesList: View {
                         ($0.name.range(of: searchText, options: .caseInsensitive) != nil) ||
                     $0.id.uuidString.lowercased() == searchText.lowercased()
                 }), selection: $selectedFile) { file in
-                    NavigationLink(destination: FileDetail(file: file).background(Color.white)) {
+                    NavigationLink(destination: FileDetail(file: file, fileManager: fileManager).background(Color.white)) {
                         FileRow(file: file)
                     }
                 }
@@ -33,7 +33,7 @@ struct FilesList: View {
                 .tracking { db in
                     try BeamFileRecord.fetchAll(db)
                 }
-                .start(in: fileManager!.grdbStore.writer,
+                .start(in: fileManager.grdbStore.writer,
                        onError: { Logger.shared.logError($0.localizedDescription, category: .fileDB) },
                        onChange: { self.files = $0 })
         }

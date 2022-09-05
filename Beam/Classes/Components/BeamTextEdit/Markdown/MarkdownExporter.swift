@@ -15,12 +15,15 @@ struct BeamNoteMarkdownExport {
     /// Attachments referenced in the Markdown contents.
     private var attachments: [BeamFileRecord]
 
+    private let fileManager: BeamFileDBManager
+
     /// Creates a Markdown export of a note.
     /// - Parameter title: title of the export.
-    fileprivate init(title: String) {
+    fileprivate init(title: String, fileManager: BeamFileDBManager) {
         self.title = title
         self.contents = ""
         self.attachments = []
+        self.fileManager = fileManager
     }
 
     /// Writes the Markdown contents and associated attachments to the specified URL.
@@ -95,15 +98,15 @@ enum MarkdownExporter {
     /// Exports a ``BeamNote`` to a ``BeamNoteMarkdownExport``.
     /// - Parameter note: a  ``BeamNote`` instance.
     /// - Returns: A Markdown export if it succeeds, throws with appropriate otherwise.
-    static func export(of note: BeamNote) -> BeamNoteMarkdownExport {
+    static func export(of note: BeamNote, fileManager: BeamFileDBManager) -> BeamNoteMarkdownExport {
         let noteToExport: BeamNote
         if note.isEntireNoteEmpty(), let fetchedNote = BeamNote.fetch(id: note.id, keepInMemory: false) {
             noteToExport = fetchedNote
         } else {
             noteToExport = note
         }
-        var document = BeamNoteMarkdownExport(title: noteToExport.title)
-        for (content, attachments) in noteToExport.children.compactMap({ Self.content(for: $0, filenamePrefix: noteToExport.title) }) {
+        var document = BeamNoteMarkdownExport(title: noteToExport.title, fileManager: fileManager)
+        for (content, attachments) in noteToExport.children.compactMap({ Self.content(for: $0, filenamePrefix: noteToExport.title, fileManager: fileManager) }) {
             document.append(content)
             document.appendAttachments(attachments)
         }
@@ -124,7 +127,8 @@ private extension MarkdownExporter {
     ///   - filenamePrefix: a prefix to use for all the filenames attachment of the export.
     ///   - level: the level at which we render the element.
     /// - Returns: Markdown content if any, `nil` otherwise.
-    static func content(for child: BeamElement, filenamePrefix: String, level: Int = .zero) -> MarkdownContent? {
+    static func content(for child: BeamElement, filenamePrefix: String, level: Int = .zero, fileManager: BeamFileDBManager
+) -> MarkdownContent? {
         switch child.kind {
         case .bullet where child.children.isEmpty:
             guard !child.text.isEmpty else { return (.markdownHtmlLinebreak, []) }
@@ -134,7 +138,7 @@ private extension MarkdownExporter {
         case .bullet:
             guard !child.text.isEmpty else { return (.markdownHtmlLinebreak, []) }
             let subContent = child.children.reduce(into: (String.empty, [])) { partialResult, element in
-                Self.content(for: element, filenamePrefix: filenamePrefix, level: level+1).map {
+                Self.content(for: element, filenamePrefix: filenamePrefix, level: level+1, fileManager: fileManager).map {
                     partialResult = (partialResult.0 + $0.0, partialResult.1 + $0.1)
                 }
             }
@@ -152,7 +156,7 @@ private extension MarkdownExporter {
             let heading = child.text.text
             guard !heading.isEmpty else { return (.markdownHtmlLinebreak, []) }
             let subContent = child.children.reduce(into: (String.empty, [])) { partialResult, element in
-                Self.content(for: element, filenamePrefix: filenamePrefix, level: level+1).map {
+                Self.content(for: element, filenamePrefix: filenamePrefix, level: level+1, fileManager: fileManager).map {
                     partialResult = (partialResult.0 + $0.0, partialResult.1 + $0.1)
                 }
             }
@@ -174,7 +178,7 @@ private extension MarkdownExporter {
             return (render(linkify(title: child.text.text, url: url.absoluteString), deepLevel: level), [])
 
         case .image(let uuid, _, _):
-            guard let file = try? BeamFileDBManager.shared?.fetch(uid: uuid) else {
+            guard let file = try? fileManager.fetch(uid: uuid) else {
                 return nil
             }
             let sanitizedFilename = file.sanitizedFilename(withSanitizedPrefix: filenamePrefix.sanitized)

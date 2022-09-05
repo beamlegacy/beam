@@ -2,12 +2,25 @@ import XCTest
 import BeamCore
 @testable import Beam
 
+enum MarkdownExportTestsError: Error {
+    case missingFileManager
+}
+
 final class MarkdownExportTests: XCTestCase {
+    let onboardingNoteCreator = OnboardingNoteCreator()
+    var fileManager: BeamFileDBManager!
+
+    override func setUpWithError() throws {
+        guard let manager = BeamData.shared.fileDBManager else {
+            throw MarkdownExportTestsError.missingFileManager
+        }
+        fileManager = manager
+    }
 
     func testEmptyNoteExport() throws {
         let note = try BeamNote(title: "An empty note")
         XCTAssert(note.isEntireNoteEmpty())
-        let export = MarkdownExporter.export(of: note)
+        let export = MarkdownExporter.export(of: note, fileManager: fileManager)
         XCTAssertTrue(export.contents.isEmpty)
     }
 
@@ -15,7 +28,7 @@ final class MarkdownExportTests: XCTestCase {
         let note = try BeamNote(title: "Simple note")
         note.addChild(BeamElement("Some content"))
 
-        let export = MarkdownExporter.export(of: note)
+        let export = MarkdownExporter.export(of: note, fileManager: fileManager)
         XCTAssertFalse(export.contents.isEmpty)
         XCTAssertEqual(export.contents, "Some content  ")
 
@@ -49,7 +62,7 @@ final class MarkdownExportTests: XCTestCase {
 
         note.addChild(list)
 
-        let export2 = MarkdownExporter.export(of: note)
+        let export2 = MarkdownExporter.export(of: note, fileManager: fileManager)
         XCTAssertFalse(export2.contents.isEmpty)
         XCTAssertEqual(
             export2.contents,
@@ -77,11 +90,11 @@ final class MarkdownExportTests: XCTestCase {
     }
 
     func testComplexNoteExport() throws {
-        OnboardingNoteCreator.shared.createOnboardingNotes()
+        onboardingNoteCreator.createOnboardingNotes(data: BeamData.shared)
 
         let note = try XCTUnwrap(BeamNote.fetch(title: "Capture"))
 
-        let export = MarkdownExporter.export(of: note)
+        let export = MarkdownExporter.export(of: note, fileManager: fileManager)
         XCTAssertFalse(export.contents.isEmpty)
         XCTAssertEqual(
             export.contents,

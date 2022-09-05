@@ -20,11 +20,13 @@ final class AllNotesPageContextualMenu {
     private let onLoadBlock: ((_ isLoading: Bool) -> Void)?
     private let onFinishBlock: ((_ needReload: Bool) -> Void)?
     private let cmdManager = CommandManagerAsync<BeamDocumentCollection>()
+    private var data: BeamData
 
     var undoManager: UndoManager?
     weak var delegate: AllNotesPageContextualMenuDelegate?
 
-    init(selectedNotes: [BeamNote], onLoad: ((_ isLoading: Bool) -> Void)? = nil, onFinish: ((_ needReload: Bool) -> Void)? = nil) {
+    init(data: BeamData, selectedNotes: [BeamNote], onLoad: ((_ isLoading: Bool) -> Void)? = nil, onFinish: ((_ needReload: Bool) -> Void)? = nil) {
+        self.data = data
         self.selectedNotes = selectedNotes
         self.onLoadBlock = onLoad
         self.onFinishBlock = onFinish
@@ -242,6 +244,7 @@ final class AllNotesPageContextualMenu {
     }
 
     private func updateProfileGroup(publish: Bool) async {
+        guard let fileManager = data.fileDBManager else { return }
         await withTaskGroup(of: Void.self, body: { group in
             for note in selectedNotes where note.publicationStatus.isPublic {
                 group.addTask {
@@ -255,7 +258,7 @@ final class AllNotesPageContextualMenu {
                             publicationGroups.append("profile")
                         }
 
-                        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: publicationGroups) { _ in
+                        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: publicationGroups, fileManager: fileManager) { _ in
                             continuation.resume()
                         }
                     }
@@ -282,11 +285,12 @@ final class AllNotesPageContextualMenu {
     }
 
     private func makeNotes(isPublic: Bool) async {
+        guard let fileManager = data.fileDBManager else { return }
         await withTaskGroup(of: Void.self, body: { group in
             _ = selectedNotes.map { note in
                 group.addTask {
                     await withCheckedContinuation { continuation in
-                        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: isPublic) { _ in
+                        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: isPublic, fileManager: fileManager) { _ in
                             continuation.resume()
                         }
                     }

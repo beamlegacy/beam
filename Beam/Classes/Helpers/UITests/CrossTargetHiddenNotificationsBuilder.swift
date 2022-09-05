@@ -17,10 +17,10 @@ class CrossTargetHiddenNotificationsBuilder {
     private var scope = Set<AnyCancellable>()
     private var registeredIdentifiers = [String]()
     private var beeper: CrossTargetBeeper
-    init(data: BeamData, beeper: CrossTargetBeeper) {
+    init(data: BeamData?, beeper: CrossTargetBeeper) {
         self.beeper = beeper
         self.data = data
-        data.currentDocumentCollection?.observeIds([.userFacingNotes], nil).sink { _ in } receiveValue: { [weak self] _ in
+        data?.currentDocumentCollection?.observeIds([.userFacingNotes], nil).sink { _ in } receiveValue: { [weak self] _ in
             self?.registerDynamicIdentifiers()
         }.store(in: &scope)
 

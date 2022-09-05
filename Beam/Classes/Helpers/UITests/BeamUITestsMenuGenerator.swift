@@ -3,6 +3,7 @@ import BeamCore
 import AutoUpdate
 import MockHttpServer
 import Fakery
+import Combine
 
 struct BeamUITestsMenuGeneratorSource: BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
@@ -13,13 +14,20 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
 
     private(set) var beeper: CrossTargetNotificationCenterBeeper
     private var hiddenIdentifiersBuilder: CrossTargetHiddenNotificationsBuilder
-    private weak var account: BeamAccount?
+    private weak var appData: AppData?
+    private var appObserverScope = Set<AnyCancellable>()
+    private var currentAccount: BeamAccount? {
+        appData?.currentAccount
+    }
 
-    init(account: BeamAccount) {
+    init(appData: AppData) {
         self.beeper = CrossTargetNotificationCenterBeeper()
-        self.account = account
-        self.hiddenIdentifiersBuilder = .init(data: account.data, beeper: beeper)
+        self.appData = appData
+        self.hiddenIdentifiersBuilder = .init(data: appData.currentAccount?.data, beeper: beeper)
         self.beeper.delegate = self
+        appData.$currentAccount.sink { [unowned self] currentAccount in
+            self.hiddenIdentifiersBuilder = .init(data: currentAccount?.data, beeper: self.beeper)
+        }.store(in: &appObserverScope)
     }
 
     private var dismissBeeperStatusWork: DispatchWorkItem?
@@ -113,7 +121,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         for window in AppDelegate.main.windows {
             window.state.closeAllTabs(closePinnedTabs: true)
         }
-        AppData.shared.currentAccount?.logout()
+        currentAccount?.logout()
         AppDelegate.main.deleteAllLocalData()
     }
 
@@ -250,10 +258,10 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
             Logger.shared.logInfo($0, category: .autoUpdate)
         }
         appDel.window?.state.objectWillChange.send()
-        appDel.data.currentAccount?.data.versionChecker = checker
+        currentAccount?.data.versionChecker = checker
 
         Task {
-            await appDel.data.currentAccount?.data.versionChecker.performUpdateIfAvailable()
+            await currentAccount?.data.versionChecker.performUpdateIfAvailable()
         }
     }
 
@@ -275,7 +283,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     }
 
     private func addPageToHistory(url: String, aliasUrl: String? = nil, title: String) {
-        guard let linkDB = account?.data.linkDB else { return }
+        guard let linkDB = currentAccount?.data.linkDB else { return }
 
         _ = IndexDocument(source: url, title: title, contents: title)
         let id: UUID = {
@@ -295,7 +303,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         let password = Configuration.testAccountPassword
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
-        AppData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
+        currentAccount?.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
             if case .failure(let error) = result {
                 fatalError(error.localizedDescription)
             }
@@ -314,20 +322,20 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         let username = "\(emailComponents[0])_\(randomString)".replacingOccurrences(of: "+", with: "_").substring(from: 0, to: 30)
         let password = Configuration.testAccountPassword
 
-        AppData.shared.currentAccount?.signUp(email, password) { result in
+        currentAccount?.signUp(email, password) { [weak currentAccount] result in
             if case .failure(let error) = result {
                 DispatchQueue.main.async {
                     self.showAlert("Cannot sign up", "Cannot sign up with \(email): \(error.localizedDescription)")
                 }
                 return
             }
-            AppData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: false, completionHandler: { result in
+            currentAccount?.signIn(email: email, password: password, runFirstSync: false, completionHandler: { result in
                 if case .failure(let error) = result {
                     DispatchQueue.main.async {
                         self.showAlert("Cannot sign in", "Cannot sign in with \(email): \(error.localizedDescription)")
                     }
                 } else {
-                    AppData.shared.currentAccount?.setUsername(username: username) { result in
+                    currentAccount?.setUsername(username: username) { result in
                         DispatchQueue.main.async {
                             switch result {
                             case .failure(let error):
@@ -349,7 +357,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
                                 NSPasteboard.general.clearContents()
                                 NSPasteboard.general.setString(email, forType: .string)
 
-                                AppData.shared.currentAccount?.runFirstSync(useBuiltinPrivateKeyUI: false)
+                                currentAccount?.runFirstSync(useBuiltinPrivateKeyUI: false)
                             }
                         }
                     }
@@ -382,7 +390,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         logout()
         clearPasswordsDatabase()
         AuthenticationManager.shared.username = nil
-        let onboarding = AppDelegate.main.window?.state.data.onboardingManager
+        let onboarding = currentAccount?.data.onboardingManager
         onboarding?.forceDisplayOnboarding()
         AppDelegate.main.windows.forEach { window in
             window.close()
@@ -391,7 +399,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     }
 
     private func clearPasswordsDatabase() {
-        account?.data.passwordManager.deleteAll(includedRemote: false)
+        currentAccount?.data.passwordManager.deleteAll(includedRemote: false)
     }
 
     private func clearCreditCardsDatabase() {
@@ -439,7 +447,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     }
 
     private func deleteRemoteAccount() {
-        AppData.shared.currentAccount?.deleteAccount { result in
+        currentAccount?.deleteAccount { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Error while deleting account: \(error)", category: .accountManager)
@@ -535,14 +543,15 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     }
 
     private func createPublishedNote(open: Bool = false) {
+        guard let fileManager = currentAccount?.data.fileDBManager else { return }
         let note = createNote()
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, completion: { _ in
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, fileManager: fileManager) { _ in
             if open {
                 DispatchQueue.main.async {
                     self.open(note: note)
                 }
             }
-        })
+        }
     }
 
     private func open(note: BeamNote) {

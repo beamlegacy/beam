@@ -144,7 +144,9 @@ class WebTestView: BaseView {
     }
 
     func getTabUrlAtIndex(index: Int) -> String {
-        return getTabURLElementByIndex(index: index).getStringValue()
+        let element = getTabURLElementByIndex(index: index)
+        XCTAssert(element.waitForExistence(timeout: 10))
+        return element.getStringValue()
     }
     
     func waitForTabUrlAtIndexToEqual(index: Int, expectedString: String) -> Bool {

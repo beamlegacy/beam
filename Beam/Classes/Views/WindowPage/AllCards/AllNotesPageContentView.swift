@@ -287,7 +287,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             selectedNotes = notes.enumerated().filter { i, _ in selectedRowsIndexes.contains(i) }.compactMap({ _, item -> BeamNote? in item.getNote()
             })
         }
-        let handler = AllNotesPageContextualMenu(selectedNotes: selectedNotes, onFinish: { shouldReload in
+        let handler = AllNotesPageContextualMenu(data: data, selectedNotes: selectedNotes, onFinish: { shouldReload in
             if shouldReload {
                 model.refreshAllNotes()
             }
@@ -310,14 +310,16 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             return
         }
         if row >= notesList.count {
-            guard let newNote = try? state.fetchOrCreateNoteForQuery(title) else { return }
+            guard let newNote = try? state.fetchOrCreateNoteForQuery(title),
+                  let fileManager = data.fileDBManager
+            else { return }
             let isPublic = listType == .publicNotes
             let publishOnProfile = listType == .onProfileNotes
 
             //If we create a public note, publish it right after creation, else just save it
             if isPublic || publishOnProfile {
                 model.publishingNoteTitle = newNote.title
-                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true, publicationGroups: publishOnProfile ? ["profile"] : nil) { result in
+                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true, publicationGroups: publishOnProfile ? ["profile"] : nil, fileManager: fileManager) { result in
                     DispatchQueue.main.async {
                         model.publishingNoteTitle = nil
                         switch result {

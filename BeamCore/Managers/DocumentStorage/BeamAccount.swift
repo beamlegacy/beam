@@ -78,7 +78,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     let userSessionRequest = UserSessionRequest()
     let userInfoRequest = UserInfoRequest()
 
-    let data = BeamData.shared
+    public let data = BeamData.shared
 
     public internal(set) var state = ConnectionState.signedOff
     public enum ConnectionState {
@@ -103,7 +103,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
     private func setup(overrideDatabasePath: String?, migrate: Bool) throws {
         let databasePath = URL(fileURLWithPath: path).appendingPathComponent("account.sqlite").path
-        let db = try DatabaseQueue(path: overrideDatabasePath ?? databasePath)
+        let db = try GRDBStore.createWriter(at: overrideDatabasePath ?? databasePath)
         grdbStore = GRDBStore(writer: db)
 
         try loadManagers(grdbStore)
@@ -199,6 +199,14 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
         defaultDatabaseId = try container.decode(UUID.self, forKey: .defaultDatabaseId)
     }
 
+    deinit {
+        do {
+            try unload()
+        } catch {
+            Logger.shared.logError("Error while BeamAccount  \(self) deinit: \(error)", category: .accountManager)
+        }
+    }
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
@@ -273,6 +281,21 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
         return account
     }
 
+    func unload() throws {
+        uninitSync()
+        try allDatabases.forEach {
+            try $0.unload()
+        }
+        allDatabases.removeAll()
+        databases.removeAll()
+        unloadManagers()
+        if let store = grdbStore {
+            store.close()
+            self.grdbStore = nil
+        }
+        objectManager.unregisterAll()
+    }
+
     func delete(_ source: BeamDocumentSource) throws {
         guard let grdbStore = grdbStore else { return }
 
@@ -282,7 +305,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
         unloadManagers()
 
-        try grdbStore.writer.close()
+        grdbStore.close()
         self.grdbStore = nil
 
         try FileManager.default.removeItem(atPath: path)
@@ -305,9 +328,16 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     private static var syncDisabled = false
     public func setupSync() {
         guard !syncSetup, !Self.syncDisabled else { return }
-        databaseSynchroniser = BeamDatabaseSynchronizer(account: self, objectManager: data.objectManager)
-        documentSynchroniser = BeamDocumentSynchronizer(account: self, objectManager: data.objectManager)
+        databaseSynchroniser = BeamDatabaseSynchronizer(account: self, objectManager: objectManager)
+        documentSynchroniser = BeamDocumentSynchronizer(account: self, objectManager: objectManager)
+        data.registerSyncDelegates()
         syncSetup = true
+    }
+
+    private func uninitSync() {
+        databaseSynchroniser = nil
+        documentSynchroniser = nil
+        syncSetup = false
     }
 
     func clear() {
@@ -356,7 +386,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     @MainActor
     func checkPrivateKey() async {
         if await checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
-            data.objectManager.liveSync { (_, _) in
+            objectManager.liveSync { (_, _) in
                 Task { @MainActor in
                     do {
                         _ = try self.syncDataWithBeamObject()
@@ -373,7 +403,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
     // MARK: - Web sockets
     func disconnectWebSockets() {
-        data.objectManager.disconnectLiveSync()
+        objectManager.disconnectLiveSync()
     }
 
     // MARK: - Database
@@ -413,7 +443,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
             let initialDBs = Set(allDatabases)
             Logger.shared.logInfo("syncAllFromAPI calling", category: .sync)
             do {
-                try await data.objectManager.syncAllFromAPI(force: force, prepareBeforeSaveAll: {
+                try await objectManager.syncAllFromAPI(force: force, prepareBeforeSaveAll: {
                     self.mergeAllDatabases(initialDBs: initialDBs)
                 })
             } catch {

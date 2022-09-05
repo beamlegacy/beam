@@ -214,7 +214,7 @@ struct NoteHeaderView: View {
                             type: .itemWithToggle, action: nil, isToggleOn: model.isOnUserProfile, toggleAction: { _ in
                 model.togglePublishOnProfile { _ in }
             }),
-            ContextMenuItem(title: "Share", icon: "editor-arrow_right", iconPlacement: ContextMenuItem.IconPlacement.trailing, iconSize: 16, iconColor: BeamColor.AlphaGray, type: .itemWithDisclosure, action: { }, subMenuModel: SocialShareContextMenu(urlToShare: model.getLink(), of: model.note?.title).socialShareMenuViewModel),
+            ContextMenuItem(title: "Share", icon: "editor-arrow_right", iconPlacement: ContextMenuItem.IconPlacement.trailing, iconSize: 16, iconColor: BeamColor.AlphaGray, type: .itemWithDisclosure, action: { }, subMenuModel: SocialShareContextMenu(urlToShare: model.getLink(), of: model.note?.title, data: data).socialShareMenuViewModel),
             ContextMenuItem.separator(),
             ContextMenuItem(title: "Unpublish", action: {
                 CustomPopoverPresenter.shared.dismissPopovers(animated: false)

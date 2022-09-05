@@ -51,6 +51,7 @@ public class BeamDatabase: CustomStringConvertible, Codable, Identifiable, Equat
     public var updatedAt: Date
     public var deletedAt: Date?
     public var source: String
+    public let data = BeamData.shared
 
     var grdbStore: GRDBStore!
 
@@ -126,7 +127,7 @@ public class BeamDatabase: CustomStringConvertible, Codable, Identifiable, Equat
         guard let databasePath = account?.pathForDatabase(id)  else { throw BeamDocumentCollectionError.noAccount }
         try FileManager.default.createDirectory(at: URL(fileURLWithPath: databasePath), withIntermediateDirectories: true)
         let collectionPath = databasePath + "/data.sqlite"
-        let db = try DatabaseQueue(path: overrideDatabasePath ?? collectionPath)
+        let db = try GRDBStore.createWriter(at: overrideDatabasePath ?? collectionPath)
         grdbStore = GRDBStore(writer: db)
 
         try loadManagers(grdbStore)
@@ -137,14 +138,10 @@ public class BeamDatabase: CustomStringConvertible, Codable, Identifiable, Equat
     }
 
     func unload() throws {
-        for manager in managers.values {
-            do {
-                try manager.unload()
-            } catch {
-                Logger.shared.logError("Unable to unload manager \(manager) from \(self)", category: .database)
-            }
-        }
         unloadManagers()
+        guard grdbStore != nil else { return }
+        grdbStore.close()
+        grdbStore = nil
     }
 
     private func createPath() throws {
