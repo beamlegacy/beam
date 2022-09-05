@@ -10,7 +10,7 @@ import BeamCore
 
 final class AppData: ObservableObject {
     static let shared = AppData()
-    
+
     @Published private(set) var accounts = [BeamAccount]()
     // Will be removed for multi-account, avoid use if possible.
     @Published private(set) var currentAccount: BeamAccount?
@@ -145,6 +145,18 @@ final class AppData: ObservableObject {
             try? setCurrentAccount(account, database: db)
         }
         saveData()
+    }
+
+    func applicationWillTerminate() {
+        for account in accounts {
+            do {
+                try account.unload()
+            } catch {
+                Logger.shared.logError("Error while unloading account \(account): \(error)", category: .accountManager)
+            }
+        }
+        accounts = []
+        currentAccount = nil
     }
 
     func checkAndRepairDB() {

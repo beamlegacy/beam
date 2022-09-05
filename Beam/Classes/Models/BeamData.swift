@@ -149,6 +149,15 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     let browsingTreeStoreManager: BrowsingTreeStoreManager
     let linkDB: BeamLinkDB
 
+    func registerSyncDelegates() {
+        self.contactsManager.registerOnBeamObjectManager(objectManager)
+        self.passwordManager.registerOnBeamObjectManager(objectManager)
+        self.privateKeySignatureManager.registerOnBeamObjectManager(objectManager)
+        //self.browsingTreeStoreManager.registerOnBeamObjectManager(objectManager)
+        ((self.noteFrecencyScorer as? ExponentialFrecencyScorer)?.storage as? GRDBNoteFrecencyStorage)?.registerOnBeamObjectManager(objectManager)
+        self.linkDB.registerOnBeamObjectManager(objectManager)
+    }
+
     override init() {
         self.contactsManager = ContactsManager(objectManager: objectManager)
         self.passwordManager = PasswordManager(objectManager: objectManager)
@@ -178,7 +187,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
         super.init()
-
         BeamNote.idForNoteNamed = { [weak self] title in
             guard let collection = self?.currentDocumentCollection,
                   let doc = try? collection.fetchFirst(filters: [.title(title)])
@@ -273,7 +281,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
 
         PreferencesManager.$alwaysShowBullets
             .receive(on: DispatchQueue.main)
-            .sink { alwaysShowBullets in
+            .sink { [weak self] alwaysShowBullets in
                 guard let collection = BeamData.shared.currentDocumentCollection else { return }
                 let allDocuments = (try? collection.fetch(filters: [.isPublic(true)])) ?? []
 
@@ -285,8 +293,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
                     allPublicNotes.append(note)
                 }
 
+                guard let fileManager = self?.fileDBManager else { return }
                 allPublicNotes.forEach { note in
-                    BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, publicationGroups: note.publicationStatus.publicationGroups)
+                    BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, publicationGroups: note.publicationStatus.publicationGroups, fileManager: fileManager)
                 }
         }.store(in: &scope)
     }
@@ -643,14 +652,14 @@ extension BeamData {
     func reindexFileReferences() throws {
         guard let collection = currentDocumentCollection else { throw BeamDataError.currentDatabaseNotSet }
         do {
-            try BeamFileDBManager.shared?.clearFileReferences()
+            try fileDBManager?.clearFileReferences()
             for noteId in try collection.fetchIds(filters: []) {
                 guard let note = BeamNote.fetch(id: noteId) else { continue }
 
                 note.visitAllElements { element in
                     guard case let .image(fileId, origin: _, displayInfos: _) = element.kind else { return }
                     do {
-                        try BeamFileDBManager.shared?.addReference(fromNote: noteId, element: element.id, to: fileId)
+                        try self.fileDBManager?.addReference(fromNote: noteId, element: element.id, to: fileId)
                     } catch {
                         Logger.shared.logError("Unable to add reindexed reference to file \(fileId) from element \(element.id) of note \(element.note?.id ?? UUID.null)", category: .fileDB)
                     }

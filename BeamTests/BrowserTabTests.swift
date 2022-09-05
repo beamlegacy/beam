@@ -13,10 +13,11 @@ import XCTest
 class BrowserTabTests: XCTestCase {
     var note: BeamNote!
     var tab: BrowserTab!
+    let state = BeamState()
 
     override func setUpWithError() throws {
         note = try BeamNote(title: "Sample note")
-        tab = BrowserTab(state: BeamState(), browsingTreeOrigin: nil, originMode: .note, note: note)
+        tab = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .note, note: note)
     }
 
     func testTabInit_AssignsNoteToNoteController() throws {
@@ -42,7 +43,7 @@ class BrowserTabTests: XCTestCase {
 
     func testPerformance_InitTab() throws {
         self.measure {
-            let _ = BrowserTab(state: BeamState(), browsingTreeOrigin: nil, originMode: .note, note: note)
+            let _ = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .note, note: note)
         }
     }
 }

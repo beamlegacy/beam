@@ -79,9 +79,10 @@ extension TabsListContextMenuBuilder {
     }
 
     private func shareGroup(_ group: TabGroup, itemFrame: CGRect?, shareService: ShareService) {
-        guard let tabGroupingManager = state?.browserTabsManager.tabGroupingManager else { return }
+        guard let state = state else { return }
+        let tabGroupingManager = state.browserTabsManager.tabGroupingManager
         let startTime = BeamDate.now
-        let canShare = tabGroupingManager.shareGroup(group, shareService: shareService) { [weak self] result in
+        let canShare = tabGroupingManager.shareGroup(group, shareService: shareService, state: state) { [weak self] result in
             // let's make sure the loading state was visible for at least 2s to avoid blinking.
             let delayInSeconds: Int = max(0, 2 + Int(startTime.timeIntervalSinceNow))
             var previousStatus: TabGroup.Status?

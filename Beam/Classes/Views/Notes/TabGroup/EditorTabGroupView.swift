@@ -258,7 +258,7 @@ struct EditorTabGroupView: View {
     private func shareGroup(shareService: ShareService) {
         isLoading = true
         let group = TabGroupingStoreManager.convertBeamObjectToGroup(tabGroup)
-        state.data.tabGroupingManager.shareGroup(group, shareService: shareService) { result in
+        state.data.tabGroupingManager.shareGroup(group, shareService: shareService, state: state) { result in
             isLoading = false
             switch result {
             case .success:

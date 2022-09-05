@@ -12,7 +12,7 @@ import BeamCore
 class ShareHelperTests: XCTestCase {
     private let baseURL = URL(string: "http://sharehelpertests.com")!
     private let timeout: TimeInterval = 2
-
+    private let data = BeamData.shared
     private func buildExpectedTwitterURL(with text: String) -> String {
         let encodedText = text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
         let encodedURL = baseURL.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
@@ -24,7 +24,7 @@ class ShareHelperTests: XCTestCase {
         let content = [BeamElement(text)]
         var receivedURL: URL?
         let expectation = self.expectation(description: "receive_url")
-        let sut = ShareHelper(baseURL) { url in
+        let sut = ShareHelper(baseURL, data: BeamData.shared) { url in
             receivedURL = url
             expectation.fulfill()
         }
@@ -47,7 +47,7 @@ class ShareHelperTests: XCTestCase {
         ]
         var receivedURL: URL?
         let expectation = self.expectation(description: "receive_url")
-        let sut = ShareHelper(baseURL) { url in
+        let sut = ShareHelper(baseURL, data: data) { url in
             receivedURL = url
             expectation.fulfill()
         }
@@ -71,7 +71,7 @@ class ShareHelperTests: XCTestCase {
             BeamElement(text),
             BeamElement(text)
         ]
-        let sut = ShareHelper(baseURL) { _ in }
+        let sut = ShareHelper(baseURL, data: data) { _ in }
         await sut.shareContent(content, originURL: baseURL, service: .copy)
 
         let fullText = [text, text, text].joined(separator: .lineSeparator)
@@ -103,7 +103,7 @@ class ShareHelperTests: XCTestCase {
 
         downloadManager.mockData = imageData
         downloadManager.mockFileName = "image.jpg"
-        guard let fileID = try BeamFileDBManager.shared?.insert(name: "image.jpg", data: imageData, type: "image/jpeg") else {
+        guard let fileID = try BeamData.shared.fileDBManager?.insert(name: "image.jpg", data: imageData, type: "image/jpeg") else {
             XCTFail("fileID is required for test to pass")
             return
         }
@@ -115,7 +115,7 @@ class ShareHelperTests: XCTestCase {
             displayInfos: .init()
         )
 
-        let sut = ShareHelper(baseURL) { _ in }
+        let sut = ShareHelper(baseURL, data: data) { _ in }
         await sut.shareContent([imageElement], originURL: baseURL, service: .copy)
 
         let objects = pasteboard.readObjects(forClasses: [NSImage.self], options: nil)

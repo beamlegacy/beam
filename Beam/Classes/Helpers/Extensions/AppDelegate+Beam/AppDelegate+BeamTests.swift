@@ -11,9 +11,7 @@ extension AppDelegate {
 
     #if DEBUG
     func prepareMenuForTestEnv() {
-        if let account = data.currentAccount {
-            beamUIMenuGenerator = BeamUITestsMenuGenerator(account: account)
-        }
+        beamUIMenuGenerator = BeamUITestsMenuGenerator(appData: data)
         let beeper = beamUIMenuGenerator.beeper
         let prepareBeam = NSMenuItem()
         prepareBeam.submenu = NSMenu(title: "UITests")

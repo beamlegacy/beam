@@ -109,9 +109,11 @@ struct NoteView: View {
         }
         .onReceive(note.changed.debounce(for: .seconds(10), scheduler: RunLoop.main)) { changed in
             let (_, change) = changed
-            guard change != .meta else { return }
-            guard note.publicationStatus != .unpublished else { return }
-            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, publicationGroups: note.publicationStatus.publicationGroups)
+            guard change != .meta,
+                  note.publicationStatus != .unpublished,
+                  let fileManager = self.state.data.fileDBManager
+            else { return }
+            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, publicationGroups: note.publicationStatus.publicationGroups, fileManager: fileManager)
         }
         .onReceive(note.changed) { changed in
             let (element, _) = changed

@@ -154,7 +154,7 @@ class BeamLinkDBTests: XCTestCase {
         let store = GRDBStore(writer: dbQueue)
         let inMemoryGrdb = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
         let linkstore = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
-        let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb, objectManager: objectManager)
+        let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb, objectManager: objectManager, linkStore: linkstore)
         try store.migrate()
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let t0 = BeamDate.now

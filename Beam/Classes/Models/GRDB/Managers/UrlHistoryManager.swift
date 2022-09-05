@@ -10,13 +10,13 @@ import GRDB
 import BeamCore
 
 class UrlHistoryManager: GRDBHandler, BeamManager {
-    weak public private(set) var holder: BeamManagerOwner?
+    weak public private(set) var owner: BeamManagerOwner?
     static var id = UUID()
 
     static var name = "UrlHistoryManager"
 
     required init(holder: BeamManagerOwner? = nil, objectManager: BeamObjectManager, store: GRDBStore) throws {
-        self.holder = holder
+        self.owner = holder
         try super.init(store: store)
     }
 
