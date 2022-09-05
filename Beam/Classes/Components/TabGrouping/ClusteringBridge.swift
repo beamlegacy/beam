@@ -73,7 +73,7 @@ enum ClusteringType {
 struct ClusteringResultValue {
     var pageGroups: [[UUID]]
     var noteGroups: [[UUID]]
-    var similarities: [UUID: [UUID: Double]]
+    var similarities: [UUID: [UUID: Float]]
     var legacyFlag: LegacyClustering.Flag?
 }
 
@@ -194,7 +194,7 @@ final class LegacyClusteringBridge: ClusteringBridge {
     }
 
     private typealias LegacyClusteringResult = Result<(pageGroups: [[UUID]], noteGroups: [[UUID]],
-                                                       flag: LegacyClustering.Flag, similarities: [UUID: [UUID: Double]]), Error>
+                                                       flag: LegacyClustering.Flag, similarities: [UUID: [UUID: Float]]), Error>
     private func convertLegacyClusteringResult(_ result: LegacyClusteringResult) -> CompletionResult {
         switch result {
         case .failure(let error): return .failure(error)
