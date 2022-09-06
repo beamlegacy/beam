@@ -1,5 +1,5 @@
 //
-//  ClusteringOrphanedUrlManager.swift
+//  ClusteringExportManager.swift
 //  Beam
 //
 //  Created by Paul Lefkopoulos on 23/09/2021.
@@ -35,7 +35,7 @@ fileprivate extension Date {
     }
 }
 
-struct OrphanedUrl: CsvRow {
+struct ClusteringExportOrphanedURL: CsvRow {
     let sessionId: UUID
     let url: String?
     let groupId: Int
@@ -48,7 +48,8 @@ struct OrphanedUrl: CsvRow {
     let language: NLLanguage?
 
     static var columnNames: [String] {
-        ["sessionId", "url", "groupId", "navigationGroupId", "savedAt", "title", "cleanedContent", "entities", "entitiesInTitle", "language"]
+        ["sessionId", "url", "groupId", "navigationGroupId", "savedAt",
+         "title", "cleanedContent", "entities", "entitiesInTitle", "language"]
     }
 
     var columns: [String] {
@@ -56,33 +57,41 @@ struct OrphanedUrl: CsvRow {
     }
 }
 
-struct AnyUrl: CsvRow {
-    let noteName: String?
-    let url: String?
-    let groupId: Int
-    let navigationGroupId: Int?
-    let tabColouringGroupId: UUID?
-    let userCorrectionGroupId: UUID?
-    let title: String?
-    let cleanedContent: String?
-    let entities: EntitiesInText?
-    let entitiesInTitle: EntitiesInText?
+struct ClusteringExportAnyURL: CsvRow {
+    var noteName: String?
+    var url: String?
+    let groupOffsetInClustering: Int?
+    var navigationGroupId: Int?
+    var tabColouringGroupId: UUID?
+    var userCorrectionGroupId: UUID?
+    var isGroupCreatedDuringFeedback: Bool = false
+    var title: String?
+    var cleanedContent: String?
+    var entities: EntitiesInText?
+    var entitiesInTitle: EntitiesInText?
     let language: NLLanguage?
-    let isOpenAtExport: Bool?
+    let threshold: Float?
+    var isOpenAtExport: Bool?
     let id: UUID?
-    let parentId: UUID?
+    var parentId: UUID?
 
     static var columnNames: [String] {
-        ["noteName", "url", "groupId", "navigationGroupId", "tabColouringGroupId", "userCorrectionGroupId", "title", "cleanedContent", "entities", "entitiesInTitle", "language", "isOpenAtExport", "id", "parentId"]
+        ["noteName", "url", "groupId", "navigationGroupId",
+         "tabColouringGroupId", "userCorrectionGroupId", "isGroupCreatedDuringFeedback",
+         "title", "cleanedContent", "entities", "entitiesInTitle", "language",
+         "threshold", "isOpenAtExport", "id", "parentId"]
     }
 
     var columns: [String] {
-        [optionalToString(noteName), optionalToString(url), String(groupId), String(navigationGroupId ?? -1), optionalToString(tabColouringGroupId), optionalToString(userCorrectionGroupId), optionalToString(title), optionalToString(cleanedContent), optionalToString(entities?.description), optionalToString(entitiesInTitle?.description), optionalToString(language?.rawValue), optionalToString(isOpenAtExport), optionalToString(id), optionalToString(parentId)]
+        [optionalToString(noteName), optionalToString(url), optionalToString(groupOffsetInClustering), String(navigationGroupId ?? -1),
+         optionalToString(tabColouringGroupId), optionalToString(userCorrectionGroupId), "\(isGroupCreatedDuringFeedback)",
+         optionalToString(title), optionalToString(cleanedContent), optionalToString(entities?.description), optionalToString(entitiesInTitle?.description), optionalToString(language?.rawValue),
+         optionalToString(threshold), optionalToString(isOpenAtExport), optionalToString(id), optionalToString(parentId)]
     }
 }
 
 class ClusteringSessionExporter {
-    var urls: [AnyUrl] = [AnyUrl]()
+    var urls: [ClusteringExportAnyURL] = [ClusteringExportAnyURL]()
     let fileManager = FileManager.default
     var gcsManager: GCSObjectManager?
 
@@ -94,13 +103,13 @@ class ClusteringSessionExporter {
         }
     }
 
-    func add(anyUrl: AnyUrl) {
+    func add(anyUrl: ClusteringExportAnyURL) {
         urls.append(anyUrl)
     }
 
     func export(to: URL, sessionId: UUID, keepFile: Bool) {
         let destination = to.appendingPathComponent("beam_clustering_session-\(sessionId)-\(BeamDate.now).csv")
-        let writer = CsvRowsWriter(header: AnyUrl.header, rows: self.urls)
+        let writer = CsvRowsWriter(header: ClusteringExportAnyURL.header, rows: self.urls)
         do {
             try writer.overWrite(to: destination)
             let clusteringVersion = ClusteringType.current.versionRepresentation
@@ -127,8 +136,8 @@ class ClusteringSessionExporter {
 }
 
 class ClusteringOrphanedUrlManager {
-    var urls: [OrphanedUrl] = [OrphanedUrl]()
-    var tempUrls: [OrphanedUrl] = [OrphanedUrl]()
+    var urls: [ClusteringExportOrphanedURL] = [ClusteringExportOrphanedURL]()
+    var tempURLs: [ClusteringExportOrphanedURL] = [ClusteringExportOrphanedURL]()
     var savePath: URL
     var savePathTemp: URL?
     let fileManager = FileManager.default
@@ -138,16 +147,16 @@ class ClusteringOrphanedUrlManager {
         self.savePathTemp =  URL(string: savePath.deletingLastPathComponent().string + "temp.csv")
     }
 
-    func add(orphanedUrl: OrphanedUrl) {
+    func add(orphanedUrl: ClusteringExportOrphanedURL) {
         urls.append(orphanedUrl)
     }
 
-    func addTemporarily(orphanedUrl: OrphanedUrl) {
-        tempUrls.append(orphanedUrl)
+    func addTemporarily(orphanedUrl: ClusteringExportOrphanedURL) {
+        tempURLs.append(orphanedUrl)
     }
 
     func save() {
-        let writer = CsvRowsWriter(header: OrphanedUrl.header, rows: urls)
+        let writer = CsvRowsWriter(header: ClusteringExportOrphanedURL.header, rows: urls)
         do {
             try writer.append(to: savePath)
         } catch {
@@ -165,7 +174,7 @@ class ClusteringOrphanedUrlManager {
             }
             do {
                 try FileManager.default.copyItem(at: savePath, to: savePathTemp)
-                let writer = CsvRowsWriter(header: OrphanedUrl.header, rows: tempUrls)
+                let writer = CsvRowsWriter(header: ClusteringExportOrphanedURL.header, rows: tempURLs)
                 try writer.append(to: savePathTemp)
                 _ = fileManager.secureCopyItem(at: savePathTemp, to: destination)
             } catch {
@@ -173,7 +182,7 @@ class ClusteringOrphanedUrlManager {
                 _ = fileManager.secureCopyItem(at: savePath, to: destination)
             }
         }
-        tempUrls = [OrphanedUrl]()
+        tempURLs = [ClusteringExportOrphanedURL]()
     }
 
     func clear() throws {
