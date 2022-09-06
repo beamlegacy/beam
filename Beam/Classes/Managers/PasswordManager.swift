@@ -33,7 +33,11 @@ final class PasswordManager {
         }
 
         var description: String {
-            "Total records: \(total), deleted: \(deleted) - \(readableValidSignature + readableInvalidSignature) readable (\(readableInvalidSignature) invalid signatures) - \(unreadableValidSignature + unreadableInvalidSignature) unreadable (\(unreadableInvalidSignature) invalid signatures)"
+            """
+            Total records: \(total), deleted: \(deleted)
+            \(readableValidSignature + readableInvalidSignature) readable (\(readableInvalidSignature) invalid signatures)
+            \(unreadableValidSignature + unreadableInvalidSignature) unreadable (\(unreadableInvalidSignature) invalid signatures)
+            """
         }
     }
 

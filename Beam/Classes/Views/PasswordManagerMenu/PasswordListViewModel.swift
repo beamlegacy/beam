@@ -36,6 +36,29 @@ final class PasswordListViewModel: ObservableObject {
         }
     }
 
+    enum LocalPrivateKeyResult {
+        case unavailable(reason: Error)
+        case available(digest: PasswordManager.SanityDigest)
+
+        var isValid: Bool {
+            switch self {
+            case .available(digest: let digest):
+                return digest.isValid
+            default:
+                return false
+            }
+        }
+
+        var alertMessage: String {
+            switch self {
+            case .unavailable(reason: let error):
+                return "The private key is not available: \(error.localizedDescription)"
+            case .available(digest: let digest):
+                return digest.description
+            }
+        }
+    }
+
     let passwordManager: PasswordManager
     private var allPasswordEntries: [PasswordManagerEntry] = []
     private var allPasswordTableViewItems: [PasswordTableViewItem] = []
@@ -48,6 +71,7 @@ final class PasswordListViewModel: ObservableObject {
     @Published var disableFillButton = true
     @Published var disableRemoveButton = true
     @Published var isUnlocked = false
+    @Published var localPrivateKeyCheck: LocalPrivateKeyResult? = nil
 
     var searchString = "" {
         didSet {
@@ -79,6 +103,18 @@ final class PasswordListViewModel: ObservableObject {
                 self.refresh()
             }
             .store(in: &cancellables)
+        Task.detached(priority: .background) { [weak self] in
+            do {
+                let digest = try passwordManager.sanityDigest()
+                await MainActor.run { [weak self] in
+                    self?.localPrivateKeyCheck = .available(digest: digest)
+                }
+            } catch {
+                await MainActor.run { [weak self] in
+                    self?.localPrivateKeyCheck = .unavailable(reason: error)
+                }
+            }
+        }
     }
 
     func updateSelection(_ idx: IndexSet) {

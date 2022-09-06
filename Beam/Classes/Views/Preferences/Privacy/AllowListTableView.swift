@@ -84,12 +84,3 @@ class AllowListViewItem: TableViewItem {
         super.init()
     }
 }
-
-private struct IdentifiableString: Identifiable {
-    let string: String
-    var id: String { string }
-
-    init(_ string: String) {
-        self.string = string
-    }
-}

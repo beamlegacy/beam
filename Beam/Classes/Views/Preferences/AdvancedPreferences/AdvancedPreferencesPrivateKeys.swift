@@ -81,9 +81,9 @@ struct AdvancedPreferencesPrivateKeys: View {
                         }.foregroundColor(Color.red)
                     }.frame(width: 450)
                     TextField("local private key:", text: Binding<String>(get: {
-                        Persistence.Encryption.localPrivateKey ?? ""
+                        (try? EncryptionManager.shared.loadLocalPrivateKey()) ?? ""
                     }, set: { value, _ in
-                        Persistence.Encryption.localPrivateKey = value
+                        try? EncryptionManager.shared.storeLocalPrivateKey(value)
                         updateKeys()
                     })).frame(width: 450)
                     Spacer()
@@ -179,9 +179,9 @@ struct AdvancedPreferencesPrivateKeys: View {
 
     // MARK: - Local PK
     func resetLocalPrivateKey() {
-        UserAlert.showAlert(message: "Are you sure you want to reset the local private key?", buttonTitle: "Cancel", secondaryButtonTitle: "Reset Local Private Key", secondaryButtonAction: {
+        UserAlert.showAlert(message: "Are you sure you want to reset the local private key? This will make all your passwords unreadable.", buttonTitle: "Cancel", secondaryButtonTitle: "Reset Local Private Key", secondaryButtonAction: {
             let pkey = EncryptionManager.shared.generateKey()
-            Persistence.Encryption.localPrivateKey = pkey.asString()
+            try? EncryptionManager.shared.storeLocalPrivateKey(pkey.asString())
             updateKeys()
         }, style: .critical)
     }
@@ -189,7 +189,7 @@ struct AdvancedPreferencesPrivateKeys: View {
     func verifyLocalPrivateKey() {
         do {
             let string = "This is the clear text with accent é 🤤"
-            let PKey = EncryptionManager.shared.localPrivateKey()
+            let PKey = try EncryptionManager.shared.localPrivateKey()
             let encryptedString = try EncryptionManager.shared.encryptString(string, PKey)
             var decryptedString: String?
 

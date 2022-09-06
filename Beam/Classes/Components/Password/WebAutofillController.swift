@@ -100,6 +100,9 @@ class WebAutofillController: NSObject, WebPageRelated {
     }
 
     private func isAutofillEnabled(for action: WebAutofillAction) -> Bool {
+        guard (try? EncryptionManager.shared.loadLocalPrivateKey()) != nil else {
+            return false
+        }
         switch action {
         case .login, .createAccount:
             return PreferencesManager.autofillUsernamePasswords
