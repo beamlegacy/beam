@@ -50,6 +50,7 @@ final class AppData: ObservableObject {
     }
 
     func createDefaultAccount() throws -> BeamAccount {
+        try EncryptionManager.shared.localPrivateKey(allowCreating: true)
         let path = URL(fileURLWithPath: dataFolder(fileName: accountsFilename))
         let accountName = "Local"
         let id = UUID()
