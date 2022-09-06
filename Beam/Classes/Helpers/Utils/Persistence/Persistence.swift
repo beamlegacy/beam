@@ -33,7 +33,7 @@ struct Persistence {
     }
 
     enum Encryption {
-        @KeychainStorable("encryption.localPrivateKey", synchronizable: false) static var localPrivateKey: String?
+        static let localPrivateKeyName = Configuration.env.rawValue + ".encryption.localPrivateKey"
         @KeychainStorable("encryption.privateKeys") static var privateKeys: [String: String]?
 
         // This is deprecated but we keep it as for now

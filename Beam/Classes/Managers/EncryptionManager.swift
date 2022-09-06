@@ -1,6 +1,7 @@
 import Foundation
 import CryptoKit
 import BeamCore
+import KeychainAccess
 
 enum EncryptionManagerError: Error {
     case authenticationFailure
@@ -144,17 +145,37 @@ class EncryptionManager {
     }
 
     // MARK: - Local Private Key
+    private var cachedLocalPrivateKey: String? // avoid hitting the keychain for each request
+
+    func loadLocalPrivateKey() throws -> String? {
+        if cachedLocalPrivateKey != nil {
+            return cachedLocalPrivateKey
+        }
+        let keychain = Keychain(service: Configuration.bundleIdentifier).synchronizable(false)
+        cachedLocalPrivateKey = try keychain.getString(Persistence.Encryption.localPrivateKeyName)
+        return cachedLocalPrivateKey
+    }
+
+    func storeLocalPrivateKey(_ privateKey: String) throws {
+        let keychain = Keychain(service: Configuration.bundleIdentifier).synchronizable(false)
+        try keychain.set(privateKey, key: Persistence.Encryption.localPrivateKeyName)
+        cachedLocalPrivateKey = privateKey
+    }
+
     @discardableResult
-    func localPrivateKey() -> SymmetricKey {
-        return lock.write {
-            if let localDataKey = Persistence.Encryption.localPrivateKey,
+    func localPrivateKey(allowCreating: Bool = false) throws -> SymmetricKey {
+        try lock.write {
+            if let localDataKey = try self.loadLocalPrivateKey(),
                let localPrivateKey = SymmetricKey(base64EncodedString: localDataKey) {
                 return localPrivateKey
             }
-            Logger.shared.logWarning("Local Private key doesn't exist or has a wrong format: \(Persistence.Encryption.localPrivateKey ?? "-"), creating new one",
-                                     category: .encryption)
+            guard allowCreating else {
+                Logger.shared.logError("Local Private key doesn't exist or has a wrong format, password manager will be disabled", category: .encryption)
+                throw EncryptionManagerError.keyError
+            }
+            Logger.shared.logInfo("Local Private key doesn't exist or has a wrong format, creating new one", category: .encryption)
             let key = self.generateKey()
-            Persistence.Encryption.localPrivateKey = key.asString()
+            try self.storeLocalPrivateKey(key.asString())
             return key
         }
     }
