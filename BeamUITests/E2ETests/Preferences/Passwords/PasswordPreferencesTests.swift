@@ -57,7 +57,7 @@ class PasswordPreferencesTests: BaseTest {
             XCTAssertTrue(passwordPreferencesView.staticText(PasswordPreferencesViewLocators.StaticTexts.passwordProtectionTitle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             // Increased timeout to match deadline of updateHasTouchID in LockedPasswordsView
             XCTAssertTrue(passwordPreferencesView.app.windows.staticTexts.matching(NSPredicate(format: "value BEGINSWITH  '\(PasswordPreferencesViewLocators.StaticTexts.passwordProtectionDescription.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: TimeInterval(1)))
-            XCTAssertTrue(passwordPreferencesView.button(PasswordPreferencesViewLocators.Buttons.unlockButton.accessibilityIdentifier).isEnabled)
+            XCTAssertTrue(passwordPreferencesView.getUnlockButtonElement().isEnabled)
             XCTAssertFalse(passwordPreferencesView.checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillPasswords.accessibilityIdentifier).exists)
         }
     }
@@ -288,48 +288,39 @@ class PasswordPreferencesTests: BaseTest {
         
     }
     
-    func testAutofillUsernameAndPasswords() throws {
-        try XCTSkipIf(true, "Skipped due to BE-4951")
-        // Test deactivated on Test Plan because we don't have an easy way to restore preferences settings after this test
-        // Especially in case of failure at the middle of the test
+    func testAutofillUsernameAndPasswords() {
         testrailId("C627")
-        step ("GIVEN I open password preferences"){
-            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
-            PreferencesBaseView().navigateTo(preferenceView: .passwords)
-            uiMenu.populatePasswordsDB()
-        }
-        
-        step ("THEN Autofill password settings is enabled"){
-            if !passwordPreferencesView.getAutofillPasswordSettingElement().isSettingEnabled() {
-                passwordPreferencesView.clickAutofillPassword()
-            }
-            XCTAssertTrue(passwordPreferencesView.getAutofillPasswordSettingElement().isSettingEnabled())
-        }
+        setup()
         
         step ("WHEN I go to Password Manager Test page"){
-            XCUIApplication().windows["Passwords"].buttons[XCUIIdentifierCloseWindow].clickOnExistence()
+            shortcutHelper.shortcutActionInvoke(action: .close)
             uiMenu.loadUITestPagePassword()
             testPage.clickInputField(.username)
         }
         
         step ("THEN Autofill is proposed"){
-            XCTAssertTrue(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
+            passwordManagerHelper.getKeyIconElement().hoverAndTapInTheMiddle()
+            XCTAssertTrue(passwordManagerHelper.getOtherPasswordsOptionElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
 
         step ("WHEN I deactivate Autofill password setting"){
+            uiMenu.disablePasswordAndCardsProtection()
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
-            PreferencesBaseView().navigateTo(preferenceView: .passwords)
+            if (passwordPreferencesView.getUnlockButtonElement().exists) {
+            passwordPreferencesView.getUnlockButtonElement().hoverAndTapInTheMiddle()
+            }
             passwordPreferencesView.clickAutofillPassword()
         }
         
         step ("THEN Autofill password settings is disabled"){
             XCTAssertFalse(passwordPreferencesView.getAutofillPasswordSettingElement().isSettingEnabled())
-            XCUIApplication().windows["Passwords"].buttons[XCUIIdentifierCloseWindow].clickOnExistence()
+            shortcutHelper.shortcutActionInvoke(action: .close)
         }
 
         step ("AND Autofill is not proposed anymore"){
             uiMenu.loadUITestPagePassword()
             testPage.clickInputField(.username)
+            XCTAssertFalse(passwordManagerHelper.getKeyIconElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }
     }
