@@ -14,23 +14,24 @@ class BrowserTabsPreferencesTests: BaseTest {
     let omnibox = OmniBoxTestView()
     
     override func setUpWithError() throws {
-        step ("GIVEN I open Browser preferences"){
+        step ("GIVEN I launch app"){
             launchApp()
-            openBrowserPrefs()
-            browserPref.waitForViewToLoad()
         }
     }
     
     private func openBrowserPrefs() {
-        shortcutHelper.shortcutActionInvoke(action: .openPreferences)
-        PreferencesBaseView().navigateTo(preferenceView: .browser)
+        step ("GIVEN I open Browser preferences"){
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+            PreferencesBaseView().navigateTo(preferenceView: .browser)
+            browserPref.waitForViewToLoad()
+        }
     }
         
     func testCMDClickFunctionalityEnablingDisabling() {
         testrailId("C594")
         let expectedCheckboxTitle = "⌘-click opens a link in a new tab"
-        
-        step("THEN by default checkbox is enabled by default and has title: \(expectedCheckboxTitle)") {
+        openBrowserPrefs()
+        step("THEN by default checkbox is enabled and has title: \(expectedCheckboxTitle)") {
             XCTAssertEqual(browserPref.getCMDClickCheckbox().title, expectedCheckboxTitle)
             XCTAssertTrue(browserPref.getCMDClickCheckbox().isSettingEnabled())
         }
@@ -42,15 +43,6 @@ class BrowserTabsPreferencesTests: BaseTest {
         testrailId("C595")
         let expectedCheckboxTitle = "Use ⌘1 to ⌘9 to switch tabs"
         
-        step("WHEN enable Switch Tabs checkbox that has title: \(expectedCheckboxTitle)") {
-            XCTAssertEqual(browserPref.getSwitchTabsCheckbox().title, expectedCheckboxTitle)
-            if !browserPref.getSwitchTabsCheckbox().isSettingEnabled() {
-                browserPref.getSwitchTabsCheckbox().tapInTheMiddle()
-            }
-            shortcutHelper.shortcutActionInvoke(action: .close)
-            waitForDoesntExist(browserPref.getSetDefaultButton())
-        }
-        
         step("WHEN I open multiple tabs") {
             uiMenu.loadUITestPage1()
             uiMenu.loadUITestPage2()
@@ -60,23 +52,7 @@ class BrowserTabsPreferencesTests: BaseTest {
             webView.getTabByIndex(index: 1).tapInTheMiddle()
         }
         
-        step("THEN I CAN successfully switch the tabs using shortcuts") {
-            shortcutHelper.invokeCMDKey("1")
-            XCTAssertTrue(webView.getTabByIndex(index: 0).isSelected)
-            webView.getTabByIndex(index: 3).tapInTheMiddle()
-            shortcutHelper.invokeCMDKey("3")
-            XCTAssertTrue(webView.getTabByIndex(index: 2).isSelected)
-        }
-        
-        step("WHEN I disable Switch tabs checkbox") {
-            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
-            browserPref.waitForViewToLoad()
-            browserPref.getSwitchTabsCheckbox().tapInTheMiddle()
-            shortcutHelper.shortcutActionInvoke(action: .close)
-            waitForDoesntExist(browserPref.getSetDefaultButton())
-        }
-        
-        step("THEN I can NOT switch the tabs using shortcuts") {
+        step("THEN I can NOT switch the tabs using shortcuts by default") {
             XCTAssertTrue(webView.waitForWebViewToLoad())
             webView.getTabByIndex(index: 0).tapInTheMiddle()
             shortcutHelper.invokeCMDKey("2")
@@ -86,6 +62,22 @@ class BrowserTabsPreferencesTests: BaseTest {
             XCTAssertTrue(webView.getTabByIndex(index: 0).isSelected)
             XCTAssertFalse(webView.getTabByIndex(index: 3).isSelected)
         }
+        
+        step("WHEN enable Switch Tabs checkbox that has title: \(expectedCheckboxTitle)") {
+            openBrowserPrefs()
+            XCTAssertEqual(browserPref.getSwitchTabsCheckbox().title, expectedCheckboxTitle)
+            browserPref.getSwitchTabsCheckbox().tapInTheMiddle()
+            shortcutHelper.shortcutActionInvoke(action: .close)
+            waitForDoesntExist(browserPref.getSetDefaultButton())
+        }
+        
+        step("THEN I CAN successfully switch the tabs using shortcuts") {
+            shortcutHelper.invokeCMDKey("1")
+            XCTAssertTrue(webView.getTabByIndex(index: 0).isSelected)
+            webView.getTabByIndex(index: 3).tapInTheMiddle()
+            shortcutHelper.invokeCMDKey("3")
+            XCTAssertTrue(webView.getTabByIndex(index: 2).isSelected)
+        }
     }
     
     func testGroupTabsAutomatically() {
@@ -93,21 +85,13 @@ class BrowserTabsPreferencesTests: BaseTest {
         let expectedCheckboxTitle = "Group tabs automatically"
         let tabGroupMenu = TabGroupMenuView()
         
-        step("WHEN I enable Auto Group Tab checkbox that has title: \(expectedCheckboxTitle)") {
-            XCTAssertEqual(browserPref.getAutoGroupTabsCheckbox().title, expectedCheckboxTitle)
-            if !browserPref.getAutoGroupTabsCheckbox().isSettingEnabled() {
-                browserPref.getAutoGroupTabsCheckbox().tapInTheMiddle()
-            }
-            shortcutHelper.shortcutActionInvoke(action: .close)
-        }
-        
         step("WHEN I open multiple time the same tab") {
             uiMenu.loadUITestPage1()
             uiMenu.loadUITestPage1()
             webView.waitForWebViewToLoad()
         }
         
-        step("THEN tab group is automatically created") {
+        step("THEN tab group is automatically created by default") {
             XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
             // Closing opened tabs
             shortcutHelper.shortcutActionInvoke(action: .close)
@@ -117,11 +101,9 @@ class BrowserTabsPreferencesTests: BaseTest {
         step("WHEN I disable Auto Group Tab checkbox that has title: \(expectedCheckboxTitle)") {
             openBrowserPrefs()
             browserPref.waitForViewToLoad()
-            if browserPref.getAutoGroupTabsCheckbox().isSettingEnabled() {
-                browserPref.getAutoGroupTabsCheckbox().tapInTheMiddle()
-            }
+            browserPref.getAutoGroupTabsCheckbox().tapInTheMiddle()
             shortcutHelper.shortcutActionInvoke(action: .close)
-            launchApp()
+            shortcutHelper.shortcutActionInvoke(action: .newWindow)
         }
         
         step("WHEN I open multiple time the same tab") {
