@@ -28,25 +28,16 @@ class NotesPreferencesTests: BaseTest {
             notesView.typeKeyboardKey(.enter)
             notesView.typeKeyboardKey(.upArrow)
         }
-        
-        step("GIVEN I open Notes preferences") {
-            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
-            notesPrefView.navigateTo(preferenceView: .notes)
-            showBulletsCheckbox = notesPrefView.getAlwaysShowBulletsCheckbox()
-        }
-    
-        step("THEN The bullet is visible when Always show bullets checkbox is enabled") {
-            XCTAssertTrue(notesPrefView.staticText(NotesPreferencesViewLocators.StaticTexts.indentationLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            if !showBulletsCheckbox.isSettingEnabled() {
-                showBulletsCheckbox.tapInTheMiddle()
-            }
-            shortcutHelper.shortcutActionInvoke(action: .close)
-            notesView.waitForNoteViewToLoad()
+
+        step("THEN by default Always show bullets is enabled") {
             XCTAssertEqual(notesView.getNumberOfVisibleBullets(), 5)
         }
         
         step("WHEN I disable Always show bullets checkbox") {
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+            notesPrefView.navigateTo(preferenceView: .notes)
+            showBulletsCheckbox = notesPrefView.getAlwaysShowBulletsCheckbox()
+            XCTAssertTrue(notesPrefView.staticText(NotesPreferencesViewLocators.StaticTexts.indentationLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             showBulletsCheckbox.clickOnExistence()
             shortcutHelper.shortcutActionInvoke(action: .close)
         }
