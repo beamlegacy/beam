@@ -115,10 +115,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         ContentBlockingManager.shared.setup()
-        // Setup localPrivateKey
-        EncryptionManager.shared.localPrivateKey()
+
         //TODO: - Remove when everyone has its local links data moved from old db to grdb
         data.setup()
+
+        // Check localPrivateKey
+        do {
+            try EncryptionManager.shared.localPrivateKey()
+        } catch {
+            Logger.shared.logError("Local private key isn't available. Password manager features will be disabled. \(error.localizedDescription)", category: .encryption)
+        }
 
         if deleteAllLocalDataAtStartup {
             self.deleteAllLocalData()
