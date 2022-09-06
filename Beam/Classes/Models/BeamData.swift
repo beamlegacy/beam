@@ -528,16 +528,12 @@ extension BeamData {
                     //We need to DispatchAsync here because, if not, the AlertPanel will pause the thread before the state will actually be changed to .downloaded
                     DispatchQueue.main.async {
                         self.showUpdateAlert(onStartUp: true, availableRelease: release.appRelease)
-                        self.checkForUpdateCancellable = nil
                     }
-                case .noUpdate where self.versionChecker.lastCheck != nil:
-                    self.checkForUpdateCancellable = nil
-                case .error(let errorMessage):
-                    UserAlert.showMessage(message: "Error checking for updates",
-                                          informativeText: errorMessage,
-                                          buttonTitle: "OK")
                 default:
                     break
+                }
+                DispatchQueue.main.async {
+                    self.checkForUpdateCancellable = nil
                 }
             }
         }
