@@ -161,6 +161,10 @@ class PasswordPreferencesTestView: PreferencesBaseView {
         return checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillCC.accessibilityIdentifier)
     }
     
+    func getUnlockButtonElement() -> XCUIElement {
+        return button(PasswordPreferencesViewLocators.Buttons.unlockButton.accessibilityIdentifier)
+    }
+    
     enum PasswordFieldToFill: Int, CaseIterable {
         case site = 0
         case username = 1

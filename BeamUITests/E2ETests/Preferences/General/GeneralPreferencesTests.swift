@@ -18,8 +18,6 @@ class GeneralPreferencesTests: BaseTest {
     
     override func setUp() {
         journalView = launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-        openGeneralPrefs()
-        startBeamCheckbox = generalPrefView.getStartBeamWithOpenedTabsElement()
     }
     
     private func openGeneralPrefs() {
@@ -29,26 +27,33 @@ class GeneralPreferencesTests: BaseTest {
     
     func testStartBeamWithOpenedTabs() {
         testrailId("C586")
-        step("THEN I see Start beam with opened tabs checkbox available") {
-            XCTAssertTrue(startBeamCheckbox.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.startBeamlabel.accessibilityIdentifier).exists)
+        
+        step("THEN by default Journal view is opened on restart") {
+            uiMenu.loadUITestPage1()
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            journalView.waitForJournalViewToLoad()
+            self.restartApp(storeSessionWhenTerminated: true)
+            XCTAssertTrue(journalView
+                            .waitForJournalViewToLoad()
+                            .isJournalOpened())
         }
         
-        step("WHEN Start beam with opened tabs") {
-            if !startBeamCheckbox.isSettingEnabled() {
-                startBeamCheckbox.tapInTheMiddle()
-            }
+        step("WHEN I enable Start beam with opened tabs checkbox") {
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            openGeneralPrefs()
+            startBeamCheckbox = generalPrefView.getStartBeamWithOpenedTabsElement()
+            XCTAssertTrue(startBeamCheckbox.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.startBeamlabel.accessibilityIdentifier).exists)
+            startBeamCheckbox.clickOnExistence()
             shortcutHelper.shortcutActionInvoke(action: .close)
         }
         
         step("THEN Webview is opened on restart with opened tab") {
-            uiMenu.loadUITestPage1()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             self.restartApp(storeSessionWhenTerminated: true)
             XCTAssertTrue(webView.waitForWebViewToLoad())
             XCTAssertEqual(webView.getNumberOfTabs(), 1)
         }
-
+        
         if !isBigSurOS() {
             step("THEN Webview is opened on restart with pinned tab") {
                 webView.openTabMenu(tabIndex: 0).selectTabMenuItem(.pinTab)
@@ -58,24 +63,12 @@ class GeneralPreferencesTests: BaseTest {
             }
         }
         
-        step("WHEN I disable Start beam with opened tabs checkbox") {
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            openGeneralPrefs()
-            startBeamCheckbox.clickOnExistence()
-            shortcutHelper.shortcutActionInvoke(action: .close)
-        }
-        
-        step("THEN Journal view is opened on restart") {
-            self.restartApp(storeSessionWhenTerminated: true)
-            XCTAssertTrue(journalView
-                            .waitForJournalViewToLoad()
-                            .isJournalOpened())
-        }
     }
     
     func testGeneralPrefsAppearanceElements() {
         testrailId("C585")
         step("THEN Appearance elements are correctly displayed") {
+            openGeneralPrefs()
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.appearanceLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             for buttonID in GeneralPreferencesViewLocators.Buttons.allCases {
                 XCTAssertTrue(generalPrefView.button(buttonID.accessibilityIdentifier).exists)
@@ -87,6 +80,7 @@ class GeneralPreferencesTests: BaseTest {
     func testGeneralPrefsAccessibilityElements() {
         testrailId("C587")
         step("THEN Accessibility Press Tab to highlight checkbox is correctly displayed") {
+            openGeneralPrefs()
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.accessibilityLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(generalPrefView.checkBox(GeneralPreferencesViewLocators.Checkboxes.highlightTab.accessibilityIdentifier).exists)
             XCTAssertTrue(generalPrefView.staticText(GeneralPreferencesViewLocators.StaticTexts.highlightCheckboxDescription.accessibilityIdentifier).exists)
