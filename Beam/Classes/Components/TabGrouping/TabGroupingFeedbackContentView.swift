@@ -10,10 +10,10 @@ import BeamCore
 
 private final class TabGroupingFeedbackItem: NSObject, Codable, Identifiable {
     var id = UUID().uuidString
-    var tabId: UUID
+    var pageId: UUID
 
-    init(tabId: UUID) {
-        self.tabId = tabId
+    init(pageId: UUID) {
+        self.pageId = pageId
     }
 }
 
@@ -80,23 +80,21 @@ private struct TabDropDelegate: DropDelegate {
 
             if let newGrpId = newGrpId {
                 DispatchQueue.main.async {
-                    guard let groupIdx = viewModel.remove(tabId: tabItem.tabId) else { return }
+                    guard viewModel.remove(pageId: tabItem.pageId) else { return }
                     for group in viewModel.groups where group.id == newGrpId {
                         var newPageIDs = group.pageIds
-                        newPageIDs.append(tabItem.tabId)
+                        newPageIDs.append(tabItem.pageId)
                         group.updatePageIds(newPageIDs)
-                        viewModel.updateCorrectedPages(with: tabItem.tabId, in: group.id)
+                        viewModel.updateCorrectedPages(with: tabItem.pageId, in: group.id)
                     }
-                    viewModel.remove(group: groupIdx)
                 }
             } else {
                 DispatchQueue.main.async {
-                    guard let groupIdx = viewModel.remove(tabId: tabItem.tabId) else { return }
-                    let newGroup = TabGroup(pageIds: [tabItem.tabId])
+                    guard viewModel.remove(pageId: tabItem.pageId) else { return }
+                    let newGroup = TabGroup(pageIds: [tabItem.pageId])
                     newGroup.changeColor(viewModel.getNewColor())
                     viewModel.groups.append(newGroup)
-                    viewModel.updateCorrectedPages(with: tabItem.tabId, in: newGroup.id)
-                    viewModel.remove(group: groupIdx)
+                    viewModel.updateCorrectedPages(with: tabItem.pageId, in: newGroup.id)
                 }
             }
         }
@@ -107,6 +105,29 @@ private struct TabDropDelegate: DropDelegate {
 struct TabGroupingFeedbackContentView: View {
     @ObservedObject var viewModel: TabGroupingFeedbackViewModel
 
+    func triggerSendFeedback(saveToURL url: URL?) {
+        let correctedPages = viewModel.buildCorrectedPagesForExport()
+        viewModel.clusteringManager.exportSession(sessionExporter: BeamData.shared.sessionExporter,
+                                                  to: url,
+                                                  allPages: viewModel.allOpenedPages(),
+                                                  initialBuiltGroups: viewModel.initialAssignations,
+                                                  correctedPages: correctedPages)
+        AppDelegate.main.tabGroupingFeedbackWindow?.close()
+    }
+
+    func triggerSaveAndSendFeedback() {
+        let savePanel = NSSavePanel()
+        savePanel.canCreateDirectories = true
+        savePanel.showsTagField = false
+        savePanel.begin { (result) in
+            guard result == .OK, let url = savePanel.url else {
+                savePanel.close()
+                return
+            }
+            triggerSendFeedback(saveToURL: url)
+        }
+    }
+
     var body: some View {
         VStack {
             Text("Please, re-arrange the groups in a way that makes sense to you:")
@@ -115,14 +136,14 @@ struct TabGroupingFeedbackContentView: View {
             ScrollView {
                 ForEach(viewModel.groups) { tabGroup in
                     VStack(spacing: 4) {
-                        ForEach(tabGroup.pageIds, id: \.self) { tabId in
-                            if let url = viewModel.urlFor(pageId: tabId),
-                               let title = viewModel.titleFor(pageId: tabId) {
+                        ForEach(tabGroup.pageIds, id: \.self) { pageId in
+                            if let url = viewModel.urlFor(pageId: pageId),
+                               let title = viewModel.titleFor(pageId: pageId) {
                                 TabGroupingFeedbackTabView(url: url,
                                                            title: title,
                                                            color: (tabGroup.color?.mainColor?.swiftUI ?? Color.red).opacity(0.25))
                                 .onDrag {
-                                    return NSItemProvider(object: TabGroupingFeedbackItem(tabId: tabId))
+                                    return NSItemProvider(object: TabGroupingFeedbackItem(pageId: pageId))
                                 }
                             }
                         }
@@ -151,23 +172,12 @@ struct TabGroupingFeedbackContentView: View {
             HStack {
                 Spacer()
                 Button {
-                    BeamData.shared.clusteringManager.exportSession(sessionExporter: BeamData.shared.sessionExporter, to: nil, correctedPages: viewModel.correctedPages)
-                    AppDelegate.main.tabGroupingFeedbackWindow?.close()
+                    triggerSendFeedback(saveToURL: nil)
                 } label: {
                     Text("Send Feedback")
                 }.buttonStyle(.automatic)
                 Button {
-                    let savePanel = NSSavePanel()
-                    savePanel.canCreateDirectories = true
-                    savePanel.showsTagField = false
-                    savePanel.begin { (result) in
-                        guard result == .OK, let url = savePanel.url else {
-                            savePanel.close()
-                            return
-                        }
-                        BeamData.shared.clusteringManager.exportSession(sessionExporter: BeamData.shared.sessionExporter, to: url, correctedPages: viewModel.correctedPages)
-                        AppDelegate.main.tabGroupingFeedbackWindow?.close()
-                    }
+                    triggerSaveAndSendFeedback()
                 } label: {
                     Text("Save and send Feedback")
                 }.buttonStyle(.automatic)
