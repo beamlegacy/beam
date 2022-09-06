@@ -1497,7 +1497,7 @@
 		DAAFF670283B86C4007305B4 /* AutocompleteManager+Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAFF66F283B86C4007305B4 /* AutocompleteManager+Logging.swift */; };
 		DAAFF677283BE779007305B4 /* OmniboxAnalyticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAFF676283BE779007305B4 /* OmniboxAnalyticsTests.swift */; };
 		DAB8DB05269C502C00453867 /* UrlScoresCollectionTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB8DB04269C502C00453867 /* UrlScoresCollectionTest.swift */; };
-		DABFD3B026FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */; };
+		DABFD3B026FC974B00C1F7F0 /* ClusteringExportManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3AF26FC974B00C1F7F0 /* ClusteringExportManager.swift */; };
 		DABFD3B726FCAC8300C1F7F0 /* Csv.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3B626FCAC8300C1F7F0 /* Csv.swift */; };
 		DABFF8072742731B00FAF364 /* BeamLinkDBTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */; };
 		DAC803E8284F815100D15371 /* BrowsingTreeDBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC803E7284F815100D15371 /* BrowsingTreeDBManager.swift */; };
@@ -3461,7 +3461,7 @@
 		DAAFF66F283B86C4007305B4 /* AutocompleteManager+Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Logging.swift"; sourceTree = "<group>"; };
 		DAAFF676283BE779007305B4 /* OmniboxAnalyticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxAnalyticsTests.swift; sourceTree = "<group>"; };
 		DAB8DB04269C502C00453867 /* UrlScoresCollectionTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlScoresCollectionTest.swift; sourceTree = "<group>"; };
-		DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringOrphanedUrlManager.swift; sourceTree = "<group>"; };
+		DABFD3AF26FC974B00C1F7F0 /* ClusteringExportManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringExportManager.swift; sourceTree = "<group>"; };
 		DABFD3B626FCAC8300C1F7F0 /* Csv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Csv.swift; sourceTree = "<group>"; };
 		DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamLinkDBTest.swift; sourceTree = "<group>"; };
 		DAC803E7284F815100D15371 /* BrowsingTreeDBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeDBManager.swift; sourceTree = "<group>"; };
@@ -4571,7 +4571,6 @@
 				A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */,
 				A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */,
 				A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */,
-				DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */,
 				96F53559271DADDD00B719C6 /* BeamLinkDB.swift */,
 				A062DD32275FC5EE0033DB6E /* ContactsManager.swift */,
 				A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */,
@@ -6890,8 +6889,6 @@
 		A043B7FC26593A4800E267E5 /* TabGrouping */ = {
 			isa = PBXGroup;
 			children = (
-				A0A4301526655993003A3C08 /* ClusteringManager.swift */,
-				332CE706288955C5007E585A /* ClusteringBridge.swift */,
 				A5B68434287DE9FE00213BD7 /* TabGroup.swift */,
 				4E0556E027B4004E00B4A42F /* TabGroupingManager.swift */,
 				A5FD982A2890153900842673 /* TabGroupingManager+Notes.swift */,
@@ -6905,6 +6902,9 @@
 				A0E9B0FA2666A80600FC99A5 /* TabGroupingSettingsTitleBarView.swift */,
 				A05FCDB027E8DB3D007FD449 /* TabGroupingFeedbackWindow.swift */,
 				A0D6E5B627E108750040A447 /* TabGroupingFeedbackContentView.swift */,
+				A0A4301526655993003A3C08 /* ClusteringManager.swift */,
+				332CE706288955C5007E585A /* ClusteringBridge.swift */,
+				DABFD3AF26FC974B00C1F7F0 /* ClusteringExportManager.swift */,
 			);
 			path = TabGrouping;
 			sourceTree = "<group>";
@@ -9541,7 +9541,7 @@
 				37DB5A1327BB515700534760 /* CollapseButtonLayer.swift in Sources */,
 				A52D1DDD28AFD2DF00FF7CB4 /* TabGroupNode.swift in Sources */,
 				9688F2BE2851F02600FAA51B /* DataView.swift in Sources */,
-				DABFD3B026FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift in Sources */,
+				DABFD3B026FC974B00C1F7F0 /* ClusteringExportManager.swift in Sources */,
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
 				A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */,
@@ -12341,7 +12341,7 @@
 			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
 			requirement = {
 				kind = revision;
-				revision = a15eb1abb7175ae09eba7be75bdb515928f33057;
+				revision = cef5f6cba8dc435a68c01c3a0fcad9d2fd87201b;
 			};
 		};
 		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {

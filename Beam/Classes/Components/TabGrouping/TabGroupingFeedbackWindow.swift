@@ -7,10 +7,11 @@
 
 import Foundation
 
-class TabGroupingFeedbackViewModel: ObservableObject {
+final class TabGroupingFeedbackViewModel: ObservableObject {
     @Published var clusteringManager: ClusteringManager
     @Published var groups: [TabGroup] = []
-    var correctedPages: [ClusteringManager.PageID: UUID] = [ : ]
+    private(set) var correctedPages = [ClusteringManager.PageID: TabGroup.GroupID]()
+    private(set) var initialAssignations = [ClusteringManager.PageID: TabGroup.GroupID]()
 
     init(clusteringManager: ClusteringManager) {
         self.clusteringManager = clusteringManager
@@ -18,21 +19,28 @@ class TabGroupingFeedbackViewModel: ObservableObject {
     }
 
     private func prepareData() {
-        let tabGroups = Set((self.clusteringManager.tabGroupingManager?.builtPagesGroups ?? [:]).values)
-        tabGroups.forEach { tabGroup in
-            self.groups.append(tabGroup.copy(locked: false, discardPages: false))
+        var groups = [TabGroup]()
+
+        // we copy the existing groups (to be able to change them without consequences)
+        let existingBuiltGroups = Set((self.clusteringManager.tabGroupingManager?.builtPagesGroups ?? [:]).values)
+        existingBuiltGroups.forEach { tabGroup in
+            let copyOfExistingGroup = tabGroup.copy(locked: false, discardPages: false)
+            groups.append(copyOfExistingGroup)
+            copyOfExistingGroup.pageIds.forEach { pageId in
+                initialAssignations[pageId] = copyOfExistingGroup.id
+            }
         }
 
-        let pages = self.clusteringManager.openBrowsing.allOpenBrowsingPages
-        let pagesGrouped = self.groups.flatMap({ $0.pageIds })
-        for page in pages where !pagesGrouped.contains(where: { $0 == page }) {
-            guard let pageId = page,
-                  !self.groups.flatMap({ $0.pageIds }).contains(pageId) else { continue }
-
+        // we create a new group for each page without group.
+        let pages = allOpenedPages()
+        let pagesGrouped = groups.flatMap({ $0.pageIds })
+        for pageId in pages where !pagesGrouped.contains(pageId) {
             let group = TabGroup(pageIds: [pageId])
             group.changeColor(getNewColor())
-            self.groups.append(group)
+            groups.append(group)
         }
+
+        self.groups = groups
     }
 
     func urlFor(pageId: UUID) -> URL? {
@@ -52,31 +60,67 @@ class TabGroupingFeedbackViewModel: ObservableObject {
     }
 
     func updateCorrectedPages(with pageId: ClusteringManager.PageID, in groupId: UUID) {
-        correctedPages.updateValue(groupId, forKey: pageId)
+        if initialAssignations[pageId] == groupId {
+            correctedPages.removeValue(forKey: pageId)
+        } else {
+            correctedPages.updateValue(groupId, forKey: pageId)
+        }
     }
 
-    func remove(tabId: UUID) -> Int? {
-        var tabIdx: Int = 0
+    /// - Returns: `true` if the page was removed from a group
+    func remove(pageId: UUID) -> Bool {
         let groupIdx = groups.firstIndex { group in
-            if let idx = group.pageIds.firstIndex(where: { $0 == tabId}) {
-                tabIdx = idx
-                return true
-            }
-            return false
+            return group.pageIds.contains(pageId)
         }
-        guard let groupIdx = groupIdx else { return nil }
-        var newPageIDs = groups[groupIdx].pageIds
-        newPageIDs.remove(at: tabIdx)
-        groups[groupIdx].updatePageIds(newPageIDs)
-
-        return groupIdx
+        guard let groupIdx = groupIdx else { return false }
+        removePage(pageId, fromGroup: groups[groupIdx])
+        removeEmptyGroups()
+        return true
     }
 
-    func remove(group: Int) {
-        if groups[group].pageIds.isEmpty {
-            groups.remove(at: group)
+    private func removePage(_ pageId: ClusteringManager.PageID, fromGroup group: TabGroup) {
+        var newPageIDs = group.pageIds
+        newPageIDs.removeAll(where: { $0 == pageId })
+        group.updatePageIds(newPageIDs)
+    }
+
+    private func removeEmptyGroups() {
+        self.groups = groups.filter { !$0.pageIds.isEmpty }
+    }
+
+    func allOpenedPages() -> [ClusteringManager.PageID] {
+        self.clusteringManager.openBrowsing.allOpenBrowsingPages.compactMap { $0 }
+    }
+
+    func buildCorrectedPagesForExport() -> [ClusteringManager.ClusteringFeedbackCorrectedPage] {
+        var final = Set<ClusteringManager.ClusteringFeedbackCorrectedPage>()
+        let initalGroupIds = Set(initialAssignations.values)
+        correctedPages.forEach { (pageId, groupId) in
+            let isGroupCreatedDuringFeedback = !initalGroupIds.contains(groupId)
+            let newGroup = groups.first(where: { $0.id == groupId })
+            let correctedGroupId = !isGroupCreatedDuringFeedback || newGroup?.pageIds.count != 1 ? groupId : nil
+            let cfcp = ClusteringManager.ClusteringFeedbackCorrectedPage(pageId: pageId, groupId: correctedGroupId,
+                                                                         isGroupCreatedDuringFeedback: correctedGroupId != nil && isGroupCreatedDuringFeedback)
+            final.insert(cfcp)
+
+            if isGroupCreatedDuringFeedback, let newGroup = newGroup {
+                for pageIdInNewGroup in newGroup.pageIds where pageIdInNewGroup != pageId {
+                    let cfcp = ClusteringManager.ClusteringFeedbackCorrectedPage(pageId: pageIdInNewGroup, groupId: groupId,
+                                                                                 isGroupCreatedDuringFeedback: isGroupCreatedDuringFeedback)
+                    final.insert(cfcp)
+                }
+            }
         }
-        objectWillChange.send()
+
+        // also send the page that are now alone in their initial group as if they were corrected out of the group
+        initialAssignations.forEach { (pageId, groupId) in
+            if let group = groups.first(where: { $0.id == groupId }), group.pageIds.count == 1 && group.pageIds.contains(pageId) {
+                let cfcp = ClusteringManager.ClusteringFeedbackCorrectedPage(pageId: pageId, groupId: nil,
+                                                                             isGroupCreatedDuringFeedback: false)
+                final.insert(cfcp)
+            }
+        }
+        return Array(final)
     }
 }
 
