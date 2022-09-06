@@ -19,12 +19,12 @@ class PasswordsDBTests: XCTestCase {
     let beamObjectHelper = BeamObjectTestsHelper()
     let passwordManager = PasswordManager(objectManager: BeamObjectManager())
 
-    override func setUp() {
-        super.setUp()
+    override func setUpWithError() throws {
+        try super.setUpWithError()
 
         BeamTestsHelper.logout()
         passwordManager.deleteAll(includedRemote: false)
-        Persistence.Encryption.localPrivateKey = Configuration.testPrivateKey
+        try EncryptionManager.shared.storeLocalPrivateKey(Configuration.testPrivateKey)
     }
 
     func testSavingPassword() {
@@ -205,12 +205,12 @@ class PasswordsDBWithNetworkTests: XCTestCase {
     let objectManager = BeamObjectManager()
     lazy var passwordManager = PasswordManager(objectManager: objectManager)
 
-    override func setUp() {
-        super.setUp()
+    override func setUpWithError() throws {
+        try super.setUpWithError()
 
         BeamTestsHelper.logout()
         passwordManager.deleteAll(includedRemote: false)
-        Persistence.Encryption.localPrivateKey = Configuration.testPrivateKey
+        try EncryptionManager.shared.storeLocalPrivateKey(Configuration.testPrivateKey)
         beforeNetworkTests()
     }
 
