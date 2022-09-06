@@ -66,8 +66,17 @@ struct CreditCardsModalView: View {
                 Button {
                     dismiss()
                 } label: {
+                    EmptyView() // dummy button, to add support for escape key
+                }
+                .hidden()
+                .keyboardShortcut(.cancelAction)
+                Button {
+                    dismiss()
+                } label: {
                     Text("Done")
-                }.buttonStyle(.bordered)
+                }
+                .buttonStyle(.bordered)
+                .keyboardShortcut(.defaultAction)
             }
             .padding(.vertical, 20)
             .frame(width: 526, alignment: .center)
