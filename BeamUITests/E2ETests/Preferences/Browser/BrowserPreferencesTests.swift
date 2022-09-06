@@ -15,16 +15,15 @@ class BrowserPreferencesTests: BaseTest {
     let searchWord = "beam"
     
     override func setUpWithError() throws {
-        step ("GIVEN I open Browser preferences"){
+        step ("GIVEN I launch the app"){
             launchApp()
-            openBrowserPrefs()
-            browserPref.waitForViewToLoad()
         }
     }
     
     private func openBrowserPrefs() {
         shortcutHelper.shortcutActionInvoke(action: .openPreferences)
         PreferencesBaseView().navigateTo(preferenceView: .browser)
+        browserPref.waitForViewToLoad()
     }
     
     private func assertSearchEngine(_ engine: BrowserPreferencesViewLocators.MenuItemsSearchEngine, _ expectedTabTitle: String, _ prepareNextSteps: Bool = true) {
@@ -58,6 +57,7 @@ class BrowserPreferencesTests: BaseTest {
     private func assertSearchEngineSuggestion(_ engine: BrowserPreferencesViewLocators.MenuItemsSearchEngine, _ prepareNextSteps: Bool = true, _ searchEngingeSuggestionEnabled: Bool = true) {
         
         step("WHEN I select \(engine) ") {
+            openBrowserPrefs()
             browserPref.selectSearchEngine(engine)
             shortcutHelper.shortcutActionInvoke(action: .close)
             waitForDoesntExist(browserPref.getSuggestionEngineCheckbox())
@@ -84,6 +84,7 @@ class BrowserPreferencesTests: BaseTest {
         testrailId("C588")
         //scenario is quite primitive due to limitation of the system alerts usage, only button existence and hittable is possible
         step("THEN Set default browser button exists and is hittable") {
+            openBrowserPrefs()
             XCTAssertTrue(browserPref.getSetDefaultButton().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(browserPref.getSetDefaultButton().isHittable)
         }
@@ -92,6 +93,7 @@ class BrowserPreferencesTests: BaseTest {
     func testClearCacheButton() {
         testrailId("C598")
         step("THEN Set default browser button exists and is hittable") {
+            openBrowserPrefs()
             XCTAssertTrue(browserPref.getClearCacheButtonButton().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(browserPref.getClearCacheButtonButton().isHittable)
         }
@@ -102,6 +104,7 @@ class BrowserPreferencesTests: BaseTest {
         testrailId("C597")
         //scenario is quite primitive due to impossibility to assert sounds existence
         step("THEN Enable Capture Sounds Checkbox exists and is enabled") {
+            openBrowserPrefs()
             XCTAssertTrue(browserPref.getCaptureSoundsCheckbox().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(browserPref.getCaptureSoundsCheckbox().isSettingEnabled())
         }
@@ -113,6 +116,7 @@ class BrowserPreferencesTests: BaseTest {
         let expectedDuckTitle = "\(searchWord) at DuckDuckGo"
         let expectedEcosiaTitle = "\(searchWord) - Ecosia - Web"
         
+        openBrowserPrefs()
         assertSearchEngine(.duck, expectedDuckTitle)
         assertSearchEngine(.ecosia, expectedEcosiaTitle)
         assertSearchEngine(.google, expectedGoogleTitle, false)
@@ -121,21 +125,16 @@ class BrowserPreferencesTests: BaseTest {
     
     func testIncludeSearchEngineSuggestion() {
         testrailId("C590")
-        step("THEN engine suggestion checkbox exists and is enabled by default") {
-            XCTAssertTrue(browserPref.getSuggestionEngineCheckbox().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertEqual(browserPref.getSuggestionEngineCheckbox().title, "Include search engine suggestions")
-            if !browserPref.getSuggestionEngineCheckbox().isSettingEnabled() {
-                browserPref.getSuggestionEngineCheckbox().tapInTheMiddle()
-            } //to be solved via Beam preferences reset to default set via BE-4769
-        }
-        
         step("THEN engine suggestion is available during the web search") {
+            openBrowserPrefs()
             assertSearchEngineSuggestion(.duck)
             assertSearchEngineSuggestion(.google)
             assertSearchEngineSuggestion(.ecosia)
         }
         
         step("THEN search engine suggestion is unavailable on checkbox disabling") {
+            XCTAssertTrue(browserPref.getSuggestionEngineCheckbox().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertEqual(browserPref.getSuggestionEngineCheckbox().title, "Include search engine suggestions")
             browserPref.getSuggestionEngineCheckbox().tapInTheMiddle()
             assertSearchEngineSuggestion(.google, false, false)
         }
@@ -144,6 +143,7 @@ class BrowserPreferencesTests: BaseTest {
     func testImportBrowserDataTrigger() {
         testrailId("C591")
         step("THEN Import browser click triggers Onboarding import view appearing") {
+            openBrowserPrefs()
             XCTAssertTrue(browserPref.staticText(BrowserPreferencesViewLocators.StaticTexts.importPasswordlabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             browserPref.getImportButton().tapInTheMiddle()
             XCTAssertTrue(OnboardingImportDataTestView().waitForImportDataViewLoad())
@@ -153,6 +153,7 @@ class BrowserPreferencesTests: BaseTest {
     func testDownloadsFolderSelection() {
         testrailId("C592")
         step("THEN Downloads folder selection options are correct") {
+            openBrowserPrefs()
             browserPref.triggerDownloadFolderSelection()
             for item in BrowserPreferencesViewLocators.MenuItemsDownload.allCases {
                 XCTAssertTrue(browserPref.menuItem(item.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout), "\(item.accessibilityIdentifier) is not in the search engines list")

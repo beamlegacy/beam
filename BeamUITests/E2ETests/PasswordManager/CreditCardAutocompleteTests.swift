@@ -152,18 +152,14 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         verifyDBCCNotes()
     }
     
-    func testAutoFillDeactivated() throws {
-        try XCTSkipIf(true, "To be fixed in scope of BE-5259")
+    func testAutoFillDeactivated() {
         testrailId("C638")
-        uiMenu.resetUserPreferences()
         step ("WHEN I deactivate Autofill password setting"){
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+            uiMenu.disablePasswordAndCardsProtection()
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
-            if passwordPreferencesView.getAutofillCCSettingElement().isSettingEnabled() {
-                passwordPreferencesView.clickAutofillCC()
-            }
-            
-            XCUIApplication().windows["Passwords"].buttons[XCUIIdentifierCloseWindow].clickOnExistence()
+            passwordPreferencesView.clickAutofillCC()
+            shortcutHelper.shortcutActionInvoke(action: .close)
         }
         
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, inView: view, autocomplete: false)
