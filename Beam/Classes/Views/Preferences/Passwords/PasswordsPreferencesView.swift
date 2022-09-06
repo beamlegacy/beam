@@ -131,13 +131,15 @@ struct Passwords: View {
     @State private var editedPassword: PasswordListViewModel.EditedPassword?
     @State private var alertMessage: PasswordListViewModel.AlertMessage?
 
+    @State private var localPrivateKeyAlertMessage: IdentifiableString?
+
     @State private var autofillUsernamePasswords = PreferencesManager.autofillUsernamePasswords
 
     @State private var availableImportSources: [OnboardingImportsView.ImportSource] = [.passwordsCSV]
 
     @State private var isViewUnlocked = false
 
-    var topRow: some View {
+    private var topRow: some View {
         HStack {
             Toggle(isOn: $autofillUsernamePasswords) {
                 Text("Autofill usernames and passwords")
@@ -237,6 +239,19 @@ struct Passwords: View {
         }
     }
 
+    private func localEncryptionKeyRow(_ privateKeyCheck: PasswordListViewModel.LocalPrivateKeyResult) -> some View {
+        HStack {
+            Image(systemName: "exclamationmark.triangle.fill")
+            Text("Some passwords can't be decrypted.")
+            Button {
+                localPrivateKeyAlertMessage = IdentifiableString(privateKeyCheck.alertMessage)
+            } label: {
+                Text("More Information…")
+            }
+            Spacer()
+        }
+    }
+
     var body: some View {
         HStack {
             Spacer()
@@ -244,6 +259,9 @@ struct Passwords: View {
                 topRow
                 passwordTableView
                 bottomRow
+                if let privateKeyCheck = passwordsViewModel.localPrivateKeyCheck, !privateKeyCheck.isValid {
+                    localEncryptionKeyRow(privateKeyCheck)
+                }
             }.frame(width: 682, alignment: .center)
             Spacer()
         }
@@ -252,6 +270,9 @@ struct Passwords: View {
         }
         .alert(item: $alertMessage) {
             Alert(title: Text($0.message))
+        }
+        .alert(item: $localPrivateKeyAlertMessage) {
+            Alert(title: Text("Some passwords could not be decrypted."), message: Text($0.string))
         }
     }
 
