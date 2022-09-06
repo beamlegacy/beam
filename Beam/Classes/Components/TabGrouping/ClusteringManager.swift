@@ -483,14 +483,23 @@ extension ClusteringManager: ClusteringManagerProtocol {
 // MARK: - Feedback Export
 extension ClusteringManager {
 
+    struct ClusteringFeedbackCorrectedPage: Hashable {
+        let pageId: PageID
+        let groupId: TabGroup.GroupID?
+        let isGroupCreatedDuringFeedback: Bool
+    }
+
     private func getExportInformationForId(_ id: UUID, link: Link?) -> InformationForId {
         var informationForId = self.clusteringBridge.getExportInformationForId(id: id)
         guard typeInUse == .smart, let link = link else {
             return informationForId
         }
         // While Smart Clustering supports informationForId, we fill it manually
+        let tabInfo = tabsInfo.first { $0.document.id == id }
         informationForId.title = informationForId.title ?? link.title
-        informationForId.cleanedContent = informationForId.cleanedContent ?? link.content
+        var cleanedContent = informationForId.cleanedContent ?? tabInfo?.cleanedTextContentForClustering.joined(separator: " ") ?? link.content
+        cleanedContent = cleanedContent?.components(separatedBy: .whitespacesAndNewlines).joined(separator: " ")
+        informationForId.cleanedContent = cleanedContent
         return informationForId
     }
 
@@ -510,7 +519,7 @@ extension ClusteringManager {
                 let link = LinkStore.linkFor(urlId)
                 let url = link?.url
                 let informationForId = self.getExportInformationForId(urlId, link: link)
-                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
+                orphanedUrlManager.addTemporarily(orphanedUrl: ClusteringExportOrphanedURL(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
     }
@@ -523,33 +532,77 @@ extension ClusteringManager {
                 let link = LinkStore.linkFor(urlId)
                 let url = link?.url
                 let informationForId = self.getExportInformationForId(urlId, link: link)
-                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
+                orphanedUrlManager.add(orphanedUrl: ClusteringExportOrphanedURL(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
         orphanedUrlManager.save()
     }
 
-    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL?, correctedPages: [ClusteringManager.PageID: UUID]?) {
-        for group in self.clusteredPagesId.enumerated() {
-            let notesInGroup = self.clusteredNotesId[group.offset]
-            for noteId in notesInGroup {
-                let informationForId = self.getExportInformationForId(noteId, link: nil)
-                sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, tabColouringGroupId: nil, userCorrectionGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, id: noteId, parentId: nil))
-            }
-            for urlId in group.element {
-                let link = LinkStore.linkFor(urlId)
-                let url = link?.url
-                let informationForId = self.getExportInformationForId(urlId, link: link)
-                let isOpenAtExport = self.openBrowsing.allOpenBrowsingPages.contains(urlId)
-                let correctionGroupId = correctedPages?[urlId]
+    /// - Parameters:
+    ///   - sessionExporter: TBD
+    ///   - to: local URL to save the file
+    ///   - allPages: opened tab pages.
+    ///   - initialBuiltGroups: The initial grouping when opening the feedback window. Before any change.
+    ///   - correctedPages: The changes suggested by the user in the feedback window.
+    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL?, allPages: [PageID],
+                              initialBuiltGroups: [PageID: TabGroup.GroupID],
+                              correctedPages: [ClusteringFeedbackCorrectedPage]?) {
+        for pageId in allPages {
+            let groupOffsetInClustering: Int? = self.clusteredPagesId.firstIndex(where: { $0.contains(pageId) })
 
-                let tabColouringGroupId = self.tabGroupingManager?.builtPagesGroups[urlId]?.id
-                sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), tabColouringGroupId: tabColouringGroupId, userCorrectionGroupId: correctionGroupId ?? nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, id: urlId, parentId: informationForId.parentId))
-            }
+//            We don't need clustered notes for now, we would need a way to match them properly
+//            let notesInGroup = self.clusteredNotesId[groupOffsetInClustering]
+//            for noteId in notesInGroup {
+//                let informationForId = self.getExportInformationForId(noteId, link: nil)
+//                let exportObject = ClusteringExportAnyURL(noteId: noteId, group: group, threshold: clusteringBridge.threshold, informationForId: informationForId)
+//                sessionExporter.add(anyUrl: exportObject)
+//            }
+
+            let link = LinkStore.linkFor(pageId)
+            let url = link?.url
+            let informationForId = self.getExportInformationForId(pageId, link: link)
+            let isOpenAtExport = self.openBrowsing.allOpenBrowsingPages.contains(pageId)
+            let currentGroupId = initialBuiltGroups[pageId]
+            let correctedValue = correctedPages?.first { $0.pageId == pageId }
+            // TODO: if group is 1 object only now, correct to nil.
+            // if group wasn't correct we put the original value in there.
+            let correctionGroupId = correctedValue != nil ? correctedValue?.groupId : currentGroupId
+            let navigationGroup = self.findPageGroupForID(pageId: pageId, pageGroups: self.navigationBasedPageGroups)
+            let isGroupCreatedDuringFeedback = correctedValue?.isGroupCreatedDuringFeedback ?? false
+
+            let exportObject = ClusteringExportAnyURL(pageId: pageId, url: url, groupOffsetInClustering: groupOffsetInClustering,
+                                                      navigationGroup: navigationGroup, currentGroupId: currentGroupId, correctionGroupId: correctionGroupId,
+                                                      isGroupCreatedDuringFeedback: isGroupCreatedDuringFeedback,
+                                                      threshold: clusteringBridge.threshold, isOpenAtExport: isOpenAtExport, informationForId: informationForId)
+            sessionExporter.add(anyUrl: exportObject)
         }
 
         let pathUrl: URL = to ?? URL(fileURLWithPath: NSTemporaryDirectory())
         sessionExporter.export(to: pathUrl, sessionId: self.sessionId, keepFile: (to != nil))
-        sessionExporter.urls = [AnyUrl]()
+        sessionExporter.urls = [ClusteringExportAnyURL]()
+    }
+}
+
+private extension ClusteringExportAnyURL {
+    init(noteId: UUID, groupOffsetInClustering: Int?, threshold: Float?, informationForId: Clustering.InformationForId) {
+        let note = BeamNote.fetch(id: noteId)
+        self.init(noteName: note?.title, groupOffsetInClustering: groupOffsetInClustering, title: informationForId.title,
+                  cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText,
+                  entitiesInTitle: informationForId.entitiesInTitle,
+                  language: informationForId.language, threshold: threshold, id: noteId)
+    }
+
+    init(pageId: UUID, url: String?, groupOffsetInClustering: Int?,
+         navigationGroup: Int?, currentGroupId: UUID?, correctionGroupId: UUID?,
+         isGroupCreatedDuringFeedback: Bool,
+         threshold: Float?, isOpenAtExport: Bool,
+         informationForId: Clustering.InformationForId) {
+
+        self.init(url: url, groupOffsetInClustering: groupOffsetInClustering,
+                  navigationGroupId: navigationGroup, tabColouringGroupId: currentGroupId, userCorrectionGroupId: correctionGroupId,
+                  isGroupCreatedDuringFeedback: isGroupCreatedDuringFeedback,
+                  title: informationForId.title, cleanedContent: informationForId.cleanedContent,
+                  entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle,
+                  language: informationForId.language, threshold: threshold, isOpenAtExport: isOpenAtExport, id: pageId, parentId: informationForId.parentId)
     }
 }

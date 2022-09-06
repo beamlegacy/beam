@@ -84,6 +84,7 @@ protocol ClusteringBridge {
     var weightNavigation: Double { get set }
     var weightText: Double { get set }
     var weightEntities: Double { get set }
+    var threshold: Float? { get }
 
     init(selectedTabGroupingCandidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double)
 
@@ -123,7 +124,9 @@ final class SmartClusteringBridge: ClusteringBridge {
     var weightNavigation: Double
     var weightText: Double
     var weightEntities: Double
-
+    var threshold: Float? {
+        clustering.getThreshold()
+    }
     private lazy var clustering: SmartClustering = {
         let sc = SmartClustering()
         sc.prepare()
@@ -168,6 +171,7 @@ final class SmartClusteringBridge: ClusteringBridge {
         // Need to be implemented by Clustering.SmartClustering
         InformationForId()
     }
+
 }
 
 // MARK: - Legacy Clustering
@@ -179,6 +183,7 @@ final class LegacyClusteringBridge: ClusteringBridge {
     var weightNavigation: Double
     var weightText: Double
     var weightEntities: Double
+    var threshold: Float? { nil }
 
     private lazy var legacy = LegacyClustering(candidate: selectedTabGroupingCandidate,
                                                weightNavigation: weightNavigation,
