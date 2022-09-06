@@ -204,7 +204,7 @@ struct Configuration {
                 if newValue {
                     Task { @MainActor in
                         do {
-                            _ = try AppDelegate.main.syncDataWithBeamObject()
+                            _ = try await AppDelegate.main.syncDataWithBeamObject()
                         } catch {
                             Logger.shared.logError("Error while syncing data: \(error)", category: .document)
                         }
