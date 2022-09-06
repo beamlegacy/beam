@@ -199,9 +199,10 @@ class WebAutofillController: NSObject, WebPageRelated {
         }
 
         Task {
-            page.executeJS("installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal)
-            _ = lock.write { [weak self] in
-                self?.framesWithInstalledSubmitHandler.insert(frameHref)
+            page.executeJS("installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal) { [weak self] _ in
+                _ = self?.lock.write {
+                    self?.framesWithInstalledSubmitHandler.insert(frameHref)
+                }
             }
             completion()
         }
@@ -232,9 +233,10 @@ class WebAutofillController: NSObject, WebPageRelated {
             DispatchQueue.main.async {
                 self.clearInputFocus()
                 Task.init {
-                    self.page?.executeJS("sendTextFields(null)", objectName: self.JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal)
-                    if let autofillGroup = self.fieldClassifiers?.autofillGroup(for: elementId, frameInfo: frameInfo) {
-                        self.handleInputFieldFocus(elementId: elementId, inGroup: autofillGroup, frameInfo: frameInfo, contents: contents)
+                    self.page?.executeJS("sendTextFields(null)", objectName: self.JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal) { [weak self] _ in
+                        if let autofillGroup = self?.fieldClassifiers?.autofillGroup(for: elementId, frameInfo: frameInfo) {
+                            self?.handleInputFieldFocus(elementId: elementId, inGroup: autofillGroup, frameInfo: frameInfo, contents: contents)
+                        }
                     }
                 }
             }
@@ -257,6 +259,7 @@ class WebAutofillController: NSObject, WebPageRelated {
     }
 
     private func handleInputFieldFocus(elementId: String, inGroup autofillGroup: WebAutofillGroup, frameInfo: WKFrameInfo?, contents: String?) {
+        Logger.shared.logDebug("handleInputFieldFocus \(elementId)", category: .webAutofillInternal)
         guard isAutofillEnabled(for: autofillGroup.action) else { return }
         let menuOptions = menuOptions(for: elementId, emptyField: true, inGroup: autofillGroup)
         guard menuOptions != nil || autofillGroup.action == .payment else { return }
@@ -694,8 +697,9 @@ extension WebAutofillController: PasswordManagerMenuDelegate {
             let data = try encoder.encode(params)
             guard let jsonString = String(data: data, encoding: .utf8)?.javascriptEscaped() else { return }
             let script = "passwordHelper.setTextFieldValues('\(jsonString)')"
-            self.page?.executeJS(script, objectName: JSObjectName, frameInfo: currentOverlay?.frameInfo, successLogCategory: .webAutofillInternal)
-            Logger.shared.logDebug("passwordOverlay text fields set.", category: .webAutofillInternal)
+            self.page?.executeJS(script, objectName: JSObjectName, frameInfo: currentOverlay?.frameInfo, successLogCategory: .webAutofillInternal) { _ in
+                Logger.shared.logDebug("passwordOverlay text fields set.", category: .webAutofillInternal)
+            }
         } catch {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
         }
