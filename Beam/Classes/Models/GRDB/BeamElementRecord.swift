@@ -18,7 +18,7 @@ struct BeamElementRecord {
     var uid: String
     var noteId: String // Added noteId
     var databaseId: String
-    var linkRanges: LinkRanges
+    var linkRanges: LinkRanges?
 
     static let frecency = hasOne(FrecencyNoteRecord.self, key: "frecency", using: FrecencyNoteRecord.BeamElementForeignKey)
 
@@ -113,7 +113,7 @@ extension BeamElementRecord: MutablePersistableRecord {
         container[Columns.uid] = uid
         container[Columns.noteId] = noteId
         container[Columns.databaseId] = databaseId
-        container[Columns.linkRanges] = linkRanges
+        container[Columns.linkRanges] = linkRanges ?? LinkRanges([])
     }
 
     // Update auto-incremented id upon successful insertion
