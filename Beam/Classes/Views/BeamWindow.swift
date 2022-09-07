@@ -10,7 +10,7 @@ import Combine
 import SwiftUI
 import BeamCore
 
-class BeamWindow: NSWindow, NSDraggingDestination, Codable {
+class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
     enum Error: Swift.Error {
         case missingAccount(UUID)
     }
