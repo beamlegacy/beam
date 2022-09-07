@@ -164,4 +164,32 @@ class PasswordImporterTest: XCTestCase {
             XCTAssertNil(error, "Retrieving imported password failed with: \(String(describing: error))")
         }
     }
+
+    func testUTF8FileCanBeImported() throws {
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "XCTests-Passwords-UTF8-noBOM", withExtension: "binary"))
+        _ = try PasswordImporter.importPasswords(fromCSV: url)
+
+        let expectation1 = expectation(description: "Expect password request returns.")
+        let password = try BeamData.shared.passwordManager.password(hostname: "test1.com", username: "user1")
+        XCTAssertEqual(password, "pass1")
+        expectation1.fulfill()
+
+        waitForExpectations(timeout: 1) { error in
+            XCTAssertNil(error, "Retrieving imported password failed with: \(String(describing: error))")
+        }
+    }
+
+    func testUTF8FileWithBOMCanBeImported() throws {
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "XCTests-Passwords-UTF8-BOM", withExtension: "binary"))
+        _ = try PasswordImporter.importPasswords(fromCSV: url)
+
+        let expectation1 = expectation(description: "Expect password request returns.")
+        let password = try BeamData.shared.passwordManager.password(hostname: "test1.com", username: "user1")
+        XCTAssertEqual(password, "pass1")
+        expectation1.fulfill()
+
+        waitForExpectations(timeout: 1) { error in
+            XCTAssertNil(error, "Retrieving imported password failed with: \(String(describing: error))")
+        }
+    }
 }
