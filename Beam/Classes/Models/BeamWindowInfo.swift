@@ -8,6 +8,10 @@
 import Foundation
 import SwiftUI
 
+protocol WindowInfoCapable {
+    var windowInfo: BeamWindowInfo { get }
+}
+
 class BeamWindowInfo: ObservableObject {
     @Published var windowIsResizing = false
     var undraggableWindowRects: [CGRect] = []

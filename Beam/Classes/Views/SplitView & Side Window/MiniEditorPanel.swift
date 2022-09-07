@@ -8,7 +8,7 @@
 import AppKit
 import BeamCore
 
-class MiniEditorPanel: NSPanel {
+class MiniEditorPanel: NSPanel, WindowInfoCapable {
 
     let note: BeamNote
     let data: BeamData

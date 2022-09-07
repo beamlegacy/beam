@@ -18,9 +18,6 @@ extension BeamNote {
 
     @ViewBuilder static func contextualMenu(for note: BeamNote, state: BeamState) -> some View {
         Group {
-            Button("Open Note") {
-                state.navigateToNote(id: note.id)
-            }
             Button("Open in New Window") {
                 state.openNoteInNewWindow(id: note.id)
             }
@@ -63,10 +60,6 @@ extension BeamNote {
     ///   - note: The note on which the menu will appear
     ///   - state: The current state
     func configureNoteContextualMenu(_ menu: NSMenu, for note: BeamNote, state: BeamState) {
-
-        menu.addItem(withTitle: loc("Open Note")) { _ in
-            state.navigateToNote(id: note.id)
-        }
 
         menu.addItem(withTitle: loc("Open in New Window")) { _ in
             state.openNoteInNewWindow(id: note.id)
