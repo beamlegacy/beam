@@ -480,7 +480,7 @@ import UniformTypeIdentifiers
         guard let url = request.url else { return }
         hasError = false
         screenshotCapture = nil
-        if !isFromNoteSearch {
+        if !isFromNoteSearch, !browsingTree.justCreatedFromOtherTab {
             webViewController?.webViewIsInstructedToLoadURLFromUI(url)
         }
         self.url = url

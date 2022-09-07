@@ -61,7 +61,6 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
             }
         }
         migrator.registerMigration("linkAliasesCleanup") { db in
-            let now = BeamDate.now
             let youtubeAliasesQuery: SQLRequest<Link> = """
         SELECT
             l.id,
@@ -80,12 +79,8 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
             AND d.url LIKE 'https://www.youtube.com/%'
         """
 
-            let youtubeAliases = try Link.fetchAll(db, youtubeAliasesQuery)
-            for var alias in youtubeAliases {
-                alias.destination = nil
-                alias.updatedAt = now
-                try alias.save(db)
-            }
+            try Link.aliasCleanup(db, query: youtubeAliasesQuery)
+
 
             let gmailAliasesQuery: SQLRequest<Link> = """
         SELECT
@@ -104,13 +99,29 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
             l.url != 'http://gmail.com/'
             AND d.url LIKE 'https://mail.google.com/%'
         """
-            let gmailAliases = try Link.fetchAll(db, gmailAliasesQuery)
-            for var alias in gmailAliases {
-                alias.destination = nil
-                alias.updatedAt = now
-                try alias.save(db)
-            }
+            try Link.aliasCleanup(db, query: gmailAliasesQuery)
         }
+        migrator.registerMigration("googleAliasesCleanup") { db in
+            let googleAliasesQuery: SQLRequest<Link> = """
+        SELECT
+            l.id,
+            l.createdAt,
+            l.updatedAt,
+            l.url,
+            l.title,
+            l.content,
+            l.frecencyVisitLastAccessAt,
+            l.frecencyVisitScore,
+            l.frecencyVisitSortScore
+        FROM link AS l
+        LEFT JOIN link AS d ON l.destination = d.id
+        WHERE
+            l.url LIKE 'https://www.google.com/url?q=%'
+            OR l.url LIKE 'https://www.google.com/search?q=https$%3A$%2F$%2F%' ESCAPE '$'
+        """
+            try Link.aliasCleanup(db, query: googleAliasesQuery, resetFrecency: true)
+        }
+
     }
 
     func getLinks(matchingUrl url: String) -> [UUID: Link] {

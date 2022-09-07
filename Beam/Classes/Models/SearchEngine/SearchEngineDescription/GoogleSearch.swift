@@ -37,7 +37,7 @@ struct GoogleSearch: SearchEngineDescription {
     func canHandle(_ queryURL: URL) -> Bool {
         guard let host = queryURL.host else { return false }
 
-        return host.hasSuffix("google.com") && (queryURL.path == "/search" || queryURL.path == "/url")
+        return host.hasSuffix("google.com") && (queryURL.path == "/search")
     }
 
 }
