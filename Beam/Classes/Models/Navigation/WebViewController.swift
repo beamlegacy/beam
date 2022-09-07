@@ -63,6 +63,15 @@ protocol WebViewControllerDelegate: AnyObject {
     func webViewController(_ controller: WebViewController, didChangeLoadedContentType contentDescription: BrowserContentDescription?)
 }
 
+private enum NavigationTriggerType {
+    /// Triggered by beam app UI such as omnibox or note
+    case userUI
+    /// Triggered by webkit interaction such as link activation, redirections or other
+    case userOther
+    /// Default or unknown
+    case other
+}
+
 /**
  * WebViewController helps understand navigation events and properties changes
  *
@@ -92,7 +101,8 @@ class WebViewController {
     private var requestedURL: URL?
     private let maxTimeSinceLastNavigationForRedirection = 0.5 // seconds
     private var lastNavigationFinished: WebViewNavigationDescription?
-    private var lastNavigationWasTriggeredByBeamUI = false
+    private var currentNavigationTrigger: NavigationTriggerType = .other
+    private var previousNavigationTrigger: NavigationTriggerType?
 
     init(with webView: WKWebView) {
         self.webView = webView
@@ -242,7 +252,7 @@ extension WebViewController: WebViewNavigationHandler {
 
     func webViewIsInstructedToLoadURLFromUI(_ url: URL) {
         requestedURL = url
-        lastNavigationWasTriggeredByBeamUI = true
+        currentNavigationTrigger = .userUI
     }
 
     func webView(_ webView: WKWebView, didReachURL url: URL) {
@@ -293,13 +303,9 @@ extension WebViewController: WebViewNavigationHandler {
             break
         }
 
-        lastNavigationWasTriggeredByBeamUI = false
         Logger.shared.logInfo("Nav Redirecting toward: \(action.request.url?.absoluteString ?? "nilURL"), type:\(action.navigationType)",
                               category: .web)
-        // update the requested url as it is not from a redirection but from a user action:
-        if let url = action.request.url {
-            self.requestedURL = url
-        }
+        currentNavigationTrigger = .userOther
     }
 
     func webView(_ webView: WKWebView, didFinishNavigationToURL url: URL, source: WebViewControllerNavigationSource) {
@@ -336,7 +342,7 @@ extension WebViewController: WebViewNavigationHandler {
         guard self.page?.responseStatusCode == 200 else { return }
 
         var isJSPush = false
-        var isLinkActivation = !lastNavigationWasTriggeredByBeamUI
+        var isLinkActivation = currentNavigationTrigger != .userUI
         if case .javascript(let event) = source {
 
             let replacing = event == .replaceState
@@ -348,15 +354,17 @@ extension WebViewController: WebViewNavigationHandler {
         // if we receive a navigation less than 500ms after the previous one,
         // and it's not a user interaction (no requestedURL)
         // then consider this as a redirect that the website was just too slow to trigger.
-        if requestedURL == nil, !isJSPush, let previousNav = lastNavigationFinished,
-           previousNav.time.timeIntervalSinceNow > -maxTimeSinceLastNavigationForRedirection {
+        if currentNavigationTrigger == .other, !isJSPush, let previousNav = lastNavigationFinished,
+           previousNav.time.timeIntervalSinceNow > -maxTimeSinceLastNavigationForRedirection,
+           previousNavigationTrigger == .userUI {
             requestedURL = previousNav.requestedURL
         }
         let description = WebViewNavigationDescription(url: url, source: source, isLinkActivation: isLinkActivation,
                                                        requestedURL: requestedURL, keepSameParent: keepSameParent,
                                                        isBackwardNavigation: lastActionIsBackwardNavigation)
         lastNavigationFinished = description
-        lastNavigationWasTriggeredByBeamUI = false
+        previousNavigationTrigger = currentNavigationTrigger
+        currentNavigationTrigger = .other
         lastActionIsBackwardNavigation = false
         previousBackForwardUrlTriplet = BackForwardURLTriplet(list: webView.backForwardList)
 
