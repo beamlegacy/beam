@@ -39,7 +39,7 @@
 <ul>
 {% for redirection in params.redirections %}
 <li>
-<a href="http://lvh.me:{{ params.port }}/redirection/{{ redirection }}">http://lvh.me:{{ params.port }}/redirection/{{ redirection }}</a>
+<a href="http://lvh.me:{{ params.port }}/redirection/{{ redirection }}" id="redirection_{{ redirection }}">http://lvh.me:{{ params.port }}/redirection/{{ redirection }}</a>
 </li>
 {% endfor %}
 </ul>
