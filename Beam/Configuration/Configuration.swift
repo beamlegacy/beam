@@ -44,12 +44,15 @@ struct Configuration {
     // Runtime configuration
     // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
     static private(set) var apiHostnameDefault = "https://api.prod.beamapp.co"
+    static private(set) var beamObjectsApiHostnameDefault = "https://api-rust.prod.beamapp.co"
     static private(set) var restApiHostnameDefault = "https://api-rust.prod.beamapp.co"
 
     static private(set) var apiHostnameDefaultStaging = "https://api.staging.beamapp.co"
+    static private(set) var beamObjectsApiHostnameDefaultStaging = "https://api.staging.beamapp.co"
     static private(set) var restApiHostnameDefaultStaging = "https://api.staging.beamapp.co"
 
     static private(set) var apiHostnameDefaultDev = "https://api.beam.lvh.me"
+    static private(set) var beamObjectsApiHostnameDefaultDev = "https://api.beam.lvh.me"
     static private(set) var restApiHostnameDefaultDev = "https://api.beam.lvh.me"
 
     static private(set) var featureFlagURL = "https://s3.eu-west-3.amazonaws.com/downloads.beamapp.co/flags"
@@ -170,7 +173,7 @@ struct Configuration {
     static private var beamObjectsApiHostnameKey = "beamObjectsApiHostname"
     static var beamObjectsApiHostname: String {
         get {
-            UserDefaults.standard.string(forKey: beamObjectsApiHostnameKey) ?? apiHostname
+            UserDefaults.standard.string(forKey: beamObjectsApiHostnameKey) ?? beamObjectsApiHostnameDefault
         }
         set {
             if newValue != beamObjectsApiHostname {
@@ -325,12 +328,15 @@ struct Configuration {
     static func setAPIEndPointsToStaging() {
         Self.apiHostname = apiHostnameDefaultStaging
         Self.restApiHostname = restApiHostnameDefaultStaging
+        Self.beamObjectsApiHostname = beamObjectsApiHostnameDefaultStaging
+
         Self.publicAPIpublishServer = "https://staging-web-server.ew.r.appspot.com"
         Self.publicAPIembed = "https://staging-proxy-api.netlify.app/.netlify/functions/embed"
     }
 
     static func setAPIEndPointsToDevelopment() {
         Self.apiHostname = apiHostnameDefaultDev
+        Self.beamObjectsApiHostname = beamObjectsApiHostnameDefaultDev
         Self.restApiHostname = restApiHostnameDefaultDev
     }
 

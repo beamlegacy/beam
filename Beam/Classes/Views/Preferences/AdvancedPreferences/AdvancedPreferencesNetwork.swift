@@ -218,6 +218,7 @@ struct AdvancedPreferencesNetwork: View {
         Button(action: {
             Configuration.reset()
             apiHostname = Configuration.apiHostname
+            beamObjectsApiHostname = Configuration.beamObjectsApiHostname
             restApiHostname = Configuration.restApiHostname
             publicAPIpublishServer = Configuration.publicAPIpublishServer
             publicAPIembed = Configuration.publicAPIembed
@@ -232,6 +233,7 @@ struct AdvancedPreferencesNetwork: View {
         Button(action: {
             Configuration.setAPIEndPointsToStaging()
             apiHostname = Configuration.apiHostname
+            beamObjectsApiHostname = Configuration.beamObjectsApiHostname
             restApiHostname = Configuration.restApiHostname
             publicAPIpublishServer = Configuration.publicAPIpublishServer
             publicAPIembed = Configuration.publicAPIembed
@@ -246,6 +248,7 @@ struct AdvancedPreferencesNetwork: View {
         Button(action: {
             Configuration.setAPIEndPointsToDevelopment()
             apiHostname = Configuration.apiHostname
+            beamObjectsApiHostname = Configuration.beamObjectsApiHostname
             restApiHostname = Configuration.restApiHostname
             promptEraseAllDataAlert()
         }, label: {
