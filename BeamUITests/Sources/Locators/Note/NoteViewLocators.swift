@@ -40,7 +40,7 @@ enum NoteViewLocators {
         case unpublishNoteButton = "Unpublish"
         case linkNamesButton = "cardTitleLayer"
         case sourceButton = "source"
-        case expandButton = "global-expand"
+        case expandButton = "toggle"
         case imageNoteCollapsedView = "collapsed-text"
         case linkReferenceCounterTitle = "sectionTitle"
         case breadcrumbTitle = "breadcrumb0"
