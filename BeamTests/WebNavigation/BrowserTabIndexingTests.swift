@@ -248,4 +248,24 @@ class BrowserTabIndexingTests: WebBrowsingBaseTests {
         let link = try XCTUnwrap(linkStore.getLinks(matchingUrl: "http://signin.form.lvh.me:\(Configuration.MockHttpServer.port)").values.first)
         XCTAssertNil(link.destination)
     }
+
+    func testNoAliasWhenClickingOnRedirectingURL() throws {
+        let indexExpectations = (0...1).map { i in expectation(description: "index \(i)") }
+        var indexExpectation = indexExpectations[0]
+        mockIndexingDelegate?.onIndexingFinished = { _ in
+            indexExpectation.fulfill()
+        }
+        let url0 = "http://lvh.me:\(Configuration.MockHttpServer.port)/"
+        tab.load(request: URLRequest(url: URL(string: url0)!))
+        wait(for: [indexExpectation], timeout: 1)
+
+        //here redirection follows a clicked link so we don't alias
+        indexExpectation = indexExpectations[1]
+        indexExpectation.expectedFulfillmentCount = 2
+        activateLinkById(id: "redirection_html_redirect")
+        wait(for: [indexExpectation], timeout: 1)
+
+        let link = try XCTUnwrap(linkStore.getLinks(matchingUrl: "http://lvh.me:\(Configuration.MockHttpServer.port)/redirection/html_redirect").values.first)
+        XCTAssertNil(link.destination)
+    }
 }

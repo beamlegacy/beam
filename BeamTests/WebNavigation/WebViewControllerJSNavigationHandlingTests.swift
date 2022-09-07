@@ -136,7 +136,7 @@ class WebViewControllerJSNavigationHandlingTests: XCTestCase {
         XCTAssertEqual(lastNavigationDescription?.url, initialURL)
         XCTAssertEqual(lastNavigationDescription?.requestedURL, initialURL)
 
-        // When I navigate with JS pushState
+        // When I navigate with JS replaceState
         expectation = self.expectation(description: "navigation_finished2")
         let jsExpectation = self.expectation(description: "jsExpectation")
         let url2 = "some2ndURL"
@@ -166,7 +166,7 @@ class WebViewControllerJSNavigationHandlingTests: XCTestCase {
         XCTAssertEqual(lastNavigationDescription?.url.absoluteString.hasSuffix(url3), true)
         XCTAssertEqual(lastNavigationDescription?.source, WebViewControllerNavigationSource.javascript(event: .replaceState))
         XCTAssertEqual(lastNavigationDescription?.isLinkActivation, false)
-        XCTAssertEqual(lastNavigationDescription?.requestedURL, initialURL)
+        XCTAssertNil(lastNavigationDescription?.requestedURL)
 
         XCTAssertEqual(navigationFinishedCount, 3)
     }
