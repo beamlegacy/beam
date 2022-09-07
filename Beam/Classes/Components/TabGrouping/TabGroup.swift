@@ -76,6 +76,10 @@ final class TabGroup: Identifiable {
         collapsed.toggle()
     }
 
+    func lockGroup() {
+        isLocked = true
+    }
+
     func copy(locked: Bool = false, discardPages: Bool = true) -> TabGroup {
         let newGroup = TabGroup(pageIds: pageIds)
         newGroup.title = title
