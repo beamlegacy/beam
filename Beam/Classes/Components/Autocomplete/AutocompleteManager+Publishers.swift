@@ -376,8 +376,9 @@ extension AutocompleteManager {
                                            beamState.shareTabGroup(group, fromOmniboxResult: result)
                                        })
                 )
+                let isForgettable = self.noteIdsContaingTabGroup(group).isEmpty
                 results.append(
-                    AutocompleteResult(text: group.isLocked ? loc("Delete Tab Group") : loc("Forget Tab Group"), source: .action,
+                    AutocompleteResult(text: isForgettable ? loc("Forget Tab Group") : loc("Delete Tab Group"), source: .action,
                                        customIcon: "editor-delete", iconColor: BeamColor.Munsell.nsColor, score: 0,
                                        handler: { beamState, result in
                                            Task { @MainActor in
@@ -399,27 +400,17 @@ extension AutocompleteManager {
             let start = DispatchTime.now()
             var results = [AutocompleteResult]()
             let tabGroupDB = BeamData.shared.tabGroupingDBManager
-            let dispatchGroup = DispatchGroup()
             if let group = tabGroupDB?.searchGroups(forText: query).first {
                 let scores = LinkStore.shared.getLinks(for: group.pageIds).compactMap { $1.frecencyVisitSortScore }
                 let bestScore = scores.max()
                 var info: String?
-                dispatchGroup.enter()
-                BeamData.shared.noteLinksAndRefsManager?.search(containingTabGroup: group.id) { result in
-                    defer { dispatchGroup.leave() }
-                    switch result {
-                    case .success(let searchResults):
-                        guard let noteId = searchResults.first?.noteId, let note = BeamNote.fetch(id: noteId) else { return }
-                        if case .tabGroup = note.type {
-                            info = loc("Shared")
-                        } else {
-                            info = "from \(note.title)"
-                        }
-                    case .failure:
-                        break
+                if let noteId = self.noteIdsContaingTabGroup(group).first, let note = BeamNote.fetch(id: noteId) {
+                    if case .tabGroup = note.type {
+                        info = loc("Shared")
+                    } else {
+                        info = loc("from \(note.title)")
                     }
                 }
-                _ = dispatchGroup.wait(timeout: .now() + .milliseconds(300))
                 results.append(AutocompleteResult(text: group.title ?? "Tab Group (\(group.pageIds.count) tabs)",
                                                   source: .tabGroup(group: group), information: info,
                                                   completingText: query, uuid: group.id, score: bestScore, handler: { state, _ in
@@ -430,6 +421,23 @@ extension AutocompleteManager {
 
             promise(.success(results))
         }
+    }
+
+    private func noteIdsContaingTabGroup(_ group: TabGroup) -> [UUID] {
+        let dispatchGroup = DispatchGroup()
+        dispatchGroup.enter()
+        var noteIds: [UUID] = []
+        BeamData.shared.noteLinksAndRefsManager?.search(containingTabGroup: group.id) { result in
+            defer { dispatchGroup.leave() }
+            switch result {
+            case .success(let searchResults):
+                noteIds = searchResults.map { $0.noteId }
+            case .failure:
+                break
+            }
+        }
+        _ = dispatchGroup.wait(timeout: .now() + .milliseconds(300))
+        return noteIds
     }
 
     // MARK: - Actions Suggestions

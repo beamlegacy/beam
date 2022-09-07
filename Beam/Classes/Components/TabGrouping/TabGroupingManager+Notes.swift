@@ -37,8 +37,18 @@ extension TabGroupingManager: BeamDocumentSource {
                 throw TabGroupSharingError.notAuthenticated
             }
             group.status = .sharing
+            let shouldSaveParentGroup = !group.isLocked
+            if !group.isLocked {
+                // once we started sharing a group, we don't want clustering to update it anymore.
+                // even if we're going to make an actual copy, user might be scared if the parent is being updated.
+                group.lockGroup()
+            }
+
             let (note, groupCopy) = try fetchOrCreateTabGroupNote(for: group)
             Task { @MainActor in
+                if shouldSaveParentGroup {
+                    await saveGroupToDBIfNeeded(group, copyOf: nil)
+                }
                 await saveGroupToDBIfNeeded(groupCopy, copyOf: group)
                 BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, fileManager: fileManager) { [weak self] result in
                     group.status = .default
