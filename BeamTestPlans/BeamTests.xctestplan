@@ -64,6 +64,7 @@
     {
       "skippedTests" : [
         "BeamAccountDeleteAccountTests",
+        "BeamAccountSynchronisationTest",
         "BeamLinkDBTests\/testMoveFrecencyToLinkDB()",
         "BrowserImportManagerTest\/testSpeed()",
         "DailyUrlStorageTest\/testGetRepeatingUrlsSpeed()",
