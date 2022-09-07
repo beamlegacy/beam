@@ -337,6 +337,49 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.reset()
     }
 
+    func testGoogleUrlAliasesCleanup() throws {
+        BeamDate.freeze("2001-01-01T12:21:03Z")
+        let t0 = BeamDate.now
+        let grdbStore = GRDBStore.empty()
+        let urlHistoryManager = try UrlHistoryManager(objectManager: BeamObjectManager(),store: grdbStore)
+        try grdbStore.migrate(upTo: "linkAliasesCleanup")
+        let AliasLessGoogleUrlLink = urlHistoryManager.visit(url: "https://www.google.com/search?q=https%3A%2F%2Fabc.com%2F", content: nil, destination: nil)
+        urlHistoryManager.updateLinkFrecency(id: AliasLessGoogleUrlLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
+        let AliasGoogleUrlLink = urlHistoryManager.visit(url: "https://www.google.com/url?q=https%3A%2F%2Fabc.com%2F", content: nil, destination: AliasLessGoogleUrlLink.url)
+        urlHistoryManager.updateLinkFrecency(id: AliasGoogleUrlLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
+        let regularGoogleSearchLink = urlHistoryManager.visit(url: "https://www.google.com/search?q=coucou", content: nil, destination: nil)
+        urlHistoryManager.updateLinkFrecency(id: regularGoogleSearchLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
+
+        BeamDate.travel(24 * 60 * 60)
+        let t1 = BeamDate.now
+        try grdbStore.migrate(upTo: "googleAliasesCleanup")
+
+        //a google search url with a url like query gets cleaned
+        let postCleanupAliasLessGoogleUrlLink = try XCTUnwrap(urlHistoryManager.linkFor(id: AliasLessGoogleUrlLink.id))
+        XCTAssertNil(postCleanupAliasLessGoogleUrlLink.destination)
+        XCTAssertNil(postCleanupAliasLessGoogleUrlLink.frecencyVisitScore)
+        XCTAssertNil(postCleanupAliasLessGoogleUrlLink.frecencyVisitSortScore)
+        XCTAssertNil(postCleanupAliasLessGoogleUrlLink.frecencyVisitLastAccessAt)
+        XCTAssertEqual(postCleanupAliasLessGoogleUrlLink.updatedAt, t1)
+
+        //a google redirection url  gets cleaned
+        let postCleanupAliasGoogleUrlLink = try XCTUnwrap(urlHistoryManager.linkFor(id: AliasGoogleUrlLink.id))
+        XCTAssertNil(postCleanupAliasGoogleUrlLink.destination)
+        XCTAssertNil(postCleanupAliasGoogleUrlLink.frecencyVisitScore)
+        XCTAssertNil(postCleanupAliasGoogleUrlLink.frecencyVisitSortScore)
+        XCTAssertNil(postCleanupAliasGoogleUrlLink.frecencyVisitLastAccessAt)
+        XCTAssertEqual(postCleanupAliasGoogleUrlLink.updatedAt, t1)
+
+        //a google search url with a regular query gets untouched
+        let postCleanupRegularGoogleSearchLink = try XCTUnwrap(urlHistoryManager.linkFor(id: regularGoogleSearchLink.id))
+        XCTAssertNotNil(postCleanupRegularGoogleSearchLink.frecencyVisitScore)
+        XCTAssertNotNil(postCleanupRegularGoogleSearchLink.frecencyVisitSortScore)
+        XCTAssertNotNil(postCleanupRegularGoogleSearchLink.frecencyVisitLastAccessAt)
+        XCTAssertEqual(postCleanupRegularGoogleSearchLink.updatedAt, t0)
+
+        BeamDate.reset()
+    }
+
     private func beforeNetworkTests() {
         // Need to freeze date to compare objects, as `createdAt` would be different from the network stubs we get
         // back from Vinyl.

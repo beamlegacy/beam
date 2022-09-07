@@ -526,7 +526,7 @@ extension AutocompleteManager {
             text = query
             information = searchEngine.description
         }
-        guard !text.isEmpty else { return nil }
+        guard !text.isEmpty && !text.mayBeURL else { return nil }
         return AutocompleteResult(text: text, source: .searchEngine, url: url, information: information,
                                   completingText: result.completingText, score: result.score, urlFields: [])
     }
