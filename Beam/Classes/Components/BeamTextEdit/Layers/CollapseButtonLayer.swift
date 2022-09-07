@@ -26,6 +26,12 @@ final class CollapseButtonLayer: ButtonLayer {
         }
     }
 
+    var isCompact: Bool = false {
+        didSet {
+            textLayer.opacity = isCompact ? 0 : 1
+        }
+    }
+
     private lazy var textLayer: CATextLayer = {
         let layer = CATextLayer()
         layer.fontSize = 12

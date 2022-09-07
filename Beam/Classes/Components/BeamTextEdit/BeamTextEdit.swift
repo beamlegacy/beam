@@ -372,6 +372,10 @@ public extension CALayer {
         }
     }
 
+    var useCompactTrailingGutter: Bool {
+        self.frame.width < 640
+    }
+
     public var activated: () -> Void = { }
     public var activateOnLostFocus = true
     public var useFocusRing = false
