@@ -47,7 +47,7 @@ class GoogleSearchTests: XCTestCase {
 
     func testCanHandleGoogleSearchURLs() {
         XCTAssertTrue(searchEngine.canHandle(URL(string: "http://google.com/search?proud")!))
-        XCTAssertTrue(searchEngine.canHandle(URL(string: "http://google.com/url?proud")!))
+        XCTAssertFalse(searchEngine.canHandle(URL(string: "http://google.com/url?proud")!))
         XCTAssertFalse(searchEngine.canHandle(URL(string: "http://groogle.com/search?proud")!))
         XCTAssertFalse(searchEngine.canHandle(URL(string: "http://google.com/blop?proud")!))
     }

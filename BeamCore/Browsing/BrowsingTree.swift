@@ -472,6 +472,10 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
             dailyScoreStore?.apply(to: current.link) { $0.isPinned = $0.isPinned || self.isPinned }
         }
     }
+    public var justCreatedFromOtherTab: Bool {
+        guard case .browsingNode = origin else { return false }
+        return current.parent == nil
+    }
 
     public init(_ origin: BrowsingTreeOrigin?, linkStore: LinkStore = LinkStore.shared, frecencyScorer: FrecencyScorer? = nil,
                 domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil, dailyScoreStore: DailyUrlScoreStoreProtocol? = nil) {
