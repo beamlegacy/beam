@@ -19,7 +19,7 @@ class BrowserTabIndexingTests: WebBrowsingBaseTests {
                                                 destinationTitle: String) {
         let initialURL = redirectURL(for: type)
 
-        let expectation = expectation(description: "done_indexing")
+        let expectation = expectation(description: "done_indexing_\(UUID())")
         expectation.expectedFulfillmentCount = expectedNumberOfIndexingCalls
         mockIndexingDelegate?.onIndexingFinished = { _ in
             expectation.fulfill()
@@ -79,6 +79,16 @@ class BrowserTabIndexingTests: WebBrowsingBaseTests {
         let expectedNumberOfIndexingCalls = 2
         performAndTestAliasRedirection(ofType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls, destinationTitle: destinationPageTitle)
         checkTree(redirectionType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls)
+    }
+
+    func testHTMLRedirectionWhenNewTabFollowingLink() {
+        let redirectionType: MockHttpServer.RedirectionType = .html
+        let expectedNumberOfIndexingCalls = 2
+        //simulates a tab originating from a cmd click
+        tab.browsingTree = BrowsingTree(.browsingNode(id: UUID(), pageLoadId: nil, rootOrigin: nil, rootId: nil))
+        performAndTestAliasRedirection(ofType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls, initialURLShouldBeAlias: false, destinationTitle: destinationPageTitle)
+        //however on a second navigation aliasing is allowed
+        performAndTestAliasRedirection(ofType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls, initialURLShouldBeAlias: true, destinationTitle: destinationPageTitle)
     }
 
     func testJavascriptPushRedirectionIsNOTStoredAsAlias() {
