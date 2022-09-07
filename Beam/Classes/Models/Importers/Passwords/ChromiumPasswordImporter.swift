@@ -46,6 +46,7 @@ struct ChromiumPasswordItem: BrowserPasswordItem, Decodable, FetchableRecord {
     var password: Data
     var dateCreated: Date?
     var dateLastUsed: Date?
+    var blacklisted: Bool
 
     fileprivate enum CodingKeys: String, CodingKey {
         case url = "origin_url"
@@ -53,6 +54,7 @@ struct ChromiumPasswordItem: BrowserPasswordItem, Decodable, FetchableRecord {
         case password = "password_value"
         case dateCreated = "date_created"
         case dateLastUsed = "date_last_used"
+        case blacklisted = "blacklisted_by_user"
     }
 
     init(from decoder: Decoder) throws {
@@ -61,11 +63,13 @@ struct ChromiumPasswordItem: BrowserPasswordItem, Decodable, FetchableRecord {
         guard let url = URL(string: urlStr) ?? URL(string: String(urlStr.prefix(while: { $0 != "?" }))) else { throw DecodingError.dataCorruptedError(forKey: .url, in: container, debugDescription: "Invalid URL") }
         let dateCreated = try container.decode(Double.self, forKey: .dateCreated)
         let dateLastUsed = try container.decode(Double.self, forKey: .dateLastUsed)
+        let blacklisted = try container.decodeIfPresent(Int.self, forKey: .blacklisted) ?? 0
         self.url = url
         self.username = try container.decode(String.self, forKey: .username)
         self.password = try container.decode(Data.self, forKey: .password)
         self.dateCreated = Date(timeIntervalSince1970: dateCreated)
         self.dateLastUsed = Date(timeIntervalSince1970: dateLastUsed)
+        self.blacklisted = blacklisted != 0
     }
 }
 
@@ -233,12 +237,18 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
                 throw Error.countNotAvailable
             }
             // timestamps are number of microseconds since 1601-01-01, the SQL query converts them to seconds since UNIX Epoch.
-            let rows = try ChromiumPasswordItem.fetchCursor(db, sql: "SELECT origin_url, username_value, password_value, date_created / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS date_created, date_last_used / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS date_last_used FROM logins")
+            let rows = try ChromiumPasswordItem.fetchCursor(db, sql: "SELECT origin_url, username_value, password_value, date_created / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS date_created, date_last_used / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS date_last_used, blacklisted_by_user FROM logins")
+            var importedCount = 0
             while let row = rows.nextPasswordItem(using: symmetricKey) {
                 Logger.shared.logDebug("Successfully decoded row for \(row.username) at \(row.url.absoluteString)", category: .browserImport)
-                currentSubject?.send(BrowserPasswordResult(itemCount: itemCount, item: row))
+                if row.blacklisted {
+                    Logger.shared.logDebug("Skipping row for \(row.url.absoluteString) (blacklisted)", category: .browserImport)
+                } else {
+                    currentSubject?.send(BrowserPasswordResult(itemCount: itemCount, item: row))
+                    importedCount += 1
+                }
             }
-            importedCountCallback(itemCount)
+            importedCountCallback(importedCount)
         }
     }
 }
