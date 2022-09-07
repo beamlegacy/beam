@@ -393,12 +393,14 @@ extension BrowserTabsManager {
         tabToPin.pin()
         updateIsPinned(for: tabToPin, isPinned: true)
         removeFromTabNeighborhood(tabId: tabToPin.id)
+        data.clusteringManager.removePinTab(tabToPin: tabToPin)
     }
 
     func unpinTab(_ tabToUnpin: BrowserTab) {
         tabToUnpin.unPin()
         updateIsPinned(for: tabToUnpin, isPinned: false)
         createNewNeighborhood(for: tabToUnpin.id)
+        data.clusteringManager.addUnpinTab(tabToUnpin: tabToUnpin)
     }
 
     func tabIndex(forListIndex listIndex: Int) -> Int? {
