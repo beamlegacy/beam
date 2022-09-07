@@ -119,7 +119,8 @@ enum PasswordImporter {
     }
 
     static func importPasswords(fromCSV file: URL) throws -> Int {
-        let text = try String(contentsOf: file, encoding: .utf8)
+        var encoding: String.Encoding = .utf8
+        let text = try String(contentsOf: file, usedEncoding: &encoding)
         return try importPasswords(fromCSV: text)
     }
 }
