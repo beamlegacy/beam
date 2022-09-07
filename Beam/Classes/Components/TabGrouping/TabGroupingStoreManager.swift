@@ -53,8 +53,11 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
         let existingValue = fetch(byIds: [group.id]).first
         if origin == .clustering, let existingValue = existingValue {
             let existingPagesIds = existingValue.pages.map { $0.id }
-            if group.isLocked || existingPagesIds.count > group.pageIds.count || Set(existingPagesIds) == Set(group.pageIds) {
-                Logger.shared.logDebug("Not Saving Tab Group '\(group.title ?? "untitled")' because unimportant pages change", category: .tabGrouping)
+            if group.isLocked {
+                Logger.shared.logDebug("Not Updating Tab Group '\(group.title ?? "untitled")' pages because it is locked", category: .tabGrouping)
+                return false
+            } else if existingPagesIds.count > group.pageIds.count || Set(existingPagesIds) == Set(group.pageIds) {
+                Logger.shared.logDebug("Not Updating Tab Group '\(group.title ?? "untitled")' pages because unimportant pages change", category: .tabGrouping)
                 return false
             }
         }
