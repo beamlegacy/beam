@@ -405,6 +405,43 @@ extension ClusteringManager: ClusteringManagerProtocol {
     func addPage(id: UUID, tabId: UUID, parentId: UUID?, value: TabIndexingInfo?) {
         addPage(id: id, tabId: tabId, parentId: parentId, value: value, newContent: nil)
     }
+    
+    func addUnpinTab(tabToUnpin: BrowserTab) {
+        guard let url = tabToUnpin.url else { return }
+
+        Readability.read(tabToUnpin.webView) { [weak self] result in
+            switch result {
+            case let .failure(error):
+                Logger.shared.logError("Error while reading when unpintab: \(error)", category: .tabGrouping)
+            case let .success(read):
+                guard let self = self else { return }
+                var currentId: UUID?
+                var parentId: UUID?
+                
+                guard let readabilityResult = read else { return }
+                let indexDocument = IndexDocument(source: url.absoluteString, title: tabToUnpin.webView.title ?? "", contents: readabilityResult.textContentForClustering.joined(separator: " "))
+                let tabIndexingInfo = TabIndexingInfo(url: url, tabId: tabToUnpin.id,
+                                                      requestedURL: nil,
+                                                      shouldBeIndexed: tabToUnpin.responseStatusCode == 200,
+                                                      tabTree: tabToUnpin.browsingTree.deepCopy(),
+                                                      currentTabTree: nil,
+                                                      previousTabTree: nil,
+                                                      document: indexDocument,
+                                                      cleanedTextContentForClustering: readabilityResult.textContentForClustering,
+                                                      isPinnedTab: false,
+                                                      isBackwardNavigation: false)
+                (currentId, parentId) = self.getIdAndParent(tabToIndex: tabIndexingInfo)
+                guard let id = currentId else { return }
+                self.addPage(id: id, tabId: tabToUnpin.id, parentId: parentId, value: tabIndexingInfo)
+            }
+        }
+    }
+    
+    func removePinTab(tabToPin: BrowserTab) {
+        if let pageId = tabToPin.pageId {
+            self.removePage(pageId: pageId, tabId: tabToPin.id)
+        }
+    }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func addPage(id: UUID, tabId: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?) {
