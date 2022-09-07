@@ -18,6 +18,12 @@ class ImageNode: ResizableNode {
     private var imageVerticalOffset: CGFloat {
         isCollapsed ? 1 : 0
     }
+    private var toggleButtonOrigin: CGPoint {
+        CGPoint(
+            x: availableWidth + childInset,
+            y: contentsTop + 2
+        )
+    }
 
     override var selectionLayerPosY: CGFloat {
         selectedAlone ? -5 : super.selectionLayerPosY
@@ -40,15 +46,14 @@ class ImageNode: ResizableNode {
 
     var lottieView: AnimationView?
 
+    private var toggleButtonBeamLayer: CollapseButtonLayer?
+
     var isCollapsed: Bool {
         didSet {
             guard isCollapsed != oldValue else { return }
 
             element.collapsed = isCollapsed
             configureCollapsed(isCollapsed)
-            if !element.isProxy {
-                setupCollapseExpandLayer(hidden: !frontmostHover)
-            }
             if let imageLayer = imageLayer {
                 layoutCollapseExpand(contentLayer: imageLayer.layer, verticalOffset: imageVerticalOffset)
             }
@@ -120,7 +125,7 @@ class ImageNode: ResizableNode {
         setupImageLayer(using: imageRecord, uid: uid, width: width)
         configureCollapsed(isCollapsed)
         if !element.isProxy {
-            setupCollapseExpandLayer(hidden: !frontmostHover)
+            addToggleButton()
         }
 
         updateLayout()
@@ -309,7 +314,7 @@ class ImageNode: ResizableNode {
         guard let imageLayer = imageLayer else { return }
 
         layoutImageLayer()
-        layoutCollapseExpand(contentLayer: imageLayer.layer, verticalOffset: imageVerticalOffset)
+        layoutToggleButton()
         layoutFocus(contentLayer: imageLayer.layer)
     }
 
@@ -319,14 +324,6 @@ class ImageNode: ResizableNode {
         if let focusLayer = layers["focus"], let borderLayer = focusLayer.layer as? CAShapeLayer {
             borderLayer.strokeColor = selectionColor
         }
-
-        if let collapseExpandLayer = layers["global-expand"]?.layer,
-           let textLayer = collapseExpandLayer.sublayers?[1] as? CATextLayer {
-            let color = BeamColor.Editor.collapseExpandButton
-            textLayer.foregroundColor = color.cgColor
-        }
-
-        setLottieViewColor(color: BeamColor.Editor.collapseExpandButton.nsColor)
 
         updateFocus()
     }
@@ -413,12 +410,8 @@ class ImageNode: ResizableNode {
                     source.layer.backgroundFilters = []
                 }
             }
-            if let collapseExpand = self.layers["global-expand"],
-                  let textLayer = collapseExpand.layer.sublayers?[1] as? CATextLayer {
-                collapseExpand.layer.opacity = frontmostHover ? 1.0 : 0.0
-                textLayer.opacity = frontmostHover ? 1.0 : 0.0
-            }
 
+            toggleButtonBeamLayer?.layer.opacity = frontmostHover ? 1.0 : 0.0
             invalidate()
             super.frontmostHover = frontmostHover
         }
@@ -437,6 +430,25 @@ class ImageNode: ResizableNode {
             self.setupResizeHandleLayer()
             self.setupSourceButtonLayer()
             self.imageLayer?.layer.borderWidth = 0
+        }
+    }
+
+    private func addToggleButton() {
+        toggleButtonBeamLayer = CollapseButtonLayer(name: "toggle", isCollapsed: isCollapsed) { [weak self] isCollapsed in
+            self?.isCollapsed = isCollapsed
+        }
+
+        toggleButtonBeamLayer?.layer.opacity = 0
+        toggleButtonBeamLayer?.collapseText = NSLocalizedString("to Link", comment: "Embed collapse button label")
+        toggleButtonBeamLayer?.expandText = NSLocalizedString("to Image", comment: "Embed expand button label")
+
+        addLayer(toggleButtonBeamLayer!)
+    }
+
+    private func layoutToggleButton() {
+        CATransaction.disableAnimations {
+            toggleButtonBeamLayer?.layer.frame.origin = toggleButtonOrigin
+            toggleButtonBeamLayer?.isCompact = (editor?.useCompactTrailingGutter ?? false)
         }
     }
 
