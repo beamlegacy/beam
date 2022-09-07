@@ -104,6 +104,23 @@ extension Link: Hashable {
     }
 }
 
+extension Link {
+    public static func aliasCleanup(_ db: GRDB.Database, query: SQLRequest<Link>, resetFrecency: Bool = false) throws {
+        let now = BeamDate.now
+        let aliases = try Self.fetchAll(db, query)
+        for var alias in aliases {
+            alias.destination = nil
+            alias.updatedAt = now
+            if resetFrecency {
+                alias.frecencyVisitLastAccessAt = nil
+                alias.frecencyVisitScore = nil
+                alias.frecencyVisitSortScore = nil
+            }
+            try alias.save(db)
+        }
+    }
+}
+
 enum BeamLinkDBManagerError: Error, Equatable {
     case localLinkNotFound
 }
