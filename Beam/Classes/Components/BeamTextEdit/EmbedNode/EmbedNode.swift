@@ -103,7 +103,7 @@ class EmbedNode: ResizableNode {
 
     private var toggleButtonOrigin: CGPoint {
         CGPoint(
-            x: availableWidth + childInset + 11,
+            x: availableWidth + childInset,
             y: contentsTop + 2
         )
     }
@@ -507,6 +507,7 @@ extension EmbedNode {
     private func layoutToggleButton() {
         CATransaction.disableAnimations {
             toggleButtonBeamLayer?.layer.frame.origin = toggleButtonOrigin
+            toggleButtonBeamLayer.isCompact = (editor?.useCompactTrailingGutter ?? false)
         }
     }
 

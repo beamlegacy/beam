@@ -35,6 +35,10 @@ protocol Collapsable: AnyObject {
 
 extension Collapsable where Self: ElementNode {
 
+    var isCompact: Bool {
+        editor?.useCompactTrailingGutter ?? false
+    }
+
     var tokenColor: CGColor {
         guard isCollapsed else { return NSColor.clear.cgColor }
         let tokenColor = mediaURL != nil ? BeamColor.Editor.linkActiveBackground.cgColor : BeamColor.Editor.tokenNoLinkActiveBackground.cgColor
@@ -162,8 +166,7 @@ extension Collapsable where Self: ElementNode {
         textLayer.fontSize = 12
         textLayer.font = BeamFont.medium(size: 12).nsFont
         textLayer.frame.size = textLayer.preferredFrameSize()
-        textLayer.opacity = isHoverCollapseExpandButton ? 1.0 : 0.0
-
+        textLayer.opacity = isHoverCollapseExpandButton && !isCompact ? 1.0 : 0.0
         return textLayer
     }
 
@@ -193,14 +196,15 @@ extension Collapsable where Self: ElementNode {
         let mouseHover: (Bool) -> Void = { [weak self] isHover in
             guard let collapseExpand = self?.layers["global-expand"],
                   let textLayer = collapseExpand.layer.sublayers?[1] as? CATextLayer else { return }
-            textLayer.opacity = isHover ? 1.0 : 0.0
+            guard let self = self else { return }
+            textLayer.opacity = isHover && !self.isCompact ? 1.0 : 0.0
             let hoverColor = isHover ? BeamColor.Editor.collapseExpandButtonHover : BeamColor.Editor.collapseExpandButton
             textLayer.foregroundColor = hoverColor.cgColor
-            self?.setLottieViewColor(color: hoverColor.nsColor)
-            self?.isHoverCollapseExpandButton = isHover
+            self.setLottieViewColor(color: hoverColor.nsColor)
+            self.isHoverCollapseExpandButton = isHover
 
             if isHover {
-                self?.lottieView?.play(completion: nil)
+                self.lottieView?.play(completion: nil)
             }
         }
 
@@ -234,7 +238,7 @@ extension Collapsable where Self: ElementNode {
 
         if let expandButtonLayer = layers["global-expand"]?.layer,
            let textLayer = expandButtonLayer.sublayers?.first(where: {$0 is CATextLayer}) as? CATextLayer {
-            let margin: CGFloat = 11.0
+            let margin: CGFloat = 0
             expandButtonLayer.frame.origin = CGPoint(x: availableWidth + childInset + margin, y: contentsTop + 2)
 
             let title = isCollapsed ? "to Image" : collapsedTitle
