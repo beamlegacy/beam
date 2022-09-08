@@ -13,8 +13,8 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
 
     // MARK: Public methods
 
-    public func initHyperlinkFormatter() {
-        let hyperlinkView = HyperlinkFormatterView(key: "HyperlinkFormatter", viewType: .inline)
+    public func initHyperlinkFormatter(debounce: Bool, autoDismiss: Bool = true) {
+        let hyperlinkView = HyperlinkFormatterView(debouncePresenting: debounce, autoDismiss: autoDismiss)
         hyperlinkView.delegate = self
         inlineFormatter = hyperlinkView
     }
@@ -29,7 +29,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         let (_, linkFrame) = node.linkRangeAt(point: point)
         let link = node.linkAt(index: node.cursorPosition)
 
-        hideInlineFormatter { [weak self] in
+        hideInlineFormatter(skipDebounce: true) { [weak self] in
             guard let self = self else { return }
             let linkTitle = self.selectedText
             let targetRange = self.selectedTextRange
@@ -39,7 +39,8 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
                 self.showHyperlinkContextMenu(for: node, targetRange: targetRange, frame: frame, url: link, linkTitle: linkTitle, fromPaste: false)
             } else {
                 let frame = linkFrame ?? node.rectAt(caretIndex: node.cursorPosition)
-                self.showHyperlinkFormatter(for: node, targetRange: targetRange, frame: frame, url: link, linkTitle: linkTitle, debounce: false)
+                self.showHyperlinkFormatter(for: node, targetRange: targetRange, frame: frame, url: link, linkTitle: linkTitle,
+                                            debounce: false, autoDismiss: false)
                 DispatchQueue.main.async {
                     if let linkEditor = self.inlineFormatter as? HyperlinkFormatterView {
                         linkEditor.startEditingUrl()
@@ -67,12 +68,12 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         return true
     }
 
-    public func linkStartedHovering(for currentNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?) {
+    public func linkStartedHoveringArrow(for currentNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?) {
         showHyperlinkFormatter(for: currentNode, targetRange: targetRange, frame: frame, url: url, linkTitle: linkTitle)
     }
 
     public func linkStoppedHovering() {
-        dismissHyperlinkView()
+        dismissHyperlinkViewAutomatically()
     }
 
     public func linkCanBeEmbed(_ url: URL) -> Bool {
@@ -90,18 +91,13 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     // MARK: Mouse Events
     public override func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)
-        dismissHyperlinkView()
+        dismissHyperlinkViewAutomatically()
     }
 
     // MARK: Private methods
-    private func dismissHyperlinkView() {
-        guard case .custom = displayedInlineFormatterKind, let view = inlineFormatter as? HyperlinkFormatterView else { return }
-
-        let shouldDismiss = !view.hasEditedUrl()
-        if shouldDismiss {
-            clearDebounceTimer()
-            debounceShowHideInlineFormatter(false)
-        }
+    private func dismissHyperlinkViewAutomatically() {
+        guard let view = inlineFormatter as? HyperlinkFormatterView, view.canBeAutomaticallyDismissed else { return }
+        hideInlineFormatter()
     }
 
     private func getDefaultItemsForLink(for node: TextNode, link: URL) -> [ContextMenuItem] {
@@ -159,11 +155,10 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
 
     private func showHyperlinkContextMenu(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?, fromPaste: Bool) {
         guard inlineFormatter?.isMouseInsideView != true else { return }
-        clearDebounceTimer()
+        clearAnyDelayedFormatterPresenting()
         guard let frame = frame,
               let node = formatterTargetNode ?? (focusedWidget as? TextNode),
-              let link = node.linkAt(index: targetRange.upperBound),
-              isInlineFormatterHidden else { return }
+              let link = node.linkAt(index: targetRange.upperBound) else { return }
         let atPoint = CGPoint(x: frame.origin.x + node.offsetInDocument.x - 10, y: frame.maxY + node.offsetInDocument.y + 7)
 
         if fromPaste {
@@ -185,25 +180,23 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             let menu = NSMenu()
             items.forEach { menu.addItem($0.toNSMenuItem) }
             menu.popUp(positioning: nil, at: atPoint, in: self)
-
-            displayedInlineFormatterKind = .native
         }
 
     }
 
     private func showHyperlinkFormatter(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?,
-                                        url: URL?, linkTitle: String?, debounce: Bool = true) {
+                                        url: URL?, linkTitle: String?, debounce: Bool = true, autoDismiss: Bool = true) {
         guard inlineFormatter?.isMouseInsideView != true else { return }
         if let currentHyperlinkView = inlineFormatter as? HyperlinkFormatterView {
-            if !currentHyperlinkView.hasEditedUrl() && targetRange != formatterTargetRange {
+            if currentHyperlinkView.canBeAutomaticallyDismissed && targetRange != formatterTargetRange {
                 // another link view is present, dismiss it before the new one
-                clearDebounceTimer()
                 BeamTextEdit.isExitingLink = true
-                debounceShowHideInlineFormatter(false) {
+                hideInlineFormatter {
                     BeamTextEdit.isExitingLink = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + FormatterView.disappearAnimationDuration) { [weak self] in
                         guard let self = self else { return }
-                        self.showHyperlinkFormatter(for: targetNode, targetRange: targetRange, frame: frame, url: url, linkTitle: linkTitle, debounce: debounce)
+                        self.showHyperlinkFormatter(for: targetNode, targetRange: targetRange, frame: frame, url: url, linkTitle: linkTitle,
+                                                    debounce: debounce, autoDismiss: autoDismiss)
                     }
                 }
                 return
@@ -212,12 +205,11 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             }
         }
 
-        clearDebounceTimer()
-        initHyperlinkFormatter()
+        clearAnyDelayedFormatterPresenting()
+        initHyperlinkFormatter(debounce: debounce, autoDismiss: autoDismiss)
 
         guard let hyperlinkView = inlineFormatter as? HyperlinkFormatterView,
-              let node = targetNode, let frame = frame,
-              isInlineFormatterHidden else { return }
+              let node = targetNode, let frame = frame else { return }
 
         prepareInlineFormatterWindowBeforeShowing(hyperlinkView, atPoint: .zero)
 
@@ -230,12 +222,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         }
 
         updateLinkFormatterWindow(hyperlinkView: hyperlinkView, frame: frame, in: node)
-
-        if debounce {
-            debounceShowHideInlineFormatter(true)
-        } else {
-            showInlineFormatter()
-        }
+        showInlineFormatter()
     }
 
     private func updateLinkFormatterWindow(hyperlinkView: HyperlinkFormatterView, frame: CGRect, in node: TextNode) {

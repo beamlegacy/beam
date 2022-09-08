@@ -178,12 +178,12 @@ public extension CALayer {
     private var noteCancellables = [AnyCancellable]()
 
     // Formatter properties
-    internal var displayedInlineFormatterKind: FormatterKind = .none
     internal var inlineFormatter: FormatterView?
-
     internal var formatterTargetRange: Range<Int>?
     internal var formatterTargetNode: TextNode?
-    internal var isInlineFormatterHidden = true
+    internal var isInlineFormatterPresented: Bool {
+        inlineFormatter?.isVisible == true
+    }
 
     func addToMainLayer(_ layer: CALayer, at index: UInt32? = nil) {
         //Logger.shared.logDebug("addToMainLayer: \(layer.name)")

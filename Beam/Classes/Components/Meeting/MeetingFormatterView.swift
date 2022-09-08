@@ -151,7 +151,7 @@ class MeetingFormatterView: FormatterView {
     init(calendarManager: CalendarManager, todaysNote: BeamNote?) {
         self.todaysNote = todaysNote
         self.calendarManager = calendarManager
-        super.init(key: "MeetingPicker", viewType: .inline)
+        super.init(key: "MeetingPicker")
     }
 
     required init?(coder: NSCoder) {
