@@ -104,6 +104,13 @@ class TextFormatterView: FormatterView {
         return TextFormatterViewSwiftUI.idealSize(forNumberOfItems: items.count)
     }
 
+    init() {
+        super.init(key: "TextFormatter")
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
         super.animateOnAppear()
         subviewModel.visible = true
@@ -123,7 +130,7 @@ class TextFormatterView: FormatterView {
     override func setupUI() {
         super.setupUI()
         subviewModel.onSelectFormatterItem = self.onSelectFormatterItem
-        let rootView = TextFormatterViewSwiftUI(viewModel: subviewModel, alwaysShowShadow: self.viewType == .inline)
+        let rootView = TextFormatterViewSwiftUI(viewModel: subviewModel, alwaysShowShadow: true)
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]
         hostingView.frame = self.bounds
