@@ -27,20 +27,21 @@ class DeleteNotesTests: BaseTest {
     }
     
     private func runDeleteNoteTest(isLocalContentsTest: Bool) {
-        let expectedNumberOfNotesAfterPopulatingDB = 11
-        let expectedNumberOfNotesAfterClearingDB = 1
+        let expectedNumberOfNotesAfterPopulatingDB = 14
+        let expectedNumberOfNotesAfterClearingDB = 4
         step("Given I populate the app with random notes"){
             launchAppAndOpenTodayNote()
             uiMenu.insertTextInCurrentNote()
-            uiMenu.create10Notes()
+            uiMenu.create10NormalNotes()
         }
         
         step("When I open All notes"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotes.waitForAllNotesViewToLoad()
         }
         
         step("Then there is \(expectedNumberOfNotesAfterPopulatingDB) notes"){
-            XCTAssertTrue(allNotes.getNumberOfNotes() > expectedNumberOfNotesAfterClearingDB, "Error occurred when populating the DB")
+            XCTAssertEqual(allNotes.getNumberOfNotes(), expectedNumberOfNotesAfterPopulatingDB, "Error occurred when populating the DB")
         }
         
         step("When I click clear notes option"){
@@ -49,9 +50,11 @@ class DeleteNotesTests: BaseTest {
         
         step("Then notes are cleared"){
             launchApp()
-            XCTAssertEqual(NoteTestView().getNumberOfVisibleNotes(), 1, "Local data hasn't been cleared")
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotes.waitForAllNotesViewToLoad()
             XCTAssertEqual(allNotes.getNumberOfNotes(), expectedNumberOfNotesAfterClearingDB, "Local data hasn't been cleared")
+            openTodayNote()
+            XCTAssertEqual(NoteTestView().getNumberOfVisibleNodes(), 1, "Local data hasn't been cleared")
         }
     }
 }

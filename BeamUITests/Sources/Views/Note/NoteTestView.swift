@@ -168,7 +168,7 @@ class NoteTestView: TextEditorContextTestView {
         return app.windows.textViews.matching(identifier:NoteViewLocators.TextFields.textNode.accessibilityIdentifier)
     }
     
-    func getNumberOfVisibleNotes() -> Int {
+    func getNumberOfVisibleNodes() -> Int {
         return self.getNoteNodesForVisiblePart().count
     }
     

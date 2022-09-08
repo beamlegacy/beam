@@ -152,11 +152,18 @@ public enum UITestMenuGroup: String, CaseIterable {
     case preferences = "Preferences"
 }
 
+/// Commands send from the UITests to the App through the beeper
 public enum UITestsHiddenMenuAvailableCommands: String, CaseIterable {
     case openTodayNote
     case openNotePrefix = "OpenNote-"
+    case deleteAllNotes
 
     static func openNoteIdentifier(title: String) -> String {
         UITestsHiddenMenuAvailableCommands.openNotePrefix.rawValue + title
     }
+}
+
+/// Notifications sent from the App to UITests through the beeper
+public enum UITestsHiddenMenuAvailableNotifications: String, CaseIterable {
+    case userDidSignIn
 }

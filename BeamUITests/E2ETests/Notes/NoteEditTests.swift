@@ -118,7 +118,7 @@ class NoteEditTests: BaseTest {
         }
         
         step("Then I'm redirected to the source page when clicking on the icon"){
-            noteView.button(NoteViewLocators.Buttons.sourceButton.accessibilityIdentifier).tapInTheMiddle()
+            noteView.button(NoteViewLocators.Buttons.sourceButton.accessibilityIdentifier).hoverAndTapInTheMiddle()
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             let webPageUrl = webView.getTabUrlAtIndex(index: 1)
             XCTAssertTrue(webPageUrl.hasSuffix("/UITests-4.html"), "Actual web page is \(webPageUrl)")

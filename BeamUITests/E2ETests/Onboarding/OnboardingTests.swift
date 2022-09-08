@@ -21,7 +21,7 @@ class OnboardingTests: BaseTest {
     override func setUpWithError() throws {
         try super.setUpWithError()
         step("Given I enable onboarding"){
-            launchAppWithArgument(uiTestModeLaunchArgument)
+            launchApp()
             uiMenu.resetAPIEndpoints()
                             .showOnboarding()
         }
@@ -97,9 +97,8 @@ class OnboardingTests: BaseTest {
     func testConnectWithEmailUsernameSignInCaseInsensitive() throws {
         testrailId("C660")
         step("GIVEN I sign up an account and take credentials") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            deletePK = true
             uiMenu.showOnboarding()
                 .deletePrivateKeys()
         }
@@ -121,9 +120,8 @@ class OnboardingTests: BaseTest {
     func testConnectWithEmailUsernameSignInRequirements() throws {
         testrailId("C669")
         step("GIVEN I sign up an account and take credentials") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            deletePK = true
             uiMenu.showOnboarding()
                 .deletePrivateKeys()
         }
@@ -322,9 +320,8 @@ class OnboardingTests: BaseTest {
     
     func testOnboardingPrivateKeyVerification() {
         step("GIVEN I sign up an account and take credentials") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            deletePK = true
             uiMenu.showOnboarding()
                 .deletePrivateKeys()
         }
@@ -381,9 +378,8 @@ class OnboardingTests: BaseTest {
     func testSignInSuccessfullyFromOnboarding() {
         testrailId("C1156")
         step("GIVEN I sign up an account and take credentials") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            deletePK = true
             uiMenu.showOnboarding()
                 .deletePrivateKeys()
         }
@@ -463,7 +459,8 @@ class OnboardingTests: BaseTest {
         let expectedTabs = 1
         let expectedTabTitle = "Welcome to beam"
         step("GIVEN I sign up an account") {
-            setupStaging(withRandomAccount: true)
+            uiMenu.setAPIEndpointsToStaging()
+            uiMenu.signUpWithRandomTestAccount()
         }
         
         step("THEN \(expectedTabs) tab with '\(expectedTabTitle)' is displayed") {
@@ -489,7 +486,9 @@ class OnboardingTests: BaseTest {
         let welcomePages = [page1, page2, page3, page4, page5, page6, page7, page8]
         
         step("GIVEN I sign up a new account") {
-            setupStaging(withRandomAccount: true)
+            uiMenu.setAPIEndpointsToStaging()
+            uiMenu.signUpWithRandomTestAccount()
+            _ = webView.waitForTabUrlAtIndexToEqual(index: 0, expectedString: welcomeTourURL)
         }
         
         step("THEN welcome web views display correct content") {
