@@ -11,6 +11,7 @@ import XCTest
 class NotesNavigationHistoryTests: BaseTest {
     
     var noteView: NoteTestView!
+    let allNotesView = AllNotesTestView()
     
     private func assertJournalIsOpened() {
         XCTAssertTrue(JournalTestView()
@@ -19,7 +20,7 @@ class NotesNavigationHistoryTests: BaseTest {
     }
     
     private func assertAllNotesIsOpened() {
-        XCTAssertTrue(AllNotesTestView().waitForAllNotesViewToLoad())
+        XCTAssertTrue(allNotesView.waitForAllNotesViewToLoad())
     }
     
     private func assertTodayNoteIsOpened() {
@@ -33,7 +34,8 @@ class NotesNavigationHistoryTests: BaseTest {
         testrailId("C828")
         step("GIVEN I open All notes and default note") {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            noteView = AllNotesTestView().openFirstNote()
+            allNotesView.waitForAllNotesViewToLoad()
+            noteView = allNotesView.openFirstNote()
         }
 
         step("THEN forward button is disabled and All Notes opened on Back button click"){

@@ -20,8 +20,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
         testrailId("C1171")
         step("Given I have a captured group in a note") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroup()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            createTabGroupAndSwitchToWeb()
             captureGroupToNoteAndOpenNote()
         }
         
@@ -47,8 +46,8 @@ class TabGroupSharingFromNoteTests: BaseTest {
     func testShareTabGroupMenu() throws {
         testrailId("C1165, C1166, C1167, C1168, C1169, C1170")
         step("Given I have a captured group in a note being logged in") {
-            setupStaging(withRandomAccount: true)
-            uiMenu.createTabGroup()
+            signUpStagingWithRandomAccount()
+            createTabGroupAndSwitchToWeb()
             captureGroupToNoteAndOpenNote()
         }
         
@@ -77,8 +76,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
         testrailId("C1171, C1170")
         step("Given I have a captured group in a note") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroup()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            createTabGroupAndSwitchToWeb()
             captureGroupToNoteAndOpenNote()
         }
         
@@ -100,8 +98,8 @@ class TabGroupSharingFromNoteTests: BaseTest {
     func testShareTabGroupCopyUrl() throws {
         testrailId("C1171, C1170")
         step("Given I have a captured group in a note being logged in") {
-            setupStaging(withRandomAccount: true)
-            uiMenu.createTabGroup()
+            signUpStagingWithRandomAccount()
+            createTabGroupAndSwitchToWeb()
             captureGroupToNoteAndOpenNote()
         }
         

@@ -10,7 +10,7 @@ import XCTest
 
 class AllNotesSortingTests: BaseTest {
     
-    var allNotesView: AllNotesTestView!
+    let allNotesView = AllNotesTestView()
     var table: AllNotesTestTable!
     
     private func sortBy(_ column: AllNotesViewLocators.SortButtons) -> AllNotesTestTable {
@@ -46,11 +46,9 @@ class AllNotesSortingTests: BaseTest {
     func testSortNotesByTitlesAndWordsAndLinks() {
         
         step("GIVEN I setup staging environment and open All cards") {
-            setupStaging(withRandomAccount: true)
-            uiMenu.create10Notes()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            signUpStagingWithRandomAccount()
+            uiMenu.create10RandomNotes()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            allNotesView = AllNotesTestView()
             allNotesView.waitForAllNotesViewToLoad()
         }
         

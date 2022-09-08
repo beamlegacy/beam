@@ -25,13 +25,14 @@ class NoteViewEmbedsTests: BaseTest {
         
         testrailId("C768, C769, C770, C771")
         step("When I add image to a note"){
+            uiMenu.resizeWindowLandscape()
             uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
         }
         
         step("Then I see collapse button"){
-            noteView = webView.openDestinationNote()
+            noteView = openTodayNote()
             expandButton = noteView.getNoteExpandButtonByIndex(noteIndex: 0)
             XCTAssertEqual(noteView.getNotesExpandButtonsCount(), 1)
             XCTAssertEqual(expandButton.title, toLinkTitle)
@@ -51,9 +52,8 @@ class NoteViewEmbedsTests: BaseTest {
         }
         
         step("Then element width and height is changed accordingly"){
-            //XCTAssertEqual(sizeBeforeCollapse.width, sizeAfterCollapse.width) too flaky due to issue with random resizing of notes
+            XCTAssertEqual(sizeBeforeCollapse.width, sizeAfterCollapse.width) // too flaky due to issue with random resizing of notes
             XCTAssertGreaterThan(sizeBeforeCollapse.height, sizeAfterCollapse.height * 2)
-            XCTAssertLessThan(sizeBeforeCollapse.height, sizeAfterCollapse.height * 4.5)
         }
         
         step("Then image node is expanded"){
@@ -65,7 +65,7 @@ class NoteViewEmbedsTests: BaseTest {
         
         step("Then element width and height is changed accordingly"){
             let sizeAfterExpand = noteView.getImageNodeByIndex(nodeIndex: 0).getSize()
-            // XCTAssertEqual(sizeBeforeCollapse.width, sizeAfterExpand.width) too flaky due to issue with random resizing of notes
+            XCTAssertEqual(sizeBeforeCollapse.width, sizeAfterExpand.width) // too flaky due to issue with random resizing of notes
             XCTAssertEqual(sizeBeforeCollapse.height, sizeAfterExpand.height)
         }
        

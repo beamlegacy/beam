@@ -16,7 +16,7 @@ class AllNotesPublishProfileTests: BaseTest {
     
     override func setUp() {
         step("GIVEN I sign up") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
         }

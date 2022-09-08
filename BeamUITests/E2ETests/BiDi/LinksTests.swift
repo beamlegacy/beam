@@ -94,7 +94,9 @@ class LinksTests: BaseTest {
         
         step("When I navigate on Beam notes"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            AllNotesTestView().waitForAllNotesViewToLoad()
             shortcutHelper.shortcutActionInvoke(action: .browserHistoryBack)
+            noteView.waitForNoteViewToLoad()
         }
         
         step("Then Links section collapse status is saved"){
@@ -185,7 +187,7 @@ class LinksTests: BaseTest {
        
         step("And note name changes are applied for note 2 note"){
             openNoteByTitle(noteName2)
-            XCTAssertEqual(noteView.getNumberOfVisibleNotes(), 1)
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 1)
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), expectedEditedName1)
         }
 

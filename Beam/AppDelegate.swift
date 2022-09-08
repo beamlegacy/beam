@@ -81,6 +81,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var isRunningTests: Bool {
         NSClassFromString("XCTest") != nil
     }
+    
+    var areE2ETestsRunning: Bool {
+        ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument)
+    }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         defer { didFinishLaunching = true }
@@ -113,7 +117,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             NSSetUncaughtExceptionHandler(prevHandler)
         }
-
+        
+        #if DEBUG
+        if areE2ETestsRunning {
+            Configuration.setAPIEndPointsToStaging()
+            // add onboarding notes and clear daily summary
+            OnboardingNoteCreator().createOnboardingNotes(data: BeamData.shared)
+            KeychainDailyNoteScoreStore.shared.clear()
+        }
+        #endif
+        
         ContentBlockingManager.shared.setup()
 
         //TODO: - Remove when everyone has its local links data moved from old db to grdb
@@ -152,7 +165,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logWarning("REST API HOSTNAME is \(Configuration.restApiHostname)", category: .general)
         }
 
-        #if DEBUG        
+        #if DEBUG
         prepareMenuForTestEnv()
 
         // In test mode, we want to start fresh without auth tokens as they may have expired
@@ -186,9 +199,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.isNetworkReachable = false
             case .reachable:
                 self?.isNetworkReachable = true
-                Task { @MainActor [weak self] in
-                    await self?.checkPrivateKey()
-                    self?.window?.state.reloadOfflineTabs()
+                if !(self?.areE2ETestsRunning ?? false) { // remove this condition once https://linear.app/beamapp/issue/BE-5478/exc-breakpoint-beambeamaccountremoteserverswift48-assertion-failed is fixed
+                    Task { @MainActor [weak self] in
+                        await self?.checkPrivateKey()
+                        self?.window?.state.reloadOfflineTabs()
+                    }
                 }
             }
         }.store(in: &cancellableScope)

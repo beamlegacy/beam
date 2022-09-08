@@ -57,9 +57,8 @@ class SigninTests: BaseTest {
     func testSignInUsingInvalidCredentials() throws {
         try XCTSkipIf(true, "Is duplicated by testConnectWithEmailUsernameSignInRequirements. To be refactored/removed")
         step("GIVEN I sign up an account and take credentials") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            deletePK = true
             uiMenu.showOnboarding()
                 .deletePrivateKeys()
         }
