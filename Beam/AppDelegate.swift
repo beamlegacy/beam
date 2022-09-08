@@ -670,7 +670,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         //More explanations here: https://www.thecave.com/2015/08/10/dispatch-async-to-main-queue-doesnt-work-with-modal-window-on-mac-os-x
         fullSyncOnQuitStatus = .ongoing
         Task { @MainActor in
-            _ = try await syncDataWithBeamObject(force: false, showAlert: false)
+            _ = try? await syncDataWithBeamObject(force: false, showAlert: false)
             Logger.shared.logDebug("Full sync finished. Asking again to quit, without full sync")
             self.fullSyncOnQuitStatus = .done
             NSApp.terminate(nil)
