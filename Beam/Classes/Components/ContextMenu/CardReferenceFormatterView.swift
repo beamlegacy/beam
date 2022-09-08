@@ -72,7 +72,7 @@ class CardReferenceFormatterView: FormatterView {
         self.onSelectCreate = onCreateNoteHandler
         self.initialText = initialText
         self.excludeElements = excludingElements
-        super.init(key: "CardReference", viewType: .inline)
+        super.init(key: "CardReference")
     }
 
     required init?(coder: NSCoder) {

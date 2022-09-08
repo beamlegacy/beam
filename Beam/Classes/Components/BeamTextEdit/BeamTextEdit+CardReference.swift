@@ -50,9 +50,9 @@ extension BeamTextEdit {
                                            prefix: Int = 2, suffix: Int = 2) {
         guard inlineFormatter?.isMouseInsideView != true else { return }
         hideInlineFormatter()
-        clearDebounceTimer()
+        clearAnyDelayedFormatterPresenting()
         guard let node = formatterTargetNode ?? (focusedWidget as? TextNode),
-              isInlineFormatterHidden else { return }
+              !isInlineFormatterPresented else { return }
         var atPoint = baseInlineFormatterPosition(for: node, cursorPosition: atPosition)
         atPoint.x -= 4
         atPoint.y += 8

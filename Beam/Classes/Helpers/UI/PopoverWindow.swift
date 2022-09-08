@@ -12,6 +12,11 @@ protocol PopoverWindowPresented: AnyObject {
     var presentingWindow: PopoverWindow? { get set }
 }
 
+protocol PopoverWindowContentView {
+    func popoverWindowDidClose()
+    func popoverWindowShouldAutoClose(validationBlock: @escaping (Bool) -> Void)
+}
+
 /// Use this class if you need a NSWindow that can close itself once it looses key status, if it hasn't been moved.
 class PopoverWindow: NSWindow {
 
@@ -40,14 +45,19 @@ class PopoverWindow: NSWindow {
         super.init(contentRect: .zero, styleMask: [.fullSizeContentView, .borderless], backing: .buffered, defer: false)
     }
 
+    private var popoverContentView: PopoverWindowContentView? {
+        if let contentView = contentView as? PopoverWindowContentView {
+            return contentView
+        } else if let subView = self.contentView?.subviews.first(where: { $0 is PopoverWindowContentView }) as? PopoverWindowContentView {
+            return subView
+        }
+        return nil
+    }
+
     override func close() {
         super.close()
-        if let contentView = self.contentView {
-            for subview in contentView.subviews {
-                guard let formatterView = subview as? FormatterView else { continue }
-                formatterView.didClose()
-            }
-        }
+
+        popoverContentView?.popoverWindowDidClose()
         self.contentView?.subviews.removeAll()
         self.didClose?()
     }
@@ -115,7 +125,13 @@ class PopoverWindow: NSWindow {
 
     override func resignKey() {
         if _autocloseIfNotMoved && !didMove {
-            close()
+            if let popoverContentView = popoverContentView {
+                popoverContentView.popoverWindowShouldAutoClose { [weak self] should in
+                    if should { self?.close() }
+                }
+            } else {
+                close()
+            }
             NotificationCenter.default.removeObserver(self, name: .init("NSWindowDidMoveNotification"), object: nil)
         }
         super.resignKey()
