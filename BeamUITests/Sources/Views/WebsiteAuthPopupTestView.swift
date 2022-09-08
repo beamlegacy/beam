@@ -11,14 +11,13 @@ import AppKit
 class WebsiteAuthPopupTestView: BaseView {
     
     func authenticate(_ login: String, _ password: String) -> AppWebsiteTestView {
-        textField(WebsiteAuthPopupViewLocators.TextFields.loginField.accessibilityIdentifier).doubleClick()
-        textField(WebsiteAuthPopupViewLocators.TextFields.loginField.accessibilityIdentifier).typeText(login)
+        textField(WebsiteAuthPopupViewLocators.TextFields.loginField.accessibilityIdentifier).tapInTheMiddle()
+        textField(WebsiteAuthPopupViewLocators.TextFields.loginField.accessibilityIdentifier).typeSlowly(login, everyNChar: 2)
 
-        secureTextField(WebsiteAuthPopupViewLocators.TextFields.passwordField.accessibilityIdentifier).doubleClick()
-        self.pasteText(textToPaste: password)
+        secureTextField(WebsiteAuthPopupViewLocators.TextFields.passwordField.accessibilityIdentifier).tapInTheMiddle()
+        secureTextField(WebsiteAuthPopupViewLocators.TextFields.passwordField.accessibilityIdentifier).typeSlowly(password, everyNChar: 2)
         
-        sleep(4) //temp solution between pasting and auth action
-        staticText(WebsiteAuthPopupViewLocators.Buttons.connectButton.accessibilityIdentifier).doubleClick()
+        staticText(WebsiteAuthPopupViewLocators.Buttons.connectButton.accessibilityIdentifier).tapInTheMiddle()
         
         return AppWebsiteTestView()
     }

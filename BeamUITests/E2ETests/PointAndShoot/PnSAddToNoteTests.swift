@@ -159,6 +159,7 @@ class PnSAddToNoteTests: BaseTest {
     func testCollectVideo() throws {
         testrailId("C1006")
         step ("WHEN I collect a video to Today's note"){
+            deleteAllNotes() // delete onboarding notes for the test
             uiMenu.loadUITestPageMedia()
             let itemToCollect = pnsView.app.groups.containing(.button, identifier:"Play Video").children(matching: .group).element.children(matching: .group).element
             pnsView.addToTodayNote(itemToCollect)
@@ -227,6 +228,7 @@ class PnSAddToNoteTests: BaseTest {
         let expectedNoteText = uiTestPageThree
         
         step ("Given I open Test page"){
+            deleteAllNotes() // delete onboarding notes for the test
             uiMenu.loadUITestPage3()
         }
         
@@ -429,6 +431,7 @@ class PnSAddToNoteTests: BaseTest {
         let pageToBeOpenedAfterLinkClick = webView.staticText("I-Beam")
         
         step("GIVEN I load a test page") {
+            deleteAllNotes() // delete onboarding notes for the test
             uiMenu.loadUITestPage3()
         }
         

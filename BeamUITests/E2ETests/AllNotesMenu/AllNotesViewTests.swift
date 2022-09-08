@@ -10,16 +10,7 @@ import XCTest
 
 class AllNotesViewTests: BaseTest {
     
-    var allNotesView: AllNotesTestView!
-    
-    override func setUp() {
-        step ("GIVEN I open All notes") {
-            setupStaging(withRandomAccount: true)
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            allNotesView = AllNotesTestView()
-            allNotesView.waitForAllNotesViewToLoad()
-        }
-    }
+    var allNotesView = AllNotesTestView()
     
     private func openAllNotesAndGetRowFor(noteTitle: String) -> RowAllNotesTestTable {
         //Open journal to trigger AllNotes updating (flakiness reproduced only on CI)
@@ -38,13 +29,11 @@ class AllNotesViewTests: BaseTest {
     }
     
     private func openAndRemoveAllFrom(note: String) {
-        let noteView = allNotesView.openNoteByName(noteTitle: note)
-        //flakiness workaround to make shortcuts actions applicable
-        noteView.waitForNoteViewToLoad()
+        let noteView = openNoteByTitle(note)
         noteView.waitForNoteTitleToBeVisible()
         noteView.getNoteNodeElementByIndex(0).tapInTheMiddle()
         selectAllNodesAndDeleteContent(view: noteView)
-        if noteView.getNumberOfVisibleNotes() > 1 {
+        if noteView.getNumberOfVisibleNodes() > 1 {
             selectAllNodesAndDeleteContent(view: noteView)
         }
         noteView.waitForNoteViewToLoad()
@@ -52,13 +41,17 @@ class AllNotesViewTests: BaseTest {
     
     func testAllNotesTableViewHeaderForSignedAccount() {
         testrailId("C737, C738")
-        let expectedUsername = self.getCredentials()?.username
-        let profileHyperlink = allNotesView.getProfileHyperlinkElement(username: expectedUsername!)
+        step ("GIVEN I open All notes") {
+            launchAndOpenAllNotes(signedIn: true)
+        }
+        
+        let expectedUsername = getCredentials()!.username
+        let profileHyperlink = allNotesView.getProfileHyperlinkElement(username: expectedUsername)
         
         step ("THEN I see correct Table title and Profile link as a signed in user") {
             shortcutHelper.shortcutActionInvoke(action: .close)
             allNotesView.waitForAllNotesViewToLoad()
-            XCTAssertTrue(allNotesView.staticText(expectedUsername!).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(allNotesView.staticText(expectedUsername).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(profileHyperlink.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
@@ -74,6 +67,11 @@ class AllNotesViewTests: BaseTest {
     func testNoteRenamingAppliedInAllNotes() {
         testrailId("C1180")
         let noteName = "Capture"
+        
+        step ("GIVEN I open All notes") {
+            launchAndOpenAllNotes()
+        }
+        
         step ("WHEN I rename the note") {
             let noteView = allNotesView.openNoteByName(noteTitle: noteName)
             noteView.waitForNoteViewToLoad()
@@ -84,7 +82,6 @@ class AllNotesViewTests: BaseTest {
         
         step ("THEN it is successfully renamed in All Notes") {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            allNotesView = AllNotesTestView()
             allNotesView.waitForAllNotesViewToLoad()
             XCTAssertFalse(allNotesView.isNoteNameAvailable(noteName))
             XCTAssertTrue(allNotesView.isNoteNameAvailable("Cap"))
@@ -97,7 +94,8 @@ class AllNotesViewTests: BaseTest {
         let linkNoteName = "How to beam"
         let linkedNoteName = "Capture"
         
-        step ("WHEN I remove links from \(linkNoteName)") {
+        step ("GIVEN I remove links from \(linkNoteName)") {
+            launchApp()
             openAndRemoveAllFrom(note: linkNoteName)
         }
         
@@ -126,9 +124,12 @@ class AllNotesViewTests: BaseTest {
         
         let rowIndex = 0
         
+        step ("GIVEN I open All notes") {
+            launchAndOpenAllNotes(signedIn: true)
+        }
+        
         step ("WHEN I publish first note") {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            allNotesView = AllNotesTestView()
             allNotesView.waitForAllNotesViewToLoad()
             allNotesView
                 .openMenuForSingleNote(rowIndex)
@@ -149,6 +150,10 @@ class AllNotesViewTests: BaseTest {
         testrailId("C724")
         let noteName = "How to beam"
         let wordsToAdd = "Here are_the words to-add"
+        
+        step ("GIVEN I open All notes") {
+            launchAndOpenAllNotes()
+        }
         
         step ("WHEN I remove words from \(noteName)") {
             openAndRemoveAllFrom(note: noteName)
@@ -175,6 +180,10 @@ class AllNotesViewTests: BaseTest {
         testrailId("C726")
         let expectedDate = DateHelper().getTodaysDateString(.allNotesViewDates)
         
+        step ("GIVEN I open All notes") {
+            launchAndOpenAllNotes()
+        }
+        
         step ("THEN by default the notes has correct today's '\(expectedDate)' date") {
             let tableRows = AllNotesTestTable().rows
             tableRows.forEach {
@@ -185,8 +194,12 @@ class AllNotesViewTests: BaseTest {
     
     func testShowDailyNotesFilter() throws {
         testrailId("C736")
-        let tableBeforeFilterApplied = AllNotesTestTable()
         
+        step ("GIVEN I open All notes") {
+            launchAndOpenAllNotes()
+        }
+        let tableBeforeFilterApplied = AllNotesTestTable()
+
         step ("WHEN I disable displaying of the Daily notes") {
             allNotesView.showDailyNotesClick()
                         .waitForAllNotesViewToLoad()

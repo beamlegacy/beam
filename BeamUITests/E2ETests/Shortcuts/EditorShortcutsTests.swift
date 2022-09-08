@@ -30,7 +30,7 @@ class EditorShortcutsTests: BaseTest {
         }
         
         step ("Then I see \(searchWord) link as a first note"){
-            XCTAssertEqual(noteView.getNumberOfVisibleNotes(), 1)
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 1)
             let actualNoteValue = noteView.getNoteNodeValueByIndex(0)
             XCTAssertTrue(actualNoteValue == searchWord + " - Google Search" ||
                           actualNoteValue == searchWord + " - Recherche Google" ||
@@ -44,7 +44,7 @@ class EditorShortcutsTests: BaseTest {
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             webView.openDestinationNote()
             XCTAssertTrue(noteView!.waitForTodayNoteViewToLoad())
-            XCTAssertEqual(noteView!.getNumberOfVisibleNotes(), 1)
+            XCTAssertEqual(noteView!.getNumberOfVisibleNodes(), 1)
             let actualNoteValue = noteView.getNoteNodeValueByIndex(0)
             XCTAssertTrue(actualNoteValue == searchWord + " - Google Search" ||
                           actualNoteValue == searchWord + " - Recherche Google" ||

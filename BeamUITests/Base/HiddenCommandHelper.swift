@@ -25,4 +25,27 @@ class HiddenCommandHelper {
         NoteTestView().waitForNoteViewToLoad()
         return NoteTestView()
     }
+    
+    @discardableResult
+    func deleteAllNotes() -> NoteTestView {
+        beeper.beep(identifier: UITestsHiddenMenuAvailableCommands.deleteAllNotes.rawValue)
+        return NoteTestView()
+    }
+}
+
+class HiddenNotificationHelper {
+
+    let beeper: CrossTargetBeeper = CrossTargetNotificationCenterBeeper()
+
+    init() { }
+
+    func waitForUserSignIn(timeout: TimeInterval) {
+        let dispatchGroup = DispatchGroup()
+        dispatchGroup.enter()
+        beeper.register(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue) {
+            dispatchGroup.leave()
+            self.beeper.unregister(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue)
+        }
+        _ = dispatchGroup.wait(timeout: .now() + timeout)
+    }
 }

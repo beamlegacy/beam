@@ -53,6 +53,8 @@ class CrossTargetHiddenNotificationsBuilder {
             switch hiddenId {
             case .openTodayNote:
                 openNote(journalDate: BeamDate.now)
+            case .deleteAllNotes:
+                deleteAllNotes()
             default: break
             }
             return
@@ -73,6 +75,12 @@ class CrossTargetHiddenNotificationsBuilder {
 
     private func open(note: BeamNote) {
         AppDelegate.main.window?.state.navigateToNote(note)
+    }
+    
+    private func deleteAllNotes() {
+        guard let collection = data?.currentDocumentCollection else { return }
+        let cmdManager = CommandManagerAsync<BeamDocumentCollection>()
+        cmdManager.deleteAllDocuments(in: collection)
     }
 
 }

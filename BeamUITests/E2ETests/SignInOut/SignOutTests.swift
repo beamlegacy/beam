@@ -17,8 +17,7 @@ class SignOutTests: BaseTest {
     
     override func setUp() {
         step("GIVEN I sign up creating 10 random notes") {
-            setupStaging(withRandomAccount: true)
-            webView.waitForWebViewToLoad()
+            signUpStagingWithRandomAccount()
         }
     }
     
@@ -32,7 +31,7 @@ class SignOutTests: BaseTest {
             allNotes.waitForAllNotesViewToLoad()
             //defaultNotes = AllNotesTestTable()
             shortcutHelper.shortcutActionInvoke(action: .showJournal)
-            uiMenu.create10Notes()
+            uiMenu.create10RandomNotes()
         }
         
         testrailId("C617")
@@ -90,7 +89,7 @@ class SignOutTests: BaseTest {
         var tableBeforeSignOut: AllNotesTestTable!
         
         step("GIVEN I get the All Notes table content") {
-            uiMenu.create10Notes()
+            uiMenu.create10RandomNotes()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
             tableBeforeSignOut = AllNotesTestTable()

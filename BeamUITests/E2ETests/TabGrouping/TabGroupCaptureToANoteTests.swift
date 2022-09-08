@@ -29,8 +29,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         testrailId("C981, C1053")
         step("Given I have one tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroup()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            createTabGroupAndSwitchToWeb()
         }
         
         step("When I capture the tab group") {
@@ -68,8 +67,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         testrailId("C981, C1054")
         step("Given I have one tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroupNamed()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            createTabGroupAndSwitchToWeb(named: true)
         }
         
         step("When I capture the tab group") {
@@ -105,8 +103,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         testrailId("C981, C1055")
         step("Given I have one tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroup()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            createTabGroupAndSwitchToWeb()
         }
         
         step("When I capture the tab group") {
@@ -135,8 +132,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         
         step("Given I have one tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroupNamed()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            createTabGroupAndSwitchToWeb(named: true)
         }
         
         step("When I capture the tab group to different notes") {

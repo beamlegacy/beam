@@ -12,7 +12,6 @@ class NotePublishTests: BaseTest {
     
     var noteView: NoteTestView!
     var allNotesView: AllNotesTestView!
-    var journalView: JournalTestView!
     let dialogView = DialogTestView()
     
     private func switchReloadAndAssert(noteName: String, isPublished: Bool = true) {
@@ -31,6 +30,7 @@ class NotePublishTests: BaseTest {
         step("Given I open all notes menu"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView = AllNotesTestView()
+            allNotesView.waitForAllNotesViewToLoad()
         }
         
         testrailId("C738")
@@ -71,13 +71,12 @@ class NotePublishTests: BaseTest {
     
     func testPublishUnpublishNote() throws {
 
-        journalView = setupStaging(withRandomAccount: true)
-        OmniBoxTestView().navigateToNoteViaPivotButton()
+        signUpStagingWithRandomAccount()
         let noteNameToBeCreated = "Test1"
         
         step("Given I create \(noteNameToBeCreated) note"){
             noteView = uiMenu.createAndOpenNote()
-            XCTAssertTrue(noteView.waitForNoteViewToLoad(), "Note view wasn't loaded")
+            noteView.waitForNoteViewToLoad()
         }
         
         testrailId("C752")
@@ -105,7 +104,7 @@ class NotePublishTests: BaseTest {
         }
         
         step("When I publish the note") {
-            journalView.shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             noteView.publishNote()
         }
         
@@ -114,7 +113,7 @@ class NotePublishTests: BaseTest {
         }
         
         step("When I delete the note") {
-            journalView.shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             noteView
                 .clickDeleteButton()
                 .confirmDeletion()
@@ -131,7 +130,8 @@ class NotePublishTests: BaseTest {
         let publishedNoteName = "Test1"
         
         step("GIVEN I created and publish a note") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
+            hiddenNotification.waitForUserSignIn(timeout: BaseTest.implicitWaitTimeout)
             uiMenu.createAndOpenPublishedNote()
             noteView = NoteTestView()
             noteView.waitForNoteViewToLoad()
@@ -151,8 +151,7 @@ class NotePublishTests: BaseTest {
         step("THEN profile web page is opened on profile link click") {
             noteView.getStagingProfileLinkElement().tapInTheMiddle()
             webView.waitForWebViewToLoad()
-            webView.activateSearchFieldFromTab(index: 1)
-            let tabURL = webView.getTabUrlAtIndex(index: 1)
+            let tabURL = webView.getTabUrlAtIndex(index: 0)
             XCTAssertTrue(tabURL.starts(with: self.stagingEnvironmentServerAddress), "\(tabURL) doesn't start with staging environment server address: \(self.stagingEnvironmentServerAddress)")
             XCTAssertTrue(webView.staticText(publishedNoteName).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
@@ -188,7 +187,8 @@ class NotePublishTests: BaseTest {
         let noteNameToBeCreated = "Test1"
 
         step("GIVEN I created and publish a note") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
+            hiddenNotification.waitForUserSignIn(timeout: BaseTest.implicitWaitTimeout)
             uiMenu.createAndOpenPublishedNote()
             noteView = NoteTestView()
         }
@@ -252,7 +252,8 @@ class NotePublishTests: BaseTest {
         let apps = ["Mail", "Messages"]
         
         step("Given I created and publish a note") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
+            hiddenNotification.waitForUserSignIn(timeout: BaseTest.implicitWaitTimeout)
             uiMenu.createAndOpenPublishedNote()
             noteView = NoteTestView()
         }

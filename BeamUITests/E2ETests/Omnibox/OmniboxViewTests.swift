@@ -118,6 +118,7 @@ class OmniboxViewTests: BaseTest {
         let noteBTitle = "Test2"
 
         step("Given I have at least 4 notes"){
+            deleteAllNotes() // delete onboarding notes
             //Open is required to make it appear in autocomplete
             uiMenu.createAndOpenNote()
             uiMenu.createAndOpenNote()

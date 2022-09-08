@@ -297,13 +297,24 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     }
 
     private func signInWithTestAccount() {
-        guard !AuthenticationManager.shared.isAuthenticated else { return }
+        signInWithTestAccount { [weak self] signedIn in
+            guard signedIn else { return }
+            self?.beeper.beep(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue)
+        }
+    }
+
+    private func signInWithTestAccount(completionHandler: @escaping (Bool) -> Void) {
+        guard !AuthenticationManager.shared.isAuthenticated else {
+            completionHandler(false)
+            return
+        }
 
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
         currentAccount?.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
+            defer { completionHandler(true) }
             if case .failure(let error) = result {
                 fatalError(error.localizedDescription)
             }
@@ -311,8 +322,16 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     }
 
     private func signUpWithRandomTestAccount() {
+        signUpWithRandomTestAccount { [weak self] signedIn in
+            guard signedIn else { return }
+            self?.beeper.beep(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue)
+        }
+    }
+
+    private func signUpWithRandomTestAccount(completionHandler: @escaping (Bool) -> Void) {
         guard !AuthenticationManager.shared.isAuthenticated else {
             showAlert("Already authenticated", "You are already authenticated")
+            completionHandler(false)
             return
         }
 
@@ -326,6 +345,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
             if case .failure(let error) = result {
                 DispatchQueue.main.async {
                     self.showAlert("Cannot sign up", "Cannot sign up with \(email): \(error.localizedDescription)")
+                    completionHandler(false)
                 }
                 return
             }
@@ -333,10 +353,12 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
                 if case .failure(let error) = result {
                     DispatchQueue.main.async {
                         self.showAlert("Cannot sign in", "Cannot sign in with \(email): \(error.localizedDescription)")
+                        completionHandler(false)
                     }
                 } else {
                     currentAccount?.setUsername(username: username) { result in
                         DispatchQueue.main.async {
+                            defer { completionHandler(true) }
                             switch result {
                             case .failure(let error):
                                 let errorMessage: String?
