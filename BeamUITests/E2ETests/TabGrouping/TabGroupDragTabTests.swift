@@ -15,8 +15,7 @@ class TabGroupDragTabTests: BaseTest {
     override func setUp() {
         step("Given I have a tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroup()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            createTabGroupAndSwitchToWeb()
         }
     }
     

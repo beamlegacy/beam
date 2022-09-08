@@ -16,9 +16,8 @@ class TabGroupSharingFromBrowserTests: BaseTest {
     
     private func createTabGroupOnStaging(){
         step("Given I open Share Tab Group Menu being logged in") {
-            setupStaging(withRandomAccount: true)
-            uiMenu.createTabGroup()
-            tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
+            signUpStagingWithRandomAccount()
+            createTabGroupAndSwitchToWeb()
             tabGroupMenu.openTabGroupMenu(index: 0)
                 .clickTabGroupMenu(.tabGroupShareGroup)
         }
@@ -27,8 +26,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
     private func createTabGroupWithoutBeingLogged(){
         step("Given I open Share Tab Group Menu without being logged in") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroup()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            createTabGroupAndSwitchToWeb()
             tabGroupMenu.openTabGroupMenu(index: 0)
                 .clickTabGroupMenu(.tabGroupShareGroup)
         }

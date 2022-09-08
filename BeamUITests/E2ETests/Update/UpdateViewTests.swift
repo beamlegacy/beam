@@ -44,6 +44,7 @@ class UpdateViewTests: BaseTest {
         step ("Then it is visible in All notes view"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             let allNotesView = AllNotesTestView()
+            allNotesView.waitForAllNotesViewToLoad()
             XCTAssertTrue(allNotesView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
     }

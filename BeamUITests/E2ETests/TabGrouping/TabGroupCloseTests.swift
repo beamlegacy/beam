@@ -16,9 +16,8 @@ class TabGroupCloseTests: BaseTest {
     override func setUp() {
         step("Given I have a tab group") {
             journalTestView = launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroup()
             testrailId("C936")
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            createTabGroupAndSwitchToWeb()
         }
     }
     

@@ -13,20 +13,20 @@ class AllNotesDeleteTests: BaseTest {
     var allNotesView = AllNotesTestView()
     var journalView: JournalTestView!
     
+    let indexOfNote = 0
+    
     override func setUp() {
-        step("GIVEN I launch app and create a note") {
+        step("Given I create a note and switch to All Notes") {
             launchApp()
             uiMenu.createNote()
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotesView.waitForAllNotesViewToLoad()
+            XCTAssertTrue(allNotesView.getNumberOfNotes() == 5)
         }
     }
     
     func testDeleteAllNotes() {
         testrailId("C963")
-        step ("Given I create a note and switch to All Notes"){
-            uiMenu.createNote()
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            XCTAssertTrue(allNotesView.getNumberOfNotes() == 3)
-        }
 
         step ("Then I successfully delete all notes"){
             allNotesView.deleteAllNotes()
@@ -36,16 +36,6 @@ class AllNotesDeleteTests: BaseTest {
     
     func testDeleteSingleNote() throws {
         testrailId("C716")
-        let indexOfNote = 1
-        
-        var notesBeforeDeletion: Int!
-        
-        step ("Given I create a note and switch to All Notes"){
-            uiMenu.createNote()
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            notesBeforeDeletion = allNotesView.getNumberOfNotes()
-            XCTAssertTrue(notesBeforeDeletion == 3)
-        }
 
         step ("Then I successfully delete a note at \(indexOfNote) index"){
             let noteName = allNotesView.getNoteNameValueByIndex(indexOfNote)
@@ -54,7 +44,7 @@ class AllNotesDeleteTests: BaseTest {
                 .selectActionInMenu(.deleteNotes)
             AlertTestView().confirmDeletion()
 
-            XCTAssertEqual(allNotesView.getNumberOfNotes(), notesBeforeDeletion - 1)
+            XCTAssertEqual(allNotesView.getNumberOfNotes(), 4)
             XCTAssertFalse(allNotesView.isNoteNameAvailable(noteName))
         }
 
@@ -62,14 +52,7 @@ class AllNotesDeleteTests: BaseTest {
     
     func testUndoDeleteNoteAction() throws {
         testrailId("C716")
-        let indexOfNote = 0
         var noteName : String!
-        var notesBeforeDeletion: Int!
-        
-        step ("Given I switch to All Notes") {
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            notesBeforeDeletion = allNotesView.getNumberOfNotes()
-        }
         
         testrailId("C527")
         step ("When I delete created note from All Notes view and undo it") {
@@ -81,7 +64,7 @@ class AllNotesDeleteTests: BaseTest {
         step ("Then deleted note appears in the list again") {
             allNotesView.waitForAllNotesViewToLoad()
             allNotesView.waitForNoteTitlesToAppear()
-            XCTAssertEqual(allNotesView.getNumberOfNotes(), notesBeforeDeletion)
+            XCTAssertEqual(allNotesView.getNumberOfNotes(), 5)
             XCTAssertTrue(allNotesView.isNoteNameAvailable(noteName))
         }
     }

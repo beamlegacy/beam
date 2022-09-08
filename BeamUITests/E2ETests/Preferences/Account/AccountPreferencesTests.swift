@@ -12,10 +12,11 @@ class AccountPreferencesTests: BaseTest {
     
     var accountView: AccountTestView!
     var alertView: AlertTestView!
+    let allNotes = AllNotesTestView()
     
     override func setUp() {
         step ("GIVEN I sign up with new account") {
-            setupStaging(withRandomAccount: true)
+            signUpStagingWithRandomAccount()
         }
     }
     
@@ -46,7 +47,7 @@ class AccountPreferencesTests: BaseTest {
         testrailId("C624")
         step ("GIVEN I add some notes and open Account preferences") {
             uiMenu.resizeSquare1000()
-            uiMenu.create10Notes()
+            uiMenu.create10RandomNotes()
             self.openAccountPrefs()
             accountView = AccountTestView()
             XCTAssertTrue(accountView.staticText(AccountViewLocators.StaticTexts.deleteDBLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -61,12 +62,12 @@ class AccountPreferencesTests: BaseTest {
         step ("THEN I see all notes") {
             shortcutHelper.shortcutActionInvoke(action: .close)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            AllNotesTestView().waitForAllNotesViewToLoad()
+            allNotes.waitForAllNotesViewToLoad()
             XCTAssertGreaterThan(AllNotesTestTable().numberOfVisibleItems, 10)
         }
         
         step ("WHEN I confirm Deletion of the DB") {
-            self.openAccountPrefs()
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             accountView
                 .clickDeleteDBButton()
                 .getAlertDialog().buttons[AlertViewLocators.Buttons.deleteButton.accessibilityIdentifier].clickOnExistence()
@@ -82,7 +83,7 @@ class AccountPreferencesTests: BaseTest {
                 .clickSkipButton()
                 .waitForJournalViewToLoad()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            AllNotesTestView().waitForAllNotesViewToLoad()
+            allNotes.waitForAllNotesViewToLoad()
         }
         
         step ("THEN default notes are displayed" ) {
