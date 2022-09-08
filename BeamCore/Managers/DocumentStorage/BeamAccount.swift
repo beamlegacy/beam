@@ -293,7 +293,14 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
             store.close()
             self.grdbStore = nil
         }
-        objectManager.unregisterAll()
+
+        // Do not unregister objectManager managers here.
+        // For every BeamAccount created (for example during the check for legacy data migration))
+        // we create a temp instance of BeamAccount
+        // When this instance is deallocated, the BeamObject manager will loose all existing registered managers
+        
+//        objectManager.unregisterAll()
+
     }
 
     func delete(_ source: BeamDocumentSource) throws {

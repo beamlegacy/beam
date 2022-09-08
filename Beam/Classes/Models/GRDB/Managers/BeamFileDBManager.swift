@@ -189,7 +189,14 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
         self.grdbStore = store
         try super.init(store: store)
 
-        registerOnBeamObjectManager(objectManager)
+
+        // Do not register now, as every new instance will override the current instance owned
+        // by BeamObjectManager.
+        // Not that we should do better and avoid having a global BeamObjectManager
+        // and multiple accounts
+
+//         registerOnBeamObjectManager(objectManager)
+
     }
 
     override func prepareMigration(migrator: inout DatabaseMigrator) throws {
