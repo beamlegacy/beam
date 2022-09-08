@@ -64,8 +64,12 @@ class CalendarPickerFormatterView: FormatterView {
 
     var onDateChange: ((Date) -> Void)?
     var onDismiss: ((Bool) -> Void)?
-    convenience init() {
-        self.init(key: "CalendarPicker", viewType: .inline)
+
+    init() {
+        super.init(key: "CalendarPicker")
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {

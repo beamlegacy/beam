@@ -10,17 +10,12 @@ import SwiftUI
 import BeamCore
 
 // Base Class for any formatting view
-class FormatterView: NSView {
+class FormatterView: NSView, PopoverWindowContentView {
 
     static let appearAnimationDuration = 0.3
     static let disappearAnimationDuration = 0.15
 
-    enum FormatterViewType {
-        case inline
-    }
-
     internal var key: String = ""
-    internal var viewType: FormatterViewType = .inline
 
     var idealSize: CGSize {
         return .zero
@@ -34,12 +29,15 @@ class FormatterView: NSView {
         false
     }
 
+    var shouldDebouncePresenting: Bool {
+        false
+    }
+
     var isMouseInsideView = false
-    private var isVisible = false
-    init(key: String, viewType: FormatterViewType) {
+    private(set) var isVisible = false
+    init(key: String) {
         super.init(frame: .zero)
         self.key = key
-        self.viewType = viewType
         self.setupUI()
     }
 
@@ -56,10 +54,15 @@ class FormatterView: NSView {
 
     func animateOnAppear(completionHandler: (() -> Void)? = nil) {
         isVisible = true
+        if shouldDebouncePresenting {
+            self.window?.makeKeyAndOrderFront(nil)
+        }
+        completionHandler?()
     }
 
     func animateOnDisappear(completionHandler: (() -> Void)? = nil) {
         isVisible = false
+        completionHandler?()
     }
 
     private var customTrackingArea: NSTrackingArea?
@@ -103,6 +106,17 @@ class FormatterView: NSView {
 
     func formatterHandlesInputText(_ text: String) -> Bool {
         false
+    }
+
+    // MARK: - PopoverWindow handling
+    func popoverWindowDidClose() {
+        didClose()
+    }
+
+    func popoverWindowShouldAutoClose(validationBlock: @escaping (Bool) -> Void) {
+        animateOnDisappear {
+            validationBlock(true)
+        }
     }
 }
 

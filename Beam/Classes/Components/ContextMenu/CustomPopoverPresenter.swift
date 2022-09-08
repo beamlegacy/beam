@@ -95,11 +95,10 @@ final class CustomPopoverPresenter {
         window?.setView(with: container, at: rect.origin)
         window?.setContentSize(rect.size)
         presentedFormatterViews.append(view)
-
         if animated {
             DispatchQueue.main.async { view.animateOnAppear() }
         }
-        if view.canBecomeKeyView {
+        if view.canBecomeKeyView && !view.shouldDebouncePresenting {
             window?.makeKeyAndOrderFront(nil)
         }
 
