@@ -160,6 +160,8 @@ class HyperlinkFormatterView: FormatterView {
     private var originalUrlValue: String?
     private var originalTitleValue: String?
     private var subviewModel = HyperlinkEditorViewModel()
+    private let debouncePresenting: Bool
+    private let shouldAutoDismiss: Bool
 
     override var idealSize: CGSize {
         HyperlinkEditorView.idealSize
@@ -171,6 +173,20 @@ class HyperlinkFormatterView: FormatterView {
 
     override var canBecomeKeyView: Bool {
         true
+    }
+
+    override var shouldDebouncePresenting: Bool {
+        debouncePresenting
+    }
+
+    init(debouncePresenting: Bool = true, autoDismiss: Bool = true) {
+        self.debouncePresenting = debouncePresenting
+        self.shouldAutoDismiss = autoDismiss
+        super.init(key: "HyperlinkFormatter")
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
@@ -249,8 +265,12 @@ extension HyperlinkFormatterView {
         self.editingUrl = url ?? self.editingUrl
     }
 
-    func hasEditedUrl() -> Bool {
-        return editingUrl != originalUrlValue || editingTitle != originalTitleValue
+    var canBeAutomaticallyDismissed: Bool {
+        shouldAutoDismiss && !hasEditedUrl
+    }
+
+    var hasEditedUrl: Bool {
+        editingUrl != originalUrlValue || editingTitle != originalTitleValue
     }
 
     func startEditingUrl() {
