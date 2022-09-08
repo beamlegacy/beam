@@ -128,7 +128,7 @@ extension XCUIElement: WaitHelper {
     
     @discardableResult
     public func hoverAndTapInTheMiddle() -> XCUIElement {
-        self.hover()
+        self.hoverInTheMiddle()
         self.tapInTheMiddle()
         return self
     }

@@ -26,7 +26,6 @@ class BaseTest: XCTestCase {
     let incorrectPassword = "Incorrect1"
     let username = "AutomationTestSignin"
     let host = "form.lvh.me"
-    let mockBaseUrl = "http://form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
     let stagingEnvironmentServerAddress = "staging-web-server.ew.r.appspot.com"
     
     let uiTestPageOne = "Point And Shoot Test Fixture Ultralight Beam"
@@ -36,16 +35,16 @@ class BaseTest: XCTestCase {
     
     let copyLinkShareAction = "Copy Link"
     
+    let welcomeTourURL = "https://welcometour.beamapp.co"
+    
     let uiMenu = UITestsMenuBar()
     let hiddenCommand = HiddenCommandHelper()
+    let hiddenNotification = HiddenNotificationHelper()
     let shortcutHelper = ShortcutsHelper()
     let mockPage = MockHTTPWebPages()
     let passwordManagerHelper = PasswordManagerHelper()
     var webView = WebTestView()
     var app = XCUIApplication()
-    
-    var deletePK = false
-    var deleteRemoteAccount = false
 
     struct AccountInformation {
         let email: String
@@ -60,23 +59,19 @@ class BaseTest: XCTestCase {
     }
     
     override func tearDown() {
-        if deleteRemoteAccount {
-            uiMenu.deleteRemoteAccount().resetAPIEndpoints()
-        }
+        uiMenu.deleteRemoteAccount()
         if isAppRunning() {
             storeScreenshot()
             uiMenu.destroyDB()
-            sleep(1) //wait untill DB is destroyed to be used
+            usleep(500) //wait until DB is destroyed to be used
         }
-        if deletePK {
-            uiMenu.deletePrivateKeys()
-        }
+        uiMenu.deletePrivateKeys()
         self.clearPasteboard()
         super.tearDown()
         terminateAppInstance()
     }
     
-    func waitUntiAppIsNotRunningFor(timeout: TimeInterval = TimeInterval(5)) -> Bool {
+    func waitUntilAppIsNotRunningFor(timeout: TimeInterval = TimeInterval(5)) -> Bool {
         let now = NSTimeIntervalSince1970
         while isAppRunning() && NSTimeIntervalSince1970 < now + timeout {
             usleep(1000)
@@ -94,7 +89,7 @@ class BaseTest: XCTestCase {
     @discardableResult
     func launchApp(storeSessionWhenTerminated: Bool = false,
                    preventSessionRestore: Bool = false) -> JournalTestView {
-        return launchAppWithArguments([],
+        return launchAppWithArguments([uiTestModeLaunchArgument],
                                       storeSessionWhenTerminated: storeSessionWhenTerminated,
                                       preventSessionRestore: preventSessionRestore)
     }
@@ -117,9 +112,24 @@ class BaseTest: XCTestCase {
         var args: [String] = arguments
         args.append(contentsOf: ["-NSQuitAlwaysKeepsWindows", storeSessionWhenTerminated ? "1" : "0"])
         args.append(contentsOf: ["-WindowsRestorationPrevented", preventSessionRestore ? "1" : "0"])
+        args.append(uiTestModeLaunchArgument)
         app.launchArguments = args
         app.launch()
         return JournalTestView()
+    }
+    
+    @discardableResult
+    func launchAndOpenAllNotes(signedIn: Bool = false) -> AllNotesTestView {
+        launchApp().waitForJournalViewToLoad()
+        if signedIn {
+            uiMenu.setAPIEndpointsToStaging()
+            uiMenu.signUpWithRandomTestAccount()
+            _ = webView.waitForTabUrlAtIndexToEqual(index: 0, expectedString: welcomeTourURL)
+        }
+        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+        let allNotesView = AllNotesTestView()
+        allNotesView.waitForAllNotesViewToLoad()
+        return allNotesView
     }
 
     /// terminateImmediately means the app won't receive the proper termination events (aka applicationShouldTerminate),
@@ -141,6 +151,7 @@ class BaseTest: XCTestCase {
         var args: [String] = arguments
         args.append(contentsOf: ["-NSQuitAlwaysKeepsWindows", storeSessionWhenTerminated ? "1" : "0"])
         args.append(contentsOf: ["-WindowsRestorationPrevented", preventSessionRestore ? "1" : "0"])
+        args.append(uiTestModeLaunchArgument)
         app.launchArguments = args
         app.launch()
         return JournalTestView()
@@ -161,6 +172,11 @@ class BaseTest: XCTestCase {
     func openNoteByTitle(_ title: String) -> NoteTestView {
         hiddenCommand.openNote(title: title)
     }
+    
+    @discardableResult
+    func deleteAllNotes() -> NoteTestView {
+        hiddenCommand.deleteAllNotes()
+    }
 
     func terminateAppInstance() {
         if isAppRunning() {
@@ -174,7 +190,7 @@ class BaseTest: XCTestCase {
     
     @discardableResult
     func launchAppAndOpenTodayNote() -> NoteTestView {
-        launchApp()
+        launchApp().waitForJournalViewToLoad()
         return openTodayNote()
     }
     
@@ -184,19 +200,10 @@ class BaseTest: XCTestCase {
     }
     
     @discardableResult
-    func setupStaging(withRandomAccount: Bool = false, waitingForWebViewToLoad: Bool = true) -> JournalTestView {
-        deleteRemoteAccount = true
-        deletePK = true
-        
-        let journalView = launchAppWithArgument(uiTestModeLaunchArgument)
-        
-        uiMenu.setAPIEndpointsToStaging()
-        if withRandomAccount {
-            uiMenu.signUpWithRandomTestAccount()
-            if waitingForWebViewToLoad {
-                webView.waitForWebViewToLoad()
-            }
-        }
+    func signUpStagingWithRandomAccount() -> JournalTestView {
+        let journalView = launchApp()
+        journalView.waitForJournalViewToLoad()
+        uiMenu.signUpWithRandomTestAccount()
         return journalView
     }
 
@@ -246,7 +253,6 @@ class BaseTest: XCTestCase {
     func captureGroupToNoteAndOpenNote() {
         let tabGroupMenu = TabGroupMenuView()
         
-        tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
         tabGroupMenu.captureTabGroup(index: 0)
         tabGroupMenu.closeTabGroup(index: 0)
         openTodayNote()
@@ -266,6 +272,17 @@ class BaseTest: XCTestCase {
     
     func moveMouseOutOfTheWay() {
         app.windows.firstMatch.coordinate(withNormalizedOffset: .zero).hover()
+    }
+    
+    func createTabGroupAndSwitchToWeb(named: Bool = false) {
+        if named {
+            uiMenu.createTabGroupNamed()
+        } else {
+            uiMenu.createTabGroup()
+        }
+        shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+        webView.waitForWebViewToLoad()
+        TabGroupMenuView().waitForTabGroupToBeDisplayed(index: 0)
     }
     
     func typeAndEditHardcodedText (_ view: BaseView) -> String {

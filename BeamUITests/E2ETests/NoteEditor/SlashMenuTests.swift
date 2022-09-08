@@ -69,7 +69,7 @@ class SlashMenuTests: BaseTest {
 
         step("Then divider appears in the note area"){
             XCTAssertTrue(noteTestView.splitter(NoteViewLocators.Splitters.noteDivider.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertEqual(noteTestView.getNumberOfVisibleNotes(), 3)
+            XCTAssertEqual(noteTestView.getNumberOfVisibleNodes(), 3)
             XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(0), row1Text + " ")
             XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(1), emptyString)
             XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(2), row2Text)
@@ -177,7 +177,9 @@ class SlashMenuTests: BaseTest {
         
         step("And note with \(noteNameToBeCreated) name appears in All notes menu list"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            XCTAssertTrue(AllNotesTestView().isNoteNameAvailable(noteNameToBeCreated))
+            let allNotesView = AllNotesTestView()
+            allNotesView.waitForAllNotesViewToLoad()
+            XCTAssertTrue(allNotesView.isNoteNameAvailable(noteNameToBeCreated))
         }
     }
 }

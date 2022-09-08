@@ -20,13 +20,7 @@ class TabGroupInOmniboxTests: BaseTest {
     let tabGroupNamed = "Test1"
 
     private func createAndCaptureTabGroup (named: Bool){
-        if named {
-            uiMenu.createTabGroupNamed()
-        } else {
-            uiMenu.createTabGroup()
-        }
-        shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-        tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
+        createTabGroupAndSwitchToWeb(named: named)
         tabGroupMenu.captureTabGroup(index: 0)
     }
     
@@ -178,11 +172,8 @@ class TabGroupInOmniboxTests: BaseTest {
     func testShareTabGroup() throws {
         testrailId("C1163")
         step("Given I capture an unnamed tab group") {
-            setupStaging(withRandomAccount: true)
-            webView.closeTab() // workaround for BE-5275
-            uiMenu.createTabGroup()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
+            signUpStagingWithRandomAccount()
+            createTabGroupAndSwitchToWeb()
             tabGroupMenu.captureTabGroup(index: 0)
         }
         
@@ -204,10 +195,7 @@ class TabGroupInOmniboxTests: BaseTest {
         testrailId("C1173")
         step("Given I create an unnamed tab group") {
             launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-            uiMenu.createTabGroupNamed()
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            webView.waitForWebViewToLoad()
-            tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
+            createTabGroupAndSwitchToWeb(named: true)
         }
         
         step("When I open tab group in omnibox") {

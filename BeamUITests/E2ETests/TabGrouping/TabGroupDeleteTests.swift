@@ -17,12 +17,8 @@ class TabGroupDeleteTests: BaseTest {
     let tabGroupNamed = "Test1"
     
     private func setUpSharedNotCapturedTabGroup() {
-        setupStaging(withRandomAccount: true)
-        webView.closeTab()
-        JournalTestView().waitForJournalViewToLoad()
-        uiMenu.createTabGroupNamed()
-        shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-        tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
+        signUpStagingWithRandomAccount()
+        createTabGroupAndSwitchToWeb(named: true)
         tabGroupMenu.openTabGroupMenu(index: 0)
             .clickTabGroupMenu(.tabGroupShareGroup)
             .shareTabGroupAction(copyLinkShareAction)
@@ -31,8 +27,7 @@ class TabGroupDeleteTests: BaseTest {
     
     private func setUpCapturedNotSharedTabGroup() {
         launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-        uiMenu.createTabGroupNamed()
-        shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+        createTabGroupAndSwitchToWeb(named: true)
         captureGroupToNoteAndOpenNote()
     }
     

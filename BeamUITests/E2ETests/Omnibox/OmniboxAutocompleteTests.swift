@@ -60,7 +60,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
 
         step("Then results back to default, search field is empty focused"){
-            XCTAssertLessThanOrEqual(omniboxView.getNoteAutocompleteElementQuery().count, 1) // default shows 1 today note
+            XCTAssertLessThanOrEqual(omniboxView.getNoteAutocompleteElementQuery().count, 3)
             XCTAssertEqual(omniboxView.getSearchFieldValue(), emptyString)
             XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
         }
