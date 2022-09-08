@@ -9,7 +9,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        guard fullSyncRunning.compareExchange(expected: false, desired: true, ordering: .acquiring).exchanged else {
+        guard fullSyncRunning.compareExchange(expected: false, desired: true, ordering: .acquiringAndReleasing).exchanged else {
             throw BeamObjectManagerError.fullSyncAlreadyRunning
         }
 
