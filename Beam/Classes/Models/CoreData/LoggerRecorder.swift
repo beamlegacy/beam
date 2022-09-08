@@ -1,6 +1,7 @@
 import Foundation
 import BeamCore
 import os
+import Atomics
 
 class LoggerRecorder {
     public static var shared = LoggerRecorder()
@@ -16,8 +17,23 @@ class LoggerRecorder {
         lock.lock()
         defer { lock.unlock() }
 
+        let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        let counter = ManagedAtomic(0)
+
         Logger.shared.callback = { (message, level, category, thread, duration) in
-            CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
+            while true {
+                let counterValue = counter.load(ordering: .acquiring)
+                if counterValue >= 100 {
+                    let oslogger = Logger(subsystem: "co.beamapp.macos", category: "logger")
+                    oslogger.info("LoggerRecorder overwhelmed, dropping log.")
+                    return
+                }
+                if counter.compareExchange(expected: counterValue, desired: counterValue+1, ordering: .acquiringAndReleasing).exchanged {
+                    break
+                }
+            }
+
+            context.perform {
                 let logEntry = LogEntry(context: context)
                 logEntry.created_at = BeamDate.now
                 logEntry.log = "[\(thread)] \(message)"
@@ -41,6 +57,8 @@ class LoggerRecorder {
                 } catch {
                     Logger.shared.logDebug("Unable to save LoggerRecorder context: \(error.localizedDescription)", category: .coredata)
                 }
+
+                counter.wrappingDecrement(ordering: .acquiringAndReleasing)
             }
         }
     }
