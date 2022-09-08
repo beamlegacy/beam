@@ -5,16 +5,8 @@
 //  Created by Ravichandrane Rajendran on 03/01/2021.
 //
 
-import Cocoa
+import AppKit
 import BeamCore
-
-extension BeamTextEdit {
-    enum FormatterKind {
-        case none
-        case custom
-        case native
-    }
-}
 
 extension BeamTextEdit {
 
@@ -24,11 +16,9 @@ extension BeamTextEdit {
 
     private static var bottomAnchor: NSLayoutConstraint?
     private static var centerXAnchor: NSLayoutConstraint?
-    private static var debounceKeyEventTimer: Timer?
-    private static var debounceMouseEventTimer: Timer?
 
-    private static var formatterPresentDelay: TimeInterval = 0.7
-    private static var formatterDismissDelay: TimeInterval = 0.2
+    // We can only have one presenter per beam app. For now.
+    private static var delayedFormatterPresenter = DelayedFormatterPresenter()
 
     static var formatterPlaceholderAttribute: BeamText.Attribute {
         let placeholderDecoration: [NSAttributedString.Key: Any] = [
@@ -50,41 +40,29 @@ extension BeamTextEdit {
 
     private func initInlineTextFormatter() {
         guard inlineFormatter == nil else { return }
-        let formatterView = TextFormatterView(key: "TextFormatter", viewType: .inline)
+        let formatterView = TextFormatterView()
         formatterView.items = BeamTextEdit.textFormatterType
         formatterView.delegate = self
         inlineFormatter = formatterView
         prepareInlineFormatterWindowBeforeShowing(formatterView, atPoint: .zero)
     }
 
-    internal func initInlineFormatterView(isHyperlinkView: Bool = false) {
-        guard inlineFormatter == nil else { return }
-
-        if isHyperlinkView {
-            initHyperlinkFormatter()
-        } else {
-            let formatterView = TextFormatterView(key: "TextFormatter", viewType: .inline)
-            formatterView.items = BeamTextEdit.textFormatterType
-            formatterView.delegate = self
-            inlineFormatter = formatterView
-        }
-        guard let formatterView = inlineFormatter else { return }
-        prepareInlineFormatterWindowBeforeShowing(formatterView, atPoint: .zero)
-    }
-
     // MARK: - Methods
 
-    func debounceShowHideInlineFormatter(_ show: Bool, completionHandler: (() -> Void)? = nil) {
-        let delay = show ? Self.formatterPresentDelay : Self.formatterDismissDelay
-        BeamTextEdit.debounceMouseEventTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false, block: { [weak self] (_) in
+    private func debounceShowHideInlineFormatter(_ show: Bool, completionHandler: (() -> Void)? = nil) {
+        let block: () -> Void = { [weak self] in
             guard let self = self else { return }
-
-            if show || self.inlineFormatter?.isMouseInsideView == false {
-                self.showOrHideInlineFormatter(isPresent: show)
-                completionHandler?()
+            if show || self.inlineFormatter?.isMouseInsideView != true {
+                self.showOrHideInlineFormatter(isPresent: show, completionHandler: completionHandler)
             }
-            self.clearDebounceTimer()
-        })
+            self.clearAnyDelayedFormatterPresenting()
+        }
+        let key = inlineFormatter?.key ?? ""
+        if show {
+            Self.delayedFormatterPresenter.present(key: key, completion: block)
+        } else {
+            Self.delayedFormatterPresenter.dismiss(key: key, completion: block)
+        }
     }
 
     /// This will put the formatter in a window, but you need to call showOrHideInlineFormatter to actually make it visible.
@@ -109,7 +87,7 @@ extension BeamTextEdit {
         guard showInlineTextFormatterIfNeeded() else { return }
         updateInlineFormatterView(isKeyEvent: isKeyEvent)
 
-        if isInlineFormatterHidden {
+        if !isInlineFormatterPresented {
             showOrHideInlineFormatter(isPresent: true)
         }
     }
@@ -120,11 +98,19 @@ extension BeamTextEdit {
     }
 
     func showInlineFormatter(completionHandler: (() -> Void)? = nil) {
-        showOrHideInlineFormatter(isPresent: true, completionHandler: completionHandler)
+        if inlineFormatter?.shouldDebouncePresenting == true {
+            debounceShowHideInlineFormatter(true, completionHandler: completionHandler)
+        } else {
+            showOrHideInlineFormatter(isPresent: true, completionHandler: completionHandler)
+        }
     }
 
-    func hideInlineFormatter(completionHandler: (() -> Void)? = nil) {
-        showOrHideInlineFormatter(isPresent: false, completionHandler: completionHandler)
+    func hideInlineFormatter(skipDebounce: Bool = false, completionHandler: (() -> Void)? = nil) {
+        if inlineFormatter?.shouldDebouncePresenting == true && !skipDebounce {
+            debounceShowHideInlineFormatter(false, completionHandler: completionHandler)
+        } else {
+            showOrHideInlineFormatter(isPresent: false, completionHandler: completionHandler)
+        }
     }
 
     private func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false, completionHandler: (() -> Void)? = nil) {
@@ -135,16 +121,12 @@ extension BeamTextEdit {
 
         if isPresent {
             DispatchQueue.main.async {
-                formatterView.animateOnAppear { [weak self] in
-                    self?.displayedInlineFormatterKind = .custom
-                    completionHandler?()
-                }
+                formatterView.animateOnAppear(completionHandler: completionHandler)
             }
         } else {
             formatterView.animateOnDisappear { [weak self] in
                 (formatterView.window as? PopoverWindow)?.close()
                 self?.window?.makeKey()
-                self?.displayedInlineFormatterKind = .none
                 completionHandler?()
             }
             dismissFormatterView(formatterView, removeView: isDragged, animated: false)
@@ -153,18 +135,18 @@ extension BeamTextEdit {
 
     internal func updateInlineFormatterView(isDragged: Bool = false, isKeyEvent: Bool = false) {
         guard let rootNode = rootNode else { return }
-        guard inlineFormatter != nil else { return }
+        guard let inlineFormatter = inlineFormatter else { return }
         detectTextFormatterType()
 
-        let formatterHandlesKeyEvents = inlineFormatter?.handlesTyping == true
+        let formatterHandlesKeyEvents = inlineFormatter.handlesTyping
         let hasNodeSelection = rootNode.state.nodeSelection != nil
         let hasTextSelected = rootNode.textIsSelected
         if isKeyEvent && !hasTextSelected && !hasNodeSelection && !formatterHandlesKeyEvents {
             // Enable timer to hide inline formatter during key selection
-            BeamTextEdit.debounceKeyEventTimer = Timer.scheduledTimer(withTimeInterval: 0.23, repeats: false, block: { [weak self] (_) in
+            Self.delayedFormatterPresenter.dismiss(key: inlineFormatter.key) { [weak self] in
                 guard let self = self else { return }
                 self.showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
-            })
+            }
             return
         } else if isKeyEvent && formatterHandlesKeyEvents,
                   let node = formatterTargetNode,
@@ -173,8 +155,8 @@ extension BeamTextEdit {
                 var text = node.text.text
                 let fullRange = targetRange.lowerBound..<node.cursorPosition
                 text = text.substring(range: targetRange.lowerBound..<node.cursorPosition)
-                if inlineFormatter?.formatterHandlesInputText(text) == true {
-                    inlineFormatter?.typingAttributes(for: fullRange)?.forEach { (typingAttributes, forRange) in
+                if inlineFormatter.formatterHandlesInputText(text) {
+                    inlineFormatter.typingAttributes(for: fullRange)?.forEach { (typingAttributes, forRange) in
                         node.text.setAttributes(typingAttributes, to: forRange)
                     }
                 } else {
@@ -185,10 +167,10 @@ extension BeamTextEdit {
             }
         } else if hasNodeSelection {
             // Invalid the timer when we select all bullet
-            BeamTextEdit.debounceKeyEventTimer?.invalidate()
+            Self.delayedFormatterPresenter.stopAnyDelayedEvent()
         } else if !hasTextSelected && (!isKeyEvent || !formatterHandlesKeyEvents) {
             // Invalid the timer & hide the inline formatter when nothing is selected
-            BeamTextEdit.debounceKeyEventTimer?.invalidate()
+            Self.delayedFormatterPresenter.stopAnyDelayedEvent()
             showOrHideInlineFormatter(isPresent: false, isDragged: isDragged)
         }
 
@@ -316,11 +298,10 @@ extension BeamTextEdit {
         clearFormatterTypingAttributes(view)
         if view == inlineFormatter {
             CustomPopoverPresenter.shared.dismissPopovers()
-            isInlineFormatterHidden = true
             inlineFormatter = nil
             formatterTargetRange = nil
             formatterTargetNode = nil
-            clearDebounceTimer()
+            clearAnyDelayedFormatterPresenting()
         }
     }
 
@@ -455,11 +436,8 @@ extension BeamTextEdit {
         return childInset
     }
 
-    func clearDebounceTimer() {
-        if let debounce = BeamTextEdit.debounceMouseEventTimer {
-            debounce.invalidate()
-            BeamTextEdit.debounceMouseEventTimer = nil
-        }
+    func clearAnyDelayedFormatterPresenting() {
+        Self.delayedFormatterPresenter.stopAnyDelayedEvent()
     }
 }
 
@@ -468,5 +446,67 @@ extension BeamTextEdit: TextFormatterViewDelegate {
                            didSelectFormatterType type: TextFormatterType,
                            isActive: Bool) {
         self.selectFormatterAction(type, isActive)
+    }
+}
+
+private class DelayedFormatterPresenter {
+    enum State {
+        case presenting(_ key: String), dismissing(_ key: String), none
+    }
+    var state: State = .none
+
+    private var awaitingCompletions: [DispatchWorkItem] = []
+    private var debounceTimer: Timer?
+
+    private let presentDelay: TimeInterval = 0.7
+    private let dismissDelay: TimeInterval = 0.2
+
+    private func addCompletion(_ block: @escaping () -> Void) {
+        let workItem = DispatchWorkItem(block: block)
+        awaitingCompletions.append(workItem)
+    }
+
+    private func startTimer(delay: TimeInterval) {
+        debounceTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false, block: { [weak self] _ in
+            self?.state = .none
+            self?.awaitingCompletions.forEach { completionBlock in
+                DispatchQueue.main.async(execute: completionBlock)
+            }
+            self?.awaitingCompletions.removeAll()
+        })
+    }
+
+    func present(key: String, completion: @escaping () -> Void) {
+        if case .presenting(key) = state {
+            addCompletion(completion)
+            return
+        }
+        if case .dismissing(key) = state {
+            stopAnyDelayedEvent()
+        }
+        state = .presenting(key)
+        addCompletion(completion)
+        startTimer(delay: presentDelay)
+    }
+
+    func dismiss(key: String, completion: @escaping () -> Void) {
+        if case .dismissing(key) = state {
+            addCompletion(completion)
+            return
+        }
+
+        if case .presenting(key) = state {
+            stopAnyDelayedEvent()
+        }
+        state = .dismissing(key)
+        addCompletion(completion)
+        startTimer(delay: dismissDelay)
+    }
+
+    func stopAnyDelayedEvent() {
+        debounceTimer?.invalidate()
+        debounceTimer = nil
+        state = .none
+        awaitingCompletions.removeAll()
     }
 }

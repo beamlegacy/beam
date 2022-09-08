@@ -76,7 +76,7 @@ class ContextMenuFormatterView: FormatterView {
         self.lastComputedSize = ContextMenuView.idealSizeForItems(items, forcedWidth: forcedWidth)
         self.origin = origin
         self.canBecomeKey = canBecomeKey
-        super.init(key: key, viewType: .inline)
+        super.init(key: key)
     }
 
     required init?(coder: NSCoder) {

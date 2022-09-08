@@ -44,9 +44,9 @@ extension BeamTextEdit {
 
     private func showSlashContextMenu(for targetNode: TextNode?, targetRange: Range<Int>) {
         guard inlineFormatter?.isMouseInsideView != true else { return }
-        clearDebounceTimer()
+        clearAnyDelayedFormatterPresenting()
         guard let node = formatterTargetNode ?? (focusedWidget as? TextNode),
-              isInlineFormatterHidden else { return }
+              !isInlineFormatterPresented else { return }
 
         var atPoint = baseInlineFormatterPosition(for: node)
         atPoint.y += 8

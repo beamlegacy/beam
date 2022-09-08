@@ -742,7 +742,7 @@ public class TextNode: ElementNode {
                     cursor = .pointingHand
                     if let positionInText = indexAt(point: mouseInfo.position, limitToTextString: false),
                        BeamText.isPositionOnLinkArrow(positionInText, in: linkRange) {
-                        editor.linkStartedHovering(
+                        editor.linkStartedHoveringArrow(
                             for: currentNode,
                             targetRange: linkRange.position ..< linkRange.end,
                             frame: linkFrame,
