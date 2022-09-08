@@ -37,7 +37,14 @@ public class TextNode: ElementNode {
     static func fontSizeFor(kind: ElementKind) -> CGFloat {
         switch kind {
         case .heading(let level):
-            return [PreferencesManager.editorFontSizeHeadingOne, PreferencesManager.editorFontSizeHeadingTwo][level - 1]
+            switch level {
+            case 1:
+                return PreferencesManager.editorFontSizeHeadingOne
+            case 2...:
+                return PreferencesManager.editorFontSizeHeadingTwo
+            default:
+                return PreferencesManager.editorFontSize
+            }
         default:
             return PreferencesManager.editorFontSize
         }
