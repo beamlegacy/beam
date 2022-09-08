@@ -677,6 +677,15 @@ extension BeamData {
         Persistence.Account.currentDatabaseId = db.id
         currentDatabaseChanged.send(db)
 
+        // We have for now only one current database & account.
+        // As tabGroup & file manager do not register on instance creation anymore,
+        // this is the good place to register the 2 previous managers on BeamObjectManager
+        if let grdbStore = currentDatabase?.grdbStore {
+            self.fileDBManager?.grdbStore = grdbStore
+        }
+        self.fileDBManager?.registerOnBeamObjectManager(objectManager)
+        self.tabGroupingManager.storeManager?.registerOnBeamObjectManager(objectManager)
+
         BeamNote.clearFetchedNotes()
 
         DispatchQueue.main.async { [weak self] in
