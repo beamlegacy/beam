@@ -43,8 +43,9 @@ class NotePinUnpinTests: BaseTest {
         testrailId("C1039")
         step("Given I pin 6 notes") {
             launchApp()
-            uiMenu.create10Notes()
+            uiMenu.create10RandomNotes()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotesView.waitForAllNotesViewToLoad()
             for i in 0...5 {
                 allNotesView.openMenuForSingleNote(i)
                 allNotesView.selectActionInMenu(.pinNote)
@@ -91,7 +92,9 @@ class NotePinUnpinTests: BaseTest {
         testrailId("C711")
         step ("Given I navigate to All Note") {
             launchApp()
+            deleteAllNotes() // delete onboarding notes for the test
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotesView.waitForAllNotesViewToLoad()
         }
         
         step ("When I pin a note from All Notes") {

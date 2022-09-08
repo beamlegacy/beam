@@ -20,7 +20,9 @@ class TodayNoteTests: BaseTest {
     func testCannotDeleteTodayNoteInAllNote() {
         testrailId("C748")
         step ("Given I navigate to All Note") {
+            deleteAllNotes() // delete onboarding notes for the test
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotesView.waitForAllNotesViewToLoad()
         }
         
         step ("Then I cannot delete Today Note from All Notes") {
@@ -39,8 +41,9 @@ class TodayNoteTests: BaseTest {
         testrailId("C748")
         
         step ("Given I navigate to All Note") {
-            uiMenu.create10Notes()
+            uiMenu.create10RandomNotes()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotesView.waitForAllNotesViewToLoad()
         }
         
         step ("Then I cannot delete Today Note from All Notes") {

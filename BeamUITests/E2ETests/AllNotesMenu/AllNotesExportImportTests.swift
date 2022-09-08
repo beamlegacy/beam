@@ -17,6 +17,7 @@ class AllNotesExportImportTests: BaseTest {
             launchApp()
             uiMenu.createNote()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotesView.waitForAllNotesViewToLoad()
         }
     }
     

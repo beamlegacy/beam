@@ -60,7 +60,7 @@ class ReferencesTests: BaseTest {
         step ("Then I can navigate to a note by Reference to a source note"){
             noteView.openLinkByIndex(0)
             noteView.waitForNoteViewToLoad()
-            XCTAssertEqual(noteView.getNumberOfVisibleNotes(), 2)
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 2)
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), noteName1)
         }
     }
@@ -81,7 +81,7 @@ class ReferencesTests: BaseTest {
         }
 
         step ("Then note 2 has no references available"){
-            XCTAssertEqual(noteView.getNumberOfVisibleNotes(), 2)
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 2)
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), emptyString)
         }
 
@@ -168,7 +168,7 @@ class ReferencesTests: BaseTest {
         }
 
         step ("Then in note 2 the note is renamed as in note 1"){
-            XCTAssertEqual(noteView.getNumberOfVisibleNotes(), 2)
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 2)
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), noteName1)
         }
 

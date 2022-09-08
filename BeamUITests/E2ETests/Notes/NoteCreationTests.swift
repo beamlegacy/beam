@@ -81,6 +81,9 @@ class NoteCreationTests: BaseTest {
     func testCreateNoteOmniboxSearch() {
         testrailId("C745")
         step("When I create \(noteNameToBeCreated) a note from Omnibox search results"){
+            deleteAllNotes() // delete onboarding notes for the test
+            shortcutHelper.shortcutActionInvoke(action: .showJournal)
+            journalView.waitForJournalViewToLoad()
             journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
         }
         
@@ -92,7 +95,7 @@ class NoteCreationTests: BaseTest {
         step("Then Journal has no mentions for created note"){
             shortcutHelper.shortcutActionInvoke(action: .showJournal)
             journalView.waitForJournalViewToLoad()
-            XCTAssertEqual(noteView.getNumberOfVisibleNotes(), 2)
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 2)
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), emptyString )
         }
 
@@ -158,7 +161,7 @@ class NoteCreationTests: BaseTest {
         step("THEN Yesterday's and Tomorrow's notes are created, today's one remains by default") {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()
-            XCTAssertEqual(allNotesView.getNumberOfNotes(), 3)
+            XCTAssertEqual(allNotesView.getNumberOfNotes(), 5)
             for title in expectedNotesTitles {
                 XCTAssertTrue(allNotesView.isNoteNameAvailable(title))
             }
