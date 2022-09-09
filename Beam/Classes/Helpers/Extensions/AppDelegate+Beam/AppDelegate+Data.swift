@@ -190,7 +190,7 @@ extension AppDelegate {
     // MARK: Markdown
 
     @IBAction func importMarkdown(_ sender: Any) {
-        guard let fileManager = data.currentAccount?.data.fileDBManager else { return }
+        guard let fileManager = data.currentAccount?.fileDBManager else { return }
         let openPanel = NSOpenPanel()
         openPanel.allowsMultipleSelection = true
         openPanel.canChooseDirectories = false

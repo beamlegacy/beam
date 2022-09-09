@@ -537,12 +537,6 @@ extension BeamFileRecord: Identifiable {
     public var id: UUID { uid }
 }
 
-extension BeamManagerOwner {
-    var fileDBManager: BeamFileDBManager? {
-        try? manager(BeamFileDBManager.self)
-    }
-}
-
 extension BeamData {
     var fileDBManager: BeamFileDBManager? {
         currentDatabase?.fileDBManager
