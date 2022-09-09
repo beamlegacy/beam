@@ -12,6 +12,7 @@ class BrowserPreferencesTests: BaseTest {
     
     let browserPref = BrowserPreferencesTestView()
     let omnibox = OmniBoxTestView()
+    let finder = FinderView()
     let searchWord = "beam"
     
     override func setUpWithError() throws {
@@ -156,22 +157,23 @@ class BrowserPreferencesTests: BaseTest {
             openBrowserPrefs()
             browserPref.triggerDownloadFolderSelection()
             for item in BrowserPreferencesViewLocators.MenuItemsDownload.allCases {
-                XCTAssertTrue(browserPref.menuItem(item.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout), "\(item.accessibilityIdentifier) is not in the search engines list")
+                XCTAssertTrue(browserPref.menuItem(item.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout), "\(item.accessibilityIdentifier) is not in download folders list")
             }
         }
         
-        //Folder selection cancellation test is blocked by //https://linear.app/beamapp/issue/BE-4523/no-download-folder-is-selected-on-cancellation
-        /*step("THEN I successfully cancel folder selection") {
-            
-        }*/
+        if !isBigSurOS() { //impossible to get selected folder on Big Sur only
+            step("THEN I successfully cancel folder selection") {
+                browserPref.menuItem(BrowserPreferencesViewLocators.MenuItemsDownload.other.accessibilityIdentifier).hoverAndTapInTheMiddle()
+                finder.clickCancel()
+                XCTAssertTrue(waitForStringValueEqual(BrowserPreferencesViewLocators.MenuItemsDownload.downloads.accessibilityIdentifier, browserPref.getFolderSelectionElement()))
+            }
         
-        //To be unblocked via https://linear.app/beamapp/issue/BE-4531/reset-downloads-destination-folder-uitest-menu
-        /*step("THEN I can select another folder") {
-            browserPref.selectDownloadFolder(.other)
-            let finderWindow = XCUIApplication().dialogs["Open"]
-            XCTAssertTrue(finderWindow.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            finderWindow.buttons["OKButton"].clickOnExistence()
-            XCTAssertTrue(waitForDoesntExist(finderWindow))
-        }*/
+            step("THEN I can select another folder") {
+                browserPref.selectDownloadFolder(.other)
+                XCTAssertTrue(finder.isFinderOpened())
+                finder.clickOkSelect()
+                XCTAssertTrue(waitForStringValueEqual(BrowserPreferencesViewLocators.MenuItemsDownload.other.accessibilityIdentifier, browserPref.getFolderSelectionElement()))
+            }
+        }
     }
 }
