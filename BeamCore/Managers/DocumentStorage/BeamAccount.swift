@@ -497,3 +497,10 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
         }
     }
 }
+
+
+extension BeamAccount {
+    var fileDBManager: BeamFileDBManager? {
+        data.currentDatabase?.fileDBManager
+    }
+}
