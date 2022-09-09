@@ -37,8 +37,9 @@ class TabGroupCaptureToANoteTests: BaseTest {
                 .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCapture)
             pnsView.waitForCollectPopUpAppear()
-            tabGroupMenu.typeKeyboardKey(.enter)
-            tabGroupMenu.typeKeyboardKey(.escape)
+            pnsView.typeKeyboardKey(.enter)
+            XCTAssertTrue(pnsView.assertAddedToNoteLabelDisplayed())
+            pnsView.typeKeyboardKey(.escape)
         }
         
         testrailId("C813")
@@ -75,8 +76,9 @@ class TabGroupCaptureToANoteTests: BaseTest {
                 .waitForMenuToBeDisplayed()
             tabGroupMenu.clickTabGroupMenu(.tabGroupCapture)
             pnsView.waitForCollectPopUpAppear()
-            tabGroupMenu.typeKeyboardKey(.enter)
-            tabGroupMenu.typeKeyboardKey(.escape)
+            pnsView.typeKeyboardKey(.enter)
+            XCTAssertTrue(pnsView.assertAddedToNoteLabelDisplayed())
+            pnsView.typeKeyboardKey(.escape)
         }
         
         testrailId("C1026")
