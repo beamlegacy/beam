@@ -565,7 +565,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     }
 
     private func createPublishedNote(open: Bool = false) {
-        guard let fileManager = currentAccount?.data.fileDBManager else { return }
+        guard let fileManager = currentAccount?.fileDBManager else { return }
         let note = createNote()
         BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, fileManager: fileManager) { _ in
             if open {
