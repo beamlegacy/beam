@@ -268,4 +268,8 @@ extension BeamDatabase {
     var hasBeenSyncedOnce: Bool {
         previousChecksum != nil
     }
+
+    var fileDBManager: BeamFileDBManager? {
+        try? manager(BeamFileDBManager.self)
+    }
 }
