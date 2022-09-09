@@ -40,7 +40,7 @@ public class TextNode: ElementNode {
             switch level {
             case 1:
                 return PreferencesManager.editorFontSizeHeadingOne
-            case 2...:
+            case 2:
                 return PreferencesManager.editorFontSizeHeadingTwo
             default:
                 return PreferencesManager.editorFontSize
