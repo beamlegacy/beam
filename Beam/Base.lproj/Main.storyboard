@@ -566,7 +566,7 @@
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="ci5-nd-Obf"/>
-                                                    <menuItem title="Markdown file..." id="0ic-HM-Rf4">
+                                                    <menuItem title="Markdown file..." tag="11" id="0ic-HM-Rf4">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="exportToMarkdown:" target="Voe-Tx-rLC" id="oE9-wN-xXs"/>
