@@ -11,6 +11,7 @@ import XCTest
 class AllNotesExportImportTests: BaseTest {
     
     let allNotesView = AllNotesTestView()
+    let finder = FinderView()
     
     override func setUp() {
         step("GIVEN I open All Notes") {
@@ -23,15 +24,14 @@ class AllNotesExportImportTests: BaseTest {
     
     private func assertAndCancelFinderWindow(_ isImport: Bool = true) {
         step("THEN Finder window is opened") {
-            let finderWindow = XCUIApplication().dialogs.firstMatch
-            XCTAssertTrue(finderWindow.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(finder.isFinderOpened())
             if (isImport) {
-                XCTAssertTrue(finderWindow.buttons["Open"].exists)
+                XCTAssertTrue(finder.getButtonBy(identifier: .openButton).exists)
             } else {
-                XCTAssertTrue(finderWindow.buttons["Export"].exists || finderWindow.buttons["Save"].exists)
+                XCTAssertTrue(finder.getButtonBy(identifier: .exportButton).exists || finder.getButtonBy(identifier: .saveButton).exists)
             }
-            finderWindow.buttons["Cancel"].clickOnExistence()
-            XCTAssertTrue(waitForDoesntExist(finderWindow))
+            finder.clickCancel()
+            XCTAssertTrue(waitForDoesntExist(finder.getWindowElement()))
         }
     }
     
