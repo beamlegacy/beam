@@ -127,8 +127,8 @@ extension AppDelegate {
 
             var failedCount: UInt = .zero
 
-            func export(note: BeamNote, isExportingAllNotes: Bool = false) {
-                guard let fileManager = self.data.currentAccount?.fileDBManager else { return }
+            func export(note: BeamNote) {
+                guard let fileManager = self.data.currentAccount?.data.fileDBManager else { return }
                 do {
                     let export = MarkdownExporter.export(of: note, fileManager: fileManager)
                     try export.write(to: selectedURL)
@@ -140,7 +140,7 @@ extension AppDelegate {
 
             if selectedNotes.isEmpty, let allNotesIDs = try? self.data.currentAccount?.data.currentDocumentCollection?.fetchIds(filters: []) {
                 for note in allNotesIDs.compactMap({ BeamNote.fetch(id: $0, keepInMemory: false) }) {
-                    export(note: note, isExportingAllNotes: true)
+                    export(note: note)
                 }
             } else if !selectedNotes.isEmpty {
                 for note in selectedNotes {
