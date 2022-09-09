@@ -67,7 +67,7 @@ class DeleteDocument: DocumentCommand, BeamDocumentSource {
             }
         } else {
             saveDocumentsLinks().forEach { notesToUpdate.insert($0.noteID) }
-            if let fileManager = context?.owner?.fileDBManager {
+            if let fileManager = context?.owner?.data.fileDBManager {
                 unpublishNotes(in: documents, fileManager: fileManager)
             }
 
