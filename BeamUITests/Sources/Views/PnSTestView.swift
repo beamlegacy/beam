@@ -93,6 +93,10 @@ class PnSTestView: BaseView {
         return staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + noteName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
+    func assertAddedToNoteLabelDisplayed() -> Bool {
+        return staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+    }
+    
     func assertPointFrameExists() -> Bool {
         return otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
