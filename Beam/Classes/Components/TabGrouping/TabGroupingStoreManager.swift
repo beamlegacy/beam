@@ -191,7 +191,7 @@ extension TabGroupingStoreManager {
             return "Empty Tab Group"
         }
         var result: String = ""
-        let count = tabs?.count ?? group.pageIds.count
+        let count = group.pageIds.count
         if !firstPageTitle.isEmpty {
             if truncated {
                 result = "”\(firstPageTitle.truncated(limit: 25, position: .tail))”"
