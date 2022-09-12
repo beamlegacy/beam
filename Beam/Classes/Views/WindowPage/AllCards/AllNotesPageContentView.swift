@@ -138,6 +138,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                             .font(BeamFont.regular(size: 24).swiftUI)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                         Icon(name: "editor-options", width: 16, color: BeamColor.LightStoneGray.swiftUI)
+                            .blendModeLightMultiplyDarkScreen()
                             .padding(.top, 4)
                     }
                     .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
@@ -185,6 +186,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                                         .font(BeamFont.regular(size: 12).swiftUI)
                                         .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
                                     Icon(name: "editor-breadcrumb_down", width: 8, color: hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                                        .blendModeLightMultiplyDarkScreen()
                                 }
                             )
                         }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {

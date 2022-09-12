@@ -54,6 +54,7 @@ private struct HyperlinkEditorView: View {
                 HStack(alignment: .center, spacing: 4) {
                     textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title", accId: "link-title")
                     Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
+                        .blendModeLightMultiplyDarkScreen()
                         .opacity(isEditingTitle ? 1 : 0)
                         .padding(BeamSpacing._20)
                         .onTapGesture {
@@ -117,11 +118,13 @@ private struct HyperlinkEditorView: View {
     private var urlIcon: some View {
         if isEditingUrl {
             Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
+                .blendModeLightMultiplyDarkScreen()
                 .onTapGesture {
                     onFinishEditing?(false)
                 }
         } else {
             Icon(name: "editor-url_copy", width: 12, color: urlIconCopyColor)
+                .blendModeLightMultiplyDarkScreen()
                 .onHover { isHoveringURLCopyIcon = $0 }
                 .onTapGestureToggle($showOverlayForCopyIcon, scheduler: DispatchQueue.main, delay: 2.0) {
                     onCopy?()

@@ -63,6 +63,7 @@ struct GutterItemView: View {
                 HStack(alignment: .top, spacing: 2) {
                     if let icon = item.icon {
                         Icon(name: icon, width: 12, color: foregroundColor)
+                            .blendModeLightMultiplyDarkScreen()
                     }
                     if !isSmallLayout || isHoveringContent {
                         Text(item.title)

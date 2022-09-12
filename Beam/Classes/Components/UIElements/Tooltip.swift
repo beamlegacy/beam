@@ -30,6 +30,7 @@ struct Tooltip: View {
             HStack(spacing: 0) {
                 if let icon = icon {
                     Icon(name: icon, color: foregroundColor)
+                        .blendModeLightMultiplyDarkScreen()
                 }
                 if let title = title {
                     Text(title)

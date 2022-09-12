@@ -122,6 +122,7 @@ struct OmniboxSearchField: View {
                     .transition(.identity)
             } else if let iconName = leadingIconName(for: autocompleteManager.mode) {
                 Icon(name: iconName, width: 16, color: BeamColor.LightStoneGray.swiftUI)
+                    .blendModeLightMultiplyDarkScreen()
                     .transition(.identity)
             }
             ZStack(alignment: .leading) {
@@ -277,6 +278,7 @@ extension OmniboxSearchField {
             } else {
                 if let iconName = leadingIconName(for: mode) {
                     Icon(name: iconName, width: 16, color: BeamColor.LightStoneGray.swiftUI)
+                        .blendModeLightMultiplyDarkScreen()
                 }
                 Text(placeholder(for: mode))
                     .font(textFont.swiftUI)

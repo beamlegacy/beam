@@ -28,6 +28,7 @@ struct OnboardingImportsView: View {
                 Image(nsImage: iconImage).resizable().scaledToFill()
             } else {
                 Icon(name: source.icon, color: BeamColor.LightStoneGray.swiftUI)
+                    .blendModeLightMultiplyDarkScreen()
             }
         }
         .frame(width: 16, height: 16, alignment: .center)

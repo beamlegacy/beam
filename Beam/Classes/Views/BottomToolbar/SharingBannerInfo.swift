@@ -15,6 +15,7 @@ struct SharingBannerInfo: View {
         HStack(spacing: 0) {
             if let icon = icon {
                 Icon(name: icon, color: BeamColor.Generic.text.swiftUI)
+                    .blendModeLightMultiplyDarkScreen()
             }
             Text(text)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)

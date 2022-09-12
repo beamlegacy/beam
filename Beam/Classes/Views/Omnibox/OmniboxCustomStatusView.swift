@@ -25,6 +25,7 @@ struct OmniboxCustomStatusView: View {
     var body: some View {
         HStack(spacing: BeamSpacing._120) {
             Icon(name: icon, color: BeamColor.Generic.text.swiftUI)
+                .blendModeLightMultiplyDarkScreen()
             Text(title)
                 .font(BeamFont.regular(size: 17).swiftUI)
             +
@@ -35,6 +36,7 @@ struct OmniboxCustomStatusView: View {
             Spacer()
             HStack(spacing: BeamSpacing._20) {
                 Icon(name: "editor-url_link", color: BeamColor.LightStoneGray.swiftUI)
+                    .blendModeLightMultiplyDarkScreen()
                 Text("Link Copied")
                     .font(BeamFont.medium(size: 12).swiftUI)
                     .foregroundColor(BeamColor.LightStoneGray.swiftUI)
