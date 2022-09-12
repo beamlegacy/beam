@@ -24,6 +24,7 @@ class BrowserTabsManagerTests: XCTestCase {
 
     private func tab(_ title: String, origin: BrowsingTreeOrigin? = nil) -> BrowserTab {
         let tab = BrowserTab(state: state, browsingTreeOrigin: origin, originMode: .web, note: nil)
+        tab.preloadUrl = URL(string: title.replacingOccurrences(of: " ", with: "").lowercased() + ".com")
         tab.title = title
         return tab
     }
@@ -259,7 +260,7 @@ class BrowserTabsManagerTests: XCTestCase {
         var tabs = [
             tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D With Very Long Title truncated")
         ]
-        let groupA = TabGroup(pageIds: [])
+        let groupA = TabGroup(pageIds: [tabs[1].pageId, tabs[3].pageId].compactMap { $0 })
         let tabGroups = [
             tabs[1].id: groupA,
             tabs[3].id: groupA
@@ -279,6 +280,7 @@ class BrowserTabsManagerTests: XCTestCase {
         result = sut.describingTitle(forGroup: groupA, truncated: false)
         XCTAssertEqual(result, "Tab D With Very Long Title truncated & 1 more")
 
+        groupA.updatePageIds([tabs[1].pageId].compactMap { $0 })
         sut._testSetLocalTabsGroups([ tabs[0].id: groupA ])
         result = sut.describingTitle(forGroup: groupA, truncated: true)
         XCTAssertEqual(result, "”Tab D With Very Long Titl…”")

@@ -566,6 +566,11 @@ extension BrowserTabsManager {
         data.tabGroupingManager
     }
 
+    /// mixes the grouping manager group and the forced tab to show what groups were actually computed to be displayed
+    var allDisplayedTabGroups: [TabGroup] {
+        listItems.allItems.compactMap { $0.group }
+    }
+
     private func updateTabsClusteringGroupsAfterTabsChange(withTabs tabs: [BrowserTab]) {
         self.localTabsGroup = localTabsGroup.filter { (key, _) in
             guard let tab = tabs.first(where: { $0.id == key }) else { return false }
