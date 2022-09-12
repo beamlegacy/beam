@@ -100,6 +100,7 @@ struct HelpAndFeedbackMenuView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         HStack(spacing: 0) {
                             Icon(name: section.iconName, width: 16, color: BeamColor.Niobium.swiftUI)
+                                .blendModeLightMultiplyDarkScreen()
                                 .padding(.leading, 6)
                                 .padding(.trailing, 8)
 

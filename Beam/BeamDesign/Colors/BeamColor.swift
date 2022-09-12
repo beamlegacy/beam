@@ -20,14 +20,6 @@ indirect enum BeamColor {
     case CharmedGreen
     /** A light gray. Lighter in dark mode */
     case Corduroy
-    /** AlphaGray with dark and light variation inverted */
-    case InvertedAlphaGray
-    /** Corduroy with dark and light variation inverted */
-    case InvertedCorduroy
-    /** LightStoneGray with dark and light variation inverted */
-    case InvertedLightStoneGray
-    /** Niobium with dark and light variation inverted */
-    case InvertedNiobium
     /** A light gray. Darker in dark mode */
     case LightStoneGray
     /** A white in light mode. A fake black in dark mode */
@@ -175,6 +167,27 @@ extension BeamColor {
     }
 }
 
+// MARK: - Inverted Helpers
+extension BeamColor {
+    private static let availableInverted: [BeamColor] = [
+        .AlphaGray, .Corduroy, .LightStoneGray, .Mercury, .Niobium, .Shiraz
+    ]
+
+    /// Invert the dark and light appearances.
+    ///
+    /// Useful for pieces of UI displayed in light colors even in dark mode.
+    /// - Warning: Can only be used with certain Design Colors.
+    func inverted(_ inverted: Bool = true) -> Self {
+        #if DEBUG
+        if !Self.availableInverted.contains(where: { $0.description == self.description }) {
+            fatalError("BeamColor inverted variation could not be found.")
+        }
+        #endif
+        guard inverted else { return self }
+        return BeamColor.Custom(named: "Inverted" + self.description)
+    }
+}
+
 // MARK: - Performance
 // See investigation: BE-4790
 extension BeamColor {
@@ -205,10 +218,6 @@ extension BeamColor: CustomStringConvertible {
         case .Bluetiful: return "Bluetiful"
         case .CharmedGreen: return "CharmedGreen"
         case .Corduroy: return "Corduroy"
-        case .InvertedAlphaGray: return "InvertedAlphaGray"
-        case .InvertedCorduroy: return "InvertedCorduroy"
-        case .InvertedLightStoneGray: return "InvertedLightStoneGray"
-        case .InvertedNiobium: return "InvertedNiobium"
         case .LightStoneGray: return "LightStoneGray"
         case .Mercury: return "Mercury"
         case .Nero: return "Nero"

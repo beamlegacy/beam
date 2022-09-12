@@ -29,6 +29,7 @@ struct FaviconView: View {
                     .frame(width: 16, height: 16)
             case .generic:
                 Icon(name: "field-web", color: BeamColor.Niobium.swiftUI)
+                    .blendModeLightMultiplyDarkScreen()
                     .padding(.trailing, 4)
             default:
                 Color.clear

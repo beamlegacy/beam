@@ -124,7 +124,8 @@ struct ActionableButton: View {
     var body: some View {
         HStack(spacing: hSpacing) {
             if let icon = variant.style.icon, icon.alignment == .leading {
-                Icon(name: icon.name, width: icon.size, color: iconColor, invertBlendMode: invertBlendMode ? colorScheme == .light : false)
+                Icon(name: icon.name, width: icon.size, color: iconColor)
+                    .blendModeLightMultiplyDarkScreen(invert: invertBlendMode && colorScheme == .light)
                     .padding(.leading, hPadding)
             }
             Text(LocalizedStringKey(text))
@@ -138,6 +139,7 @@ struct ActionableButton: View {
                 }
             if let icon = variant.style.icon, icon.alignment == .trailing {
                 Icon(name: icon.name, width: icon.size, color: iconColor)
+                    .blendModeLightMultiplyDarkScreen(invert: invertBlendMode && colorScheme == .light)
                     .padding(.trailing, hPadding)
             }
         }

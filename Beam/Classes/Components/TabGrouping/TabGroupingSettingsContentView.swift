@@ -137,6 +137,7 @@ struct NoteRowView: View {
     var body: some View {
         HStack {
             Icon(name: "field-card", color: BeamColor.Generic.text.swiftUI)
+                .blendModeLightMultiplyDarkScreen()
                 .padding(.trailing, 4)
             Text(noteName)
                 .font(BeamFont.medium(size: 11).swiftUI)
