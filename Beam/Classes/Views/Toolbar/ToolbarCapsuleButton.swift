@@ -56,9 +56,9 @@ struct ToolbarCapsuleButton<Content: View>: View {
         if let hueTint = hueTint {
             return Color(hue: hueTint, saturation: 0.4, brightness: 1, opacity: 0.2)
         } else if isPressed {
-            return BeamColor.Mercury.swiftUI
+            return BeamColor.Mercury.inverted(isForeground).swiftUI
         } else if isForeground {
-            return isIncognito ? BeamColor.ToolBar.capsuleIncognitoForegroundBackground.swiftUI : BeamColor.ToolBar.capsuleForegroundBackground.swiftUI
+            return BeamColor.ToolBar.capsuleIncognitoForegroundBackground.swiftUI 
         } else if isHovering {
             return BeamColor.Nero.swiftUI.opacity(0.7)
         }

@@ -11,9 +11,15 @@ extension TabView {
     struct TabContentIcon: View {
         var name: String
         var width: CGFloat = 16
-        var color = BeamColor.AlphaGray
-        var hoveredColor = BeamColor.Corduroy
+        var color = BeamColor.combining(lightColor: .LightStoneGray, darkColor: .Corduroy)
+        var hoveredColor = BeamColor.combining(lightColor: .Corduroy, darkColor: .Corduroy)
         var pressedColor = BeamColor.Niobium
+
+        private let invertedColor = BeamColor.combining(lightColor: .Corduroy, darkColor: .LightStoneGray)
+        private let invertedhoveredColor = BeamColor.combining(lightColor: .Corduroy, darkColor: .Corduroy)
+        private let invertedPressedColor = BeamColor.Niobium.inverted(true)
+
+        var invertedColors: Bool = false
         var action: (() -> Void)?
 
         @State private var isHovering = false
@@ -21,11 +27,11 @@ extension TabView {
 
         private var foregroundColor: Color {
             if isPressed {
-                return pressedColor.swiftUI
+                return (invertedColors ? invertedPressedColor : pressedColor).swiftUI
             } else if isHovering {
-                return hoveredColor.swiftUI
+                return (invertedColors ? invertedhoveredColor : hoveredColor).swiftUI
             }
-            return color.swiftUI
+            return (invertedColors ? invertedColor : color).swiftUI
         }
         var body: some View {
             Icon(name: name, width: width, color: foregroundColor)

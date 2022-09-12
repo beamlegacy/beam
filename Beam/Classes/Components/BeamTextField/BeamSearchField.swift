@@ -32,6 +32,7 @@ struct BeamSearchField: View {
                 )
                 HStack {
                     Icon(name: "field-search", color: BeamColor.Generic.placeholder.swiftUI)
+                        .blendModeLightMultiplyDarkScreen()
                         .frame(width: 16)
                         .opacity(0.8)
                         .padding(.leading, 6.5)
@@ -49,6 +50,7 @@ struct BeamSearchField: View {
                             searchStr = ""
                         }, label: {
                             Icon(name: "tool-clear_xs", color: BeamColor.Generic.placeholder.swiftUI)
+                                .blendModeLightMultiplyDarkScreen()
                                 .padding(.trailing, 6.5)
                         })
                         .buttonStyle(PlainButtonStyle())

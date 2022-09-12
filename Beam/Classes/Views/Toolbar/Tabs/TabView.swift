@@ -62,7 +62,7 @@ struct TabView: View {
             return Color(hue: hueTint, saturation: 0.6, brightness: 0.5)
         }
         if isSelected {
-            return isIncognito ? BeamColor.InvertedNiobium.swiftUI : BeamColor.Generic.text.swiftUI
+            return BeamColor.Generic.text.inverted(isIncognito).swiftUI
         }
         return BeamColor.Corduroy.swiftUI
     }
@@ -83,15 +83,22 @@ struct TabView: View {
     }
 
     private var audioView: some View {
-        TabAudioView(tab: tab, action: onToggleMute)
+        TabAudioView(tab: tab, invertedColors: isSelected && isIncognito, action: onToggleMute)
     }
 
     private var securityIcon: some View {
         // hasOnlySecureContent is KVO observable, may be we should subscribe to it to reflect dynamic changes to it accordingly
         let isSecure = tab.webView.hasOnlySecureContent
         let icon = isSecure ? "tabs-security" : "tabs-security_risk"
-        let color = isSecure ? BeamColor.AlphaGray : BeamColor.Shiraz
-        return Icon(name: icon, color: color.swiftUI).opacity(isSecure ? 1 : 0.4)
+        let color: BeamColor
+        let inverted = isIncognito && isSelected
+        if isSecure {
+            color = BeamColor.AlphaGray.inverted(inverted)
+        } else {
+            color = BeamColor.Shiraz.inverted(inverted)
+        }
+        let opacity = isSecure ? 1 : (colorScheme == .dark ? 0.6 : 0.4)
+        return Icon(name: icon, color: color.swiftUI).opacity(opacity)
     }
 
     private func leadingViews(shouldShowClose: Bool) -> some View {
@@ -114,9 +121,7 @@ struct TabView: View {
             if shouldShowCopy {
                 TabContentIcon(name: "editor-url_copy",
                                width: 12,
-                               color: isIncognito ? BeamColor.InvertedAlphaGray : BeamColor.AlphaGray,
-                               hoveredColor: isIncognito ? BeamColor.InvertedCorduroy : BeamColor.Corduroy,
-                               pressedColor: isIncognito ? BeamColor.InvertedNiobium : BeamColor.Niobium,
+                               invertedColors: isIncognito && isSelected,
                                action: onCopy)
                     .transition(sideViewsTransition)
             }
@@ -147,11 +152,10 @@ struct TabView: View {
         }
     }
 
-    private var closeIcon: some View {
+    @ViewBuilder private var closeIcon: some View {
+        let invert = isIncognito && isSelected
         TabContentIcon(name: "tabs-close_xs",
-                       color: isIncognito ? BeamColor.InvertedLightStoneGray: BeamColor.LightStoneGray,
-                       hoveredColor: isIncognito ?  BeamColor.InvertedCorduroy: BeamColor.Corduroy,
-                       pressedColor: isIncognito ? BeamColor.InvertedNiobium : BeamColor.Niobium,
+                       invertedColors: invert,
                        action: onClose)
     }
 
