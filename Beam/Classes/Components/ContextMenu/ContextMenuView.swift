@@ -74,6 +74,7 @@ struct ContextMenuItemView: View {
                     ButtonLabel(icon: icon, customStyle: .tinyIconStyle, action: iconAction)
                 } else {
                     Icon(name: icon, width: item.iconSize, color: item.iconColor.swiftUI)
+                        .blendModeLightMultiplyDarkScreen()
                 }
             }
         }

@@ -19,6 +19,7 @@ struct SidebarListPageButton: View {
     var body: some View {
         HStack(spacing: 6.0) {
             Icon(name: iconName, width: 12, color: foregroundColor)
+                .blendModeLightMultiplyDarkScreen()
             Text(text)
                 .lineLimit(1)
             Spacer()

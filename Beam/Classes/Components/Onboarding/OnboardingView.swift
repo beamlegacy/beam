@@ -264,6 +264,7 @@ struct OnboardingView: View {
         var body: some View {
             HStack(spacing: 1) {
                 Icon(name: "nav-back", size: CGSize(width: 20, height: 24), color: foregroundColor)
+                    .blendModeLightMultiplyDarkScreen()
                 Text("Back")
                     .foregroundColor(foregroundColor)
                     .font(BeamFont.regular(size: 14).swiftUI)
