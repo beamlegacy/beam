@@ -215,10 +215,10 @@ extension TabsListContextMenuBuilder {
         return image
     }
 
-    private func availableTabGroups(forItem item: TabsListItem) -> [TabGroup] {
-        var groups: [TabGroup] = []
+    private func availableTabGroups(forItem item: TabsListItem) -> Set<TabGroup> {
+        var groups = Set<TabGroup>()
         if let state = state {
-            groups = Array(Set(state.browserTabsManager.tabGroupingManager.builtPagesGroups.values))
+            groups = Set(state.browserTabsManager.allDisplayedTabGroups)
         }
         if item.group != nil {
             groups = groups.filter { $0 != item.group }
@@ -233,7 +233,7 @@ extension TabsListContextMenuBuilder {
         return self.state?.browserTabsManager.describingTitle(forGroup: group, truncated: true) ?? ""
     }
 
-    private func listOfTabGroupsAsMenu(item: TabsListItem, availableGroups: [TabGroup]) -> [NSMenuItem] {
+    private func listOfTabGroupsAsMenu(item: TabsListItem, availableGroups: Set<TabGroup>) -> [NSMenuItem] {
         availableGroups.compactMap { group in
             guard group != item.group else { return nil }
             let color = (group.color?.mainColor ?? BeamColor.TabGrouping.red).nsColor
