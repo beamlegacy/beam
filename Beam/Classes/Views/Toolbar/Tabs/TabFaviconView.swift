@@ -56,6 +56,7 @@ struct TabFaviconView: View {
             } else {
                 let iconSize: CGFloat = isLoading ? 12 : 16
                 Icon(name: "field-web", width: iconSize, color: BeamColor.LightStoneGray.swiftUI)
+                    .blendModeLightMultiplyDarkScreen()
             }
         }
         .animation(disableAnimations ? nil : BeamAnimation.spring(stiffness: 380, damping: 20), value: isLoading)

@@ -129,6 +129,7 @@ struct ButtonLabel: View {
             } else {
                 if let icon = iconName {
                     Icon(name: icon, width: style.iconSize, color: foregroundColor)
+                        .blendModeLightMultiplyDarkScreen()
                 }
                 if let lottie = lottieName {
                     LottieView(name: lottie,
@@ -147,6 +148,7 @@ struct ButtonLabel: View {
                 }
                 if variant == .dropdown {
                     Icon(name: "editor-breadcrumb_down", width: 8, color: foregroundColor)
+                        .blendModeLightMultiplyDarkScreen()
                 }
             }
         }

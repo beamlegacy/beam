@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TabAudioView: View {
     @ObservedObject var tab: BrowserTab
+    var invertedColors: Bool = false
     var action: (() -> Void)?
 
     private var audioIsPlaying: Bool {
@@ -24,7 +25,7 @@ struct TabAudioView: View {
     }
 
     var body: some View {
-        TabView.TabContentIcon(name: audioIsMuted ? "tabs-media_muted" : "tabs-media", action: action)
+        TabView.TabContentIcon(name: audioIsMuted ? "tabs-media_muted" : "tabs-media", invertedColors: invertedColors, action: action)
         .accessibility(identifier: "browserTabMediaIndicator")
         .contextMenu {
             Button("\(audioIsMuted ? "Unmute" : "Mute") this tab") {

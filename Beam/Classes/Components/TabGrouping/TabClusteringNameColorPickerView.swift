@@ -111,6 +111,7 @@ struct TabClusteringNameColorPickerView: View {
             }
             if isEditing && !groupName.isEmpty {
                 Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
+                    .blendModeLightMultiplyDarkScreen()
             } else {
                 colorPicker
                     .accessibility(identifier: "TabGroupColorPicker")

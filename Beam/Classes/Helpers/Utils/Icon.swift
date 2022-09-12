@@ -14,7 +14,6 @@ struct Icon: View {
     var size: CGSize?
     var color = BeamColor.Button.text.swiftUI
     var alignment: Alignment = .center
-    var invertBlendMode: Bool = false
 
     var body: some View {
         Image(name).renderingMode(.template)
@@ -23,6 +22,5 @@ struct Icon: View {
             .foregroundColor(.white)
             .colorMultiply(color) // foregroundColor cannot be animated while colorMultiply can
             .frame(width: size?.width ?? width, height: size?.height ?? width, alignment: alignment)
-            .blendModeLightMultiplyDarkScreen(invert: invertBlendMode)
     }
 }
