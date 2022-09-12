@@ -16,6 +16,7 @@ struct SidebarListSectionTitle: View {
         HStack(spacing: 6.0) {
             if let iconName = iconName {
                 Icon(name: iconName, width: 12, color: foregroundColor)
+                    .blendModeLightMultiplyDarkScreen()
             }
             Text(title)
             Spacer()

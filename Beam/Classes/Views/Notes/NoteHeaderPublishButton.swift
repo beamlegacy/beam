@@ -91,6 +91,7 @@ struct NoteHeaderPublishButton: View {
                                        loopMode: .loop, speed: 1)
                                 .opacity(isPublic ? 0 : 1)
                             Icon(name: "editor-url_link", color: displayTitle ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                                .blendModeLightMultiplyDarkScreen()
                                 .opacity(isPublic ? 1 : 0)
                         }
                         .frame(width: 16, height: 16)
