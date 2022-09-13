@@ -75,7 +75,7 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
         } else if tagEnum == .hasBrowserTab {
             return state?.hasBrowserTabs ?? false
         } else if tagEnum == .hasClusteringSettingsOn {
-            return PreferencesManager.showClusteringSettingsMenu
+            return PreferencesManager.showClusteringSettingsMenu && state?.data.clusteringManager.typeInUse == .legacy
         } else if tagEnum == .isDebugMode {
             if Configuration.branchType != .develop {
                 return false

@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 enum SettingTab: String, CaseIterable {
-    case general, browser, notes, privacy, passwords, accounts, about, beta, advanced, editor
+    case general, browser, notes, privacy, passwords, accounts, about, beta, advanced, editor, clustering
 
     var label: String {
         switch self {
@@ -23,6 +23,7 @@ enum SettingTab: String, CaseIterable {
         case .beta: return "Beta"
         case .advanced: return "Advanced"
         case .editor: return "Editor UI Debug"
+        case .clustering: return "Clustering"
         }
     }
 
@@ -38,6 +39,7 @@ enum SettingTab: String, CaseIterable {
         case .beta: return "preferences-developer"
         case .advanced: return "preferences-developer"
         case .editor: return "preferences-editor-debug"
+        case .clustering: return "field-tabgroup"
         }
     }
 
@@ -55,6 +57,7 @@ enum SettingTab: String, CaseIterable {
             return NSHostingView(rootView: BetaPreferencesView(viewModel: BetaPreferencesViewModel(objectManager: BeamData.shared.objectManager)).environment(\.managedObjectContext, CoreDataManager.shared.mainContext).fixedSize())
         case .advanced: return NSHostingView(rootView: AdvancedPreferencesView().environment(\.managedObjectContext, CoreDataManager.shared.mainContext).fixedSize())
         case .editor: return NSHostingView(rootView: EditorDebugPreferencesView().fixedSize())
+        case .clustering: return NSHostingView(rootView: ClusteringPreferencesView().fixedSize())
         }
     }
 
@@ -63,6 +66,6 @@ enum SettingTab: String, CaseIterable {
     }
 
     static var privateSettings: [SettingTab] {
-        return [.advanced, .editor]
+        return [.advanced, .editor, .clustering]
     }
 }
