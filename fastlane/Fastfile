@@ -186,7 +186,7 @@ platform :mac do
  end
 
 
-  8.times do |index|
+  9.times do |index|
     name = "Thread#{index+1}"
 
     desc "Run UI tests #{name}"
