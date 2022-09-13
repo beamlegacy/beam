@@ -20,11 +20,26 @@ class CrossTargetHiddenNotificationsBuilder {
     init(data: BeamData?, beeper: CrossTargetBeeper) {
         self.beeper = beeper
         self.data = data
-        data?.currentDocumentCollection?.observeIds([.userFacingNotes], nil).sink { _ in } receiveValue: { [weak self] _ in
-            self?.registerDynamicIdentifiers()
-        }.store(in: &scope)
-
+        setupDocumentsObservers()
         registerDynamicIdentifiers()
+    }
+
+    private func setupDocumentsObservers() {
+        let handler: (BeamDocument) -> Void = { [weak self] _ in
+            self?.registerDynamicIdentifiers()
+        }
+        BeamDocumentCollection.documentSaved
+            .removeDuplicates(by: { old, new in
+                old.title == new.title
+            })
+            .throttle(for: .seconds(1), scheduler: DispatchQueue.main, latest: true)
+            .sink(receiveValue: handler)
+            .store(in: &scope)
+
+        BeamDocumentCollection.documentDeleted
+            .throttle(for: .seconds(1), scheduler: DispatchQueue.main, latest: true)
+            .sink(receiveValue: handler)
+            .store(in: &scope)
     }
 
     private func registerDynamicIdentifiers() {
