@@ -35,7 +35,7 @@ class PrivacyPreferencesTestView: PreferencesBaseView {
 
     @discardableResult
     func addAllowUrl() -> PrivacyPreferencesTestView {
-        button(PrivacyAllowListPreferencesViewLocators.Buttons.addUrl.accessibilityIdentifier).clickOnExistence()
+        button(PrivacyAllowListPreferencesViewLocators.Buttons.addURL.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
@@ -54,7 +54,7 @@ class PrivacyPreferencesTestView: PreferencesBaseView {
     
     @discardableResult
     func removeAllowUrl() -> PrivacyPreferencesTestView {
-        button(PrivacyAllowListPreferencesViewLocators.Buttons.removeUrl.accessibilityIdentifier).clickOnExistence()
+        button(PrivacyAllowListPreferencesViewLocators.Buttons.removeURL.accessibilityIdentifier).clickOnExistence()
         return self
     }
     

@@ -10,8 +10,8 @@ import Foundation
 enum PrivacyAllowListPreferencesViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
-        case addUrl = "basicAdd"
-        case removeUrl = "basicRemove"
+        case addURL = "basicAdd"
+        case removeURL = "basicRemove"
         case cancelButton = "Cancel"
         case applyButton = "Apply"
     }
