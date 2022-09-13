@@ -38,8 +38,8 @@ class BrowserFancyUrlTests: BaseTest {
             }
 
             step("Then \(urlToTest) is opened with https/http is correctly added") {
-                let lowercasedUrl = urlToTest.lowercased()
-                XCTAssertTrue(url!.contains("https://" + lowercasedUrl) || url!.contains("http://" + lowercasedUrl), "\(url!) does not contain \("https://" + lowercasedUrl) OR \("http://" + lowercasedUrl)")
+                let lowercasedURL = urlToTest.lowercased()
+                XCTAssertTrue(url!.contains("https://" + lowercasedURL) || url!.contains("http://" + lowercasedURL), "\(url!) does not contain \("https://" + lowercasedURL) OR \("http://" + lowercasedURL)")
             }
         }
     }

@@ -12,7 +12,7 @@ class AdBlockerTests: BaseTest {
     
     let adBlockerPage = AdBlockerTestView()
     let url = MockHTTPWebPages().getMockPageUrl(.fullSiteAdBlock)
-    let hostUrl = "a-stat.test.adblock.lvh.me"
+    let hostURL = "a-stat.test.adblock.lvh.me"
     let tabTitleOfTestPage = "AdBlock"
     let tabTitleOfAdBlocker = "Site is blocked by Beam"
     let privacyWindow = PrivacyPreferencesTestView()
@@ -49,7 +49,7 @@ class AdBlockerTests: BaseTest {
             mockPage.openMockPage(.fullSiteAdBlock)
         }
         
-        verifyWebsiteIsBlocked(index: 0, url: url, hostUrl: hostUrl)
+        verifyWebsiteIsBlocked(index: 0, url: url, hostUrl: hostURL)
         
         step("When I allow the website \(url) once") {
             webView = adBlockerPage.allowWebSiteOnce()
@@ -73,7 +73,7 @@ class AdBlockerTests: BaseTest {
             webView = mockPage.openMockPage(.fullSiteAdBlock)
         }
         
-        verifyWebsiteIsBlocked(index: 1, url: url, hostUrl: hostUrl)
+        verifyWebsiteIsBlocked(index: 1, url: url, hostUrl: hostURL)
         
         step("When I allow the website \(url) once") {
             webView = adBlockerPage.allowWebSiteOnce()
@@ -85,7 +85,7 @@ class AdBlockerTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .reloadPage)
         }
         
-        verifyWebsiteIsBlocked(index: 1, url: url, hostUrl: hostUrl)
+        verifyWebsiteIsBlocked(index: 1, url: url, hostUrl: hostURL)
         
     }
     
@@ -96,7 +96,7 @@ class AdBlockerTests: BaseTest {
             mockPage.openMockPage(.fullSiteAdBlock)
         }
         
-        verifyWebsiteIsBlocked(index: 0, url: url, hostUrl: hostUrl)
+        verifyWebsiteIsBlocked(index: 0, url: url, hostUrl: hostURL)
         
         step("When I access to Allow List in Preferences") {
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
@@ -145,8 +145,8 @@ class AdBlockerTests: BaseTest {
             PrivacyPreferencesTestView().accessAllowList()
         }
         
-        step("Then host \(hostUrl) is correctly added") {
-            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostUrl)
+        step("Then host \(hostURL) is correctly added") {
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostURL)
         }
     }
     
@@ -162,8 +162,8 @@ class AdBlockerTests: BaseTest {
             XCTAssertFalse(privacyWindow.isAllowListFilled())
         }
         
-        step("When I add \(hostUrl) in Allow List") {
-            privacyWindow.addAllowUrl().fillNewUrl(hostUrl).saveAllowList()
+        step("When I add \(hostURL) in Allow List") {
+            privacyWindow.addAllowUrl().fillNewUrl(hostURL).saveAllowList()
             shortcutHelper.shortcutActionInvoke(action: .closeTab) // close
         }
         

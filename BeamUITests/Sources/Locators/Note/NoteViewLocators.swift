@@ -81,7 +81,7 @@ enum NoteViewLocators {
         case shareFacebook = "ContextMenuItem-facebook"
         case shareLinkedin = "ContextMenuItem-linkedin"
         case shareReddit = "ContextMenuItem-reddit"
-        case shareCopyUrl = "ContextMenuItem-copy url"
+        case shareCopyURL = "ContextMenuItem-copy url"
     }
     
     enum TextViews: String, CaseIterable, UIElement {
