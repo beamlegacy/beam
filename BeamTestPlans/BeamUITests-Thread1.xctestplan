@@ -31,6 +31,7 @@
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination8()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination9()",
         "AdvancedSignInPasswordAutofillTests\/testPasswordMenuIsDismissedWhenNavigatingBack()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination5()",
         "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination6()",
         "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination7()",
         "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination8()",
