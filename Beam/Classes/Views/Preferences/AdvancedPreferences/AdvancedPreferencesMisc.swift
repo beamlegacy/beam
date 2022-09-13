@@ -13,7 +13,6 @@ struct AdvancedPreferencesMisc: View {
     @State private var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
     @State private var includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBox
     @State private var enableOmnibeams = PreferencesManager.enableOmnibeams
-    @State private var showClusteringSettingsMenu = PreferencesManager.showClusteringSettingsMenu
 
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {
@@ -36,12 +35,7 @@ struct AdvancedPreferencesMisc: View {
                 Text("Omnibeams")
             } content: {
                 OmnibeamsCheckbox
-            }
-            Settings.Row(hasDivider: true) {
-                Text("Clustering Settings menu")
-            } content: {
-                EnableClusteringSettingsCheckbox
-            }
+            }            
             Settings.Row {
                 Text("Collect Feedback:")
             } content: {
@@ -91,17 +85,6 @@ struct AdvancedPreferencesMisc: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onChange(of: enableOmnibeams) {
                 PreferencesManager.enableOmnibeams = $0
-            }
-    }
-
-    private var EnableClusteringSettingsCheckbox: some View {
-        return Toggle(isOn: $showClusteringSettingsMenu) {
-            Text("Enabled")
-        }.toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onChange(of: showClusteringSettingsMenu) {
-                PreferencesManager.showClusteringSettingsMenu = $0
             }
     }
 
