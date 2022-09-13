@@ -9,20 +9,16 @@ import BeamCore
 import CryptoKit
 
 enum PasswordEncryptionManager {
-        static func laxReEncryptAfterReceive(_ networkPassword: RemotePasswordRecord) -> LocalPasswordRecord {
+        static func laxReEncryptAfterReceive(_ networkPassword: RemotePasswordRecord) -> LocalPasswordRecord? {
             if let localPassword = tryReEncryptAfterReceive(networkPassword) {
                 return localPassword
             }
-            var privateKeySignature = networkPassword.privateKeySignature
-            var updatedAt = networkPassword.updatedAt
-            if (try? EncryptionManager.shared.decryptString(networkPassword.password, EncryptionManager.shared.localPrivateKey())) != nil {
+            if let localPrivateKey = try? EncryptionManager.shared.localPrivateKey(), let privateKeySignature = try? localPrivateKey.asString().SHA256(), (try? EncryptionManager.shared.decryptString(networkPassword.password, localPrivateKey)) != nil {
                 Logger.shared.logWarning("Network password was encrypted with valid local key: \(networkPassword.hostname)", category: .passwordNetwork)
-                privateKeySignature = try? EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString().SHA256()
-                updatedAt = BeamDate.now
-            } else {
-                Logger.shared.logError("Network password can't be decrypted with either remote or local key: \(networkPassword.hostname)", category: .passwordNetwork)
+                return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: networkPassword.password, createdAt: networkPassword.createdAt, updatedAt: networkPassword.updatedAt, usedAt: networkPassword.usedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
             }
-            return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: networkPassword.password, createdAt: networkPassword.createdAt, updatedAt: updatedAt, usedAt: networkPassword.usedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
+            Logger.shared.logError("Network password can't be decrypted with either remote or local key, deleting: \(networkPassword.hostname)", category: .passwordNetwork)
+            return nil
         }
 
         static func tryReEncryptAfterReceive(_ networkPassword: RemotePasswordRecord) -> LocalPasswordRecord? {
@@ -31,7 +27,7 @@ enum PasswordEncryptionManager {
 
         static func reEncryptAfterReceive(_ networkPassword: RemotePasswordRecord) throws -> LocalPasswordRecord {
             do {
-                let password = try reEncrypt(networkPassword.password, encryptKey: EncryptionManager.shared.localPrivateKey())
+                let password = try reEncrypt(networkPassword.password, deleted: networkPassword.deletedAt != nil, encryptKey: EncryptionManager.shared.localPrivateKey())
                 let privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
                 return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: password, createdAt: networkPassword.createdAt, updatedAt: networkPassword.updatedAt, usedAt: networkPassword.usedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
             } catch {
@@ -46,7 +42,7 @@ enum PasswordEncryptionManager {
 
         static func reEncryptBeforeSend(_ localPassword: LocalPasswordRecord) throws -> RemotePasswordRecord {
             do {
-                let password = try reEncrypt(localPassword.password, decryptKey: EncryptionManager.shared.localPrivateKey())
+                let password = try reEncrypt(localPassword.password, deleted: localPassword.deletedAt != nil, decryptKey: EncryptionManager.shared.localPrivateKey())
                 let privateKeySignature = try EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString().SHA256()
                 return RemotePasswordRecord(uuid: localPassword.uuid, entryId: localPassword.entryId, hostname: localPassword.hostname, username: localPassword.username, password: password, createdAt: localPassword.createdAt, updatedAt: localPassword.updatedAt, usedAt: localPassword.usedAt, deletedAt: localPassword.deletedAt, privateKeySignature: privateKeySignature)
             } catch {
@@ -55,8 +51,8 @@ enum PasswordEncryptionManager {
             }
         }
 
-        private static func reEncrypt(_ password: String, decryptKey: SymmetricKey? = nil, encryptKey: SymmetricKey? = nil) throws -> String {
-            guard let decryptedPassword = try EncryptionManager.shared.decryptString(password, decryptKey) else {
+        private static func reEncrypt(_ password: String, deleted: Bool = false, decryptKey: SymmetricKey? = nil, encryptKey: SymmetricKey? = nil) throws -> String {
+            guard let decryptedPassword = (deleted ? "" : try EncryptionManager.shared.decryptString(password, decryptKey)) else {
                 throw EncryptionManagerError.stringDecodingError
             }
             guard let newlyEncryptedPassword = try EncryptionManager.shared.encryptString(decryptedPassword, encryptKey) else {
