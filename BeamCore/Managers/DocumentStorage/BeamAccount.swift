@@ -50,7 +50,8 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
     private var synchronizationTask: Task<Bool, Error>?
     private var synchronizationSubject = PassthroughSubject<Bool, Never>()
-    private(set) var isSynchronizationRunning = false
+
+    var isSynchronizationRunning: Bool { synchronizationTask != nil }
 
     var checkPrivateKeyTask:Task<ConnectionState, Never>?
 
@@ -424,17 +425,15 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
             return false
         }
 
-        guard isSynchronizationRunning == false else {
+        if let task = synchronizationTask {
             Logger.shared.logDebug("syncTask already running", category: .beamObjectNetwork)
-            return false
+            return try await task.value
         }
-
-        isSynchronizationRunning = true
-        synchronizationIsRunningDidUpdate()
 
         let task = launchSynchronizationTask(force, showAlert)
 
         synchronizationTask = task
+        synchronizationIsRunningDidUpdate()
 
         return try await task.value
     }
@@ -474,7 +473,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     private func synchronizationTaskDidStop() {
         Logger.shared.logInfo("synchronizationTaskDidStop", category: .beamObjectNetwork)
         synchronizationTask = nil
-        isSynchronizationRunning = false
         synchronizationIsRunningDidUpdate()
     }
 
