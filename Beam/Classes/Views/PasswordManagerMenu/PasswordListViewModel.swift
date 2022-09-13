@@ -103,9 +103,14 @@ final class PasswordListViewModel: ObservableObject {
                 self.refresh()
             }
             .store(in: &cancellables)
+        checkLocalPrivateKey()
+    }
+
+    func checkLocalPrivateKey() {
         Task.detached(priority: .background) { [weak self] in
+            guard let self = self else { return }
             do {
-                let digest = try passwordManager.sanityDigest()
+                let digest = try self.passwordManager.sanityDigest()
                 await MainActor.run { [weak self] in
                     self?.localPrivateKeyCheck = .available(digest: digest)
                 }
