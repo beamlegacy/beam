@@ -329,6 +329,17 @@ final class PasswordManager {
         }
         return digest
     }
+
+    func deleteUnrecoverablePasswords() throws {
+        let localPrivateKey = try EncryptionManager.shared.localPrivateKey()
+        let allRecords = try passwordsDB?.fetchAll() ?? []
+        for record in allRecords.filter({ $0.deletedAt == nil }) {
+            let password = try? EncryptionManager.shared.decryptString(record.password, localPrivateKey)
+            if password?.isEmpty != false { // password is nil or empty
+                markDeleted(hostname: record.hostname, for: record.username)
+            }
+        }
+    }
 }
 
 // MARK: - BeamObjectManagerDelegate
@@ -343,7 +354,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
         guard let passwordsDB = passwordsDB else {
             throw BeamDataError.databaseNotFound
         }
-        let localPasswords = passwords.map(PasswordEncryptionManager.laxReEncryptAfterReceive)
+        let localPasswords = passwords.compactMap(PasswordEncryptionManager.laxReEncryptAfterReceive)
         if localPasswords.count != passwords.count {
             EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - localPasswords.count)/\(passwords.count)"))
         }
@@ -361,7 +372,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
             throw BeamDataError.databaseNotFound
         }
 
-        let localPasswords = passwords.map(PasswordEncryptionManager.laxReEncryptAfterReceive)
+        let localPasswords = passwords.compactMap(PasswordEncryptionManager.laxReEncryptAfterReceive)
         if localPasswords.count != passwords.count {
             EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - localPasswords.count)/\(passwords.count)"))
         }
