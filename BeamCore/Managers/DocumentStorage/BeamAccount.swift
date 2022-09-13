@@ -52,7 +52,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     private var synchronizationSubject = PassthroughSubject<Bool, Never>()
     private(set) var isSynchronizationRunning = false
 
-    var checkPrivateKeyTask:Task<ConnectionState, Never>?
+    var checkPrivateKeyTask:Task<Bool, Never>?
 
     var isSynchronizationRunningPublisher: AnyPublisher<Bool, Never> {
         synchronizationSubject.eraseToAnyPublisher()
@@ -82,13 +82,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
     public let data = BeamData.shared
 
-    public internal(set) var state = ConnectionState.signedOff
-    public enum ConnectionState {
-        case signedOff
-        case authenticated
-        case privateKeyCheck
-        case signedIn
-    }
+    public internal(set) var signedIn = false
 
     /// Only use nil as a path for testing purposes
     public init(id: UUID, email: String, name: String, path: String?, overrideDatabasePath: String? = nil, migrate: Bool = true) throws {
@@ -394,7 +388,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     // MARK: - Private Key Check
     @MainActor
     func checkPrivateKey() async {
-        if await checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
+        if await checkPrivateKey(useBuiltinPrivateKeyUI: true) {
             objectManager.liveSync { (_, _) in
                 Task { @MainActor in
                     do {
@@ -405,8 +399,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
                     self.data.updateNoteCount()
                 }
             }
-        } else {
-            logoutIfNeeded()
         }
     }
 

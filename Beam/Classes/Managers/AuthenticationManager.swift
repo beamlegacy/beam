@@ -32,12 +32,12 @@ class AuthenticationManager {
         set {
             Persistence.Authentication.accessToken = newValue
             persistenceDidUpdate()
-            if isAuthenticated && account?.state == .signedOff {
-                account?.moveToAuthenticated()
-            } else if !isAuthenticated && account?.state != .signedOff {
-                account?.moveToSignedOff()
+            guard let account = account else { return }
+            if isAuthenticated && !account.signedIn {
+                account.moveToSignedIn()
+            } else if !isAuthenticated && account.signedIn {
+                account.moveToSignedOff()
             }
-
         }
     }
     var refreshToken: String? {
@@ -68,7 +68,7 @@ class AuthenticationManager {
 
     var isLoggedIn: Bool {
         if let account = account {
-            return account.state == .signedIn && AuthenticationManager.shared.isAuthenticated
+            return account.signedIn && AuthenticationManager.shared.isAuthenticated
         }
         return false
     }
