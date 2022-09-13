@@ -97,6 +97,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case cleanDownloads = "Clean SF-Symbols-3.dmg from Downloads"
     case showWebViewCount = "Show Number of WebView in Memory"
     case showUpdateWindow = "Show Update Window"
+    case triggerCrash = "Trigger Crash"
 
     var group: UITestMenuGroup? {
         switch self {
