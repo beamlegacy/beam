@@ -4,6 +4,7 @@ import AutoUpdate
 import MockHttpServer
 import Fakery
 import Combine
+import Sentry
 
 struct BeamUITestsMenuGeneratorSource: BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
@@ -107,6 +108,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         case .disablePasswordProtect: disablePasswordProtection()
         case .resetUserPreferences: resetUserPreferences()
         case .showUpdateWindow: showUpdateWindow()
+        case .triggerCrash: triggerCrash()
         default: break
         }
     }
@@ -640,6 +642,10 @@ extension BeamUITestsMenuGenerator {
                 window.state.cachedJournalScrollView = nil
             }
         }
+    }
+    
+    private func triggerCrash() {
+        SentrySDK.crash()
     }
 
 }

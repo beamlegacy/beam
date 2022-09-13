@@ -299,4 +299,10 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.resetUserPreferences.rawValue)
         return self
     }
+    
+    @discardableResult
+    func triggerCrash() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.triggerCrash.rawValue)
+        return self
+    }
 }
