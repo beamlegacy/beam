@@ -272,7 +272,14 @@ struct Passwords: View {
             Alert(title: Text($0.message))
         }
         .alert(item: $localPrivateKeyAlertMessage) {
-            Alert(title: Text("Some passwords could not be decrypted."), message: Text($0.string))
+            Alert(
+                title: Text("Some passwords could not be decrypted."),
+                message: Text($0.string),
+                primaryButton: .default(Text("Delete unrecoverable passwords")) {
+                    deleteUnrecoverablePasswords()
+                },
+                secondaryButton: .cancel()
+            )
         }
     }
 
@@ -280,6 +287,11 @@ struct Passwords: View {
         availableImportSources = OnboardingImportsView.ImportSource.allCases
             .filter { $0 == .passwordsCSV || $0.supportsAutomaticPasswordImport }
             .filter { $0.isAvailable }
+    }
+
+    private func deleteUnrecoverablePasswords() {
+        try? passwordsViewModel.passwordManager.deleteUnrecoverablePasswords()
+        passwordsViewModel.checkLocalPrivateKey()
     }
 
     private func promptDeletePasswordsAlert() {
