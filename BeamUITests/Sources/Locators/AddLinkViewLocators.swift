@@ -11,7 +11,7 @@ enum AddLinkViewLocators {
     
     enum TextFields: String, CaseIterable, UIElement  {
         case linkTitle = "link-title"
-        case linkUrl = "link-url"
+        case linkURL = "link-url"
     }
     
     enum Images: String, CaseIterable, UIElement  {

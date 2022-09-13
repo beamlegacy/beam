@@ -16,7 +16,7 @@ class AddLinkView: BaseView {
     }
     
     func getLinkElement() -> XCUIElement{
-        return app.dialogs.textFields[AddLinkViewLocators.TextFields.linkUrl.accessibilityIdentifier]
+        return app.dialogs.textFields[AddLinkViewLocators.TextFields.linkURL.accessibilityIdentifier]
     }
     
     func getTitleElement() -> XCUIElement{
