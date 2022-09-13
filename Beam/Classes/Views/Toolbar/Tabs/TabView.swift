@@ -135,7 +135,9 @@ struct TabView: View {
     private var faviconView: some View {
         TabFaviconView(
             favIcon: faviconImage,
+            iconName: tab.contentType == .pdf ? "tabs-file" : nil,
             showGrayScale: !isInMainWindow,
+            invertedColors: isSelected && isIncognito,
             isLoading: tab.isLoading,
             estimatedLoadingProgress: tab.estimatedLoadingProgress,
             disableAnimations: isDragging
@@ -146,9 +148,8 @@ struct TabView: View {
         switch tab.contentType {
         case .web:
             return tab.favIcon
-
         case .pdf:
-            return NSImage(named: "tabs-file")?.fill(color: BeamColor.LightStoneGray.nsColor)
+            return nil
         }
     }
 
