@@ -11,7 +11,9 @@ import Combine
 struct TabFaviconView: View {
 
     var favIcon: NSImage?
+    var iconName: String?
     var showGrayScale = false
+    var invertedColors = false
     var isLoading: Bool
     var estimatedLoadingProgress: CGFloat
     var disableAnimations = false
@@ -30,6 +32,11 @@ struct TabFaviconView: View {
             .rotationEffect(Angle(degrees: self.loadingIndicatorAnimatedFlag ? 360.0 : 0.0))
             .animation(loadingForeverAnimation, value: self.loadingIndicatorAnimatedFlag)
             .animation(BeamAnimation.easeInOut(duration: 0.15), value: estimatedLoadingProgress)
+    }
+    private static let defaultIconColor = BeamColor.combining(lightColor: .LightStoneGray, darkColor: .Corduroy)
+    private static let invertedDefaultIconColor = BeamColor.combining(lightColor: .Corduroy, darkColor: .LightStoneGray)
+    private var iconColor: Color {
+        (invertedColors ? Self.invertedDefaultIconColor : Self.defaultIconColor).swiftUI
     }
 
     var body: some View {
@@ -55,8 +62,8 @@ struct TabFaviconView: View {
                     }
             } else {
                 let iconSize: CGFloat = isLoading ? 12 : 16
-                Icon(name: "field-web", width: iconSize, color: BeamColor.LightStoneGray.swiftUI)
-                    .blendModeLightMultiplyDarkScreen()
+                Icon(name: iconName ?? "field-web", width: iconSize, color: iconColor)
+                    .blendModeLightMultiplyDarkScreen(invert: invertedColors)
             }
         }
         .animation(disableAnimations ? nil : BeamAnimation.spring(stiffness: 380, damping: 20), value: isLoading)
