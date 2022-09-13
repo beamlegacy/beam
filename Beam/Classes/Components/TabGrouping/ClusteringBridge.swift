@@ -128,7 +128,12 @@ final class SmartClusteringBridge: ClusteringBridge {
         clustering.getThreshold()
     }
     private lazy var clustering: SmartClustering = {
-        let sc = SmartClustering()
+        let sc: SmartClustering
+        if let threshold = PreferencesManager.clusteringV2Threshold {
+            sc = SmartClustering(threshold: threshold)
+        } else {
+            sc = SmartClustering()
+        }
         sc.prepare()
         return sc
     }()
