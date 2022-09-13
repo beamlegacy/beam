@@ -167,6 +167,7 @@ class PasswordImporterTest: XCTestCase {
 
     func testUTF8FileCanBeImported() throws {
         let url = try XCTUnwrap(Bundle.main.url(forResource: "XCTests-Passwords-UTF8-noBOM", withExtension: "binary"))
+        XCTAssertEqual(try Data(contentsOf: url).count, 51, "Unexpected file size: file encoding was possibly modified by git")
         _ = try PasswordImporter.importPasswords(fromCSV: url)
 
         let expectation1 = expectation(description: "Expect password request returns.")
@@ -181,6 +182,7 @@ class PasswordImporterTest: XCTestCase {
 
     func testUTF8FileWithBOMCanBeImported() throws {
         let url = try XCTUnwrap(Bundle.main.url(forResource: "XCTests-Passwords-UTF8-BOM", withExtension: "binary"))
+        XCTAssertEqual(try Data(contentsOf: url).count, 54, "Unexpected file size: file encoding was possibly modified by git")
         _ = try PasswordImporter.importPasswords(fromCSV: url)
 
         let expectation1 = expectation(description: "Expect password request returns.")
