@@ -10,43 +10,21 @@ import BeamCore
 
 extension BeamAccount {
     public func updateInitialState() {
-        switch state {
-        case .signedOff:
-            if AuthenticationManager.shared.isAuthenticated {
-                state = .authenticated
-            }
-        case .signedIn, .privateKeyCheck, .authenticated:
-            if !AuthenticationManager.shared.isAuthenticated {
-                state = .signedOff
-            }
-        }
+        signedIn = AuthenticationManager.shared.isAuthenticated
     }
 
     func logoutIfNeeded() {
-        if state == .authenticated || state == .privateKeyCheck {
+        if signedIn {
             logout()
         }
     }
 
-    internal func moveToSignedOff() {
-        state = .signedOff
+    func moveToSignedOff() {
+        signedIn = false
     }
 
-    internal func moveToAuthenticated() {
-        assert(AuthenticationManager.shared.isAuthenticated)
-        state = .authenticated
-    }
-
-    internal func moveToPrivateKeyCheck() {
-        assert(AuthenticationManager.shared.isAuthenticated)
-        assert(state == .authenticated || state == .privateKeyCheck)
-        state = .privateKeyCheck
-    }
-
-    internal func moveToSignedIn() {
-        assert(AuthenticationManager.shared.isAuthenticated)
-        assert(state == .privateKeyCheck)
-        state = .signedIn
+    func moveToSignedIn() {
+        signedIn = true
     }
 }
 
@@ -76,7 +54,7 @@ extension BeamAccount {
                 Persistence.Authentication.accessToken = refresh.accessToken
                 Persistence.Authentication.refreshToken = refresh.refreshToken
                 AuthenticationManager.shared.persistenceDidUpdate()
-                moveToAuthenticated()
+                moveToSignedIn()
                 completionHandler?(.success(true))
             } catch {
                 Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .accountManager)
@@ -111,7 +89,7 @@ extension BeamAccount {
                     }
                 }
 
-                moveToAuthenticated()
+                moveToSignedIn()
                 completionHandler?(.success(true))
             } catch {
                 Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .accountManager)
@@ -147,7 +125,7 @@ extension BeamAccount {
                         self.runFirstSync(useBuiltinPrivateKeyUI: true, syncCompletion: syncCompletion)
                     }
                 }
-                moveToAuthenticated()
+                moveToSignedIn()
                 completionHandler?(.success(true))
             } catch {
                 Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .accountManager)
@@ -280,29 +258,26 @@ extension BeamAccount {
 
     // MARK: - Check private key
     @MainActor
-    func checkPrivateKey(useBuiltinPrivateKeyUI: Bool) async -> ConnectionState {
+    func checkPrivateKey(useBuiltinPrivateKeyUI: Bool) async -> Bool {
         if let task = checkPrivateKeyTask {
             return await task.value
         }
 
-        let task = Task {@MainActor () -> ConnectionState in
+        let task = Task { @MainActor () -> Bool in
             defer {
                 self.checkPrivateKeyTask = nil
             }
 
-            guard state == .authenticated || state == .privateKeyCheck else { return state }
-            moveToPrivateKeyCheck()
             guard !AppDelegate.main.isRunningTests else {
-                moveToSignedIn()
-                return state
+                return true
             }
 
             guard Persistence.Authentication.email != nil else {
                 moveToSignedOff()
-                return state
+                return false
             }
 
-            guard AuthenticationManager.shared.isAuthenticated else { return state }
+            guard AuthenticationManager.shared.isAuthenticated else { return false }
 
             let privateKeySignatureManager = data.privateKeySignatureManager
 
@@ -312,18 +287,15 @@ extension BeamAccount {
                 pkStatus = try await privateKeySignatureManager.distantKeyStatus()
             } catch {
                 Logger.shared.logError("Couldn't check the private key status: \(error)", category: .privateKeySignature)
-                return state
+                return false
             }
 
             switch pkStatus {
             case .valid:
                 Logger.shared.logInfo("Matching local and distant private key was found.")
-                moveToSignedIn()
-                return state
+                return true
             case .invalid:
                 Logger.shared.logInfo("Local and distant private key are not matching. We need to ask the user.")
-
-                moveToPrivateKeyCheck()
 
                 if useBuiltinPrivateKeyUI {
                     var validPrivateKey = false
@@ -342,9 +314,9 @@ extension BeamAccount {
                             height: 24
                         )
 
-                        let keyString = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
+                        let keyString = EncryptionManager.shared.existingPrivateKey(for: Persistence.emailOrRaiseError())?.asString()
 
-                        let textField = NSTextField(string: keyString)
+                        let textField = NSTextField(string: keyString ?? "")
                         textField.frame = inputFrame
                         textField.placeholderString = loc("Private Key", comment: "Alert text field placeholder")
 
@@ -372,17 +344,16 @@ extension BeamAccount {
                             }
                         default:
                             Logger.shared.logInfo("The user choose to not enter the private key, we logout", category: .privateKeySignature)
-                            logout()
-                            return state
+                            return false
                         }
                     } while AuthenticationManager.shared.isAuthenticated && !validPrivateKey
 
                     if validPrivateKey {
-                        moveToSignedIn()
+                        return true
                     }
                 }
 
-                return state
+                return false
             case .none:
                 Logger.shared.logInfo("No distant private key found. We will create one with the local one.")
                 //UserAlert.showError(message: "No distant private key. The local one will be used", informativeText: "Virging account", buttonTitle: "Ok")
@@ -399,17 +370,16 @@ extension BeamAccount {
                 }
 
                 guard canUploadPrivateKey else {
-                    moveToPrivateKeyCheck()
-                    return state
+                    return false
                 }
 
                 do {
                     try await privateKeySignatureManager.saveOnNetwork(privateKeySignatureManager.privateKeySignature)
-                    self.moveToSignedIn()
+                    return true
                 } catch {
                     Logger.shared.logError("Unable to save private key signature on network: \(error)", category: .privateKeySignature)
+                    return false
                 }
-                return state
             }
         }
         checkPrivateKeyTask = task
@@ -418,7 +388,7 @@ extension BeamAccount {
 
     func runFirstSync(useBuiltinPrivateKeyUI: Bool, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         Task { @MainActor in
-            if await checkPrivateKey(useBuiltinPrivateKeyUI: useBuiltinPrivateKeyUI) == .signedIn {
+            if await checkPrivateKey(useBuiltinPrivateKeyUI: useBuiltinPrivateKeyUI) {
                 // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
                 data.objectManager.liveSync { (firstCall, _) in
                     Task { @MainActor in

@@ -24,6 +24,15 @@ struct OnboardingStep: Equatable {
 
     let type: StepType
     var title: String?
+
+    var canGoBack: Bool {
+        switch type {
+        case .welcome, .profile, .imports, .savePrivateKey, .loading:
+            return false
+        default:
+            return true
+        }
+    }
 }
 
 protocol OnboardingManagerDelegate: AnyObject {
@@ -146,7 +155,7 @@ class OnboardingManager: ObservableObject {
         if let nextStep = nextStep ?? stepAfter(step: previous) {
             currentStep = nextStep
             viewIsLoading = false
-            if AuthenticationManager.shared.isAuthenticated && AppData.shared.currentAccount?.state == .signedIn {
+            if !nextStep.canGoBack {
                 stepsHistory.removeAll()
             } else {
                 stepsHistory.append(previous)
@@ -197,11 +206,7 @@ class OnboardingManager: ObservableObject {
     }
 
     private func onboardingDidStart() {
-        AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
-            if isAuthenticated && AppData.shared.currentAccount?.state == .signedIn {
-                self?.stepsHistory.removeAll()
-            }
-        }.store(in: &cancellables)
+
     }
 
     private func onboardingDidFinish() {
@@ -225,16 +230,13 @@ class OnboardingManager: ObservableObject {
     func checkForPrivateKey(completionHandler: @escaping (OnboardingStep?) -> Void, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         Task { @MainActor in
             if let currentAccount = AppData.shared.currentAccount {
-                switch await currentAccount.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
-                case .signedIn:
+                if await currentAccount.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
                     completionHandler(nil)
                     currentAccount.runFirstSync(useBuiltinPrivateKeyUI: false) { result in
                         syncCompletion?(result)
                     }
-                case .privateKeyCheck:
+                } else {
                     completionHandler(OnboardingStep(type: .setupPrivateKey))
-                default:
-                    assert(false)
                 }
             } else {
                 assert(false)

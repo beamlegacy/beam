@@ -603,7 +603,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logDebug("Tried to quit while full syncing")
             return .terminateCancel }
 
-        data.currentAccount?.logoutIfNeeded()
         data.saveData()
 
         _ = data.currentAccount?.data.browsingTreeSender?.groupWait()
