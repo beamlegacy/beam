@@ -16,7 +16,7 @@ class LoginTest: BaseTest {
 
     var email: String = ""
     var password: String = ""
-    let testUrl = "UITests-Password.html"
+    let testURL = "UITests-Password.html"
         
     func preparation() -> AlertTestView {
         launchApp()
@@ -47,12 +47,12 @@ class LoginTest: BaseTest {
             uiMenu.disablePasswordAndCardsProtection()
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
-            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(testUrl))
+            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(testURL))
             XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(email))
             XCTAssertEqual(passwordsWindow.getNumberOfEntries(),1)
-            passwordsWindow.selectFirstPasswordItem(testUrl)
+            passwordsWindow.selectFirstPasswordItem(testURL)
             passwordsWindow.clickDetails()
-            XCTAssertEqual(passwordsWindow.getPasswordFieldToFill(.site).getStringValue(), testUrl)
+            XCTAssertEqual(passwordsWindow.getPasswordFieldToFill(.site).getStringValue(), testURL)
             XCTAssertEqual(passwordsWindow.getPasswordFieldToFill(.username).getStringValue(), email)
             XCTAssertEqual(passwordsWindow.getPasswordFieldToFill(.password).getStringValue(), password)
         }

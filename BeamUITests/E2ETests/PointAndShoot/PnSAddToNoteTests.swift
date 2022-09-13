@@ -413,10 +413,10 @@ class PnSAddToNoteTests: BaseTest {
             XCUIElement.perform(withKeyModifiers: .option) {
                 sleep(1)
                 // get the url before clicking
-                let beforeUrl = webView.getTabUrlAtIndex(index: 0)
+                let beforeURL = webView.getTabUrlAtIndex(index: 0)
                 webView.staticText("I-Beam").clickOnExistence()
                 // compare with url after clicking
-                XCTAssertEqual(beforeUrl, webView.getTabUrlAtIndex(index: 0))
+                XCTAssertEqual(beforeURL, webView.getTabUrlAtIndex(index: 0))
             }
         }
     }

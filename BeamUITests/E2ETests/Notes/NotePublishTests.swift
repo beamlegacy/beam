@@ -216,7 +216,7 @@ class NotePublishTests: BaseTest {
             noteView.waitForNoteViewToLoad()
             noteView.clickPublishedMenuDisclosureTriangle()
                 .sharePublishedNoteMenuDisplay()
-                .sharePublishedNoteAction(.shareCopyUrl)
+                .sharePublishedNoteAction(.shareCopyURL)
         }
         
         step("Then I can open it in the web") {

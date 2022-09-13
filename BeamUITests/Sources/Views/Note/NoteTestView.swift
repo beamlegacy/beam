@@ -141,7 +141,7 @@ class NoteTestView: TextEditorContextTestView {
     @discardableResult
     func sharePublishedNoteAction(_ item: NoteViewLocators.SharePublishedNote) -> NoteTestView {
         // hover first item to not dismiss the menu
-        app.staticTexts[NoteViewLocators.SharePublishedNote.shareCopyUrl.accessibilityIdentifier].hoverInTheMiddle()
+        app.staticTexts[NoteViewLocators.SharePublishedNote.shareCopyURL.accessibilityIdentifier].hoverInTheMiddle()
         app.staticTexts[item.accessibilityIdentifier].clickOnExistence()
         return self
     }
