@@ -14,7 +14,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     static var sourceId: String { "\(Self.self)" }
 
     private(set) var beeper: CrossTargetNotificationCenterBeeper
-    private var hiddenIdentifiersBuilder: CrossTargetHiddenNotificationsBuilder
+    private var hiddenIdentifiersBuilder: CrossTargetHiddenNotificationsBuilder?
     private weak var appData: AppData?
     private var appObserverScope = Set<AnyCancellable>()
     private var currentAccount: BeamAccount? {
@@ -24,11 +24,13 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     init(appData: AppData) {
         self.beeper = CrossTargetNotificationCenterBeeper()
         self.appData = appData
-        self.hiddenIdentifiersBuilder = .init(data: appData.currentAccount?.data, beeper: beeper)
         self.beeper.delegate = self
-        appData.$currentAccount.sink { [unowned self] currentAccount in
-            self.hiddenIdentifiersBuilder = .init(data: currentAccount?.data, beeper: self.beeper)
-        }.store(in: &appObserverScope)
+        if Configuration.env == .test {
+            self.hiddenIdentifiersBuilder = .init(data: appData.currentAccount?.data, beeper: beeper)
+            appData.$currentAccount.sink { [unowned self] currentAccount in
+                self.hiddenIdentifiersBuilder = .init(data: currentAccount?.data, beeper: self.beeper)
+            }.store(in: &appObserverScope)
+        }
     }
 
     private var dismissBeeperStatusWork: DispatchWorkItem?
