@@ -199,11 +199,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.isNetworkReachable = false
             case .reachable:
                 self?.isNetworkReachable = true
-                if !(self?.areE2ETestsRunning ?? false) { // remove this condition once https://linear.app/beamapp/issue/BE-5478/exc-breakpoint-beambeamaccountremoteserverswift48-assertion-failed is fixed
-                    Task { @MainActor [weak self] in
-                        await self?.checkPrivateKey()
-                        self?.window?.state.reloadOfflineTabs()
-                    }
+                Task { @MainActor [weak self] in
+                    await self?.checkPrivateKey()
+                    self?.window?.state.reloadOfflineTabs()
                 }
             }
         }.store(in: &cancellableScope)

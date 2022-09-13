@@ -52,6 +52,8 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     private var synchronizationSubject = PassthroughSubject<Bool, Never>()
     private(set) var isSynchronizationRunning = false
 
+    var checkPrivateKeyTask:Task<ConnectionState, Never>?
+
     var isSynchronizationRunningPublisher: AnyPublisher<Bool, Never> {
         synchronizationSubject.eraseToAnyPublisher()
     }

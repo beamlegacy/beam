@@ -281,127 +281,139 @@ extension BeamAccount {
     // MARK: - Check private key
     @MainActor
     func checkPrivateKey(useBuiltinPrivateKeyUI: Bool) async -> ConnectionState {
-        guard state == .authenticated || state == .privateKeyCheck else { return state }
-        moveToPrivateKeyCheck()
-        guard !AppDelegate.main.isRunningTests else {
-            moveToSignedIn()
-            return state
+        if let task = checkPrivateKeyTask {
+            return await task.value
         }
 
-        guard Persistence.Authentication.email != nil else {
-            moveToSignedOff()
-            return state
-        }
+        let task = Task {@MainActor () -> ConnectionState in
+            defer {
+                self.checkPrivateKeyTask = nil
+            }
 
-        guard AuthenticationManager.shared.isAuthenticated else { return state }
-
-        let privateKeySignatureManager = data.privateKeySignatureManager
-
-        var pkStatus = PrivateKeySignatureManager.DistantKeyStatus.invalid
-
-        do {
-            pkStatus = try await privateKeySignatureManager.distantKeyStatus()
-        } catch {
-            Logger.shared.logError("Couldn't check the private key status: \(error)", category: .privateKeySignature)
-            return state
-        }
-
-        switch pkStatus {
-        case .valid:
-            Logger.shared.logInfo("Matching local and distant private key was found.")
-            moveToSignedIn()
-            return state
-        case .invalid:
-            Logger.shared.logInfo("Local and distant private key are not matching. We need to ask the user.")
-
+            guard state == .authenticated || state == .privateKeyCheck else { return state }
             moveToPrivateKeyCheck()
-
-            if useBuiltinPrivateKeyUI {
-                var validPrivateKey = false
-                repeat {
-                    Logger.shared.logInfo("Ask the user for a valid private key for this account", category: .privateKeySignature)
-                    let alert = NSAlert()
-                    alert.messageText = loc("Beam needs your private key to connect to this account.", comment: "Alert message")
-                    _ = alert.addButton(withTitle: loc("Use Encryption Key", comment: "Alert button"))
-                    _ = alert.addButton(withTitle: loc("Disconnect", comment: "Alert button"))
-
-                    // Add an input NSTextField for the prompt
-                    let inputFrame = NSRect(
-                        x: 0,
-                        y: 0,
-                        width: 300,
-                        height: 24
-                    )
-
-                    let keyString = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
-
-                    let textField = NSTextField(string: keyString)
-                    textField.frame = inputFrame
-                    textField.placeholderString = loc("Private Key", comment: "Alert text field placeholder")
-
-                    alert.accessoryView = textField
-
-                    // Display the NSAlert
-                    let choice = await alert.run()
-                    switch choice {
-                    case .alertFirstButtonReturn:
-                        // Use the private key given by the user:
-                        do {
-                            var pk = textField.stringValue
-                            // Let help the user here:
-                            if pk.suffix(1) != "=" {
-                                pk += "="
-                            }
-                            Logger.shared.logInfo("New private key from user: \(textField.stringValue)", category: .privateKeySignature)
-                            try EncryptionManager.shared.replacePrivateKey(for: Persistence.emailOrRaiseError(), with: pk)
-                            // Check the validity of the private key with the object on server:
-                            let newStatus = try await privateKeySignatureManager.distantKeyStatus()
-                            validPrivateKey = newStatus == .valid
-                            Logger.shared.logInfo("New private key status: \(newStatus), valid = \(validPrivateKey)")
-                        } catch {
-                            Logger.shared.logError("Invalid private key from user: \(textField.stringValue)", category: .privateKeySignature)
-                        }
-                    default:
-                        Logger.shared.logInfo("The user choose to not enter the private key, we logout", category: .privateKeySignature)
-                        logout()
-                        return state
-                    }
-                } while AuthenticationManager.shared.isAuthenticated && !validPrivateKey
-
-                if validPrivateKey {
-                    moveToSignedIn()
-                }
-            }
-
-            return state
-        case .none:
-            Logger.shared.logInfo("No distant private key found. We will create one with the local one.")
-            //UserAlert.showError(message: "No distant private key. The local one will be used", informativeText: "Virging account", buttonTitle: "Ok")
-
-            // but first, let's try to see if the account is really empty:
-            var canUploadPrivateKey = false
-            do {
-                let request = BeamObjectRequest()
-                let signatures = try await request.fetchAllObjectPrivateKeySignatures()
-                let localSignature = (try? privateKeySignatureManager.privateKeySignature.signature.SHA256()) ?? "invalid"
-                canUploadPrivateKey = signatures.isEmpty || signatures.contains(localSignature)
-            } catch {
-                canUploadPrivateKey = false
-            }
-
-            guard canUploadPrivateKey else {
-                moveToPrivateKeyCheck()
+            guard !AppDelegate.main.isRunningTests else {
+                moveToSignedIn()
                 return state
             }
 
-            do {
-                try await privateKeySignatureManager.saveOnNetwork(privateKeySignatureManager.privateKeySignature)
-                self.moveToSignedIn()
-            } catch {
-                Logger.shared.logError("Unable to save private key signature on network: \(error)", category: .privateKeySignature)
+            guard Persistence.Authentication.email != nil else {
+                moveToSignedOff()
+                return state
             }
-            return state
+
+            guard AuthenticationManager.shared.isAuthenticated else { return state }
+
+            let privateKeySignatureManager = data.privateKeySignatureManager
+
+            var pkStatus = PrivateKeySignatureManager.DistantKeyStatus.invalid
+
+            do {
+                pkStatus = try await privateKeySignatureManager.distantKeyStatus()
+            } catch {
+                Logger.shared.logError("Couldn't check the private key status: \(error)", category: .privateKeySignature)
+                return state
+            }
+
+            switch pkStatus {
+            case .valid:
+                Logger.shared.logInfo("Matching local and distant private key was found.")
+                moveToSignedIn()
+                return state
+            case .invalid:
+                Logger.shared.logInfo("Local and distant private key are not matching. We need to ask the user.")
+
+                moveToPrivateKeyCheck()
+
+                if useBuiltinPrivateKeyUI {
+                    var validPrivateKey = false
+                    repeat {
+                        Logger.shared.logInfo("Ask the user for a valid private key for this account", category: .privateKeySignature)
+                        let alert = NSAlert()
+                        alert.messageText = loc("Beam needs your private key to connect to this account.", comment: "Alert message")
+                        _ = alert.addButton(withTitle: loc("Use Encryption Key", comment: "Alert button"))
+                        _ = alert.addButton(withTitle: loc("Disconnect", comment: "Alert button"))
+
+                        // Add an input NSTextField for the prompt
+                        let inputFrame = NSRect(
+                            x: 0,
+                            y: 0,
+                            width: 300,
+                            height: 24
+                        )
+
+                        let keyString = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
+
+                        let textField = NSTextField(string: keyString)
+                        textField.frame = inputFrame
+                        textField.placeholderString = loc("Private Key", comment: "Alert text field placeholder")
+
+                        alert.accessoryView = textField
+
+                        // Display the NSAlert
+                        let choice = await alert.run()
+                        switch choice {
+                        case .alertFirstButtonReturn:
+                            // Use the private key given by the user:
+                            do {
+                                var pk = textField.stringValue
+                                // Let help the user here:
+                                if pk.suffix(1) != "=" {
+                                    pk += "="
+                                }
+                                Logger.shared.logInfo("New private key from user: \(textField.stringValue)", category: .privateKeySignature)
+                                try EncryptionManager.shared.replacePrivateKey(for: Persistence.emailOrRaiseError(), with: pk)
+                                // Check the validity of the private key with the object on server:
+                                let newStatus = try await privateKeySignatureManager.distantKeyStatus()
+                                validPrivateKey = newStatus == .valid
+                                Logger.shared.logInfo("New private key status: \(newStatus), valid = \(validPrivateKey)")
+                            } catch {
+                                Logger.shared.logError("Invalid private key from user: \(textField.stringValue)", category: .privateKeySignature)
+                            }
+                        default:
+                            Logger.shared.logInfo("The user choose to not enter the private key, we logout", category: .privateKeySignature)
+                            logout()
+                            return state
+                        }
+                    } while AuthenticationManager.shared.isAuthenticated && !validPrivateKey
+
+                    if validPrivateKey {
+                        moveToSignedIn()
+                    }
+                }
+
+                return state
+            case .none:
+                Logger.shared.logInfo("No distant private key found. We will create one with the local one.")
+                //UserAlert.showError(message: "No distant private key. The local one will be used", informativeText: "Virging account", buttonTitle: "Ok")
+
+                // but first, let's try to see if the account is really empty:
+                var canUploadPrivateKey = false
+                do {
+                    let request = BeamObjectRequest()
+                    let signatures = try await request.fetchAllObjectPrivateKeySignatures()
+                    let localSignature = (try? privateKeySignatureManager.privateKeySignature.signature.SHA256()) ?? "invalid"
+                    canUploadPrivateKey = signatures.isEmpty || signatures.contains(localSignature)
+                } catch {
+                    canUploadPrivateKey = false
+                }
+
+                guard canUploadPrivateKey else {
+                    moveToPrivateKeyCheck()
+                    return state
+                }
+
+                do {
+                    try await privateKeySignatureManager.saveOnNetwork(privateKeySignatureManager.privateKeySignature)
+                    self.moveToSignedIn()
+                } catch {
+                    Logger.shared.logError("Unable to save private key signature on network: \(error)", category: .privateKeySignature)
+                }
+                return state
+            }
         }
+        checkPrivateKeyTask = task
+        return await task.value
     }
 
     func runFirstSync(useBuiltinPrivateKeyUI: Bool, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
