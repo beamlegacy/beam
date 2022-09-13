@@ -10,7 +10,6 @@ import Foundation
 // MARK: - Keys
 extension PreferencesManager {
     private static let browsingSessionCollectionIsOnKey = "browsingSessionCollectionIsOn"
-    private static let showClusteringSettingsMenuKey = "showClusteringSettingsMenuKey"
     private static let showDebugSectionKey = "showDebugSection"
     private static let showOmniboxScoreSectionKey = "showOmnibarScoreSection"
     private static let showPNSKey = "showPNSview"
@@ -24,8 +23,10 @@ extension PreferencesManager {
     private static let includeHistoryContentsInOmniBoxKey = "includeHistoryContentsInOmniBox"
     private static let enableOmnibeamsKey = "enableOmnibeams"
     private static let enableDailySummaryKey = "enableDailySummary"
-    private static let enableClusteringV2Key = "enableClusteringV2"
     private static let enableFallbackReadabilityParserKey = "enableFallbackReadabilityParser"
+    private static let showClusteringV1SettingsMenuKey = "showClusteringSettingsMenuKey"
+    private static let enableClusteringV2Key = "enableClusteringV2"
+    private static let clusteringV2ThresholdKey = "clusteringV2ThresholdKey"
 }
 
 // MARK: - Default Values
@@ -34,7 +35,6 @@ extension PreferencesManager {
     private static let browsingSessionCollectionIsOnDefault = true
     #endif
     private static let browsingSessionCollectionIsOnDefault = false
-    private static let showClusteringSettingsMenuDefault = Configuration.branchType == .develop
     private static let showDebugSectionDefault = false
     private static let showOmniboxScoreSectionDefault = false
     private static let showPNSDefault = true
@@ -47,16 +47,15 @@ extension PreferencesManager {
     static let includeHistoryContentsInOmniBoxDefault = false
     static let enableOmnibeamsDefault = false
     private static let enableDailySummaryDefault: Bool = Configuration.branchType == .develop
-    private static let enableClusteringV2Default: Bool = Configuration.branchType == .develop
     private static let enableFallbackReadabilityParserDefault: Bool = false
+    private static let showClusteringV1SettingsMenuDefault = Configuration.branchType == .develop
+    private static let enableClusteringV2Default: Bool = Configuration.branchType == .develop
+    private static let clusteringV2ThresholdDefault: Float? = nil
 }
 
 extension PreferencesManager {
     @UserDefault(key: browsingSessionCollectionIsOnKey, defaultValue: browsingSessionCollectionIsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var browsingSessionCollectionIsOn: Bool
-
-    @UserDefault(key: showClusteringSettingsMenuKey, defaultValue: showClusteringSettingsMenuDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
-    static var showClusteringSettingsMenu: Bool
 
     @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showDebugSection: Bool
@@ -97,7 +96,17 @@ extension PreferencesManager {
     @UserDefault(key: enableDailySummaryKey, defaultValue: enableDailySummaryDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var enableDailySummary: Bool
 
+}
+
+// MARK: - Clustering
+extension PreferencesManager {
     @UserDefault(key: enableClusteringV2Key, defaultValue: enableClusteringV2Default, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var enableClusteringV2: Bool
+
+    @UserDefault(key: showClusteringV1SettingsMenuKey, defaultValue: showClusteringV1SettingsMenuDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
+    static var showClusteringSettingsMenu: Bool
+
+    @UserDefault(key: clusteringV2ThresholdKey, defaultValue: clusteringV2ThresholdDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
+    static var clusteringV2Threshold: Float?
 
 }
