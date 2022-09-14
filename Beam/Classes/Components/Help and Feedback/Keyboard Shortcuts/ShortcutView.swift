@@ -29,10 +29,10 @@ struct ShortcutView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.tab]))
-            ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.string("d")]))
+            ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.string("D")]))
             ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.tab]))
                 .preferredColorScheme(.dark)
-            ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.string("d")]))
+            ShortcutView(shortcut: Shortcut(modifiers: [.shift, .command], keys: [.string("D")]))
                 .preferredColorScheme(.dark)
         }
     }

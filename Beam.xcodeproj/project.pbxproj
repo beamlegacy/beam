@@ -891,7 +891,7 @@
 		A03CE0EC25F954CB00D767B0 /* BeamNoteDataHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */; };
 		A03E64A6282CFF8D0003A7B2 /* RoundedCornersModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03E64A5282CFF8D0003A7B2 /* RoundedCornersModifier.swift */; };
 		A0404F0C25E7ECDD00E347F3 /* CommandNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */; };
-		A043B7E7265937DA00E267E5 /* AppDelegate+TabGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7E6265937DA00E267E5 /* AppDelegate+TabGrouping.swift */; };
+		A043B7E7265937DA00E267E5 /* AppDelegate+Tabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7E6265937DA00E267E5 /* AppDelegate+Tabs.swift */; };
 		A043B7FE26593A5300E267E5 /* TabGroupingSettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7FD26593A5300E267E5 /* TabGroupingSettingsWindow.swift */; };
 		A043B800265A547100E267E5 /* TabGroupingSettingsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7FF265A547100E267E5 /* TabGroupingSettingsContentView.swift */; };
 		A0440E52282DC7AE00464AAC /* ToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0440E51282DC7AE00464AAC /* ToggleView.swift */; };
@@ -2860,7 +2860,7 @@
 		A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteDataHolder.swift; sourceTree = "<group>"; };
 		A03E64A5282CFF8D0003A7B2 /* RoundedCornersModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedCornersModifier.swift; sourceTree = "<group>"; };
 		A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandNodeTests.swift; sourceTree = "<group>"; };
-		A043B7E6265937DA00E267E5 /* AppDelegate+TabGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+TabGrouping.swift"; sourceTree = "<group>"; };
+		A043B7E6265937DA00E267E5 /* AppDelegate+Tabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Tabs.swift"; sourceTree = "<group>"; };
 		A043B7FD26593A5300E267E5 /* TabGroupingSettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingSettingsWindow.swift; sourceTree = "<group>"; };
 		A043B7FF265A547100E267E5 /* TabGroupingSettingsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingSettingsContentView.swift; sourceTree = "<group>"; };
 		A0440E51282DC7AE00464AAC /* ToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleView.swift; sourceTree = "<group>"; };
@@ -4600,7 +4600,7 @@
 				4181727A258110D100317ED8 /* AppDelegate+URL.swift */,
 				A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */,
 				A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */,
-				A043B7E6265937DA00E267E5 /* AppDelegate+TabGrouping.swift */,
+				A043B7E6265937DA00E267E5 /* AppDelegate+Tabs.swift */,
 				0DC6E2CE269DE73B00BD2E2A /* AppDelegate+TopDomain.swift */,
 				52A8698C26CBB3C000FCCC69 /* AppDelegate+ShowError.swift */,
 				96A1C67526F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift */,
@@ -9513,7 +9513,7 @@
 				A5B68435287DE9FE00213BD7 /* TabGroup.swift in Sources */,
 				8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */,
 				964E5F8E2845027F0065EEC5 /* BeamDocumentSynchronizer.swift in Sources */,
-				A043B7E7265937DA00E267E5 /* AppDelegate+TabGrouping.swift in Sources */,
+				A043B7E7265937DA00E267E5 /* AppDelegate+Tabs.swift in Sources */,
 				37DB5A0E27BB514400534760 /* EmbedContentViewDelegate.swift in Sources */,
 				962AC88827901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift in Sources */,
 				5295D91627187246008AF38C /* LoggerNSTableViewController.swift in Sources */,
