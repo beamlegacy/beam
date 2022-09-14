@@ -244,14 +244,11 @@ struct CalendarIemView: View {
                 }
                 if let meetingLink = meetingLink, let url = URL(string: meetingLink) {
                     Button {
-                        _ = AppDelegate.main.window?.state.addNewTab(
-                            origin: nil,
-                            setCurrent: true,
-                            note: nil,
-                            element: nil,
-                            request: URLRequest(url: url),
-                            webView: nil
-                        )
+                        do {
+                            try AppDelegate.main.window?.state.videoCallManager.startVideoConferencing(with: .init(url: url))
+                        } catch {
+                            UserAlert.showError(error: error)
+                        }
                     } label: {
                         Image("editor-calendar_video")
                             .renderingMode(.template)

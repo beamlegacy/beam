@@ -15,9 +15,19 @@
 -(void)_setBackspaceKeyNavigationEnabled:(BOOL)enabled;
 @end
 
+typedef NS_OPTIONS(NSUInteger, _WKMediaMutedState) {
+    _WKMediaNoneMuted = 0,
+    _WKMediaAudioMuted = 1 << 0,
+    _WKMediaCaptureDevicesMuted = 1 << 1,
+    _WKMediaScreenCaptureMuted = 1 << 2,
+};
+
 @interface WKWebView ()
 @property (nonatomic, readonly) BOOL _isInFullscreen;
 @property (nonatomic, readonly, nullable) NSString *_MIMEType;
+@property (nonatomic, readonly) _WKMediaMutedState _mediaMutedState;
+
+- (void)_setPageMuted:(_WKMediaMutedState)mutedState;
 
 - (void)_setAddsVisitedLinks:(BOOL)addsVisitedLinks;
 

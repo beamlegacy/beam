@@ -250,9 +250,7 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
         self.initialFirstResponder = nil
 
         if !terminatingApplication {
-            for tab in state.browserTabsManager.tabs {
-                tab.tabWillClose()
-            }
+            state.closeAllTabs()
         }
 
         let idToRemove = state.browserTabsManager.browserTabManagerId
