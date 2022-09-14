@@ -28,10 +28,8 @@ class NotesNavigationHistoryTests: BaseTest {
     }
     
     func testNotesNavigationHistory() {
-        testrailId("C825, C826")
-        launchApp()
+        testrailId("C825, C826, C828")
 
-        testrailId("C828")
         step("GIVEN I open All notes and default note") {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()

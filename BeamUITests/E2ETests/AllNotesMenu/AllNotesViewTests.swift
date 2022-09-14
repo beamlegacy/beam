@@ -95,7 +95,7 @@ class AllNotesViewTests: BaseTest {
         let linkedNoteName = "Capture"
         
         step ("GIVEN I remove links from \(linkNoteName)") {
-            launchApp()
+            super.setUp()
             openAndRemoveAllFrom(note: linkNoteName)
         }
         

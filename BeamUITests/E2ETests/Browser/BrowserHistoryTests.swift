@@ -23,12 +23,9 @@ class BrowserHistoryTests: BaseTest {
         webView.button("Continue").tapInTheMiddle()
     }
     
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        launchApp()
-        uiMenu
-            .invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp()  {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
     }
     
     private func openMultipleWebPagesInSameTab() {

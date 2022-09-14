@@ -14,7 +14,7 @@ class TabGroupNewTabTests: BaseTest {
     
     override func setUp() {
         step("Given I have a tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
+            super.setUp()
             createTabGroupAndSwitchToWeb()
         }
     }

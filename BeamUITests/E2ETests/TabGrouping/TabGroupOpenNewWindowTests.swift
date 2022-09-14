@@ -14,7 +14,7 @@ class TabGroupOpenNewWindowTests: BaseTest {
     
     override func setUp() {
         step("Given I have two tab groups") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
+            super.setUp()
             uiMenu.invoke(.createTabGroupNamed)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             uiMenu.invoke(.createTabGroupNamed)

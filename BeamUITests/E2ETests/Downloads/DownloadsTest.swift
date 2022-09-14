@@ -16,7 +16,7 @@ class DownloadsTest: BaseTest {
     var downloadsView = DownloadTestView()
 
     override func setUp() {
-        journalView = launchApp()
+        super.setUp()
         
         step("Given I start downloading process using \(downloadLink) link"){
             journalView.searchInOmniBox(downloadLink, true)

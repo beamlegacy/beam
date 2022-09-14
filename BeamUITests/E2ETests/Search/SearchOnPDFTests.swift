@@ -10,11 +10,9 @@ import XCTest
 
 class SearchOnPDFTests: BaseTest {
     
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp() {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
         clearPasteboard()
     }
     

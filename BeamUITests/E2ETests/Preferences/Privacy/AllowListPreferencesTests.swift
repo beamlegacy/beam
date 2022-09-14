@@ -16,9 +16,9 @@ class AllowListPreferencesTests: BaseTest {
 
     let privacyWindow = PrivacyPreferencesTestView()
     
-    override func setUpWithError() throws {
+    override func setUp() {
         step ("GIVEN I open Allow list preferences"){
-            launchApp()
+            super.setUp()
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .privacy)
             privacyWindow.accessAllowList()

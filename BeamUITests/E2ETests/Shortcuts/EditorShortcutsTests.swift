@@ -138,8 +138,10 @@ class EditorShortcutsTests: BaseTest {
         let note1 = "Destination One"
         let note2 = "Destination Two"
 
-        let journalView = launchApp()
+        let journalView = JournalTestView()
+        
         step ("Given I create \(note1) note"){
+            super.setUp()
             //TBD replace creation by omnibox to craetion by Destination notes search
             webView.searchForNoteByTitle(note1)
             journalView.createNoteViaOmniboxSearch(note1)
