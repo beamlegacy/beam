@@ -14,12 +14,7 @@ class PnSAddToNoteTests: BaseTest {
     let pnsView = PnSTestView()
     let noteView = NoteTestView()
     var noteNodes: [XCUIElement]!
-    var journalView: JournalTestView!
-
-    override func setUp() {
-        journalView = launchApp()
-        uiMenu.invoke(.resizeSquare1000)
-    }
+    let journalView = JournalTestView()
     
     func SKIPtestAddTextToTodaysNote() throws {
         try XCTSkipIf(true, "Skipped so far, to replace NavigationCollectUITests")

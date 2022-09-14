@@ -19,10 +19,9 @@ class CreditCardSaveTests: BaseCreditCardTest {
     let expectedCardExpDate = "04/23"
     let expectedCardHiddenNumber = "xxxx-xxxx-xxxx-9903"
         
-    override func setUpWithError() throws {
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp() {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
     }
     
     private func fillDataWithoutPwManager(field: String, data: String) {

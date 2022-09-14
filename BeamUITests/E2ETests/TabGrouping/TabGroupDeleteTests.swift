@@ -26,7 +26,6 @@ class TabGroupDeleteTests: BaseTest {
     }
     
     private func setUpCapturedNotSharedTabGroup() {
-        launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
         createTabGroupAndSwitchToWeb(named: true)
         captureGroupToNoteAndOpenNote()
     }

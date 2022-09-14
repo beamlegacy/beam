@@ -11,7 +11,7 @@ import SwiftUI
 
 class DailySummaryTests: BaseTest {
     
-    var journalView: JournalTestView!
+    let journalView = JournalTestView()
     let noteView = NoteTestView()
     let allNotes = AllNotesTestView()
     let linkToOpen = "Pitchfork"
@@ -21,7 +21,7 @@ class DailySummaryTests: BaseTest {
     let continueOnDailySummaryExpected = "Continue on Key Glock, Maxo Kream and LeMonde, Twitter"
     
     override func setUp() {
-        journalView = launchApp()
+        super.setUp()
 
         step("Given I populate daily summary"){
             uiMenu.invoke(.showOnboarding)

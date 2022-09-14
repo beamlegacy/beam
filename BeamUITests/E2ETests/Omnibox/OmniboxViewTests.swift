@@ -13,7 +13,7 @@ class OmniboxViewTests: BaseTest {
     
     let omniboxView = OmniBoxTestView()
     let noteView = NoteTestView()
-    var journalView: JournalTestView!
+    let journalView = JournalTestView()
     var stopMockServer = false
     
     override func tearDown() {
@@ -21,12 +21,6 @@ class OmniboxViewTests: BaseTest {
             uiMenu.invoke(.stopMockHttpServer)
         }
         super.tearDown()
-    }
-    
-    override func setUp() {
-        step("Given I launch the app") {
-            journalView = launchApp()
-        }
     }
     
     func testOmniBoxSearchField() {

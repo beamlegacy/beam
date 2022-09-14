@@ -19,10 +19,9 @@ class CookieBannerBlockerTests: BaseTest {
         "Decline"
     ]
 
-    override func setUpWithError() throws {
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp() {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
         shortcutHelper.shortcutActionInvoke(action: .openPreferences)
         PreferencesBaseView().navigateTo(preferenceView: .privacy)
     }

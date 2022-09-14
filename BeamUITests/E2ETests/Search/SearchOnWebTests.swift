@@ -13,9 +13,8 @@ class SearchOnWebTests: BaseTest {
     let waitForCountValueTimeout = TimeInterval(2)
     let searchView = SearchTestView()
     
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        launchApp()
+    override func setUp() {
+        super.setUp()
         clearPasteboard()
     }
     

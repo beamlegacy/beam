@@ -19,7 +19,7 @@ class TabGroupCaptureToANoteMenuTests: BaseTest {
     
     override func setUp() {
         step("Given I have a captured group in a note") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
+            super.setUp()
             createTabGroupAndSwitchToWeb()
             captureGroupToNoteAndOpenNote()
         }

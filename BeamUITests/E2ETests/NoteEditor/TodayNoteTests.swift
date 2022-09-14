@@ -13,10 +13,6 @@ class TodayNoteTests: BaseTest {
     let allNotesView = AllNotesTestView()
     let noteTestView = NoteTestView()
     
-    override func setUp() {
-        launchApp()
-    }
-    
     func testCannotDeleteTodayNoteInAllNote() {
         testrailId("C748")
         step ("Given I navigate to All Note") {
