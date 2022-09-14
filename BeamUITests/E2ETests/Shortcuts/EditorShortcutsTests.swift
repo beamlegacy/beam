@@ -67,7 +67,7 @@ class EditorShortcutsTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .redo)
         }
         
-        uiMenu.insertTextInCurrentNote()
+        uiMenu.invoke(.insertTextInCurrentNote)
         waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5, elementQuery: noteView.getNoteNodesElementQuery())
         let firstNoteValue = noteView.getNoteNodeValueByIndex(1)
         

@@ -20,12 +20,12 @@ class BrowserShortcutsTests: BaseTest {
     
     func testWebTabsJumpOpenCloseReopen() {
         step ("Given I open a web page"){
-            uiMenu.loadUITestPagePassword()
+            uiMenu.invoke(.loadUITestPagePassword)
             XCTAssertTrue(testPage.isPasswordPageOpened())
         }
         
         step ("Given I open a second web page"){
-            uiMenu.loadUITestPageAlerts()
+            uiMenu.invoke(.loadUITestPageAlerts)
             XCTAssertTrue(testPage.isAlertPageOpened())
         }
 
@@ -59,9 +59,9 @@ class BrowserShortcutsTests: BaseTest {
     func testJumpBetweenWebTabs() throws {
  
         step ("Given I open web pages"){
-            uiMenu.loadUITestPagePassword()
-                .loadUITestPageMedia()
-                .loadUITestPageAlerts()
+            uiMenu.invoke(.loadUITestPagePassword)
+                .invoke(.loadUITestPageMedia)
+                .invoke(.loadUITestPageAlerts)
         }
         
         step ("Then I can jump between tabs using shortcuts"){
@@ -90,7 +90,7 @@ class BrowserShortcutsTests: BaseTest {
     func testWebPageReload() {
         
         step ("Given I open a web page"){
-            uiMenu.loadUITestPagePassword()
+            uiMenu.invoke(.loadUITestPagePassword)
         }
         
         testrailId("C556")
@@ -114,9 +114,9 @@ class BrowserShortcutsTests: BaseTest {
         }
         
         step ("Given I open web pages"){
-            uiMenu.loadUITestPagePassword()
-                .loadUITestPageMedia()
-                .loadUITestPageAlerts()
+            uiMenu.invoke(.loadUITestPagePassword)
+                .invoke(.loadUITestPageMedia)
+                .invoke(.loadUITestPageAlerts)
         }
         
         step ("When I quit the app"){
@@ -154,7 +154,7 @@ class BrowserShortcutsTests: BaseTest {
         let expectedSearchTextPart2 = "Google"
         
         step("GIVEN I open test page") {
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage2)
         }
         
         step("WHEN I select \(textToSelect) and press CMD+Return") {

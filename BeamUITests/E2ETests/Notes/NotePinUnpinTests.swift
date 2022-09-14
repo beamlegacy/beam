@@ -43,7 +43,7 @@ class NotePinUnpinTests: BaseTest {
         testrailId("C1039")
         step("Given I pin 6 notes") {
             launchApp()
-            uiMenu.create10RandomNotes()
+            uiMenu.invoke(.create10Notes)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()
             for i in 0...5 {

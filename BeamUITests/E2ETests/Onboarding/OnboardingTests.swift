@@ -22,8 +22,8 @@ class OnboardingTests: BaseTest {
         try super.setUpWithError()
         step("Given I enable onboarding"){
             launchApp()
-            uiMenu.resetAPIEndpoints()
-                            .showOnboarding()
+            uiMenu.invoke(.resetAPIEndpoints)
+                .invoke(.showOnboarding)
         }
     }
     
@@ -99,8 +99,8 @@ class OnboardingTests: BaseTest {
         step("GIVEN I sign up an account and take credentials") {
             signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            uiMenu.showOnboarding()
-                .deletePrivateKeys()
+            uiMenu.invoke(.showOnboarding)
+                .invoke(.deletePrivateKeys)
         }
         
         step("Then I can successfully move to next view with camel case on email") {
@@ -122,8 +122,8 @@ class OnboardingTests: BaseTest {
         step("GIVEN I sign up an account and take credentials") {
             signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            uiMenu.showOnboarding()
-                .deletePrivateKeys()
+            uiMenu.invoke(.showOnboarding)
+                .invoke(.deletePrivateKeys)
         }
         
         step("Then I can successfully edit email field and move to next view") {
@@ -322,8 +322,8 @@ class OnboardingTests: BaseTest {
         step("GIVEN I sign up an account and take credentials") {
             signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            uiMenu.showOnboarding()
-                .deletePrivateKeys()
+            uiMenu.invoke(.showOnboarding)
+                .invoke(.deletePrivateKeys)
         }
         
         step("When I pass autorisation views") {
@@ -380,8 +380,8 @@ class OnboardingTests: BaseTest {
         step("GIVEN I sign up an account and take credentials") {
             signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            uiMenu.showOnboarding()
-                .deletePrivateKeys()
+            uiMenu.invoke(.showOnboarding)
+                .invoke(.deletePrivateKeys)
         }
         
         step("When I pass authorisation") {
@@ -459,8 +459,8 @@ class OnboardingTests: BaseTest {
         let expectedTabs = 1
         let expectedTabTitle = "Welcome to beam"
         step("GIVEN I sign up an account") {
-            uiMenu.setAPIEndpointsToStaging()
-            uiMenu.signUpWithRandomTestAccount()
+            uiMenu.invoke(.setAPIEndpointsToStaging)
+                .invoke(.signUpWithRandomTestAccount)
         }
         
         step("THEN \(expectedTabs) tab with '\(expectedTabTitle)' is displayed") {
@@ -486,8 +486,8 @@ class OnboardingTests: BaseTest {
         let welcomePages = [page1, page2, page3, page4, page5, page6, page7, page8]
         
         step("GIVEN I sign up a new account") {
-            uiMenu.setAPIEndpointsToStaging()
-            uiMenu.signUpWithRandomTestAccount()
+            uiMenu.invoke(.setAPIEndpointsToStaging)
+                .invoke(.signUpWithRandomTestAccount)
             _ = webView.waitForTabUrlAtIndexToEqual(index: 0, expectedString: welcomeTourURL)
         }
         

@@ -18,9 +18,9 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         
     override func setUpWithError() throws {
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-            .populateCreditCardsDB()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
+            .invoke(.populateCreditCardsDB)
         
         step("Given I navigate to \(mockPage.getMockPageUrl(.paymentForm))") {
             mockPage.openMockPage(.paymentForm)
@@ -37,7 +37,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     
     func testValidateNoAutoFillCC() {
         testrailId("C1086")
-        uiMenu.clearCreditCardsDB()
+        uiMenu.invoke(.clearCreditCardsDB)
                 
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, inView: view, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, inView: view, autocomplete: false)
@@ -47,7 +47,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     
     func testValidateAutoFillDataCC() {
 
-        uiMenu.disablePasswordAndCardsProtection()
+        uiMenu.invoke(.disablePasswordProtect)
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel, inView: view)
         
         step("When I click on pop-up suggestion") {
@@ -74,10 +74,10 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     func testValidateOtherCCMoreThan4() {
         testrailId("C1087")
         // Add two more cards in DB to have 4 cards
-        uiMenu.populateCreditCardsDB()
+        uiMenu.invoke(.populateCreditCardsDB)
         
         step ("WHEN I deactivate Autofill password setting"){
-            uiMenu.disablePasswordAndCardsProtection()
+            uiMenu.invoke(.disablePasswordProtect)
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             if !passwordPreferencesView.getAutofillCCSettingElement().isSettingEnabled() {
@@ -156,7 +156,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         testrailId("C638")
         step ("WHEN I deactivate Autofill password setting"){
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
-            uiMenu.disablePasswordAndCardsProtection()
+            uiMenu.invoke(.disablePasswordProtect)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             passwordPreferencesView.clickAutofillCC()
             shortcutHelper.shortcutActionInvoke(action: .close)

@@ -23,10 +23,10 @@ class CreditCardsTests: BaseTest {
         
         step("GIVEN I open Credit cards table in Preferences") {
             launchApp()
-            uiMenu.disablePasswordAndCardsProtection()
+            uiMenu.invoke(.disablePasswordProtect)
 
             if populateCardsDB {
-                uiMenu.populateCreditCardsDB()
+                uiMenu.invoke(.populateCreditCardsDB)
             }
             
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)

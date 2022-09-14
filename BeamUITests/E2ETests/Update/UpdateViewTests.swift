@@ -19,7 +19,7 @@ class UpdateViewTests: BaseTest {
     func testUpdateViewAppearance() {
         testrailId("C696")
         step ("Given I enable Update for the app"){
-            uiMenu.setAutoUpdateToMock()
+            uiMenu.invoke(.setAutoUpdateToMock)
         }
         
         step ("Then I can open and close it. It has required items"){
@@ -33,7 +33,7 @@ class UpdateViewTests: BaseTest {
     func testUpdateAvailableEverywhereInNoteView() {
         testrailId("C696")
         step ("Given I enable Update for the app"){
-            uiMenu.setAutoUpdateToMock()
+            uiMenu.invoke(.setAutoUpdateToMock)
             XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 

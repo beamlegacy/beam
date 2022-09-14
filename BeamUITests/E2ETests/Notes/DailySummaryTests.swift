@@ -24,8 +24,8 @@ class DailySummaryTests: BaseTest {
         journalView = launchApp()
 
         step("Given I populate daily summary"){
-            uiMenu.showOnboarding()
-            uiMenu.createFakeDailySummary()
+            uiMenu.invoke(.showOnboarding)
+                .invoke(.createFakeDailySummary)
             OnboardingLandingTestView()
                 .signUpLater()
                 .clickSkipButton()

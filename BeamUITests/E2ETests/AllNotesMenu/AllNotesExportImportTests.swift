@@ -16,7 +16,7 @@ class AllNotesExportImportTests: BaseTest {
     override func setUp() {
         step("GIVEN I open All Notes") {
             launchApp()
-            uiMenu.createNote()
+            uiMenu.invoke(.createNote)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()
         }

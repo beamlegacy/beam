@@ -38,7 +38,7 @@ class RightClickPageMenuTests: BaseTest {
     override func setUp() {
         step("Given I open multiple web pages in the same tab"){
             launchApp()
-            uiMenu.startMockHTTPServer()
+            uiMenu.invoke(.startMockHttpServer)
             mockPage.openMockPage(.mainView)
             self.openPageByLinkClick()
             self.openPageByContinueButtonClick()
