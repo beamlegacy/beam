@@ -14,11 +14,7 @@ class NoteCreationTests: BaseTest {
     let otherNoteNameToBeCreated = "OtherNoteCreation"
     let noteView = NoteTestView()
     let allNotesView = AllNotesTestView()
-    var journalView: JournalTestView!
-    
-    override func setUp() {
-        journalView = launchApp()
-    }
+    let journalView = JournalTestView()
     
     func testCreateNoteFromAllNotes() {
         testrailId("C708")

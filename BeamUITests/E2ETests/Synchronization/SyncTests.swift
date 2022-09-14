@@ -16,8 +16,7 @@ class SyncTests: BaseTest {
         let allNotes = AllNotesTestView()
         
         step("GIVEN I start using app without being signed in") {
-            launchApp()
-            uiMenu.invoke(.setAPIEndpointsToStaging)
+            uiMenu.invoke(.showOnboarding)
             XCTAssertTrue(OnboardingLandingTestView().waitForLandingViewToLoad(), "Onboarding view wasn't loaded")
             OnboardingLandingTestView()
                 .signUpLater()

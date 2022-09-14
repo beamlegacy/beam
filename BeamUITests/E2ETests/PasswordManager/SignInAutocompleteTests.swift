@@ -24,9 +24,7 @@ class SignInAutocompleteTests: BaseTest {
     
     func testCredentialsAutocompleteSuccessfully() {
         let login = "signin.form"
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+        uiMenu.invoke(.startMockHttpServer)
             .invoke(.populatePasswordsDB)
         OmniBoxTestView().searchInOmniBox(signInPageURL, true)
         
@@ -46,9 +44,7 @@ class SignInAutocompleteTests: BaseTest {
     
     func testPasswordMenuIsHiddenWhenOmniboxIsVisible() {
         testrailId("C1080")
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+        uiMenu.invoke(.startMockHttpServer)
             .invoke(.populatePasswordsDB)
         mockPage.openMockPage(.signinForm)
 
@@ -79,9 +75,7 @@ class SignInAutocompleteTests: BaseTest {
 
     func testPasswordMenuIsHiddenWhenOmniboxTriggersTabChange() {
         testrailId("C1081")
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+        uiMenu.invoke(.startMockHttpServer)
             .invoke(.populatePasswordsDB)
         mockPage.openMockPage(.signinForm)
 
@@ -113,7 +107,6 @@ class SignInAutocompleteTests: BaseTest {
         try XCTSkipIf(isBigSurOS(), "Reactivate once BE-5032 is fixed")
 
         let login = "qa@beamapp.co"
-        launchApp()
         
         step("Given I populate passwords and load a test page"){
             uiMenu.invoke(.populatePasswordsDB)
@@ -195,7 +188,6 @@ class SignInAutocompleteTests: BaseTest {
 
     func testOtherPasswordsSearch() {
         testrailId("C1083")
-        launchApp()
 
         step("Given I populate passwords and load a test page"){
             uiMenu.invoke(.populatePasswordsDB)

@@ -38,7 +38,6 @@ class TabGroupInOmniboxTests: BaseTest {
         
         testrailId("C1148")
         step("Given I capture an unnamed tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createAndCaptureTabGroup(named: false)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
@@ -89,7 +88,6 @@ class TabGroupInOmniboxTests: BaseTest {
         ]
         
         step("Given I capture an unnamed tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createAndCaptureTabGroup(named: false)
             tabGroupMenu.closeTabGroup(index: 0)
         }
@@ -115,7 +113,6 @@ class TabGroupInOmniboxTests: BaseTest {
     func testOpenIndividualTab() throws {
         testrailId("C1059")
         step("Given I capture an unnamed tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createAndCaptureTabGroup(named: false)
             tabGroupMenu.closeTabGroup(index: 0)
         }
@@ -137,7 +134,6 @@ class TabGroupInOmniboxTests: BaseTest {
     func testNamedTabGroupInOmnibox() throws {
         testrailId("C1060")
         step("Given I capture a named tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createAndCaptureTabGroup(named: true)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
@@ -152,7 +148,6 @@ class TabGroupInOmniboxTests: BaseTest {
         testrailId("C1171, C1163")
 
         step("Given I capture an unnamed tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createAndCaptureTabGroup(named: false)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
@@ -194,7 +189,6 @@ class TabGroupInOmniboxTests: BaseTest {
     func testForgetTabGroup() throws {
         testrailId("C1173")
         step("Given I create an unnamed tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createTabGroupAndSwitchToWeb(named: true)
         }
         

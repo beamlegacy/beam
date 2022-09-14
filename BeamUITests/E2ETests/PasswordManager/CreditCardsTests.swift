@@ -22,7 +22,6 @@ class CreditCardsTests: BaseTest {
     private func launchAppAndOpenEditCreditCardsTable(populateCardsDB: Bool) {
         
         step("GIVEN I open Credit cards table in Preferences") {
-            launchApp()
             uiMenu.invoke(.disablePasswordProtect)
 
             if populateCardsDB {

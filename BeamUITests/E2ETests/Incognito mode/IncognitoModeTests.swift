@@ -12,7 +12,7 @@ class IncognitoModeTests: BaseTest {
     
     func testIcognitoModeEnabling() {
         testrailId("C904, C500")
-        let journalView = launchApp()
+        let journalView = JournalTestView()
         
         step ("Given I enable an incognito mode"){
             shortcutHelper.shortcutActionInvoke(action: .newIncognitoWindow)

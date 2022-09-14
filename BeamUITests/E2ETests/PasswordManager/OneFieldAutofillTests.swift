@@ -13,10 +13,9 @@ class OneFieldAutofillTests: BaseTest {
 
     let baseURL = "http://form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/custom"
 
-    override func setUpWithError() throws {
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp()  {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
             .invoke(.populatePasswordsDB)
         shortcutHelper.shortcutActionInvoke(action: .newTab)
     }

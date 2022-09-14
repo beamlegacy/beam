@@ -13,11 +13,11 @@ class GeneralPreferencesTests: BaseTest {
     let generalPrefView = GeneralPreferenceTestView()
     let basePrefView = PreferencesBaseView()
     let browserPrefView = BrowserPreferencesTestView()
-    var journalView: JournalTestView!
+    let journalView = JournalTestView()
     var startBeamCheckbox: XCUIElement!
     
     override func setUp() {
-        journalView = launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
+        launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
     }
     
     private func openGeneralPrefs() {

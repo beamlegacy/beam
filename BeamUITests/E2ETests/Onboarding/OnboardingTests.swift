@@ -18,12 +18,10 @@ class OnboardingTests: BaseTest {
     var journalView: JournalTestView!
     var accountInfo: AccountInformation!
     
-    override func setUpWithError() throws {
-        try super.setUpWithError()
+    override func setUp()  {
         step("Given I enable onboarding"){
-            launchApp()
-            uiMenu.invoke(.resetAPIEndpoints)
-                .invoke(.showOnboarding)
+            super.setUp()
+            uiMenu.invoke(.showOnboarding)
         }
     }
     

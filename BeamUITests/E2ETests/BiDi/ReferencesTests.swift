@@ -15,7 +15,7 @@ class ReferencesTests: BaseTest {
     var noteView: NoteTestView!
 
     private func createNotesAndReferenceThem() -> NoteTestView {
-        let journalView = launchApp()
+        let journalView = JournalTestView()
         
         step ("GIVEN I create 2 notes"){
             uiMenu.invoke(.createAndOpenNote)

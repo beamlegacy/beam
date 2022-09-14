@@ -15,10 +15,9 @@ class SigninTests: BaseTest {
     let onboardingImportView = OnboardingImportDataTestView()
     var accountInfo: AccountInformation!
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
+    override func setUp()  {
+        super.setUp()
         step("Given I enable onboarding") {
-            launchApp()
             uiMenu.invoke(.showOnboarding)
         }
     }

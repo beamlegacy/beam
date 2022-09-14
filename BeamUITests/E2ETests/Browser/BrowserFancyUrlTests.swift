@@ -12,7 +12,7 @@ class BrowserFancyUrlTests: BaseTest {
     
     func testFancyUrlOpening() throws {
         let omniboxTestView = OmniBoxTestView()
-        let journalView = launchApp()
+        let journalView = JournalTestView()
 
         let urlsToTest = [
             "localhost:3000",

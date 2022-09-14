@@ -13,10 +13,13 @@ class AppLifecycleTests: BaseTest {
     let windowMenu = WindowMenu()
     var journalView: JournalTestView!
 
+    override func setUp(){
+        launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
+    }
+    
     func testOpenNewWindowCloseItAndQuitApp() {
         testrailId("C499")
         step("THEN I open new window successfully") {
-            launchApp()
             shortcutHelper.shortcutActionInvoke(action: .newWindow)
             XCTAssertEqual(getNumberOfWindows(), 2)
         }
@@ -27,7 +30,7 @@ class AppLifecycleTests: BaseTest {
             XCTAssertEqual(getNumberOfWindows(), 1)
         }
         
-        step("THEN I app is still running on closing last window") {
+        step("THEN app is still running on closing last window") {
             shortcutHelper.shortcutActionInvoke(action: .closeWindow)
             XCTAssertEqual(getNumberOfWindows(), 0)
             XCTAssertTrue(isAppRunning())
@@ -36,15 +39,14 @@ class AppLifecycleTests: BaseTest {
         testrailId("C498")
         step("THEN I quit app successfully") {
             shortcutHelper.shortcutActionInvoke(action: .quitApp)
-            XCTAssertFalse(isAppRunning())
+            // let 5 seconds to the app to quit
+            let background = app.wait(for: .notRunning, timeout: 5)
+            XCTAssertTrue(background)
         }
     }
     
     func testRestoreAllTabsFromLastSession() {
         testrailId("C906")
-        step("WHEN I prepare app") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-        }
 
         step("WHEN I open multiple tabs and one incognito window") {
             uiMenu.invoke(.loadUITestPage1)

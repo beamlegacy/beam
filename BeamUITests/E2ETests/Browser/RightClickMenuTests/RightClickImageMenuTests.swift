@@ -17,7 +17,7 @@ class RightClickImageMenuTests: BaseTest {
     
     override func setUp() {
         step("Given I open test page") {
-            launchApp()
+            super.setUp()
             uiMenu.invoke(.loadUITestPage2)
         }
         

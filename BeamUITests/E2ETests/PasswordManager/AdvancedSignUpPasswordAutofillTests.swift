@@ -25,10 +25,9 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     let timeout = 0.5
     var generatedPassword = "password"
 
-    override func setUpWithError() throws {
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp() {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
             .invoke(.populatePasswordsDB)
     }
 
