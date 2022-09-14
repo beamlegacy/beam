@@ -122,7 +122,7 @@ struct Configuration {
         }
     }
 
-    static private(set) var directUploadAllObjectsDefault = true
+    static private(set) var directUploadAllObjectsDefault = false
     static private var directUploadAllObjectsKey = "directUploadAllObjects"
     static var directUploadAllObjects: Bool {
         get {

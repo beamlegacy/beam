@@ -125,7 +125,7 @@ public final class BeamObjectManager {
                                        category: .beamObjectNetwork)
             }
 
-            let encapsulatedObjects: [O] = try toSaveObjects.map {
+            let encapsulatedObjects: [O] = try toSaveObjects.filter { $0.data != nil }.map {
                 do {
                     let result: O = try $0.decodeBeamObject()
                     totalSize += Int64($0.data?.count ?? 0)
