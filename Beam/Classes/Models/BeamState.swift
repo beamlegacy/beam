@@ -177,6 +177,8 @@ import Sentry
     private var scope = Set<AnyCancellable>()
     let cmdManager = CommandManager<BeamState>()
 
+    lazy var videoCallManager = VideoConferencingManager()
+
     func goBack(openingInNewTab: Bool = false) {
         guard canGoBackForward.back else { return }
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
@@ -424,10 +426,10 @@ import Sentry
         }
     }
 
-    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, request: URLRequest? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, request: URLRequest? = nil, loadRequest: Bool = true, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: request))", category: "BeamState")
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
-        browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: setCurrent, withURLRequest: request)
+        browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: setCurrent, withURLRequest: request, loadRequest: loadRequest)
         if setCurrent {
             mode = .web
         } else if tab.contentView.window == nil {
@@ -447,10 +449,10 @@ import Sentry
     ///   - rootElement: optional root BeamElement where collected content with be added to.
     ///   - webView: optional webview to create a new tab with
     /// - Returns: Returns the newly created tab. The returned tab can safely be discarded.
-    @discardableResult func createTab(withURLRequest request: URLRequest, originalQuery: String? = nil, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+    @discardableResult func createTab(withURLRequest request: URLRequest, originalQuery: String? = nil, setCurrent: Bool = true, loadRequest: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: request.url))", category: "BeamState")
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>", referringRootId: browserTabsManager.currentTab?.browsingTree.rootId)
-        let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, request: request, webView: webView)
+        let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, request: request, loadRequest: loadRequest, webView: webView)
 
         if setCurrent {
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { [weak self, weak tab] in
