@@ -7,8 +7,8 @@ class BrowserStatusBarTests: BaseTest {
 
         step("Given I open a web page"){
             launchApp()
-            uiMenu.resizeSquare1000()
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.resizeSquare1000)
+                .invoke(.loadUITestPage1)
         }
 
         let link = webView.staticText("on Twitter")
@@ -34,7 +34,7 @@ class BrowserStatusBarTests: BaseTest {
 
         step("Given I open a web page"){
             launchApp()
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
         }
         
         let link = webView.staticText("new-tab-beam")
@@ -60,7 +60,7 @@ class BrowserStatusBarTests: BaseTest {
 
         step("Given I open a web page"){
             launchApp()
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
         }
 
         let opensInNewTabLink = webView.staticText("new-tab-beam")

@@ -24,7 +24,7 @@ class NotesPreferencesTests: BaseTest {
         step("GIVEN I prepare a note with lines") {
             journalView.waitForJournalViewToLoad()
             journalView.createNoteViaOmniboxSearch("Test1")
-            uiMenu.insertTextInCurrentNote()
+            uiMenu.invoke(.insertTextInCurrentNote)
             notesView.typeKeyboardKey(.enter)
             notesView.typeKeyboardKey(.upArrow)
         }

@@ -16,7 +16,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
         let journalView = launchApp()
         
         step("Given I open a test page to \(buttonTitle)"){
-            uiMenu.loadUITestPageAlerts()
+            uiMenu.invoke(.loadUITestPageAlerts)
         }
         
         let webViewElement = journalView.app.webViews.containing(.button, identifier: buttonTitle).element
@@ -88,7 +88,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
         var webView: XCUIElement?
         
         step("Given I open a test page with Upload File dialog"){
-            uiMenu.loadUITestPageAlerts()
+            uiMenu.invoke(.loadUITestPageAlerts)
             webView = journalView.app.webViews.containing(.button, identifier: message).element
             XCTAssert(webView!.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(webView!.staticTexts[fileExistanceLabel].waitForExistence(timeout: BaseTest.minimumWaitTimeout))

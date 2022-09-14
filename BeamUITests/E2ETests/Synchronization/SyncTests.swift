@@ -17,12 +17,12 @@ class SyncTests: BaseTest {
         
         step("GIVEN I start using app without being signed in") {
             launchApp()
-            uiMenu.setAPIEndpointsToStaging()
+            uiMenu.invoke(.setAPIEndpointsToStaging)
             XCTAssertTrue(OnboardingLandingTestView().waitForLandingViewToLoad(), "Onboarding view wasn't loaded")
             OnboardingLandingTestView()
                 .signUpLater()
                 .clickSkipButton()
-            uiMenu.create10NormalNotes()
+            uiMenu.invoke(.create10NormalNotes)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
             notesBeforeSync = AllNotesTestTable()
@@ -30,7 +30,7 @@ class SyncTests: BaseTest {
         
         step("WHEN close the app and I sign up with a new account") {
             restartApp()
-            uiMenu.signUpWithRandomTestAccount()
+            uiMenu.invoke(.signUpWithRandomTestAccount)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
         }

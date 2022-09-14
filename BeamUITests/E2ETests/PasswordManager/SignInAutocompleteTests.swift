@@ -25,9 +25,9 @@ class SignInAutocompleteTests: BaseTest {
     func testCredentialsAutocompleteSuccessfully() {
         let login = "signin.form"
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-            .populatePasswordsDB()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
+            .invoke(.populatePasswordsDB)
         OmniBoxTestView().searchInOmniBox(signInPageURL, true)
         
         step("GIVEN I click on password field"){
@@ -47,9 +47,9 @@ class SignInAutocompleteTests: BaseTest {
     func testPasswordMenuIsHiddenWhenOmniboxIsVisible() {
         testrailId("C1080")
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-            .populatePasswordsDB()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
+            .invoke(.populatePasswordsDB)
         mockPage.openMockPage(.signinForm)
 
         step("When I click on password field"){
@@ -80,9 +80,9 @@ class SignInAutocompleteTests: BaseTest {
     func testPasswordMenuIsHiddenWhenOmniboxTriggersTabChange() {
         testrailId("C1081")
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-            .populatePasswordsDB()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
+            .invoke(.populatePasswordsDB)
         mockPage.openMockPage(.signinForm)
 
         step("When I click on password field"){
@@ -116,9 +116,9 @@ class SignInAutocompleteTests: BaseTest {
         launchApp()
         
         step("Given I populate passwords and load a test page"){
-            uiMenu.populatePasswordsDB()
-            uiMenu.disablePasswordAndCardsProtection()
-            uiMenu.loadUITestPagePassword()
+            uiMenu.invoke(.populatePasswordsDB)
+                .invoke(.disablePasswordProtect)
+                .invoke(.loadUITestPagePassword)
         }
         let passwordPage = UITestPagePasswordManager()
         
@@ -198,9 +198,9 @@ class SignInAutocompleteTests: BaseTest {
         launchApp()
 
         step("Given I populate passwords and load a test page"){
-            uiMenu.populatePasswordsDB()
-            uiMenu.disablePasswordAndCardsProtection()
-            uiMenu.loadUITestPagePassword()
+            uiMenu.invoke(.populatePasswordsDB)
+                .invoke(.disablePasswordProtect)
+                .invoke(.loadUITestPagePassword)
         }
         let passwordPage = UITestPagePasswordManager()
 

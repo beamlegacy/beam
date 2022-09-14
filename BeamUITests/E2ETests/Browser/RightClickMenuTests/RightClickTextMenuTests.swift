@@ -34,7 +34,7 @@ class RightClickTextMenuTests: BaseTest {
     override func setUp() {
         step("Given I open test page") {
             launchApp()
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage2)
         }
         
         step("When I right click on a text") {

@@ -16,7 +16,7 @@ class BrowserPinnedTabTests: BaseTest {
     override func setUp() {
         step("Given I open a web page"){
             journalView = launchApp()
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
         }
     }
     
@@ -79,7 +79,7 @@ class BrowserPinnedTabTests: BaseTest {
     func testPinMultipleTabs() throws {
         testrailId("C968")
         step("And I open a second tab"){
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage2)
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 0)
             XCTAssertEqual(webView.getNumberOfUnpinnedTabs(wait: true), 2)
         }
@@ -119,7 +119,7 @@ class BrowserPinnedTabTests: BaseTest {
         }
 
         step("And enable start on opened tabs"){
-            UITestsMenuBar().setStartBeamOnTabs(true)
+            uiMenu.invoke(.startBeamOnTabs)
         }
         
         step("And I restart the app"){
@@ -129,7 +129,7 @@ class BrowserPinnedTabTests: BaseTest {
         step("Then tab is still pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
             XCTAssertEqual(webView.getNumberOfUnpinnedTabs(wait: true), 0)
-            UITestsMenuBar().setStartBeamOnTabs(false)
+            uiMenu.invoke(.startBeamOnDefault)
         }
     }
     
@@ -177,7 +177,7 @@ class BrowserPinnedTabTests: BaseTest {
     func testPinUnpinTabsViaDragAndDrop() {
         testrailId("C971")
         step("GIVEN I open second web page"){
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage2)
         }
         
         step("THEN the tab is pinned if I drag it to a Pin notes section"){

@@ -17,9 +17,9 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         
     override func setUpWithError() throws {
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-            .populateCreditCardsDB()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
+            .invoke(.populateCreditCardsDB)
     }
     
     private func navigateToPayment(page: MockHTTPWebPages.MockPageLink) {
@@ -195,7 +195,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     func testAgodaAutofill() {
         testrailId("C893")
         navigateToPayment(page: .paymentAgodaForm)
-        uiMenu.disablePasswordAndCardsProtection()
+        uiMenu.invoke(.disablePasswordProtect)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, password:true, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)
@@ -213,7 +213,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     func testNetflixAutofill() {
         testrailId("C894")
         navigateToPayment(page: .paymentNetflixShortForm) // must be dedicated domain name to apply rule for netflix.com
-        uiMenu.disablePasswordAndCardsProtection()
+        uiMenu.invoke(.disablePasswordProtect)
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
@@ -267,7 +267,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     func testAppleAutofill() {
         testrailId("C899")
         navigateToPayment(page: .paymentAppleForm)
-        uiMenu.disablePasswordAndCardsProtection()
+        uiMenu.invoke(.disablePasswordProtect)
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)

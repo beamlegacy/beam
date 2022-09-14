@@ -101,7 +101,7 @@ class WebTestView: BaseView {
     }
 
     func getNumberOfWebViewInMemory() -> Int {
-        uiMenu.showWebViewCount()
+        uiMenu.invoke(.showWebViewCount)
         _ = AlertTestView().isAlertDialogDisplayed()
         let element = app.staticTexts.element(matching: NSPredicate(format: "value BEGINSWITH 'WebViews alives:'")).firstMatch
         var intValue: Int?
