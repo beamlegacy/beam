@@ -314,6 +314,7 @@ class ImageNode: ResizableNode {
         guard let imageLayer = imageLayer else { return }
 
         layoutImageLayer()
+        layoutCollapseExpand(contentLayer: imageLayer.layer, verticalOffset: imageVerticalOffset)
         layoutToggleButton()
         layoutFocus(contentLayer: imageLayer.layer)
     }
