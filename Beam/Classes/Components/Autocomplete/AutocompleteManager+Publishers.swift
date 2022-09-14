@@ -57,6 +57,7 @@ extension AutocompleteManager {
             futureToPublisher(autocompleteMnemonicResults(for: searchText), source: .mnemonic),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
             futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
+            futureToPublisher(autocompleteOpenedTabsResults(for: searchText), source: .tab(tabId: nil)),
             futureToPublisher(autocompleteTabGroupingResults(for: searchText), source: .tabGroup(group: nil))
         ]
 
@@ -272,6 +273,38 @@ extension AutocompleteManager {
                     promise(.success([ac]))
                 }
             }
+        }
+    }
+
+    private func filterOpenedTabsDuplicates(_ openedTabs: [BrowserTab]) -> [BrowserTab]{
+        var alreadyInsertedURLs = Set<URL>()
+        return openedTabs.filter {
+            guard let url = $0.url else { return false }
+            return alreadyInsertedURLs.insert(url).inserted
+        }
+    }
+
+    private func autocompleteOpenedTabsResults(for query: String) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            let start = DispatchTime.now()
+            var results: [AutocompleteResult] = []
+            if let data = self.beamState?.data {
+                let searchTerm = query.lowercased()
+                let allOpenedTabs = data.allOpenTabsForTabGroupingManager(data.tabGroupingManager)
+                let currentTab = self.beamState?.mode == .web ? self.beamState?.browserTabsManager.currentTab : nil
+                var tabsMatchingQuery = allOpenedTabs.filter { tab in
+                    tab != currentTab && tab.url != currentTab?.url &&
+                    (tab.title.lowercased().contains(searchTerm) || tab.url?.urlStringByRemovingUnnecessaryCharacters.contains(searchTerm) == true)
+                }
+                tabsMatchingQuery = self.filterOpenedTabsDuplicates(tabsMatchingQuery)
+                results = tabsMatchingQuery.map { tab in
+                    AutocompleteResult(text: tab.title, source: .tab(tabId: tab.id), url: tab.url, information: tab.url?.urlStringByRemovingUnnecessaryCharacters,
+                                       shortcut: Shortcut(modifiers: [], keys: [.string("Go to Tab"), .right]),
+                                       completingText: query, urlFields: [.info])
+                }
+                self.logIntermediate(step: "OpenedTabs", stepShortName: "OT", results: results, startedAt: start)
+            }
+            promise(.success(results))
         }
     }
 

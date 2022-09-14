@@ -58,7 +58,7 @@ struct OmniboxSearchField: View {
     private var favicon: NSImage? {
         var icon: NSImage?
         if let autocompleteResult = selectedAutocompleteResult, let url = autocompleteResult.url,
-           [.history, .url, .topDomain, .mnemonic].contains(autocompleteResult.source) {
+            autocompleteResult.source.isWebURLResult {
             FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { favicon in
                 icon = favicon?.image
                 if favicon == nil, let aliasDestinationURL = autocompleteResult.aliasForDestinationURL {

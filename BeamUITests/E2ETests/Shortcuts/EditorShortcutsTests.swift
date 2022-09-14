@@ -37,7 +37,14 @@ class EditorShortcutsTests: BaseTest {
                           actualNoteValue == "https://www.google.com/search?q=\(searchWord)&client=safari" ||
                           actualNoteValue == "https://www.google.com/search?q=\(searchWord)",
                           "Actual note value:\(actualNoteValue)")
-            noteView.getNoteNodeElementByIndex(0).coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.5)).tap()
+        }
+
+        step ("When I click on the link"){
+            XCUIElement.perform(withKeyModifiers: .command) { // open with command to make sure we have a 2nd tab
+                noteView.getNoteNodeElementByIndex(0).coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.5)).tap()
+            }
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            shortcutHelper.shortcutActionInvoke(action: .jumpToNextTab)
         }
         
         step ("Then I'm redirected to a new tab and the note has not been changed"){

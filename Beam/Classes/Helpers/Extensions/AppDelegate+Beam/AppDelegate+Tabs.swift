@@ -8,6 +8,18 @@
 import Foundation
 import BeamCore
 
+
+// MARK: - Tabs Retrieval
+extension AppDelegate {
+
+    func windowContainingTab(_ tabId: BrowserTab.TabID) -> BeamWindow? {
+        return windows.first(where: {
+            window in window.state.browserTabsManager.tabs.contains(where: { $0.id == tabId })
+        })
+    }
+}
+
+// MARK: - Tab Grouping Feedback
 extension AppDelegate {
 
     static private var lastTabGroupingFeedback: Date?

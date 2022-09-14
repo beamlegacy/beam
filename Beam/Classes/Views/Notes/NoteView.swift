@@ -57,7 +57,7 @@ struct NoteView: View {
                 note: note,
                 state: state,
                 openURL: { url, element, inBackground in
-                    state.handleOpenUrl(url, note: note, element: element, inBackground: inBackground)
+                    state.handleOpenURLFromNote(url, note: note, element: element, inBackground: inBackground)
                 },
                 openCard: { cardId, elementId, unfold in
                     state.navigateToNote(id: cardId, elementId: elementId, unfold: unfold ?? false)

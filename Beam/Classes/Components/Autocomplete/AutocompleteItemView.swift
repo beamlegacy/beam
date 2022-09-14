@@ -25,6 +25,7 @@ struct AutocompleteItemView: View {
     var fontSize: CGFloat = 14
     var additionalLeadingPadding: CGFloat = 0
     var cornerRadius: Double = 6
+    var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     @State private var isTouchDown = false
 
@@ -106,9 +107,24 @@ struct AutocompleteItemView: View {
         }
     }
 
+    private func shortcutMatchesPressedModifierFlags(_ shortcut: Shortcut) -> Bool {
+        guard let modifierFlagsPressed = modifierFlagsPressed else { return true }
+        if modifierFlagsPressed.contains(.command) && !shortcut.modifiers.contains(.command) {
+            return false
+        } else if modifierFlagsPressed.contains(.control) && !shortcut.modifiers.contains(.control) {
+            return false
+        } else if modifierFlagsPressed.contains(.option) && !shortcut.modifiers.contains(.option) {
+            return false
+        }
+        return true
+    }
+
     private var shortcut: Shortcut? {
         guard allowsShortcut else { return nil }
         if let shortcut = item.shortcut {
+            if !shortcutMatchesPressedModifierFlags(shortcut) {
+                return selected ? Shortcut(modifiers: [], keys: [.enter]) : nil
+            }
             return shortcut
         } else {
             return Shortcut(modifiers: [], keys: [.enter])
