@@ -3,7 +3,6 @@ import SwiftUI
 import Combine
 import WebKit
 import BeamCore
-import UniformTypeIdentifiers
 
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable {
 
@@ -476,7 +475,12 @@ import UniformTypeIdentifiers
         return plainData?.base64EncodedString(options: [])
     }
 
-    public func load(request: URLRequest) {
+    /// Loads a request to webView.
+    /// - Parameters:
+    ///   - request: the request to load.
+    ///   - entirely: performs entirely the request, defaults to `true`.
+    ///   If ``BeamWebView`` is already loaded and you just want to fetch associated info to the request, set this to `false`.
+    public func load(request: URLRequest, entirely: Bool = true) {
         guard let url = request.url else { return }
         hasError = false
         screenshotCapture = nil
@@ -486,11 +490,16 @@ import UniformTypeIdentifiers
         self.url = url
 
         numberOfLinksOpenedInANewTab = 0
-        if url.isFileURL {
-            let mayLoadLocalResources = UTType(filenameExtension: url.pathExtension) == .html
-            webView.loadFileURL(url, allowingReadAccessTo: mayLoadLocalResources ? url.deletingLastPathComponent() : url)
+        if entirely {
+            if url.isFileURL {
+                let mayLoadLocalResources = BeamUniformTypeIdentifiers.urlMayLoadLocalResources(url)
+                webView.loadFileURL(url, allowingReadAccessTo: mayLoadLocalResources ? url.deletingLastPathComponent() : url)
+            } else {
+                webView.load(request)
+            }
         } else {
-            webView.load(request)
+            webViewController?.webView(webView, didReachURL: url)
+            webViewController?.webView(webView, didFinishNavigationToURL: url, source: .webKit)
         }
 
         Logger.shared.logDebug("BrowserTab load \(url.absoluteString)", category: .webAutofillInternal)

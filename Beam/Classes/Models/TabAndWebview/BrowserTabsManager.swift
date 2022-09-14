@@ -236,9 +236,9 @@ class BrowserTabsManager: ObservableObject {
         }
     }
 
-    private func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, at index: Int? = nil) {
+    private func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, loadRequest: Bool = true, at index: Int? = nil) {
         if let request = request, request.url != nil {
-            tab.load(request: request)
+            tab.load(request: request, entirely: loadRequest)
         }
         if var tabIndex = index, tabIndex >= 0, tabs.count > tabIndex {
             if !tab.isPinned, tabIndex < tabs.count - 1, tabs[tabIndex].isPinned {
@@ -284,10 +284,9 @@ extension BrowserTabsManager {
     }
 
     /// This is now the only entry point to add a tab
-    func addNewTabAndNeighborhood(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, at tabIndex: Int? = nil) {
-
+    func addNewTabAndNeighborhood(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, loadRequest: Bool = true, at tabIndex: Int? = nil) {
         let at = tabIndex ?? indexForNewTabInNeighborhood
-        addNewTab(tab, setCurrent: setCurrent, withURLRequest: request, at: at)
+        addNewTab(tab, setCurrent: setCurrent, withURLRequest: request, loadRequest: loadRequest, at: at)
 
         guard !tab.isPinned else { return }
         if let currentTabNeighborhoodKey = currentTabNeighborhoodKey, (request?.url != nil || tab.preloadUrl != nil) {
