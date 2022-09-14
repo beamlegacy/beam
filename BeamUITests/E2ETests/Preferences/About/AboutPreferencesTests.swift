@@ -37,7 +37,7 @@ class AboutPreferencesTests: BaseTest {
     
     override func setUp() {
         step ("GIVEN I open About preferences") {
-            launchApp()
+            super.setUp()
             aboutPreferencesView = self.openAboutPreferences()
         }
     }

@@ -13,7 +13,6 @@ class RightClickTabMenuTests: BaseTest {
     private func openThreeTabsAndSwitchToWebView() {
         
         step("GIVEN I open 3 web pages in 3 tabs"){
-            launchApp().waitForJournalViewToLoad()
             uiMenu.invoke(.loadUITestPage1)
                 .invoke(.loadUITestPage2)
                 .invoke(.loadUITestPage3)
@@ -63,7 +62,6 @@ class RightClickTabMenuTests: BaseTest {
     func testMuteTab() {
         testrailId("C1070")
         step("GIVEN I open a web page where no sounds are playing"){
-            launchApp().waitForJournalViewToLoad()
             uiMenu.invoke(.loadUITestPage1)
             XCTAssertTrue(webView.waitForWebViewToLoad())
         }
@@ -79,7 +77,6 @@ class RightClickTabMenuTests: BaseTest {
     func testCopyAddressPasteAndGo() {
         testrailId("C1071, C1072")
         step("GIVEN I open 2 different web pages"){
-            launchApp().waitForJournalViewToLoad()
             uiMenu.invoke(.loadUITestPage1)
                 .invoke(.loadUITestPage2)
             XCTAssertTrue(webView.waitForWebViewToLoad())
@@ -105,7 +102,6 @@ class RightClickTabMenuTests: BaseTest {
         let testPage = UITestPagePasswordManager()
         let fakeData = "Fake Data"
         step("GIVEN I open a web page"){
-            launchApp().waitForJournalViewToLoad()
             uiMenu.invoke(.loadUITestPagePassword)
             XCTAssertTrue(testPage.isPasswordPageOpened())
         }

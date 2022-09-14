@@ -28,7 +28,6 @@ class TabGroupCaptureToANoteTests: BaseTest {
     func testUnnamedTabGroupCapture() {
         testrailId("C981, C1053")
         step("Given I have one tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createTabGroupAndSwitchToWeb()
         }
         
@@ -67,7 +66,6 @@ class TabGroupCaptureToANoteTests: BaseTest {
     func testNamedTabGroupCapture() throws {
         testrailId("C981, C1054")
         step("Given I have one tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createTabGroupAndSwitchToWeb(named: true)
         }
         
@@ -104,7 +102,6 @@ class TabGroupCaptureToANoteTests: BaseTest {
     func testMultipleTabGroupsCapture() throws {
         testrailId("C981, C1055")
         step("Given I have one tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createTabGroupAndSwitchToWeb()
         }
         
@@ -133,7 +130,6 @@ class TabGroupCaptureToANoteTests: BaseTest {
         let capturedTabGroupName = "Test1 tab group"
         
         step("Given I have one tab group") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createTabGroupAndSwitchToWeb(named: true)
         }
         

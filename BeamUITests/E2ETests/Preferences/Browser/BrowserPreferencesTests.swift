@@ -15,12 +15,6 @@ class BrowserPreferencesTests: BaseTest {
     let finder = FinderView()
     let searchWord = "beam"
     
-    override func setUpWithError() throws {
-        step ("GIVEN I launch the app"){
-            launchApp()
-        }
-    }
-    
     private func openBrowserPrefs() {
         shortcutHelper.shortcutActionInvoke(action: .openPreferences)
         PreferencesBaseView().navigateTo(preferenceView: .browser)

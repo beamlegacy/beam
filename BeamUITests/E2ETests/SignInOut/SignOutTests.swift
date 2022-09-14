@@ -17,6 +17,7 @@ class SignOutTests: BaseTest {
     
     override func setUp() {
         step("GIVEN I sign up creating 10 random notes") {
+            super.setUp()
             signUpStagingWithRandomAccount()
         }
     }

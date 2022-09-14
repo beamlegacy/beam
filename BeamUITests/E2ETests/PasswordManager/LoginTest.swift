@@ -19,7 +19,6 @@ class LoginTest: BaseTest {
     let testURL = "UITests-Password.html"
         
     func preparation() -> AlertTestView {
-        launchApp()
         email = self.getRandomEmail()
         password = self.getRandomPassword()
         uiMenu.invoke(.loadUITestPagePassword)

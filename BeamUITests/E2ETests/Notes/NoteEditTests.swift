@@ -10,13 +10,8 @@ import XCTest
 
 class NoteEditTests: BaseTest {
     
-    var noteView: NoteTestView!
-    var journalView: JournalTestView!
-    
-    override func setUp() {
-        journalView = launchApp()
-        noteView = NoteTestView()
-    }
+    let noteView = NoteTestView()
+    let journalView = JournalTestView()
     
     func testRenameNoteSuccessfully() {
         testrailId("C751")
@@ -149,8 +144,7 @@ class NoteEditTests: BaseTest {
         testrailId("C761")
         var nodesBeforeChange = [String]()
         step("GIVEN I populate today's note with the rows") {
-            noteView = launchApp()
-                .createNoteViaOmniboxSearch("Bullets") //https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
+            journalView.createNoteViaOmniboxSearch("Bullets") //https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
             uiMenu.invoke(.insertTextInCurrentNote)
             waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5, elementQuery: noteView.getNoteNodesElementQuery())
             nodesBeforeChange = noteView.getNoteTextsForVisiblePart()
@@ -185,7 +179,7 @@ class NoteEditTests: BaseTest {
         let firstPart = "text "
         let secondPart = "to be "
         let thirdPart = "deleted"
-        noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)//https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
+        journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)//https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
         
         step("When I use Option+backspace and CMD+backspace on empty note"){
             shortcutHelper.shortcutActionInvoke(action: .removeLastWord)

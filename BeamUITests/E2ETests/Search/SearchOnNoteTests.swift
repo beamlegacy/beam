@@ -199,7 +199,7 @@ class SearchOnNoteTests: BaseTest {
         let searchText = "Lorem Ipsum"
         
         step("GIVEN I type in a note: \(searchText)"){
-            launchApp().createNoteViaOmniboxSearch("SearchNote")
+            JournalTestView().createNoteViaOmniboxSearch("SearchNote")
             noteView.waitForNoteViewToLoad()
             noteView.typeInNoteNodeByIndex(noteIndex: 0, text: searchText, needsActivation: true)
             shortcutHelper.shortcutActionInvoke(action: .selectAll)
@@ -227,7 +227,7 @@ class SearchOnNoteTests: BaseTest {
     
     @discardableResult
     func prepareTest(populateNoteTimes: Int) -> SearchTestView {
-        launchApp().createNoteViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
+        JournalTestView().createNoteViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
         //https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
         step("Given I populate the note"){
             for _ in 1...populateNoteTimes {

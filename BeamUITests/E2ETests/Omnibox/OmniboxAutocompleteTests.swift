@@ -17,10 +17,6 @@ class OmniboxAutocompleteTests: BaseTest {
     let partiallyTypedSearchText = "fr.wiki"
     let oneLetterToAdd = "p"
     let anotherOneLetterToAdd = "a"
-
-    override func setUp() {
-        launchApp()
-    }
     
     func testAutocompleteSelection() {
         testrailId("C1100")

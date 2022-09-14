@@ -26,7 +26,6 @@ class NotePublishTests: BaseTest {
     
     func testDefaultPublishStatus() {
         testrailId("C1040")
-        launchApp()
         step("Given I open all notes menu"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView = AllNotesTestView()

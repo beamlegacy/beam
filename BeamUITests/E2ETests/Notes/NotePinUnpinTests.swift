@@ -42,7 +42,6 @@ class NotePinUnpinTests: BaseTest {
     func testMax5PinnedNotes() {
         testrailId("C1039")
         step("Given I pin 6 notes") {
-            launchApp()
             uiMenu.invoke(.create10Notes)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()
@@ -91,7 +90,6 @@ class NotePinUnpinTests: BaseTest {
     func testPinUnpinFromAllNotes() {
         testrailId("C711")
         step ("Given I navigate to All Note") {
-            launchApp()
             deleteAllNotes() // delete onboarding notes for the test
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()

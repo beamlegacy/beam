@@ -10,14 +10,10 @@ import XCTest
 
 class NotesPreferencesTests: BaseTest {
     
-    var journalView: JournalTestView!
+    let journalView = JournalTestView()
     let notesPrefView = NotesPreferencesTestView()
     let notesView = NoteTestView()
     var showBulletsCheckbox: XCUIElement!
-    
-    override func setUp() {
-        journalView = launchApp()
-    }
     
     func testIndentationShowBullets() {
         testrailId("C599")
