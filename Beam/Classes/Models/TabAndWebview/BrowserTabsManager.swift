@@ -342,11 +342,16 @@ extension BrowserTabsManager {
 
     func setCurrentTab(_ tab: BrowserTab?) {
         if let tab = tab, !visibleTabs.contains(tab) {
-            // tab is not in the visible ones, we need to select another one.
-            Logger.shared.logError("Couldn't select tab '\(tab.title)'. It might be hidden.", category: .web)
-            let index = tabs.firstIndex(of: tab) ?? 0
-            setCurrentTab(at: index)
-            return
+            if let group = group(for: tab), group.collapsed, tabs.contains(tab) {
+                // tab is not visible because group is collapsed.
+                toggleGroupCollapse(group)
+            } else {
+                // tab is not in the visible ones, we need to select another one.
+                Logger.shared.logError("Couldn't select tab '\(tab.title)'. It might be hidden.", category: .web)
+                let index = tabs.firstIndex(of: tab) ?? 0
+                setCurrentTab(at: index)
+                return
+            }
         }
         currentTab = tab
     }
@@ -373,7 +378,9 @@ extension BrowserTabsManager {
     }
 
     func openedTab(for url: URL, allowPinnedTabs: Bool) -> BrowserTab? {
-        tabs.first { (allowPinnedTabs || !$0.isPinned) && $0.url?.absoluteString == url.absoluteString }
+        tabs.first { (allowPinnedTabs || !$0.isPinned) &&
+            $0.url?.urlStringByRemovingUnnecessaryCharacters == url.urlStringByRemovingUnnecessaryCharacters            
+        }
     }
 
     private func updateIsPinned(for tab: BrowserTab, isPinned: Bool) {
