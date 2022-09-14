@@ -15,10 +15,9 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     var ccPrefView = AutoFillCCTestView()
     var passwordPreferencesView = PasswordPreferencesTestView()
         
-    override func setUpWithError() throws {
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp() {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
             .invoke(.populateCreditCardsDB)
     }
     

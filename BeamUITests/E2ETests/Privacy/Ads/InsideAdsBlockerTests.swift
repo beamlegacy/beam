@@ -15,11 +15,10 @@ class InsideAdsBlockerTests: BaseTest {
     let adLinkText = "Featured Deals made easy all year long. Free shipping. Best prices. Get your thing Get your thing"
     let view = "AdBlock"
 
-    override func setUpWithError() throws {
+    override func setUp() {
         step ("GIVEN I start mock server and navigate to privacy prefs"){
-            launchApp()
-            uiMenu.invoke(.destroyDB)
-                .invoke(.startMockHttpServer)
+            super.setUp()
+            uiMenu.invoke(.startMockHttpServer)
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .privacy)
         }

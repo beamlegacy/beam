@@ -32,7 +32,7 @@ class NoteEditorTests: BaseTest {
     
     func testTypeTextInNote() {
         testrailId("C758")
-        let journalView = launchApp()
+        let journalView = JournalTestView()
         let firstJournalEntry = journalView.getNoteByIndex(1)
         firstJournalEntry.clear()
         
@@ -65,7 +65,7 @@ class NoteEditorTests: BaseTest {
     
     func testSlashCommandsView() {
         testrailId("C1033")
-        let journalView = launchApp()
+        let journalView = JournalTestView()
         let contextMenuTriggerKey = "/"
         
         step("Given I type \(contextMenuTriggerKey) char"){

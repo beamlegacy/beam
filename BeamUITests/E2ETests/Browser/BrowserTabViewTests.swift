@@ -11,11 +11,11 @@ import XCTest
 class BrowserTabViewTests: BaseTest {
     
     let linkToOpen = "released his perhaps still-in-progress album"
-    var journalView: JournalTestView!
+    let journalView = JournalTestView()
     
     override func setUp() {
         step("Given I open a web page"){
-            journalView = launchApp()
+            super.setUp()
             uiMenu.invoke(.loadUITestPage1)
         }
     }

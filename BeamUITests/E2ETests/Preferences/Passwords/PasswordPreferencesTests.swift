@@ -22,7 +22,7 @@ class PasswordPreferencesTests: BaseTest {
     
     func setup(isPasswordProtectionDisabled: Bool = true, doPopulatePasswordsDB: Bool = true) {
         step ("GIVEN I open password preferences"){
-            launchApp()
+            super.setUp()
             if isPasswordProtectionDisabled {
                 uiMenu.invoke(.disablePasswordProtect)
             }

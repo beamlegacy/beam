@@ -11,11 +11,7 @@ import XCTest
 class NoteViewEmbedsTests: BaseTest {
     
     var noteView: NoteTestView!
-    var journalView: JournalTestView!
-    
-    override func setUp() {
-        journalView = launchApp()
-    }
+    let journalView = JournalTestView()
     
     func testEmbedsCollapseExpandIcons() throws {
         let toLinkTitle = "to Link"

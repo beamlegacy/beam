@@ -6,9 +6,7 @@ class BrowserStatusBarTests: BaseTest {
     func testShowStatusBar() throws {
 
         step("Given I open a web page"){
-            launchApp()
-            uiMenu.invoke(.resizeSquare1000)
-                .invoke(.loadUITestPage1)
+            uiMenu.invoke(.loadUITestPage1)
         }
 
         let link = webView.staticText("on Twitter")
@@ -33,7 +31,6 @@ class BrowserStatusBarTests: BaseTest {
     func testShowStatusBarForLinkOpeningInNewTab() throws {
 
         step("Given I open a web page"){
-            launchApp()
             uiMenu.invoke(.loadUITestPage1)
         }
         
@@ -59,7 +56,6 @@ class BrowserStatusBarTests: BaseTest {
     func testDisableStatusBar() {
 
         step("Given I open a web page"){
-            launchApp()
             uiMenu.invoke(.loadUITestPage1)
         }
 

@@ -29,9 +29,8 @@ class RightClickLinkMenuTests: BaseTest {
         
     override func setUp() {
         step("Given I open test page") {
-            launchApp()
+            super.setUp()
             uiMenu.invoke(.loadUITestPage2)
-                .invoke(.resizeSquare1000)
         }
         
         step("When I right click on an image") {

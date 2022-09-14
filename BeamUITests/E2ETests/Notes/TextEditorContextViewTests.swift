@@ -59,8 +59,7 @@ class TextEditorContextViewTests: BaseTest {
         let composedText = notePrefix + noteName + notePostix
         
         step("Given I create \(noteName)"){
-            let journalView = launchApp()
-            noteView = journalView.createNoteViaOmniboxSearch(noteName)//https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
+            noteView = JournalTestView().createNoteViaOmniboxSearch(noteName)//https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
         }
         
         step("When I type in note: \(composedText)"){

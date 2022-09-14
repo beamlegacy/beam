@@ -11,13 +11,8 @@ import XCTest
 class HelpAndFeedbackTests: BaseTest {
     
     var helpView: HelpTestView!
-    var journalView: JournalTestView!
+    let journalView = JournalTestView()
     var tabIndex = 0
-    
-    override func setUp() {
-        journalView = launchApp()
-        uiMenu.invoke(.resizeSquare1000)
-    }
     
     private func assertCorrectTabIsOpened(_ expectedUrl: String) {
         step ("THEN I see \(expectedUrl) URL opened") {

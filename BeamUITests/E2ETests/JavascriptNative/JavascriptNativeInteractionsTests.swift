@@ -13,7 +13,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
     
     @discardableResult
     func prepareTest(_ buttonTitle: String) -> (XCUIElement, XCUIElement, XCUIElement) {
-        let journalView = launchApp()
+        let journalView = JournalTestView()
         
         step("Given I open a test page to \(buttonTitle)"){
             uiMenu.invoke(.loadUITestPageAlerts)
@@ -84,7 +84,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
     func testJSNativeFileDialogInteraction() {
         let fileExistanceLabel = "NO FILE"
         let message = "no file selected"
-        let journalView = launchApp()
+        let journalView = JournalTestView()
         var webView: XCUIElement?
         
         step("Given I open a test page with Upload File dialog"){

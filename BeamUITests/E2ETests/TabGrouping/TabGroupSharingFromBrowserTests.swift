@@ -25,7 +25,6 @@ class TabGroupSharingFromBrowserTests: BaseTest {
     
     private func createTabGroupWithoutBeingLogged(){
         step("Given I open Share Tab Group Menu without being logged in") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createTabGroupAndSwitchToWeb()
             tabGroupMenu.openTabGroupMenu(index: 0)
                 .clickTabGroupMenu(.tabGroupShareGroup)

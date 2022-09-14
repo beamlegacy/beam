@@ -11,12 +11,7 @@ import XCTest
 class JournalTest: BaseTest {
     
     let noteView = NoteTestView()
-    var journalView: JournalTestView!
-    
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        journalView = launchApp()
-    }
+    let journalView = JournalTestView()
     
     func testJournalScrollViewExistence() {
         testrailId("C739")
@@ -26,6 +21,7 @@ class JournalTest: BaseTest {
         
         step("When I open All notes and restart the app"){
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            AllNotesTestView().waitForAllNotesViewToLoad()
             restartApp()
         }
 

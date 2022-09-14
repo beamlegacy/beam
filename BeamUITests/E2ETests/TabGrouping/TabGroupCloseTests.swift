@@ -11,12 +11,12 @@ import XCTest
 class TabGroupCloseTests: BaseTest {
     
     let tabGroupMenu = TabGroupMenuView()
-    var journalTestView: JournalTestView!
+    var journalTestView = JournalTestView()
     
     override func setUp() {
         step("Given I have a tab group") {
-            journalTestView = launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             testrailId("C936")
+            super.setUp()
             createTabGroupAndSwitchToWeb()
         }
     }
