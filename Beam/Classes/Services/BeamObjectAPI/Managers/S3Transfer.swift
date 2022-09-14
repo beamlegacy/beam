@@ -14,7 +14,7 @@ import BeamCore
 struct S3TransferConfiguration {
     static let requestTimeout: TimeAmount = .seconds(30)
     static let nioMaxBodyDownloadSize: Int = 1024 * 1024 * 10 /* 10 MB */
-    static let concurrentHTTP1ConnectionsPerHostSoftLimit = 50
+    static let concurrentHTTP1ConnectionsPerHostSoftLimit = 30
     static let nioConnectionPoolIdleTimeout:TimeAmount = .seconds(60)
 }
 
