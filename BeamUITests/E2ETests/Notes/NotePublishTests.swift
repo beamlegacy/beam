@@ -10,7 +10,7 @@ import XCTest
 
 class NotePublishTests: BaseTest {
     
-    var noteView: NoteTestView!
+    var noteView = NoteTestView()
     var allNotesView: AllNotesTestView!
     let dialogView = DialogTestView()
     
@@ -75,7 +75,7 @@ class NotePublishTests: BaseTest {
         let noteNameToBeCreated = "Test1"
         
         step("Given I create \(noteNameToBeCreated) note"){
-            noteView = uiMenu.createAndOpenNote()
+            uiMenu.invoke(.createAndOpenNote)
             noteView.waitForNoteViewToLoad()
         }
         
@@ -132,8 +132,7 @@ class NotePublishTests: BaseTest {
         step("GIVEN I created and publish a note") {
             signUpStagingWithRandomAccount()
             hiddenNotification.waitForUserSignIn(timeout: BaseTest.implicitWaitTimeout)
-            uiMenu.createAndOpenPublishedNote()
-            noteView = NoteTestView()
+            uiMenu.invoke(.createAndOpenPublishedNote)
             noteView.waitForNoteViewToLoad()
             noteView.clickPublishedMenuDisclosureTriangle()
         }
@@ -189,8 +188,7 @@ class NotePublishTests: BaseTest {
         step("GIVEN I created and publish a note") {
             signUpStagingWithRandomAccount()
             hiddenNotification.waitForUserSignIn(timeout: BaseTest.implicitWaitTimeout)
-            uiMenu.createAndOpenPublishedNote()
-            noteView = NoteTestView()
+            uiMenu.invoke(.createAndOpenPublishedNote)
         }
         
         step("When I click on Publish link") {
@@ -254,8 +252,7 @@ class NotePublishTests: BaseTest {
         step("Given I created and publish a note") {
             signUpStagingWithRandomAccount()
             hiddenNotification.waitForUserSignIn(timeout: BaseTest.implicitWaitTimeout)
-            uiMenu.createAndOpenPublishedNote()
-            noteView = NoteTestView()
+            uiMenu.invoke(.createAndOpenPublishedNote)
         }
         
         step("When I open share menu") {

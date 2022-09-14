@@ -59,13 +59,13 @@ class BaseTest: XCTestCase {
     }
     
     override func tearDown() {
-        uiMenu.deleteRemoteAccount()
+        uiMenu.invoke(.deleteRemoteAccount)
         if isAppRunning() {
             storeScreenshot()
-            uiMenu.destroyDB()
+            uiMenu.invoke(.destroyDB)
             usleep(500) //wait until DB is destroyed to be used
         }
-        uiMenu.deletePrivateKeys()
+        uiMenu.invoke(.deletePrivateKeys)
         self.clearPasteboard()
         super.tearDown()
         terminateAppInstance()
@@ -122,8 +122,8 @@ class BaseTest: XCTestCase {
     func launchAndOpenAllNotes(signedIn: Bool = false) -> AllNotesTestView {
         launchApp().waitForJournalViewToLoad()
         if signedIn {
-            uiMenu.setAPIEndpointsToStaging()
-            uiMenu.signUpWithRandomTestAccount()
+            uiMenu.invoke(.setAPIEndpointsToStaging)
+            uiMenu.invoke(.signUpWithRandomTestAccount)
             _ = webView.waitForTabUrlAtIndexToEqual(index: 0, expectedString: welcomeTourURL)
         }
         shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
@@ -203,7 +203,7 @@ class BaseTest: XCTestCase {
     func signUpStagingWithRandomAccount() -> JournalTestView {
         let journalView = launchApp()
         journalView.waitForJournalViewToLoad()
-        uiMenu.signUpWithRandomTestAccount()
+        uiMenu.invoke(.signUpWithRandomTestAccount)
         return journalView
     }
 
@@ -276,9 +276,9 @@ class BaseTest: XCTestCase {
     
     func createTabGroupAndSwitchToWeb(named: Bool = false) {
         if named {
-            uiMenu.createTabGroupNamed()
+            uiMenu.invoke(.createTabGroupNamed)
         } else {
-            uiMenu.createTabGroup()
+            uiMenu.invoke(.createTabGroup)
         }
         shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         webView.waitForWebViewToLoad()

@@ -18,7 +18,7 @@ class AllNotesDeleteTests: BaseTest {
     override func setUp() {
         step("Given I create a note and switch to All Notes") {
             launchApp()
-            uiMenu.createNote()
+            uiMenu.invoke(.createNote)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()
             XCTAssertTrue(allNotesView.getNumberOfNotes() == 5)

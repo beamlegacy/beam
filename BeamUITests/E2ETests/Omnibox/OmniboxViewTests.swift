@@ -18,7 +18,7 @@ class OmniboxViewTests: BaseTest {
     
     override func tearDown() {
         if stopMockServer {
-            uiMenu.stopMockHTTPServer()
+            uiMenu.invoke(.stopMockHttpServer)
         }
         super.tearDown()
     }
@@ -73,8 +73,8 @@ class OmniboxViewTests: BaseTest {
     func testOmniboxPivotButtonClicking() {
         
         step("Given I open 2 test pages"){
-            uiMenu.loadUITestPage1()
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage1)
+                .invoke(.loadUITestPage2)
         }
 
         step("Then Webview is opened and browser tab bar is visible"){
@@ -120,9 +120,9 @@ class OmniboxViewTests: BaseTest {
         step("Given I have at least 4 notes"){
             deleteAllNotes() // delete onboarding notes
             //Open is required to make it appear in autocomplete
-            uiMenu.createAndOpenNote()
-            uiMenu.createAndOpenNote()
-            uiMenu.createAndOpenNote()
+            uiMenu.invoke(.createAndOpenNote)
+                .invoke(.createAndOpenNote)
+                .invoke(.createAndOpenNote)
         }
         let results = omniboxView.getAutocompleteResults()
         let noteResults = omniboxView.getNoteAutocompleteElementQuery()
@@ -164,7 +164,7 @@ class OmniboxViewTests: BaseTest {
 
         // In Web
         step("When I open omnibox in web mode"){
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
             omniboxView.focusOmniBoxSearchField()
         }
 
@@ -215,7 +215,7 @@ class OmniboxViewTests: BaseTest {
         let replacedSourceToSearchInTab = "nestediframe.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
         let expectedReplacedSourceToSearchURL = "http://nestediframe.form.lvh.me:\(EnvironmentVariables.MockHttpServer.port)/"
         
-        uiMenu.startMockHTTPServer()
+        uiMenu.invoke(.startMockHttpServer)
         stopMockServer = true
         
         step("GIVEN I open \(initialSearch)"){
@@ -277,7 +277,7 @@ class OmniboxViewTests: BaseTest {
         let noteATitle = "Test1"
 
         step("Given I have at least 1 note"){
-            uiMenu.createAndOpenNote()
+            uiMenu.invoke(.createAndOpenNote)
         }
         
         let results = omniboxView.getAutocompleteResults()

@@ -39,7 +39,7 @@ class CaptureCopyShareTests: BaseTest {
     func testCopyCapturedText() {
         testrailId("C998")
         step("GIVEN I load the test page") {
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage3)
         }
         
         step ("When I capture text and click Copy") {
@@ -63,8 +63,8 @@ class CaptureCopyShareTests: BaseTest {
         testrailId("C998")
         
         step("GIVEN I load the test page") {
-            uiMenu.resizeSquare1000()
-            uiMenu.loadUITestPage4()
+            uiMenu.invoke(.resizeSquare1000)
+                .invoke(.loadUITestPage4)
         }
         
         step ("When I capture text and click Copy") {
@@ -92,7 +92,7 @@ class CaptureCopyShareTests: BaseTest {
         let textElementToAdd = pnsView.staticText(textToCapture)
         
         step("GIVEN I load the test page") {
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage3)
         }
         
         for windowTitle in windows {

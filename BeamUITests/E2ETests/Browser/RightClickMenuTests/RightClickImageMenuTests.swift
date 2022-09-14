@@ -18,7 +18,7 @@ class RightClickImageMenuTests: BaseTest {
     override func setUp() {
         step("Given I open test page") {
             launchApp()
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage2)
         }
         
         step("When I right click on an image") {
@@ -101,7 +101,7 @@ class RightClickImageMenuTests: BaseTest {
         }
         
         step("When I open an image from raw URL") {
-            uiMenu.startMockHTTPServer()
+            uiMenu.invoke(.startMockHttpServer)
             shortcutHelper.shortcutActionInvoke(action: .openLocation)
             mockPage.openMockPage(.jpgFile)
         }
@@ -127,7 +127,7 @@ class RightClickImageMenuTests: BaseTest {
         }
         
         step("When I open an image from raw URL") {
-            uiMenu.startMockHTTPServer()
+            uiMenu.invoke(.startMockHttpServer)
             shortcutHelper.shortcutActionInvoke(action: .openLocation)
             mockPage.openMockPage(.jpgFile)
         }

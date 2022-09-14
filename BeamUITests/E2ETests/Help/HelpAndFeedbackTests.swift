@@ -16,7 +16,7 @@ class HelpAndFeedbackTests: BaseTest {
     
     override func setUp() {
         journalView = launchApp()
-        uiMenu.resizeSquare1000()
+        uiMenu.invoke(.resizeSquare1000)
     }
     
     private func assertCorrectTabIsOpened(_ expectedUrl: String) {

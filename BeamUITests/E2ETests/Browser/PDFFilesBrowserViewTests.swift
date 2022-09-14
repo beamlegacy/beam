@@ -14,14 +14,14 @@ class PDFFilesBrowserViewTests: BaseTest {
         try super.setUpWithError()
         step("Given I start mock server") {
             launchApp()
-            uiMenu.destroyDB()
-                .startMockHTTPServer()
+            uiMenu.invoke(.destroyDB)
+                .invoke(.startMockHttpServer)
         }
     }
     
     override func tearDown() {
         step("Given I stop mock server") {
-            uiMenu.stopMockHTTPServer()
+            uiMenu.invoke(.stopMockHttpServer)
             super.tearDown()
         }
     }

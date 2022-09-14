@@ -25,8 +25,8 @@ class NoteViewEmbedsTests: BaseTest {
         
         testrailId("C768, C769, C770, C771")
         step("When I add image to a note"){
-            uiMenu.resizeWindowLandscape()
-            uiMenu.loadUITestPage4()
+            uiMenu.invoke(.resizeWindowLandscape)
+            uiMenu.invoke(.loadUITestPage4)
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
         }
@@ -73,15 +73,15 @@ class NoteViewEmbedsTests: BaseTest {
 
     func testEmbedVideoMediaControlOld() {
         testrailId("C763")
-        uiMenu.disableCreateJournalOnce()
+        uiMenu.invoke(.disableCreateJournalOnce)
         _testEmbedVideoMediaControl(expectedWebViewCount: 1)
     }
 
     func testEmbedVideoMediaControlNew() {
         testrailId("C763")
-        uiMenu.enableCreateJournalOnce()
+        uiMenu.invoke(.enableCreateJournalOnce)
         _testEmbedVideoMediaControl(expectedWebViewCount: 1)
-        uiMenu.disableCreateJournalOnce()
+        uiMenu.invoke(.disableCreateJournalOnce)
     }
 
     func _testEmbedVideoMediaControl(expectedWebViewCount: Int) {

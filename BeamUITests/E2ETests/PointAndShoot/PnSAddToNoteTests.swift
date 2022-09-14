@@ -18,7 +18,7 @@ class PnSAddToNoteTests: BaseTest {
 
     override func setUp() {
         journalView = launchApp()
-        uiMenu.resizeSquare1000()
+        uiMenu.invoke(.resizeSquare1000)
     }
     
     func SKIPtestAddTextToTodaysNote() throws {
@@ -28,7 +28,7 @@ class PnSAddToNoteTests: BaseTest {
         var todaysDateInNoteTitleFormat: String?
         
         step("Given I open Test page"){
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage3)
         }
         
         step("When I point and shoot the following text and add it to Todays note"){
@@ -58,7 +58,7 @@ class PnSAddToNoteTests: BaseTest {
     func testAddTextToNewNote() {
         testrailId("C1061, C1014, C747")
         step("Given I open Test page"){
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage3)
             let textElementToAdd = pnsView.staticText(" capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime")
             pnsView.addToNoteByName(textElementToAdd, noteNameToBeCreated, true)
         }
@@ -78,11 +78,11 @@ class PnSAddToNoteTests: BaseTest {
     func testAddTextToExistingNote() {
         testrailId("C1062, C1014, C997")
         step("Given I create \(noteNameToBeCreated) note"){
-            uiMenu.createNote()
+            uiMenu.invoke(.createNote)
         }
         
         step("Given I open Test page"){
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage3)
             let textElementToAdd = pnsView.staticText(". The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.")
             pnsView.addToNoteByName(textElementToAdd, noteNameToBeCreated)
         }
@@ -112,11 +112,11 @@ class PnSAddToNoteTests: BaseTest {
         testrailId("C1065")
         step("Given I create \(noteNameToBeCreated) note"){
             //To be replaced with UITests helper - note creation
-            uiMenu.createNote()
+            uiMenu.invoke(.createNote)
         }
         
         step("Given I open Test page"){
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage3)
         }
         
         step ("When I collect a text via PnS"){
@@ -135,11 +135,11 @@ class PnSAddToNoteTests: BaseTest {
     func testCollectImage() {
         testrailId("C1007")
         step("Given I create \(noteNameToBeCreated) note"){
-            uiMenu.createNote()
+            uiMenu.invoke(.createNote)
         }
         
         step ("Then I successfully collect gif"){
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage2)
             let gifItemToAdd = pnsView.image("File:Beam mode 2.gif")
             pnsView.addToNoteByName(gifItemToAdd, noteNameToBeCreated)
             webView.openDestinationNote()
@@ -147,7 +147,7 @@ class PnSAddToNoteTests: BaseTest {
         }
 
         step ("Then I successfully collect image"){
-            uiMenu.loadUITestPage4()
+            uiMenu.invoke(.loadUITestPage4)
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToNoteByName(imageItemToAdd, noteNameToBeCreated)
             webView.openDestinationNote()
@@ -160,7 +160,7 @@ class PnSAddToNoteTests: BaseTest {
         testrailId("C1006")
         step ("WHEN I collect a video to Today's note"){
             deleteAllNotes() // delete onboarding notes for the test
-            uiMenu.loadUITestPageMedia()
+            uiMenu.invoke(.loadUITestPageMedia)
             let itemToCollect = pnsView.app.groups.containing(.button, identifier:"Play Video").children(matching: .group).element.children(matching: .group).element
             pnsView.addToTodayNote(itemToCollect)
         }
@@ -182,8 +182,8 @@ class PnSAddToNoteTests: BaseTest {
     func testCollectSVGToNote() {
         testrailId("C1066")
         step ("WHEN I load a web page with SVG image"){
-            uiMenu.loadUITestSVG()
-            uiMenu.resetCollectAllert()
+            uiMenu.invoke(.loadUITestSVG)
+                .invoke(.resetCollectAlert)
             webView.waitForWebViewToLoad()
         }
         
@@ -229,7 +229,7 @@ class PnSAddToNoteTests: BaseTest {
         
         step ("Given I open Test page"){
             deleteAllNotes() // delete onboarding notes for the test
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage3)
         }
         
         testrailId("C508, C935")
@@ -256,8 +256,8 @@ class PnSAddToNoteTests: BaseTest {
         let parentElement = pnsView.staticText(searchText).firstMatch
 
         step ("GIVEN I load a test webpage"){
-            uiMenu.resizeWindowLandscape()
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.resizeWindowLandscape)
+                .invoke(.loadUITestPage1)
         }
 
         step ("When I click and drag between start and end of full text"){
@@ -290,7 +290,7 @@ class PnSAddToNoteTests: BaseTest {
         }
 
         step ("And I see Shoot Frame Selection remained after window resize"){
-            uiMenu.resizeWindowPortrait()
+            uiMenu.invoke(.resizeWindowPortrait)
             XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
         }
 
@@ -308,8 +308,8 @@ class PnSAddToNoteTests: BaseTest {
         var center: XCUICoordinate?
         step ("Given I open test page in landscape mode"){
             uiMenu
-                .resizeWindowLandscape()
-                .loadUITestPage1()
+                .invoke(.resizeWindowLandscape)
+                .invoke(.loadUITestPage1)
             
             let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
             let parent = webView.staticText(searchText).firstMatch
@@ -347,7 +347,7 @@ class PnSAddToNoteTests: BaseTest {
             
             // Resize window
                 step ("And point Frame is available after resizing"){
-                    uiMenu.resizeWindowPortrait()
+                    uiMenu.invoke(.resizeWindowPortrait)
                     center!.hover()
                     XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
                     // Shoot
@@ -368,7 +368,7 @@ class PnSAddToNoteTests: BaseTest {
         let textElementToShoot = webView.staticText(searchText).firstMatch
 
         step ("WHEN I select a text on a test page"){
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
             webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: textElementToShoot)
         }
         
@@ -405,7 +405,7 @@ class PnSAddToNoteTests: BaseTest {
         testrailId("C997")
         //"opens ShootCardPicker and not navigate the page"
         step ("Given I open a test page"){
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
         }
 
         step ("Then I'm not redireceted after pointing a URL"){
@@ -432,7 +432,7 @@ class PnSAddToNoteTests: BaseTest {
         
         step("GIVEN I load a test page") {
             deleteAllNotes() // delete onboarding notes for the test
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage3)
         }
         
         step("WHEN I collect a text to Today's note") {
