@@ -59,7 +59,8 @@ struct AutocompleteListView: View {
                 AutocompleteItemView(item: item, selected: isSelected, loading: loadingElement?.id == item.id,
                                      displaySubtitle: displaySubtitle,
                                      allowsShortcut: allowsShortcut,
-                                     colorPalette: Self.colorPalette(for: item, mode: state.autocompleteManager.animatingToMode ?? state.autocompleteManager.mode))
+                                     colorPalette: Self.colorPalette(for: item, mode: state.autocompleteManager.animatingToMode ?? state.autocompleteManager.mode),
+                                     modifierFlagsPressed: modifierFlagsPressed)
                     .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {

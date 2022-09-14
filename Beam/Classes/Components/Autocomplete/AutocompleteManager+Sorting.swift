@@ -7,6 +7,19 @@
 
 import Foundation
 
+private struct ResultsToSort {
+    let notesResults: [AutocompleteResult]
+    let historyResults: [AutocompleteResult]
+    let urlResults: [AutocompleteResult]
+    let topDomainResults: [AutocompleteResult]
+    let mnemonicResults: [AutocompleteResult]
+    let openedTabResults: [AutocompleteResult]
+    let tabGroupsResults: [AutocompleteResult]
+    let searchEngineResults: [AutocompleteResult]
+    let otherResults: [AutocompleteResult]
+    let createCardResults: [AutocompleteResult]
+}
+
 extension AutocompleteManager {
     private static let resultsLimit = 8
 
@@ -39,60 +52,56 @@ extension AutocompleteManager {
             defaultLimit = 40
         }
         let limit = limit ?? defaultLimit
-        let finalResults = sortResults(notesResults: autocompleteResults[.note, default: []],
-                                       historyResults: autocompleteResults[.history] ?? [],
-                                       urlResults: autocompleteResults[.url] ?? [],
-                                       topDomainResults: autocompleteResults[.topDomain] ?? [],
-                                       mnemonicResults: autocompleteResults[.mnemonic] ?? [],
-                                       tabGroupsResults: autocompleteResults[.tabGroup(group: nil)] ?? [],
-                                       searchEngineResults: autocompleteResults[.searchEngine] ?? [],
+        let resultsToSort = ResultsToSort(notesResults: autocompleteResults[.note, default: []],
+                                          historyResults: autocompleteResults[.history] ?? [],
+                                          urlResults: autocompleteResults[.url] ?? [],
+                                          topDomainResults: autocompleteResults[.topDomain] ?? [],
+                                          mnemonicResults: autocompleteResults[.mnemonic] ?? [],
+                                          openedTabResults: autocompleteResults[.tab(tabId: nil)] ?? [],
+                                          tabGroupsResults: autocompleteResults[.tabGroup(group: nil)] ?? [],
+                                          searchEngineResults: autocompleteResults[.searchEngine] ?? [],
+                                          otherResults: otherResults,
+                                          createCardResults: autocompleteResults[.createNote] ?? [])
+        let finalResults = sortResults(resultsToSort,
                                        expectSearchEngineResultsLater: expectSearchEngineResultsLater,
-                                       otherResults: otherResults,
-                                       createCardResults: autocompleteResults[.createNote] ?? [],
                                        limit: limit)
 
         let canCreateNote = autocompleteResults[.createNote]?.isEmpty == false
         return (results: finalResults, canCreateNote: canCreateNote)
     }
 
-    private func sortResults(notesResults: [AutocompleteResult],
-                             historyResults: [AutocompleteResult],
-                             urlResults: [AutocompleteResult],
-                             topDomainResults: [AutocompleteResult],
-                             mnemonicResults: [AutocompleteResult],
-                             tabGroupsResults: [AutocompleteResult],
-                             searchEngineResults: [AutocompleteResult],
+    private func sortResults(_ resultsToSort: ResultsToSort,
                              expectSearchEngineResultsLater: Bool,
-                             otherResults: [AutocompleteResult],
-                             createCardResults: [AutocompleteResult],
                              limit: Int) -> [AutocompleteResult] {
+
         let start = DispatchTime.now()
-        let historyResultsTruncated = Array(historyResults.prefix(6))
+        let historyResultsTruncated = Array(resultsToSort.historyResults.prefix(6))
 
         // but prioritize title match over content match ?
-        let notesResultsTruncated = Array(autocompleteResultsUniqueNotes(sequence: notesResults).prefix(6))
-        let urlResultsTruncated = Array(urlResults.prefix(6))
+        let notesResultsTruncated = Array(autocompleteResultsUniqueNotes(sequence: resultsToSort.notesResults).prefix(6))
+        let urlResultsTruncated = Array(resultsToSort.urlResults.prefix(6))
 
         var sortableResults = [AutocompleteResult]()
         let uniqueURLs = autocompleteResultsUniqueURLs(sequence: historyResultsTruncated + urlResultsTruncated)
         self.rawSortedURLResults = uniqueURLs
-        sortableResults.append(contentsOf: uniqueURLs)
+        let urlsAndOpenedTabs = autocompleteResultsURLResultsMixedWithOpenedTabs(urlResults: uniqueURLs, openedTabResults: resultsToSort.openedTabResults)
+        sortableResults.append(contentsOf: urlsAndOpenedTabs)
         sortableResults.append(contentsOf: notesResultsTruncated)
-        sortableResults.append(contentsOf: tabGroupsResults)
+        sortableResults.append(contentsOf: resultsToSort.tabGroupsResults)
 
         sortableResults.sort(by: >)
         Self.logIntermediate(step: "SortableResults", stepShortName: "SR", results: sortableResults, startedAt: start)
 
-        sortableResults = boostResult(topDomainResults, results: sortableResults)
-        sortableResults = boostResult(mnemonicResults, results: sortableResults)
+        sortableResults = boostResult(resultsToSort.topDomainResults, results: sortableResults)
+        sortableResults = boostResult(resultsToSort.mnemonicResults, results: sortableResults)
 
-        var filteredSearchEngineResults = filterOutSearchEngineURLResults(from: searchEngineResults, forURLAlreadyIn: sortableResults)
+        var filteredSearchEngineResults = filterOutSearchEngineURLResults(from: resultsToSort.searchEngineResults, forURLAlreadyIn: sortableResults)
         filteredSearchEngineResults = autocompleteResultsUniqueSearchEngine(sequence: filteredSearchEngineResults)
 
         let results = merge(sortableResults: sortableResults,
                             searchEngineResults: filteredSearchEngineResults,
-                            otherResults: otherResults,
-                            createCardResults: createCardResults,
+                            otherResults: resultsToSort.otherResults,
+                            createCardResults: resultsToSort.createCardResults,
                             limit: limit,
                             expectSearchEngineResultsLater: expectSearchEngineResultsLater)
         return results
@@ -221,6 +230,36 @@ extension AutocompleteManager {
             }
         }
         return finalList.sorted(by: >)
+    }
+
+    /// Replace url results by their opened tab equivalent, while keeping the highest score.
+    private func autocompleteResultsURLResultsMixedWithOpenedTabs(urlResults: [AutocompleteResult], openedTabResults: [AutocompleteResult]) -> [AutocompleteResult] {
+        var final = [AutocompleteResult]()
+        var unusedOpenedTabs = openedTabResults
+        urlResults.forEach { urlResult in
+            if let openedTabIndex = unusedOpenedTabs.firstIndex(where: {
+                $0.url?.urlStringByRemovingUnnecessaryCharacters == urlResult.url?.urlStringByRemovingUnnecessaryCharacters                
+            }) {
+                let openedTabResult = unusedOpenedTabs[openedTabIndex]
+                let copied = copyURLResultForOpenedTab(urlResult, openedTabResult: openedTabResult)
+                final.append(copied)
+                unusedOpenedTabs.remove(at: openedTabIndex)
+            } else {
+                final.append(urlResult)
+            }
+        }
+        final.append(contentsOf: unusedOpenedTabs)
+        return final
+    }
+
+    private func copyURLResultForOpenedTab(_ urlResult: AutocompleteResult, openedTabResult: AutocompleteResult) -> AutocompleteResult {
+        let u = urlResult
+        let score = max(u.score ?? 0, openedTabResult.score ?? 0)
+        return AutocompleteResult(text: u.text, source: openedTabResult.source, disabled: u.disabled,
+                                  url: u.url, aliasForDestinationURL: u.aliasForDestinationURL,
+                                  information: u.information, customIcon: u.icon, iconColor: u.iconColor,
+                                  shortcut: openedTabResult.shortcut, completingText: u.completingText, additionalSearchTerms: u.additionalSearchTerms,
+                                  uuid: u.uuid, score: score, urlFields: u.urlFields, displayTopDivider: u.shouldDisplayTopDivider, handler: openedTabResult.handler)
     }
 
     internal func autocompleteResultsUniqueSearchEngine(sequence: [AutocompleteResult]) -> [AutocompleteResult] {

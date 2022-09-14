@@ -139,7 +139,7 @@ enum ShortcutKey: Hashable {
     }
 
     private func characterImage(string: String) -> Image {
-        let attributedString = NSAttributedString(string: string.uppercased())
+        let attributedString = NSAttributedString(string: string)
         let image = attributedString.image(foregroundColor: BeamColor.Corduroy.nsColor, font: BeamFont.medium(size: 12).nsFont)
         return Image(nsImage: image)
     }

@@ -313,10 +313,10 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         let note2 = try BeamNote(title: expectedNoteTitle)
         note2.owner = BeamData.shared.currentDatabase
         let element = BeamElement("some text")
-        state.handleOpenUrl(URL(string: url)!, note: note2, element: element, inBackground: false)
+        state.handleOpenURLFromNote(URL(string: url)!, note: note2, element: element, inBackground: true)
         wait(for: [indexExpectation], timeout: 1)
 
-        switch state.browserTabsManager.currentTab?.browsingTree.origin {
+        switch state.browserTabsManager.tabs.last?.browsingTree.origin {
         case let .linkFromNote(noteName: noteName):
             XCTAssertEqual(noteName, expectedNoteTitle)
         default: XCTFail("Should be a link from note origin")
