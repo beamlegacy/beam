@@ -41,7 +41,7 @@ class TodayNoteTests: BaseTest {
         testrailId("C748")
         
         step ("Given I navigate to All Note") {
-            uiMenu.create10RandomNotes()
+            uiMenu.invoke(.create10Notes)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()
         }

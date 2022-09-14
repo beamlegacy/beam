@@ -47,8 +47,8 @@ class AppLifecycleTests: BaseTest {
         }
 
         step("WHEN I open multiple tabs and one incognito window") {
-            uiMenu.loadUITestPage1()
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage1)
+                .invoke(.loadUITestPage2)
             webView.waitForWebViewToLoad()
             shortcutHelper.shortcutActionInvoke(action: .newIncognitoWindow)
         }

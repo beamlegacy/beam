@@ -14,9 +14,9 @@ class RightClickTabMenuTests: BaseTest {
         
         step("GIVEN I open 3 web pages in 3 tabs"){
             launchApp().waitForJournalViewToLoad()
-            uiMenu.loadUITestPage1()
-            uiMenu.loadUITestPage2()
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage1)
+                .invoke(.loadUITestPage2)
+                .invoke(.loadUITestPage3)
             XCTAssertTrue(webView.waitForWebViewToLoad())
             XCTAssertEqual(webView.getNumberOfTabs(), 3)
         }
@@ -64,7 +64,7 @@ class RightClickTabMenuTests: BaseTest {
         testrailId("C1070")
         step("GIVEN I open a web page where no sounds are playing"){
             launchApp().waitForJournalViewToLoad()
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
             XCTAssertTrue(webView.waitForWebViewToLoad())
         }
         
@@ -80,8 +80,8 @@ class RightClickTabMenuTests: BaseTest {
         testrailId("C1071, C1072")
         step("GIVEN I open 2 different web pages"){
             launchApp().waitForJournalViewToLoad()
-            uiMenu.loadUITestPage1()
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage1)
+                .invoke(.loadUITestPage2)
             XCTAssertTrue(webView.waitForWebViewToLoad())
         }
         
@@ -106,7 +106,7 @@ class RightClickTabMenuTests: BaseTest {
         let fakeData = "Fake Data"
         step("GIVEN I open a web page"){
             launchApp().waitForJournalViewToLoad()
-            uiMenu.loadUITestPagePassword()
+            uiMenu.invoke(.loadUITestPagePassword)
             XCTAssertTrue(testPage.isPasswordPageOpened())
         }
 

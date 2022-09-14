@@ -18,7 +18,7 @@ class ReferencesTests: BaseTest {
         let journalView = launchApp()
         
         step ("GIVEN I create 2 notes"){
-            uiMenu.createAndOpenNote()
+            uiMenu.invoke(.createAndOpenNote)
             noteView = journalView.createNoteViaOmniboxSearch(noteName2) //to be applied once https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu is fixed
         }
 
@@ -135,7 +135,7 @@ class ReferencesTests: BaseTest {
         let textToType = " some text"
         let renamedNote1 = noteName1 + textToType
         noteView = createNotesAndReferenceThem()
-        uiMenu.resizeWindowLandscape()
+        uiMenu.invoke(.resizeWindowLandscape)
         
         step ("Given I rename note 1 to \(noteName1)\(textToType)"){
             openNoteByTitle(noteName1).makeNoteTitleEditable()
