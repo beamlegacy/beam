@@ -19,8 +19,17 @@ xcode_file = "../.xcode_version"
 xcversion(version: File.read(xcode_file)) if File.exists?(xcode_file)
 
 platform :mac do
+
+  def init_webfilelist
+    Dir.chdir("..") do
+      sh("touch", "WebFileList_input.xcfilelist")
+      sh("touch", "WebFileList_output.xcfilelist")
+    end
+  end
+
   desc "Run linting"
   lane :lint do
+
     swiftlint(
       mode: :lint,
       strict: true,
@@ -94,6 +103,8 @@ platform :mac do
   desc "Build for UI Testing"
   lane :build_for_testing do
 
+      init_webfilelist
+
       update_app_identifier(
         xcodeproj: "Beam.xcodeproj",
         plist_path: "Beam/Configuration/Info.plist",
@@ -129,6 +140,8 @@ platform :mac do
 
   desc "Run Unit Tests"
   lane :tests do
+
+    init_webfilelist
 
     update_app_identifier(
       xcodeproj: "Beam.xcodeproj",
@@ -302,6 +315,9 @@ platform :mac do
 
   ## To create DeveloperId signed builds
   lane :build do
+    
+    init_webfilelist
+
     branch = Actions.git_branch
     
     build_number = unique_build_number()
