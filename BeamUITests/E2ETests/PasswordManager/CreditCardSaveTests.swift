@@ -21,8 +21,8 @@ class CreditCardSaveTests: BaseCreditCardTest {
         
     override func setUpWithError() throws {
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
     }
     
     private func fillDataWithoutPwManager(field: String, data: String) {
@@ -53,7 +53,7 @@ class CreditCardSaveTests: BaseCreditCardTest {
         }
         
         step("Then CC is saved in Preferences") {
-            uiMenu.disablePasswordAndCardsProtection()
+            uiMenu.invoke(.disablePasswordProtect)
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             creditCardView = PasswordPreferencesTestView().clickEditCreditCardButton()
@@ -83,7 +83,7 @@ class CreditCardSaveTests: BaseCreditCardTest {
         }
         
         step("Then CC is not saved in Preferences") {
-            uiMenu.disablePasswordAndCardsProtection()
+            uiMenu.invoke(.disablePasswordProtect)
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             PasswordPreferencesTestView().clickEditCreditCardButton()

@@ -16,7 +16,7 @@ class BrowserTabViewTests: BaseTest {
     override func setUp() {
         step("Given I open a web page"){
             journalView = launchApp()
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
         }
     }
     
@@ -81,8 +81,8 @@ class BrowserTabViewTests: BaseTest {
         
         step("GIVEN I open another web page"){
             //uiMenu.resizeWindowLandscape() required for the step to merge windows
-            uiMenu.loadUITestPage2()
-            uiMenu.loadUITestPage3()
+            uiMenu.invoke(.loadUITestPage2)
+                .invoke(.loadUITestPage3)
         }
 
         step("THEN the tabs order is successfully changed on drag'n'drop"){

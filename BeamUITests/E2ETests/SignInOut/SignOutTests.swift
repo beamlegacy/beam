@@ -31,7 +31,7 @@ class SignOutTests: BaseTest {
             allNotes.waitForAllNotesViewToLoad()
             //defaultNotes = AllNotesTestTable()
             shortcutHelper.shortcutActionInvoke(action: .showJournal)
-            uiMenu.create10RandomNotes()
+            uiMenu.invoke(.create10Notes)
         }
         
         testrailId("C617")
@@ -89,7 +89,7 @@ class SignOutTests: BaseTest {
         var tableBeforeSignOut: AllNotesTestTable!
         
         step("GIVEN I get the All Notes table content") {
-            uiMenu.create10RandomNotes()
+            uiMenu.invoke(.create10Notes)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
             tableBeforeSignOut = AllNotesTestTable()

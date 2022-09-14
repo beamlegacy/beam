@@ -15,9 +15,9 @@ class OneFieldAutofillTests: BaseTest {
 
     override func setUpWithError() throws {
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-            .populatePasswordsDB()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
+            .invoke(.populatePasswordsDB)
         shortcutHelper.shortcutActionInvoke(action: .newTab)
     }
 

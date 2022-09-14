@@ -20,10 +20,10 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
 
     override func setUpWithError() throws {
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-            .clearPasswordsDB()
-            .populatePasswordsDB()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
+            .invoke(.clearPasswordsDB)
+            .invoke(.populatePasswordsDB)
     }
 
     func testHiddenFieldsAreIgnored() {

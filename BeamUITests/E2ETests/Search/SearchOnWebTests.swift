@@ -21,7 +21,7 @@ class SearchOnWebTests: BaseTest {
     
     func testSearchViewAppearance() {
         step("Given I open a test page"){
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage2)
             webView.waitForWebViewToLoad()
         }
         
@@ -65,7 +65,7 @@ class SearchOnWebTests: BaseTest {
     func testSearchResultsCounter() {
         testrailId("C922")
         step("Given I open a test page"){
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage2)
             webView.waitForWebViewToLoad()
         }
         
@@ -136,7 +136,7 @@ class SearchOnWebTests: BaseTest {
         testrailId("C1090")
         
         step("Given I open a test page"){
-            uiMenu.loadUITestPage2()
+            uiMenu.invoke(.loadUITestPage2)
             webView.waitForWebViewToLoad()
         }
         
@@ -161,7 +161,7 @@ class SearchOnWebTests: BaseTest {
         let textElementToSelect = webView.staticText(searchText).firstMatch
         
         step("GIVEN I open a test page and select a text: \(searchText)"){
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
             webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: textElementToSelect)
         }
         
@@ -189,7 +189,7 @@ class SearchOnWebTests: BaseTest {
         let thirdSearch = additionalWord + " " + firstSearch
         
         step("Given I open a test page"){
-            uiMenu.loadUITestPageAlerts()
+            uiMenu.invoke(.loadUITestPageAlerts)
             webView.waitForWebViewToLoad()
         }
         
@@ -233,7 +233,7 @@ class SearchOnWebTests: BaseTest {
         let expectedSecondResult = "Click"
         
         step("Given I open a test page"){
-            uiMenu.loadUITestPageAlerts()
+            uiMenu.invoke(.loadUITestPageAlerts)
             webView.waitForWebViewToLoad()
         }
         

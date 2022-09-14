@@ -19,7 +19,7 @@ class SigninTests: BaseTest {
         try super.setUpWithError()
         step("Given I enable onboarding") {
             launchApp()
-            uiMenu.showOnboarding()
+            uiMenu.invoke(.showOnboarding)
         }
     }
     
@@ -59,8 +59,8 @@ class SigninTests: BaseTest {
         step("GIVEN I sign up an account and take credentials") {
             signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
-            uiMenu.showOnboarding()
-                .deletePrivateKeys()
+            uiMenu.invoke(.showOnboarding)
+                .invoke(.deletePrivateKeys)
         }
         
         step("GIVEN Username view is opened"){

@@ -18,8 +18,8 @@ class InsideAdsBlockerTests: BaseTest {
     override func setUpWithError() throws {
         step ("GIVEN I start mock server and navigate to privacy prefs"){
             launchApp()
-            uiMenu.destroyDB()
-                .startMockHTTPServer()
+            uiMenu.invoke(.destroyDB)
+                .invoke(.startMockHttpServer)
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .privacy)
         }

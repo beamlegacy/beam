@@ -27,8 +27,8 @@ class BrowserHistoryTests: BaseTest {
         try super.setUpWithError()
         launchApp()
         uiMenu
-            .destroyDB()
-            .startMockHTTPServer()
+            .invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
     }
     
     private func openMultipleWebPagesInSameTab() {

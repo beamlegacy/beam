@@ -22,7 +22,7 @@ class LinksTests: BaseTest {
     private func createNotesAndLinkThem() -> NoteTestView {
         let journalView = launchApp()
         step("Given I create 2 notes"){
-            uiMenu.createAndOpenNote()
+            uiMenu.invoke(.createAndOpenNote)
             noteView = journalView.createNoteViaOmniboxSearch(noteName2) //to be applied once https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu is fixed
         }
 

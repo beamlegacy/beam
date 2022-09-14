@@ -13,8 +13,8 @@ class SearchOnPDFTests: BaseTest {
     override func setUpWithError() throws {
         try super.setUpWithError()
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
         clearPasteboard()
     }
     
