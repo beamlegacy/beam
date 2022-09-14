@@ -483,6 +483,10 @@
 		56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3625CCAFA400ED7C50 /* english.stopwords */; };
 		660325A7285B5278008F4471 /* BeamWebContextMenu+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660325A6285B5278008F4471 /* BeamWebContextMenu+Actions.swift */; };
 		660325B6285B7D32008F4471 /* BeamWebContextMenu+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660325B5285B7D32008F4471 /* BeamWebContextMenu+Data.swift */; };
+		6615797128CB828100904C24 /* VideoConferencingPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6615796A28CB828000904C24 /* VideoConferencingPanel.swift */; };
+		6615797228CB828100904C24 /* VideoConferencingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6615796B28CB828000904C24 /* VideoConferencingManager.swift */; };
+		6615797428CB83CA00904C24 /* Combine+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6615797328CB83CA00904C24 /* Combine+Beam.swift */; };
+		6615797628CBC1EA00904C24 /* VideoConferencingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6615797528CBC1EA00904C24 /* VideoConferencingTests.swift */; };
 		6633BA5E283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6633BA5D283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift */; };
 		6635D9832853E73A00F4B775 /* BeamWebContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */; };
 		6635D9842853E73A00F4B775 /* ContextMenuMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */; };
@@ -498,6 +502,8 @@
 		66C917A028B38E4F007B4636 /* MarkdownImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C9179F28B38E4F007B4636 /* MarkdownImporter.swift */; };
 		66D77CA128351612004D03E9 /* NSMenu+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D77CA028351612004D03E9 /* NSMenu+Beam.swift */; };
 		66E618E928635B5100D06A15 /* WebKitManualDownloadProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */; };
+		66F1A23028D078C000DAAC79 /* VideoConferencingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F1A22F28D078C000DAAC79 /* VideoConferencingView.swift */; };
+		66F1A23728D079FB00DAAC79 /* VideoConferencingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F1A23628D079FB00DAAC79 /* VideoConferencingModel.swift */; };
 		66F9AEBE283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */; };
 		66F9AEBF283E215100C28EE3 /* MouseOverAndSelection_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA1283E215100C28EE3 /* MouseOverAndSelection_prod.js */; };
 		66F9AEC0283E215100C28EE3 /* MouseOverAndSelection.d.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA3283E215100C28EE3 /* MouseOverAndSelection.d.ts */; };
@@ -2172,6 +2178,10 @@
 		56A5BD3625CCAFA400ED7C50 /* english.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = english.stopwords; sourceTree = "<group>"; };
 		660325A6285B5278008F4471 /* BeamWebContextMenu+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWebContextMenu+Actions.swift"; sourceTree = "<group>"; };
 		660325B5285B7D32008F4471 /* BeamWebContextMenu+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWebContextMenu+Data.swift"; sourceTree = "<group>"; };
+		6615796A28CB828000904C24 /* VideoConferencingPanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoConferencingPanel.swift; sourceTree = "<group>"; };
+		6615796B28CB828000904C24 /* VideoConferencingManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoConferencingManager.swift; sourceTree = "<group>"; };
+		6615797328CB83CA00904C24 /* Combine+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Combine+Beam.swift"; sourceTree = "<group>"; };
+		6615797528CBC1EA00904C24 /* VideoConferencingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConferencingTests.swift; sourceTree = "<group>"; };
 		6633BA5D283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseOverAndSelectionMessageHandlerTests.swift; sourceTree = "<group>"; };
 		6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebContextMenu.swift; sourceTree = "<group>"; };
 		6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextMenuMessageHandler.swift; sourceTree = "<group>"; };
@@ -2201,6 +2211,8 @@
 		66C9179F28B38E4F007B4636 /* MarkdownImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownImporter.swift; sourceTree = "<group>"; };
 		66D77CA028351612004D03E9 /* NSMenu+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMenu+Beam.swift"; sourceTree = "<group>"; };
 		66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebKitManualDownloadProxy.swift; sourceTree = "<group>"; };
+		66F1A22F28D078C000DAAC79 /* VideoConferencingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConferencingView.swift; sourceTree = "<group>"; };
+		66F1A23628D079FB00DAAC79 /* VideoConferencingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConferencingModel.swift; sourceTree = "<group>"; };
 		66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseOverAndSelectionMessageHandler.swift; sourceTree = "<group>"; };
 		66F9AEA1283E215100C28EE3 /* MouseOverAndSelection_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = MouseOverAndSelection_prod.js; sourceTree = "<group>"; };
 		66F9AEA3283E215100C28EE3 /* MouseOverAndSelection.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelection.d.ts; sourceTree = "<group>"; };
@@ -4409,6 +4421,7 @@
 				6635D99E2853E8AD00F4B775 /* Result+Beam.swift */,
 				0553079C28902A0A0037BECE /* NSAlert+async.swift */,
 				6650C7BC2892C22700F3757B /* UniformTypeIdentifiers+Beam.swift */,
+				6615797328CB83CA00904C24 /* Combine+Beam.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -4620,6 +4633,7 @@
 		418172A625811A3A00317ED8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				6615796928CB828000904C24 /* VideoConferencing */,
 				9670B8F028500C2D00BEC4A0 /* Debug */,
 				8AEF14AF27F1D16C00A27C1B /* MediaPlayer */,
 				339D193026AED9B2006DE745 /* Authentication */,
@@ -5227,6 +5241,17 @@
 				56A5BD3625CCAFA400ED7C50 /* english.stopwords */,
 			);
 			path = Stopwords;
+			sourceTree = "<group>";
+		};
+		6615796928CB828000904C24 /* VideoConferencing */ = {
+			isa = PBXGroup;
+			children = (
+				66F1A23628D079FB00DAAC79 /* VideoConferencingModel.swift */,
+				6615796A28CB828000904C24 /* VideoConferencingPanel.swift */,
+				6615796B28CB828000904C24 /* VideoConferencingManager.swift */,
+				66F1A22F28D078C000DAAC79 /* VideoConferencingView.swift */,
+			);
+			path = VideoConferencing;
 			sourceTree = "<group>";
 		};
 		6635D95B2853E73A00F4B775 /* ContextMenu */ = {
@@ -6728,6 +6753,7 @@
 				3338064128510808002D1EB3 /* PinNoteTests.swift */,
 				666DE4E6289DA5C7008CB8E0 /* MarkdownExportTests.swift */,
 				669E244728BE1A5A002DEF82 /* MarkdownImportTests.swift */,
+				6615797528CBC1EA00904C24 /* VideoConferencingTests.swift */,
 			);
 			path = BeamTests;
 			sourceTree = "<group>";
@@ -9320,6 +9346,7 @@
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
 				A5208D80261D231B006193AF /* BeamColor+Contexts.swift in Sources */,
 				418171F12581107C00317ED8 /* UserSessionRequest.swift in Sources */,
+				6615797428CB83CA00904C24 /* Combine+Beam.swift in Sources */,
 				8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */,
 				A0689E6D25DE623D00B19CBB /* DeleteText.swift in Sources */,
 				A05123CA27708D88009B81CF /* MeetingCalendar.swift in Sources */,
@@ -9459,6 +9486,7 @@
 				879157372799EECF00AE1040 /* BrowserImporter.swift in Sources */,
 				75FD7B6F2707006400BEFBA7 /* BeamSchemeHandler.swift in Sources */,
 				418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */,
+				66F1A23728D079FB00DAAC79 /* VideoConferencingModel.swift in Sources */,
 				A52E73F72865B4E600D0E2AF /* LightBeamView.swift in Sources */,
 				37520B0B27EAA40000A1C20B /* ElementNodeDisplaySizeCache.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
@@ -9467,6 +9495,7 @@
 				96F2BF0F263B208500F02F16 /* Caret.swift in Sources */,
 				A5AD646327C53D27005FC3B1 /* TabContentIcon.swift in Sources */,
 				A5F47EBB26F8AEB2004B7CDE /* Tooltip.swift in Sources */,
+				66F1A23028D078C000DAAC79 /* VideoConferencingView.swift in Sources */,
 				87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */,
 				8784955F27C55E0200195C62 /* WebFrames.swift in Sources */,
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
@@ -9624,6 +9653,7 @@
 				A0FB59BF2809D074001A1850 /* SummaryEngine.swift in Sources */,
 				A0C7D11C283636A0002EDF4C /* BeamTableCellIconView.swift in Sources */,
 				9661A58B266A70DA00CB56B3 /* NodeProvider.swift in Sources */,
+				6615797228CB828100904C24 /* VideoConferencingManager.swift in Sources */,
 				872F658127F1C0EE005475B8 /* HostnameCanonicalizer.swift in Sources */,
 				37520B0D27EAA40000A1C20B /* MediaContentGeometry.swift in Sources */,
 				9661A589266A289200CB56B3 /* BlockReferenceNode.swift in Sources */,
@@ -9660,6 +9690,7 @@
 				961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */,
 				370794DA27D7AB0E00D2768B /* PDFContentDescription.swift in Sources */,
 				75BDCDAD26F339B1004BBC7E /* ErrorPageManager.swift in Sources */,
+				6615797128CB828100904C24 /* VideoConferencingPanel.swift in Sources */,
 				8A34EAE527C7BDD20063DAF6 /* WebKitNavigationHandler.swift in Sources */,
 				418172542581107C00317ED8 /* ToolbarContentView.swift in Sources */,
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
@@ -10027,6 +10058,7 @@
 				96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */,
 				8795070328B422AA00E23758 /* KeyEventHijackerTests.swift in Sources */,
 				9652A93526A6B27500F0590C /* FakeNoteGeneratorTests.swift in Sources */,
+				6615797628CBC1EA00904C24 /* VideoConferencingTests.swift in Sources */,
 				8A5EDB1A278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift in Sources */,
 				37B85B8C27A2C83B003871F9 /* BeamDownloadDocumentTests.swift in Sources */,
 				BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */,
