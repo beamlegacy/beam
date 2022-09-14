@@ -36,6 +36,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         case url
         case createNote
         case topDomain
+        case tab(tabId: UUID?)
         case mnemonic
         case action
         case tabGroup(group: TabGroup?)
@@ -54,7 +55,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
                 return "tool-go"
             case .tabGroup:
                 return "field-tabgroup"
-            case .topDomain, .url, .mnemonic:
+            case .topDomain, .url, .mnemonic, .tab:
                 return "field-web"
             }
         }
@@ -68,7 +69,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         /// lowest value priority means it's more important.
         private var priority: Int {
             switch self {
-            case .history:
+            case .history, .tab:
                 return 0
             case .url:
                 return 1
@@ -97,6 +98,13 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
                 return id
             }
             return nil
+        }
+
+        var isWebURLResult: Bool {
+            switch self {
+            case .history, .url, .topDomain, .mnemonic, .tab: return true
+            default: return false
+            }
         }
     }
 

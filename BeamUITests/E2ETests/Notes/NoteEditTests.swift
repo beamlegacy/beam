@@ -107,6 +107,7 @@ class NoteEditTests: BaseTest {
             uiMenu.loadUITestPage4()
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
+            webView.closeTab()
         }
         
         testrailId("C812")
@@ -119,8 +120,8 @@ class NoteEditTests: BaseTest {
         
         step("Then I'm redirected to the source page when clicking on the icon"){
             noteView.button(NoteViewLocators.Buttons.sourceButton.accessibilityIdentifier).hoverAndTapInTheMiddle()
-            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
-            let webPageURL = webView.getTabUrlAtIndex(index: 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
+            let webPageURL = webView.getTabUrlAtIndex(index: 0)
             XCTAssertTrue(webPageURL.hasSuffix("/UITests-4.html"), "Actual web page is \(webPageURL)")
         }
        

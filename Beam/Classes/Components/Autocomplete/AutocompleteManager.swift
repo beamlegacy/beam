@@ -159,15 +159,15 @@ class AutocompleteManager: ObservableObject {
         case .mnemonic: return true // a mnemonic is by definition something that can take over the result
         case .topDomain:
             return result.text.lowercased().starts(with: searchText.lowercased())
-        case .history, .url, .note, .tabGroup:
+        case .history, .url, .note, .tab, .tabGroup:
             return result.takeOverCandidate
         case .searchEngine:
             return result.takeOverCandidate && result.url != nil || // search engine result found in history 
             (autocompleteResults.count == 2 && !searchQuery.mayBeURL && result.text == searchQuery) // 1 search engine result + 1 create note
         case .createNote:
-            guard case .noteCreation = mode else { fallthrough }
+            guard case .noteCreation = mode else { return false }
             return true
-        default:
+        case .action:
             return false
         }
     }
