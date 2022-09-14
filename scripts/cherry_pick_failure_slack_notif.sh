@@ -8,7 +8,7 @@ GITLAB_API_URL="https://gitlab.com/api/v4"
 
 # Get title and id of cherry picked MR
 MR_TITLE=$(curl -sS -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/merge_requests" | \
-    jq '.[] | .title' | jq -sRr @uri)
+    jq '.[] | .title')
 ORIGINAL_MR_IID=$(curl -sS -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/merge_requests" | \
     jq '.[] | .iid')
 
@@ -26,7 +26,7 @@ function print_slack_summary() {
     slack_channel="$CHANNEL"
 
     # Create slack message body
-    slack_msg_body="MR ID: ${ORIGINAL_MR_IID}\nMR Title: ${MR_TITLE}\n"
+    slack_msg_body="Impacted MR: <https://gitlab.com/beamgroup/beam/-/merge_requests/${ORIGINAL_MR_IID}|${ORIGINAL_MR_IID} - ${MR_TITLE}>\n"
     
     cat <<-SLACK
             {
