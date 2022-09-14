@@ -273,11 +273,12 @@ struct OnboardingEmailConnectView: View {
                             finish(nextStep)
                         } syncCompletion: { result in
                             switch result {
-                            case .success:
-                                handleSyncCompletion(startTime: loadingStartTime)
+                            case .failure(let error):
+                                Logger.shared.logError("Run first Sync failed when trying to connect with Email: \(error)", category: .network)
                             default:
-                                Logger.shared.logError("Run first Sync failed when trying to connect with Email", category: .network)
+                                break
                             }
+                            handleSyncCompletion(startTime: loadingStartTime)
                         }
                     }
                 }
