@@ -28,6 +28,13 @@ enum BeamUniformTypeIdentifiers {
         return supportedConcreteTypes.contains(utType) || supportedSuperTypes.contains(where: { $0.isSupertype(of: utType) })
     }
 
+    /// Checks whether loading this URL within a web view might load additional local resources.
+    /// - Parameter url: the `URL` to check.
+    /// - Returns: `true` if `URL` is a file URL and if it might load additional local resources, `false` otherwise.
+    static func urlMayLoadLocalResources(_ url: URL) -> Bool {
+        return url.isFileURL && UTType(filenameExtension: url.pathExtension) == .html
+    }
+
 }
 
 extension BeamUniformTypeIdentifiers {
