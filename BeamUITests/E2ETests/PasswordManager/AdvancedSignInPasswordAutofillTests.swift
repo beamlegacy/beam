@@ -18,10 +18,9 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     let loginEscape = "signin.form@escape.co"
     let securedAutoCompletedPassword = "••••••••••"
 
-    override func setUpWithError() throws {
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp() {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
             .invoke(.clearPasswordsDB)
             .invoke(.populatePasswordsDB)
     }

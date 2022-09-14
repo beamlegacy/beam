@@ -17,7 +17,7 @@ class TabGroupManualTests: BaseTest {
     
     override func setUp() {
         step("Given I open multiple pages") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
+            super.setUp()
             uiMenu.invoke(.loadUITestPage1)
                 .invoke(.loadUITestPage2)
                 .invoke(.loadUITestPage3)

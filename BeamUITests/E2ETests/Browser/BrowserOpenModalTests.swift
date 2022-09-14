@@ -11,11 +11,9 @@ class BrowserOpenModalTests: BaseTest {
 
     let testPage = UITestPageBrowserWindow()
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp()  {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
     }
 
     func testOpenModalInNewWindowTHENNewTab() {

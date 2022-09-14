@@ -19,7 +19,6 @@ class TabGroupSharingFromNoteTests: BaseTest {
     func testShareTabGroupMenuNotLogged() throws {
         testrailId("C1171")
         step("Given I have a captured group in a note") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createTabGroupAndSwitchToWeb()
             captureGroupToNoteAndOpenNote()
         }
@@ -75,7 +74,6 @@ class TabGroupSharingFromNoteTests: BaseTest {
     func testShareTabGroupCopyUrlNotLogged() throws {
         testrailId("C1171, C1170")
         step("Given I have a captured group in a note") {
-            launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
             createTabGroupAndSwitchToWeb()
             captureGroupToNoteAndOpenNote()
         }

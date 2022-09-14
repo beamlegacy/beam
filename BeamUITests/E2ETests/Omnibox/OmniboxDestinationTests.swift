@@ -29,7 +29,7 @@ class OmniboxDestinationTests: BaseTest {
     
     func SKIPtestTodayNoteDisplayedByDefault() throws {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
-        let journalView = launchApp()
+        let journalView = JournalTestView()
         step("Given I clean the DB and create a note named: \(noteNameToBeCreated)"){
             createDestinationNote(journalView, noteNameToBeCreated)
         }
@@ -103,7 +103,7 @@ class OmniboxDestinationTests: BaseTest {
     
     func SKIPtestFocusDestinationNoteUsingShortcut() throws {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
-        let journalView = launchApp()
+        let journalView = JournalTestView()
         step("Given I clean the DB and create a note named: \(noteNameToBeCreated)"){
             createDestinationNote(journalView, noteNameToBeCreated)
         }

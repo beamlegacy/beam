@@ -10,12 +10,10 @@ import XCTest
 
 class PDFFilesBrowserViewTests: BaseTest {
     
-    override func setUpWithError() throws {
-        try super.setUpWithError()
+    override func setUp() {
         step("Given I start mock server") {
-            launchApp()
-            uiMenu.invoke(.destroyDB)
-                .invoke(.startMockHttpServer)
+            super.setUp()
+            uiMenu.invoke(.startMockHttpServer)
         }
     }
     

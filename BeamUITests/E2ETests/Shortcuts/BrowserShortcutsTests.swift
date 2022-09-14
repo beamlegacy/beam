@@ -12,11 +12,8 @@ class BrowserShortcutsTests: BaseTest {
     
     let omniboxView = OmniBoxTestView()
     let testPage = UITestPagePasswordManager()
-    var journalView: JournalTestView!
-    
-    override func setUp() {
-        journalView = launchApp(storeSessionWhenTerminated: true, preventSessionRestore: true)
-    }
+    let journalView = JournalTestView()
+
     
     func testWebTabsJumpOpenCloseReopen() {
         step ("Given I open a web page"){

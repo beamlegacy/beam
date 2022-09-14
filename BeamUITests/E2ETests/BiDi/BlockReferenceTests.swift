@@ -13,11 +13,11 @@ class BlockReferenceTests: BaseTest {
     let noteName1 = "Test1"
     let noteName2 = "Test2"
     var noteView = NoteTestView()
+    let journalView = JournalTestView()
     var noteForReference: String?
     
     func SKIPtestCreateBlockReference() throws {
         try XCTSkipIf(true, "Feature is temporary deprecated")
-        let journalView = launchApp()
 
         step("Given I create I create a block reference"){
             noteForReference = createBlockRefForTwoNotes(journalView, noteName1, noteName2)
@@ -32,7 +32,6 @@ class BlockReferenceTests: BaseTest {
     
     func SKIPtestLockUnlockBlockReference() throws {
         try XCTSkipIf(true, "Feature is temporary deprecated")
-        let journalView = launchApp()
         let textToAdd = " additional text"
         step("Given I create I create a block reference"){
             noteForReference = createBlockRefForTwoNotes(journalView, noteName1, noteName2)
@@ -61,7 +60,6 @@ class BlockReferenceTests: BaseTest {
     
     func SKIPtestViewBlockReferenceOrigin() throws {
         try XCTSkipIf(true, "Feature is temporary deprecated")
-        let journalView = launchApp()
         
         step("Given I create 2 notes"){
             createBlockRefForTwoNotes(journalView, noteName1, noteName2)
@@ -76,7 +74,6 @@ class BlockReferenceTests: BaseTest {
     
     func SKIPtestRemoveBlockReference() throws {
         try XCTSkipIf(true, "Feature is temporary deprecated")
-        let journalView = launchApp()
         
         step("Given I create 2 notes"){
             noteForReference = createBlockRefForTwoNotes(journalView, noteName1, noteName2)

@@ -13,12 +13,6 @@ class BrowserTabsPreferencesTests: BaseTest {
     let browserPref = BrowserPreferencesTestView()
     let omnibox = OmniBoxTestView()
     
-    override func setUpWithError() throws {
-        step ("GIVEN I launch app"){
-            launchApp()
-        }
-    }
-    
     private func openBrowserPrefs() {
         step ("GIVEN I open Browser preferences"){
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)

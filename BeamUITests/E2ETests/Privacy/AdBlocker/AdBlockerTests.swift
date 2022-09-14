@@ -17,8 +17,8 @@ class AdBlockerTests: BaseTest {
     let tabTitleOfAdBlocker = "Site is blocked by Beam"
     let privacyWindow = PrivacyPreferencesTestView()
 
-    override func setUpWithError() throws {
-        launchApp()
+    override func setUp() {
+        super.setUp()
         uiMenu.invoke(.destroyDB)
             .invoke(.startMockHttpServer)
     }

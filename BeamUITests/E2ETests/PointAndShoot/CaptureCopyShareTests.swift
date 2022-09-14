@@ -11,7 +11,7 @@ import XCTest
 class CaptureCopyShareTests: BaseTest {
     
     let pnsView = PnSTestView()
-    var journalView: JournalTestView!
+    let journalView = JournalTestView()
     let textToCapture = " capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime"
     
     private func switchToJournalAndPasteToFirstNode() {
@@ -27,12 +27,6 @@ class CaptureCopyShareTests: BaseTest {
             .clickOnExistence()
         if clickMenuItem {
             pnsView.menuItem(title).clickOnExistence()
-        }
-    }
-    
-    override func setUp() {
-        step ("GIVEN I launch the app") {
-            journalView = launchApp()
         }
     }
     

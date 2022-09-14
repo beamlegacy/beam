@@ -52,11 +52,6 @@ class BaseTest: XCTestCase {
         let password: String
         let pk: String
     }
-
-    override func tearDownWithError() throws {
-        super.tearDown()
-        terminateAppInstance()
-    }
     
     override func tearDown() {
         uiMenu.invoke(.deleteRemoteAccount)
@@ -67,8 +62,11 @@ class BaseTest: XCTestCase {
         }
         uiMenu.invoke(.deletePrivateKeys)
         self.clearPasteboard()
-        super.tearDown()
         terminateAppInstance()
+    }
+    
+    override func setUp() {
+        launchApp()
     }
     
     func waitUntilAppIsNotRunningFor(timeout: TimeInterval = TimeInterval(5)) -> Bool {
@@ -201,9 +199,9 @@ class BaseTest: XCTestCase {
     
     @discardableResult
     func signUpStagingWithRandomAccount() -> JournalTestView {
-        let journalView = launchApp()
-        journalView.waitForJournalViewToLoad()
         uiMenu.invoke(.signUpWithRandomTestAccount)
+        let journalView = JournalTestView()
+        journalView.waitForJournalViewToLoad()
         return journalView
     }
 

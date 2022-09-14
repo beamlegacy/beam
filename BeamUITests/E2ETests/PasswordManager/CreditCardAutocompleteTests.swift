@@ -16,10 +16,9 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     var passwordPreferencesView = PasswordPreferencesTestView()
     let view = "Payment"
         
-    override func setUpWithError() throws {
-        launchApp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+    override func setUp() {
+        super.setUp()
+        uiMenu.invoke(.startMockHttpServer)
             .invoke(.populateCreditCardsDB)
         
         step("Given I navigate to \(mockPage.getMockPageUrl(.paymentForm))") {

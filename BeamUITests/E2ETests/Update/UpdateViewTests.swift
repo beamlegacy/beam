@@ -10,11 +10,7 @@ import XCTest
 
 class UpdateViewTests: BaseTest {
 
-    var journalView: JournalTestView!
-
-    override func setUp() {
-        journalView = launchApp()
-    }
+    let journalView = JournalTestView()
     
     func testUpdateViewAppearance() {
         testrailId("C696")
