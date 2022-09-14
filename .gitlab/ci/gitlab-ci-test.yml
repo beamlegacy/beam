@@ -58,7 +58,6 @@ xctests:
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
-    - pwd
     - time bundle exec fastlane tests
   after_script:
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
