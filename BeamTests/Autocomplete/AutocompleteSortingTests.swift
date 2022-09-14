@@ -17,11 +17,15 @@ class AutocompleteSortingTests: XCTestCase {
     }
 
     private func arLink(_ text: String, info: String? = nil, completing: String? = nil, score: Float? = nil) -> AutocompleteResult {
-        .init(text: text, source: .history, information: info, completingText: completing, score: score, urlFields: .text)
+        .init(text: text, source: .history, url: URL(string: text), information: info, completingText: completing, score: score, urlFields: .text)
     }
 
     private func arNote(_ text: String, completing: String? = nil, score: Float? = nil) -> AutocompleteResult {
         .init(text: text, source: .note, completingText: completing, score: score)
+    }
+
+    private func arTab(_ text: String, url: String? = nil, completing: String? = nil, tabId: UUID? = nil) -> AutocompleteResult {
+        .init(text: text, source: .tab(tabId: tabId ?? UUID()), url: URL(string: url ?? ""), information: url, completingText: completing, urlFields: .info)
     }
 
     // MARK: - Notes merging
@@ -237,9 +241,34 @@ class AutocompleteSortingTests: XCTestCase {
         ]
 
         let result = sut.insertSearchEngineResults(searchEngineResults, in: base)
-        let expected = Array(base[0..<3] + searchEngineResults[0..<2] + searchEngineResults[3..<5] + base[3..<4])
+        let expectedBeforeSearchEngine = base[0..<3]
+        let expectedAfterSearchEngine = base[3..<4]
+        let expectedSearchEngineResults = searchEngineResults[0..<2] + searchEngineResults[3..<5]
+        let expected = Array(expectedBeforeSearchEngine + expectedSearchEngineResults + expectedAfterSearchEngine)
         XCTAssertEqual(result.count, 8)
         XCTAssertEqual(result, expected)
+    }
+
+    func testURLResultsMixedWithOpenedTabs() {
+        let searchText = "red"
+        let tabsIds = [UUID(), UUID(), UUID()]
+        let base: [AutocompleteManager.AutocompletePublisherSourceResults] = [
+            .init(source: .history, results: [
+                arLink("redpanda.com", info: "Red pandas are the best", completing: searchText, score: 1.0),
+                arLink("redalert.com", info: "the movie red alert", completing: searchText, score: 1.0),
+                arLink("redonegame.com", info: "the game red one", completing: searchText, score: 1.0)
+            ]),
+            .init(source: .tab(tabId: nil), results: [
+                arTab("Red pandas are the best", url: "redpanda.com", completing: searchText, tabId: tabsIds[0]),
+                arTab("the movie red alert", url: "http://redalert.com/", completing: searchText, tabId: tabsIds[1]),
+                arTab("some other tab", url: "some.com", completing: searchText, tabId: tabsIds[2])
+            ])
+        ]
+        let results = sut.mergeAndSortPublishersResults(publishersResults: base, for: searchText)
+        let resultsTitles = results.results.map { $0.text }
+        let resultsSources = results.results.map { $0.source }
+        XCTAssertEqual(resultsTitles, ["redpanda.com", "redalert.com", "redonegame.com", "some other tab"])
+        XCTAssertEqual(resultsSources, [.tab(tabId: tabsIds[0]), .tab(tabId: tabsIds[1]), .history, .tab(tabId: tabsIds[2])])
     }
 
     // More Tests TBD https://linear.app/beamapp/issue/BE-3548/more-omnibox-unit-tests

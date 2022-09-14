@@ -393,6 +393,12 @@ import Sentry
         updateCanGoBackForward()
     }
 
+    func navigateToTab(_ tabId: BrowserTab.TabID) {
+        guard let tab = browserTabsManager.tabs.first(where: { $0.id == tabId }) else { return }
+        browserTabsManager.setCurrentTab(tab)
+        mode = .web
+    }
+
     func navigateCurrentTab(toURLRequest request: URLRequest) {
         guard let currentTab = currentTab else {
             Logger.shared.logError("Unable to navigate current tab without any tab", category: .general); return
@@ -580,9 +586,11 @@ import Sentry
         return try BeamNote.fetchOrCreate(self, title: query)
     }
 
-    func handleOpenUrl(_ url: URL, note: BeamNote?, element: BeamElement?, inBackground: Bool) {
+    func handleOpenURLFromNote(_ url: URL, note: BeamNote?, element: BeamElement?, inBackground: Bool) {
         if URL.browserSchemes.contains(url.scheme) {
-            if let note = note, let element = element {
+            if !inBackground, let existingTab = browserTabsManager.openedTab(for: url, allowPinnedTabs: false) {
+                navigateToTab(existingTab.id)
+            } else if let note = note, let element = element {
                 createTabFromNote(note, element: element, withURLRequest: URLRequest(url: url), setCurrent: !inBackground)
             } else {
                 _ = createTab(withURLRequest: URLRequest(url: url), originalQuery: nil, setCurrent: !inBackground)
@@ -652,7 +660,13 @@ import Sentry
                 mode = .web
             }
 
-        case .history, .url, .topDomain, .mnemonic:
+        case .tab(let tabId) where modifierFlags?.contains(.command) != true:
+            guard let tabId = tabId, let window = AppDelegate.main.windowContainingTab(tabId) else { return }
+            stopFocusOmnibox()
+            window.state.navigateToTab(tabId)
+            window.makeKeyAndOrderFront(nil)
+
+        case .history, .url, .topDomain, .mnemonic, .tab:
             let urlWithScheme = result.url?.urlWithScheme
             let (urlFromText, _) = urlFor(query: result.text)
             guard let url = urlWithScheme ?? urlFromText else {
