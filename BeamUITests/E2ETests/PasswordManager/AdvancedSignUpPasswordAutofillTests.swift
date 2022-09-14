@@ -27,9 +27,9 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
 
     override func setUpWithError() throws {
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
-            .populatePasswordsDB()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
+            .invoke(.populatePasswordsDB)
     }
 
     private func verifyPwManagerNotDisplayedDropdown(field: String, data: String) {

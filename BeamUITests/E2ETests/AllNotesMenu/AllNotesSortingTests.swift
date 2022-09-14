@@ -47,7 +47,7 @@ class AllNotesSortingTests: BaseTest {
         
         step("GIVEN I setup staging environment and open All cards") {
             signUpStagingWithRandomAccount()
-            uiMenu.create10RandomNotes()
+            uiMenu.invoke(.create10Notes)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()
         }

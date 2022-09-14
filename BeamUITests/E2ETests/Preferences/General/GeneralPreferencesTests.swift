@@ -29,7 +29,7 @@ class GeneralPreferencesTests: BaseTest {
         testrailId("C586")
         
         step("THEN by default Journal view is opened on restart") {
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             journalView.waitForJournalViewToLoad()
             self.restartApp(storeSessionWhenTerminated: true)

@@ -46,8 +46,8 @@ class AccountPreferencesTests: BaseTest {
     func testDeleteDB() {
         testrailId("C624")
         step ("GIVEN I add some notes and open Account preferences") {
-            uiMenu.resizeSquare1000()
-            uiMenu.create10RandomNotes()
+            uiMenu.invoke(.resizeSquare1000)
+                .invoke(.create10Notes)
             self.openAccountPrefs()
             accountView = AccountTestView()
             XCTAssertTrue(accountView.staticText(AccountViewLocators.StaticTexts.deleteDBLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))

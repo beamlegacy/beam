@@ -25,7 +25,7 @@ class NoteEditTests: BaseTest {
         let numberOfLetterToBeDeleted = 4
                                                 
         step("Given I create and open a note"){
-            uiMenu.createAndOpenNote()
+            uiMenu.invoke(.createAndOpenNote)
             noteView.waitForNoteViewToLoad()
         }
         
@@ -54,8 +54,8 @@ class NoteEditTests: BaseTest {
         let expectedErrorMessage = "This note’s title already exists in your knowledge base"
         
         step("Given I create and open a note"){
-            uiMenu.createNote()
-            uiMenu.createAndOpenNote()
+            uiMenu.invoke(.createNote)
+            uiMenu.invoke(.createAndOpenNote)
             noteView.waitForNoteViewToLoad()
         }
         
@@ -75,7 +75,7 @@ class NoteEditTests: BaseTest {
         let noteNameToBeCreated = "Test1"
         
         step("Given I create and open \(noteNameToBeCreated) note"){
-            uiMenu.createAndOpenNote()
+            uiMenu.invoke(.createAndOpenNote)
         }
         
         step("When I try to delete \(noteNameToBeCreated) and cancel it"){
@@ -104,7 +104,7 @@ class NoteEditTests: BaseTest {
         let pnsView = PnSTestView()
         
         step("When I add image to a note"){
-            uiMenu.loadUITestPage4()
+            uiMenu.invoke(.loadUITestPage4)
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
         }
@@ -131,7 +131,7 @@ class NoteEditTests: BaseTest {
         let pnsView = PnSTestView()
 
         step("When I add image to a note"){
-            uiMenu.loadUITestPage4()
+            uiMenu.invoke(.loadUITestPage4)
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToTodayNote(imageItemToAdd)
         }
@@ -150,7 +150,7 @@ class NoteEditTests: BaseTest {
         step("GIVEN I populate today's note with the rows") {
             noteView = launchApp()
                 .createNoteViaOmniboxSearch("Bullets") //https://linear.app/beamapp/issue/BE-4443/allow-typing-in-texteditor-of-the-note-created-via-uitest-menu
-            uiMenu.insertTextInCurrentNote()
+            uiMenu.invoke(.insertTextInCurrentNote)
             waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5, elementQuery: noteView.getNoteNodesElementQuery())
             nodesBeforeChange = noteView.getNoteTextsForVisiblePart()
         }

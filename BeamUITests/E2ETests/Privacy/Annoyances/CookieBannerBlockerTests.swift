@@ -21,8 +21,8 @@ class CookieBannerBlockerTests: BaseTest {
 
     override func setUpWithError() throws {
         launchApp()
-        uiMenu.destroyDB()
-            .startMockHTTPServer()
+        uiMenu.invoke(.destroyDB)
+            .invoke(.startMockHttpServer)
         shortcutHelper.shortcutActionInvoke(action: .openPreferences)
         PreferencesBaseView().navigateTo(preferenceView: .privacy)
     }

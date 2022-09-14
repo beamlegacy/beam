@@ -96,9 +96,9 @@ class BlockReferenceTests: BaseTest {
     
     @discardableResult
     func createBlockRefForTwoNotes(_ view: JournalTestView, _ noteName1: String, _ noteName2: String) -> String {
-        uiMenu.createNote()
+        uiMenu.invoke(.createNote)
         view.createNoteViaOmniboxSearch(noteName2)
-        uiMenu.insertTextInCurrentNote()
+        uiMenu.invoke(.insertTextInCurrentNote)
         
         let noteForReference = noteView.getNoteNodesForVisiblePart()[1].getStringValue()
         let referencePart = (noteForReference.substring(from: 0, to: 6))

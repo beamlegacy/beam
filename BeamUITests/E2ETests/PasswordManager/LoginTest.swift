@@ -22,7 +22,7 @@ class LoginTest: BaseTest {
         launchApp()
         email = self.getRandomEmail()
         password = self.getRandomPassword()
-        uiMenu.loadUITestPagePassword()
+        uiMenu.invoke(.loadUITestPagePassword)
         testPage.enterInput(password, .password) //password first to avoid Other Passwords cover over the Submit button
         testPage.enterInput(email, .username)
         // close Other Passwords if it still covers Submit button
@@ -44,7 +44,7 @@ class LoginTest: BaseTest {
         }
 
         step ("AND it is saved in password preferences"){
-            uiMenu.disablePasswordAndCardsProtection()
+            uiMenu.invoke(.disablePasswordProtect)
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(testURL))

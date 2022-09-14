@@ -171,8 +171,8 @@ class OmniboxAutocompleteTests: BaseTest {
     
         step("GIVEN I populate browser history with mocked data") {
             uiMenu
-                .omniboxEnableSearchInHistoryContent()
-                .omniboxFillHistory()
+                .invoke(.omniboxEnableSearchInHistoryContent)
+                .invoke(.omniboxFillHistory)
         }
 
         step("When I type: \(partiallyTypedSearchText)"){
@@ -232,7 +232,7 @@ class OmniboxAutocompleteTests: BaseTest {
         step("Then search field value is updated accordingly and there is 1 selected result"){
             XCTAssertTrue(waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
-            uiMenu.omniboxDisableSearchInHistoryContent()
+            uiMenu.invoke(.omniboxDisableSearchInHistoryContent)
         }
     }
 
@@ -243,7 +243,7 @@ class OmniboxAutocompleteTests: BaseTest {
         let expectedURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: expectedSearchFieldText)
         
         step("GIVEN I populate browser history with mocked data") {
-            uiMenu.omniboxFillHistory()
+            uiMenu.invoke(.omniboxFillHistory)
         }
 
         step("When I type: \(partiallyTypedSearchText)"){
@@ -265,8 +265,8 @@ class OmniboxAutocompleteTests: BaseTest {
     
         step("GIVEN I populate browser history with mocked data") {
             uiMenu
-                .omniboxDisableSearchInHistoryContent()
-                .omniboxFillHistory()
+                .invoke(.omniboxDisableSearchInHistoryContent)
+                .invoke(.omniboxFillHistory)
         }
 
         step("When I type: \(partiallyTypedSearchText)"){
@@ -310,7 +310,7 @@ class OmniboxAutocompleteTests: BaseTest {
 
         step("Then search field value is \(partiallyTypedSearchText)"){
             XCTAssertTrue(waitForStringValueEqual(partiallyTypedSearchText, omniboxView.getOmniBoxSearchField()))
-            uiMenu.omniboxDisableSearchInHistoryContent()
+            uiMenu.invoke(.omniboxDisableSearchInHistoryContent)
         }
     }
     

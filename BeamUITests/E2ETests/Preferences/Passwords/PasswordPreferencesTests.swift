@@ -24,10 +24,10 @@ class PasswordPreferencesTests: BaseTest {
         step ("GIVEN I open password preferences"){
             launchApp()
             if isPasswordProtectionDisabled {
-                uiMenu.disablePasswordAndCardsProtection()
+                uiMenu.invoke(.disablePasswordProtect)
             }
             if doPopulatePasswordsDB {
-                uiMenu.populatePasswordsDB()
+                uiMenu.invoke(.populatePasswordsDB)
             }
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
@@ -294,7 +294,7 @@ class PasswordPreferencesTests: BaseTest {
         
         step ("WHEN I go to Password Manager Test page"){
             shortcutHelper.shortcutActionInvoke(action: .close)
-            uiMenu.loadUITestPagePassword()
+            uiMenu.invoke(.loadUITestPagePassword)
             testPage.clickInputField(.username)
         }
         
@@ -304,7 +304,7 @@ class PasswordPreferencesTests: BaseTest {
         }
 
         step ("WHEN I deactivate Autofill password setting"){
-            uiMenu.disablePasswordAndCardsProtection()
+            uiMenu.invoke(.disablePasswordProtect)
             shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             if (passwordPreferencesView.getUnlockButtonElement().exists) {
             passwordPreferencesView.getUnlockButtonElement().hoverAndTapInTheMiddle()
@@ -318,7 +318,7 @@ class PasswordPreferencesTests: BaseTest {
         }
 
         step ("AND Autofill is not proposed anymore"){
-            uiMenu.loadUITestPagePassword()
+            uiMenu.invoke(.loadUITestPagePassword)
             testPage.clickInputField(.username)
             XCTAssertFalse(passwordManagerHelper.getKeyIconElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)

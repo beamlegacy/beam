@@ -44,10 +44,10 @@ class BrowserTabsPreferencesTests: BaseTest {
         let expectedCheckboxTitle = "Use ⌘1 to ⌘9 to switch tabs"
         
         step("WHEN I open multiple tabs") {
-            uiMenu.loadUITestPage1()
-            uiMenu.loadUITestPage2()
-            uiMenu.loadUITestPage3()
-            uiMenu.loadUITestPage4()
+            uiMenu.invoke(.loadUITestPage1)
+                .invoke(.loadUITestPage2)
+                .invoke(.loadUITestPage3)
+                .invoke(.loadUITestPage4)
             webView.waitForWebViewToLoad()
             webView.getTabByIndex(index: 1).tapInTheMiddle()
         }
@@ -86,8 +86,8 @@ class BrowserTabsPreferencesTests: BaseTest {
         let tabGroupMenu = TabGroupMenuView()
         
         step("WHEN I open multiple time the same tab") {
-            uiMenu.loadUITestPage1()
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
+                .invoke(.loadUITestPage1)
             webView.waitForWebViewToLoad()
         }
         
@@ -107,8 +107,8 @@ class BrowserTabsPreferencesTests: BaseTest {
         }
         
         step("WHEN I open multiple time the same tab") {
-            uiMenu.loadUITestPage1()
-            uiMenu.loadUITestPage1()
+            uiMenu.invoke(.loadUITestPage1)
+                .invoke(.loadUITestPage1)
             webView.waitForWebViewToLoad()
         }
         
