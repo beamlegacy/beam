@@ -9,16 +9,20 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        guard fullSyncRunning.compareExchange(expected: false, desired: true, ordering: .acquiringAndReleasing).exchanged else {
+        let alreadyRunning = lock { () -> Bool in
+            if fullSyncRunning { return true }
+            fullSyncRunning = true
+            return false
+        }
+
+        guard !alreadyRunning else {
             throw BeamObjectManagerError.fullSyncAlreadyRunning
         }
 
         do {
             defer {
                 disableSendingObjects = false
-                fullSyncRunning.store(false, ordering: .releasing)
             }
-
             disableSendingObjects = true
 
             synchronizationStatus = .downloading(0)
@@ -44,9 +48,33 @@ extension BeamObjectManager {
                                    category: .sync,
                                    localTimer: localTimer)
 
+            // Save all changed objects.
+            while true {
+                for (_, manager) in managerInstances {
+                    do {
+                        try await manager.saveChangedObjects()
+                    } catch {
+                        Logger.shared.logError("syncAllFromAPI: error while saving changed objects for \(type(of: manager)). \(error)",
+                                               category: .sync,
+                                               localTimer: localTimer)
+                    }
+                }
+                let done = lock { () -> Bool in
+                    if managerInstances.values.allSatisfy({ $0.isChangedObjectsEmpty() }) {
+                        fullSyncRunning = false
+                        return true
+                    }
+                    return false
+                }
+                if done {
+                    break
+                }
+            }
+
             synchronizationStatus = .finished
         } catch {
             synchronizationStatus = .failure(error)
+            lock { fullSyncRunning = false }
             throw error
         }
     }
