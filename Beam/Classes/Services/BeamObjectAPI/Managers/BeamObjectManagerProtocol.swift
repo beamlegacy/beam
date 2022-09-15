@@ -9,6 +9,9 @@ protocol BeamObjectManagerDelegateProtocol {
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
     // it will call this method
     func saveAllOnBeamObjectApi(force: Bool, progress: ((Float) -> Void)?) async throws -> (Int, Date?)
+
+    func saveChangedObjects() async throws
+    func isChangedObjectsEmpty() -> Bool
 }
 
 protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
