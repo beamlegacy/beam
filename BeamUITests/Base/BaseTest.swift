@@ -113,6 +113,7 @@ class BaseTest: XCTestCase {
         args.append(uiTestModeLaunchArgument)
         app.launchArguments = args
         app.launch()
+        hiddenCommand.resizeAndCenterAppForE2ETests()
         return JournalTestView()
     }
     
