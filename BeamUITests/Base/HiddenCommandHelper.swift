@@ -31,6 +31,12 @@ class HiddenCommandHelper {
         beeper.beep(identifier: UITestsHiddenMenuAvailableCommands.deleteAllNotes.rawValue)
         return NoteTestView()
     }
+    
+    @discardableResult
+    func resizeAndCenterAppForE2ETests() -> JournalTestView {
+        beeper.beep(identifier: UITestsHiddenMenuAvailableCommands.resizeAndCenterAppE2E.rawValue)
+        return JournalTestView()
+    }
 }
 
 class HiddenNotificationHelper {

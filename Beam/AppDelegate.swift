@@ -121,9 +121,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #if DEBUG
         if areE2ETestsRunning {
             Configuration.setAPIEndPointsToStaging()
-            // Define a specific size for e2e tests
-            resizeWindow(width: 1500, height: 1500)
-            window?.center()
             // add onboarding notes and clear daily summary
             OnboardingNoteCreator().createOnboardingNotes(data: BeamData.shared)
             KeychainDailyNoteScoreStore.shared.clear()

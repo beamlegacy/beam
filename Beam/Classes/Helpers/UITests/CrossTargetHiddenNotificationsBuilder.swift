@@ -70,6 +70,8 @@ class CrossTargetHiddenNotificationsBuilder {
                 openNote(journalDate: BeamDate.now)
             case .deleteAllNotes:
                 deleteAllNotes()
+            case .resizeAndCenterAppE2E:
+                resizeAndCenterAppForE2ETests()
             default: break
             }
             return
@@ -96,6 +98,11 @@ class CrossTargetHiddenNotificationsBuilder {
         guard let collection = data?.currentDocumentCollection else { return }
         let cmdManager = CommandManagerAsync<BeamDocumentCollection>()
         cmdManager.deleteAllDocuments(in: collection)
+    }
+    
+    private func resizeAndCenterAppForE2ETests() {
+        AppDelegate.main.resizeWindow(width: 1500, height: 1000)
+        AppDelegate.main.window?.center()
     }
 
 }

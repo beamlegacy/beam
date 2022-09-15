@@ -111,6 +111,7 @@ class AdBlockerTests: BaseTest {
         }
         
         step("When I allow the website permanently") {
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             webView = adBlockerPage.allowWebSitePermanently()
         }
         
