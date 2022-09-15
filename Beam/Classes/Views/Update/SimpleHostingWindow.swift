@@ -32,7 +32,7 @@ class SimpleHostingPanel: NSPanel {
     }
 
     func setView<Content>(content: Content) where Content: View {
-        self.contentView = NSHostingView(rootView: content)
+        self.contentView = BeamHostingView(rootView: content)
     }
 }
 

@@ -110,6 +110,14 @@ class BeamWebView: WKWebView {
         }
     }
 
+    override func viewWillMove(toWindow newWindow: NSWindow?) {
+        super.viewWillMove(toWindow: newWindow)
+
+        if newWindow is VideoConferencingPanel {
+            setTopContentInset(.zero)
+        }
+    }
+
     override func updateLayer() {
         layer?.backgroundColor = BeamColor.Generic.background.cgColor
     }

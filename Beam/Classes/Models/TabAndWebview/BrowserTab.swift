@@ -470,6 +470,10 @@ import BeamCore
         webView.uiDelegate = nil
     }
 
+    func removeFromWindow() {
+        state?.browserTabsManager.removeTab(tabId: id)
+    }
+
     private func encodeStringTo64(fromString: String) -> String? {
         let plainData = fromString.data(using: .utf8)
         return plainData?.base64EncodedString(options: [])
