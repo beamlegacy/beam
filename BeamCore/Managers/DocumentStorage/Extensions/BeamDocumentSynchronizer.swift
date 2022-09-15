@@ -470,6 +470,10 @@ extension BeamDocumentSynchronizer {
                 }
                 try await saveOnBeamObjectAPI(updatedDocument)
                 Logger.shared.logInfo("\(document.id) saved on server", category: .sync)
+            } catch APIRequestError.notAuthenticated {
+                Logger.shared.logInfo("Could not save on server \(document): notAuthenticated", category: .sync)
+            } catch APIRequestError.networkUnavailable {
+                Logger.shared.logInfo("Could not save on server \(document): networkUnavailable", category: .sync)
             } catch {
                 Logger.shared.logError("Failed to save on server \(document): \(error)", category: .sync)
             }
