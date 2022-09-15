@@ -158,6 +158,7 @@ public enum UITestsHiddenMenuAvailableCommands: String, CaseIterable {
     case openTodayNote
     case openNotePrefix = "OpenNote-"
     case deleteAllNotes
+    case resizeAndCenterAppE2E
 
     static func openNoteIdentifier(title: String) -> String {
         UITestsHiddenMenuAvailableCommands.openNotePrefix.rawValue + title

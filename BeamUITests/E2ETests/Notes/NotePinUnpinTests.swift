@@ -16,7 +16,7 @@ class NotePinUnpinTests: BaseTest {
     
     func testPinUnpinTest() {
         
-        launchAppAndOpenTodayNote()
+        openTodayNote()
 
         testrailId("C756")
         step("Given I pin a note") {
@@ -64,7 +64,7 @@ class NotePinUnpinTests: BaseTest {
     
     func testShortcutPinNote() {
         
-        launchAppAndOpenTodayNote()
+        openTodayNote()
         
         testrailId("C505")
         step("Given I pin a note with shortcut") {

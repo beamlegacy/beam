@@ -11,12 +11,12 @@ import XCTest
 class AdBlockerTestView: BaseView {
     
     func allowWebSiteOnce() -> WebTestView {
-        button(AdBlockerViewLocators.Buttons.justThisTimeButton.accessibilityIdentifier).clickOnExistence()
+        button(AdBlockerViewLocators.Buttons.justThisTimeButton.accessibilityIdentifier).clickOnHittable()
         return WebTestView()
     }
     
     func allowWebSitePermanently() -> WebTestView {
-        button(AdBlockerViewLocators.Buttons.permanentlyButton.accessibilityIdentifier).clickOnExistence()
+        button(AdBlockerViewLocators.Buttons.permanentlyButton.accessibilityIdentifier).clickOnHittable()
         return WebTestView()
     }
     
