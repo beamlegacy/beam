@@ -54,6 +54,7 @@ extension NSMenu {
     /// - Parameters:
     ///   - title: A string to be made the title of the menu item.
     ///   - keyEquivalent: A string identifying the key to use as a key equivalent for the menu item.
+    ///   - enabled: boolean indicating if the element is enabled, `true` by default.
     ///   - handler: The closure that will be executed when this item is selected.
     /// - Returns: The created menu item.
     @discardableResult
