@@ -12,7 +12,12 @@ import WebKit
 public struct WebView: View, NSViewRepresentable {
     /// The WKWebView to display
     let webView: WKWebView
-    let topContentInset: CGFloat? = nil
+    let topContentInset: CGFloat?
+
+    init(webView: WKWebView, topContentInset: CGFloat? = nil) {
+        self.webView = webView
+        self.topContentInset = topContentInset
+    }
 
     public typealias NSViewType = NSViewContainerView<WKWebView>
 
