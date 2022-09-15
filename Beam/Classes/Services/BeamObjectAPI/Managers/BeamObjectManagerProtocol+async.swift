@@ -16,14 +16,7 @@ extension BeamObjectManagerDelegate {
         var savedCount = 0
         var objects: [BeamObjectType] = []
 
-        let objectsToSaveWithoutChangedObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
-        objectsToSaveWithoutChangedObjects.forEach {
-            changedObjects[$0.beamObjectId] = $0
-        }
-
-        let objectsToSave = changedObjects.values
-
-        changedObjects.removeAll()
+        let objectsToSave = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
 
         var chunk = objectsToSave.count / 100
         let min = 1000
@@ -221,11 +214,15 @@ extension BeamObjectManagerDelegate {
         Logger.shared.logDebug("saveOnBeamObjectAPI called. Object \(object.beamObjectId), type: \(type(of: object).beamObjectType)",
                                category: .beamObjectNetwork)
 
-        let fullSyncRunning = objectManager.fullSyncRunning.load(ordering: .acquiring)
-        if fullSyncRunning {
-            addChangedObject(object)
-            return
+        let fullSyncRunning = objectManager.lock { () -> Bool in
+            if objectManager.fullSyncRunning {
+                addChangedObject(object)
+                return true
+            }
+            return false
         }
+
+        guard !fullSyncRunning else { return }
 
         try await objectQueue.addOperation(for: [object]) { _ in
             do {
@@ -320,6 +317,23 @@ extension BeamObjectManagerDelegate {
         return goodObjects + newObjectsSaved
     }
 
+    func saveChangedObjects() async throws {
+        let objects = objectManager.lock { () -> [BeamObjectType] in
+            let objects = Array(changedObjects.values)
+            changedObjects = [:]
+            return objects
+        }
+        if !objects.isEmpty {
+            try await saveOnBeamObjectsAPI(objects)
+        }
+    }
+
+    /// Must be called while holding the object manager lock.
+    func isChangedObjectsEmpty() -> Bool {
+        return changedObjects.isEmpty
+    }
+
+    /// Must be called while holding the object manager lock.
     internal func addChangedObject(_ object: BeamObjectType) {
         changedObjects[object.beamObjectId] = object
     }
