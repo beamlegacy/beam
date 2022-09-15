@@ -68,7 +68,9 @@ public final class BeamObjectManager {
     var translators: [BeamObjectObjectType: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
     var uploadTypeForTests: BeamObjectRequestUploadType?
     var disableSendingObjects = true
-    var fullSyncRunning = ManagedAtomic<Bool>(false)
+
+    let lock = NSLock()
+    var fullSyncRunning = false
 
     var synchronizationStatusSubject = CurrentValueSubject<BeamObjectObjectSynchronizationStatus, Never>(.notStarted)
     var synchronizationStatus: BeamObjectObjectSynchronizationStatus {
