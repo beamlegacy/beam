@@ -182,7 +182,7 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
         guard let db = db, let record = browsingTree.toRecord(appSessionId: appSessionId) else { return }
         try db.save(browsingTreeRecord: record)
         if AuthenticationManager.shared.isAuthenticated,
-            Configuration.networkEnabled,
+            NetworkMonitor.isNetworkAvailable,
             Configuration.browsingTreeApiSyncEnabled {
             try self.saveOnNetwork(record)
         }
