@@ -186,7 +186,7 @@ final class VideoConferencingViewModel: NSObject, ObservableObject {
     }
 
     func shrink() {
-        guard isExpanded, let panel = detailsClient.webView.window as? VideoConferencingPanel, panel.sheets.isEmpty
+        guard isExpanded, let panel = detailsClient.webView.window as? VideoConferencingPanel, panel.sheets.isEmpty, !panel.isFullscreen
         else { return }
         panel.shrink {
             self.detailsClient.webView.pageZoom = 0.5

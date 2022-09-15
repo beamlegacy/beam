@@ -14,15 +14,22 @@ final class VideoConferencingPanel: SimpleClearHostingPanel {
 
     let viewModel: VideoConferencingViewModel
 
+    private(set) var isFullscreen: Bool = false
+
     private var titleCancellable: AnyCancellable?
     private var eventMonitor: Any?
     private var isExplicitlyBeingDragged: Bool = false
     private var isProbablyBeingDragged: Bool = false
 
+    private var isUserInteractionEnabled: Bool {
+        get { (contentView as! BeamHostingView<VideoConferencingView>).userInteractionEnabled }
+        set { (contentView as! BeamHostingView<VideoConferencingView>).userInteractionEnabled = newValue }
+    }
+
     init(viewModel: VideoConferencingViewModel, webView: BeamWebView) {
         self.viewModel = viewModel
 
-        let mask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView]
+        let mask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView, .nonactivatingPanel]
         super.init(rect: .zero, styleMask: mask)
 
         self.setFrame(.init(origin: .zero, size: viewModel.isExpanded ? Self.panelIdealSize : Self.panelMinSize), display: false)
@@ -76,7 +83,10 @@ final class VideoConferencingPanel: SimpleClearHostingPanel {
     override func performDrag(with event: NSEvent) {
         super.performDrag(with: event)
 
-        frameToRestore.origin = frame.origin
+        var originShifted = frame.origin
+        originShifted.x -= Self.panelMinSize.width / 2
+        originShifted.y -= Self.panelMinSize.height / 2
+        frameToRestore.origin = originShifted
     }
 }
 
@@ -91,10 +101,20 @@ extension VideoConferencingPanel: NSWindowDelegate {
         }
         isProbablyBeingDragged = false
     }
+
+    func windowDidEnterFullScreen(_ notification: Notification) {
+        isFullscreen = true
+    }
+
+    func windowDidExitFullScreen(_ notification: Notification) {
+        isFullscreen = false
+    }
 }
 
 extension VideoConferencingPanel {
     func shrink(animateAlongBlock: (() -> Void)? = nil) {
+        isUserInteractionEnabled = false
+
         frameToRestore = frame
 
         var newFrame = frame
@@ -112,6 +132,8 @@ extension VideoConferencingPanel {
     }
 
     func expand(animateAlongBlock: (() -> Void)? = nil) {
+        isUserInteractionEnabled = true
+
         NSAnimationContext.current.timingFunction = .beamWindowCurve
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.300

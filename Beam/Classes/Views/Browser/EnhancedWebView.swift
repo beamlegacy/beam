@@ -129,10 +129,16 @@ struct WebViewContainer: View, NSViewRepresentable {
 
     func updateNSView(_ nsView: NSViewContainerView<ContentView>, context: Context) {
         #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
-        if let webView = contentView.contentView, webView.supportsTopContentInset, !webView._isInFullscreen {
+        if let webView = contentView.contentView, webView.supportsTopContentInset, !webView._isInFullscreen, !webView.isDetached {
             webView.setTopContentInset(topContentInset)
         }
         #endif
         nsView.contentView = contentView
+    }
+}
+
+private extension BeamWebView {
+    var isDetached: Bool {
+        return window is VideoConferencingPanel
     }
 }

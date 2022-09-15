@@ -31,7 +31,7 @@ struct VideoConferencingView: View {
                     .transition(.opacity)
             }
 
-            WebView(webView: webView)
+            WebView(webView: webView, topContentInset: .zero)
                 .cornerRadius(cornerRadius)
                 .frame(
                     minWidth: Self.webViewMinFrame.width,
