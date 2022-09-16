@@ -10,6 +10,7 @@ enum APIRequestError: Error {
     case parserError
     case deviceNotFound
     case notAuthenticated
+    case networkUnavailable
     case beamObjectInvalidChecksum(Errorable)
     case apiError([String])
     case apiErrors(Errorable)
@@ -36,6 +37,8 @@ extension APIRequestError: LocalizedError {
             return loc("error.api.internalServerError")
         case .notAuthenticated:
             return loc("error.api.notAuthenticated")
+        case .networkUnavailable:
+            return loc("error.api.networkUnavailable")
         case .apiError(let explanations):
             return explanations.joined(separator: ", ")
         case .duplicateTitle:

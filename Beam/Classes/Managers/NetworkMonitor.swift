@@ -19,6 +19,11 @@ public enum NetworkReachabilityStatus: Equatable {
 }
 
 final class NetworkMonitor: NetworkReachabilityProvider {
+    static var isNetworkReachable = false
+    static var isNetworkAvailable: Bool {
+        return isNetworkReachable && Configuration.networkEnabled
+    }
+
     public var networkStatusHandler: AnyPublisher<NetworkReachabilityStatus, Never> {
         reachabilityNotifier.eraseToAnyPublisher()
     }
@@ -62,7 +67,7 @@ final class NetworkMonitor: NetworkReachabilityProvider {
             guard let self = self else { return }
 
             switch path.status {
-            case .satisfied:
+            case .satisfied, .requiresConnection:
                 if let url = URL(string: "https://1.1.1.1") {
                     var request = URLRequest(url: url)
                     request.httpMethod = "HEAD"
@@ -80,22 +85,26 @@ final class NetworkMonitor: NetworkReachabilityProvider {
                                 Logger.shared.logInfo("Outside world reachable", category: .network)
                             case .failure(let error):
                                 Logger.shared.logWarning("Outside world not reachable: \(error)", category: .network)
+                                Self.isNetworkReachable = false
                                 self.reachabilityNotifier.send(.notReachable)
                             }
                         }, receiveValue: { response in
                             guard let httpResponse = response as? HTTPURLResponse,
                                   httpResponse.statusCode == 200 else {
+                                Self.isNetworkReachable = false
                                 self.reachabilityNotifier.send(.notReachable)
                                 return
                             }
+                            Self.isNetworkReachable = true
                             self.reachabilityNotifier.send(.reachable)
                         }).store(in: &self.cancellable)
 
                 }
-            case .unsatisfied,
-                    .requiresConnection:
+            case .unsatisfied:
+                Self.isNetworkReachable = false
                 self.reachabilityNotifier.send(.notReachable)
             @unknown default:
+                Self.isNetworkReachable = false
                 self.reachabilityNotifier.send(.notReachable)
             }
         }
