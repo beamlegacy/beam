@@ -309,7 +309,7 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
+        guard AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable else { return }
 
         Logger.shared.logDebug("Will save links \(links) on the BeamObject API",
                                category: .linkNetwork)
@@ -331,7 +331,7 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ link: Link, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
+        guard AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable else { return }
 
         Logger.shared.logDebug("Will save link \(link.url) [\(link.id)] on the BeamObject API",
                                category: .linkNetwork)

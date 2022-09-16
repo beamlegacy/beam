@@ -3,6 +3,7 @@ import Foundation
 enum BeamObjectManagerError: Error {
     case parsingError(String)
     case notAuthenticated
+    case networkUnavailable
     case multipleErrors([Error])
     case invalidChecksum(BeamObject)
     case decodingError(BeamObject)
@@ -24,6 +25,8 @@ extension BeamObjectManagerError: LocalizedError {
             return message
         case .notAuthenticated:
             return "Not Authenticated"
+        case .networkUnavailable:
+            return "Network Unavailable"
         case .multipleErrors(let errors):
             return "Multiple errors: \(errors)"
         case .invalidChecksum(let object):

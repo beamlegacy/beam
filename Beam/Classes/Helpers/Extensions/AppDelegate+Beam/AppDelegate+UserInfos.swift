@@ -14,7 +14,7 @@ extension AppDelegate {
 
         guard !testsAreRunning,
               AuthenticationManager.shared.isAuthenticated,
-              Configuration.networkEnabled else {
+              NetworkMonitor.isNetworkAvailable else {
                   completionHandler?(.success(false))
                   return
               }
@@ -30,7 +30,7 @@ extension AppDelegate {
 
         guard !testsAreRunning,
               AuthenticationManager.shared.isAuthenticated,
-              Configuration.networkEnabled else {
+              NetworkMonitor.isNetworkAvailable else {
                   return false
               }
         try await AppData.shared.currentAccount?.getUserInfosAsync()

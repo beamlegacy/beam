@@ -413,7 +413,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     func syncDataWithBeamObject(force: Bool = false, showAlert: Bool = true) async throws -> Bool {
         guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
-              Configuration.networkEnabled else {
+              NetworkMonitor.isNetworkAvailable else {
             return false
         }
 
