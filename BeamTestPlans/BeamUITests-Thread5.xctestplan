@@ -120,6 +120,7 @@
         "LinksTests\/testExpandCollapseNoteLink()",
         "LinksTests\/testNoteLinkDeletion()",
         "OmniboxDestinationTests",
+        "OmniboxGoToTab",
         "OmniboxViewTests",
         "OnboardingTests",
         "OneFieldAutofillTests",

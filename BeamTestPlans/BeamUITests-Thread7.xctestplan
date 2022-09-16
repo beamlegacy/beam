@@ -154,6 +154,7 @@
         "OmniboxAutocompleteTests\/testAutoCompleteUrlOmniboxDisappear()",
         "OmniboxAutocompleteTests\/testAutocompleteLeftRightArrowBehavior()",
         "OmniboxDestinationTests",
+        "OmniboxGoToTab",
         "OmniboxViewTests",
         "OnboardingTests",
         "OneFieldAutofillTests",

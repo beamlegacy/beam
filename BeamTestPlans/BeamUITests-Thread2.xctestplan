@@ -129,6 +129,7 @@
         "OmniboxAutocompleteTests\/testAutoCompleteUrlOmniboxDisappear()",
         "OmniboxAutocompleteTests\/testAutocompleteLeftRightArrowBehavior()",
         "OmniboxDestinationTests",
+        "OmniboxGoToTab",
         "OmniboxViewTests",
         "OmniboxViewTests\/testOmniBoxSearchField()",
         "OmniboxViewTests\/testOmniboxCreateNoteMode()",
