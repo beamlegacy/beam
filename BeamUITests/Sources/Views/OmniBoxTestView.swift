@@ -133,6 +133,16 @@ class OmniBoxTestView: BaseView {
     }
     
     @discardableResult
+    func isAutocompleteResultContainGoToTabIcon(autocompleteResult: String) -> Bool {
+        return getAutocompleteResults().matching(NSPredicate(format: "value == '\(autocompleteResult)' and identifier CONTAINS'-tab'")).firstMatch.exists
+    }
+    
+    @discardableResult
+    func isAutocompleteResultContainHistoryIcon(autocompleteResult: String) -> Bool {
+        return getAutocompleteResults().matching(NSPredicate(format: "value == '\(autocompleteResult)' and identifier CONTAINS'-history'")).firstMatch.exists
+    }
+    
+    @discardableResult
     func isTabGroupResultDisplayed(tabGroupName: String) -> Bool {
         return getAutocompleteResults().matching(NSPredicate(format: "label == 'tabGroup' && value == '\(tabGroupName)'")).firstMatch.exists
     }
