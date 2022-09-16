@@ -71,6 +71,7 @@
         "NotesPreferencesTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
+        "OmniboxGoToTab",
         "OmniboxViewTests",
         "OnboardingTests",
         "OneFieldAutofillTests",

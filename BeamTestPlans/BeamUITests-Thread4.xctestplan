@@ -127,6 +127,7 @@
         "NotesPreferencesTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
+        "OmniboxGoToTab",
         "OmniboxViewTests",
         "OmniboxViewTests\/testOmniBoxDoesNotBounce()",
         "OmniboxViewTests\/testOmniBoxSearchField()",
