@@ -265,7 +265,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
             try f.insert(db)
             Self.fileSaved.send(f)
         }
-        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+        if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
             try self.saveOnNetwork(file)
         }
         return uid
@@ -281,7 +281,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                 }
             }
 
-            if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+            if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
                 try self.saveAllOnNetwork(files)
             }
         } catch let error {
@@ -357,7 +357,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                             file.deletedAt = BeamDate.now
                             file.updatedAt = BeamDate.now
                             try file.save(db)
-                            if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+                            if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
                                 try self.saveOnNetwork(file)
                             }
                         }
@@ -406,7 +406,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                         file.deletedAt = BeamDate.now
                         file.updatedAt = BeamDate.now
                         try file.save(db)
-                        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+                        if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
                             try self.saveOnNetwork(file)
                         }
 
@@ -419,7 +419,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                         file.deletedAt = nil
                         file.updatedAt = BeamDate.now
                         try file.save(db)
-                        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+                        if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
                             try self.saveOnNetwork(file)
                         }
                     } catch {

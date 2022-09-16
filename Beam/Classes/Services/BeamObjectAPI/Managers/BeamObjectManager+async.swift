@@ -5,8 +5,11 @@ import Atomics
 extension BeamObjectManager {
     @MainActor
     func syncAllFromAPI(force: Bool = false, delete: Bool = true, prepareBeforeSaveAll: (() -> Void)? = nil) async throws {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         let alreadyRunning = lock { () -> Bool in
@@ -81,8 +84,11 @@ extension BeamObjectManager {
 
     @discardableResult
     func saveAllToAPI(force: Bool = false) async throws -> Int {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         var errors: [Error] = []
@@ -177,8 +183,11 @@ extension BeamObjectManager {
     // checksum locally, and therefor must be fetched from the API. This allows for a faster fetch since most of the time
     // we might already have those object locally if they had been sent and updated from the same device
     func fetchAllByChecksumsFromAPI(force: Bool = false) async throws {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         let beamRequest = BeamObjectRequest()
@@ -257,8 +266,11 @@ extension BeamObjectManager {
 
     /// Will fetch all updates from the API and call each managers based on object's type
     func fetchAllFromAPI() async throws {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         let lastReceivedAt: Date? = Persistence.Sync.BeamObjects.last_received_at
@@ -329,8 +341,11 @@ extension BeamObjectManager {
                                                  force: Bool = false,
                                                  maxChunk: Int = 1000,
                                                  conflictPolicy: BeamObjectConflictResolution) async throws -> [T] {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         guard !objects.isEmpty else {
@@ -479,8 +494,11 @@ extension BeamObjectManager {
                                                           force: Bool = false,
                                                           conflictPolicy: BeamObjectConflictResolution) async throws -> [T] {
 
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         guard !objects.isEmpty else {
@@ -791,8 +809,11 @@ extension BeamObjectManager {
     func saveToAPIClassic<T: BeamObjectProtocol>(_ object: T,
                                                  force: Bool = false,
                                                  conflictPolicy: BeamObjectConflictResolution) async throws -> T {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         let localTimer = Date()
@@ -825,8 +846,11 @@ extension BeamObjectManager {
     func saveToAPIWithDirectUpload<T: BeamObjectProtocol>(_ object: T,
                                                           force: Bool = false,
                                                           conflictPolicy: BeamObjectConflictResolution) async throws -> T {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         let localTimer = Date()
@@ -967,8 +991,11 @@ extension BeamObjectManager {
     func saveToAPI(_ beamObjects: [BeamObject],
                    deep: Int = 0,
                    conflictPolicy: BeamObjectConflictResolution) async throws -> [BeamObject] {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         guard deep < 3 else {
@@ -1077,8 +1104,11 @@ extension BeamObjectManager {
         guard !disableSendingObjects else {
             throw BeamObjectManagerError.sendingObjectsDisabled
         }
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         guard deep < 3 else {
@@ -1257,8 +1287,11 @@ extension BeamObjectManager {
 
     @discardableResult
     func delete<T: BeamObjectProtocol>(object: T, raise404: Bool = false) async throws -> BeamObject? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         let request = BeamObjectRequest()
@@ -1268,8 +1301,11 @@ extension BeamObjectManager {
 
     @discardableResult
     func delete(beamObject: BeamObject, raise404: Bool = false) async throws -> BeamObject? {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         try BeamObjectChecksum.deletePreviousChecksum(beamObject: beamObject)
@@ -1280,8 +1316,11 @@ extension BeamObjectManager {
 
     @discardableResult
     func deleteAll(_ beamObjectType: BeamObjectObjectType? = nil) async throws -> Bool {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+        guard AuthenticationManager.shared.isAuthenticated else {
             throw BeamObjectManagerError.notAuthenticated
+        }
+        guard NetworkMonitor.isNetworkAvailable else {
+            throw BeamObjectManagerError.networkUnavailable
         }
 
         let request = BeamObjectRequest()

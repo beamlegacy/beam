@@ -213,7 +213,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         try db.saveFrecencyNote(recordToSave)
 
         if AuthenticationManager.shared.isAuthenticated &&
-            Configuration.networkEnabled {
+            NetworkMonitor.isNetworkAvailable {
 
             Self.apiSaveLimiter.add(record: recordToSave)
 
@@ -235,7 +235,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         let recordsToSave = scores.map { createOrUpdate(record: recordsToUpdate[$0.id], score: $0, paramKey: paramKey) }
         try db.save(noteFrecencies: recordsToSave)
 
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
+        guard AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable else { return }
         try saveAllOnNetwork(recordsToSave)
     }
 

@@ -127,6 +127,9 @@ class APIWebSocketRequest: APIRequest {
             Logger.shared.logError("websocket variable is nil", category: .webSocket)
             return
         }
+        guard NetworkMonitor.isNetworkAvailable else {
+            return
+        }
 
         #if DEBUG_API_1
         Logger.shared.logDebug("Sending ping", category: .webSocket)
@@ -285,6 +288,12 @@ class APIWebSocketRequest: APIRequest {
 
     /// Requirement for parsing data received from the API
     private func receive_messages() {
+        guard NetworkMonitor.isNetworkAvailable else {
+            Logger.shared.logInfo("Network unavailable, disconnecting...", category: .webSocket)
+            self.enforceDisconnect(callDisconnectHandler: true)
+            return
+        }
+
         webSocketTask?.receive { [weak self] result in
             guard let self = self else { return }
 

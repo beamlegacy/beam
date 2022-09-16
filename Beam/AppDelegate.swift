@@ -65,7 +65,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     static let defaultWindowSize = CGSize(width: 1024, height: 768)
 
     private let networkMonitor = NetworkMonitor()
-    @Published public private(set) var isNetworkReachable: Bool = false
 
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
@@ -196,9 +195,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             .sink { [weak self] status in
             switch status {
             case .unknown, .notReachable:
-                self?.isNetworkReachable = false
+                break
             case .reachable:
-                self?.isNetworkReachable = true
                 Task { @MainActor [weak self] in
                     await self?.checkPrivateKey()
                     self?.window?.state.reloadOfflineTabs()
