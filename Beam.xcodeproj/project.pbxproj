@@ -1426,6 +1426,7 @@
 		D75AA9D028B4C59F00E495D9 /* TabGroupSharingFromNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75AA9CF28B4C59F00E495D9 /* TabGroupSharingFromNoteTests.swift */; };
 		D75EEB402844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */; };
 		D75EEB4F2845F8B000994C17 /* InsideAdsBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */; };
+		D76A1AA728D364CE000F5405 /* OmniboxGoToTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76A1AA628D364CE000F5405 /* OmniboxGoToTab.swift */; };
 		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
 		D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */; };
 		D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */; };
@@ -3403,6 +3404,7 @@
 		D75AA9CF28B4C59F00E495D9 /* TabGroupSharingFromNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupSharingFromNoteTests.swift; sourceTree = "<group>"; };
 		D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedCreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
 		D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsideAdsBlockerTests.swift; sourceTree = "<group>"; };
+		D76A1AA628D364CE000F5405 /* OmniboxGoToTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxGoToTab.swift; sourceTree = "<group>"; };
 		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
 		D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
@@ -7701,6 +7703,7 @@
 				B55B4E3E26C108B900604850 /* OmniboxViewTests.swift */,
 				B5EB9A6926C25FB8004C798A /* OmniboxDestinationTests.swift */,
 				B5EB9A7726C2A887004C798A /* OmniboxAutocompleteTests.swift */,
+				D76A1AA628D364CE000F5405 /* OmniboxGoToTab.swift */,
 			);
 			path = Omnibox;
 			sourceTree = "<group>";
@@ -10098,6 +10101,7 @@
 				D7251BC2288ED72900CD5D64 /* TabGroupDragTabTests.swift in Sources */,
 				A3AF8CF22888926800FB6310 /* NotesPreferencesTestView.swift in Sources */,
 				B5A76EB927FB3E1100964340 /* OnboardingSignupWithEmailViewLocators.swift in Sources */,
+				D76A1AA728D364CE000F5405 /* OmniboxGoToTab.swift in Sources */,
 				B5FB3A2227E8D30C00037FD5 /* OnboardingImportDataTestView.swift in Sources */,
 				A3D2898B280864DD00FA0D3A /* OnboardingLostPKTestView.swift in Sources */,
 				D7858BCF283BC4E000D0336A /* AutoFillCCViewLocators.swift in Sources */,
