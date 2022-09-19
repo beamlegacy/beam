@@ -1436,7 +1436,7 @@
 		D77A5A912878688500652727 /* RightClickTextMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A902878688500652727 /* RightClickTextMenuTests.swift */; };
 		D77A5A9C287C55C800652727 /* RightClickPageMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5A9B287C55C800652727 /* RightClickPageMenuTests.swift */; };
 		D77A5AAD287EB43B00652727 /* TabGroupNameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5AAC287EB43B00652727 /* TabGroupNameTests.swift */; };
-		D77A5AAF287EB48400652727 /* TabGroupMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5AAE287EB48400652727 /* TabGroupMenuView.swift */; };
+		D77A5AAF287EB48400652727 /* TabGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5AAE287EB48400652727 /* TabGroupView.swift */; };
 		D77A5AB1287EBF6100652727 /* TabGroupMenuViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77A5AB0287EBF6100652727 /* TabGroupMenuViewLocators.swift */; };
 		D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D77D4792282273940006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
@@ -3415,7 +3415,7 @@
 		D77A5A902878688500652727 /* RightClickTextMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickTextMenuTests.swift; sourceTree = "<group>"; };
 		D77A5A9B287C55C800652727 /* RightClickPageMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightClickPageMenuTests.swift; sourceTree = "<group>"; };
 		D77A5AAC287EB43B00652727 /* TabGroupNameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupNameTests.swift; sourceTree = "<group>"; };
-		D77A5AAE287EB48400652727 /* TabGroupMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupMenuView.swift; sourceTree = "<group>"; };
+		D77A5AAE287EB48400652727 /* TabGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupView.swift; sourceTree = "<group>"; };
 		D77A5AB0287EBF6100652727 /* TabGroupMenuViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupMenuViewLocators.swift; sourceTree = "<group>"; };
 		D77D4788282269640006847A /* CrossTargetBeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetBeeper.swift; sourceTree = "<group>"; };
 		D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPinnedTabTests.swift; sourceTree = "<group>"; };
@@ -7849,7 +7849,7 @@
 				A5EB6EAE26FDFC55001442E7 /* ContextMenuTestView.swift */,
 				D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */,
 				D77A5A7928770F0D00652727 /* RightClickMenuTestView.swift */,
-				D77A5AAE287EB48400652727 /* TabGroupMenuView.swift */,
+				D77A5AAE287EB48400652727 /* TabGroupView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -10136,7 +10136,7 @@
 				B5F845E326F8CCA700B15209 /* LinksTests.swift in Sources */,
 				D7858BD1283BDAB500D0336A /* CreditCardSaveTests.swift in Sources */,
 				B52744CD270B03730045805F /* SearchOnNoteTests.swift in Sources */,
-				D77A5AAF287EB48400652727 /* TabGroupMenuView.swift in Sources */,
+				D77A5AAF287EB48400652727 /* TabGroupView.swift in Sources */,
 				B507CB34275F8CB800DFF11A /* SlashMenuTests.swift in Sources */,
 				B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */,
 				D77A5A8428780F2100652727 /* RightClickLinkMenuTests.swift in Sources */,

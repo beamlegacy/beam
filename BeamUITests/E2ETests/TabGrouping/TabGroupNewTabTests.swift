@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupNewTabTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     
     override func setUp() {
         step("Given I have a tab group") {
@@ -22,15 +22,15 @@ class TabGroupNewTabTests: BaseTest {
     func testTabGroupNewTab() throws {
         testrailId("C982")
         step("When I add a tab to the group") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupNewTab)
+            tabGroupView.clickTabGroupMenu(.tabGroupNewTab)
         }
         
         step("Then Tab Group contains one more tab") {
             XCTAssertEqual(webView.getNumberOfTabs(), 5)
-            tabGroupMenu.collapseTabGroup(index: 0)
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "5")
+            tabGroupView.collapseTabGroup(index: 0)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), "5")
             XCTAssertEqual(webView.getNumberOfTabs(), 0)
         }
     }
@@ -38,23 +38,23 @@ class TabGroupNewTabTests: BaseTest {
     func testTabGroupNewTabWhenCollapsed() throws {
         testrailId("C982")
         step("When I collapse tab group") {
-            tabGroupMenu.collapseTabGroup(index: 0)
+            tabGroupView.collapseTabGroup(index: 0)
         }
         
         step("Then Tab Group name contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "4")
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), "4")
         }
         
         step("When I add a tab to the group") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupNewTab)
+            tabGroupView.clickTabGroupMenu(.tabGroupNewTab)
         }
         
         step("Then Tab Group contains one more tab") {
             XCTAssertEqual(webView.getNumberOfTabs(), 1)
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "5")
-            tabGroupMenu.expandTabGroup(index: 0)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), "5")
+            tabGroupView.expandTabGroup(index: 0)
             XCTAssertEqual(webView.getNumberOfTabs(), 5)
         }
     }

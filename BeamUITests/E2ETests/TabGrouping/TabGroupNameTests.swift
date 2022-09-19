@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupNameTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     let tabGroupName = "Tab Group Name"
     let tabGroupNameSpecialChars = "+-.,!@#$%^&*();\\/|<>\"\'"
     let expectedTabGroupName = "4"
@@ -25,75 +25,75 @@ class TabGroupNameTests: BaseTest {
     func testTabGroupName() throws {
         testrailId("C979")
         step("When I open Tab Group Menu") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
         }
         
         step("Then Tab Group Menu is displayed") {
-            XCTAssertTrue(tabGroupMenu.waitForMenuToBeDisplayed())
+            XCTAssertTrue(tabGroupView.waitForMenuToBeDisplayed())
         }
         
         step("When I set a tab group name") {
-            tabGroupMenu.setTabGroupName(tabGroupName: tabGroupName)
+            tabGroupView.setTabGroupName(tabGroupName: tabGroupName)
         }
         
         step("Then tab group name is set") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), tabGroupName)
         }
         
         step("When I delete tab group name") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.deleteTabGroupName()
+            tabGroupView.deleteTabGroupName()
         }
         
         step("Then tab group name is unset") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), emptyString)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), emptyString)
         }
     }
     
     func testTabGroupNameCollapsed() throws {
         testrailId("C985")
         step("When I collapse tab group") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupCollapse)
+            tabGroupView.clickTabGroupMenu(.tabGroupCollapse)
         }
         
         step("Then Tab Group name contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), expectedTabGroupName)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), expectedTabGroupName)
         }
         
         step("When I set a tab group name") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.setTabGroupName(tabGroupName: tabGroupName)
+            tabGroupView.setTabGroupName(tabGroupName: tabGroupName)
         }
         
         step("Then tab group name is set and contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (\(expectedTabGroupName))")
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), tabGroupName + " (\(expectedTabGroupName))")
         }
         
         step("When I delete tab group name") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.deleteTabGroupName()
+            tabGroupView.deleteTabGroupName()
         }
 
         step("Then tab group name is unset but we still see tab group number") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), expectedTabGroupName)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), expectedTabGroupName)
         }
     }
     
     func testTabGroupNameSpecialChar() throws {
         testrailId("C979")
         step("When I set a tab group name with special chars") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.setTabGroupName(tabGroupName: tabGroupNameSpecialChars)
+            tabGroupView.setTabGroupName(tabGroupName: tabGroupNameSpecialChars)
         }
         
         step("Then tab group name is set") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupNameSpecialChars)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), tabGroupNameSpecialChars)
         }
     }
 
@@ -104,22 +104,22 @@ class TabGroupNameTests: BaseTest {
         }
 
         step("Then the tab group is restored") {
-            XCTAssertTrue(tabGroupMenu.getTabGroupElementIndex(index: 0).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(tabGroupView.getTabGroupElementIndex(index: 0).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
         step("When I collapse tab group, set a tab group name and restart the app") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupCollapse)
+            tabGroupView.clickTabGroupMenu(.tabGroupCollapse)
                 .openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.setTabGroupName(tabGroupName: tabGroupName)
+            tabGroupView.setTabGroupName(tabGroupName: tabGroupName)
 
             restartApp(storeSessionWhenTerminated: true)
         }
 
         step("Then tab group name is set and contains the number of tabs") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupName + " (\(expectedTabGroupName))")
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), tabGroupName + " (\(expectedTabGroupName))")
         }
     }
 }

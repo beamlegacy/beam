@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupCloseTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     var journalTestView = JournalTestView()
     
     override func setUp() {
@@ -24,15 +24,15 @@ class TabGroupCloseTests: BaseTest {
     func testTabGroupClose() {
         testrailId("C987")
         step("When I open Tab Group Menu") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
         }
         
         step("Then Tab Group Menu is displayed") {
-            XCTAssertTrue(tabGroupMenu.waitForMenuToBeDisplayed())
+            XCTAssertTrue(tabGroupView.waitForMenuToBeDisplayed())
         }
         
         step("When I close the tab group") {
-            tabGroupMenu.clickTabGroupMenu(.tabGroupCloseGroup)
+            tabGroupView.clickTabGroupMenu(.tabGroupCloseGroup)
         }
         
         step("Then tab group is closed") {
