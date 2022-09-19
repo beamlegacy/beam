@@ -242,6 +242,10 @@ class BaseTest: XCTestCase {
         return app.windows.element(boundBy: index).groups.matching(WebTestView().getAnyTabPredicate()).count
     }
     
+    func getNumberOfTabGroupInWindowIndex(index: Int) -> Int {
+        return app.windows.element(boundBy: index).groups.matching(TabGroupView().getAnyTabGroupPredicate()).count
+    }
+    
     func clearPasteboard() {
         NSPasteboard.general.clearContents()
         let pboard = NSPasteboard(name: .find)
@@ -250,10 +254,10 @@ class BaseTest: XCTestCase {
     }
 
     func captureGroupToNoteAndOpenNote() {
-        let tabGroupMenu = TabGroupMenuView()
+        let tabGroupView = TabGroupView()
         
-        tabGroupMenu.captureTabGroup(index: 0)
-        tabGroupMenu.closeTabGroup(index: 0)
+        tabGroupView.captureTabGroup(index: 0)
+        tabGroupView.closeTabGroup(index: 0)
         openTodayNote()
     }
 
@@ -281,7 +285,7 @@ class BaseTest: XCTestCase {
         }
         shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         webView.waitForWebViewToLoad()
-        TabGroupMenuView().waitForTabGroupToBeDisplayed(index: 0)
+        TabGroupView().waitForTabGroupToBeDisplayed(index: 0)
     }
     
     func typeAndEditHardcodedText (_ view: BaseView) -> String {

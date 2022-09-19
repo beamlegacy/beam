@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupSharingFromBrowserTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     let dialogView = DialogTestView()
     let tabGroupNameSharing = "Sharing..."
     
@@ -18,7 +18,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
         step("Given I open Share Tab Group Menu being logged in") {
             signUpStagingWithRandomAccount()
             createTabGroupAndSwitchToWeb()
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .clickTabGroupMenu(.tabGroupShareGroup)
         }
     }
@@ -26,7 +26,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
     private func createTabGroupWithoutBeingLogged(){
         step("Given I open Share Tab Group Menu without being logged in") {
             createTabGroupAndSwitchToWeb()
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .clickTabGroupMenu(.tabGroupShareGroup)
         }
     }
@@ -36,7 +36,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
         createTabGroupWithoutBeingLogged()
         
         step("When I Share Tab Group without being logged in") {
-            tabGroupMenu.shareTabGroupAction("Twitter")
+            tabGroupView.shareTabGroupAction("Twitter")
         }
         
         step("Then I get the connect alert message") {
@@ -49,7 +49,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
         createTabGroupOnStaging()
         
         step("Then Share Tab Group Menu is displayed") {
-            XCTAssertTrue(tabGroupMenu.isShareTabMenuDisplayed())
+            XCTAssertTrue(tabGroupView.isShareTabMenuDisplayed())
             webView.typeKeyboardKey(.escape) // close tab group menu
         }
         
@@ -58,7 +58,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
         for windowTitle in windows {
             if windowTitle != windows[2] { //To be removed as part of BE-5195
                 step ("And \(windowTitle) window is opened using Share option") {
-                    _ = tabGroupMenu.openTabGroupMenu(index: 0)
+                    _ = tabGroupView.openTabGroupMenu(index: 0)
                         .clickTabGroupMenu(.tabGroupShareGroup)
                         .shareTabGroupAction(windowTitle)
                         .waitForWebViewToLoad()
@@ -79,7 +79,7 @@ class TabGroupSharingFromBrowserTests: BaseTest {
         
         step("When I copy link of tab to share tab group without being logged in") {
             clearPasteboard() // clear content of pasteboard
-            tabGroupMenu.shareTabGroupAction(copyLinkShareAction)
+            tabGroupView.shareTabGroupAction(copyLinkShareAction)
         }
         
         step("Then I get the connect alert message") {
@@ -97,14 +97,14 @@ class TabGroupSharingFromBrowserTests: BaseTest {
         
         step("When I copy link of tab to share tab group") {
             clearPasteboard() // clear content of pasteboard
-            tabGroupMenu.shareTabGroupAction(copyLinkShareAction)
+            tabGroupView.shareTabGroupAction(copyLinkShareAction)
         }
         
         step("Then tab group link is copied to pasteboard") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), tabGroupNameSharing)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), tabGroupNameSharing)
             XCTAssertTrue(webView.staticText(TabGroupMenuViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
             XCTAssertEqual(getNumberOfPasteboardItem(), 1)
-            XCTAssertTrue(tabGroupMenu.isTabGroupLinkInPasteboard())
+            XCTAssertTrue(tabGroupView.isTabGroupLinkInPasteboard())
         }
     }
 
