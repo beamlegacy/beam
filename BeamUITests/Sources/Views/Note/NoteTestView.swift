@@ -548,11 +548,11 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func openTabGroupMenu(index: Int) -> TabGroupMenuView {
+    func openTabGroupMenu(index: Int) -> TabGroupView {
         _ = getTabGroupElementIndex(index: index).waitForExistence(timeout: implicitWaitTimeout)
         getTabGroupElementIndex(index: index).children(matching: .staticText).firstMatch.hoverInTheMiddle()
         getTabGroupElementIndex(index: index).rightClickInTheMiddle()
-        return TabGroupMenuView()
+        return TabGroupView()
     }
     
     func getTabGroupNameOfWindow(index: Int) -> String {

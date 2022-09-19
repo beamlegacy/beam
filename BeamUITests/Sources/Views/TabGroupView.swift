@@ -8,9 +8,13 @@
 import Foundation
 import XCTest
 
-class TabGroupMenuView: BaseView {
+class TabGroupView: BaseView {
     
     private let anyTabGroupPredicate = NSPredicate(format: "identifier BEGINSWITH '\(TabGroupMenuViewLocators.TabGroups.tabGroupPrefix.accessibilityIdentifier)'")
+    
+    func getAnyTabGroupPredicate() -> NSPredicate {
+        return anyTabGroupPredicate
+    }
     
     func getTabGroupElementIndex(index: Int) -> XCUIElement {
         return app.windows.groups.matching(anyTabGroupPredicate).element(boundBy: index)
@@ -30,13 +34,13 @@ class TabGroupMenuView: BaseView {
     }
     
     @discardableResult
-    func openTabGroupMenu(index: Int) -> TabGroupMenuView {
+    func openTabGroupMenu(index: Int) -> TabGroupView {
         getTabGroupElementIndex(index: index).rightClickInTheMiddle()
         return self
     }
     
     @discardableResult
-    func openTabGroupMenuWithName(tabGroupName: String) -> TabGroupMenuView {
+    func openTabGroupMenuWithName(tabGroupName: String) -> TabGroupView {
         getTabGroupWithName(tabGroupName: tabGroupName).rightClickInTheMiddle()
         return self
     }
@@ -57,7 +61,7 @@ class TabGroupMenuView: BaseView {
     }
     
     @discardableResult
-    func setTabGroupName(tabGroupName: String) -> TabGroupMenuView {
+    func setTabGroupName(tabGroupName: String) -> TabGroupView {
         let tabGroupNameElement = textField(TabGroupMenuViewLocators.MenuItems.tabGroupName.accessibilityIdentifier)
         tabGroupNameElement.clickOnExistence()
         tabGroupNameElement.typeText(tabGroupName)
@@ -67,7 +71,7 @@ class TabGroupMenuView: BaseView {
     }
     
     @discardableResult
-    func deleteTabGroupName() -> TabGroupMenuView {
+    func deleteTabGroupName() -> TabGroupView {
         textField(TabGroupMenuViewLocators.MenuItems.tabGroupName.accessibilityIdentifier).clickOnExistence()
         shortcutHelper.shortcutActionInvoke(action: .selectAll)
         self.typeKeyboardKey(.delete)
@@ -76,7 +80,7 @@ class TabGroupMenuView: BaseView {
     }
     
     @discardableResult
-    func renameExistingTabGroupName(tabGroupName: String) -> TabGroupMenuView {
+    func renameExistingTabGroupName(tabGroupName: String) -> TabGroupView {
         let tabGroupNameElement = textField(TabGroupMenuViewLocators.MenuItems.tabGroupName.accessibilityIdentifier).clickOnExistence()
         tabGroupNameElement.clickOnExistence()
         shortcutHelper.shortcutActionInvoke(action: .selectAll)
@@ -87,18 +91,18 @@ class TabGroupMenuView: BaseView {
     }
     
     @discardableResult
-    func getTabGroupName() -> String {
-        return staticText(TabGroupMenuViewLocators.MenuItems.tabGroupCapsuleName.accessibilityIdentifier).getStringValue()
+    func getTabGroupNameByIndex(index: Int) -> String {
+        return getTabGroupElementIndex(index: index).staticTexts[TabGroupMenuViewLocators.MenuItems.tabGroupCapsuleName.accessibilityIdentifier].getStringValue()
     }
     
     @discardableResult
-    func clickTabGroupMenu(_ item: TabGroupMenuViewLocators.MenuItems) -> TabGroupMenuView {
+    func clickTabGroupMenu(_ item: TabGroupMenuViewLocators.MenuItems) -> TabGroupView {
         menuItem(item.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
     @discardableResult
-    func clickTabGroupCapsule(index: Int) -> TabGroupMenuView {
+    func clickTabGroupCapsule(index: Int) -> TabGroupView {
         getTabGroupElementIndex(index: index).clickInTheMiddle()
         return self
     }
@@ -174,5 +178,26 @@ class TabGroupMenuView: BaseView {
         let regex = try! NSRegularExpression(pattern: "https://" + BaseTest().stagingEnvironmentServerAddress + "/.*/tabgroup/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.*")
         let range = NSRange(location: 0, length: URLtoMatch.utf16.count)
         return regex.firstMatch(in: URLtoMatch, options: [], range: range) != nil
+    }
+    
+    @discardableResult
+    func dragDropTabGroup(draggedTabGroupIndexFromSelectedTab: Int, destinationTabGroupIndexFromSelectedTab: Int) -> TabGroupView {
+        //Important! Counting starts from the next of selected tab
+        getTabGroupElementIndex(index: draggedTabGroupIndexFromSelectedTab).clickForDurationThenDragToInTheMiddle(forDuration: self.defaultPressDurationSeconds, thenDragTo: getTabGroupElementIndex(index: destinationTabGroupIndexFromSelectedTab))
+        return self
+    }
+    
+    @discardableResult
+    func dragAndDropTabGroupToElement(tabGroupIndex: Int, elementToDragTo: XCUIElement) -> TabGroupView {
+        self.getTabGroupElementIndex(index: tabGroupIndex).clickForDurationThenDragToInTheMiddle(forDuration: self.defaultPressDurationSeconds, thenDragTo: elementToDragTo)
+        return self
+    }
+    
+    func areTabGroupsInCorrectOrder(tabGroups: Array<String>) -> Bool {
+        var result = true
+        for i in 0...getTabGroupCount() - 1 {
+            result =  result && (getTabGroupNameByIndex(index: i).elementsEqual(tabGroups[i]))
+        }
+        return result
     }
 }

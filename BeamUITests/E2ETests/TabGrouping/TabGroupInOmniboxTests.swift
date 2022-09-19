@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupInOmniboxTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     let omniboxView = OmniBoxTestView()
     let dialogView = DialogTestView()
     let openAllTabsLabel = "Open All Tabs"
@@ -21,7 +21,7 @@ class TabGroupInOmniboxTests: BaseTest {
 
     private func createAndCaptureTabGroup (named: Bool){
         createTabGroupAndSwitchToWeb(named: named)
-        tabGroupMenu.captureTabGroup(index: 0)
+        tabGroupView.captureTabGroup(index: 0)
     }
     
     func testTabGroupNavigationInOmnibox() throws {
@@ -89,7 +89,7 @@ class TabGroupInOmniboxTests: BaseTest {
         
         step("Given I capture an unnamed tab group") {
             createAndCaptureTabGroup(named: false)
-            tabGroupMenu.closeTabGroup(index: 0)
+            tabGroupView.closeTabGroup(index: 0)
         }
         
         step("When I reopen all tabs") {
@@ -106,7 +106,7 @@ class TabGroupInOmniboxTests: BaseTest {
         }
         
         step("And tab group name is correct") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), uiTestPageOne + tabGroupUnnamedSuffix)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), uiTestPageOne + tabGroupUnnamedSuffix)
         }
     }
     
@@ -114,7 +114,7 @@ class TabGroupInOmniboxTests: BaseTest {
         testrailId("C1059")
         step("Given I capture an unnamed tab group") {
             createAndCaptureTabGroup(named: false)
-            tabGroupMenu.closeTabGroup(index: 0)
+            tabGroupView.closeTabGroup(index: 0)
         }
         
         step("When I open one tab") {
@@ -169,7 +169,7 @@ class TabGroupInOmniboxTests: BaseTest {
         step("Given I capture an unnamed tab group") {
             signUpStagingWithRandomAccount()
             createTabGroupAndSwitchToWeb()
-            tabGroupMenu.captureTabGroup(index: 0)
+            tabGroupView.captureTabGroup(index: 0)
         }
         
         step("When I share tab group") {
@@ -182,7 +182,7 @@ class TabGroupInOmniboxTests: BaseTest {
         
         step("Then tab group link is copied to pasteboard") {
             XCTAssertTrue(webView.staticText(TabGroupMenuViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
-            XCTAssertTrue(tabGroupMenu.isTabGroupLinkInPasteboard())
+            XCTAssertTrue(tabGroupView.isTabGroupLinkInPasteboard())
         }
     }
     
@@ -216,7 +216,7 @@ class TabGroupInOmniboxTests: BaseTest {
         }
         
         step("Then tab group is not forgotten") {
-            XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            XCTAssertTrue(tabGroupView.isTabGroupDisplayed(index: 0))
         }
         
         step("When I forget tab group") {
@@ -225,7 +225,7 @@ class TabGroupInOmniboxTests: BaseTest {
         }
         
         step("Then tab group is forgotten") {
-            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            XCTAssertFalse(tabGroupView.isTabGroupDisplayed(index: 0))
             shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
             omniboxView.searchInOmniBox(tabGroupNamed, false)
             XCTAssertFalse(omniboxView.isTabGroupResultDisplayed(tabGroupName: tabGroupNamed))
