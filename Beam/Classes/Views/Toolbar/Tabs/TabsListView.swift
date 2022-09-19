@@ -354,7 +354,6 @@ struct TabsListView: View {
                                 .opacity(shouldShowSectionSeparator(tabsSections: sections) ? 1 : 0)
                         }
                     }
-                    .animation(isAnimatingDrop || dragModel.isDragging ? nil : BeamAnimation.spring(stiffness: 400, damping: 30), value: sections.pinnedItems.count)
                     // Scrollable Tabs
                     GeometryReader { scrollContainerProxy in
                         let singleTabCenteringAdjustment = hasSingleOtherTab ? calculateSingleTabAdjustment(scrollContainerProxy) : 0
@@ -386,7 +385,6 @@ struct TabsListView: View {
                                 .onChange(of: singleTabCenteringAdjustment) { newValue in
                                     viewModel.singleTabCenteringAdjustment = newValue
                                 }
-                                .animation(isAnimatingDrop || dragModel.isDragging ? nil : BeamAnimation.spring(stiffness: 400, damping: 30), value: sections.unpinnedItems.count)
                             }
                         }
                         .if(tabsShouldScroll) {
