@@ -13,10 +13,10 @@ struct PointAndShootOffsetWithAnimationView: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .animation(nil)
-            .scaleEffect(1)
+//            .animation(nil)
+//            .scaleEffect(1)
             .offset(x: offset.x, y: offset.y)
-            .animation(animation, value: offset)
+//            .animation(animation, value: offset)
     }
 
 }
