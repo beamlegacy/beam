@@ -13,13 +13,13 @@ class TabGroupDeleteTests: BaseTest {
     let noteView = NoteTestView()
     let omniboxView = OmniBoxTestView()
     let dialogView = DialogTestView()
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     let tabGroupNamed = "Test1"
     
     private func setUpSharedNotCapturedTabGroup() {
         signUpStagingWithRandomAccount()
         createTabGroupAndSwitchToWeb(named: true)
-        tabGroupMenu.openTabGroupMenu(index: 0)
+        tabGroupView.openTabGroupMenu(index: 0)
             .clickTabGroupMenu(.tabGroupShareGroup)
             .shareTabGroupAction(copyLinkShareAction)
         XCTAssertTrue(webView.staticText(TabGroupMenuViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
@@ -63,7 +63,7 @@ class TabGroupDeleteTests: BaseTest {
         
         step("Then tab group is not deleted") {
             shortcutHelper.shortcutActionInvoke(action: .showOmnibox) // close omnibox
-            captured ? XCTAssertTrue(noteView.isTabGroupDisplayed(index: 0)) : XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            captured ? XCTAssertTrue(noteView.isTabGroupDisplayed(index: 0)) : XCTAssertTrue(tabGroupView.isTabGroupDisplayed(index: 0))
         }
         
         step("When I delete tab group") {
@@ -78,7 +78,7 @@ class TabGroupDeleteTests: BaseTest {
             }
         } else {
             step("Then tab group is not deleted on browser") {
-                XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
+                XCTAssertTrue(tabGroupView.isTabGroupDisplayed(index: 0))
             }
         }
         

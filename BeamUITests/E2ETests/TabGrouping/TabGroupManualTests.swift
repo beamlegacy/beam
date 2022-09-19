@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupManualTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     let tabGroupUnnamed = "”Point And Shoot Test Fixt…”"
     let tabGroupNamed = "Tab Group Name"
 
@@ -37,17 +37,17 @@ class TabGroupManualTests: BaseTest {
         step("Then tab group is not created") {
             webView.waitForWebViewToLoad()
             XCTAssertEqual(webView.getNumberOfTabs(), 3)
-            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            XCTAssertFalse(tabGroupView.isTabGroupDisplayed(index: 0))
         }
         
         createTabGroupManuallyForTab(index: 0)
         
         step("Then tab group is created") {
             XCTAssertEqual(webView.getNumberOfTabs(), 3)
-            XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
-            tabGroupMenu.clickTabGroupCapsule(index: 0)
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "1")
-            tabGroupMenu.clickTabGroupCapsule(index: 0)
+            XCTAssertTrue(tabGroupView.isTabGroupDisplayed(index: 0))
+            tabGroupView.clickTabGroupCapsule(index: 0)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), "1")
+            tabGroupView.clickTabGroupCapsule(index: 0)
         }
     }
     
@@ -82,10 +82,10 @@ class TabGroupManualTests: BaseTest {
         }
         
         step("Then tab is added to the group") {
-            XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
-            tabGroupMenu.clickTabGroupCapsule(index: 0)
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "2")
-            tabGroupMenu.clickTabGroupCapsule(index: 0)
+            XCTAssertTrue(tabGroupView.isTabGroupDisplayed(index: 0))
+            tabGroupView.clickTabGroupCapsule(index: 0)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), "2")
+            tabGroupView.clickTabGroupCapsule(index: 0)
         }
         
         step("And unnamed tab group is updated") {
@@ -98,11 +98,11 @@ class TabGroupManualTests: BaseTest {
         testrailId("C974")
         step("When I create tab group manually and name it") {
             createTabGroupManuallyForTab(index: 0)
-            tabGroupMenu.waitForTabGroupToBeDisplayed(index: 0)
-            tabGroupMenu
+            tabGroupView.waitForTabGroupToBeDisplayed(index: 0)
+            tabGroupView
                 .openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.setTabGroupName(tabGroupName: tabGroupNamed)
+            tabGroupView.setTabGroupName(tabGroupName: tabGroupNamed)
         }
         
         step("Then Add to group option is mentioning the correct name") {
@@ -122,7 +122,7 @@ class TabGroupManualTests: BaseTest {
                 .openTabMenu(tabIndex: 0)
                 .selectTabMenuItem(.ungroup)
             XCTAssertEqual(webView.getNumberOfTabs(), 3)
-            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            XCTAssertFalse(tabGroupView.isTabGroupDisplayed(index: 0))
         }
     }
     
@@ -135,7 +135,7 @@ class TabGroupManualTests: BaseTest {
         }
         
         step("Then I have \(expectedGroupsNumber) groups") {
-            XCTAssertEqual(tabGroupMenu.getTabGroupCount(), expectedGroupsNumber)
+            XCTAssertEqual(tabGroupView.getTabGroupCount(), expectedGroupsNumber)
         }
     }
 }

@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupUngroupTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     
     override func setUp() {
         step("Given I have a tab group") {
@@ -22,21 +22,21 @@ class TabGroupUngroupTests: BaseTest {
     func testTabGroupUngroup() throws {
         testrailId("C986")
         step("When I ungroup tabs") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupUngroup)
+            tabGroupView.clickTabGroupMenu(.tabGroupUngroup)
         }
         
         step("Then tabs are ungrouped") {
             XCTAssertEqual(webView.getNumberOfTabs(), 4)
-            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            XCTAssertFalse(tabGroupView.isTabGroupDisplayed(index: 0))
         }
     }
     
     func testTabGroupUngroupWhenCollapsed() throws {
         testrailId("C986")
         step("When I collapse tab group") {
-            tabGroupMenu.collapseTabGroup(index: 0)
+            tabGroupView.collapseTabGroup(index: 0)
         }
         
         step("Then group is collapsed") {
@@ -44,14 +44,14 @@ class TabGroupUngroupTests: BaseTest {
         }
         
         step("And I ungroup tabs") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupUngroup)
+            tabGroupView.clickTabGroupMenu(.tabGroupUngroup)
         }
         
         step("Then tabs are ungrouped") {
             XCTAssertEqual(webView.getNumberOfTabs(), 4)
-            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            XCTAssertFalse(tabGroupView.isTabGroupDisplayed(index: 0))
         }
     }
 }

@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupCaptureToANoteTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     let noteView = NoteTestView()
     let allNotesView = AllNotesTestView()
     let pnsView = PnSTestView()
@@ -32,9 +32,9 @@ class TabGroupCaptureToANoteTests: BaseTest {
         }
         
         step("When I capture the tab group") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupCapture)
+            tabGroupView.clickTabGroupMenu(.tabGroupCapture)
             pnsView.waitForCollectPopUpAppear()
             pnsView.typeKeyboardKey(.enter)
             XCTAssertTrue(pnsView.assertAddedToNoteLabelDisplayed())
@@ -49,7 +49,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         step("When I close the tab group") {
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             webView.waitForWebViewToLoad()
-            tabGroupMenu.closeTabGroup(index: 0)
+            tabGroupView.closeTabGroup(index: 0)
             XCTAssertTrue(noteView.waitForTodayNoteViewToLoad())
         }
 
@@ -58,7 +58,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             noteView.openTabGroup(index: 0)
             webView.waitForWebViewToLoad()
             XCTAssertEqual(webView.getNumberOfTabs(),4)
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), uiTestPageOne + " & 3 more")
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), uiTestPageOne + " & 3 more")
         }
         
     }
@@ -70,9 +70,9 @@ class TabGroupCaptureToANoteTests: BaseTest {
         }
         
         step("When I capture the tab group") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupCapture)
+            tabGroupView.clickTabGroupMenu(.tabGroupCapture)
             pnsView.waitForCollectPopUpAppear()
             pnsView.typeKeyboardKey(.enter)
             XCTAssertTrue(pnsView.assertAddedToNoteLabelDisplayed())
@@ -87,7 +87,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
         step("When I close the tab group") {
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             webView.waitForWebViewToLoad()
-            tabGroupMenu.closeTabGroup(index: 0)
+            tabGroupView.closeTabGroup(index: 0)
             XCTAssertTrue(noteView.waitForTodayNoteViewToLoad())
         }
 
@@ -95,7 +95,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             noteView.openTabGroup(index: 0)
             webView.waitForWebViewToLoad()
             XCTAssertEqual(webView.getNumberOfTabs(),4)
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), "Test1")
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), "Test1")
         }
     }
     
@@ -106,13 +106,13 @@ class TabGroupCaptureToANoteTests: BaseTest {
         }
         
         step("When I capture the tab group") {
-            tabGroupMenu.captureTabGroup(index: 0)
+            tabGroupView.captureTabGroup(index: 0)
         }
         
         step("And I capture the tab group with different name") {
-            tabGroupMenu.openTabGroupMenu(index: 0)
+            tabGroupView.openTabGroupMenu(index: 0)
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.setTabGroupName(tabGroupName: "E2E Test")
+            tabGroupView.setTabGroupName(tabGroupName: "E2E Test")
                 .captureTabGroup(index: 0)
         }
         
@@ -134,8 +134,8 @@ class TabGroupCaptureToANoteTests: BaseTest {
         }
         
         step("When I capture the tab group to different notes") {
-            tabGroupMenu.captureTabGroup(index: 0, destinationNote: note1)
-            tabGroupMenu.captureTabGroup(index: 0, destinationNote: note2)
+            tabGroupView.captureTabGroup(index: 0, destinationNote: note1)
+            tabGroupView.captureTabGroup(index: 0, destinationNote: note2)
         }
         
         step("Then tab group is saved in \(note1) and \(note2)") {

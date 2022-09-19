@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupOpenNewWindowTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     
     override func setUp() {
         step("Given I have two tab groups") {
@@ -18,8 +18,8 @@ class TabGroupOpenNewWindowTests: BaseTest {
             uiMenu.invoke(.createTabGroupNamed)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             uiMenu.invoke(.createTabGroupNamed)
-            tabGroupMenu.waitForTabGroupNameToBeDisplayed(tabGroupName: "Test1")
-            tabGroupMenu.waitForTabGroupNameToBeDisplayed(tabGroupName: "Test2")
+            tabGroupView.waitForTabGroupNameToBeDisplayed(tabGroupName: "Test1")
+            tabGroupView.waitForTabGroupNameToBeDisplayed(tabGroupName: "Test2")
         }
     }
     
@@ -31,9 +31,9 @@ class TabGroupOpenNewWindowTests: BaseTest {
         }
         
         step("When I open one tab group to another window") {
-            tabGroupMenu.openTabGroupMenuWithName(tabGroupName: "Test1")
+            tabGroupView.openTabGroupMenuWithName(tabGroupName: "Test1")
                 .waitForMenuToBeDisplayed()
-            tabGroupMenu.clickTabGroupMenu(.tabGroupMoveNewWindow)
+            tabGroupView.clickTabGroupMenu(.tabGroupMoveNewWindow)
         }
         
         step("Then two windows are opened with 4 tabs each") {

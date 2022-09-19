@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupSharingFromNoteTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     let allNotesView = AllNotesTestView()
     let dialogView = DialogTestView()
     let noteView = NoteTestView()
@@ -29,12 +29,12 @@ class TabGroupSharingFromNoteTests: BaseTest {
         }
         
         step("Then Share Tab Group Menu is displayed") {
-            XCTAssertTrue(tabGroupMenu.clickTabGroupMenu(.tabGroupShareGroup)
+            XCTAssertTrue(tabGroupView.clickTabGroupMenu(.tabGroupShareGroup)
                 .isShareTabMenuDisplayed())
         }
         
         step("When I Share Tab Group without being logged in") {
-            tabGroupMenu.shareTabGroupAction(shareWithTwitterAction)
+            tabGroupView.shareTabGroupAction(shareWithTwitterAction)
         }
         
         step("Then I get the connect alert message") {
@@ -110,7 +110,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
         step("Then short tab group link is copied to pasteboard") {
             XCTAssertTrue(webView.staticText(TabGroupMenuViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
             XCTAssertEqual(getNumberOfPasteboardItem(), 1)
-            XCTAssertTrue(tabGroupMenu.isTabGroupLinkInPasteboard())
+            XCTAssertTrue(tabGroupView.isTabGroupLinkInPasteboard())
         }
         
         step("And short link URL redirect to full link URL") {
@@ -121,7 +121,7 @@ class TabGroupSharingFromNoteTests: BaseTest {
             webView.waitForWebViewToLoad()
             shortcutHelper.shortcutActionInvoke(action: .openLocation)
             _ = omniboxTestView.getOmniBoxSearchField().waitForExistence(timeout: BaseTest.implicitWaitTimeout)
-            XCTAssertTrue(tabGroupMenu.isMatchingFullURL(omniboxTestView.getSearchFieldValue()))
+            XCTAssertTrue(tabGroupView.isMatchingFullURL(omniboxTestView.getSearchFieldValue()))
         }
     }
 }
