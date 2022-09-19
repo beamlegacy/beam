@@ -18,25 +18,28 @@ struct PointAndShootView: View {
     @State private var allowAnimation: Bool = false
     @State private var wiggleValue: CGFloat = 0
 
-    private var transitionAnchor: UnitPoint {
-        guard let page = pns.page else {
-            return UnitPoint(x: pns.mouseLocation.x, y: pns.mouseLocation.y)
-        }
-        return UnitPoint(
-            x: (1 / page.frame.width) * pns.mouseLocation.x,
-            y: (1 / page.frame.height) * pns.mouseLocation.y
-        )
-    }
+    // All the animation code has been commented in this file because of SwiftUI crashes
+    // which have become only more present in macOS 13.
 
-    private var transitionInOut: AnyTransition {
-        let anchor = transitionAnchor
-        let transitionIn = AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2))
-            .combined(with: AnyTransition.scale(scale: 0.98, anchor: anchor).animation(BeamAnimation.easeInOut(duration: 0.2)))
-        let transitionOut = AnyTransition.scale(scale: 1.03, anchor: anchor).animation(BeamAnimation.easeInOut(duration: 0.1))
-            .combined(with: AnyTransition.scale(scale: 0.7, anchor: anchor).animation(BeamAnimation.easeInOut(duration: 0.25).delay(0.1)))
-            .combined(with: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.3)))
-        return AnyTransition.asymmetric(insertion: transitionIn, removal: transitionOut)
-    }
+//    private var transitionAnchor: UnitPoint {
+//        guard let page = pns.page else {
+//            return UnitPoint(x: pns.mouseLocation.x, y: pns.mouseLocation.y)
+//        }
+//        return UnitPoint(
+//            x: (1 / page.frame.width) * pns.mouseLocation.x,
+//            y: (1 / page.frame.height) * pns.mouseLocation.y
+//        )
+//    }
+//
+//    private var transitionInOut: AnyTransition {
+//        let anchor = transitionAnchor
+//        let transitionIn = AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2))
+//            .combined(with: AnyTransition.scale(scale: 0.98, anchor: anchor).animation(BeamAnimation.easeInOut(duration: 0.2)))
+//        let transitionOut = AnyTransition.scale(scale: 1.03, anchor: anchor).animation(BeamAnimation.easeInOut(duration: 0.1))
+//            .combined(with: AnyTransition.scale(scale: 0.7, anchor: anchor).animation(BeamAnimation.easeInOut(duration: 0.25).delay(0.1)))
+//            .combined(with: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.3)))
+//        return AnyTransition.asymmetric(insertion: transitionIn, removal: transitionOut)
+//    }
 
     var shouldAnimateRect: Bool {
         pns.activeShootGroup == nil
@@ -71,19 +74,19 @@ struct PointAndShootView: View {
             RoundedRectangle(cornerRadius: isRect ? padding : 20, style: .continuous)
                 .fill(background)
                 .accessibility(identifier: "PointFrame")
-                .animation(.easeInOut(duration: 0.2), value: background)
-                .scaleEffect(scale)
-                .animation(.spring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.2), value: scale)
+//                .animation(.easeInOut(duration: 0.2), value: background)
+//                .scaleEffect(scale)
+//                .animation(.spring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.2), value: scale)
                 .onScroll({ event in
                     webViewScrollEvent(event)
                 })
                 .frame(width: rect.width, height: rect.height)
-                .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4) : nil, value: rect.width)
-                .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4) : nil, value: rect.height)
+//                .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4) : nil, value: rect.width)
+//                .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.4) : nil, value: rect.height)
                 .opacity(opacity)
-                .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.2) : nil, value: isRect)
+//                .animation(shouldAnimateRect ? .timingCurve(0.165, 0.84, 0.44, 1, duration: 0.2) : nil, value: isRect)
                 .position(x: x, y: y)
-                .animation(nil)
+//                .animation(nil)
                 .id("rectangle shoot frame")
                 .onReceive(pns.$activeShootGroup, perform: { shootGroup in
                     // if nil set to true
@@ -113,7 +116,7 @@ struct PointAndShootView: View {
                 PointAndShootPathFrame(group: pns.translateAndScaleGroup(activeGroup), scrollEventCallback: webViewScrollEvent)
                     .id(activeGroup.id)
                     .zIndex(19) // for animation to work correctly
-                    .transition(transitionInOut)
+//                    .transition(transitionInOut)
             }
         }
 
@@ -154,11 +157,11 @@ struct PointAndShootView: View {
                     }
                 }
             }
-            .wiggleEffect(animatableValue: wiggleValue)
-            .animation(.spring(response: 0.4, dampingFraction: 0.58), value: wiggleValue)
-            .animation(allowAnimation ? .spring(response: 0.4, dampingFraction: 0.58) : nil)
+//            .wiggleEffect(animatableValue: wiggleValue)
+//            .animation(.spring(response: 0.4, dampingFraction: 0.58), value: wiggleValue)
+//            .animation(allowAnimation ? .spring(response: 0.4, dampingFraction: 0.58) : nil)
             .zIndex(21) // for animation to work correctly
-            .transition(transitionInOut)
+//            .transition(transitionInOut)
             .pointAndShootOffsetWithAnimation(y: offset, animation: .spring(response: 0.2, dampingFraction: 0.58))
             .id(group.id)
             .onReceive(pns.$shootConfirmationGroup, perform: { group in
@@ -172,8 +175,8 @@ struct PointAndShootView: View {
             })
             .onDisappear {
                 // This fixes a crash seemingly caused by SwiftUI animations (commenting the `.transition(transitionInOut)`
-                // line in PointAndShootView.swift makes the crash disappear) when showing the point and shoot card picker
-                // then going to notes and back to web.
+                // line makes the crash disappear) when showing the point and shoot card picker then going to notes and
+                // back to web.
                 pns.cancelShoot()
             }
         }
