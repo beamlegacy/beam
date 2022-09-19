@@ -48,11 +48,11 @@ class OmniboxGoToTab: BaseTest {
     
     func testGoToTabCollapsedGroup(){
         testrailId("C1186")
-        let tabGroupMenu = TabGroupMenuView()
+        let tabGroupView = TabGroupView()
         
         step("Given I have a collapsed tab group"){
             createTabGroupAndSwitchToWeb()
-            tabGroupMenu.collapseTabGroup(index: 0)
+            tabGroupView.collapseTabGroup(index: 0)
             XCTAssertEqual(webView.getNumberOfTabs(), 0)
         }
         
@@ -67,7 +67,7 @@ class OmniboxGoToTab: BaseTest {
         }
         
         step("When I collapse tab group and switch to note"){
-            tabGroupMenu.collapseTabGroup(index: 0)
+            tabGroupView.collapseTabGroup(index: 0)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
         
