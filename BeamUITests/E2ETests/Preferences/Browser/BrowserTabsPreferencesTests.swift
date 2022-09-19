@@ -77,7 +77,7 @@ class BrowserTabsPreferencesTests: BaseTest {
     func testGroupTabsAutomatically() {
         testrailId("C593")
         let expectedCheckboxTitle = "Group tabs automatically"
-        let tabGroupMenu = TabGroupMenuView()
+        let tabGroupView = TabGroupView()
         
         step("WHEN I open multiple time the same tab") {
             uiMenu.invoke(.loadUITestPage1)
@@ -86,7 +86,7 @@ class BrowserTabsPreferencesTests: BaseTest {
         }
         
         step("THEN tab group is automatically created by default") {
-            XCTAssertTrue(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            XCTAssertTrue(tabGroupView.isTabGroupDisplayed(index: 0))
             // Closing opened tabs
             shortcutHelper.shortcutActionInvoke(action: .close)
             shortcutHelper.shortcutActionInvoke(action: .close)
@@ -107,7 +107,7 @@ class BrowserTabsPreferencesTests: BaseTest {
         }
         
         step("THEN tab group is automatically created") {
-            XCTAssertFalse(tabGroupMenu.isTabGroupDisplayed(index: 0))
+            XCTAssertFalse(tabGroupView.isTabGroupDisplayed(index: 0))
         }
     }
 }

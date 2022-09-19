@@ -10,7 +10,7 @@ import XCTest
 
 class TabGroupCaptureToANoteMenuTests: BaseTest {
     
-    let tabGroupMenu = TabGroupMenuView()
+    let tabGroupView = TabGroupView()
     let omniboxView = OmniBoxTestView()
     let allNotesView = AllNotesTestView()
     let noteView = NoteTestView()
@@ -33,7 +33,7 @@ class TabGroupCaptureToANoteMenuTests: BaseTest {
         }
 
         step("Then I can rename the captured tab group") {
-            tabGroupMenu.renameExistingTabGroupName(tabGroupName: "Renamed Captured")
+            tabGroupView.renameExistingTabGroupName(tabGroupName: "Renamed Captured")
             XCTAssertEqual(noteView.getTabGroupElementName(index: 0), "Renamed Captured tab group")
         }
     }
@@ -56,7 +56,7 @@ class TabGroupCaptureToANoteMenuTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             webView.waitForWebViewToLoad()
             XCTAssertEqual(webView.getNumberOfTabs(), 4)
-            XCTAssertEqual(tabGroupMenu.getTabGroupName(), uiTestPageOne + tabGroupNameSuffix)
+            XCTAssertEqual(tabGroupView.getTabGroupNameByIndex(index: 0), uiTestPageOne + tabGroupNameSuffix)
             XCTAssertTrue(webView.areTabsInCorrectOrder(tabs: tabTitles))
         }
     }
