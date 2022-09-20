@@ -1293,6 +1293,7 @@
 		B52C147D27FF051800D67EE5 /* AboutPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C147C27FF051800D67EE5 /* AboutPreferencesTests.swift */; };
 		B52C147F27FF05D700D67EE5 /* AboutPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C147E27FF05D700D67EE5 /* AboutPreferencesTestView.swift */; };
 		B52C148127FF068000D67EE5 /* AboutPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C148027FF068000D67EE5 /* AboutPreferencesViewLocators.swift */; };
+		B52D078528D8C1E00071AAA7 /* ConferencePopupViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52D078428D8C1E00071AAA7 /* ConferencePopupViewLocators.swift */; };
 		B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */; };
 		B551F3BF26BD0EBF00B72D27 /* WebsiteAuthTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B551F3BE26BD0EBF00B72D27 /* WebsiteAuthTest.swift */; };
 		B551F3C126BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */; };
@@ -3268,6 +3269,7 @@
 		B52C147C27FF051800D67EE5 /* AboutPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPreferencesTests.swift; sourceTree = "<group>"; };
 		B52C147E27FF05D700D67EE5 /* AboutPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPreferencesTestView.swift; sourceTree = "<group>"; };
 		B52C148027FF068000D67EE5 /* AboutPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPreferencesViewLocators.swift; sourceTree = "<group>"; };
+		B52D078428D8C1E00071AAA7 /* ConferencePopupViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencePopupViewLocators.swift; sourceTree = "<group>"; };
 		B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabViewTests.swift; sourceTree = "<group>"; };
 		B551F3BE26BD0EBF00B72D27 /* WebsiteAuthTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthTest.swift; sourceTree = "<group>"; };
 		B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthPopupTestView.swift; sourceTree = "<group>"; };
@@ -7185,6 +7187,7 @@
 			children = (
 				B5E949AD27DA404E001AAA82 /* AlertViewLocators.swift */,
 				A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */,
+				B52D078428D8C1E00071AAA7 /* ConferencePopupViewLocators.swift */,
 			);
 			path = Popups;
 			sourceTree = "<group>";
@@ -10288,6 +10291,7 @@
 				B5D2A1872805EAA600C833B9 /* OnboardingPrivateKeyTestView.swift in Sources */,
 				D77A5A7A28770F0D00652727 /* RightClickMenuTestView.swift in Sources */,
 				B57A9B3126AB06AD002C954D /* BaseTest.swift in Sources */,
+				B52D078528D8C1E00071AAA7 /* ConferencePopupViewLocators.swift in Sources */,
 				A310949B281D9F7C003B96D1 /* BrowserHistoryTests.swift in Sources */,
 				B5E8010C26AEA1F100C8BD61 /* JournalViewLocators.swift in Sources */,
 				B5E38D5A26EA244300236FBD /* SearchViewLocators.swift in Sources */,
