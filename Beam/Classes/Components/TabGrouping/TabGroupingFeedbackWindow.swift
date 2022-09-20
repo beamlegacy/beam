@@ -126,13 +126,14 @@ final class TabGroupingFeedbackViewModel: ObservableObject {
 
 class TabGroupingFeedbackWindow: NSWindow, NSWindowDelegate {
 
-    init(contentRect: NSRect, clusteringManager: ClusteringManager) {
+    init(contentRect: NSRect, data: BeamData) {
         super.init(contentRect: contentRect,
                    styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                    backing: .buffered,
                    defer: false)
         title = "Tab Grouping Feedback"
-        let tabGroupingContentView = TabGroupingFeedbackContentView(viewModel: TabGroupingFeedbackViewModel(clusteringManager: clusteringManager))
+        let tabGroupingContentView = TabGroupingFeedbackContentView(viewModel: TabGroupingFeedbackViewModel(clusteringManager: data.clusteringManager))
+            .faviconProvider(data.faviconProvider)
 
         contentView = BeamHostingView(rootView: tabGroupingContentView)
         isMovableByWindowBackground = false

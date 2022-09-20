@@ -12,6 +12,7 @@ struct AutocompleteItemView: View {
 
     static let defaultHeight: CGFloat = 38
 
+    @Environment(\.faviconProvider) var faviconProvider
     @State var item: AutocompleteResult
     let selected: Bool
     var disabled: Bool = false
@@ -269,10 +270,10 @@ struct AutocompleteItemView: View {
         }
         .onAppear {
             if let url = item.url {
-                FaviconProvider.shared.favicon(fromURL: url, cacheOnly: item.source != .topDomain) { favicon in
+                faviconProvider.favicon(fromURL: url, cachePolicy: item.source != .topDomain ? .cacheOnly : .default) { favicon in
                     self.favicon = favicon?.image
                     if favicon == nil, let aliasDestinationURL = item.aliasForDestinationURL {
-                        FaviconProvider.shared.favicon(fromURL: aliasDestinationURL, cacheOnly: true) { favicon in
+                        faviconProvider.favicon(fromURL: aliasDestinationURL, cachePolicy: .cacheOnly) { favicon in
                             self.favicon = favicon?.image
                         }
                     }

@@ -10,15 +10,24 @@ import FaviconFinder
 import BeamCore
 import WebKit
 
-class FaviconProvider {
+/**
+ * Manage favicon fetching and caching.
+ *
+ * Favicon can be of two different sources:
+ * - from the webView html content that we loaded. Using JS Script.
+ * - from a URL, using FaviconFinder.
+ *
+ * When caching a favicon for a URL, we can store it at three different levels: `host`, `path` or `full URL`.
+ * Depending on what's already in the cache.
+ */
+final class FaviconProvider {
 
-    static let shared = FaviconProvider()
     private static let cacheFileName = "favicons"
     private static let cachedIconFromURLLifetime: Int = 30 // 30 days
     private static let cachedIconFromWebViewLifetime: Int = 1 // 1 day
     typealias FaviconProviderHandler = (Favicon?) -> Void
 
-    private let cache: Cache<String, Favicon>
+    private let cache: FaviconCache
     private var finder = FaviconProvider.Finder()
 
     private lazy var debouncedSaveToDisk: (() -> Void)? = {
@@ -27,8 +36,8 @@ class FaviconProvider {
         }
     }()
 
-    init() {
-        cache = Cache.diskCache(filename: Self.cacheFileName, countLimit: 200)
+    init(withCache cache: FaviconCache? = nil) {
+        self.cache = cache ?? FaviconCache.diskCache(filename: Self.cacheFileName, countLimit: 10000)
     }
 
     private var screenScale: CGFloat {
@@ -44,15 +53,27 @@ class FaviconProvider {
     }
 
     private func getCachedIcon(for url: URL, size: Int) -> Favicon? {
-        let fullURLFavicon = cache[cacheKeyForFullURL(url, size: size)]
+        let keys = FaviconLevelsKeys(url: url, size: size)
+
+        // Level 1: Full URL
+        let fullURLFavicon = cache[keys.cacheKey(level: .full)]
         if let fullURLFavicon = fullURLFavicon, !isFaviconExpired(fullURLFavicon) {
             return fullURLFavicon
         }
-        let hostFavicon = cache[cacheKeyForURLHost(url, size: size)]
-        guard let hostFavicon = hostFavicon, !isFaviconExpired(hostFavicon) else {
-            return fullURLFavicon
+
+        // Level 2: URL with Path
+        let pathURLFavicon = cache[keys.cacheKey(level: .path)]
+        if let pathURLFavicon = pathURLFavicon, !isFaviconExpired(pathURLFavicon) {
+            return pathURLFavicon
         }
-        return hostFavicon
+
+        // Level 3: Host only
+        let hostFavicon = cache[keys.cacheKey(level: .host)]
+        if let hostFavicon = hostFavicon, !isFaviconExpired(hostFavicon) {
+            return hostFavicon
+        }
+
+        return fullURLFavicon ?? pathURLFavicon ?? hostFavicon
     }
 
     private func isFaviconExpired(_ favicon: Favicon) -> Bool {
@@ -60,14 +81,51 @@ class FaviconProvider {
                               lifetime: favicon.origin == .webView ? Self.cachedIconFromWebViewLifetime : Self.cachedIconFromURLLifetime)
     }
 
-    public func registerFavicon(_ favicon: Favicon, for url: URL) {
-        updateCache(withIcon: favicon, originURL: url, size: defaultScaledSize)
-    }
+    private func updateCache(withIcon icon: Favicon, originURL: URL, size: Int) {
+        var eraseFullKeyCache = false
 
-    private func updateCache(withIcon: Favicon, originURL: URL, size: Int, useFullURL: Bool = false) {
-        let cacheKey = useFullURL ? cacheKeyForFullURL(originURL, size: size) : cacheKeyForURLHost(originURL, size: size)
-        self.cache[cacheKey] = withIcon
-        self.debouncedSaveToDisk?()
+        let keys = FaviconLevelsKeys(url: originURL, size: size)
+        let hostKey = keys.cacheKey(level: .host)
+        let pathKey = keys.cacheKey(level: .path)
+        let fullKey = keys.cacheKey(level: .full)
+        let newIconIsFromWebView = icon.origin == .webView
+
+        defer {
+            if eraseFullKeyCache {
+                self.cache.removeValue(forKey: fullKey)
+            }
+            self.debouncedSaveToDisk?()
+        }
+        if fullKey == hostKey {
+            if newIconIsFromWebView || self.cache[hostKey]?.origin != .webView {
+                self.cache[hostKey] = icon
+            }
+            return
+        }
+        let cacheHost = self.cache[hostKey]
+        if cacheHost == nil || cacheHost?.url == icon.url {
+            eraseFullKeyCache = true
+            self.cache[hostKey] = icon
+            return
+        }
+
+        if fullKey == pathKey {
+            if newIconIsFromWebView || self.cache[pathKey]?.origin != .webView {
+                self.cache[pathKey] = icon
+            }
+            return
+        }
+
+        let cachePath = self.cache[pathKey]
+        if cachePath == nil || cachePath?.url == icon.url {
+            eraseFullKeyCache = true
+            self.cache[pathKey] = icon
+            return
+        }
+
+        if newIconIsFromWebView || self.cache[fullKey]?.origin != .webView {
+            self.cache[fullKey] = icon
+        }
     }
 
     public func clear() {
@@ -75,9 +133,9 @@ class FaviconProvider {
     }
 
     private func saveCacheToDisk() {
-        Logger.shared.logInfo("FaviconProvider saved cache to disk", category: .favIcon)
         do {
             try self.cache.saveToDisk(withName: Self.cacheFileName)
+            Logger.shared.logInfo("FaviconProvider saved cache to disk", category: .favIcon)
         } catch {
             Logger.shared.logError("FaviconProvider couldn't save cache to disk. \(error.localizedDescription)", category: .favIcon)
         }
@@ -97,9 +155,10 @@ class FaviconProvider {
         date < Calendar.current.date(byAdding: .day, value: -lifetime, to: BeamDate.now) ?? Date(timeIntervalSince1970: 0)
     }
 
-    func favicon(fromURL url: URL, webView: WKWebView? = nil, cacheOnly: Bool = false, handler: @escaping FaviconProviderHandler) {
+    func favicon(fromURL url: URL, webView: WKWebView? = nil, cachePolicy: CachePolicy = .default, handler: @escaping FaviconProviderHandler) {
         let scaledSize = defaultScaledSize
-        let cached = getCachedIcon(for: url, size: scaledSize)
+        let cacheOnly = cachePolicy == .cacheOnly
+        let cached = cachePolicy == .skipCache ? nil : getCachedIcon(for: url, size: scaledSize)
         if let cached = cached {
             handler(cached)
             if cacheOnly || (webView == nil && !hasDateExceedLifetime(cached.date, lifetime: Self.cachedIconFromURLLifetime)) {
@@ -145,13 +204,8 @@ class FaviconProvider {
             guard let self = self else { return }
             switch result {
             case .success(let favicon):
-                var useFullURL = false
-                if currentCached != nil && favicon.url != currentCached?.url {
-                    // we have a new favicon for this url. let's cache it.
-                    useFullURL = true
-                }
                 if currentCached == nil || currentCached?.origin != .webView || favicon.url != currentCached?.url {
-                    self.updateCache(withIcon: favicon, originURL: originURL, size: size, useFullURL: useFullURL)
+                    self.updateCache(withIcon: favicon, originURL: originURL, size: size)
                 }
                 handler(favicon)
             case .failure:
@@ -164,8 +218,8 @@ class FaviconProvider {
 extension FaviconProvider {
 
     /// Provide a mock finder for tests
-    convenience init(withFinder finder: FaviconProvider.Finder) {
-        self.init()
+    convenience init(withCache cache: FaviconCache? = nil, withFinder finder: FaviconProvider.Finder) {
+        self.init(withCache: cache)
         self.finder = finder
     }
 
@@ -280,14 +334,77 @@ extension FaviconProvider {
     }
 }
 
+extension FaviconProvider {
+    enum CachePolicy {
+        case cacheOnly
+        case skipCache
+        case `default`
+    }
+}
+
+extension FaviconProvider {
+    struct FaviconLevelsKeys {
+        let url: URL
+        let size: Int
+
+        enum Level {
+            case host, path, full
+        }
+
+        func cacheKey(level: Level) -> String {
+            switch level {
+            case .host: return cacheKeyForURLHost
+            case .path: return cacheKeyForURLWithPath
+            case .full: return cacheKeyForFullURL
+            }
+        }
+
+        private func urlHost(_ url: URL) -> String {
+            (url.urlWithScheme.host ?? url.urlStringWithoutScheme)
+        }
+
+        /// Includes URL host (both top level domain and subdomain)
+        private var cacheKeyForURLHost: String {
+            urlHost(url) + "-\(size)"
+        }
+
+        /// Includes URL host + path
+        private var cacheKeyForURLWithPath: String {
+            let url = url.urlWithScheme
+            var path = url.path
+            if !url.pathExtension.isEmpty {
+                path = url.deletingLastPathComponent().path
+            }
+            if path == "/" {
+                path = ""
+            }
+            return urlHost(url) + path + "-\(size)"
+        }
+
+        /// Using full URL, subdomain
+        private var cacheKeyForFullURL: String {
+            url.urlStringByRemovingUnnecessaryCharacters + "-\(size)"
+        }
+    }
+}
+
 struct Favicon: Codable, Equatable {
 
-    let url: URL
+    var url: URL
     let width: Double?
     let height: Double?
     let origin: FaviconOrigin
     var date = BeamDate.now
-    var image: NSImage?
+    var image: NSImage? {
+        didSet {
+            guard image != nil && url.absoluteString.starts(with: "data:image"), let imageId = imageId else { return }
+            // don't store base64 image in URL, image will be stored aside with imageId.
+            // replacing with fake imageId URL
+            self.url = URL(string: "data:favicon/png;\(imageId.uuidString)") ?? url
+        }
+    }
+    /// derived from the url
+    private(set) var imageId: UUID?
 
     enum FaviconOrigin: Int, Codable {
         case webView
@@ -318,27 +435,31 @@ struct Favicon: Codable, Equatable {
         case width
         case height
         case image
+        case imageId
         case origin
         case date
     }
 
-    init(url: URL, width: Double? = nil, height: Double? = nil, origin: FaviconOrigin, image: NSImage? = nil) {
+    init(url: URL, width: Double? = nil, height: Double? = nil, origin: FaviconOrigin,
+         image: NSImage? = nil) {
         self.url = url
         self.width = width
         self.height = height
         self.origin = origin
         self.image = image
+        self.imageId = UUID.v5(name: url.absoluteString, namespace: .url)
     }
 
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         url = try values.decode(URL.self, forKey: .url)
-        width = try? values.decode(Double.self, forKey: .width)
-        height = try? values.decode(Double.self, forKey: .height)
+        width = try values.decodeIfPresent(Double.self, forKey: .width)
+        height = try values.decodeIfPresent(Double.self, forKey: .height)
         date = try values.decode(Date.self, forKey: .date)
         if let imageWrapper = try? values.decode(ImageCodableWrapper.self, forKey: .image) {
             image = imageWrapper.image
         }
+        imageId = try values.decodeIfPresent(UUID.self, forKey: .imageId)
         origin = try values.decode(FaviconOrigin.self, forKey: .origin)
     }
 
@@ -353,6 +474,9 @@ struct Favicon: Codable, Equatable {
         }
         if let image = image {
             try container.encode(ImageCodableWrapper(image: image), forKey: .image)
+        }
+        if let imageId = imageId {
+            try container.encode(imageId, forKey: .imageId)
         }
     }
 }

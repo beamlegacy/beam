@@ -30,7 +30,7 @@ class IconAndTextTableViewItem: TableViewItem {
         super.init()
     }
 
-    func loadRemoteFavIcon(completion: @escaping (NSImage) -> Void) {}
+    func loadRemoteFavIcon(provider: FaviconProvider?, completion: @escaping (NSImage) -> Void) {}
 }
 
 class TwoTextFieldViewItem: IconAndTextTableViewItem {
@@ -62,6 +62,7 @@ struct TableView: NSViewRepresentable {
     var isCreationRowLoading = false
     var shouldReloadData: Binding<Bool?>?
     var sortDescriptor: Binding<NSSortDescriptor?>?
+    var iconProvider: FaviconProvider?
 
     var onEditingText: ((String?, Int) -> Void)?
     var onSelectionChanged: ((IndexSet) -> Void)?
@@ -518,7 +519,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
         let placeholderImage = NSImage(named: "field-web")
         placeholderImage?.isTemplate = true
         iconAndTextCell.updateWithIcon(placeholderImage)
-        item?.loadRemoteFavIcon(completion: { favIcon in
+        item?.loadRemoteFavIcon(provider: parent.iconProvider, completion: { favIcon in
             iconAndTextCell.updateWithIcon(favIcon)
         })
         iconAndTextCell.textField?.stringValue = item?.text ?? ""
