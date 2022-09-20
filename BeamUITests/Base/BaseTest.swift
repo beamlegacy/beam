@@ -269,6 +269,10 @@ class BaseTest: XCTestCase {
         return NSPasteboard.general.pasteboardItems?.count
     }
     
+    func getAppDialogs(dialogTitle: String) -> XCUIElement {
+        return app.dialogs[dialogTitle]
+    }
+    
     func isPasteboardEmpty() -> Bool {
         return getNumberOfPasteboardItem() == 0
     }
