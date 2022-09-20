@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import BeamCore
+import SwiftUI
 
 protocol BrowserTabsManagerDelegate: AnyObject {
 
@@ -148,7 +149,20 @@ class BrowserTabsManager: ObservableObject {
             self.pinned = pinned
         }
     }
-    private func updateListItems() {
+
+    private enum ItemsAnimationType {
+        case groupCollapse
+        case `default`
+
+        var animation: SwiftUI.Animation {
+            switch self {
+            case .groupCollapse: return Animation.timingCurve(0.3, 0.16, 0.3, 1.1)
+            case .default: return BeamAnimation.spring(stiffness: 400, damping: 30)
+            }
+        }
+    }
+
+    private func updateListItems(animationType: ItemsAnimationType = .default) {
         var sections = TabsListItemsSections()
         let groups = localTabsGroup
         var previousGroup: TabGroup?
@@ -222,8 +236,10 @@ class BrowserTabsManager: ObservableObject {
         sections.pinnedItems = pinnedItems
         sections.unpinnedItems = unpinnedItems
         sections.allItems = pinnedItems + unpinnedItems
-        self.visibleTabs = visibleTabs
-        self.listItems = sections
+        withAnimation(animationType.animation) {
+            self.visibleTabs = visibleTabs
+            self.listItems = sections
+        }
     }
 
     private var indexForNewTabInNeighborhood: Int? {
@@ -666,7 +682,7 @@ extension BrowserTabsManager {
             groupTabsInGroup(group)
         } else {
             collapsedTabsInGroup.removeValue(forKey: group.id)
-            updateListItems()
+            updateListItems(animationType: .groupCollapse)
         }
     }
 
@@ -676,7 +692,7 @@ extension BrowserTabsManager {
         defer { pauseListItemsUpdate = false }
         collapsedTabsInGroup[group.id] = tabsInGroup
         gatherTabsInGroupTogether(group)
-        updateListItems()
+        updateListItems(animationType: .groupCollapse)
         if let currentTab = currentTab, tabsInGroup.contains(currentTab.id) {
             changeCurrentTabIfNotVisible(previousTabsList: tabs)
         }
