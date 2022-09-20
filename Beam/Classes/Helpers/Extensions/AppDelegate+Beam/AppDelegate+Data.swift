@@ -29,7 +29,7 @@ extension AppDelegate {
         StandardStorable<Any>.clear()
 
         // Favicon Cache
-        FaviconProvider.shared.clear()
+        data.currentAccount?.data.faviconProvider.clearCache()
 
         // Cookies && Cache
         data.currentAccount?.data.clearCookiesAndCache()

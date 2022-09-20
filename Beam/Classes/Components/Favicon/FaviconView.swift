@@ -10,6 +10,7 @@ import Combine
 
 struct FaviconView: View {
     let url: URL?
+    let provider: FaviconProvider
 
     @State private var faviconState: FaviconState = .loading
 
@@ -40,7 +41,7 @@ struct FaviconView: View {
                 self.faviconState = .generic
                 return
             }
-            FaviconProvider.shared.favicon(fromURL: url) { favicon in
+            provider.favicon(fromURL: url) { favicon in
                 if let image = favicon?.image {
                     self.faviconState = .available(image)
                 } else {
@@ -53,6 +54,8 @@ struct FaviconView: View {
 
 struct FaviconView_Previews: PreviewProvider {
     static var previews: some View {
-        FaviconView(url: URL(string: "www.beamapp.co")!)
+        if let url = URL(string: "www.beamapp.co") {
+            FaviconView(url: url, provider: FaviconProvider())
+        }
     }
 }
