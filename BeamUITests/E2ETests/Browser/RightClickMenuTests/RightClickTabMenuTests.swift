@@ -122,4 +122,66 @@ class RightClickTabMenuTests: BaseTest {
             XCTAssertEqual(testPage.getInputValue(.username), emptyString)
         }
     }
+    
+    func testMoveTabToSideWindowAndCloseConferenceDialog() {
+        testrailId("C1187")
+        let meetingId = "rox-yfpc-yqi"
+        
+        step("GIVEN I open normal tab and tab with \(meetingId) conference meeting"){
+            OmniBoxTestView().openWebsite("meet.google.com/\(meetingId)")
+            uiMenu.invoke(.loadUITestPage1)
+            webView.waitForWebViewToLoad()
+        }
+        
+        step("WHEN I move \(meetingId) tab to a conference window"){
+            webView
+                .openTabMenu(tabIndex: 0)
+                .selectTabMenuItem(.moveTabToSideWindow)
+        }
+        
+        let conferenceDialog = getAppDialogs(dialogTitle: "Meet - \(meetingId)")
+         
+        step("THEN I web meeting tab is moved to video conference window") {
+            XCTAssertEqual(getNumberOfWindows(), 1)
+            XCTAssertTrue(conferenceDialog.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            // Comment out due to flakiness when based on meeting state when the user cannot join the meeting the icons are not displayed - https://linear.app/beamapp/issue/BE-5646/ui-menu-to-invoke-mocked-conference-window
+            /*for identifier in ConferencePopupViewLocators.Buttons.allCases {
+                XCTAssertTrue(conferenceDialog.buttons[identifier.accessibilityIdentifier].exists)
+            }*/
+        }
+        
+        step("THEN only web conferences meetings has the option to be moved in a conference window") {
+            XCTAssertFalse(webView.openTabMenu(tabIndex: 0).isTabMenuOptionDisplayed(.moveTabToSideWindow))
+        }
+        
+        step("THEN I successfully move conference window back to tab"){
+            conferenceDialog.hoverAndTapInTheMiddle() //required to activate the dialog
+            
+            let conterenceDialogPermissionDontAllowButton = conferenceDialog.sheets.buttons[AlertViewLocators.Buttons.dontAllowButton.accessibilityIdentifier]
+            if conterenceDialogPermissionDontAllowButton.exists {
+                conterenceDialogPermissionDontAllowButton.hoverAndTapInTheMiddle()
+                XCTAssertTrue(waitForDoesntExist(conferenceDialog.sheets.firstMatch))
+            }
+            
+            conferenceDialog.buttons[ConferencePopupViewLocators.Buttons.openInMainWindowButton.accessibilityIdentifier].hoverAndTapInTheMiddle()
+            XCTAssertTrue(waitForDoesntExist(conferenceDialog))
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+        }
+        
+        step("THEN I can move \(meetingId) tab back to a conference window again"){
+            webView
+                .openTabMenu(tabIndex: 1)
+                .selectTabMenuItem(.moveTabToSideWindow)
+            XCTAssertTrue(conferenceDialog.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        
+        step("THEN I successfully close the conference window"){
+            conferenceDialog.buttons[ConferencePopupViewLocators.Buttons.closeButton.accessibilityIdentifier].hoverAndTapInTheMiddle()
+            XCTAssertTrue(waitForDoesntExist(conferenceDialog))
+            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+        }
+        
+        
+    }
 }
