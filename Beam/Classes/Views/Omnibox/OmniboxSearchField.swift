@@ -59,10 +59,11 @@ struct OmniboxSearchField: View {
         var icon: NSImage?
         if let autocompleteResult = selectedAutocompleteResult, let url = autocompleteResult.url,
             autocompleteResult.source.isWebURLResult {
-            FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { favicon in
+            let provider = state.data.faviconProvider
+            provider.favicon(fromURL: url, cachePolicy: .cacheOnly) { favicon in
                 icon = favicon?.image
                 if favicon == nil, let aliasDestinationURL = autocompleteResult.aliasForDestinationURL {
-                    FaviconProvider.shared.favicon(fromURL: aliasDestinationURL, cacheOnly: true) { favicon in
+                    provider.favicon(fromURL: aliasDestinationURL, cachePolicy: .cacheOnly) { favicon in
                         icon = favicon?.image
                     }
                 }

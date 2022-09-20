@@ -410,8 +410,10 @@ import BeamCore
         guard let url = (url ?? preloadUrl) else { favIcon = nil; return }
         updateFavIconDispatchItem?.cancel()
         let dispatchItem = DispatchWorkItem { [weak self] in
-            guard !fromWebView || cacheOnly || (self?.webView != nil && self?.isLoading != true) else { return }
-            FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? self?.webView : nil, cacheOnly: cacheOnly) { [weak self] (favicon) in
+            let isLoading = self?.isLoading == true || self?.webView.isLoading == true
+            let policy: FaviconProvider.CachePolicy = cacheOnly ? .cacheOnly : .default
+            guard !fromWebView || cacheOnly || (self?.webView != nil && !isLoading), let provider = self?.data?.faviconProvider else { return }
+            provider.favicon(fromURL: url, webView: fromWebView ? self?.webView : nil, cachePolicy: policy) { [weak self] (favicon) in
                 guard let self = self else { return }
                 guard let image = favicon?.image else {
                     if clearIfNotFound {

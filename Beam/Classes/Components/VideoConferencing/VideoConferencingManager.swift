@@ -14,7 +14,7 @@ final class VideoConferencingManager {
     private(set) weak var currentPanel: VideoConferencingPanel?
 
     /// Starts a video conferencing session within a dedicated panel.
-    func startVideoConferencing(with request: URLRequest) throws {
+    func startVideoConferencing(with request: URLRequest, faviconProvider: FaviconProvider?) throws {
         guard currentPanel == nil else {
             throw Error.existingSession
         }

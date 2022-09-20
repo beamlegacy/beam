@@ -87,11 +87,12 @@ final class VideoConferencingViewModel: NSObject, ObservableObject {
     @Published private(set) var isPageMuted: Bool = false
 
     private let detailsClient: VideoConferencingClient
-
+    private let faviconProvider: FaviconProvider?
     private var cancellables: Set<AnyCancellable> = []
 
-    init(client: VideoConferencingClient) {
+    init(client: VideoConferencingClient, faviconProvider: FaviconProvider? = nil) {
         self.detailsClient = client
+        self.faviconProvider = faviconProvider
         super.init()
         detailsClient
             .isLoadingPublisher
@@ -117,19 +118,22 @@ final class VideoConferencingViewModel: NSObject, ObservableObject {
                 .store(in: &cancellables)
         }
 
-        detailsClient
-            .urlPublisher
-            .flatMap { url in
-                Future<Favicon?, Never> { promise in
-                    FaviconProvider.shared.favicon(fromURL: url) { favicon in
-                        promise(.success(favicon))
+        if let faviconProvider = faviconProvider {
+            weak var weakWebView = detailsClient.webView
+            detailsClient
+                .urlPublisher
+                .flatMap { url in
+                    Future<Favicon?, Never> { promise in
+                        faviconProvider.favicon(fromURL: url, webView: weakWebView) { favicon in
+                            promise(.success(favicon))
+                        }
                     }
                 }
-            }
-            .compactMap { $0?.image }
-            .receive(on: DispatchQueue.main)
-            .assign(to: \.faviconImage, onWeak: self)
-            .store(in: &cancellables)
+                .compactMap { $0?.image }
+                .receive(on: DispatchQueue.main)
+                .assign(to: \.faviconImage, onWeak: self)
+                .store(in: &cancellables)
+        }
 
         NotificationCenter.default
             .publisher(for: NSWindow.didResignKeyNotification)
