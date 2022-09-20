@@ -91,6 +91,14 @@ final class TabGroup: Identifiable {
         newGroup.pageIds = discardPages ? [] : pageIds
         return newGroup
     }
+
+    var descriptionForLogs: String {
+        var title = title ?? id.uuidString
+        if let parentGroup = parentGroup {
+            title += "-copyOf(\(parentGroup.uuidString))"
+        }
+        return title
+    }
 }
 
 extension TabGroup: Equatable, Hashable {

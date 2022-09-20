@@ -133,7 +133,7 @@ extension TabGroupingManager {
     }
 
     func pageWasMoved(pageId: ClusteringManager.PageID, fromGroup: TabGroup?, toGroup: TabGroup?) {
-        Logger.shared.logInfo("Page(\(pageId)) moved from group '\(fromGroup?.title ?? "")' to group '\(toGroup?.title ?? "")'", category: .tabGrouping)
+        Logger.shared.logInfo("Page(\(pageId)) moved from group '\(fromGroup?.descriptionForLogs ?? "nil")' to group '\(toGroup?.descriptionForLogs ?? "nil")'", category: .tabGrouping)
         if let fromGroup = fromGroup {
             fromGroup.updatePageIds(fromGroup.pageIds.filter { $0 != pageId })
             groupDidChangeContent(fromGroup, fromUser: true)
@@ -145,7 +145,7 @@ extension TabGroupingManager {
     }
 
     func ungroup(_ group: TabGroup) {
-        Logger.shared.logInfo("Ungrouping Tab Group '\(group.title ?? "\(group.id)")'", category: .tabGrouping)
+        Logger.shared.logInfo("Ungrouping Tab Group '\(group.descriptionForLogs)'", category: .tabGrouping)
         let beWith: [ClusteringManager.PageID] = []
         let beApart: [ClusteringManager.PageID] = group.pageIds
         let clusteringManager = BeamData.shared.clusteringManager
@@ -158,7 +158,7 @@ extension TabGroupingManager {
 
     func toggleCollapse(_ group: TabGroup) {
         group.toggleCollapsed()
-        Logger.shared.logInfo("Tab Group '\(group.title ?? "\(group.id)")' \(group.collapsed ? "collapsed" : "expanded")", category: .tabGrouping)
+        Logger.shared.logInfo("Tab Group '\(group.descriptionForLogs)' \(group.collapsed ? "collapsed" : "expanded")", category: .tabGrouping)
     }
 
     func allOpenTabs(inGroup: TabGroup? = nil) -> [BrowserTab] {
@@ -167,7 +167,7 @@ extension TabGroupingManager {
 
     @MainActor
     private func deleteGroupInDB(_ group: TabGroup) async {
-        Logger.shared.logInfo("Deleting Tab Group '\(group.title ?? "\(group.id)")'", category: .tabGrouping)
+        Logger.shared.logInfo("Deleting Tab Group '\(group.descriptionForLogs)'", category: .tabGrouping)
 
         // 1. if group was captured in a note. Remove the reference.
         let noteReferencingThisGroup = await findNoteContainingGroup(group)
