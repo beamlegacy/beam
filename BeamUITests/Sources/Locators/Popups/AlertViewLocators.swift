@@ -20,6 +20,7 @@ enum AlertViewLocators {
         case saveCCButton = "Save Credit Card"
         case signOutButton = "Sign Out"
         case forgetButton = "Forget"
+        case dontAllowButton = "Don’t Allow"
     }
     
     enum StaticTexts: String, CaseIterable, UIElement {

@@ -55,6 +55,7 @@ enum WebViewLocators {
         case pasteAndGo = "Paste and Go"
         case duplicateTab = "Duplicate Tab"
         case refreshTab = "Refresh Tab"
+        case moveTabToSideWindow = "Move Tab to Side Window"
     }
     
 }
