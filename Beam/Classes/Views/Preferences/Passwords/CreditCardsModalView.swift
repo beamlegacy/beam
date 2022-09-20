@@ -160,7 +160,7 @@ class CreditCardTableViewItem: TwoTextFieldViewItem {
         self.botTextFieldPlaceholder = "Cardholder"
     }
 
-    override func loadRemoteFavIcon(completion: @escaping (NSImage) -> Void) {
+    override func loadRemoteFavIcon(provider: FaviconProvider?, completion: @escaping (NSImage) -> Void) {
         let icon = NSImage(named: cardImageName)!
         icon.isTemplate = false
         icon.accessibilityDescription = "Card Icon"

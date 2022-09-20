@@ -427,7 +427,7 @@ extension EmbedNode {
             editor.openURL(url, element, false)
         }
 
-        FaviconProvider.shared.favicon(fromURL: url) { [weak layer] favicon in
+        editor?.state?.data.faviconProvider.favicon(fromURL: url) { [weak layer] favicon in
             guard let image = favicon?.image else { return }
             layer?.setImage(image)
         }

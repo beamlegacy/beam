@@ -113,9 +113,10 @@ struct ClusterContentView: View {
 struct TabRowView: View {
     var tabInfo: TabIndexingInfo
 
+    @Environment(\.faviconProvider) var faviconProvider
     var body: some View {
         HStack {
-            FaviconView(url: tabInfo.url)
+            FaviconView(url: tabInfo.url, provider: faviconProvider)
                 .padding(.trailing, 4)
             Text(tabInfo.document.title)
                 .font(BeamFont.medium(size: 11).swiftUI)

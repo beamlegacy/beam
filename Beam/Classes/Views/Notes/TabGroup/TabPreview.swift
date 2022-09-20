@@ -11,6 +11,7 @@ import BeamCore
 struct TabPreview: View {
 
     let tab: TabGroupBeamObject.PageInfo
+    var faviconProvider: FaviconProvider?
 
     @State private var isHovered: Bool = false
     @State private var favicon: Image?
@@ -66,7 +67,8 @@ struct TabPreview: View {
     private func setFavicon(for url: URL) {
         favicon = nil
         requestedFaviconURL = url
-        FaviconProvider.shared.favicon(fromURL: url) { favicon in
+
+        faviconProvider?.favicon(fromURL: url) { favicon in
             DispatchQueue.main.async {
                 if let nsImage = favicon?.image, url == requestedFaviconURL {
                     self.favicon = Image(nsImage: nsImage)

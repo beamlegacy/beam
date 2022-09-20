@@ -588,7 +588,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var dataTreeWindow: DataTreeWindow?
 
     var filesWindow: FilesWindow?
-    var tabGroupingWindow: TabGroupingSettingsWindow?
+    var tabClusterinV1SettingsWindow: TabClusteringV1SettingsWindow?
     weak var tabGroupingFeedbackWindow: TabGroupingFeedbackWindow?
     ///Should only be used to say that the full sync on quit is done
     ///Set to true to directly return .terminateNow in shouldTerminate
