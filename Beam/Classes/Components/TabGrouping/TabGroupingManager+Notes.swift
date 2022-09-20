@@ -36,6 +36,7 @@ extension TabGroupingManager: BeamDocumentSource {
             else {
                 throw TabGroupSharingError.notAuthenticated
             }
+            Logger.shared.logInfo("Sharing Tab Group '\(group.descriptionForLogs)'...", category: .tabGrouping)
             group.status = .sharing
             let shouldSaveParentGroup = !group.isLocked
             if !group.isLocked {
@@ -54,17 +55,19 @@ extension TabGroupingManager: BeamDocumentSource {
                     group.status = .default
                     guard case .success = result, let url = BeamNoteSharingUtils.getPublicLink(for: note) else {
                         self?.showShareGroupError(error: .publicationError, forGroup: group)
+                        Logger.shared.logError("Couldn't share Tab Group, Publication Error, '\(group.descriptionForLogs)'", category: .tabGrouping)
                         completion?(.failure(.publicationError))
                         return
                     }
                     self?.handleShareGroupService(forURL: url, with: shareService, data: state.data)
+                    Logger.shared.logInfo("Tab Group Shared '\(group.descriptionForLogs)'", category: .tabGrouping)
                     completion?(.success(url))
                 }
             }
             return true
         } catch {
             group.status = .default
-            Logger.shared.logError("Couldn't share Tab Group (\(group.id)) - \(error.localizedDescription)", category: .tabGrouping)
+            Logger.shared.logError("Couldn't share Tab Group '\(group.descriptionForLogs)' - \(error.localizedDescription)", category: .tabGrouping)
             let shareError = error as? TabGroupSharingError ?? .couldntCreateNote
             showShareGroupError(error: shareError, forGroup: group)
             completion?(.failure(shareError))
@@ -175,10 +178,10 @@ extension TabGroupingManager: BeamDocumentSource {
         let copiedGroup = self.copyForNoteInsertion(group, newTitle: newTitle)
         note.addTabGroup(copiedGroup.id)
         if note.save(self) {
-            Logger.shared.logInfo("Added group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note)", category: .tabGrouping)
+            Logger.shared.logInfo("Added group '\(copiedGroup.descriptionForLogs)' into note '\(note)'", category: .tabGrouping)
             return true
         } else {
-            Logger.shared.logInfo("Failed to add group \(copiedGroup.title ?? "Unnamed"), id: \(copiedGroup.id.uuidString) into note \(note)", category: .tabGrouping)
+            Logger.shared.logInfo("Failed to add group '\(copiedGroup.descriptionForLogs)' into note '\(note)'", category: .tabGrouping)
             return false
         }
     }
