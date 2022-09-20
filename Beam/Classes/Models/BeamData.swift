@@ -71,6 +71,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     private(set) lazy var pinnedManager: PinnedNotesManager = {
         PinnedNotesManager()
     }()
+    let faviconProvider = FaviconProvider()
     let signpost = SignPost("BeamData")
     let analyticsCollector = AnalyticsCollector()
 

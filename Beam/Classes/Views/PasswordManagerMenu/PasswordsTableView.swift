@@ -48,9 +48,9 @@ class PasswordTableViewItem: IconAndTextTableViewItem {
         self.text = hostname
     }
 
-    override func loadRemoteFavIcon(completion: @escaping (NSImage) -> Void) {
+    override func loadRemoteFavIcon(provider: FaviconProvider?, completion: @escaping (NSImage) -> Void) {
         guard let hostURL = URL(string: hostname.validUrl().url) else { return }
-        FaviconProvider.shared.favicon(fromURL: hostURL) { favicon in
+        provider?.favicon(fromURL: hostURL) { favicon in
             if let remoteImage = favicon?.image {
                 DispatchQueue.main.async {
                     completion(remoteImage)

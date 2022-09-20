@@ -60,6 +60,156 @@ class FaviconProviderTests: XCTestCase {
         XCTAssertEqual(resultFor32?.url.absoluteString, "f.co/icon.ico?s=nil")
     }
 
+
+    func testURLLevels() {
+        let url = URL(string: "https://app.beamapp.co/another/path/page.html")!
+        var keys = FaviconProvider.FaviconLevelsKeys(url: url, size: 32)
+
+        XCTAssertEqual(keys.cacheKey(level: .full), "app.beamapp.co/another/path/page.html-32")
+        XCTAssertEqual(keys.cacheKey(level: .path), "app.beamapp.co/another/path-32")
+        XCTAssertEqual(keys.cacheKey(level: .host), "app.beamapp.co-32")
+
+        let urlWithoutScheme = URL(string: "app.beamapp.co/another/path/page.html")!
+        keys = FaviconProvider.FaviconLevelsKeys(url: urlWithoutScheme, size: 32)
+
+        XCTAssertEqual(keys.cacheKey(level: .full), "app.beamapp.co/another/path/page.html-32")
+        XCTAssertEqual(keys.cacheKey(level: .path), "app.beamapp.co/another/path-32")
+        XCTAssertEqual(keys.cacheKey(level: .host), "app.beamapp.co-32")
+    }
+
+    func testURLLevelsForPath() {
+        let url = URL(string: "https://app.beamapp.co/another/path/")!
+        var keys = FaviconProvider.FaviconLevelsKeys(url: url, size: 32)
+
+        XCTAssertEqual(keys.cacheKey(level: .full), "app.beamapp.co/another/path-32")
+        XCTAssertEqual(keys.cacheKey(level: .path), keys.cacheKey(level: .full))
+        XCTAssertEqual(keys.cacheKey(level: .host), "app.beamapp.co-32")
+
+        let urlWithoutScheme = URL(string: "app.beamapp.co/another/path/")!
+        keys = FaviconProvider.FaviconLevelsKeys(url: urlWithoutScheme, size: 32)
+
+        XCTAssertEqual(keys.cacheKey(level: .full), "app.beamapp.co/another/path-32")
+        XCTAssertEqual(keys.cacheKey(level: .path), keys.cacheKey(level: .full))
+        XCTAssertEqual(keys.cacheKey(level: .host), "app.beamapp.co-32")
+    }
+
+    func testURLLevelsForHost() {
+        let url = URL(string: "https://app.beamapp.co/")!
+        var keys = FaviconProvider.FaviconLevelsKeys(url: url, size: 32)
+
+        XCTAssertEqual(keys.cacheKey(level: .full), "app.beamapp.co-32")
+        XCTAssertEqual(keys.cacheKey(level: .path), keys.cacheKey(level: .full))
+        XCTAssertEqual(keys.cacheKey(level: .host), keys.cacheKey(level: .full))
+
+        let urlWithoutScheme = URL(string: "app.beamapp.co/")!
+        keys = FaviconProvider.FaviconLevelsKeys(url: urlWithoutScheme, size: 32)
+
+        XCTAssertEqual(keys.cacheKey(level: .full), "app.beamapp.co-32")
+        XCTAssertEqual(keys.cacheKey(level: .path), keys.cacheKey(level: .full))
+        XCTAssertEqual(keys.cacheKey(level: .host), keys.cacheKey(level: .full))
+    }
+
+    private func retrieveFavicon(provider: FaviconProvider, url: URL, webView: WKWebView? = nil,
+                                 cachePolicy: FaviconProvider.CachePolicy = .default, waitCount: Int = 1) async -> Favicon? {
+        await withCheckedContinuation { continuation in
+            var waitCount = waitCount
+            provider.favicon(fromURL: url, webView: webView, cachePolicy: cachePolicy) { favicon in
+                waitCount -= 1
+                if waitCount == 0 {
+                    continuation.resume(with: .success(favicon))
+                }
+            }
+        }
+    }
+
+    func testGetCacheIconLevelsPriority() async {
+        let url = URL(string: "app.beamapp.co/another/path/page.html")!
+        let keys = FaviconProvider.FaviconLevelsKeys(url: url, size: 32)
+        let cache = FaviconCache(countLimit: 100)
+        let faviconFullURL = Favicon(url: URL(string: "beamapp.co/asset/icon.png#full")!, origin: .webView)
+        let faviconPath = Favicon(url: URL(string: "beamapp.co/asset/icon.png#path")!, origin: .webView)
+        let faviconHost = Favicon(url: URL(string: "beamapp.co/asset/icon.png#host")!, origin: .webView)
+        cache.insert(faviconFullURL, forKey: keys.cacheKey(level: .full))
+        cache.insert(faviconPath, forKey: keys.cacheKey(level: .path))
+        cache.insert(faviconHost, forKey: keys.cacheKey(level: .host))
+
+        let provider = FaviconProvider(withCache: cache)
+
+        // priority to full
+        let icon1 = await retrieveFavicon(provider: provider, url: url, cachePolicy: .cacheOnly)
+        XCTAssertEqual(icon1?.url, faviconFullURL.url)
+
+        // then path
+        cache.removeValue(forKey: keys.cacheKey(level: .full))
+        let icon2 = await retrieveFavicon(provider: provider, url: url, cachePolicy: .cacheOnly)
+        XCTAssertEqual(icon2?.url, faviconPath.url)
+
+        // then host
+        cache.removeValue(forKey: keys.cacheKey(level: .path))
+        let icon3 = await retrieveFavicon(provider: provider, url: url, cachePolicy: .cacheOnly)
+        XCTAssertEqual(icon3?.url, faviconHost.url)
+    }
+
+    @MainActor
+    func testUpdateFaviconLevelsPriority() async {
+        let url = URL(string: "app.beamapp.co/another/path/page.html")!
+        let pathURL = URL(string: "app.beamapp.co/another/path")!
+        let hostURL = URL(string: "app.beamapp.co")!
+        let keys = FaviconProvider.FaviconLevelsKeys(url: url, size: 32)
+        let cache = FaviconCache(countLimit: 100)
+        let faviconFullURL = Favicon(url: URL(string: "beamapp.co/asset/icon.png#full")!, origin: .webView)
+        let faviconPath = Favicon(url: URL(string: "beamapp.co/asset/icon.png#path")!, origin: .webView)
+        let faviconHost = Favicon(url: URL(string: "beamapp.co/asset/icon.png#host")!, origin: .webView)        
+        let finder = MockFinder()
+        let webView = MockWebView()
+        let provider = FaviconProvider(withCache: cache, withFinder: finder)
+
+        XCTAssertEqual(cache.numberOfValues, 0)
+
+        // Skipping cache to test the retrieval of a new favicon
+
+        // 1. load url. empty, updated the host with full icon
+        finder.faviconFromWebview = faviconFullURL
+        _ = await retrieveFavicon(provider: provider, url: url, webView: webView, cachePolicy: .skipCache)
+        XCTAssertEqual(cache.numberOfValues, 1)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .host))?.url, faviconFullURL.url)
+
+        // 2. load url again. nothing updated
+        finder.faviconFromWebview = faviconFullURL
+        _ = await retrieveFavicon(provider: provider, url: url, webView: webView, cachePolicy: .skipCache)
+        XCTAssertEqual(cache.numberOfValues, 1)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .host))?.url, faviconFullURL.url)
+
+        // 3. load host url. host is updated
+        finder.faviconFromWebview = faviconHost
+        _ = await retrieveFavicon(provider: provider, url: hostURL, webView: webView, cachePolicy: .skipCache)
+        XCTAssertEqual(cache.numberOfValues, 1)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .host))?.url, faviconHost.url)
+
+        // 4. load url again. path is updated, host is kept
+        finder.faviconFromWebview = faviconFullURL
+        _ = await retrieveFavicon(provider: provider, url: url, webView: webView, cachePolicy: .skipCache)
+        XCTAssertEqual(cache.numberOfValues, 2)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .host))?.url, faviconHost.url)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .path))?.url, faviconFullURL.url)
+
+        // 5. load path url. path is updated
+        finder.faviconFromWebview = faviconPath
+        _ = await retrieveFavicon(provider: provider, url: pathURL, webView: webView, cachePolicy: .skipCache)
+        XCTAssertEqual(cache.numberOfValues, 2)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .host))?.url, faviconHost.url)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .path))?.url, faviconPath.url)
+
+        // 6. load url again. full is updated, path is kept, host is kept
+        finder.faviconFromWebview = faviconFullURL
+        _ = await retrieveFavicon(provider: provider, url: url, webView: webView, cachePolicy: .skipCache)
+        XCTAssertEqual(cache.numberOfValues, 3)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .host))?.url, faviconHost.url)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .path))?.url, faviconPath.url)
+        XCTAssertEqual(cache.value(forKey: keys.cacheKey(level: .full))?.url, faviconFullURL.url)
+    }
+
+    // MARK: - Retrievals Tests
     class MockFinder: FaviconProvider.Finder {
 
         var faviconFromURL: Favicon?
@@ -67,7 +217,7 @@ class FaviconProviderTests: XCTestCase {
 
         var findFromWebViewCalled: Int = 0
         var findFromURLCalled: Int = 0
-        override func find(with url: URL, completion:  @escaping (Result<Favicon, FaviconProvider.FinderError>) -> Void) {
+        override func find(with url: URL, completion: @escaping (Result<Favicon, FaviconProvider.FinderError>) -> Void) {
             findFromURLCalled += 1
             guard let faviconToReturn = faviconFromURL else {
                 completion(.failure(.dataNotFound))

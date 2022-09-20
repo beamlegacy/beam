@@ -35,7 +35,7 @@ struct ImageCodableWrapper: Codable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        guard let data = image.tiffRepresentation else {
+        guard let data = image.pngRepresentation else {
             throw ImageCodableWrapperError.encodingFailed
         }
         try container.encode(data, forKey: CodingKeys.image)
