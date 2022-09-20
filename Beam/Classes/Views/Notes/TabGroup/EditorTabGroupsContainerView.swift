@@ -13,6 +13,8 @@ struct EditorTabGroupsContainerView: View {
     let tabGroups: [TabGroupBeamObject]
     let note: BeamNote
 
+    @Environment(\.faviconProvider) var faviconProvider
+
     @State private var hoveredTab: TabGroupBeamObject.PageInfo?
     @State private var hoveredTabGroupFrame: CGPoint?
     @State private var hoveredTabGroupColor: Color?
@@ -45,7 +47,7 @@ struct EditorTabGroupsContainerView: View {
         if let hoveredTab = hoveredTab,
            let hoveredTabGroupFrame = hoveredTabGroupFrame,
            let groupColor = hoveredTabGroupColor {
-            TabPreview(tab: hoveredTab, placeholderTintColor: groupColor)
+            TabPreview(tab: hoveredTab, faviconProvider: faviconProvider, placeholderTintColor: groupColor)
                 .position(CGPoint(x: hoveredTabGroupFrame.x - localProxy.origin.x, y: hoveredTabGroupFrame.y - localProxy.origin.y + previewOffset))
         }
     }

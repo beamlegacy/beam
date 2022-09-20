@@ -29,6 +29,7 @@ class CacheTests: XCTestCase {
         XCTAssertNil(cache["1"])
         XCTAssertNil(cache["2"])
         XCTAssertNotNil(cache["3"])
+        XCTAssertNotNil(cache["4"])
         XCTAssertNotNil(cache["5"])
         XCTAssertNotNil(cache["6"])
     }

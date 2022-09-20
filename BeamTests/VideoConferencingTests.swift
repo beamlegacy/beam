@@ -10,10 +10,10 @@ final class VideoConferencingTests: XCTestCase {
         let manager = VideoConferencingManager()
 
         XCTAssertNil(manager.currentPanel)
-        try manager.startVideoConferencing(with: URLRequest(url: url))
+        try manager.startVideoConferencing(with: URLRequest(url: url), faviconProvider: nil)
         XCTAssertNotNil(manager.currentPanel)
 
-        XCTAssertThrowsError(try manager.startVideoConferencing(with: URLRequest(url: url)))
+        XCTAssertThrowsError(try manager.startVideoConferencing(with: URLRequest(url: url), faviconProvider: nil))
     }
 
 }

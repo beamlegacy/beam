@@ -898,7 +898,7 @@
 		A03E64A6282CFF8D0003A7B2 /* RoundedCornersModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03E64A5282CFF8D0003A7B2 /* RoundedCornersModifier.swift */; };
 		A0404F0C25E7ECDD00E347F3 /* CommandNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */; };
 		A043B7E7265937DA00E267E5 /* AppDelegate+Tabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7E6265937DA00E267E5 /* AppDelegate+Tabs.swift */; };
-		A043B7FE26593A5300E267E5 /* TabGroupingSettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7FD26593A5300E267E5 /* TabGroupingSettingsWindow.swift */; };
+		A043B7FE26593A5300E267E5 /* TabClusteringV1SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7FD26593A5300E267E5 /* TabClusteringV1SettingsWindow.swift */; };
 		A043B800265A547100E267E5 /* TabGroupingSettingsContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7FF265A547100E267E5 /* TabGroupingSettingsContentView.swift */; };
 		A0440E52282DC7AE00464AAC /* ToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0440E51282DC7AE00464AAC /* ToggleView.swift */; };
 		A04E849525DD1CEF0066CD44 /* InsertText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04E849425DD1CEF0066CD44 /* InsertText.swift */; };
@@ -1185,6 +1185,8 @@
 		A5919F6F268EA499009015C5 /* EmbedNodeWebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */; };
 		A5919F7F268EF964009015C5 /* TextEditCmdReturnAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F7E268EF964009015C5 /* TextEditCmdReturnAnimator.swift */; };
 		A59227CE288EA12D00C23DBC /* TabGroupExternalDraggingSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59227CD288EA12D00C23DBC /* TabGroupExternalDraggingSource.swift */; };
+		A593BE6728D1D3D900CE6CDD /* FaviconCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A593BE6628D1D3D900CE6CDD /* FaviconCache.swift */; };
+		A593BE6E28D241DB00CE6CDD /* SwiftUIEnvironmentKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = A593BE6D28D241DB00CE6CDD /* SwiftUIEnvironmentKeys.swift */; };
 		A5946804265CE5B30044A892 /* DeleteDocumentCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946803265CE5B30044A892 /* DeleteDocumentCommand.swift */; };
 		A5946806265CE5ED0044A892 /* DocumentCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946805265CE5ED0044A892 /* DocumentCommand.swift */; };
 		A5946826265D29350044A892 /* CGPath+Union.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946825265D29350044A892 /* CGPath+Union.swift */; };
@@ -2874,7 +2876,7 @@
 		A03E64A5282CFF8D0003A7B2 /* RoundedCornersModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundedCornersModifier.swift; sourceTree = "<group>"; };
 		A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandNodeTests.swift; sourceTree = "<group>"; };
 		A043B7E6265937DA00E267E5 /* AppDelegate+Tabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Tabs.swift"; sourceTree = "<group>"; };
-		A043B7FD26593A5300E267E5 /* TabGroupingSettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingSettingsWindow.swift; sourceTree = "<group>"; };
+		A043B7FD26593A5300E267E5 /* TabClusteringV1SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabClusteringV1SettingsWindow.swift; sourceTree = "<group>"; };
 		A043B7FF265A547100E267E5 /* TabGroupingSettingsContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingSettingsContentView.swift; sourceTree = "<group>"; };
 		A0440E51282DC7AE00464AAC /* ToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleView.swift; sourceTree = "<group>"; };
 		A04E849425DD1CEF0066CD44 /* InsertText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertText.swift; sourceTree = "<group>"; };
@@ -3159,6 +3161,8 @@
 		A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedNodeWebPage.swift; sourceTree = "<group>"; };
 		A5919F7E268EF964009015C5 /* TextEditCmdReturnAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditCmdReturnAnimator.swift; sourceTree = "<group>"; };
 		A59227CD288EA12D00C23DBC /* TabGroupExternalDraggingSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupExternalDraggingSource.swift; sourceTree = "<group>"; };
+		A593BE6628D1D3D900CE6CDD /* FaviconCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconCache.swift; sourceTree = "<group>"; };
+		A593BE6D28D241DB00CE6CDD /* SwiftUIEnvironmentKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIEnvironmentKeys.swift; sourceTree = "<group>"; };
 		A5946803265CE5B30044A892 /* DeleteDocumentCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteDocumentCommand.swift; sourceTree = "<group>"; };
 		A5946805265CE5ED0044A892 /* DocumentCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCommand.swift; sourceTree = "<group>"; };
 		A5946825265D29350044A892 /* CGPath+Union.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGPath+Union.swift"; sourceTree = "<group>"; };
@@ -4162,7 +4166,6 @@
 			isa = PBXGroup;
 			children = (
 				A5297F3927AC3465006B3E1F /* SearchEngineAutocompleter.swift */,
-				A5233DE425FB682700BE6F05 /* FaviconProvider.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -4665,6 +4668,7 @@
 				A043B7FC26593A4800E267E5 /* TabGrouping */,
 				A57BFEC02615B4AC00CFB646 /* TableView */,
 				A0C5D845263C636C00FA6F6E /* Toast */,
+				A593BE5428D0997F00CE6CDD /* Favicon */,
 				A55C98C32806FAC400717D3E /* Sharing */,
 				A5153EDB260CC4AC00C84902 /* UIElements */,
 			);
@@ -6935,7 +6939,7 @@
 				A54E75F2283BC657002B9254 /* TabGroupingColor.swift */,
 				A5E4AF68282AD5F40087FAF4 /* TabClusteringGroupCapsuleView.swift */,
 				A5428C9028339E0F00309441 /* TabClusteringNameColorPickerView.swift */,
-				A043B7FD26593A5300E267E5 /* TabGroupingSettingsWindow.swift */,
+				A043B7FD26593A5300E267E5 /* TabClusteringV1SettingsWindow.swift */,
 				A043B7FF265A547100E267E5 /* TabGroupingSettingsContentView.swift */,
 				A0E9B0FA2666A80600FC99A5 /* TabGroupingSettingsTitleBarView.swift */,
 				A05FCDB027E8DB3D007FD449 /* TabGroupingFeedbackWindow.swift */,
@@ -7214,7 +7218,6 @@
 		A5153EDB260CC4AC00C84902 /* UIElements */ = {
 			isa = PBXGroup;
 			children = (
-				A0E9B0E226668C1300FC99A5 /* FaviconView.swift */,
 				A52BFE62260901980028D3F3 /* Separator.swift */,
 				A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */,
 				A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */,
@@ -7280,6 +7283,7 @@
 			isa = PBXGroup;
 			children = (
 				418171E02581107C00317ED8 /* ContentView.swift */,
+				A593BE6D28D241DB00CE6CDD /* SwiftUIEnvironmentKeys.swift */,
 				A52393A926541A18008D4C85 /* ModeView.swift */,
 				A52393A726541A06008D4C85 /* ModeViewTransitions.swift */,
 			);
@@ -7409,6 +7413,16 @@
 				A5919F6C268EA0A2009015C5 /* WebPageBaseImpl.swift */,
 			);
 			path = WebPage;
+			sourceTree = "<group>";
+		};
+		A593BE5428D0997F00CE6CDD /* Favicon */ = {
+			isa = PBXGroup;
+			children = (
+				A5233DE425FB682700BE6F05 /* FaviconProvider.swift */,
+				A0E9B0E226668C1300FC99A5 /* FaviconView.swift */,
+				A593BE6628D1D3D900CE6CDD /* FaviconCache.swift */,
+			);
+			path = Favicon;
 			sourceTree = "<group>";
 		};
 		A59467ED265CE5510044A892 /* Document */ = {
@@ -9071,6 +9085,7 @@
 				032562FD26051DCB006513E4 /* RBMockClient.m in Sources */,
 				660325B6285B7D32008F4471 /* BeamWebContextMenu+Data.swift in Sources */,
 				A5D88596274E919300F37859 /* NodeHeaderViewModel.swift in Sources */,
+				A593BE6E28D241DB00CE6CDD /* SwiftUIEnvironmentKeys.swift in Sources */,
 				96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */,
 				521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */,
 				33AC9D8E26AF482E004E7EF4 /* EnhancedWebView.swift in Sources */,
@@ -9461,7 +9476,7 @@
 				0325629426051D3B006513E4 /* NSString+IDNA.m in Sources */,
 				0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */,
 				8AEF14AD27F1C8D800A27C1B /* WebSearchMessageHandler.swift in Sources */,
-				A043B7FE26593A5300E267E5 /* TabGroupingSettingsWindow.swift in Sources */,
+				A043B7FE26593A5300E267E5 /* TabClusteringV1SettingsWindow.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
 				873A9FFC27E3B4A20092A834 /* URLProvider.swift in Sources */,
 				523060A827426D1400A03844 /* BeamObjectQueue.swift in Sources */,
@@ -9619,6 +9634,7 @@
 				A5946804265CE5B30044A892 /* DeleteDocumentCommand.swift in Sources */,
 				A55A019427DF49BF002403D5 /* BeamTableCellLottieView.swift in Sources */,
 				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,
+				A593BE6728D1D3D900CE6CDD /* FaviconCache.swift in Sources */,
 				96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */,
 				9688F2BC2851EFF300FAA51B /* TreeDetailView.swift in Sources */,
 				A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */,

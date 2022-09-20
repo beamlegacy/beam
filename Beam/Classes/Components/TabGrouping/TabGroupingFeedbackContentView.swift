@@ -199,9 +199,11 @@ private struct TabGroupingFeedbackTabView: View {
     var title: String
     var color: Color
 
+    @Environment(\.faviconProvider) var faviconProvider
+
     var body: some View {
         HStack {
-            FaviconView(url: url)
+            FaviconView(url: url, provider: faviconProvider)
                 .padding(.vertical, 6)
                 .padding(.horizontal, 8)
             Text(title)

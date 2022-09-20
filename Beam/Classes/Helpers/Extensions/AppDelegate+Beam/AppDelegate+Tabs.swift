@@ -44,14 +44,14 @@ extension AppDelegate {
     }
 
     @IBAction func showTabGroupingWindow(_ sender: Any) {
-        if let tabGroupingWindow = tabGroupingWindow {
+        if let tabGroupingWindow = tabClusterinV1SettingsWindow {
             tabGroupingWindow.makeKeyAndOrderFront(window)
             return
         }
-        guard let clusteringManager = data.currentAccount?.data.clusteringManager else {
+        guard let windowData = data.currentAccount?.data else {
             return
         }
-        let tabGroupingTitleBarView = TabGroupingSettingsTitleBarView(clusteringManager: clusteringManager)
+        let tabGroupingTitleBarView = TabGroupingSettingsTitleBarView(clusteringManager: windowData.clusteringManager)
 
         let accessoryHostingView = BeamHostingView(rootView: tabGroupingTitleBarView)
         accessoryHostingView.frame.size = accessoryHostingView.fittingSize
@@ -59,10 +59,10 @@ extension AppDelegate {
         let titlebarAccessory = NSTitlebarAccessoryViewController()
         titlebarAccessory.view = accessoryHostingView
 
-        tabGroupingWindow = TabGroupingSettingsWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), clusteringManager: clusteringManager)
-        tabGroupingWindow?.addTitlebarAccessoryViewController(titlebarAccessory)
-        tabGroupingWindow?.center()
-        tabGroupingWindow?.makeKeyAndOrderFront(window)
+        tabClusterinV1SettingsWindow = TabClusteringV1SettingsWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), data: windowData)
+        tabClusterinV1SettingsWindow?.addTitlebarAccessoryViewController(titlebarAccessory)
+        tabClusterinV1SettingsWindow?.center()
+        tabClusterinV1SettingsWindow?.makeKeyAndOrderFront(window)
     }
 
     @IBAction func showTabGroupingFeedbackWindow(_ sender: Any) {
@@ -71,10 +71,10 @@ extension AppDelegate {
             tabGroupingFeedbackWindow.makeKeyAndOrderFront(window)
             return
         }
-        guard let clusteringManager = data.currentAccount?.data.clusteringManager else {
+        guard let windowData = data.currentAccount?.data else {
             return
         }
-        let newWindow = TabGroupingFeedbackWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), clusteringManager: clusteringManager)
+        let newWindow = TabGroupingFeedbackWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), data: windowData)
         newWindow.center()
         newWindow.makeKeyAndOrderFront(window)
         tabGroupingFeedbackWindow = newWindow
