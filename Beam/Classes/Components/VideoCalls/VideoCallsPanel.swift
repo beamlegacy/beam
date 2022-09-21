@@ -2,37 +2,36 @@ import AppKit
 import Combine
 import SwiftUI
 
-/// NSPanel subclass displaying a ``VideoConferencingView``.
+/// NSPanel subclass displaying a ``VideoCallsView``.
 /// It displays an entirely custom titleBar with custom trafficLights buttons.
 /// It offers also some shrink/expand capabilities you can typically call when it looses key state.
-final class VideoConferencingPanel: SimpleClearHostingPanel {
+final class VideoCallsPanel: SimpleClearHostingPanel {
 
     private static let panelMinSize: NSSize = .init(width: 336, height: 238)
     private static let panelIdealSize: NSSize = .init(width: 672, height: 476)
 
     private var frameToRestore: CGRect = .zero
 
-    let viewModel: VideoConferencingViewModel
+    let viewModel: VideoCallsViewModel
 
-    private(set) var isFullscreen: Bool = false
+    private(set) var isFullscreen: Bool = false {
+        didSet {
+            isFloatingPanel = !isFullscreen
+        }
+    }
 
     private var titleCancellable: AnyCancellable?
     private var eventMonitor: Any?
     private var isExplicitlyBeingDragged: Bool = false
     private var isProbablyBeingDragged: Bool = false
 
-    private var isUserInteractionEnabled: Bool {
-        get { (contentView as! BeamHostingView<VideoConferencingView>).userInteractionEnabled }
-        set { (contentView as! BeamHostingView<VideoConferencingView>).userInteractionEnabled = newValue }
-    }
-
-    init(viewModel: VideoConferencingViewModel, webView: BeamWebView) {
+    init(viewModel: VideoCallsViewModel, webView: BeamWebView) {
         self.viewModel = viewModel
 
         let mask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView, .nonactivatingPanel]
         super.init(rect: .zero, styleMask: mask)
 
-        self.setFrame(.init(origin: .zero, size: viewModel.isExpanded ? Self.panelIdealSize : Self.panelMinSize), display: false)
+        self.setFrame(.init(origin: .zero, size: viewModel.isShrinked ? Self.panelMinSize : Self.panelIdealSize), display: false)
 
         self.collectionBehavior = [.fullScreenPrimary]
         self.worksWhenModal = true
@@ -40,7 +39,7 @@ final class VideoConferencingPanel: SimpleClearHostingPanel {
         self.isFloatingPanel = true
         self.minSize = Self.panelMinSize
 
-        let contentView = VideoConferencingView(webView: webView, viewModel: viewModel)
+        let contentView = VideoCallsView(webView: webView, viewModel: viewModel)
 
         self.setView(content: contentView)
 
@@ -58,19 +57,27 @@ final class VideoConferencingPanel: SimpleClearHostingPanel {
         }
 
         self.delegate = self
+
+        configureTrackingArea()
+    }
+
+    func configureTrackingArea() {
+        let trackingArea = NSTrackingArea(rect: frame, options: [.mouseEnteredAndExited, .activeAlways], owner: self, userInfo: nil)
+        contentView?.addTrackingArea(trackingArea)
     }
 
     deinit {
         eventMonitor.map { NSEvent.removeMonitor($0) }
     }
 
-    private func handleEvent(_ event: NSEvent, viewModel: VideoConferencingViewModel) -> NSEvent {
+    private func handleEvent(_ event: NSEvent, viewModel: VideoCallsViewModel) -> NSEvent {
         guard event.window === self else { return event }
         switch event.type {
         case .leftMouseUp where isExplicitlyBeingDragged:
             isExplicitlyBeingDragged = false
         case .leftMouseUp:
             viewModel.expand()
+            makeKey()
         case .leftMouseDragged where viewModel.isShrinked:
             performDrag(with: event)
             isExplicitlyBeingDragged = true
@@ -88,9 +95,21 @@ final class VideoConferencingPanel: SimpleClearHostingPanel {
         originShifted.y -= Self.panelMinSize.height / 2
         frameToRestore.origin = originShifted
     }
+
+    override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
+
+        viewModel.mouseEntered()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+
+        viewModel.mouseExited()
+    }
 }
 
-extension VideoConferencingPanel: NSWindowDelegate {
+extension VideoCallsPanel: NSWindowDelegate {
     func windowWillMove(_ notification: Notification) {
         isProbablyBeingDragged = true
     }
@@ -111,10 +130,8 @@ extension VideoConferencingPanel: NSWindowDelegate {
     }
 }
 
-extension VideoConferencingPanel {
+extension VideoCallsPanel {
     func shrink(animateAlongBlock: (() -> Void)? = nil) {
-        isUserInteractionEnabled = false
-
         frameToRestore = frame
 
         var newFrame = frame
@@ -132,8 +149,6 @@ extension VideoConferencingPanel {
     }
 
     func expand(animateAlongBlock: (() -> Void)? = nil) {
-        isUserInteractionEnabled = true
-
         NSAnimationContext.current.timingFunction = .beamWindowCurve
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.300

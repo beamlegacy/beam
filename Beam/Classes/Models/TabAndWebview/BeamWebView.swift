@@ -57,6 +57,8 @@ class BeamWebView: WKWebView {
 
     override var wantsUpdateLayer: Bool { true }
 
+    var userInteractionEnabled: Bool = true
+
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
         Self.setURLSchemeHandlers(in: configuration)
         currentConfiguration = configuration
@@ -110,12 +112,9 @@ class BeamWebView: WKWebView {
         }
     }
 
-    override func viewWillMove(toWindow newWindow: NSWindow?) {
-        super.viewWillMove(toWindow: newWindow)
-
-        if newWindow is VideoConferencingPanel {
-            setTopContentInset(.zero)
-        }
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard userInteractionEnabled else { return nil }
+        return super.hitTest(point)
     }
 
     override func updateLayer() {

@@ -139,6 +139,6 @@ struct WebViewContainer: View, NSViewRepresentable {
 
 private extension BeamWebView {
     var isDetached: Bool {
-        return window is VideoConferencingPanel
+        return window is VideoCallsPanel
     }
 }
