@@ -177,7 +177,7 @@ import Sentry
     private var scope = Set<AnyCancellable>()
     let cmdManager = CommandManager<BeamState>()
 
-    lazy var videoCallManager = VideoConferencingManager()
+    lazy var videoCallsManager = VideoCallsManager()
 
     func goBack(openingInNewTab: Bool = false) {
         guard canGoBackForward.back else { return }

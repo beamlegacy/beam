@@ -26,7 +26,7 @@ struct BrowserPreferencesView: View {
     }
 
     private func getSettingsRows() -> [Settings.Row] {
-        var rows = [searchEngineRow, importBrowserDataRow, downloadsRow, tabsRow, soundsRow, clearCachesRow]
+        var rows = [searchEngineRow, importBrowserDataRow, downloadsRow, tabsRow, soundsRow, videoCallsRow, clearCachesRow]
 
         if !BeamData.isDefaultBrowser {
             rows.insert(defaultBrowserRow, at: 0)
@@ -79,6 +79,14 @@ struct BrowserPreferencesView: View {
             Text("Sounds:")
         } content: {
             SoundsSection()
+        }
+    }
+
+    private var videoCallsRow: Settings.Row {
+        Settings.Row(hasDivider: true) {
+            Text("Video Calls:")
+        } content: {
+            VideoCallsSection()
         }
     }
 
@@ -324,12 +332,30 @@ struct SoundsSection: View {
     var body: some View {
         Toggle(isOn: $isCollectSoundsEnabled) {
             Text("Enable Capture sounds")
-        }.accessibilityIdentifier("capture-sounds-checkbox")
-            .toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onChange(of: isCollectSoundsEnabled, perform: {
-                PreferencesManager.isCollectSoundsEnabled = $0
-            })
+        }
+        .accessibilityIdentifier("capture-sounds-checkbox")
+        .toggleStyle(CheckboxToggleStyle())
+        .font(BeamFont.regular(size: 13).swiftUI)
+        .foregroundColor(BeamColor.Generic.text.swiftUI)
+        .onChange(of: isCollectSoundsEnabled) {
+            PreferencesManager.isCollectSoundsEnabled = $0
+        }
+    }
+}
+
+struct VideoCallsSection: View {
+    @State private var videoCallsAlwaysInSideWindow = PreferencesManager.videoCallsAlwaysInSideWindow
+
+    var body: some View {
+        Toggle(isOn: $videoCallsAlwaysInSideWindow) {
+            Text("Always open in side window")
+        }
+        .accessibilityIdentifier("videoCalls-always-in-side-window-checkbox")
+        .toggleStyle(CheckboxToggleStyle())
+        .font(BeamFont.regular(size: 13).swiftUI)
+        .foregroundColor(BeamColor.Generic.text.swiftUI)
+        .onChange(of: videoCallsAlwaysInSideWindow) {
+            PreferencesManager.videoCallsAlwaysInSideWindow = $0
+        }
     }
 }
