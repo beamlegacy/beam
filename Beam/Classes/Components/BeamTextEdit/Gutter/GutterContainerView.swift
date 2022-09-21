@@ -112,13 +112,29 @@ class GutterContainerView: NSView {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.wantsLayer = true
         view.layer?.masksToBounds = false
-        addSubviewWithConstraintsOnEachSide(subView: view)
+
+        self.addSubview(view)
+        view.translatesAutoresizingMaskIntoConstraints = false
+
+        let trailing = view.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+        trailing.priority = .defaultHigh
+
+        let width = view.widthAnchor.constraint(greaterThanOrEqualToConstant: 200)
+
+        NSLayoutConstraint.activate([
+            view.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            trailing,
+            view.topAnchor.constraint(equalTo: self.topAnchor),
+            view.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            width
+        ])
+        self.layer?.zPosition = 2.0
     }
 
     override var intrinsicContentSize: NSSize {
         switch leadingGutterViewType {
         case .calendarGutterView(let viewModel):
-            let calendarCellHeight = Int(CalendarView.bottomPadding + CalendarIemView.itemSize.height)
+            let calendarCellHeight = Int(CalendarView.bottomPadding + CalendarItemView.itemSize.height)
             if viewModel.meetings.count > 0 {
                 return NSSize(width: 0, height: (Int(CalendarView.itemSpacing) + calendarCellHeight) * (viewModel.meetings.count - 1) + calendarCellHeight)
             }

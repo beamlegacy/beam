@@ -53,6 +53,7 @@ struct Meeting: Identifiable, Equatable {
 
 struct MeetingModalView: View {
     @ObservedObject var viewModel: ViewModel
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     private var isContentScrollable: Bool {
         viewModel.attendees.count > 5
@@ -185,8 +186,7 @@ struct MeetingModalView: View {
                         .padding(.bottom, BeamSpacing._200)
                     }
                 }
-
-                HStack(spacing: BeamSpacing._200) {
+                DynamicStack(isVertical: useCompactMode, horizontalAlignment: .leading, spacing: BeamSpacing._200) {
                     HStack(spacing: BeamSpacing._60) {
                         CheckboxView(checked: $viewModel.linkCards)
                         Text("Link Notes")
@@ -195,12 +195,16 @@ struct MeetingModalView: View {
                     }.onTapGesture {
                         viewModel.linkCards.toggle()
                     }
-                    Spacer()
-                    ActionableButton(text: "Cancel", defaultState: .normal, variant: .secondary, minWidth: 120) {
-                        viewModel.cancel()
+                    if !useCompactMode {
+                        Spacer()
                     }
-                    ActionableButton(text: "Add", defaultState: viewModel.meetingName.isEmpty && viewModel.attendees.isEmpty ? .disabled : .normal, variant: .primaryPurple, minWidth: 120) {
-                        viewModel.addMeeting()
+                    HStack(spacing: BeamSpacing._200) {
+                        ActionableButton(text: "Cancel", defaultState: .normal, variant: .secondary, minWidth: 120, maximizeWidth: useCompactMode) {
+                            viewModel.cancel()
+                        }
+                        ActionableButton(text: "Add", defaultState: viewModel.meetingName.isEmpty && viewModel.attendees.isEmpty ? .disabled : .normal, variant: .primaryPurple, minWidth: 120, maximizeWidth: useCompactMode) {
+                            viewModel.addMeeting()
+                        }
                     }
                 }
                 .padding(.horizontal, BeamSpacing._400)
@@ -215,9 +219,10 @@ struct MeetingModalView: View {
                 }
             }))
         }
-        .frame(width: 728)
+        .frame(maxWidth: 728)
         .frame(minHeight: 300, maxHeight: 500)
         .fixedSize(horizontal: false, vertical: true)
+        .padding(.horizontal, 32)
     }
 
     func focusLastAttendee(scrollViewProxy: ScrollViewProxy) {
@@ -226,6 +231,10 @@ struct MeetingModalView: View {
         DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .milliseconds(100))) {
             scrollViewProxy.scrollTo("add-attendee")
         }
+    }
+
+    private var useCompactMode: Bool {
+        windowInfo.windowFrame.width < 600
     }
 }
 
@@ -314,7 +323,11 @@ struct MeetingModalView_Previews: PreviewProvider {
         Meeting.Attendee(email: "remi@beamapp.co", name: "Remi")
     ])
     static var previews: some View {
-        MeetingModalView(viewModel: model)
-            .frame(width: 800, height: 500)
+        Group {
+            MeetingModalView(viewModel: model)
+                .frame(width: 800, height: 500)
+            MeetingModalView(viewModel: model)
+                .frame(width: 500, height: 500)
+        }
     }
 }
