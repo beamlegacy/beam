@@ -38,7 +38,7 @@ class TabGroupDeleteTests: BaseTest {
         XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
     }
     
-    private func deleteTabGroupFromOmnibox(captured: Bool) {
+    private func deleteTabGroupFromOmnibox(captured: Bool, shouldBeVisibleInBrowser: Bool = true) {
         
         let noteTitle = DateHelper().getTodaysDateString(.noteViewTitle)
 
@@ -76,9 +76,13 @@ class TabGroupDeleteTests: BaseTest {
             step("Then tab group is deleted on note") {
                 XCTAssertFalse(noteView.isTabGroupDisplayed(index: 0))
             }
-        } else {
+        } else if shouldBeVisibleInBrowser {
             step("Then tab group is not deleted on browser") {
                 XCTAssertTrue(tabGroupView.isTabGroupDisplayed(index: 0))
+            }
+        } else {
+            step("Then tab group is deleted on browser") {
+                XCTAssertFalse(tabGroupView.isTabGroupDisplayed(index: 0))
             }
         }
         
@@ -122,11 +126,12 @@ class TabGroupDeleteTests: BaseTest {
             setUpSharedNotCapturedTabGroup()
         }
         
-        deleteTabGroupFromOmnibox(captured: false)
+        deleteTabGroupFromOmnibox(captured: false, shouldBeVisibleInBrowser: false)
         
-        step("And can now be forgotten") {
-            displayTabGroupInOmnibox()
-            XCTAssertTrue(omniboxView.isAutocompleteResultDisplayed(autocompleteResult: OmniboxLocators.Labels.forgetTabGroup.accessibilityIdentifier))
+        step("And original group has been deleted") {
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
+            omniboxView.searchInOmniBox(tabGroupNamed, false)
+            XCTAssertFalse(omniboxView.isTabGroupResultDisplayed(tabGroupName: tabGroupNamed))
         }
     }
     
