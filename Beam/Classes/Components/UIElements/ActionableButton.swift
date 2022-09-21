@@ -84,6 +84,7 @@ struct ActionableButton: View {
     var defaultState: ActionableButtonState = .normal
     let variant: ActionableButtonVariant
     var minWidth: CGFloat = 0
+    var maximizeWidth = false
     var height: CGFloat = 30
     var invertBlendMode: Bool = false
     var action: (() -> Void)?
@@ -136,6 +137,9 @@ struct ActionableButton: View {
                 .blendModeLightMultiplyDarkScreen(invert: invertBlendMode ? colorScheme == .light : false)
                 .if(minWidth > 0) {
                     $0.frame(minWidth: textMinWidth, alignment: Alignment(horizontal: variant.style.textAlignment, vertical: .center))
+                }
+                .if(maximizeWidth) {
+                    $0.frame(maxWidth: .infinity, alignment: .leading)
                 }
             if let icon = variant.style.icon, icon.alignment == .trailing {
                 Icon(name: icon.name, width: icon.size, color: iconColor)
