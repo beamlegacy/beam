@@ -126,7 +126,7 @@ final class CollapseButtonLayer: ButtonLayer {
         textLayer.frame = CGRect(
             x: symbolLayer.frame.maxX + 4,
             y: -1,
-            width: width,
+            width: isCompact ? 0 : width,
             height: textLayer.preferredFrameSize().height
         )
 
