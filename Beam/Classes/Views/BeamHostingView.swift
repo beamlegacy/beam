@@ -11,8 +11,6 @@ import SwiftUI
 class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
     public override var allowsVibrancy: Bool { false }
 
-    var userInteractionEnabled: Bool = true
-
     required public init(rootView: Content) {
         super.init(rootView: rootView)
     }
@@ -20,10 +18,5 @@ class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         assert(false)
-    }
-
-    override func hitTest(_ point: NSPoint) -> NSView? {
-        guard userInteractionEnabled else { return nil }
-        return super.hitTest(point)
     }
 }
