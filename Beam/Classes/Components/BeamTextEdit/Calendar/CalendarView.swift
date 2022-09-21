@@ -67,7 +67,7 @@ struct CalendarView: View, BeamDocumentSource {
                 if isHoveringConnect && !windowInfo.windowIsResizing {
                     VStack(alignment: .leading, spacing: CalendarView.itemSpacing) {
                         ForEach(viewModel.meetings) { meeting in
-                            CalendarIemView(allDayEvent: meeting.allDayEvent, time: meeting.startTime,
+                            CalendarItemView(allDayEvent: meeting.allDayEvent, time: meeting.startTime,
                                             meetingLink: meeting.meetingLink, title: meeting.name, onClick: {
                                 prompt(meeting)
                             }).padding(.bottom, CalendarView.bottomPadding)
@@ -75,14 +75,22 @@ struct CalendarView: View, BeamDocumentSource {
                     }.transition(AnyTransition.asymmetric(
                         insertion: .move(edge: .leading).animation(BeamAnimation.easingBounce(duration: 0.15).delay(0.15))
                             .combined(with: .opacity.animation(.easeInOut(duration: 0.15).delay(0.15))),
-                            removal: .move(edge: .leading).animation(BeamAnimation.easingBounce(duration: 0.15))
+                        removal: .move(edge: .leading).animation(BeamAnimation.easingBounce(duration: 0.15))
                             .combined(with: .opacity.animation(.easeInOut(duration: 0.15)))
-                        ))
+                    ))
+                        .padding(6)
+                        .background(
+                            ZStack {
+                                Color.white.opacity(0.8)
+                                VisualEffectView(material: .headerView)
+                            }.cornerRadius(4)
+                                .padding(.leading, 4)
+                        )
                 } else {
                     VStack(alignment: .leading, spacing: CalendarView.itemSpacing) {
                         ForEach(viewModel.meetings) { meeting in
-                            CalendarItemHiddenView(meetingDuration: meeting.duration)
-                                .frame(height: CalendarIemView.itemSize.height)
+                            CalendarItemHiddenView(meetingDuration: meeting.duration, isCompact: shouldUseCompactMode)
+                                .frame(height: CalendarItemView.itemSize.height)
                                 .padding(.bottom, CalendarView.bottomPadding)
                         }
                     }.transition(transitionInOutHiddenView)
@@ -91,6 +99,7 @@ struct CalendarView: View, BeamDocumentSource {
                 guard !state.shouldDisableLeadingGutterHover else { return }
                 withAnimation {
                     isHoveringConnect = isHovering
+                    state.isHoverLeadingGutter = isHovering
                 }
             }
         } else if viewModel.todaysCalendar && viewModel.calendarManager.showedNotConnectedView < 3 && !viewModel.isConnected {
@@ -103,6 +112,14 @@ struct CalendarView: View, BeamDocumentSource {
                     openAccountPreferences()
                 }
                 .cursorOverride(.pointingHand)
+        }
+    }
+
+    private var shouldUseCompactMode: Bool {
+        if let width = viewModel.textRoot?.editor?.frame.width, width < 500 {
+            return true
+        } else {
+            return false
         }
     }
 
@@ -196,12 +213,14 @@ struct CalendarView: View, BeamDocumentSource {
 
 struct CalendarItemHiddenView: View {
     var meetingDuration: DateComponents?
+    var isCompact: Bool
 
     var body: some View {
         VStack {
             RoundedRectangle(cornerRadius: 100, style: .continuous)
                 .fill(BeamColor.AlphaGray.alpha(0.40).swiftUI)
-                .frame(width: getWidthForDuration(), height: 2)
+                .frame(width: isCompact ? 14 : getWidthForDuration(), height: 2)
+                .animation(.easeInOut, value: isCompact)
         }.padding(.leading, 14)
     }
 
@@ -221,7 +240,7 @@ struct CalendarItemHiddenView: View {
     }
 }
 
-struct CalendarIemView: View {
+struct CalendarItemView: View {
     static let itemSize = CGSize(width: 16, height: 16)
     var allDayEvent: Bool
     var time: Date
@@ -254,10 +273,10 @@ struct CalendarIemView: View {
                         Image("editor-calendar_video")
                             .renderingMode(.template)
                             .resizable()
-                            .frame(width: CalendarIemView.itemSize.width, height: CalendarIemView.itemSize.height)
+                            .frame(width: CalendarItemView.itemSize.width, height: CalendarItemView.itemSize.height)
                             .foregroundColor(isHoveringMeetingBtn ? BeamColor.Bluetiful.swiftUI : isHoveringItem ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
                     }.buttonStyle(PlainButtonStyle())
-                        .frame(width: CalendarIemView.itemSize.width, height: CalendarIemView.itemSize.height, alignment: .leading)
+                        .frame(width: CalendarItemView.itemSize.width, height: CalendarItemView.itemSize.height, alignment: .leading)
                         .padding(.bottom, 1)
                         .onHover { isHoveringMeetingBtn = $0 }
                 }
@@ -276,8 +295,13 @@ struct CalendarIemView: View {
                                 removal: .opacity.animation(.easeInOut(duration: 0.15))
                             ))
                 }
+                else {
+                    Rectangle()
+                        .foregroundColor(.clear)
+                        .frame(width: 10, height: 10)
+                }
             }
-        }.frame(height: CalendarIemView.itemSize.height)
+        }.frame(height: CalendarItemView.itemSize.height)
         .padding(.leading, 16)
         .onHover { isHovering in
             isHoveringItem = isHovering
@@ -285,5 +309,6 @@ struct CalendarIemView: View {
         .onTapGesture {
                 onClick()
         }
+        .blendModeLightMultiplyDarkScreen()
     }
 }
