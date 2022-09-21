@@ -186,9 +186,9 @@ extension TabGroupingManager: BeamDocumentSource {
         }
     }
 
-    func findNoteContainingGroup(_ group: TabGroup) async -> [BeamNote] {
+    func findNoteContainingGroup(_ groupId: TabGroup.GroupID) async -> [BeamNote] {
         await withCheckedContinuation { continuation in
-            BeamData.shared.noteLinksAndRefsManager?.search(containingTabGroup: group.id) { result in
+            BeamData.shared.noteLinksAndRefsManager?.search(containingTabGroup: groupId) { result in
                 switch result {
                 case .success(let searchResults):
                     let notes = searchResults.compactMap { BeamNote.fetch(id: $0.noteId) }
