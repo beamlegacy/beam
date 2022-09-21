@@ -422,7 +422,7 @@ extension EmbedNode {
             text = url.absoluteString
         }
 
-        let layer = CollapsedContentLayer(name: "collapsed", text: text) { [weak editor, weak element] in
+        let layer = CollapsedContentLayer(name: "collapsed", text: text) { [weak editor, weak element] _ in
             guard let editor = editor, let element = element else { return }
             editor.openURL(url, element, false)
         }

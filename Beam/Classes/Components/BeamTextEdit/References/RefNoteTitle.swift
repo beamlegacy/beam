@@ -41,11 +41,17 @@ class RefNoteTitle: Widget {
 
         updateText()
 
-        cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
+        cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] mouseInfo in
             guard let self = self else { return }
-
-            self.editor?.openCard(noteId, nil, nil)
+            if mouseInfo?.rightMouse == true {
+                guard let note = BeamNote.fetch(id: noteId), let state = self.editor?.state else { return }
+                BeamNote.showNoteContextualNSMenu(for: note, state: state, at: mouseInfo?.globalPosition ?? .zero, in: self.editor)
+            } else {
+                let inSplitView = mouseInfo?.event.modifierFlags.contains(.command) ?? false
+                self.editor?.openNote(noteId, nil, nil, inSplitView)
+            }
         })
+
         cardTitleLayer?.cursor = .pointingHand
         cardTitleLayer?.hovered = { [weak self] hover in
             self?.updateTitleForHover(hover)
