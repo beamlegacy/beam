@@ -116,16 +116,20 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
         }
     }
 
-    func deleteGroup(_ group: TabGroup, deleteParentIfRelevant: Bool = false) {
-        guard let object = fetch(byIds: [group.id]).first else { return }
+    @discardableResult
+    func deleteGroup(_ group: TabGroup, deleteParentIfRelevant: Bool = false) -> (group: TabGroup?, parent: TabGroup?) {
+        guard let object = fetch(byIds: [group.id]).first else { return (nil, nil) }
         let parentId = group.parentGroup
         delete(groups: [object])
         // if the group is a pure copy of its parent, we can delete the parent too.
-        guard deleteParentIfRelevant, let parentId = parentId else { return }
+        guard deleteParentIfRelevant, let parentId = parentId else { return (group, nil) }
+        var deletedParent: TabGroup?
         fetch(byIds: [parentId]).forEach { parent in
-            guard object.isACopy(of: parent), !parent.isLocked else { return }
+            guard object.isACopy(of: parent) else { return }
+            deletedParent = Self.convertBeamObjectToGroup(parent)
             delete(groups: [parent])
         }
+        return (group, deletedParent)
     }
 
     private func sortPageIdsInGroup(_ group: TabGroup, withOpenTabs openTabs: [BrowserTab]) {
