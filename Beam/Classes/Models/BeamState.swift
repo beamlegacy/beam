@@ -156,13 +156,14 @@ import Sentry
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
     var shouldDisableLeadingGutterHover: Bool = false
+    var isHoverLeadingGutter = false
 
     weak var currentEditor: BeamTextEdit?
     var editorShouldAllowMouseEvents: Bool {
         overlayViewModel.modalView == nil
     }
     var editorShouldAllowMouseHoverEvents: Bool {
-        !omniboxInfo.isFocused && !showSidebar
+        !omniboxInfo.isFocused && !showSidebar && !isHoverLeadingGutter
     }
     var isShowingOnboarding: Bool {
         data.onboardingManager.needsToDisplayOnboard
