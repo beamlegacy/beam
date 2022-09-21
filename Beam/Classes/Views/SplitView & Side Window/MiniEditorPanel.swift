@@ -80,6 +80,7 @@ class MiniEditorPanel: NSPanel, WindowInfoCapable {
         windowInfo.windowFrame = frame
 
         self.delegate = self
+        self.collectionBehavior = .fullScreenPrimary
     }
 
     func reDock() {
