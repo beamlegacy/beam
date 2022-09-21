@@ -245,8 +245,8 @@ struct CalendarIemView: View {
                 if let meetingLink = meetingLink, let url = URL(string: meetingLink) {
                     Button {
                         do {
-                            let state = AppDelegate.main.window?.state
-                            try state?.videoCallManager.startVideoConferencing(with: .init(url: url), faviconProvider: state?.data.faviconProvider)
+                            let (state, data) = (AppDelegate.main.window?.state, AppDelegate.main.window?.data)
+                            try state?.videoCallsManager.start(with: .init(url: url), faviconProvider: data?.faviconProvider)
                         } catch {
                             UserAlert.showError(error: error)
                         }

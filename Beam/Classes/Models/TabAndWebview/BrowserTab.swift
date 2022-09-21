@@ -481,6 +481,40 @@ import BeamCore
         return plainData?.base64EncodedString(options: [])
     }
 
+    /// Defer to the VideoCallManager to check for the receiver if a received alert should be switched.
+    /// - Parameters:
+    ///   - message: the message shown within the original alert.
+    ///   - frameInfo: the ``WKFrameInfo`` of the original alert.
+    ///   - defaultAlertHandler: A handler in case where no alert replacement is provided and default alert should be shown.
+    ///   - completionHandler: The completion handler to call **in any case**.
+    func interceptJavaScriptAlert(
+        with message: String,
+        frameInfo: WKFrameInfo,
+        defaultAlertHandler: @escaping () -> Void,
+        completionHandler: @escaping () -> Void
+    ) {
+        if let videoCallsManager = state?.videoCallsManager {
+            videoCallsManager.switchJavaScriptAlertIfNecessary(with: message, frameInfo: frameInfo) { [weak self] context in
+                // If we do need to switch the alert and we have a context (alert+meeting), present the alert and handle feedback
+                if let (alert, meeting) = context, let self = self {
+                    let response = alert.runModal()
+                    let shouldAutoJoin = response == .alertFirstButtonReturn
+                    if shouldAutoJoin {
+                        self.state?.videoCallsManager.autoJoinMeeting(meeting, faviconProvider: self.data?.faviconProvider)
+                    }
+                    // don't forget to call completionHandler
+                    completionHandler()
+                } else {
+                    defaultAlertHandler()
+                    completionHandler()
+                }
+            }
+        } else {
+            defaultAlertHandler()
+            completionHandler()
+        }
+    }
+
     /// Loads a request to webView.
     /// - Parameters:
     ///   - request: the request to load.
@@ -488,6 +522,17 @@ import BeamCore
     ///   If ``BeamWebView`` is already loaded and you just want to fetch associated info to the request, set this to `false`.
     public func load(request: URLRequest, entirely: Bool = true) {
         guard let url = request.url else { return }
+
+        if PreferencesManager.videoCallsAlwaysInSideWindow, state?.videoCallsManager.isEligible(tab: self) == true {
+            do {
+                try state?.videoCallsManager.start(with: request, faviconProvider: data?.faviconProvider)
+                // If it succeeds, let's return!
+                return
+            } catch {
+                Logger.shared.logError("An error occured when opening video call link", category: .general)
+            }
+        }
+
         hasError = false
         screenshotCapture = nil
         if !isFromNoteSearch, !browsingTree.justCreatedFromOtherTab {

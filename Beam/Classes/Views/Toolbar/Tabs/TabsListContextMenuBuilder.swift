@@ -165,13 +165,14 @@ extension TabsListContextMenuBuilder {
         // Close Group
         tabContextMenuCloseTabsItems(forTabAtListIndex: listIndex, sections: sections, in: menu, onCloseItem: onCloseItem)
 
-        let videoCallManager = tab.state?.videoCallManager
+        let videoCallsManager = tab.state?.videoCallsManager
 
-        if videoCallManager?.isEligible(tab: tab) == true {
-            menu.addItem(withTitle: loc("Move Tab to Side Window")) { [weak tab, weak videoCallManager] _ in
+        if videoCallsManager?.isEligible(tab: tab) == true {
+            let enableMenu = tab.state?.associatedWindow?.sheets.isEmpty == true
+            menu.addItem(withTitle: loc("Move Tab to Side Window"), enabled: enableMenu) { [weak tab, weak videoCallsManager] _ in
                 guard let tab = tab else { return }
                 do {
-                    try videoCallManager?.detachTabIntoSidePanel(tab)
+                    try videoCallsManager?.detachTabIntoSidePanel(tab)
                 } catch {
                     UserAlert.showError(error: error)
                 }

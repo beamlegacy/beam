@@ -53,16 +53,21 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         Logger.shared.logDebug("webView runJavaScriptAlertPanelWithMessage \(message)", category: .web)
 
-        // Set the message as the NSAlert text
-        let alert = NSAlert()
-        alert.informativeText = message
-        alert.addButton(withTitle: "OK")
+        func showDefaultAlert(message: String) {
+            let alert = NSAlert()
+            alert.informativeText = message
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+        }
 
-        // Display the NSAlert
-        alert.runModal()
-
-        // Call completionHandler
-        completionHandler()
+        if let browserTab = page as? BrowserTab {
+            browserTab.interceptJavaScriptAlert(with: message, frameInfo: frame, defaultAlertHandler: {
+                showDefaultAlert(message: message) // If the alert isn't intercepted
+            }, completionHandler: completionHandler)
+        } else {
+            showDefaultAlert(message: message) // Show default alert in any failing case
+            completionHandler() // and call completionHandler
+        }
     }
 
     func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
