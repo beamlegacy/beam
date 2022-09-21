@@ -717,14 +717,14 @@ public class TextNode: ElementNode {
         }
 
         if !mouseIsDragged, contentsFrame.containsY(mouseInfo.position) {
+            let inBackground = mouseInfo.event.modifierFlags.contains(.command)
             if let link = linkAt(point: mouseInfo.position) {
-                let inBackground = mouseInfo.event.modifierFlags.contains(.command)
                 openExternalLink(link: link, element: element, inBackground: inBackground)
                 return true
             }
 
             if let link = internalLink(at: mouseInfo.position) {
-                editor.openCard(link, nil, nil)
+                editor.openNote(link, nil, nil, inBackground)
                 return true
             }
         }

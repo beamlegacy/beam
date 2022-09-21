@@ -83,7 +83,7 @@ class ReferencesSection: LinksSection {
             self.linkLayer = LinkButtonLayer(
                 "linkAllLayer",
                 linkContentLayer,
-                activated: { [weak self] in
+                activated: { [weak self] _ in
                     guard let self = self else { return }
 
                     if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return }

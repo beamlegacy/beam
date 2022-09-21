@@ -23,7 +23,7 @@ class LockButton: ButtonLayer {
         lockedIcon = Layer.icon(named: "status-lock", color: BeamColor.Editor.chevron.nsColor)
         unlockedIcon = Layer.icon(named: "status-unlocked", color: BeamColor.Editor.chevron.nsColor)
         super.init(name, CALayer())
-        activated = { [unowned self] in
+        activated = { [unowned self] _ in
             self.locked.toggle()
             self.changed(self.locked)
         }

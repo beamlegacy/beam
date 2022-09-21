@@ -86,7 +86,7 @@ final class CollapseButtonLayer: ButtonLayer {
 
         let customActivated = activated
 
-        self.activated = { [weak self] in
+        self.activated = { [weak self] _ in
             guard let isCollapsed = self?.isCollapsed else { return }
             customActivated(isCollapsed)
         }

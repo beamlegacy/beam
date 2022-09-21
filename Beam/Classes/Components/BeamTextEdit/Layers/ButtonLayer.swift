@@ -11,22 +11,26 @@ import Combine
 
 class ButtonLayer: Layer {
     @Published var pressed: Bool = false
-    var activated: () -> Void
+    
+    var activated: (_ mouseInfo: MouseInfo?) -> Void
 
     init(_ name: String, _ layer: CALayer,
-         activated: @escaping () -> Void = { },
+         activated: @escaping (_ mouseInfo: MouseInfo?) -> Void = { _ in },
          hovered: @escaping (Bool) -> Void = { _ in }) {
         self.activated = activated
         super.init(name: name, layer: layer, hovered: hovered)
 
-        mouseDown = { [unowned self] _ -> Bool in
+        mouseDown = { [unowned self] info -> Bool in
+            if info.rightMouse, layer.contains(info.position) {
+                activated(info)
+            }
             self.pressed = true
             return true
         }
         mouseUp = { [unowned self] info -> Bool in
             let p = layer.contains(info.position)
-            if p {
-                self.activated()
+            if !info.rightMouse, p {
+                self.activated(info)
             }
             self.pressed = false
             return true
@@ -40,7 +44,7 @@ class ButtonLayer: Layer {
 
     override func accessibilityPerformPress() -> Bool {
         guard !layer.isHidden else { return false }
-        activated()
+        activated(nil)
         return true
     }
 }
