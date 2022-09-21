@@ -115,7 +115,7 @@ class DebugSection: Widget {
         let databaseTextColor = nodeDatabaseId == defaultDatabaseId ? BeamColor.Generic.text.nsColor : BeamColor.Shiraz.nsColor
 
         let noteIdLayer = Layer.text("ID: \(self.note.id.uuidString)", color: BeamColor.Generic.text.nsColor, size: 12)
-        addLayer(ButtonLayer("noteIdBtn", noteIdLayer, activated: { [unowned self] in
+        addLayer(ButtonLayer("noteIdBtn", noteIdLayer, activated: { [unowned self] _ in
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
             pasteboard.setString(self.note.id.uuidString, forType: .string)
@@ -124,7 +124,7 @@ class DebugSection: Widget {
         }), origin: CGPoint(x: 0, y: 30))
 
         let databaseIdLayer = Layer.text("Database ID: \(nodeDatabaseId)", color: databaseTextColor, size: 12)
-        addLayer(ButtonLayer("noteDatabaseIdBtn", databaseIdLayer, activated: {
+        addLayer(ButtonLayer("noteDatabaseIdBtn", databaseIdLayer, activated: { _ in
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
             pasteboard.setString(nodeDatabaseId, forType: .string)
@@ -133,7 +133,7 @@ class DebugSection: Widget {
         }), origin: CGPoint(x: 0, y: 50))
 
         let defaultDatabaseIdLayer = Layer.text("Default Database ID: \(String(describing: defaultDatabaseId))", color: databaseTextColor, size: 12)
-        addLayer(ButtonLayer("defaultDatabaseIdBtn", defaultDatabaseIdLayer, activated: {
+        addLayer(ButtonLayer("defaultDatabaseIdBtn", defaultDatabaseIdLayer, activated: { _ in
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
             pasteboard.setString(defaultDatabaseId ?? "no default database id", forType: .string)
@@ -142,7 +142,7 @@ class DebugSection: Widget {
         }), origin: CGPoint(x: 0, y: 70))
 
         let previousChecksumIdLayer = Layer.text("Previous Checksum: \(previousChecksum)", color: BeamColor.Generic.text.nsColor, size: 12)
-        addLayer(ButtonLayer("previousChecksum", previousChecksumIdLayer, activated: {
+        addLayer(ButtonLayer("previousChecksum", previousChecksumIdLayer, activated: { _ in
             let pasteboard = NSPasteboard.general
             pasteboard.clearContents()
             pasteboard.setString(previousChecksum, forType: .string)

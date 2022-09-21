@@ -17,7 +17,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     var note: BeamNote
     var state: BeamState
     var openURL: (URL, BeamElement, _ inBackground: Bool) -> Void
-    var openCard: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?) -> Void
+    var openNote: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?, _ inSplitView: Bool?) -> Void
     var startQuery: (TextNode, Bool) -> Void = { _, _ in }
 
     var onStartEditing: () -> Void = { }
@@ -97,7 +97,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
 
     private func updateEditorProperties(_ editor: BeamTextEdit, context: Context) {
         editor.openURL = openURL
-        editor.openCard = openCard
+        editor.openNote = openNote
         editor.startQuery = startQuery
 
         editor.onStartEditing = onStartEditing

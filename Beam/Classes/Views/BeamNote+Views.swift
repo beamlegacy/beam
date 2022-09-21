@@ -59,7 +59,9 @@ extension BeamNote {
     ///   - menu: The menu to configure
     ///   - note: The note on which the menu will appear
     ///   - state: The current state
-    func configureNoteContextualMenu(_ menu: NSMenu, for note: BeamNote, state: BeamState) {
+    static func showNoteContextualNSMenu(for note: BeamNote, state: BeamState, at position: CGPoint, in view: NSView?) {
+
+        let menu = NSMenu()
 
         menu.addItem(withTitle: loc("Open in New Window")) { _ in
             state.openNoteInNewWindow(id: note.id)
@@ -96,5 +98,7 @@ extension BeamNote {
             AppDelegate.main.exportNotesToMarkdown([note])
         }
         menu.setSubmenu(exportMenu, for: export)
+
+        menu.popUp(positioning: nil, at: position, in: view)
     }
 }

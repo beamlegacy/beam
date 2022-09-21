@@ -381,7 +381,7 @@ public extension CALayer {
     public var useFocusRing = false
 
     public var openURL: (URL, BeamElement, _ inBackground: Bool) -> Void = { _, _, _ in }
-    public var openCard: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?) -> Void = { _, _, _ in }
+    public var openNote: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?, _ inSplitView: Bool?) -> Void = { _, _, _, _ in }
     public var startQuery: (TextNode, Bool) -> Void = { _, _ in }
 
     public var onStartEditing: (() -> Void)?
@@ -1298,6 +1298,16 @@ public extension CALayer {
         mouseDownPos = nil
         if event.clickCount == 1 { hideInlineFormatter() }
         self.mouseDownPos = convert(event.locationInWindow)
+
+        if event.isRightClick, showTitle {
+            let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
+            if cardTitleLayer.contains(titleCoord) {
+                guard let note = note as? BeamNote, let state = state else { return }
+                BeamNote.showNoteContextualNSMenu(for: note, state: state, at: mouseDownPos ?? .zero, in: self)
+                return
+            }
+        }
+
         let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
         mouseHandler = rootNode.dispatchMouseDown(mouseInfo: info)
         if let mouseHandler = mouseHandler {
@@ -1471,7 +1481,8 @@ public extension CALayer {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             if cardTitleLayer.contains(titleCoord) {
                 guard let cardNote = note as? BeamNote else { return }
-                self.openCard(cardNote.id, nil, nil)
+                let inBackground = event.modifierFlags.contains(.command)
+                self.openNote(cardNote.id, nil, nil, inBackground)
                 return
             }
         }
