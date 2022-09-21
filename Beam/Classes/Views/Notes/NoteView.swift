@@ -59,8 +59,12 @@ struct NoteView: View {
                 openURL: { url, element, inBackground in
                     state.handleOpenURLFromNote(url, note: note, element: element, inBackground: inBackground)
                 },
-                openCard: { cardId, elementId, unfold in
-                    state.navigateToNote(id: cardId, elementId: elementId, unfold: unfold ?? false)
+                openNote: { [weak state] noteId, elementId, unfold, inSplitView in
+                    if inSplitView == true {
+                        state?.openNoteInSplitView(id: noteId)
+                    } else {
+                        state?.navigateToNote(id: noteId, elementId: elementId, unfold: unfold ?? false)
+                    }
                 },
                 startQuery: { textNode, animated in
                     state.startQuery(textNode, animated: animated)

@@ -75,7 +75,7 @@ class LinksSection: Widget {
             self.sectionTitleLayer.font = BeamFont.semibold(size: 0).nsFont
             self.sectionTitleLayer.fontSize = 12
 
-            self.addLayer(ButtonLayer("sectionTitle", self.sectionTitleLayer, activated: { [weak self] in
+            self.addLayer(ButtonLayer("sectionTitle", self.sectionTitleLayer, activated: { [weak self] _ in
                 guard let self = self else { return }
                 guard let chevron = self.layers["disclosure"] as? ChevronButton else { return }
 

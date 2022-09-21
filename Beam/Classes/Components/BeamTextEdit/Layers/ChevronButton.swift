@@ -22,7 +22,7 @@ class ChevronButton: ButtonLayer {
         self.open = open
         chevron = Layer.icon(named: icon)
         super.init(name, CALayer())
-        activated = { [unowned self] in
+        activated = { [unowned self] _ in
             self.open.toggle()
             self.changed(self.open)
         }

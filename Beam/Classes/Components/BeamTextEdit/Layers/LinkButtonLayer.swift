@@ -10,21 +10,25 @@ import Foundation
 class LinkButtonLayer: ButtonLayer {
 
     override init(_ name: String, _ layer: CALayer,
-                  activated: @escaping () -> Void = { },
+                  activated: @escaping (_ mouseInfo: MouseInfo?) -> Void = { _ in },
                   hovered: @escaping (Bool) -> Void = { _ in }) {
 
-        super.init(name, layer, hovered: hovered)
-        self.activated = activated
+        super.init(name, layer, activated: activated, hovered: hovered)
 
-        mouseDown = { [unowned self] _ -> Bool in
+        mouseDown = { [unowned self] info -> Bool in
+            let p = layer.contains(info.position)
+            if info.rightMouse, p {
+                self.activated(info)
+            }
             self.pressed = true
             handleBackgroundUi()
             return true
         }
+        
         mouseUp = { [unowned self] info -> Bool in
             let p = layer.contains(info.position)
-            if p {
-                self.activated()
+            if !info.rightMouse, p {
+                self.activated(info)
             }
             self.pressed = false
             handleBackgroundUi()
