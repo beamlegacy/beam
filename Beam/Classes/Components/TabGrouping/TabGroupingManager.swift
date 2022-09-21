@@ -170,7 +170,7 @@ extension TabGroupingManager {
         Logger.shared.logInfo("Deleting Tab Group '\(group.descriptionForLogs)'", category: .tabGrouping)
 
         // 1. if group was captured in a note. Remove the reference.
-        let noteReferencingThisGroup = await findNoteContainingGroup(group)
+        let noteReferencingThisGroup = await findNoteContainingGroup(group.id)
         noteReferencingThisGroup.forEach { note in
             if case .tabGroup(let groupId) = note.type, groupId == group.id {
                 return
@@ -178,18 +178,26 @@ extension TabGroupingManager {
             note.removeTabGroup(group.id)
         }
 
-        var isSharedGroup = false
+        var shouldDeleteParent = false
         // 2. if tab group was shared. Delete the corresponding shared Note.
         if let (sharedNote, _) = fetchTabGroupNote(for: group), let collection = BeamData.shared.currentDocumentCollection {
             let cmdManager = CommandManagerAsync<BeamDocumentCollection>()
             cmdManager.deleteDocuments(ids: [sharedNote.id], in: collection)
-            isSharedGroup = true // for shared group, we cascade delete the parent if it is a pure copy.
+            // for shared group, we cascade delete the parent if it is a pure copy and not captured in a note.
+            if let parentId = group.parentGroup {
+                shouldDeleteParent = await findNoteContainingGroup(parentId).isEmpty
+            } else {
+                shouldDeleteParent = true
+            }
         }
 
         // 3. delete the group itself.
-        storeManager?.deleteGroup(group, deleteParentIfRelevant: isSharedGroup)
+        let result = storeManager?.deleteGroup(group, deleteParentIfRelevant: shouldDeleteParent)
 
         broadcastTabGroupDeleted(group)
+        if shouldDeleteParent, let parent = result?.parent {
+            broadcastTabGroupDeleted(parent)
+        }
     }
 
     private func broadcastTabGroupDeleted(_ group: TabGroup) {
@@ -203,7 +211,7 @@ extension TabGroupingManager {
         let message = forget ? loc("Forget tab group") : loc("Delete tab group")
         var informativeText = loc("Are you sure you want to forget the tab group “\(groupTitle)”? Forgotten tab groups cannot be recovered.")
         let buttonTitle = forget ? loc("Forget") : loc("Delete")
-        if group.isLocked, let savedInNote = await findNoteContainingGroup(group).first(where: { $0.type != .tabGroup(group.id) }) {
+        if group.isLocked, let savedInNote = await findNoteContainingGroup(group.id).first(where: { $0.type != .tabGroup(group.id) }) {
             informativeText = loc("""
                                   Are you sure you want to delete the tab group “\(groupTitle)” saved in “\(savedInNote.title)”?
                                   Deleted tab groups cannot be recovered.
