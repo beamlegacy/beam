@@ -187,7 +187,7 @@ class BlockReferenceNode: TextNode {
 
     private func openReferencedCard() {
         guard let noteid = self.displayedElement.note?.id else { return }
-        self.editor?.openCard(noteid, self.displayedElement.id, self.open)
+        self.editor?.openNote(noteid, self.displayedElement.id, self.open, nil)
     }
 
     func showMenu(mouseInfo: MouseInfo) {

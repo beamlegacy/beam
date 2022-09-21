@@ -84,7 +84,7 @@ final class CollapsedContentLayer: ButtonLayer {
         NSImage(named: "field-web")?.fill(color: BeamColor.LightStoneGray.nsColor)
     }
 
-    init(name: String, text: String, activated: @escaping () -> Void) {
+    init(name: String, text: String, activated: @escaping (_ mouseInfo: MouseInfo?) -> Void) {
         self.text = text
 
         super.init(name, CALayer(), activated: activated)

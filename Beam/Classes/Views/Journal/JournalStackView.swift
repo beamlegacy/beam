@@ -271,8 +271,12 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
         textEditView.openURL = { [weak state] url, element, inBackground in
             state?.handleOpenURLFromNote(url, note: element.note, element: element, inBackground: inBackground)
         }
-        textEditView.openCard = { [weak state] cardId, elementId, unfold in
-            state?.navigateToNote(id: cardId, elementId: elementId, unfold: unfold ?? false)
+        textEditView.openNote = { [weak state] noteId, elementId, unfold, inSplitView in
+            if inSplitView == true {
+                state?.openNoteInSplitView(id: noteId)
+            } else {
+                state?.navigateToNote(id: noteId, elementId: elementId, unfold: unfold ?? false)
+            }
         }
         textEditView.startQuery = { [weak state] textNode, animated in
             state?.startQuery(textNode, animated: animated)

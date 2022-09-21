@@ -106,7 +106,7 @@ class BreadCrumb: Widget, BeamDocumentSource {
             self.actionLayer = LinkButtonLayer(
                 "actionLinkLayer",
                 linkContentLayer,
-                activated: {[weak self] in
+                activated: {[weak self] _ in
                     guard let self = self else { return }
                     self.convertReferenceToLink()
                 },
@@ -280,7 +280,7 @@ class BreadCrumb: Widget, BeamDocumentSource {
 
         addLayer(ButtonLayer(breadcrumbLayerName(for: index),
                              crumblayer,
-                             activated: {[weak self] in
+                             activated: {[weak self] _ in
                                 guard let self = self else { return }
                                 self.selectCrumb(self.selectedCrumb == index ? self.crumbChain.count - 1 : index)
                              },
