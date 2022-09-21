@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Root SwiftUI view shown within the ``VideoConferencingPanel``.
-/// It displays a toolbar and a web view and is configured thanks to ``VideoConferencingViewModel``.
-struct VideoConferencingView: View {
+/// Root SwiftUI view shown within the ``VideoCallsPanel``.
+/// It displays a toolbar and a web view and is configured thanks to ``VideoCallsViewModel``.
+struct VideoCallsView: View {
 
     private static let webViewMinFrame: CGRect = .init(origin: .zero, size: .init(width: 324, height: 226))
     private static let webViewIdealFrame: CGRect = .init(origin: .zero, size: .init(width: 660, height: 434))
@@ -18,14 +18,14 @@ struct VideoConferencingView: View {
     private let itemSpacing: CGFloat = 8.0
     private let animationDuration: TimeInterval = 0.150
 
-    @ObservedObject var viewModel: VideoConferencingViewModel
+    @ObservedObject var viewModel: VideoCallsViewModel
 
     @State private var trafficButtonHovered: (close: Bool, main: Bool, fullscreen: Bool) = (false, false, false)
     @State private var privacyButtonHovered: (mic: Bool, video: Bool, speaker: Bool) = (false, false, false)
 
     var body: some View {
         VStack(spacing: .zero) {
-            if viewModel.isExpanded {
+            if viewModel.displayToolbar {
                 toolbarView
                     .frame(height: toolbarHeight)
                     .transition(.opacity)
@@ -35,13 +35,13 @@ struct VideoConferencingView: View {
                 .cornerRadius(cornerRadius)
                 .frame(
                     minWidth: Self.webViewMinFrame.width,
-                    idealWidth: viewModel.isExpanded ? Self.webViewIdealFrame.width : Self.webViewMinFrame.width,
+                    idealWidth: viewModel.isShrinked ? Self.webViewMinFrame.width : Self.webViewIdealFrame.width,
                     minHeight: Self.webViewMinFrame.height - Self.panelToolbarHeight,
-                    idealHeight: viewModel.isExpanded ? Self.webViewIdealFrame.height : (Self.webViewMinFrame.height - Self.panelToolbarHeight)
+                    idealHeight: viewModel.isShrinked ? (Self.webViewMinFrame.height - Self.panelToolbarHeight) : Self.webViewIdealFrame.height
                 )
         }
-        .animation(.easeInOut(duration: animationDuration), value: viewModel.isExpanded)
-        .padding(viewModel.isExpanded ? [.leading, .trailing, .bottom] : .all, padding)
+        .animation(.easeInOut(duration: animationDuration), value: viewModel.displayToolbar)
+        .padding(viewModel.displayToolbar ? [.leading, .trailing, .bottom] : .all, padding)
         .foregroundColor(BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.8, darkColor: .Mercury, darkAlpha: 0.7).swiftUI)
         .visualEffect(material: .hudWindow)
         .edgesIgnoringSafeArea(.all)
@@ -51,30 +51,34 @@ struct VideoConferencingView: View {
         HStack {
             trafficLightsView
 
-            Spacer()
+            if !viewModel.isShrinked {
+                Spacer()
 
-            HStack(spacing: toolbarSpacing) {
-                TabFaviconView(
-                    favIcon: viewModel.faviconImage,
-                    isLoading: viewModel.isLoading,
-                    estimatedLoadingProgress: viewModel.estimatedProgress
-                )
-                Text(viewModel.title)
-                    .lineLimit(1)
-                    .foregroundColor(BeamColor.Niobium.swiftUI)
-                    .blendModeLightMultiplyDarkScreen()
+                HStack(spacing: toolbarSpacing) {
+                    TabFaviconView(
+                        favIcon: viewModel.faviconImage,
+                        isLoading: viewModel.isLoading,
+                        estimatedLoadingProgress: viewModel.estimatedProgress
+                    )
+                    Text(viewModel.title)
+                        .lineLimit(1)
+                        .foregroundColor(BeamColor.Niobium.swiftUI)
+                        .blendModeLightMultiplyDarkScreen()
+                        .transition(.opacity)
+                }
             }
 
             Spacer()
 
             privacyDetailsView
         }
+        .animation(.easeInOut(duration: animationDuration), value: !viewModel.isShrinked)
         .padding(.horizontal, padding)
     }
 
 }
 
-private extension VideoConferencingView {
+private extension VideoCallsView {
     private var trafficLightsView: some View {
         HStack(spacing: itemSpacing) {
             trafficLight(imageName: "tabs-side-close") {
@@ -111,7 +115,7 @@ private extension VideoConferencingView {
     }
 }
 
-private extension VideoConferencingView {
+private extension VideoCallsView {
     enum PrivacyItem {
         case mic(activated: Bool)
         case video(activated: Bool)

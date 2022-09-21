@@ -71,6 +71,7 @@ extension PreferencesManager {
     static let showWebsiteIconTabKey = "showWebsiteIconTab"
     static let showsStatusBarKey = "showsStatusBar"
     static let collectSoundsKey = "collectSounds"
+    static let videoCallsAlwaysInSideWindowKey = "videoCallsAlwaysInSideWindow"
 }
 
 // MARK: - Default Values
@@ -86,6 +87,7 @@ extension PreferencesManager {
     static let showWebsiteIconTabDefault = true
     static let showsStatusBarDefault = false
     static let collectSoundsDefault = true
+    static let videoCallsAlwaysInSideWindowDefault = true
 }
 
 extension PreferencesManager {
@@ -121,5 +123,8 @@ extension PreferencesManager {
 
     @UserDefault(key: collectSoundsKey, defaultValue: collectSoundsDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var isCollectSoundsEnabled: Bool
+
+    @UserDefault(key: videoCallsAlwaysInSideWindowKey, defaultValue: videoCallsAlwaysInSideWindowDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
+    static var videoCallsAlwaysInSideWindow: Bool
 
 }

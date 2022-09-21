@@ -3,7 +3,7 @@ import BeamCore
 import Combine
 
 /// Provides user-facing details about the session to display within the panel.
-protocol VideoConferencingClientProtocol {
+protocol VideoCallsClientProtocol {
     var webView: BeamWebView { get }
     var isLoadingPublisher: AnyPublisher<Bool, Never> { get }
     var urlPublisher: AnyPublisher<URL, Never> { get }
@@ -13,11 +13,11 @@ protocol VideoConferencingClientProtocol {
     @available(macOS 12.0, *) var cameraEnabledPublisher: AnyPublisher<Bool, Never> { get }
 }
 
-struct VideoConferencingClient {
+struct VideoCallsClient {
     let webView: BeamWebView
 }
 
-extension VideoConferencingClient: VideoConferencingClientProtocol {
+extension VideoCallsClient: VideoCallsClientProtocol {
     var isLoadingPublisher: AnyPublisher<Bool, Never> {
         return webView
             .publisher(for: \.isLoading)
@@ -62,20 +62,38 @@ extension VideoConferencingClient: VideoConferencingClientProtocol {
     }
 }
 
-/// Video conferencing view model meant to use with SwiftUI.
-final class VideoConferencingViewModel: NSObject, ObservableObject {
+/// Video calls view model meant to use with SwiftUI.
+final class VideoCallsViewModel: NSObject, ObservableObject {
     /// Error thrown interacting with actions of the view model.
     enum Error: LocalizedError {
         case unableToAttach
     }
 
+    private struct State: OptionSet {
+        let rawValue: Int
+
+        static let shrinked     = State(rawValue: 1 << 0)
+        static let hovered      = State(rawValue: 1 << 1)
+        static let fullscreen   = State(rawValue: 1 << 2)
+    }
+
     /// Title shown in the panel tool but also synced to the title property of the panel/window.
     @Published private(set) var title: String = loc("Meeting")
 
-    @Published private(set) var isExpanded: Bool = true
-
     var isShrinked: Bool {
-        return !isExpanded
+        return states.contains(.shrinked)
+    }
+
+    var isExpanded: Bool {
+        return !isShrinked
+    }
+
+    var isHovered: Bool {
+        return states.contains(.hovered)
+    }
+
+    var displayToolbar: Bool {
+        return isExpanded || isHovered
     }
 
     @Published private(set) var isLoading: Bool = false
@@ -86,14 +104,39 @@ final class VideoConferencingViewModel: NSObject, ObservableObject {
     @Published private(set) var cameraEnabled: Bool = false
     @Published private(set) var isPageMuted: Bool = false
 
-    private let detailsClient: VideoConferencingClient
+    private let detailsClient: VideoCallsClient
     private let faviconProvider: FaviconProvider?
-    private var cancellables: Set<AnyCancellable> = []
 
-    init(client: VideoConferencingClient, faviconProvider: FaviconProvider? = nil) {
+    // those initial states have to match the @Published properties
+    private var states: State = [] {
+        willSet {
+            objectWillChange.send()
+        }
+        didSet {
+            detailsClient.webView.userInteractionEnabled = !isShrinked
+        }
+    }
+
+    private var cancellables: Set<AnyCancellable> = []
+    private var timerDispatchWorkItem: DispatchWorkItem?
+
+    init(client: VideoCallsClient, faviconProvider: FaviconProvider? = nil) {
         self.detailsClient = client
         self.faviconProvider = faviconProvider
+
         super.init()
+
+        detailsClient
+            .webView
+            .publisher(for: \.window, options: [.prior])
+            .compactMap { $0 }
+            .sink { [weak weakWebView = detailsClient.webView] window in
+                if window is VideoCallsPanel {
+                    weakWebView?.setTopContentInset(.zero)
+                }
+            }
+            .store(in: &cancellables)
+
         detailsClient
             .isLoadingPublisher
             .assign(to: \.isLoading, onWeak: self)
@@ -138,7 +181,7 @@ final class VideoConferencingViewModel: NSObject, ObservableObject {
         NotificationCenter.default
             .publisher(for: NSWindow.didResignKeyNotification)
             .filter { [weak self] notification in
-                return (notification.object as? VideoConferencingPanel) === self?.detailsClient.webView.window
+                return (notification.object as? VideoCallsPanel) === self?.detailsClient.webView.window
             }
             .sink { [weak self] _ in
                 self?.shrink()
@@ -155,17 +198,16 @@ final class VideoConferencingViewModel: NSObject, ObservableObject {
             throw Error.unableToAttach
         }
         close()
+        detailsClient.webView.userInteractionEnabled = true
+        detailsClient.webView.pageZoom = 1.0
         if AppDelegate.main.windows.isEmpty {
             let window = AppDelegate.main.createWindow(frame: nil, becomeMain: false)
             window?.state.createTab(withURLRequest: urlRequest, setCurrent: true, loadRequest: false, webView: detailsClient.webView)
             window?.makeKeyAndOrderFront(nil)
-            detailsClient.webView.pageZoom = 1.0
-        } else if let mainWindow = AppDelegate.main.window {
+        } else {
+            let mainWindow = AppDelegate.main.window ?? AppDelegate.main.windows[0]
             mainWindow.state.createTab(withURLRequest: urlRequest, setCurrent: true, loadRequest: false, webView: detailsClient.webView)
             mainWindow.makeKeyAndOrderFront(nil)
-            detailsClient.webView.pageZoom = 1.0
-        } else {
-            throw Error.unableToAttach
         }
     }
 
@@ -190,28 +232,41 @@ final class VideoConferencingViewModel: NSObject, ObservableObject {
     }
 
     func shrink() {
-        guard isExpanded, let panel = detailsClient.webView.window as? VideoConferencingPanel, panel.sheets.isEmpty, !panel.isFullscreen
+        guard isExpanded, let panel = detailsClient.webView.window as? VideoCallsPanel, panel.sheets.isEmpty, !panel.isFullscreen
         else { return }
         panel.shrink {
             self.detailsClient.webView.pageZoom = 0.5
         }
-        isExpanded = false
+        states.insert(.shrinked)
     }
 
     func expand() {
-        guard isShrinked, let panel = detailsClient.webView.window as? VideoConferencingPanel else {
+        guard isShrinked, let panel = detailsClient.webView.window as? VideoCallsPanel else {
             return
         }
         panel.expand {
             self.detailsClient.webView.pageZoom = 1.0
         }
-        isExpanded = true
+        detailsClient.webView.userInteractionEnabled = true
+        states.remove(.shrinked)
+    }
+
+    func mouseEntered() {
+        timerDispatchWorkItem?.cancel()
+        states.insert(.hovered)
+    }
+
+    func mouseExited() {
+        timerDispatchWorkItem = DispatchWorkItem { [weak self] in
+            self?.states.remove(.hovered)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(400), execute: timerDispatchWorkItem!)
     }
 }
 
 // MARK: - Conformances
 
-extension VideoConferencingViewModel.Error {
+extension VideoCallsViewModel.Error {
     var errorDescription: String? {
         switch self {
         case .unableToAttach:
