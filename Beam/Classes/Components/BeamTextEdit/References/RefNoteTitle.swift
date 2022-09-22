@@ -45,7 +45,7 @@ class RefNoteTitle: Widget {
             guard let self = self else { return }
             if mouseInfo?.rightMouse == true {
                 guard let note = BeamNote.fetch(id: noteId), let state = self.editor?.state else { return }
-                BeamNote.showNoteContextualNSMenu(for: note, state: state, at: mouseInfo?.globalPosition ?? .zero, in: self.editor)
+                BeamNote.showNoteContextualNSMenu(for: note, state: state, at: mouseInfo?.globalPosition ?? .zero, in: self.editor, sections: [.open])
             } else {
                 let inSplitView = mouseInfo?.event.modifierFlags.contains(.command) ?? false
                 self.editor?.openNote(noteId, nil, nil, inSplitView)
