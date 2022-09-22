@@ -63,7 +63,6 @@ private extension BeamNoteMarkdownExport {
     /// Appends Markdown content to the receiver.
     /// - Parameters:
     ///   - markdown: the Markdown string.
-    ///   - shouldPrettify: whether it should gives some space around headings, `true` by default.
     mutating func append(_ markdown: String) {
         if !contents.isEmpty {
             appendNewlines(count: 1)
@@ -106,7 +105,10 @@ enum MarkdownExporter {
             noteToExport = note
         }
         var document = BeamNoteMarkdownExport(title: noteToExport.title, fileManager: fileManager)
-        for (content, attachments) in noteToExport.children.compactMap({ Self.content(for: $0, filenamePrefix: noteToExport.title, fileManager: fileManager) }) {
+        let export = noteToExport.children.enumerated().compactMap { (index, child) in
+            Self.content(for: child, filenamePrefix: noteToExport.title, firstElement: index==0, fileManager: fileManager)
+        }
+        for (content, attachments) in export {
             document.append(content)
             document.appendAttachments(attachments)
         }
@@ -127,7 +129,7 @@ private extension MarkdownExporter {
     ///   - filenamePrefix: a prefix to use for all the filenames attachment of the export.
     ///   - level: the level at which we render the element.
     /// - Returns: Markdown content if any, `nil` otherwise.
-    static func content(for child: BeamElement, filenamePrefix: String, level: Int = .zero, fileManager: BeamFileDBManager
+    static func content(for child: BeamElement, filenamePrefix: String, level: Int = .zero, firstElement: Bool = false, fileManager: BeamFileDBManager
 ) -> MarkdownContent? {
         switch child.kind {
         case .bullet where child.children.isEmpty:
@@ -169,7 +171,11 @@ private extension MarkdownExporter {
             return (render(checkify(child.text.markdown, checked: checked), deepLevel: level), [])
 
         case .code:
-            return (render(codify(child.text.text), deepLevel: level), [])
+            let content = render(codify(child.text.text), deepLevel: level)
+            if firstElement {
+                return (content + .newline, [])
+            }
+            return (.newline + content + .newline, [])
 
         case .divider:
             return (.markdownDivider, [])

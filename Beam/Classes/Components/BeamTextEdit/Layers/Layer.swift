@@ -36,6 +36,7 @@ import AVFoundation
             // layer.borderWidth = hovered ? 2 : 0
         }
     }
+    private let displayHandler: (CALayer) -> Void
     var layout: () -> Void
 
     /// Layer adds a compositing filter to the CALayer (dark screen, light multiply) and update it on appearance change
@@ -52,6 +53,7 @@ import AVFoundation
          moved: @escaping MouseBlock = { _ in false },
          dragged: @escaping MouseBlock = { _ in false },
          hovered: @escaping (Bool) -> Void = { _ in },
+         display: @escaping (CALayer) -> Void = { _ in },
          layout: @escaping () -> Void = { }
     ) {
         self.name = name
@@ -62,6 +64,7 @@ import AVFoundation
         self.mouseMoved = moved
         self.mouseDragged = dragged
         self.hovered = hovered
+        self.displayHandler = display
         self.layout = layout
 
         super.init()
@@ -116,6 +119,10 @@ import AVFoundation
             return bounds.minY <= position.y && position.y < bounds.maxY
         }
         return bounds.contains(position)
+    }
+
+    func display(_ layer: CALayer) {
+        displayHandler(layer)
     }
 
     func layoutSublayers(of layer: CALayer) {

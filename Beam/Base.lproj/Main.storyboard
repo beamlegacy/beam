@@ -899,7 +899,7 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="yXb-tL-n71"/>
-                                        <menuItem title="Code Block" tag="3" hidden="YES" enabled="NO" keyEquivalent="c" id="U2P-gg-A4g">
+                                        <menuItem title="Code Block" tag="3" keyEquivalent="c" id="U2P-gg-A4g">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
                                                 <action selector="toggleCodeBlockAction:" target="Ady-hI-5gd" id="hdp-3Z-it5"/>

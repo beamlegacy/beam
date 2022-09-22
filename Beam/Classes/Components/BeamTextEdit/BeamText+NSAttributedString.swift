@@ -126,6 +126,8 @@ extension BeamText {
             font = BeamFont.medium(size: fontSize)
         } else if heading && emphasis {
             font = BeamFont.mediumItalic(size: fontSize)
+        } else if elementKind == .code {
+            font = BeamFont.monospaced(size: fontSize-1)
         } else {
             font = BeamFont.regular(size: fontSize)
         }

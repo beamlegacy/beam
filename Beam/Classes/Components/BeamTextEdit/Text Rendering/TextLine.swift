@@ -77,7 +77,7 @@ public class TextLine {
             .offsetBy(dx: frame.origin.x, dy: frame.origin.y)
     }
 
-    public func stringIndexFor(position: CGPoint) -> Int {
+    public func stringIndexFor(position: CGPoint, lastLine: Bool = true) -> Int {
         var previous = carets.first?.offset.x ?? 0
         for caret in carets where caret.edge.isTrailing {
             let offset = caret.offset.x
@@ -87,7 +87,15 @@ public class TextLine {
             }
             previous = offset
         }
-        return carets.last?.positionInSource ?? 0
+
+        if let position = carets.last?.positionInSource {
+            if lastLine {
+                return position
+            }
+            return max(0, position-1)
+        }
+        
+        return 0
     }
 
     private func charsToSkip(_ index: Int) -> Int {
