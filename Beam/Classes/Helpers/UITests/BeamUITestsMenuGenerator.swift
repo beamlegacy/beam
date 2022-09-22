@@ -297,7 +297,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
             return linkDB.visitId(url, title: title, content: title)
         }()
         let frecency = FrecencyUrlRecord(urlId: id, lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
-        try? BeamData.shared.urlHistoryManager?.saveFrecencyUrl(frecency)
+        try? BeamData.shared.linksDBManager?.saveFrecencyUrl(frecency)
     }
 
     private func signInWithTestAccount() {

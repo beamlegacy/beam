@@ -171,7 +171,7 @@ extension AutocompleteManager {
     private func autocompleteHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
-            BeamData.shared.urlHistoryManager?.searchLink(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
+            BeamData.shared.linksDBManager?.searchLink(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let historyResults):
@@ -206,7 +206,7 @@ extension AutocompleteManager {
     private func autocompleteLinkStoreResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
-            guard let scoredLinks = BeamData.shared.urlHistoryManager?.getTopScoredLinks(matchingUrl: query, frecencyParam: AutocompleteManager.urlFrecencyParamKey, limit: 6) else {
+            guard let scoredLinks = BeamData.shared.linksDBManager?.getTopScoredLinks(matchingUrl: query, frecencyParam: AutocompleteManager.urlFrecencyParamKey, limit: 6) else {
                 promise(.failure(BeamDataError.databaseNotFound))
                 return
             }
@@ -371,6 +371,8 @@ extension AutocompleteManager {
             let start = DispatchTime.now()
             var results = [AutocompleteResult]()
             let links = LinkStore.shared.getLinks(for: group.pageIds)
+            let groupInDB = self.beamState?.data.tabGroupingDBManager?.fetch(byIds: [group.id]).first
+            let pagesInDB: [UUID: TabGroupBeamObject.PageInfo] = Dictionary(uniqueKeysWithValues: groupInDB?.pages.map{ ($0.id, $0) } ?? [])
             if query.isEmpty {
                 results.append(
                     AutocompleteResult(text: loc("Open All Tabs"), source: .action, customIcon: "field-web", score: .greatestFiniteMagnitude,
@@ -381,20 +383,22 @@ extension AutocompleteManager {
             }
 
             let queryLowercase = query.lowercased()
-            results.append(contentsOf: group.pageIds.enumerated().compactMap({ (index, pageId) in
-                guard let link = links[pageId] else { return nil }
-                guard query.isEmpty || link.title?.lowercased().contains(queryLowercase) == true || link.url.contains(queryLowercase) else {
+            results.append(contentsOf: group.pageIds.enumerated().compactMap({ (index, pageId) -> AutocompleteResult? in
+                let link = links[pageId]
+                let pageInDB = pagesInDB[pageId]
+                let title = link?.title ?? pageInDB?.title ?? ""
+                guard var urlString = link?.url ?? pageInDB?.url.absoluteString else { return nil }
+                guard query.isEmpty || title.lowercased().contains(queryLowercase) == true || urlString.contains(queryLowercase) else {
                     return nil
                 }
 
-                let hasTitle = link.title?.isEmpty == false
-                let title = link.title ?? ""
-                let url = URL(string: link.url)
-                let urlString = url?.urlStringByRemovingUnnecessaryCharacters ?? link.url
-                let score = query.isEmpty ? Float(group.pageIds.count - index) : link.frecencyVisitSortScore
+                let hasTitle = title.isEmpty == false
+                let url = URL(string: urlString)
+                urlString = url?.urlStringByRemovingUnnecessaryCharacters ?? urlString
+                let score = query.isEmpty ? Float(group.pageIds.count - index) : link?.frecencyVisitSortScore
                 return AutocompleteResult(text: hasTitle ? title : urlString, source: .url, url: url,
                                           information: hasTitle ? urlString : nil, completingText: query,
-                                          uuid: link.id, score: score, urlFields: hasTitle ? .info : .text,
+                                          uuid: pageId, score: score, urlFields: hasTitle ? .info : .text,
                                           handler: { state, _ in
                     guard let url = url else { return }
                     state.createTab(withURLRequest: URLRequest(url: url))

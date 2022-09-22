@@ -136,10 +136,13 @@ class UrlStatsDBManager: GRDBHandler, BeamManager {
     }
 
     //day in format "YYYY-MM-DD"
-    func clearDailyUrlScores(toDay day: String? = nil) throws {
+    func clearDailyUrlScores(toDay: String? = nil, afterDay: String? = nil) throws {
         try self.write { db in
-            if let day = day {
-                let timeCond = DailyURLScore.Columns.localDay <= day
+            if let toDay = toDay {
+                let timeCond = DailyURLScore.Columns.localDay <= toDay
+                try DailyURLScore.filter(timeCond).deleteAll(db)
+            } else if let afterDay = afterDay {
+                let timeCond = DailyURLScore.Columns.localDay >= afterDay
                 try DailyURLScore.filter(timeCond).deleteAll(db)
             } else {
                 try DailyURLScore.deleteAll(db)
