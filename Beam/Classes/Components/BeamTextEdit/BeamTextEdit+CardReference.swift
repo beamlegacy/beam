@@ -12,6 +12,7 @@ extension BeamTextEdit {
 
     @discardableResult
     public func makeInternalLinkForSelectionOrShowFormatter(for node: TextNode, applyFormat: Bool = true) -> BeamText.Attribute? {
+        guard node.allowFormatting else { return nil }
         guard let rootNode = rootNode else { return nil }
         var title = node.root?.state.nodeSelection != nil ? node.text.text : selectedText
         title = title.trimmingCharacters(in: .whitespacesAndNewlines)

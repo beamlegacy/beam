@@ -413,8 +413,6 @@ class ImageNode: ResizableNode {
             }
 
             toggleButtonBeamLayer?.layer.opacity = frontmostHover ? 1.0 : 0.0
-            invalidate()
-            super.frontmostHover = frontmostHover
         }
     }
 
@@ -467,7 +465,7 @@ extension ImageNode {
     override var indentLayerPositionY: CGFloat { 20 }
 }
 
-extension ImageNode: Collapsable {
+extension ImageNode: Collapsible {
     var mediaName: String {
         imageSourceURL?.absoluteString ?? imageName ?? "Image"
     }

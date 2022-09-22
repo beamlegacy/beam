@@ -242,7 +242,11 @@ extension TextRoot {
         guard let node = focusedWidget as? ElementNode else { return }
         if node.isOnLastLine(cursorPosition) {
             if !moveToNextNodeIfPossible(fromNode: node, cursor: cursorPosition) {
-                cursorPosition = node.textCount
+                if node.moveDownInsertsNewElementIfNeeded {
+                    insertElementNearNonTextElement(after: node)
+                } else {
+                    cursorPosition = node.textCount
+                }
             }
         } else {
             var _caretIndex = node.caretBelow(caretIndex)

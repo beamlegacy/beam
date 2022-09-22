@@ -21,6 +21,8 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
 
     public func showLinkFormatterForSelection(mousePosition: CGPoint = .zero, showMenu: Bool = false) {
         guard let node = focusedWidget as? TextNode else { return }
+        guard node.allowFormatting else { return }
+
         var point = mousePosition
         if point == .zero {
             let (_, rect) = node.offsetAndFrameAt(index: node.cursorPosition)

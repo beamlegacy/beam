@@ -619,10 +619,7 @@ extension BeamObjectRequest {
     }
 
     public func fetchDataFromUrl(urlString: String) async throws -> Data {
-
-    try await withTaskCancellationHandler {
-            self.cancel()
-        } operation: {
+        try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
                 do {
                     try self.fetchDataFromUrl(urlString: urlString) { (result: Result<Data, Error>) in
@@ -637,6 +634,8 @@ extension BeamObjectRequest {
                     return continuation.resume(throwing: error)
                 }
             }
+        } onCancel: {
+            self.cancel()
         }
     }
 
@@ -645,8 +644,6 @@ extension BeamObjectRequest {
                        putHeaders: [String: String],
                        data: Data) async throws -> Bool {
         try await withTaskCancellationHandler {
-            self.cancel()
-        } operation: {
             try await withCheckedThrowingContinuation { continuation in
                 do {
                     try self.sendDataToUrl(urlString: urlString, putHeaders: putHeaders, data: data) { (result: Swift.Result<Bool, Error>) in
@@ -661,6 +658,8 @@ extension BeamObjectRequest {
                     return continuation.resume(throwing: error)
                 }
             }
+        } onCancel: {
+            self.cancel()
         }
     }
 
