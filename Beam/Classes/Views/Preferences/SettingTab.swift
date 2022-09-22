@@ -46,7 +46,7 @@ enum SettingTab: String, CaseIterable {
     var view: NSView {
         switch self {
         case .general: return NSHostingView(rootView: GeneralPreferencesView().fixedSize())
-        case .browser: return NSHostingView(rootView: BrowserPreferencesView(viewModel: BrowserPreferencesViewModel()).fixedSize())
+        case .browser: return NSHostingView(rootView: BrowserPreferencesView(viewModel: BrowserPreferencesViewModel(accountData: BeamData.shared)).fixedSize())
         case .notes: return NSHostingView(rootView: NotesPreferencesView().fixedSize())
         case .privacy: return NSHostingView(rootView: PrivacyPreferencesView().fixedSize())
         case .passwords:

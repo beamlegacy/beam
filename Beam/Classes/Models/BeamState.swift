@@ -1144,7 +1144,13 @@ extension BeamState: BrowserTabsManagerDelegate {
 extension BeamState {
     func openTabGroup(_ group: TabGroup, openingOption: Set<TabOpeningOption> = []) {
         let links = LinkStore.shared.getLinks(for: group.pageIds)
-        let urls = group.pageIds.compactMap({ URL(string: links[$0]?.url ?? "") })
+        let pagesInDB = data.tabGroupingDBManager?.fetch(byIds: [group.id]).first?.pages
+        let urls: [URL] = group.pageIds.compactMap { pageId in
+            let linkURLString = links[pageId]?.url
+            let pageURLString = pagesInDB?.first(where: { $0.id == pageId })?.url.absoluteString
+            let urlString = linkURLString ?? pageURLString
+            return urlString.flatMap(URL.init(string:))
+        }
 
         let state: BeamState
         if openingOption.contains(.newWindow), let window = AppDelegate.main.createWindow(frame: nil) {
