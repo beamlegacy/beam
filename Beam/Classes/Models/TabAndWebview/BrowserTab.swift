@@ -525,9 +525,11 @@ import BeamCore
 
         if PreferencesManager.videoCallsAlwaysInSideWindow, state?.videoCallsManager.isEligible(tab: self) == true {
             do {
-                try state?.videoCallsManager.start(with: request, faviconProvider: data?.faviconProvider)
+                try state?.videoCallsManager.start(with: request, faviconProvider: data?.faviconProvider, bounceIfExistingSession: false)
                 // If it succeeds, let's return!
                 return
+            } catch let err as VideoCallsManager.Error {
+                Logger.shared.logInfo("Could not open video call link \(err)", category: .general)
             } catch {
                 Logger.shared.logError("An error occured when opening video call link", category: .general)
             }
