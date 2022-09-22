@@ -266,6 +266,8 @@ struct CalendarItemView: View {
                         do {
                             let (state, data) = (AppDelegate.main.window?.state, AppDelegate.main.window?.data)
                             try state?.videoCallsManager.start(with: .init(url: url), faviconProvider: data?.faviconProvider)
+                        } catch VideoCallsManager.Error.existingSession {
+                            // no-op, existing window already foreground
                         } catch {
                             UserAlert.showError(error: error)
                         }

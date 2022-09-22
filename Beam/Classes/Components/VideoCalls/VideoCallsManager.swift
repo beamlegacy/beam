@@ -30,8 +30,12 @@ final class VideoCallsManager: NSObject {
     }()
 
     /// Starts a video call session within a dedicated panel.
-    func start(with request: URLRequest, faviconProvider: FaviconProvider?) throws {
+    func start(with request: URLRequest, faviconProvider: FaviconProvider?, bounceIfExistingSession: Bool = true) throws {
         guard currentPanel == nil else {
+            if bounceIfExistingSession {
+                currentPanel?.makeKeyAndOrderFront(nil)
+                currentPanel?.viewModel.bounceScale()
+            }
             throw Error.existingSession
         }
         let webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
@@ -91,6 +95,8 @@ final class VideoCallsManager: NSObject {
                 if let meetingLinkRequest = meetingLinkRequest {
                     try self?.start(with: meetingLinkRequest, faviconProvider: faviconProvider)
                 }
+            } catch VideoCallsManager.Error.existingSession {
+                // no-op, existing window already foreground
             } catch {
                 UserAlert.showError(error: error)
             }

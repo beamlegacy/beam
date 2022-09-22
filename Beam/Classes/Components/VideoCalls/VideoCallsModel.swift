@@ -255,6 +255,7 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
             completion(image)
         }
     }
+
     func shrink() {
         guard isExpanded, let panel = detailsClient.webView.window as? VideoCallsPanel, panel.sheets.isEmpty, !panel.isFullscreen
         else { return }
@@ -289,6 +290,21 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
             self.detailsClient.webView.pageZoom = 1.0
             _ = withAnimation(.easeInOut(duration: self.contentResizeAnimationDuration)) {
                 self.states.remove(.shrinked)
+            }
+        }
+    }
+
+    func bounceScale() {
+        guard let panel = detailsClient.webView.window as? VideoCallsPanel else {
+            return
+        }
+        isTransitioning = true
+        snapshotForTransition { image in
+            self.transitionSnapshot = image
+            panel.bounceScale(to: 0.9) {
+                guard self.transitionSnapshot == image else { return }
+                self.transitionSnapshot = nil
+                self.isTransitioning = false
             }
         }
     }
