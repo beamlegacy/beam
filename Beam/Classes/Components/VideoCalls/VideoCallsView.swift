@@ -4,8 +4,7 @@ import SwiftUI
 /// It displays a toolbar and a web view and is configured thanks to ``VideoCallsViewModel``.
 struct VideoCallsView: View {
 
-    private static let webViewMinFrame: CGRect = .init(origin: .zero, size: .init(width: 324, height: 226))
-    private static let webViewIdealFrame: CGRect = .init(origin: .zero, size: .init(width: 660, height: 434))
+    static let shadowPadding: CGFloat = 50
 
     private static let panelToolbarHeight: CGFloat = 28.0
 
@@ -19,32 +18,103 @@ struct VideoCallsView: View {
     private let animationDuration: TimeInterval = 0.150
 
     @ObservedObject var viewModel: VideoCallsViewModel
+    @State private var transitionSnapshot: NSImage?
+    @State private var showSnapshot = false
+    @State private var isHovering = false
 
     @State private var trafficButtonHovered: (close: Bool, main: Bool, fullscreen: Bool) = (false, false, false)
     @State private var privacyButtonHovered: (mic: Bool, video: Bool, speaker: Bool) = (false, false, false)
 
+    private let backgroundColor = BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.8, darkColor: .Mercury, darkAlpha: 0.7)
+    private let inactiveBackgroundColor = BeamColor.Mercury.alpha(0.1)
+
+    private var showToolbar: Bool {
+        viewModel.isExpanded || viewModel.isFullscreen || isHovering
+    }
+    private let strokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.3))
+    private let webViewStrokeColor = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.5, darkColor: .Mercury, darkAlpha: 0.5)
+
+    private var shadowColor: Color {
+        guard !viewModel.isExpanded else { return .clear }
+        return .black.opacity(showToolbar ? 0.3 : 0.15)
+    }
+    private var shadowRadius: CGFloat {
+        showToolbar ? 17 : 12
+    }
+    private var shadowY: CGFloat {
+        showToolbar ? 10 : 5
+    }
+
     var body: some View {
         VStack(spacing: .zero) {
-            if viewModel.displayToolbar {
-                toolbarView
-                    .frame(height: toolbarHeight)
-                    .transition(.opacity)
+            if !showToolbar {
+                Rectangle()
+                    .fill(.clear)
+                    .frame(height: toolbarHeight - padding)
             }
 
-            WebView(webView: webView, topContentInset: .zero)
+            VStack(spacing: .zero) {
+                if showToolbar {
+                    toolbarView
+                        .frame(height: toolbarHeight)
+                        .transition(.opacity)
+                }
+                ZStack {
+                    let image = transitionSnapshot
+                    if image == nil || !showSnapshot {
+                        WebView(webView: webView, topContentInset: .zero)
+                            .transition(.identity)
+                    }
+                    if let image = image {
+                        Image(nsImage: image)
+                            .resizable()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .opacity(showSnapshot ? 1 : 0)
+                    }
+
+                }
                 .cornerRadius(cornerRadius)
-                .frame(
-                    minWidth: Self.webViewMinFrame.width,
-                    idealWidth: viewModel.isShrinked ? Self.webViewMinFrame.width : Self.webViewIdealFrame.width,
-                    minHeight: Self.webViewMinFrame.height - Self.panelToolbarHeight,
-                    idealHeight: viewModel.isShrinked ? (Self.webViewMinFrame.height - Self.panelToolbarHeight) : Self.webViewIdealFrame.height
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius + 0.5)
+                        .stroke(webViewStrokeColor.swiftUI, lineWidth: 0.5)
                 )
+            }
+            .padding(showToolbar ? [.leading, .trailing, .bottom] : .all, padding)
+            .background((showToolbar ? backgroundColor : inactiveBackgroundColor).swiftUI)
+            .background(
+                VisualEffectView(material: .hudWindow, state: .active)
+            )
+            .cornerRadius(viewModel.isExpanded ? 0 : cornerRadius + padding)
+            .overlay(
+                RoundedRectangle(cornerRadius: viewModel.isExpanded ? cornerRadius : cornerRadius + padding + 0.5)
+                    .stroke(strokeColor.swiftUI, lineWidth: 0.5)
+            )
+            .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
         }
-        .animation(.easeInOut(duration: animationDuration), value: viewModel.displayToolbar)
-        .padding(viewModel.displayToolbar ? [.leading, .trailing, .bottom] : .all, padding)
-        .foregroundColor(BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.8, darkColor: .Mercury, darkAlpha: 0.7).swiftUI)
-        .visualEffect(material: .hudWindow)
+        .padding(viewModel.isExpanded || viewModel.isFullscreen ? 0 : Self.shadowPadding)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)
+        .onChange(of: viewModel.isHovered) { isHovered in
+            /// storing local isHovering state to manually animate
+            withAnimation(.easeInOut(duration: 0.15)) {
+                isHovering = isHovered
+            }
+        }
+        .onReceive(viewModel.$transitionSnapshot) { newSnapshot in
+            if newSnapshot == nil {
+                // Manually handling the transition from snapshot to webView
+                let duration: TimeInterval = 0.15
+                withAnimation(.easeIn(duration: duration)) {
+                    showSnapshot = false
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                    self.transitionSnapshot = nil
+                }
+            } else {
+                transitionSnapshot = newSnapshot
+                showSnapshot = true
+            }
+        }
     }
 
     private var toolbarView: some View {
