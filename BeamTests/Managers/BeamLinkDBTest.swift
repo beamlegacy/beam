@@ -52,7 +52,7 @@ class BeamLinkDBTests: XCTestCase {
             destinationLink,
         ]
         let store = GRDBStore(writer: DatabaseQueue())
-        let db = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
+        let db = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         try store.migrate()
 
         try db.insert(links: links)
@@ -72,7 +72,7 @@ class BeamLinkDBTests: XCTestCase {
         let creationDate = BeamDate.now
         let dbQueue = DatabaseQueue()
         let store = GRDBStore(writer: dbQueue)
-        let inMemoryGrdb = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
+        let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         try store.migrate(upTo: "flattenBrowsingTrees")
 
         //insertion of separated link and frecency records
@@ -120,7 +120,7 @@ class BeamLinkDBTests: XCTestCase {
     func testReceivedLinkFrecencyOverwrite() throws {
         let dbQueue = DatabaseQueue()
         let store = GRDBStore(writer: dbQueue)
-        let inMemoryGrdb = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
+        let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         let db = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
         try store.migrate()
         let now = BeamDate.now
@@ -152,7 +152,7 @@ class BeamLinkDBTests: XCTestCase {
     func testFrecencyStore() throws {
         let dbQueue = DatabaseQueue()
         let store = GRDBStore(writer: dbQueue)
-        let inMemoryGrdb = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
+        let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         let linkstore = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
         let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb, objectManager: objectManager, linkStore: linkstore)
         try store.migrate()
@@ -216,7 +216,7 @@ class BeamLinkDBTests: XCTestCase {
 
     func testConflictManagement() throws {
         let store = GRDBStore(writer: DatabaseQueue())
-        let db = try UrlHistoryManager(holder: nil, objectManager: objectManager, store: store)
+        let db = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         let linkstore = BeamLinkDB(objectManager: objectManager, overridenManager: db)
         try store.migrate()
         let now = BeamDate.now
@@ -265,34 +265,34 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.freeze("2001-01-01T12:21:03Z")
         let t0 = BeamDate.now
         let grdbStore = GRDBStore.empty()
-        let urlHistoryManager = try UrlHistoryManager(objectManager: BeamObjectManager(),store: grdbStore)
+        let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(),store: grdbStore)
         try grdbStore.migrate(upTo: "createUrlHistoryManager")
-        let youtubeLink = urlHistoryManager.visit(url: "https://www.youtube.com/abc", content: nil, destination: nil)
-        let otherLink = urlHistoryManager.visit(url: "https://www.somewhere.else/abc", content: nil, destination: youtubeLink.url)
-        let aliasToErase = urlHistoryManager.visit(url: "https://www.youtube.com/def", content: nil, destination: youtubeLink.url)
-        let aliasToKeep = urlHistoryManager.visit(url: "https://www.youtube.com/ght", content: nil, destination: otherLink.url)
+        let youtubeLink = linksDBManager.visit(url: "https://www.youtube.com/abc", content: nil, destination: nil)
+        let otherLink = linksDBManager.visit(url: "https://www.somewhere.else/abc", content: nil, destination: youtubeLink.url)
+        let aliasToErase = linksDBManager.visit(url: "https://www.youtube.com/def", content: nil, destination: youtubeLink.url)
+        let aliasToKeep = linksDBManager.visit(url: "https://www.youtube.com/ght", content: nil, destination: otherLink.url)
 
         BeamDate.travel(24 * 60 * 60)
         let t1 = BeamDate.now
         try grdbStore.migrate(upTo: "linkAliasesCleanup")
 
         //not an alias: untouched
-        let postCleanupYoutubeLink = try XCTUnwrap(urlHistoryManager.linkFor(id: youtubeLink.id))
+        let postCleanupYoutubeLink = try XCTUnwrap(linksDBManager.linkFor(id: youtubeLink.id))
         XCTAssertNil(postCleanupYoutubeLink.destination)
         XCTAssertEqual(postCleanupYoutubeLink.updatedAt, t0)
 
         //not a youtube link: untouched
-        let postCleanupOtherLink = try XCTUnwrap(urlHistoryManager.linkFor(id: otherLink.id))
+        let postCleanupOtherLink = try XCTUnwrap(linksDBManager.linkFor(id: otherLink.id))
         XCTAssertEqual(postCleanupOtherLink.destination, youtubeLink.id)
         XCTAssertEqual(postCleanupOtherLink.updatedAt, t0)
 
         //youtube to youtube alias: cleaned
-        let postCleanupAliasToErase = try XCTUnwrap(urlHistoryManager.linkFor(id: aliasToErase.id))
+        let postCleanupAliasToErase = try XCTUnwrap(linksDBManager.linkFor(id: aliasToErase.id))
         XCTAssertNil(postCleanupAliasToErase.destination)
         XCTAssertEqual(postCleanupAliasToErase.updatedAt, t1)
 
         //youtube to somewhere else: untouched
-        let postCleanupAliasToKeep = try XCTUnwrap(urlHistoryManager.linkFor(id: aliasToKeep.id))
+        let postCleanupAliasToKeep = try XCTUnwrap(linksDBManager.linkFor(id: aliasToKeep.id))
         XCTAssertEqual(postCleanupAliasToKeep.destination, otherLink.id)
         XCTAssertEqual(postCleanupAliasToKeep.updatedAt, t0)
 
@@ -303,34 +303,34 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.freeze("2001-01-01T12:21:03Z")
         let t0 = BeamDate.now
         let grdbStore = GRDBStore.empty()
-        let urlHistoryManager = try UrlHistoryManager(objectManager: BeamObjectManager(),store: grdbStore)
+        let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(),store: grdbStore)
         try grdbStore.migrate(upTo: "createUrlHistoryManager")
-        let gmailLink = urlHistoryManager.visit(url: "https://mail.google.com/abc", content: nil, destination: nil)
-        let aliasToErase = urlHistoryManager.visit(url: "https://www.some.thing/truc", content: nil, destination: gmailLink.url)
-        let aliasToKeep = urlHistoryManager.visit(url: "http://gmail.com/", content: nil, destination: gmailLink.url)
-        let otherAliasToKeep = urlHistoryManager.visit(url: "https://www.some.thing/truc2", content: nil, destination: aliasToErase.url)
+        let gmailLink = linksDBManager.visit(url: "https://mail.google.com/abc", content: nil, destination: nil)
+        let aliasToErase = linksDBManager.visit(url: "https://www.some.thing/truc", content: nil, destination: gmailLink.url)
+        let aliasToKeep = linksDBManager.visit(url: "http://gmail.com/", content: nil, destination: gmailLink.url)
+        let otherAliasToKeep = linksDBManager.visit(url: "https://www.some.thing/truc2", content: nil, destination: aliasToErase.url)
 
         BeamDate.travel(24 * 60 * 60)
         let t1 = BeamDate.now
         try grdbStore.migrate(upTo: "linkAliasesCleanup")
 
         //not an alias: untouched
-        let postCleanupGmailLink = try XCTUnwrap(urlHistoryManager.linkFor(id: gmailLink.id))
+        let postCleanupGmailLink = try XCTUnwrap(linksDBManager.linkFor(id: gmailLink.id))
         XCTAssertNil(postCleanupGmailLink.destination)
         XCTAssertEqual(postCleanupGmailLink.updatedAt, t0)
 
         //somewhere else to gmail alias: cleaned
-        let postCleanupAliasToErase = try XCTUnwrap(urlHistoryManager.linkFor(id: aliasToErase.id))
+        let postCleanupAliasToErase = try XCTUnwrap(linksDBManager.linkFor(id: aliasToErase.id))
         XCTAssertNil(postCleanupAliasToErase.destination)
         XCTAssertEqual(postCleanupAliasToErase.updatedAt, t1)
 
         //gmail to gmail else: untouched
-        let postCleanupAliasToKeep = try XCTUnwrap(urlHistoryManager.linkFor(id: aliasToKeep.id))
+        let postCleanupAliasToKeep = try XCTUnwrap(linksDBManager.linkFor(id: aliasToKeep.id))
         XCTAssertEqual(postCleanupAliasToKeep.destination, gmailLink.id)
         XCTAssertEqual(postCleanupAliasToKeep.updatedAt, t0)
 
         //no gmail to not gmail: untouched
-        let postCleanupotherAliasToKeep = try XCTUnwrap(urlHistoryManager.linkFor(id: otherAliasToKeep.id))
+        let postCleanupotherAliasToKeep = try XCTUnwrap(linksDBManager.linkFor(id: otherAliasToKeep.id))
         XCTAssertEqual(postCleanupotherAliasToKeep.destination, aliasToErase.id)
         XCTAssertEqual(postCleanupotherAliasToKeep.updatedAt, t0)
 
@@ -341,21 +341,21 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.freeze("2001-01-01T12:21:03Z")
         let t0 = BeamDate.now
         let grdbStore = GRDBStore.empty()
-        let urlHistoryManager = try UrlHistoryManager(objectManager: BeamObjectManager(),store: grdbStore)
+        let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(),store: grdbStore)
         try grdbStore.migrate(upTo: "linkAliasesCleanup")
-        let AliasLessGoogleUrlLink = urlHistoryManager.visit(url: "https://www.google.com/search?q=https%3A%2F%2Fabc.com%2F", content: nil, destination: nil)
-        urlHistoryManager.updateLinkFrecency(id: AliasLessGoogleUrlLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
-        let AliasGoogleUrlLink = urlHistoryManager.visit(url: "https://www.google.com/url?q=https%3A%2F%2Fabc.com%2F", content: nil, destination: AliasLessGoogleUrlLink.url)
-        urlHistoryManager.updateLinkFrecency(id: AliasGoogleUrlLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
-        let regularGoogleSearchLink = urlHistoryManager.visit(url: "https://www.google.com/search?q=coucou", content: nil, destination: nil)
-        urlHistoryManager.updateLinkFrecency(id: regularGoogleSearchLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
+        let AliasLessGoogleUrlLink = linksDBManager.visit(url: "https://www.google.com/search?q=https%3A%2F%2Fabc.com%2F", content: nil, destination: nil)
+        linksDBManager.updateLinkFrecency(id: AliasLessGoogleUrlLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
+        let AliasGoogleUrlLink = linksDBManager.visit(url: "https://www.google.com/url?q=https%3A%2F%2Fabc.com%2F", content: nil, destination: AliasLessGoogleUrlLink.url)
+        linksDBManager.updateLinkFrecency(id: AliasGoogleUrlLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
+        let regularGoogleSearchLink = linksDBManager.visit(url: "https://www.google.com/search?q=coucou", content: nil, destination: nil)
+        linksDBManager.updateLinkFrecency(id: regularGoogleSearchLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
 
         BeamDate.travel(24 * 60 * 60)
         let t1 = BeamDate.now
         try grdbStore.migrate(upTo: "googleAliasesCleanup")
 
         //a google search url with a url like query gets cleaned
-        let postCleanupAliasLessGoogleUrlLink = try XCTUnwrap(urlHistoryManager.linkFor(id: AliasLessGoogleUrlLink.id))
+        let postCleanupAliasLessGoogleUrlLink = try XCTUnwrap(linksDBManager.linkFor(id: AliasLessGoogleUrlLink.id))
         XCTAssertNil(postCleanupAliasLessGoogleUrlLink.destination)
         XCTAssertNil(postCleanupAliasLessGoogleUrlLink.frecencyVisitScore)
         XCTAssertNil(postCleanupAliasLessGoogleUrlLink.frecencyVisitSortScore)
@@ -363,7 +363,7 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertEqual(postCleanupAliasLessGoogleUrlLink.updatedAt, t1)
 
         //a google redirection url  gets cleaned
-        let postCleanupAliasGoogleUrlLink = try XCTUnwrap(urlHistoryManager.linkFor(id: AliasGoogleUrlLink.id))
+        let postCleanupAliasGoogleUrlLink = try XCTUnwrap(linksDBManager.linkFor(id: AliasGoogleUrlLink.id))
         XCTAssertNil(postCleanupAliasGoogleUrlLink.destination)
         XCTAssertNil(postCleanupAliasGoogleUrlLink.frecencyVisitScore)
         XCTAssertNil(postCleanupAliasGoogleUrlLink.frecencyVisitSortScore)
@@ -371,7 +371,7 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertEqual(postCleanupAliasGoogleUrlLink.updatedAt, t1)
 
         //a google search url with a regular query gets untouched
-        let postCleanupRegularGoogleSearchLink = try XCTUnwrap(urlHistoryManager.linkFor(id: regularGoogleSearchLink.id))
+        let postCleanupRegularGoogleSearchLink = try XCTUnwrap(linksDBManager.linkFor(id: regularGoogleSearchLink.id))
         XCTAssertNotNil(postCleanupRegularGoogleSearchLink.frecencyVisitScore)
         XCTAssertNotNil(postCleanupRegularGoogleSearchLink.frecencyVisitSortScore)
         XCTAssertNotNil(postCleanupRegularGoogleSearchLink.frecencyVisitLastAccessAt)

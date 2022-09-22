@@ -41,12 +41,17 @@ class GRDBDailyUrlScoreStore: DailyUrlScoreStoreProtocol {
         db.updateDailyUrlScore(urlId: urlId, day: localDay, changes: changes)
     }
 
-    func cleanup() {
+    func cleanup(afterDate: Date? = nil) {
         guard let db = db else { return }
         do {
-            let now = BeamDate.now
-            let bound = Calendar(identifier: .iso8601).date(byAdding: DateComponents(day: -daysToKeep), to: now)?.localDayString()
-            try db.clearDailyUrlScores(toDay: bound ?? "0000-00-00")
+            if let afterDate = afterDate {
+                let afterDay = afterDate.localDayString()
+                try db.clearDailyUrlScores(afterDay: afterDay ?? "0000-00-00")
+            } else {
+                let now = BeamDate.now
+                let bound = Calendar(identifier: .iso8601).date(byAdding: DateComponents(day: -daysToKeep), to: now)?.localDayString()
+                try db.clearDailyUrlScores(toDay: bound ?? "0000-00-00")
+            }
         } catch {
             Logger.shared.logError("Couldn't clearn daily url scores: \(error)", category: .database)
         }

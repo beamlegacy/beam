@@ -137,6 +137,17 @@ class BrowsingTreeDBManager: GRDBHandler, BeamManager {
                 )
         }
     }
+    func deleteBrowsingTrees(createdAfter afterDate: Date? = nil) throws {
+        _ = try self.write { db in
+            if let afterDate = afterDate {
+                try BrowsingTreeRecord
+                    .filter(BrowsingTreeRecord.Columns.rootCreatedAt >= afterDate)
+                    .deleteAll(db)
+            } else {
+                try BrowsingTreeRecord.deleteAll(db)
+            }
+        }
+    }
 }
 
 extension BeamManagerOwner {
