@@ -27,6 +27,7 @@ class BaseTest: XCTestCase {
     let username = "AutomationTestSignin"
     let host = "form.lvh.me"
     let stagingEnvironmentServerAddress = "staging-web-server.ew.r.appspot.com"
+    let tempURLToRedirectedReactNativeApp = "legendary-strudel.netlify.app"
     
     let uiTestPageOne = "Point And Shoot Test Fixture Ultralight Beam"
     let uiTestPageTwo = "Point And Shoot Test Fixture I-Beam"
