@@ -174,10 +174,12 @@ extension TabExternalDraggingSource: ExternalDraggingSource {
             let frameOrigin = CGPoint(x: max(0, screenPoint.x - (window.frame.width / 2)),
                                       y: max(0, screenPoint.y - window.frame.height + (Toolbar.height / 2)))
             window.setFrameOrigin(frameOrigin)
-
+            
             window.state.browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: true)
             window.state.mode = .web
             window.makeKeyAndOrderFront(nil)
+        } else if PreferencesManager.videoCallsAlwaysInSideWindow, state?.videoCallsManager.isEligible(tab: tab) == true {
+            try? state?.videoCallsManager.detachTabIntoSidePanel(tab)
         } else {
             AppDelegate.main.createWindow(withTabs: [tab], at: screenPoint)
         }
