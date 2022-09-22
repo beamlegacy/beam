@@ -449,12 +449,12 @@ extension TextRoot {
         return finalRange
     }
 
-    func insertNewline() {
+    func insertNewline(insertIfEmpty: Bool = false) {
         guard root?.state.nodeSelection == nil,
               let node = focusedWidget as? TextNode,
               !node.readOnly else { return }
 
-        if !node.element.text.isEmpty {
+        if insertIfEmpty || !node.element.text.isEmpty {
             if !selectedTextRange.isEmpty {
                 focusedCmdManager.deleteText(in: node, for: selectedTextRange)
             }

@@ -33,6 +33,7 @@ extension BeamTextEdit {
         guard let rootNode = rootNode else { return true }
         guard inputDetectorEnabled else { return true }
         guard let node = focusedWidget as? TextNode else { return true }
+        guard node.allowFormatting else { return true }
         defer { inputDetectorLastInput = input }
 
         let handlers: [String: () -> Bool] = [
@@ -123,6 +124,7 @@ extension BeamTextEdit {
     func postDetectInput(_ input: String) -> BeamText.Attribute? {
         guard inputDetectorEnabled, rootNode != nil else { return nil }
         guard let node = focusedWidget as? TextNode else { return nil }
+        guard node.allowFormatting else { return nil }
 
         let handlers: [String: () -> BeamText.Attribute?] = [
             "#": { [unowned self] in self.postInputMakeHeader(node: node) },
@@ -131,6 +133,7 @@ extension BeamTextEdit {
             "~": { [unowned self] in self.postInputMarkdown(node: node) },
             "_": { [unowned self] in self.postInputMarkdown(node: node) },
             "-": { [unowned self] in self.postInputHandleDash(node: node) },
+            "`": { [unowned self] in self.postInputHandleBacktick(node: node) },
             " ": { [unowned self] in
                 if let res = self.postInputMakeHeader(node: node) ??
                     self.postInputMakeQuote(node: node) {
@@ -234,6 +237,28 @@ extension BeamTextEdit {
             }
             cmdManager.endGroup()
         }
+        return nil
+    }
+
+    func postInputHandleBacktick(node: TextNode) -> BeamText.Attribute? {
+        guard let rootNode = rootNode else { return nil }
+        guard node.textCount >= 3, node.cursorPosition == 3 else { return nil }
+        guard node.text.prefix(3).text == "```" else { return nil }
+        guard let parentNode = node.parent as? ElementNode else { return nil }
+
+        // Drop all attributes, we want plain text.
+        let text = String(node.text.text.dropFirst(3))
+
+        let codeBlock = BeamElement(text)
+        codeBlock.kind = .code
+
+        let cmdManager = rootNode.focusedCmdManager
+        cmdManager.beginGroup(with: "Insert Code Block")
+        cmdManager.insertElement(codeBlock, inNode: parentNode, afterNode: node)
+        cmdManager.deleteElement(for: node)
+        cmdManager.focus(codeBlock, in: parentNode)
+        cmdManager.endGroup()
+
         return nil
     }
 

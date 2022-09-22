@@ -134,6 +134,10 @@ public class ElementNode: Widget {
         return depth == 1
     }
 
+    var allowFormatting: Bool { true }
+    var pressEnterInsertsNewLine: Bool { false }
+    var moveDownInsertsNewElementIfNeeded: Bool { false }
+
     var _readOnly: Bool?
     var readOnly: Bool {
         get {
