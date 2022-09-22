@@ -19,7 +19,7 @@ extension TabPinSuggestion: FetchableRecord {}
 extension TabPinSuggestion: PersistableRecord {}
 extension TabPinSuggestion: TableRecord {
     enum Columns: String, ColumnExpression {
-            case id, createAt, updatedAt, domainPath0
+            case id, createdAt, updatedAt, domainPath0
         }
 }
 extension TabPinSuggestion: Identifiable {}

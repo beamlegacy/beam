@@ -146,12 +146,12 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
         Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
     }
 
-    private var overridenManager: UrlHistoryManager?
-    private var manager: UrlHistoryManager? {
-        overridenManager ?? BeamData.shared.urlHistoryManager
+    private var overridenManager: LinksDBManager?
+    private var manager: LinksDBManager? {
+        overridenManager ?? BeamData.shared.linksDBManager
     }
 
-    init(objectManager: BeamObjectManager, overridenManager: UrlHistoryManager? = nil) {
+    init(objectManager: BeamObjectManager, overridenManager: LinksDBManager? = nil) {
         self.objectManager = objectManager
         self.overridenManager = overridenManager
 

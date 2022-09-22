@@ -146,8 +146,16 @@ final class FaviconProvider {
         Int(CGFloat(iconDefaultSize) * screenScale)
     }
 
-    func clearCache() {
-        cache.removeAllValues()
+    func clearCache(_ afterDate: Date? = nil) {
+        if let afterDate = afterDate {
+            cache.allEntries.forEach { entry in
+                if entry.value.date > afterDate {
+                    cache.removeValue(forKey: entry.key)
+                }
+            }
+        } else {
+            cache.removeAllValues()
+        }
         saveCacheToDisk()
     }
 

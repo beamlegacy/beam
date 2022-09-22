@@ -1,5 +1,5 @@
 //
-//  URLHistoryManager.swift
+//  LinksDBManager.swift
 //  Beam
 //
 //  Created by Sébastien Metrot on 10/06/2022.
@@ -9,11 +9,11 @@ import Foundation
 import GRDB
 import BeamCore
 
-class UrlHistoryManager: GRDBHandler, BeamManager {
+class LinksDBManager: GRDBHandler, BeamManager {
     weak public private(set) var owner: BeamManagerOwner?
     static var id = UUID()
 
-    static var name = "UrlHistoryManager"
+    static var name = "LinksDBManager"
 
     required init(holder: BeamManagerOwner? = nil, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.owner = holder
@@ -127,7 +127,9 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
     func getLinks(matchingUrl url: String) -> [UUID: Link] {
         var matchingLinks = [UUID: Link]()
         try? self.read { db in
-            try Link.filter(Column("url").like("%\(url)%"))
+            try Link
+                .filter(Link.Columns.deletedAt == nil)
+                .filter(Link.Columns.url.like("%\(url)%"))
                 .fetchAll(db)
                 .forEach { matchingLinks[$0.id] = $0 }
         }
@@ -148,7 +150,8 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
         let destinationAlias = TableAlias()
         let association = Link.destinationLink.aliased(destinationAlias)
         let query = Link
-            .filter(Column("url").like("%.\(url)%") || Column("url").like("%/\(url)%"))
+            .filter(Link.Columns.deletedAt == nil)
+            .filter(Link.Columns.url.like("%.\(url)%") || Link.Columns.url.like("%/\(url)%"))
             .including(optional: association)
             .order((destinationAlias["frecencyVisitSortScore"] ?? Link.Columns.frecencyVisitSortScore).desc)
             .limit(limit)
@@ -166,7 +169,7 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
 
     func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID {
         (try? self.read { db in
-            try Link.filter(Column("url") == url).fetchOne(db)?.id
+            try Link.filter(Link.Columns.deletedAt == nil).filter(Link.Columns.url == url).fetchOne(db)?.id
         }) ?? visit(url: url, title: title, content: content, destination: destination).id
     }
 
@@ -180,12 +183,13 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
 
     func linkFor(id: UUID) -> Link? {
         try? self.read { db in
-            try Link.filter(Column("id") == id).fetchOne(db)
+            try Link.filter(Link.Columns.id == id).filter(Link.Columns.deletedAt == nil).fetchOne(db)
         }
     }
     func getLinks(ids: [UUID]) throws -> [UUID: Link] {
         try self.read { db in
             let cursor = try Link
+                .filter(Link.Columns.deletedAt == nil)
                 .filter(ids.contains(Link.Columns.id))
                 .fetchCursor(db)
                 .map { ($0.id, $0) }
@@ -195,7 +199,7 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
 
     func linkFor(url: String) -> Link? {
         try? self.read { db in
-            try Link.filter(Column("url") == url).fetchOne(db)
+            try Link.filter(Link.Columns.deletedAt == nil).filter(Link.Columns.url == url).fetchOne(db)
         }
     }
 
@@ -232,10 +236,10 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
         link.updatedAt = BeamDate.now
 
         let updateColumns = [
-            Column("updatedAt"),
-            Column("frecencyVisitLastAccessAt"),
-            Column("frecencyVisitScore"),
-            Column("frecencyVisitSortScore")
+            Link.Columns.updatedAt,
+            Link.Columns.frecencyVisitLastAccessAt,
+            Link.Columns.frecencyVisitScore,
+            Link.Columns.frecencyVisitSortScore
         ]
         _ = try? self.write { db in
             try link.update(db, columns: updateColumns)
@@ -274,16 +278,16 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
     func allLinks(updatedSince: Date?) throws -> [Link] {
         guard let updatedSince = updatedSince
         else {
-            return try self.read { db in try Link.fetchAll(db) }
+            return try self.read { db in try Link.filter(Link.Columns.deletedAt == nil).fetchAll(db) }
         }
         return try self.read { db in
-            try Link.filter(Column("updatedAt") >= updatedSince).fetchAll(db)
+            try Link.filter(Link.Columns.deletedAt == nil).filter(Link.Columns.updatedAt >= updatedSince).fetchAll(db)
         }
     }
 
     func getLinks(ids: [UUID]) throws -> [Link] {
         try self.read { db in
-            try Link.filter(keys: ids).fetchAll(db)
+            try Link.filter(keys: ids).filter(Link.Columns.deletedAt == nil).fetchAll(db)
         }
     }
 
@@ -335,12 +339,13 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
 
         asyncRead { (dbResult: Result<GRDB.Database, Error>) in
             do {
-                let joint = PreferencesManager.includeHistoryContentsInOmniBox ? Link.contentAssociation.matching(pattern) : Link.contentAssociation.filter(Column("title").match(pattern))
+                let joint = PreferencesManager.includeHistoryContentsInOmniBox ? Link.contentAssociation.matching(pattern) : Link.contentAssociation.filter(Link.Columns.title.match(pattern))
 
                 let db = try dbResult.get()
                 let destinationAlias = TableAlias()
                 let association = Link.destinationLink.aliased(destinationAlias)
                 let request = Link
+                    .filter(Link.Columns.deletedAt == nil)
                     .joining(required: joint)
                     .including(optional: association)
                     .order((destinationAlias["frecencyVisitSortScore"] ?? Link.Columns.frecencyVisitSortScore).desc)
@@ -369,6 +374,20 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
     func deleteAll() throws {
         _ = try self.write { db in
             try Link.deleteAll(db)
+            try FrecencyUrlRecord.deleteAll(db)
+        }
+    }
+
+    func softDeleteAll(_ ids: [UUID]) throws {
+        _ = try self.write { db in
+            let now = BeamDate.now
+            try Link.filter(ids: ids)
+                .updateAll(db,
+                           Link.Columns.deletedAt.set(to: now),
+                           Link.Columns.updatedAt.set(to: now),
+                           Link.Columns.content.set(to: nil)
+                )
+            try FrecencyUrlRecord.filter(ids.contains(FrecencyUrlRecord.Columns.urlId)).deleteAll(db)
         }
     }
 
@@ -424,13 +443,13 @@ class UrlHistoryManager: GRDBHandler, BeamManager {
 }
 
 extension BeamManagerOwner {
-    var urlHistoryManager: UrlHistoryManager? {
-        try? manager(UrlHistoryManager.self)
+    var linksDBManager: LinksDBManager? {
+        try? manager(LinksDBManager.self)
     }
 }
 
 extension BeamData {
-    var urlHistoryManager: UrlHistoryManager? {
-        AppData.shared.currentAccount?.urlHistoryManager
+    var linksDBManager: LinksDBManager? {
+        AppData.shared.currentAccount?.linksDBManager
     }
 }

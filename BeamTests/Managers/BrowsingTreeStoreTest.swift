@@ -14,13 +14,13 @@ class BrowsingTreeStoreTest: XCTestCase {
 
     override func setUpWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
+        try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         try BeamData.shared.browsingTreeDBManager?.clearBrowsingTrees()
     }
 
     override func tearDownWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in}
-        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
+        try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         try BeamData.shared.browsingTreeDBManager?.clearBrowsingTrees()
     }
 
@@ -46,19 +46,19 @@ class BrowsingTreeStoreTest: XCTestCase {
         expect(store.treeProcessingCompleted).toEventually(beTrue())
 
         //received tree not already stored in db should trigger tree processsing
-        guard let treeFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: tree.current.link) else {
+        guard let treeFrecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: tree.current.link) else {
             throw BeamDataError.databaseNotFound
         }
         XCTAssert(treeFrecencies.count > 0)
 
         //tree record already in db with done should not trigger processing when received
-        guard let savedTreeFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: savedTree.current.link) else {
+        guard let savedTreeFrecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: savedTree.current.link) else {
             throw BeamDataError.databaseNotFound
         }
         XCTAssertEqual(savedTreeFrecencies.count, 0)
 
         //tree record already in db with started status should not trigger processing when received
-        guard let processingTreeFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: alreadyProcessingTree.current.link) else {
+        guard let processingTreeFrecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: alreadyProcessingTree.current.link) else {
             throw BeamDataError.databaseNotFound
         }
         XCTAssertEqual(processingTreeFrecencies.count, 0)
