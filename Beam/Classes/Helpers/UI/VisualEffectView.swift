@@ -11,17 +11,19 @@ import SwiftUI
 struct VisualEffectView: View {
     private var material: NSVisualEffectView.Material
     private var blendingMode: NSVisualEffectView.BlendingMode
-    private var state: NSVisualEffectView.State = .followsWindowActiveState
+    private var state: NSVisualEffectView.State
     private let isEmphasized: Bool
 
     init(
         material: NSVisualEffectView.Material,
         blendingMode: NSVisualEffectView.BlendingMode = .withinWindow,
-        emphasized: Bool = false
+        emphasized: Bool = false,
+        state: NSVisualEffectView.State = .followsWindowActiveState
     ) {
         self.material = material
         self.blendingMode = blendingMode
         self.isEmphasized = emphasized
+        self.state = state
     }
 
     var body: some View {

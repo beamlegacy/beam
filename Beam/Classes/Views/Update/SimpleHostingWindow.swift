@@ -32,7 +32,9 @@ class SimpleHostingPanel: NSPanel {
     }
 
     func setView<Content>(content: Content) where Content: View {
-        self.contentView = BeamHostingView(rootView: content)
+        let hostingView = BeamHostingView(rootView: content)
+        hostingView.autoresizingMask = [.width, .height]
+        self.contentView = hostingView
     }
 }
 
