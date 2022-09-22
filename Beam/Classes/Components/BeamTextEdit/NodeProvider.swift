@@ -81,6 +81,8 @@ class NodeProviderImpl: NodeProvider {
                 return BlockReferenceNode(parent: withParent, element: element, availableWidth: width)
             case .divider:
                 return DividerNode(parent: withParent, element: element, availableWidth: width)
+            case .code:
+                return ProxyCodeNode(parent: withParent, element: element, availableWidth: width)
             default:
                 return ProxyTextNode(parent: withParent, element: element, availableWidth: width)
             }
@@ -134,6 +136,8 @@ class NodeProviderImpl: NodeProvider {
                     return DividerNode(parent: withParent, element: element, availableWidth: width)
                 case .tabGroup:
                     return TabGroupNode(parent: withParent, element: element, availableWidth: width)
+                case .code:
+                    return CodeNode(parent: withParent, element: element, availableWidth: width)
                 default:
                     return TextNode(parent: withParent, element: element, availableWidth: width)
                 }

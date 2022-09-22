@@ -643,7 +643,9 @@ public class TextNode: ElementNode {
                 guard allowSelection else { return true }
                 dragMode = .select(cursorPosition)
                 root?.extendSelection(to: clickPos)
-                editor.showInlineFormatterOnKeyEventsAndClick()
+                if allowFormatting {
+                    editor.showInlineFormatterOnKeyEventsAndClick()
+                }
                 return true
             } else if mouseInfo.event.clickCount == 1 {
                 guard allowSelection else { return true }
@@ -655,7 +657,7 @@ public class TextNode: ElementNode {
                 debounceClickTimer?.invalidate()
                 guard allowSelection else { return true }
                 root?.wordSelection(from: clickPos)
-                if !selectedTextRange.isEmpty {
+                if allowFormatting && !selectedTextRange.isEmpty {
                     editor.showInlineFormatterOnKeyEventsAndClick()
                 }
                 return true
@@ -665,7 +667,7 @@ public class TextNode: ElementNode {
                 root?.selectAll()
                 editor.detectTextFormatterType()
 
-                if root?.state.nodeSelection != nil {
+                if allowFormatting && root?.state.nodeSelection != nil {
                     editor.showInlineFormatterOnKeyEventsAndClick()
                 }
                 return true
@@ -699,7 +701,7 @@ public class TextNode: ElementNode {
                 guard allowSelection else { return true }
                 focus(position: clickPos)
                 root?.wordSelection(from: clickPos)
-                if !selectedTextRange.isEmpty {
+                if allowFormatting && !selectedTextRange.isEmpty {
                     editor.showInlineFormatterOnKeyEventsAndClick()
                 }
             }
@@ -712,7 +714,7 @@ public class TextNode: ElementNode {
         guard let editor = self.editor else { return false }
         editor.detectTextFormatterType()
 
-        if mouseIsDragged, allowSelection {
+        if allowFormatting && mouseIsDragged, allowSelection {
             editor.showInlineFormatterOnKeyEventsAndClick(isKeyEvent: false)
         }
 
@@ -875,7 +877,8 @@ public class TextNode: ElementNode {
         let lineIndex = lineAt(point: point)
         let lines = textFrame.lines
         let line = lines[lineIndex]
-        return line.stringIndexFor(position: NSPoint(x: point.x - contentsPadding.left, y: point.y - contentsPadding.top))
+        return line.stringIndexFor(position: NSPoint(x: point.x - contentsPadding.left, y: point.y - contentsPadding.top),
+                                   lastLine: lineIndex == lines.count-1)
     }
 
     override public func caretIndexAvoidingUneditableRange(_ caretIndex: Int, after: Bool) -> Int? {
@@ -1213,7 +1216,7 @@ public class TextNode: ElementNode {
         context.fill(contentsFrame)
     }
 
-    private func buildAttributedString(for beamText: BeamText, enableInteractions: Bool = true) -> NSMutableAttributedString {
+    func buildAttributedString(for beamText: BeamText, enableInteractions: Bool = true) -> NSMutableAttributedString {
 
         var mouseInteraction: MouseInteraction?
         if enableInteractions, let hoverMouse = lastHoverMouseInfo, isHoveringText() {

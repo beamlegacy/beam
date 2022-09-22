@@ -115,5 +115,19 @@ extension BeamTextEdit {
 
     internal func toggleCode() {
         Logger.shared.logDebug("code")
+        guard let rootNode = rootNode else { return }
+        guard let node = focusedWidget as? TextNode else { return }
+        guard let parentNode = node.parent as? ElementNode else { return }
+
+        // Drop all attributes, we want plain text.
+        let codeBlock = BeamElement(node.text.text)
+        codeBlock.kind = .code
+
+        let cmdManager = rootNode.focusedCmdManager
+        cmdManager.beginGroup(with: "Insert Code Block")
+        cmdManager.insertElement(codeBlock, inNode: parentNode, afterNode: node)
+        cmdManager.deleteElement(for: node)
+        cmdManager.focus(codeBlock, in: parentNode)
+        cmdManager.endGroup()
     }
 }

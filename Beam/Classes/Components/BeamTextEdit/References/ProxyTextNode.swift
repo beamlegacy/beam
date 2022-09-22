@@ -96,7 +96,7 @@ class ProxyTextNode: TextNode, ProxyNode {
     }
 
     override var mainLayerName: String {
-        "ProxyTextNode - \(element.id.uuidString) (from note \(element.note?.title ?? "???"))"
+        "\(type(of: self)) - \(element.id.uuidString) (from note \(element.note?.title ?? "???"))"
     }
 
     override func onUnfocus() {

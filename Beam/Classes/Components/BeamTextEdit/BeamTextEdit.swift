@@ -893,8 +893,8 @@ public extension CALayer {
               let node = focusedWidget as? ElementNode
         else { return }
 
-        if option || shift {
-            rootNode.insertNewline()
+        if option || shift || node.pressEnterInsertsNewLine {
+            rootNode.insertNewline(insertIfEmpty: true)
             hideInlineFormatter()
         } else if ctrl, let textNode = node as? TextNode, case let .check(checked) = node.elementKind {
             node.cmdManager.formatText(in: textNode, for: .check(!checked), with: nil, for: nil, isActive: false)
@@ -1731,8 +1731,13 @@ public extension CALayer {
 
     override public func selectAll(_ sender: Any?) {
         guard let rootNode = rootNode,
-              let node = focusedWidget as? ElementNode, node.allowSelection else { return }
+              let node = focusedWidget as? ElementNode,
+              node.allowSelection else { return }
+        
         rootNode.selectAll()
+
+        guard node.allowFormatting else { return}
+
         if isOnlyOneThingSelected {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
         } else {
@@ -1742,8 +1747,13 @@ public extension CALayer {
 
     override public func moveUpAndModifySelection(_ sender: Any?) {
         guard let rootNode = rootNode,
-        let node = focusedWidget as? ElementNode, node.allowSelection else { return }
+              let node = focusedWidget as? ElementNode,
+              node.allowSelection else { return }
+
         rootNode.moveUpAndModifySelection()
+
+        guard node.allowFormatting else { return}
+
         if isOnlyOneThingSelected {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
         }
@@ -1751,8 +1761,13 @@ public extension CALayer {
 
     override public func moveDownAndModifySelection(_ sender: Any?) {
         guard let rootNode = rootNode,
-        let node = focusedWidget as? ElementNode, node.allowSelection else { return }
+              let node = focusedWidget as? ElementNode,
+              node.allowSelection else { return }
+
         rootNode.moveDownAndModifySelection()
+
+        guard node.allowFormatting else { return}
+
         if isOnlyOneThingSelected {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
         }
