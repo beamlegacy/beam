@@ -29,6 +29,7 @@ final class CollapseButtonLayer: ButtonLayer {
     var isCompact: Bool = false {
         didSet {
             textLayer.opacity = isCompact ? 0 : 1
+            updateLayout()
         }
     }
 
