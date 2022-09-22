@@ -13,13 +13,13 @@ class BrowsingTreeProcessorTest: XCTestCase {
 
     override func setUpWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
+        try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         Persistence.cleanUp()
     }
 
     override func tearDownWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
+        try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         Persistence.cleanUp()
      }
 
@@ -35,7 +35,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
         processor.process(tree: tree)
         BeamDate.reset()
 
-        guard var frecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: tree.current.link) else {
+        guard var frecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: tree.current.link) else {
             throw BeamDataError.databaseNotFound
         }
         var visitFrecencyRecord = try XCTUnwrap(frecencies[.webVisit30d0])
@@ -45,7 +45,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
 
         //domain url id frecencies should also be updated
         var domainId = try XCTUnwrap(LinkStore.shared.getDomainId(id: tree.current.link))
-        guard var domainFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: domainId) else {
+        guard var domainFrecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: domainId) else {
             throw BeamDataError.databaseNotFound
         }
         visitFrecencyRecord = try XCTUnwrap(domainFrecencies[.webVisit30d0])
@@ -59,7 +59,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
         importedTree.switchToBackground()
         processor.process(tree: importedTree)
 
-        guard let _frecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: importedTree.current.link) else {
+        guard let _frecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: importedTree.current.link) else {
             throw BeamDataError.databaseNotFound
         }
         frecencies = _frecencies
@@ -69,7 +69,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
 
         //domain url id frecencies should also be updated
         domainId = try XCTUnwrap(LinkStore.shared.getDomainId(id: importedTree.current.link))
-        guard let _domainFrecencies = try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: domainId) else {
+        guard let _domainFrecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: domainId) else {
             throw BeamDataError.databaseNotFound
         }
         domainFrecencies = _domainFrecencies
@@ -108,9 +108,9 @@ class BrowsingTreeProcessorTest: XCTestCase {
         processor.process(tree: tree0)
         XCTAssertEqual(Persistence.ImportedBrowserHistory.getMaxDate(for: .chrome), t2)
         //node whose date is > t1
-        XCTAssert(try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: link2).count ?? 0 > 0)
+        XCTAssert(try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: link2).count ?? 0 > 0)
         //node whose date is < t1
-        XCTAssertEqual(try BeamData.shared.urlHistoryManager?.fetchOneFrecency(fromUrl: link0).count, 0)
+        XCTAssertEqual(try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: link0).count, 0)
 
         BeamDate.reset()
     }

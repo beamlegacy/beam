@@ -708,7 +708,7 @@ extension BeamData {
         BeamAccount.registerManager(BrowsingTreeDBManager.self)
         BeamAccount.registerManager(TabPinSuggestionDBManager.self)
         BeamAccount.registerManager(UrlStatsDBManager.self)
-        BeamAccount.registerManager(UrlHistoryManager.self)
+        BeamAccount.registerManager(LinksDBManager.self)
         BeamAccount.registerManager(PasswordsDB.self)
         BeamAccount.registerManager(CreditCardsDB.self)
         BeamAccount.registerManager(MnemonicManager.self)

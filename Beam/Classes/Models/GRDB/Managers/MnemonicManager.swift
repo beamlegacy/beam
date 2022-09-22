@@ -57,6 +57,13 @@ class MnemonicManager: GRDBHandler, BeamManager {
             }
         return url
     }
+
+    func deleteAll(forLinks linksIds: [UUID]) throws {
+        _ = try self.write { db in
+            try MnemonicRecord.filter(linksIds.contains(MnemonicRecord.Columns.url))
+                .deleteAll(db)
+        }
+    }
 }
 
 extension BeamManagerOwner {
