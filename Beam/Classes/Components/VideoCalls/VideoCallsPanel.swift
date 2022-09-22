@@ -134,6 +134,16 @@ final class VideoCallsPanel: SimpleClearHostingPanel {
 }
 
 extension VideoCallsPanel: NSWindowDelegate {
+
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        guard sender == self, isFullscreen,
+              currentEvent?.type == .keyDown, currentEvent?.keyCode == KeyCode.escape.rawValue else {
+            return true
+        }
+        toggleFullScreen(self)
+        return false
+    }
+
     func windowWillMove(_ notification: Notification) {
         isProbablyBeingDragged = true
     }
@@ -201,10 +211,35 @@ extension VideoCallsPanel {
             completionBlock?()
         }
     }
+
+    func bounceScale(to scale: CGFloat, completion: (() -> Void)? = nil) {
+        let initialFrame = frame
+        var newFrame = frame
+        let newSize = CGSize(width: frame.width * scale, height: frame.height * scale)
+        newFrame.size = newSize
+        newFrame.origin.x += (frame.width - newSize.width) / 2
+        newFrame.origin.y += (frame.height - newSize.height) / 2
+
+        NSAnimationContext.current.timingFunction = .beamWindowScaleDownCurve
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.12
+            self.animator().setFrame(newFrame, display: true, animate: true)
+        } completionHandler: {
+            NSAnimationContext.current.timingFunction = .beamWindowScaleUpCurve
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.2
+                self.animator().setFrame(initialFrame, display: true, animate: true)
+            } completionHandler: {
+                completion?()
+            }
+        }
+    }
 }
 
 // MARK: - Helpers
 
 private extension CAMediaTimingFunction {
     static let beamWindowCurve: CAMediaTimingFunction = CAMediaTimingFunction(controlPoints: 0.3, 0.16, 0.3, 1.1)
+    static let beamWindowScaleDownCurve: CAMediaTimingFunction = CAMediaTimingFunction(controlPoints: 0.3, 0.1, 0.7, 1.3)
+    static let beamWindowScaleUpCurve: CAMediaTimingFunction = CAMediaTimingFunction(controlPoints: 0.3, 0.1, 0.7, 1.7)
 }
