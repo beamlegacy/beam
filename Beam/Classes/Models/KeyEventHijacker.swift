@@ -54,7 +54,7 @@ final class KeyEventHijacker {
     /// - Parameter handler: the handler to unregister
     func unregister(handler: KeyEventHijacking) {
         let keysToRemove = registry
-            .filter { $0.value === handler }
+            .filter { $0.value.value === handler }
             .map(\.key)
         for key in keysToRemove {
             registry[key] = nil
