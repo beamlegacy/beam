@@ -216,6 +216,7 @@ extension BeamTextEdit {
     internal func updateFormatterView(with type: TextFormatterType, attribute: BeamText.Attribute? = nil, kind: ElementKind = .bullet) {
         guard let rootNode = rootNode else { return }
         guard let node = focusedWidget as? TextNode else { return }
+        guard node.allowFormatting else { return }
 
         var hasAttribute = false
 
