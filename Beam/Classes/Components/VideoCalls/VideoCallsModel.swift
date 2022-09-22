@@ -1,6 +1,7 @@
 import AppKit
 import BeamCore
 import Combine
+import SwiftUI
 
 /// Provides user-facing details about the session to display within the panel.
 protocol VideoCallsClientProtocol {
@@ -69,7 +70,7 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
         case unableToAttach
     }
 
-    private struct State: OptionSet {
+    struct State: OptionSet {
         let rawValue: Int
 
         static let shrinked     = State(rawValue: 1 << 0)
@@ -80,6 +81,10 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
     /// Title shown in the panel tool but also synced to the title property of the panel/window.
     @Published private(set) var title: String = loc("Meeting")
 
+    /// Scaling and resizing the webView can be jittery, so we use a snapshot durign the transition
+    @Published private(set) var transitionSnapshot: NSImage?
+
+    private(set) var isTransitioning = false
     var isShrinked: Bool {
         return states.contains(.shrinked)
     }
@@ -92,8 +97,8 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
         return states.contains(.hovered)
     }
 
-    var displayToolbar: Bool {
-        return isExpanded || isHovered
+    var isFullscreen: Bool {
+        return states.contains(.fullscreen)
     }
 
     @Published private(set) var isLoading: Bool = false
@@ -108,10 +113,7 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
     private let faviconProvider: FaviconProvider?
 
     // those initial states have to match the @Published properties
-    private var states: State = [] {
-        willSet {
-            objectWillChange.send()
-        }
+    @Published private(set) var states: State = [] {
         didSet {
             detailsClient.webView.userInteractionEnabled = !isShrinked
         }
@@ -212,16 +214,29 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
     }
 
     func toggleFullscreen() {
-        detailsClient.webView.pageZoom = 1.0
-        detailsClient.webView.window?.toggleFullScreen(nil)
+        if !isFullscreen {
+            states.insert(.fullscreen)
+            detailsClient.webView.pageZoom = 1.0
+            if (detailsClient.webView.window as? VideoCallsPanel)?.isFullscreen != true {
+                detailsClient.webView.window?.toggleFullScreen(nil)
+            }
+        } else {
+            states.remove(.fullscreen)
+            detailsClient.webView.pageZoom = isShrinked ? 0.5 : 1.0
+            if (detailsClient.webView.window as? VideoCallsPanel)?.isFullscreen == true {
+                detailsClient.webView.window?.toggleFullScreen(nil)
+            }
+        }
     }
 
     @available(macOS 12.0, *)
+    @MainActor
     func toggleMic() async {
         await detailsClient.webView.setMicrophoneCaptureState(microEnabled ? .muted : .active)
     }
 
     @available(macOS 12.0, *)
+    @MainActor
     func toggleCamera() async {
         await detailsClient.webView.setCameraCaptureState(cameraEnabled ? .muted : .active)
     }
@@ -231,36 +246,69 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
         isPageMuted.toggle()
     }
 
+    private let windowResizeAnimationDuration: TimeInterval = 0.3
+    private let contentResizeAnimationDuration: TimeInterval = 0.15
+    private func snapshotForTransition(_ completion: @escaping (NSImage?) -> Void) {
+        let config = WKSnapshotConfiguration()
+        config.afterScreenUpdates = false
+        detailsClient.webView.takeSnapshot(with: config) { image, _ in
+            completion(image)
+        }
+    }
     func shrink() {
         guard isExpanded, let panel = detailsClient.webView.window as? VideoCallsPanel, panel.sheets.isEmpty, !panel.isFullscreen
         else { return }
-        panel.shrink {
+        isTransitioning = true
+        snapshotForTransition { image in
+            self.transitionSnapshot = image
+            panel.shrink(duration: self.windowResizeAnimationDuration) {
+                guard self.transitionSnapshot == image else { return }
+                self.transitionSnapshot = nil
+                self.isTransitioning = false
+            }
             self.detailsClient.webView.pageZoom = 0.5
+            _ = withAnimation(.easeInOut(duration: self.contentResizeAnimationDuration)) {
+                self.states.insert(.shrinked)
+            }
         }
-        states.insert(.shrinked)
     }
 
     func expand() {
         guard isShrinked, let panel = detailsClient.webView.window as? VideoCallsPanel else {
             return
         }
-        panel.expand {
+        isTransitioning = true
+        snapshotForTransition { image in
+            self.detailsClient.webView.userInteractionEnabled = true
+            self.transitionSnapshot = image
+            panel.expand(duration: self.windowResizeAnimationDuration) {
+                guard self.transitionSnapshot == image else { return }
+                self.transitionSnapshot = nil
+                self.isTransitioning = false
+            }
             self.detailsClient.webView.pageZoom = 1.0
+            _ = withAnimation(.easeInOut(duration: self.contentResizeAnimationDuration)) {
+                self.states.remove(.shrinked)
+            }
         }
-        detailsClient.webView.userInteractionEnabled = true
-        states.remove(.shrinked)
     }
 
     func mouseEntered() {
-        timerDispatchWorkItem?.cancel()
+        if timerDispatchWorkItem != nil {
+            timerDispatchWorkItem?.cancel()
+            timerDispatchWorkItem = nil
+        }
         states.insert(.hovered)
     }
 
     func mouseExited() {
-        timerDispatchWorkItem = DispatchWorkItem { [weak self] in
+        guard timerDispatchWorkItem == nil else { return }
+        timerDispatchWorkItem?.cancel()
+        let workItem = DispatchWorkItem { [weak self] in
             self?.states.remove(.hovered)
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(400), execute: timerDispatchWorkItem!)
+        timerDispatchWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(400), execute: workItem)
     }
 }
 
