@@ -1,5 +1,5 @@
 //
-//  CollapsableNode.swift
+//  CollapsibleNode.swift
 //  Beam
 //
 //  Created by Ludovic Ollagnier on 09/11/2021.
@@ -10,7 +10,7 @@ import AppKit
 import Lottie
 import BeamCore
 
-protocol Collapsable: AnyObject {
+protocol Collapsible: AnyObject {
     var isCollapsed: Bool { get set }
     var isHoverCollapseExpandButton: Bool { get set }
 
@@ -33,7 +33,7 @@ protocol Collapsable: AnyObject {
     func setLottieViewColor(color: NSColor)
 }
 
-extension Collapsable where Self: ElementNode {
+extension Collapsible where Self: ElementNode {
 
     var isCompact: Bool {
         editor?.useCompactTrailingGutter ?? false

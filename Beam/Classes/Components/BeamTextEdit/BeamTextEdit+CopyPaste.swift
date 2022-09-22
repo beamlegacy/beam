@@ -205,15 +205,79 @@ extension BeamTextEdit {
             } else if let fileUrl = objects?.first as? NSURL {
                 paste(url: fileUrl as URL)
             } else if let attributedStr = objects?.first as? NSAttributedString {
-                paste(attributedStrings: attributedStr.split(separateBy: "\n"))
-            } else if let pastedStr: String = objects?.first as? String {
-                var lines = [NSAttributedString]()
-                pastedStr.enumerateLines { line, _ in
-                    lines.append(NSAttributedString(string: line))
+                if focusedWidget is CodeNode {
+                    let string = NSAttributedString(string: removeExtraneousIndentation(attributedStr.string))
+                    paste(attributedStrings: [string])
+                } else {
+                    paste(attributedStrings: attributedStr.split(separateBy: "\n"))
                 }
-                paste(attributedStrings: lines)
+            } else if let pastedStr: String = objects?.first as? String {
+                if focusedWidget is CodeNode {
+                    let string = NSAttributedString(string: removeExtraneousIndentation(pastedStr))
+                    paste(attributedStrings: [string])
+                } else {
+                    var lines = [NSAttributedString]()
+                    pastedStr.enumerateLines { line, _ in
+                        lines.append(NSAttributedString(string: line))
+                    }
+                    paste(attributedStrings: lines)
+                }
             }
         }
+    }
+
+    private func removeExtraneousIndentation(_ string: String) -> String {
+        var prefix: String? = nil
+
+        string.enumerateLines { line, stop in
+            if line.isEmpty {
+                return
+            }
+
+            let scanner = Scanner(string: line)
+            scanner.charactersToBeSkipped = nil
+
+            guard let string = scanner.scanCharacters(from: .whitespaces) else {
+                prefix = nil
+                stop = true
+                return
+            }
+
+            if let previousPrefix = prefix {
+                if string.count < previousPrefix.count {
+                    if !previousPrefix.hasPrefix(string) {
+                        prefix = nil
+                        stop = true
+                        return
+                    }
+                    prefix = string
+                } else {
+                    if !string.hasPrefix(previousPrefix) {
+                        prefix = nil
+                        stop = true
+                        return
+                    }
+                }
+            } else {
+                prefix = string
+            }
+        }
+
+        guard let prefix = prefix else {
+            return string
+        }
+
+        var lines: [String] = []
+
+        string.enumerateLines { line, _ in
+            if line.isEmpty {
+                lines.append("")
+            } else {
+                lines.append(String(line.dropFirst(prefix.count)))
+            }
+        }
+
+        return lines.joined(separator: "\n")
     }
 
     private func paste(beamTextHolder: BeamTextHolder, fromRawPaste: Bool = false) {

@@ -150,6 +150,20 @@ private struct BeamNoteVisitor: MarkupVisitor {
         }
     }
 
+    mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> BeamElement {
+        var code = codeBlock.code
+        if code.last == "\n" {
+            code.removeLast()
+        }
+        let element = BeamElement(code)
+        element.kind = .code
+        return element
+    }
+
+    mutating func visitInlineCode(_ inlineCode: InlineCode) -> BeamElement {
+        return BeamElement(inlineCode.code)
+    }
+
     mutating func visitUnorderedList(_ unorderedList: Markdown.UnorderedList) -> BeamElement {
         let root = BeamElement()
         for markup in unorderedList.listItems {

@@ -344,11 +344,11 @@ public class TextRoot: ElementNode {
         return nil
     }
 
-    func insertElementNearNonTextElement(_ string: String = "") {
-        insertElementNearNonTextElement(BeamText(text: string))
+    func insertElementNearNonTextElement(_ string: String = "", after: ElementNode? = nil) {
+        insertElementNearNonTextElement(BeamText(text: string), after: after)
     }
 
-    func insertElementNearNonTextElement(_ string: BeamText) {
+    func insertElementNearNonTextElement(_ string: BeamText, after: ElementNode? = nil) {
         guard let node = focusedWidget as? ElementNode else { return }
         node.cmdManager.beginGroup(with: "Insert Element")
         defer { node.cmdManager.endGroup() }
@@ -356,7 +356,8 @@ public class TextRoot: ElementNode {
         if node.element.children.isEmpty || caretIndex == 0 {
             let parent = node.parent as? ElementNode ?? node
             let previous = node.previousSibbling() as? ElementNode
-            node.cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: (caretIndex == 0 ? previous : node)?.unproxyElement)
+            let afterElement = after ?? (caretIndex == 0 ? previous : node)
+            node.cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: afterElement?.unproxyElement)
         } else {
             let parent = node
             node.cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: nil)

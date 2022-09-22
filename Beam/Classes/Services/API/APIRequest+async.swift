@@ -10,8 +10,6 @@ extension APIRequest {
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil) async throws -> T {
         try await withTaskCancellationHandler {
-            self.cancel()
-        } operation: {
             try await withCheckedThrowingContinuation { continuation in
                 do {
                     try self.performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -27,6 +25,8 @@ extension APIRequest {
                     return continuation.resume(throwing: error)
                 }
             }
+        } onCancel: {
+            self.cancel()
         }
     }
 
@@ -37,8 +37,6 @@ extension APIRequest {
                                                                   postParams: C? = nil,
                                                                   authenticatedCall: Bool? = nil) async throws -> T {
         try await withTaskCancellationHandler {
-            self.cancel()
-        } operation: {
             try await withCheckedThrowingContinuation { continuation in
                 do {
                     try self.performRestRequest(path: path,
@@ -57,6 +55,8 @@ extension APIRequest {
                     return continuation.resume(throwing: error)
                 }
             }
+        } onCancel: {
+            self.cancel()
         }
     }
 }

@@ -483,8 +483,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
 
         #if DEBUG
-        self.performLayerChanges {
-            self.layer.backgroundColor = self.debug ? NSColor.systemPink.withAlphaComponent(0.1).cgColor : nil
+        if self.debug {
+            self.performLayerChanges {
+                self.layer.backgroundColor = NSColor.systemPink.withAlphaComponent(0.1).cgColor
+            }
         }
         #endif
 

@@ -20,6 +20,8 @@ enum BeamFont {
     case mediumItalic(size: CGFloat)
     case semiboldItalic(size: CGFloat)
     case boldItalic(size: CGFloat)
+
+    case monospaced(size: CGFloat)
 }
 
 extension BeamFont {
@@ -49,7 +51,8 @@ extension BeamFont {
             return NSFont(name: "Inter-SemiBoldItalic", size: size) ?? defaultFont(ofSize: size)
         case .boldItalic(size: let size):
             return NSFont(name: "Inter-BoldItalic", size: size) ?? defaultFont(ofSize: size)
-
+        case .monospaced(size: let size):
+            return NSFont.monospacedSystemFont(ofSize: size, weight: .regular)
         }
     }
 
