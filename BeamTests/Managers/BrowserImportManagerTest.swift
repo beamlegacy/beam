@@ -59,14 +59,14 @@ class BrowserImportManagerTest: XCTestCase {
     override func setUpWithError() throws {
         try BeamData.shared.browsingTreeStoreManager.clearBrowsingTrees()
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
+        try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         Persistence.cleanUp()
     }
 
     override func tearDownWithError() throws {
         try BeamData.shared.browsingTreeStoreManager.clearBrowsingTrees()
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        try BeamData.shared.urlHistoryManager?.clearUrlFrecencies()
+        try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         Persistence.cleanUp()
     }
 
@@ -91,11 +91,11 @@ class BrowserImportManagerTest: XCTestCase {
         XCTAssertEqual(node1.events.first?.date, Date(timeIntervalSinceReferenceDate: Double(1)))
         let urlIds = [node0.link, node1.link]
         //expects 2 frecencies to be saved in linkstore and not in frecencyRecord table anymore
-        guard let frecencies = BeamData.shared.urlHistoryManager?.getFrecencyScoreValues(urlIds: urlIds, paramKey: .webVisit30d0) else {
+        guard let frecencies = BeamData.shared.linksDBManager?.getFrecencyScoreValues(urlIds: urlIds, paramKey: .webVisit30d0) else {
             throw BeamDataError.databaseNotFound
         }
         XCTAssertEqual(frecencies.count, 0)
-        guard let links: [UUID: Link] = try BeamData.shared.urlHistoryManager?.getLinks(ids: urlIds) else {
+        guard let links: [UUID: Link] = try BeamData.shared.linksDBManager?.getLinks(ids: urlIds) else {
             throw BeamDataError.databaseNotFound
         }
         XCTAssertNotNil(links[node0.link]?.frecencyVisitScore)
@@ -140,11 +140,11 @@ class BrowserImportManagerTest: XCTestCase {
         }
         let urlIds = nodes.map { $0.link }
         //expects 3 frecencies to be saved in linkstore and not in frecencyRecord table anymore
-        guard let frecencies = BeamData.shared.urlHistoryManager?.getFrecencyScoreValues(urlIds: urlIds, paramKey: .webVisit30d0) else {
+        guard let frecencies = BeamData.shared.linksDBManager?.getFrecencyScoreValues(urlIds: urlIds, paramKey: .webVisit30d0) else {
             throw BeamDataError.databaseNotFound
         }
         XCTAssertEqual(frecencies.count, 0)
-        guard let links: [UUID: Link] = try BeamData.shared.urlHistoryManager?.getLinks(ids: urlIds) else {
+        guard let links: [UUID: Link] = try BeamData.shared.linksDBManager?.getLinks(ids: urlIds) else {
             throw BeamDataError.databaseNotFound
         }
         for node in nodes {

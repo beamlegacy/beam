@@ -52,12 +52,12 @@ extension FrecencyUrlRecord: PersistableRecord {
 }
 
 public class GRDBUrlFrecencyStorage: FrecencyStorage {
-    private var overridenManager: UrlHistoryManager?
-    private var manager: UrlHistoryManager {
-        overridenManager ?? BeamData.shared.urlHistoryManager!
+    private var overridenManager: LinksDBManager?
+    private var manager: LinksDBManager {
+        overridenManager ?? BeamData.shared.linksDBManager!
     }
 
-    init(overridenManager: UrlHistoryManager? = nil) {
+    init(overridenManager: LinksDBManager? = nil) {
         self.overridenManager = overridenManager
     }
 
@@ -110,7 +110,7 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
 
 class LinkStoreFrecencyUrlStorage: FrecencyStorage {
     weak var linkStore: BeamLinkDB?
-    init(overridenManager: UrlHistoryManager? = nil, objectManager: BeamObjectManager, linkStore: BeamLinkDB? = nil) {
+    init(overridenManager: LinksDBManager? = nil, objectManager: BeamObjectManager, linkStore: BeamLinkDB? = nil) {
         self.linkStore = linkStore ?? BeamData.shared.linkDB
     }
     func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {

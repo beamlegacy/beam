@@ -12,12 +12,12 @@ import XCTest
 class DailyUrlStorageTest: XCTestCase {
     let objectManager = BeamObjectManager()
     var urlStatsDb: UrlStatsDBManager!
-    var urlHistoryDb: UrlHistoryManager!
+    var urlHistoryDb: LinksDBManager!
 
     override func setUpWithError() throws {
         let store = GRDBStore.empty()
         urlStatsDb = try UrlStatsDBManager(store: store)
-        urlHistoryDb = try UrlHistoryManager(objectManager: objectManager, store: store)
+        urlHistoryDb = try LinksDBManager(objectManager: objectManager, store: store)
         try store.migrate()
     }
 

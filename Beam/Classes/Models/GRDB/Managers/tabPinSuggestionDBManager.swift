@@ -177,9 +177,26 @@ class TabPinSuggestionDBManager: GRDBHandler, BeamManager {
             try TabPinSuggestion.filter(TabPinSuggestion.Columns.domainPath0 == domainPath0).fetchCount(db) > 0
         }
     }
-    func cleanTabPinSuggestions() throws {
-        try _ = self.write { db in
-            try TabPinSuggestion.deleteAll(db)
+    func cleanTabPinSuggestions(afterDate: Date? = nil) throws {
+        _ = try self.write { db in
+            if let afterDate = afterDate {
+                let domainPath0treeStats = DomainPath0TreeStats.filter(DomainPath0TreeStats.Columns.createdAt >= afterDate)
+                let domainPath0s = try domainPath0treeStats.fetchAll(db).map { $0.domainPath0 }
+
+                try TabPinSuggestion.filter(TabPinSuggestion.Columns.createdAt >= afterDate)
+                    .deleteAll(db)
+                try DomainPath0ReadingDay.filter(domainPath0s.contains(DomainPath0ReadingDay.Columns.domainPath0))
+                    .deleteAll(db)
+                try domainPath0treeStats
+                    .deleteAll(db)
+                try BrowsingTreeStats.filter(BrowsingTreeStats.Columns.createdAt >= afterDate)
+                    .deleteAll(db)
+            } else {
+                try TabPinSuggestion.deleteAll(db)
+                try DomainPath0ReadingDay.deleteAll(db)
+                try DomainPath0TreeStats.deleteAll(db)
+                try BrowsingTreeStats.deleteAll(db)
+            }
         }
     }
 

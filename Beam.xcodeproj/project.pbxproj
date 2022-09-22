@@ -805,7 +805,7 @@
 		968948AB2840DF2500F97AAD /* BeamDocumentCollection+Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DDEE0A282B2B4400D9101A /* BeamDocumentCollection+Metadata.swift */; };
 		968A2DCA263973540021107F /* TextFrameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968A2DC9263973540021107F /* TextFrameTests.swift */; };
 		968FD47E2852B9DF0067D99C /* GenericTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968FD47D2852B9DF0067D99C /* GenericTableView.swift */; };
-		968FD4852853BB6C0067D99C /* UrlHistoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968FD4842853BB6C0067D99C /* UrlHistoryManager.swift */; };
+		968FD4852853BB6C0067D99C /* LinksDBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968FD4842853BB6C0067D99C /* LinksDBManager.swift */; };
 		969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969084CB25365AAE009D3C96 /* ParserTests.swift */; };
 		9691C2592644948200F70DA1 /* BeamFileDBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691C2582644948200F70DA1 /* BeamFileDBManager.swift */; };
 		9691C28B2645369100F70DA1 /* ElementNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691C28A2645369100F70DA1 /* ElementNode.swift */; };
@@ -1220,6 +1220,8 @@
 		A5BD34D727C4CFF3002AA8C6 /* DistributedRandomGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BD34D627C4CFF3002AA8C6 /* DistributedRandomGeneratorTests.swift */; };
 		A5BD34DE27C4FBC7002AA8C6 /* DistributedRandomGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BD34DD27C4FBC7002AA8C6 /* DistributedRandomGenerator.swift */; };
 		A5BDA1312886A7930080D268 /* TabsListContextMenuBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BDA1302886A7930080D268 /* TabsListContextMenuBuilder.swift */; };
+		A5BE5A9C28D8AF1B00B2E3F2 /* WebContentDeletionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BE5A9B28D8AF1B00B2E3F2 /* WebContentDeletionManager.swift */; };
+		A5BE5A9E28D8B5CD00B2E3F2 /* WebContentDeletionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BE5A9D28D8B5CD00B2E3F2 /* WebContentDeletionManagerTests.swift */; };
 		A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */; };
 		A5C2023B2761FDA2008BB2FB /* TabFaviconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2023A2761FDA2008BB2FB /* TabFaviconView.swift */; };
 		A5C202422762071C008BB2FB /* TabAudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C202412762071C008BB2FB /* TabAudioView.swift */; };
@@ -2776,7 +2778,7 @@
 		96894819283E7ACD00F97AAD /* BeamNoteLinksAndRefsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteLinksAndRefsManager.swift; sourceTree = "<group>"; };
 		968A2DC9263973540021107F /* TextFrameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFrameTests.swift; sourceTree = "<group>"; };
 		968FD47D2852B9DF0067D99C /* GenericTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericTableView.swift; sourceTree = "<group>"; };
-		968FD4842853BB6C0067D99C /* UrlHistoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlHistoryManager.swift; sourceTree = "<group>"; };
+		968FD4842853BB6C0067D99C /* LinksDBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksDBManager.swift; sourceTree = "<group>"; };
 		969084CB25365AAE009D3C96 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
 		9691C2582644948200F70DA1 /* BeamFileDBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFileDBManager.swift; sourceTree = "<group>"; };
 		9691C28A2645369100F70DA1 /* ElementNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElementNode.swift; sourceTree = "<group>"; };
@@ -3197,6 +3199,8 @@
 		A5BD34D627C4CFF3002AA8C6 /* DistributedRandomGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistributedRandomGeneratorTests.swift; sourceTree = "<group>"; };
 		A5BD34DD27C4FBC7002AA8C6 /* DistributedRandomGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DistributedRandomGenerator.swift; sourceTree = "<group>"; };
 		A5BDA1302886A7930080D268 /* TabsListContextMenuBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsListContextMenuBuilder.swift; sourceTree = "<group>"; };
+		A5BE5A9B28D8AF1B00B2E3F2 /* WebContentDeletionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebContentDeletionManager.swift; sourceTree = "<group>"; };
+		A5BE5A9D28D8B5CD00B2E3F2 /* WebContentDeletionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebContentDeletionManagerTests.swift; sourceTree = "<group>"; };
 		A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ElementNode+Layers.swift"; sourceTree = "<group>"; };
 		A5C2023A2761FDA2008BB2FB /* TabFaviconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabFaviconView.swift; sourceTree = "<group>"; };
 		A5C202412762071C008BB2FB /* TabAudioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabAudioView.swift; sourceTree = "<group>"; };
@@ -4612,6 +4616,7 @@
 				A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */,
 				3320D92A283D0D5D002A2CA4 /* PinnedNotesManager.swift */,
 				BF82F743287EF306000FE008 /* FeatureFlagManager.swift */,
+				A5BE5A9B28D8AF1B00B2E3F2 /* WebContentDeletionManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -5008,6 +5013,7 @@
 				524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */,
 				A5153EE6260DDC9D00C84902 /* RecentsManagerTests.swift */,
 				BF19CC09287F10390048D9D0 /* FeatureFlagsTest.swift */,
+				A5BE5A9D28D8B5CD00B2E3F2 /* WebContentDeletionManagerTests.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -6806,7 +6812,7 @@
 				DAC803E7284F815100D15371 /* BrowsingTreeDBManager.swift */,
 				DA61FA422850D2E300E289CB /* tabPinSuggestionDBManager.swift */,
 				DAC803F12850968B00D15371 /* UrlStatsDBManager.swift */,
-				968FD4842853BB6C0067D99C /* UrlHistoryManager.swift */,
+				968FD4842853BB6C0067D99C /* LinksDBManager.swift */,
 				96E2C15F2858E2DB00087E67 /* MnemonicManager.swift */,
 			);
 			path = Managers;
@@ -9254,6 +9260,7 @@
 				37520B0927EAA40000A1C20B /* MediaContentGeometryDescription.swift in Sources */,
 				524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */,
 				8A34EAE327C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift in Sources */,
+				A5BE5A9C28D8AF1B00B2E3F2 /* WebContentDeletionManager.swift in Sources */,
 				75F5909226F3972F001D5D19 /* ErrorPageView.swift in Sources */,
 				33353EE026F374B400063078 /* SectionFeaturesView.swift in Sources */,
 				A0CB7E54268E66CD00D15AFD /* View+Beam.swift in Sources */,
@@ -9816,7 +9823,7 @@
 				A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */,
 				A5105ADF26F3863B00E9A0BA /* TableHeaderView.swift in Sources */,
 				A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */,
-				968FD4852853BB6C0067D99C /* UrlHistoryManager.swift in Sources */,
+				968FD4852853BB6C0067D99C /* LinksDBManager.swift in Sources */,
 				A5208D8F261D25F1006193AF /* BeamSpacing.swift in Sources */,
 				A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */,
 				BAA67CE03D8FFB795346CD06 /* WebPositions.swift in Sources */,
@@ -9985,6 +9992,7 @@
 				37B85B9027A2C83B003871F9 /* DownloadItemDelegateMock.swift in Sources */,
 				5281B06425C98D2600DF66D9 /* PersistenceTests.swift in Sources */,
 				9674080625F237B2000AC2B8 /* String+URLTests.swift in Sources */,
+				A5BE5A9E28D8B5CD00B2E3F2 /* WebContentDeletionManagerTests.swift in Sources */,
 				A54A45372767983900B9AE1B /* UserInfoRequestTests.swift in Sources */,
 				8714A3FB28118CB6007DDF4F /* PasswordGeneratorTests.swift in Sources */,
 				8A7F949426A8612D00270A74 /* PointAndShootLeavePageTest.swift in Sources */,

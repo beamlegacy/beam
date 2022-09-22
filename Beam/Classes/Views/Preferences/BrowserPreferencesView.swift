@@ -7,11 +7,16 @@
 
 import SwiftUI
 import Combine
+import BeamCore
 
 class BrowserPreferencesViewModel: ObservableObject {
+    var accountData: BeamData
     @ObservedObject var onboardingManager: OnboardingManager = OnboardingManager(onlyImport: true)
-
     var scope = Set<AnyCancellable>()
+
+    init(accountData: BeamData) {
+        self.accountData = accountData
+    }
 }
 
 struct BrowserPreferencesView: View {
@@ -26,7 +31,7 @@ struct BrowserPreferencesView: View {
     }
 
     private func getSettingsRows() -> [Settings.Row] {
-        var rows = [searchEngineRow, importBrowserDataRow, downloadsRow, tabsRow, soundsRow, videoCallsRow, clearCachesRow]
+        var rows = [searchEngineRow, importBrowserDataRow, historyRow, downloadsRow, tabsRow, soundsRow, videoCallsRow, clearCachesRow]
 
         if !BeamData.isDefaultBrowser {
             rows.insert(defaultBrowserRow, at: 0)
@@ -55,6 +60,14 @@ struct BrowserPreferencesView: View {
             Text("Import Browser Data:")
         } content: {
             BookmarksSection(viewModel: viewModel)
+        }
+    }
+
+    private var historyRow: Settings.Row {
+        Settings.Row(hasDivider: true) {
+            Text("Remove history items:")
+        } content: {
+            HistorySection(viewModel: viewModel)
         }
     }
 
@@ -94,18 +107,18 @@ struct BrowserPreferencesView: View {
         Settings.Row {
             Text("Clear Caches:")
         } content: {
-            ClearCachesSection()
+            ClearCachesSection(viewModel: viewModel)
         }
     }
 }
 
 struct BrowserPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        BrowserPreferencesView(viewModel: BrowserPreferencesViewModel())
+        BrowserPreferencesView(viewModel: BrowserPreferencesViewModel(accountData: BeamData()))
     }
 }
 
-struct DefaultBrowserSection: View {
+private struct DefaultBrowserSection: View {
     @State var isDefaultBrowser: Bool = BeamData.isDefaultBrowser
 
     var body: some View {
@@ -126,14 +139,11 @@ struct DefaultBrowserSection: View {
     @State var cancellable: Cancellable?
 }
 
-struct ClearCachesSection: View {
-
+private struct ClearCachesSection: View {
+    var viewModel: BrowserPreferencesViewModel
     var body: some View {
         Button {
-            AppData.shared.accounts.forEach {
-                $0.data.faviconProvider.clearCache()
-            }
-            WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache], modifiedSince: Date(timeIntervalSince1970: 0), completionHandler: { })
+            WebContentDeletionManager(accountData: viewModel.accountData).clearWebCaches(.all)
         } label: {
             Text("Clear All Web Caches")
                 .accessibilityIdentifier("clear-cache-button")
@@ -142,7 +152,7 @@ struct ClearCachesSection: View {
     }
 }
 
-struct SearchEngineSection: View {
+private struct SearchEngineSection: View {
     @State private var selectedSearchEngine = PreferencesManager.selectedSearchEngine
     @State private var includeSearchEngineSuggestion =  PreferencesManager.includeSearchEngineSuggestion
 
@@ -171,7 +181,7 @@ struct SearchEngineSection: View {
     }
 }
 
-struct BookmarksSection: View {
+private struct BookmarksSection: View {
     var viewModel: BrowserPreferencesViewModel
 
     var body: some View {
@@ -189,7 +199,92 @@ struct BookmarksSection: View {
     }
 }
 
-struct DownloadSection: View {
+private struct HistorySection: View {
+    var viewModel: BrowserPreferencesViewModel
+    @State private var clearHistoryPanel = false
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button {
+                clearHistoryPanel = true
+            } label: {
+                Text("Clear History...")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+            }
+            .frame(minWidth: 120, alignment: .leading)
+            .frame(height: 20)
+        }
+        .sheet(isPresented: $clearHistoryPanel) {
+            ClearHistoryModalView(viewModel: viewModel)
+        }
+    }
+}
+
+struct ClearHistoryModalView: View {
+    var viewModel: BrowserPreferencesViewModel
+    @Environment(\.presentationMode) private var presentationMode
+    @State private var selectedHistoryInterval = WebContentDeletionManager.HistoryInterval.hour
+    var body: some View {
+        VStack {
+            HStack(spacing: BeamSpacing._200) {
+                AppIcon()
+                    .scaledToFit()
+                    .frame(width: 64, height: 64, alignment: .top)
+                VStack(alignment: .leading, spacing: BeamSpacing._100) {
+                    Text("Clearing history will remove related cookies \nand other website data.")
+                        .font(BeamFont.semibold(size: 13).swiftUI)
+                        .lineLimit(nil)
+                        .fixedSize()
+                    HStack(spacing: 0) {
+                        Text("Clear:")
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                        Picker("", selection: $selectedHistoryInterval) {
+                            ForEach(WebContentDeletionManager.HistoryInterval.allCases, id: \.self) { interval in
+                                Text(interval.longLocalizedDescription)
+                            }
+                        }
+                        .fixedSize()
+                        .accessibilityIdentifier("history-interval-selector")
+                    }
+                }
+            }
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            HStack {
+                Spacer()
+                Button("Cancel") {
+                    dismiss()
+                }
+                .buttonStyle(.bordered)
+                .keyboardShortcut(.cancelAction)
+                .accessibilityIdentifier("cancel")
+                Button("Clear History") {
+                    clear()
+                }
+                .buttonStyle(.bordered)
+                .keyboardShortcut(.defaultAction)
+                .accessibilityIdentifier("clear-history")
+            }
+        }
+        .padding(BeamSpacing._200)
+        .frame(idealWidth: 420)
+    }
+
+    private func dismiss() {
+        presentationMode.wrappedValue.dismiss()
+    }
+
+    private func clear() {
+        let manager = WebContentDeletionManager(accountData: viewModel.accountData)
+        do {
+            try manager.clearHistory(selectedHistoryInterval)
+        } catch {
+            Logger.shared.logError("Error clearing history \(error)", category: .general)
+        }
+        manager.clearWebCaches(selectedHistoryInterval)
+        dismiss()
+    }
+}
+
+private struct DownloadSection: View {
     @State private var selectedDownloadFolder = PreferencesManager.selectedDownloadFolder
     @State private var latestSelectedFolder: String?
     @State private var loaded = false
@@ -277,7 +372,7 @@ struct DownloadSection: View {
     }
 }
 
-struct TabsSection: View {
+private struct TabsSection: View {
     @State private var cmdClickOpenTab = PreferencesManager.cmdClickOpenTab
     @State private var newTabWindowMakeActive = PreferencesManager.newTabWindowMakeActive
     @State private var cmdNumberSwitchTabs = PreferencesManager.cmdNumberSwitchTabs
@@ -326,7 +421,7 @@ struct TabsSection: View {
     }
 }
 
-struct SoundsSection: View {
+private struct SoundsSection: View {
     @State private var isCollectSoundsEnabled = PreferencesManager.isCollectSoundsEnabled
 
     var body: some View {
