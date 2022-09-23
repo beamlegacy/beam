@@ -169,7 +169,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         self.noteFrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage(objectManager: objectManager))
 
         LinkStore.shared = LinkStore(linkManager: linkDB)
-        NoteScorer.shared = NoteScorer(dailyStorage: KeychainDailyNoteScoreStore.shared)
+        NoteScorer.shared = NoteScorer(dailyStorage: GRDBDailyNoteScoreStore.shared)
 
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         sessionExporter = ClusteringSessionExporter()
@@ -705,6 +705,7 @@ extension BeamData {
         BeamDatabase.registerManager(BeamDocumentCollection.self)
         BeamDatabase.registerManager(BeamNoteLinksAndRefsManager.self)
         BeamDatabase.registerManager(BeamFileDBManager.self)
+        BeamDatabase.registerManager(NoteStatsDBManager.self)
         BeamAccount.registerManager(BrowsingTreeDBManager.self)
         BeamAccount.registerManager(TabPinSuggestionDBManager.self)
         BeamAccount.registerManager(UrlStatsDBManager.self)

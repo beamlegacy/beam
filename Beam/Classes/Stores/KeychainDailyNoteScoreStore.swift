@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 class KeychainDailyNoteScoreStore: InMemoryDailyNoteScoreStore {
-    public static let shared = KeychainDailyNoteScoreStore()
+    public static var shared = KeychainDailyNoteScoreStore()
 
     private func toLastWordCountChange(dailyNoteScores: DailyNoteScores) -> NotesLastWordCountChangeDay {
         var lastWordCounts = NotesLastWordCountChangeDay()
