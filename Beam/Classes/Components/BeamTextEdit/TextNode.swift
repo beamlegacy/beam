@@ -56,6 +56,8 @@ public class TextNode: ElementNode {
 
     static let cmdEnterLayer = "CmdEnterLayer"
 
+    override var allowFormatting: Bool { true }
+
     override var parent: Widget? {
         didSet {
             guard parent != oldValue, parent != nil else { return }

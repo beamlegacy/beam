@@ -893,7 +893,10 @@ public extension CALayer {
               let node = focusedWidget as? ElementNode
         else { return }
 
-        if option || shift || node.pressEnterInsertsNewLine {
+        let alternate = option || shift
+        let insertNewLine = (alternate && !node.pressEnterInsertsNewLine) || (!alternate && node.pressEnterInsertsNewLine)
+
+        if insertNewLine {
             rootNode.insertNewline(insertIfEmpty: true)
             hideInlineFormatter()
         } else if ctrl, let textNode = node as? TextNode, case let .check(checked) = node.elementKind {
@@ -932,7 +935,7 @@ public extension CALayer {
                 node.cmdManager.formatText(in: node, for: nil, with: .link(linkString), for: linkRange, isActive: false)
             }
 
-            guard let range = Range(safeBounds: (rootNode.cursorPosition, node.text.count)) else {
+            guard var range = Range(safeBounds: (rootNode.cursorPosition, node.text.count)) else {
                 Logger.shared.logError("""
                     Invalid range when pressing Enter, aborting... \
                     nodeText=\(node.text), cursorPosition=\(rootNode.cursorPosition), nodeTextCount=\(node.text.count)
@@ -940,9 +943,18 @@ public extension CALayer {
                     category: .noteEditor)
                 return
             }
-            let str = node.text.extract(range: range)
+
+            var str = node.text.extract(range: range)
+
             if !range.isEmpty {
+                if range.lowerBound > 0, node.text[range.lowerBound-1] == "\n" {
+                    range = (range.lowerBound-1)..<range.upperBound
+                }
                 node.cmdManager.deleteText(in: node, for: range)
+            }
+
+            if str.hasPrefix("\n") {
+                str.removeFirst(1)
             }
 
             let newElement = BeamElement(str)
