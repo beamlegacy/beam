@@ -119,15 +119,25 @@ extension BeamTextEdit {
         guard let node = focusedWidget as? TextNode else { return }
         guard let parentNode = node.parent as? ElementNode else { return }
 
-        // Drop all attributes, we want plain text.
-        let codeBlock = BeamElement(node.text.text)
-        codeBlock.kind = .code
+        if node is CodeNode {
+            let newNode = BeamElement(node.text.text)
+            let cmdManager = rootNode.focusedCmdManager
+            cmdManager.beginGroup(with: "Remove Code Block")
+            cmdManager.insertElement(newNode, inNode: parentNode, afterNode: node)
+            cmdManager.deleteElement(for: node)
+            cmdManager.focus(newNode, in: parentNode)
+            cmdManager.endGroup()
+        } else {
+            // Drop all attributes, we want plain text.
+            let newNode = BeamElement(node.text.text)
+            newNode.kind = .code
 
-        let cmdManager = rootNode.focusedCmdManager
-        cmdManager.beginGroup(with: "Insert Code Block")
-        cmdManager.insertElement(codeBlock, inNode: parentNode, afterNode: node)
-        cmdManager.deleteElement(for: node)
-        cmdManager.focus(codeBlock, in: parentNode)
-        cmdManager.endGroup()
+            let cmdManager = rootNode.focusedCmdManager
+            cmdManager.beginGroup(with: "Insert Code Block")
+            cmdManager.insertElement(newNode, inNode: parentNode, afterNode: node)
+            cmdManager.deleteElement(for: node)
+            cmdManager.focus(newNode, in: parentNode)
+            cmdManager.endGroup()
+        }
     }
 }
