@@ -12,6 +12,7 @@ struct ToolbarCapsuleButton<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
     var iconName: String?
     var text: String
+    var isCompact = false
     var isSelected = false
     var isForeground = false
     var isIncognito = false
@@ -23,11 +24,12 @@ struct ToolbarCapsuleButton<Content: View>: View {
     @State var isHovering: Bool = false
     @State var isPressed: Bool = false
 
-    init(isIncognito: Bool = false, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, hueTint: Double? = nil,
+    init(isIncognito: Bool = false, isCompact: Bool = false, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, hueTint: Double? = nil,
          @ViewBuilder label: @escaping (_ isHovering: Bool, _ isPressed: Bool) -> Content,
          action: (() -> Void)? = nil) {
         self.text = ""
         self.isForeground = isForeground
+        self.isCompact = isCompact
         self.isSelected = isSelected
         self.tabStyle = tabStyle
         self.hueTint = hueTint
@@ -133,10 +135,12 @@ struct ToolbarCapsuleButton<Content: View>: View {
                 HStack {
                     if let iconName = iconName {
                         Icon(name: iconName, width: 12, color: foregroundColor)
-                            .offset(x: 4, y: 0)
+                            .offset(x: isCompact ? 0 : 4, y: 0)
                     }
-                    Text(text)
-                }
+                    if !isCompact {
+                        Text(text)
+                    }
+                }.animation(.default, value: isCompact)
             }
         }
         .font(defaultFont)
@@ -149,10 +153,13 @@ struct ToolbarCapsuleButton<Content: View>: View {
             HStack {
                 if let iconName = iconName {
                     Icon(name: iconName, width: 12, color: foregroundColor)
-                        .offset(x: 4, y: 0)
+                        .offset(x: isCompact ? 0 : 4, y: 0)
                 }
-                Text(text).font(selectedFont)
-            }
+                if !isCompact {
+                    Text(text).font(selectedFont)
+                }
+            }.transition(.opacity)
+                .animation(.default, value: isCompact)
             : nil
         )
         .lineLimit(1)
@@ -186,10 +193,11 @@ struct ToolbarCapsuleButton<Content: View>: View {
 }
 
 extension ToolbarCapsuleButton where Content == EmptyView {
-    init(iconName: String? = nil, text: String, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false,
+    init(iconName: String? = nil, text: String, isCompact: Bool = false, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false,
          action: (() -> Void)? = nil) {
         self.iconName = iconName
         self.text = text
+        self.isCompact = isCompact
         self.isSelected = isSelected
         self.isForeground = isForeground
         self.tabStyle = tabStyle

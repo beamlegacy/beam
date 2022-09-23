@@ -10,27 +10,17 @@ import BeamCore
 
 struct CardSwitcher: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
     @EnvironmentObject var recentsManager: RecentsManager
 
     var currentNote: BeamNote?
-    @ObservedObject var pinnedManager: PinnedNotesManager
+    @ObservedObject var viewModel: NoteSwitcherViewModel
+    @State private var overflowButtonPosition = CGPoint.zero
 
     private let maxNoteTitleLength = 40
-    private var usePinnedInsteadOfRecentsNotes: Bool {
+    static let elementSpacing = 5.0
+    static var usePinnedInsteadOfRecentsNotes: Bool {
         true
-    }
-
-    private func titleForNote(_ note: BeamNote) -> String {
-        guard let journalDate = note.type.journalDate else {
-            return truncatedTitle(note.title)
-        }
-        return truncatedTitle(BeamDate.journalNoteTitle(for: journalDate, with: .medium))
-    }
-
-    /// Manually truncating text because using maxWidth in SwiftUI makes the Text spread
-    private func truncatedTitle(_ title: String) -> String {
-        guard title.count > maxNoteTitleLength else { return title }
-        return title.prefix(maxNoteTitleLength).trimmingCharacters(in: .whitespaces) + "…"
     }
 
     private var separator: some View {
@@ -45,7 +35,7 @@ struct CardSwitcher: View {
     }
 
     var body: some View {
-        HStack(spacing: 5) {
+        HStack(spacing: Self.elementSpacing) {
             Spacer(minLength: 0)
             HStack(spacing: 0) {
                 ToolbarCapsuleButton(iconName: "editor-journal", text: "Journal", isSelected: state.mode == .today) {
@@ -63,56 +53,61 @@ struct CardSwitcher: View {
                 .layoutPriority(2)
                 .tooltipOnHover(LocalizedStringKey(Shortcut.AvailableShortcut.showAllNotes.keysDescription))
                 .accessibilityIdentifier("card-switcher-all-cards")
-            }
+            }.modifier(NoteSwitcherFixedElementsWidthMeasuring())
 
             if shouldDisplaySeparator {
                 separator
             }
 
-            if usePinnedInsteadOfRecentsNotes {
-                pinnedNotes
-            } else {
-                recentNotes
-            }
-            Spacer(minLength: 0)
-        }
-    }
+            notes
 
-    @ViewBuilder private var pinnedNotes: some View {
-        if pinnedManager.pinnedNotes.count > 0 {
-            HStack(spacing: 0) {
-                ForEach(pinnedManager.pinnedNotes) { note in
-                    let isToday = state.mode == .today
-                    let isActive = !isToday && note.id == currentNote?.id
-                    let text = titleForNote(note)
-                    ToolbarCapsuleButton(text: text, isSelected: isActive) {
-                        state.navigateToNote(note)
+            let overflowingElements = viewModel.elements.filter({$0.isOverflowing})
+            if !overflowingElements.isEmpty {
+                ButtonLabel(icon: "editor-pinned_overflow", customStyle: ButtonLabelStyle(activeBackgroundColor: .clear)) {
+                    guard let window = windowInfo.window else { return }
+                    let menu = NSMenu()
+                    for note in overflowingElements {
+                        menu.addItem(withTitle: note.displayTitle) { _ in
+                            state.navigateToNote(id: note.id)
+                        }
                     }
-                    .accessibilityIdentifier("card-switcher")
-                    .contextMenu { BeamNote.contextualMenu(for: note, state: state) }
+                    menu.popUp(positioning: nil, at: overflowButtonPosition.flippedPointToTopLeftOrigin(in: window), in: window.contentView)
                 }
+                .background(GeometryReader { proxy -> Color in
+                    let rect = proxy.frame(in: .global)
+                    let position = CGPoint(x: rect.origin.x, y: rect.origin.y + rect.height + 10)
+                    DispatchQueue.main.async {
+                        overflowButtonPosition = position
+                    }
+                    return Color.clear
+                })
+                .accessibilityIdentifier("note-overflow-button")
+                Spacer()
             }
         }
+        .animation(.default, value: windowInfo.isCompactWidth)
     }
 
-    @ViewBuilder private var recentNotes: some View {
-        if recentsManager.recentNotes.count > 0 {
+    @ViewBuilder private var notes: some View {
+        if viewModel.elements.count > 0 {
             HStack(spacing: 0) {
-                ForEach(recentsManager.recentNotes) { note in
+                ForEach(viewModel.elements.filter({ !$0.isOverflowing })) { element in
                     let isToday = state.mode == .today
-                    let isActive = !isToday && note.id == currentNote?.id
-                    let text = titleForNote(note)
-                    ToolbarCapsuleButton(text: text, isSelected: isActive) {
-                        state.navigateToNote(note)
+                    let isActive = !isToday && element.id == currentNote?.id
+                    ToolbarCapsuleButton(text: element.displayTitle, isSelected: isActive) {
+                        state.navigateToNote(id: element.id)
                     }
                     .accessibilityIdentifier("card-switcher")
+                    .contextMenu {
+                        BeamNote.contextualMenu(for: element.note, state: state)
+                    }
                 }
             }
         }
     }
 
     private var shouldDisplaySeparator: Bool {
-        usePinnedInsteadOfRecentsNotes ? !pinnedManager.pinnedNotes.isEmpty : !recentsManager.recentNotes.isEmpty
+        !viewModel.elements.isEmpty
     }
 }
 
@@ -121,8 +116,19 @@ struct CardSwitcher_Previews: PreviewProvider {
     static var previews: some View {
         let pinnedManager = state.data.pinnedManager
         state.mode = .today
-        return CardSwitcher(pinnedManager: pinnedManager)
+        return CardSwitcher(viewModel: pinnedManager.viewModel)
             .environmentObject(state)
             .frame(width: 700, height: 80)
+    }
+}
+
+struct NoteSwitcherFixedElementsWidthPreferenceKey: FloatPreferenceKey { }
+struct NoteSwitcherFixedElementsWidthMeasuring: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+            GeometryReader { proxy in
+                Color.clear.preference(key: NoteSwitcherFixedElementsWidthPreferenceKey.self, value: proxy.size.width)
+            }, alignment: .center)
     }
 }
