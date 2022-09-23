@@ -15,9 +15,13 @@ class RecentsManager: ObservableObject {
     private var recentsScores = [UUID: Int]()
     private var notesCancellables = Set<AnyCancellable>()
     private var collectionCancellables = Set<AnyCancellable>()
+    var viewModel = NoteSwitcherViewModel(notes: [])
 
     @Published private(set) var recentNotes = [BeamNote]() {
-        didSet { updateNotesObservers() }
+        didSet {
+            updateNotesObservers()
+            self.viewModel.setNotes(recentNotes)
+        }
     }
 
     init() {
