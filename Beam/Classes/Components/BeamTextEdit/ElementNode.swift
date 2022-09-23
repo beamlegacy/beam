@@ -134,7 +134,7 @@ public class ElementNode: Widget {
         return depth == 1
     }
 
-    var allowFormatting: Bool { true }
+    var allowFormatting: Bool { false }
     var pressEnterInsertsNewLine: Bool { false }
     var moveDownInsertsNewElementIfNeeded: Bool { false }
 

@@ -107,8 +107,11 @@ public func previousCaret(for index: Int, in carets: [Caret]) -> Int {
     let line = caret.line
     while newIndex > 0 {
         let caret = carets[newIndex]
-        if caret.offset.x < offset || caret.line != line {
+        if caret.offset.x < offset {
             return newIndex
+        }
+        if caret.line != line {
+            return max(0, newIndex-1)
         }
 
         newIndex -= 1
