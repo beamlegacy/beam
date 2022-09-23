@@ -301,10 +301,15 @@ extension TabsListContextMenuBuilder {
 
         addShareGroupSubMenu(in: menu, forGroup: group, itemFrame: itemFrame)
 
+        menu.addItem(withTitle: "Copy Links") { [weak self] _ in
+            self?.state?.browserTabsManager.copyAllLinks(ofGroup: group)
+        }
+
         menu.addItem(withTitle: "Capture Group to a Note…") { [weak self] _ in
             let location = event?.locationInWindow ?? .zero
             self?.presentCaptureWindow(for: group, at: location)
         }
+
         menu.addItem(.separator())
 
         menu.addItem(withTitle: "New Tab in Group") { [weak self] _ in
