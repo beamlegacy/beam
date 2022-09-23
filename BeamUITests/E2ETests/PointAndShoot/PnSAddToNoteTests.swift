@@ -168,7 +168,7 @@ class PnSAddToNoteTests: BaseTest {
         step ("THEN the note contains video link"){
             let expectedContent = "Beam.app/Contents/Resources/video.mov"
             noteNodes = noteView.getNoteNodesForVisiblePart()
-            XCTAssertEqual(noteNodes.count, 2)
+            XCTAssertEqual(noteNodes.count, 3)
             let videoNote = noteNodes[1].getStringValue()
             XCTAssertTrue(videoNote.contains(expectedContent), "'\(videoNote)' note doesn't contain:\(expectedContent)")
         }
@@ -239,7 +239,7 @@ class PnSAddToNoteTests: BaseTest {
             noteView.waitForNoteViewToLoad()
             noteNodes = noteView.getNoteNodesForVisiblePart()
             //To be refactored once BE-2117 merged
-            XCTAssertEqual(noteNodes.count, 1)
+            XCTAssertEqual(noteNodes.count, 2)
             XCTAssertEqual(noteNodes[0].getStringValue(), expectedNoteText)
         }
 
@@ -438,7 +438,7 @@ class PnSAddToNoteTests: BaseTest {
         step("THEN I switch to Journal") {
             webView.clickHomeIcon()
             XCTAssertTrue(journalView.isTextNodeDisplayed(matchingValue: prefix + linkText))
-            XCTAssertEqual(journalView.getNoteNodesForVisiblePart().count, 2)
+            XCTAssertEqual(journalView.getNoteNodesForVisiblePart().count, 3)
             XCTAssertTrue(linkElement.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         

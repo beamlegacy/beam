@@ -53,6 +53,11 @@ struct Persistence {
         @StandardStorable("top_domains.version") static var version: String?
     }
 
+    enum ContinueTo {
+        @StandardStorable("summary") static var summary: String?
+    }
+
+
     enum Database {
         @StandardStorable("currentDatabaseId") static var currentDatabaseId: UUID?
     }
