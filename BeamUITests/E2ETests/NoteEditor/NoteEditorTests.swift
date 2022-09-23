@@ -157,7 +157,7 @@ class NoteEditorTests: BaseTest {
         }
         
         step("When I fold secondary bullet with shortcut") {
-            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 5)
             noteTestView.typeKeyboardKey(.upArrow, 2)
             shortcutHelper.shortcutActionInvoke(action: .foldBullet)
         }
@@ -165,7 +165,7 @@ class NoteEditorTests: BaseTest {
         step("Then secondary bullet is fold") {
             XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
             XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
-            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
         }
         
         step("When I fold main bullet with shortcut") {
@@ -176,7 +176,7 @@ class NoteEditorTests: BaseTest {
         step("Then main bullet is fold") {
             XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
             XCTAssertFalse(noteTestView.isIndentationTriangleDisplayed(nodeIndex: 1))
-            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 2)
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
         }
         
         step("When I unfold main bullet with shortcut") {
@@ -186,7 +186,7 @@ class NoteEditorTests: BaseTest {
         step("Then main bullet is unfold") {
             XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
             XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
-            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
         }
         
         step("When I unfold secondary bullet with shortcut") {
@@ -197,7 +197,7 @@ class NoteEditorTests: BaseTest {
         step("Then all bullets are unfold") {
             XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
             XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
-            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 5)
         }
         
         step("When I fold secondary bullet with click action") {
@@ -207,7 +207,7 @@ class NoteEditorTests: BaseTest {
         step("Then secondary bullet is fold") {
             XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
             XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
-            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
         }
         
         step("When I fold main bullet with click action") {
@@ -217,7 +217,7 @@ class NoteEditorTests: BaseTest {
         step("Then main bullet is fold") {
             XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
             XCTAssertFalse(noteTestView.isIndentationTriangleDisplayed(nodeIndex: 1))
-            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 2)
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
         }
         
         step("When I unfold main bullet with click action") {
@@ -227,7 +227,7 @@ class NoteEditorTests: BaseTest {
         step("Then main bullet is unfold") {
             XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
             XCTAssertFalse(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
-            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 3)
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
         }
         
         step("When I unfold secondary bullet with click action") {
@@ -237,7 +237,7 @@ class NoteEditorTests: BaseTest {
         step("Then all bullets are unfold") {
             XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
             XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 1))
-            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 4)
+            XCTAssertEqual(noteTestView.getNoteNodesForVisiblePart().count, 5)
         }
 
     }
