@@ -457,6 +457,8 @@ extension BrowserTabsManager {
                 pinTab(tab)
             } else if tab.isPinned && toListIndex >= listItems.pinnedItems.count {
                 unpinTab(tab)
+            } else if tab.isPinned {
+                updateIsPinned(for: tab, isPinned: true)
             }
         }
         if destinationGroup != movedItem.group {
