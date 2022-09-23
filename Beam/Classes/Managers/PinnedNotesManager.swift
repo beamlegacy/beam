@@ -13,11 +13,13 @@ class PinnedNotesManager: ObservableObject {
 
     private var scope = Set<AnyCancellable>()
     private var documentManagerCancellables = Set<AnyCancellable>()
+    var viewModel = NoteSwitcherViewModel(notes: [])
 
     @Published private(set) var pinnedNotes = [BeamNote]() {
         didSet {
             let ids = pinnedNotes.map { $0.id.uuidString }
             Persistence.PinnedNotes.pinnedNotesId = ids
+            self.viewModel.setNotes(pinnedNotes)
         }
     }
 
