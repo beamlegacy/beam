@@ -111,7 +111,7 @@ extension TabGroupingManager: BeamDocumentSource {
     }
 
     /// checks if group is already shared and in a tab group note.
-    func fetchTabGroupNote(for group: TabGroup) -> (BeamNote, TabGroup)? {
+    func fetchTabGroupNote(for group: TabGroup) -> (note: BeamNote, group: TabGroup)? {
         guard storeManager?.fetch(byIds: [group.id]).first != nil else { return nil }
         var note: BeamNote?
         if group.isLocked, let groupNote = BeamNote.fetch(tabGroupId: group.id) {
@@ -132,10 +132,10 @@ extension TabGroupingManager: BeamDocumentSource {
         return (note, groupUsed)
     }
 
-    func fetchOrCreateTabGroupNote(for group: TabGroup) throws -> (BeamNote, TabGroup) {
+    func fetchOrCreateTabGroupNote(for group: TabGroup) throws -> (note: BeamNote, group: TabGroup) {
         let result = fetchTabGroupNote(for: group)
-        var note = result?.0
-        var groupUsed = result?.1 ?? group
+        var note = result?.note
+        var groupUsed = result?.group ?? group
         if result == nil {
             let frozenGroup = self.copyForSharing(group)
             groupUsed = frozenGroup

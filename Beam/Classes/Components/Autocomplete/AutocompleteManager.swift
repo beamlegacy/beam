@@ -319,10 +319,13 @@ extension AutocompleteManager {
         stopCurrentCompletionWork()
     }
 
-    func resetAutocompleteMode(to mode: Mode = .general) {
+    func resetAutocompleteMode(to mode: Mode = .general, updateResults: Bool = false) {
         self.mode = mode
         if let stateBeforeModeChange = previousModeStates.popLast() {
             resetAutocompleteToState(stateBeforeModeChange)
+        }
+        if updateResults {
+            setQuery(searchQuery, updateAutocompleteResults: true)
         }
     }
 
