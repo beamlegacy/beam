@@ -45,8 +45,7 @@ import BeamCore
             tabDidChangeWindow()
         }
     }
-    var data: BeamData? { state?.data }
-
+    var data: BeamData { state?.data ?? BeamData.shared }
     var preloadUrl: URL?
 
     private var restoredInteractionState: Any?
@@ -157,9 +156,9 @@ import BeamCore
             }
         }
     }
-    var fileStorage: BeamFileStorage? { data?.fileDBManager }
+    var fileStorage: BeamFileStorage? { data.fileDBManager }
     var downloadManager: DownloadManager? {
-        data?.downloadManager
+        data.downloadManager
     }
 
     var webViewNavigationHandler: WebViewNavigationHandler? {
@@ -322,11 +321,6 @@ import BeamCore
         }
 
         let tree: BrowsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
-        tree.set(
-            frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage(objectManager: BeamData.shared.objectManager)),
-            domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
-            dailyScoreStore: GRDBDailyUrlScoreStore()
-        )
         browsingTree = tree
         noteController = try container.decode(WebNoteController.self, forKey: .noteController)
         privateMode = try container.decode(Bool.self, forKey: .privateMode)
@@ -340,6 +334,11 @@ import BeamCore
         contentView = NSViewContainerView(contentView: beamWebView)
         webPositions = WebPositions(webFrames: webFrames)
         super.init()
+        tree.set(
+            frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage(objectManager: data.objectManager)),
+            domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
+            dailyScoreStore: GRDBDailyUrlScoreStore()
+        )
         webPositions.delegate = self
         updateFavIcon(fromWebView: false)
     }
@@ -412,7 +411,7 @@ import BeamCore
         let dispatchItem = DispatchWorkItem { [weak self] in
             let isLoading = self?.isLoading == true || self?.webView.isLoading == true
             let policy: FaviconProvider.CachePolicy = cacheOnly ? .cacheOnly : .default
-            guard !fromWebView || cacheOnly || (self?.webView != nil && !isLoading), let provider = self?.data?.faviconProvider else { return }
+            guard !fromWebView || cacheOnly || (self?.webView != nil && !isLoading), let provider = self?.data.faviconProvider else { return }
             provider.favicon(fromURL: url, webView: fromWebView ? self?.webView : nil, cachePolicy: policy) { [weak self] (favicon) in
                 guard let self = self else { return }
                 guard let image = favicon?.image else {
@@ -500,7 +499,7 @@ import BeamCore
                     let response = alert.runModal()
                     let shouldAutoJoin = response == .alertFirstButtonReturn
                     if shouldAutoJoin {
-                        self.state?.videoCallsManager.autoJoinMeeting(meeting, faviconProvider: self.data?.faviconProvider)
+                        self.state?.videoCallsManager.autoJoinMeeting(meeting, faviconProvider: self.data.faviconProvider)
                     }
                     // don't forget to call completionHandler
                     completionHandler()
@@ -525,7 +524,7 @@ import BeamCore
 
         if PreferencesManager.videoCallsAlwaysInSideWindow, state?.videoCallsManager.isEligible(tab: self) == true {
             do {
-                try state?.videoCallsManager.start(with: request, faviconProvider: data?.faviconProvider, bounceIfExistingSession: false)
+                try state?.videoCallsManager.start(with: request, faviconProvider: data.faviconProvider, bounceIfExistingSession: false)
                 // If it succeeds, let's return!
                 return
             } catch let err as VideoCallsManager.Error {

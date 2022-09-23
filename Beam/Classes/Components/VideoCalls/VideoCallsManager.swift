@@ -59,7 +59,7 @@ final class VideoCallsManager: NSObject {
         guard isEligible(tab: tab) else {
             throw Error.tabNotEligible
         }
-        let panel = panel(for: tab.webView, faviconProvider: tab.data?.faviconProvider)
+        let panel = panel(for: tab.webView, faviconProvider: tab.data.faviconProvider)
         tab.removeFromWindow()
         display(panel: panel)
     }
