@@ -16,6 +16,8 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
     @Environment(\.isMainWindow) private var isMainWindow: Bool
     @Environment(\.colorScheme) private var colorScheme
 
+    @State private var noteSwitcherFixedElementsWidth: CGFloat = 159.5
+
     private var showPivotButton: Bool {
         state.hasBrowserTabs
     }
@@ -35,22 +37,75 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
 
     // MARK: Views
 
+    private var noteSwitcherViewModel: NoteSwitcherViewModel {
+        if CardSwitcher.usePinnedInsteadOfRecentsNotes {
+            return state.data.pinnedManager.viewModel
+        } else {
+            return state.recentsManager.viewModel
+        }
+    }
+
     private func cardSwitcherView(containerGeometry: GeometryProxy) -> some View {
         GlobalCenteringContainer(containerGeometry: containerGeometry) {
             if !state.useSidebar {
-                CardSwitcher(currentNote: state.currentNote, pinnedManager: state.data.pinnedManager)
+                CardSwitcher(currentNote: state.currentNote, viewModel: noteSwitcherViewModel)
                     .frame(maxHeight: .infinity)
                     .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
                     .environmentObject(state.recentsManager)
+                    .onPreferenceChange(NoteSwitcherFixedElementsWidthPreferenceKey.self) { value in
+                        noteSwitcherFixedElementsWidth = value ?? 0
+                    }
             }
         }
         .transition(.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
-                                    .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 8))
-                                                .animation(BeamAnimation.spring(stiffness: 380, damping: 25))
-                                             ),
+            .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 8))
+                .animation(BeamAnimation.spring(stiffness: 380, damping: 25))
+            ),
                                 removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
-                                    .combined(with: .animatableOffset(offset: CGSize(width: 0, height: -8)).animation(BeamAnimation.spring(stiffness: 380, damping: 25).delay(0.03)))
-                               ))
+            .combined(with: .animatableOffset(offset: CGSize(width: 0, height: -8)).animation(BeamAnimation.spring(stiffness: 380, damping: 25).delay(0.03)))
+        ))
+        .modifier(ToolbarWidthMeasuring())
+        .onPreferenceChange(ToolbarWidthPreferenceKey.self) { fullWidth in
+            guard let fullWidth = fullWidth else { return }
+            computeOverflowingNotesTitles(width: fullWidth)
+        }
+    }
+
+    private func computeOverflowingNotesTitles(width: CGFloat) {
+        let viewModel = noteSwitcherViewModel
+        let numberOfSpacing = 5 // This is the number of spaces added by the main HStack of the CardSwitcher
+        let spacings = Double(numberOfSpacing) * CardSwitcher.elementSpacing
+        let overflowButtonWidth = 28.0
+        var usableWidth = width - noteSwitcherFixedElementsWidth - spacings
+        let font = BeamFont.regular(size: 11).nsFont
+        var elementWidths = viewModel.elements.map { element in
+            element.displayTitle.widthOfString(usingFont: font) + 17.0
+        }
+        let totalElementWidth = elementWidths.reduce(0, {$0 + $1})
+
+        // If we have enough room for everyone, let's display everyone!
+        guard totalElementWidth > usableWidth else {
+            viewModel.dislayAllElements()
+            return
+        }
+
+        // If we don't, let's remove items one by one to find the max we can display
+        // But as we are going to display the overflow menu, don't forget to remove it from the available space
+        usableWidth -= overflowButtonWidth
+        var overflowCount = 1
+
+        repeat {
+            elementWidths.removeLast()
+            overflowCount += 1
+        } while elementWidths.reduce(0, {$0 + $1}) > usableWidth && overflowCount < viewModel.elements.count
+
+        let numberOfElementsToHide = overflowCount - 1
+        let startHidingIndex = viewModel.elements.count - numberOfElementsToHide
+        for (offset, _) in viewModel.elements.enumerated() {
+            var element = viewModel.elements[offset]
+            element.isOverflowing = offset >= startHidingIndex
+            viewModel.updateElement(element, at: offset)
+        }
     }
 
     private func tabs(containerGeometry: GeometryProxy) -> some View {
@@ -162,6 +217,18 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
             window.makeKey()
             downloadList.presentingWindow = window
         }
+    }
+}
+
+struct ToolbarWidthPreferenceKey: FloatPreferenceKey { }
+
+struct ToolbarWidthMeasuring: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+            GeometryReader { proxy in
+                Color.clear.preference(key: ToolbarWidthPreferenceKey.self, value: proxy.size.width)
+            }, alignment: .center)
     }
 }
 
