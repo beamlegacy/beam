@@ -146,6 +146,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             GRDBDailyUrlScoreStore(daysToKeep: Configuration.DailyUrlStats.daysToKeep).cleanup()
             NoteScorer.shared.cleanup()
         }
+        //TODO: - Remove when everyone has its summary erased
+        Persistence.ContinueTo.summary = nil
         startDisplayingBrowserImportCompletions()
 
         if !isRunningTests, !restoreSessionAtLaunch() {
@@ -429,7 +431,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if Configuration.branchType != .beta && Configuration.branchType != .publicRelease {
             data.clusteringManager.saveOrphanedUrlsAtSessionClose(orphanedUrlManager: data.clusteringOrphanedUrlManager)
         }
-        KeychainDailyNoteScoreStore.shared.save()
+
         windows.removeAll()
         self.data.applicationWillTerminate()
     }

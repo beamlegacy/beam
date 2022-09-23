@@ -121,7 +121,7 @@ class NoteScoreTriggerTests: XCTestCase {
         let note = try BeamNote(title: "Amazing Thoughts")
         note.owner = BeamData.shared.currentDatabase
         note.addChild(BeamElement("Nothing"))
-        KeychainDailyNoteScoreStore.shared.clear()
+        GRDBDailyNoteScoreStore.shared.clear()
 
         XCTAssertNil(NoteScorer.shared.getLocalDailyScore(noteId: note.id, daysAgo: 0))
 
