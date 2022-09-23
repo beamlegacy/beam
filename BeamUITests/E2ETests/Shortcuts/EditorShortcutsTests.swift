@@ -30,7 +30,7 @@ class EditorShortcutsTests: BaseTest {
         }
         
         step ("Then I see \(searchWord) link as a first note"){
-            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 1)
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 2)
             let actualNoteValue = noteView.getNoteNodeValueByIndex(0)
             XCTAssertTrue(actualNoteValue == searchWord + " - Google Search" ||
                           actualNoteValue == searchWord + " - Recherche Google" ||
@@ -51,7 +51,7 @@ class EditorShortcutsTests: BaseTest {
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             webView.openDestinationNote()
             XCTAssertTrue(noteView!.waitForTodayNoteViewToLoad())
-            XCTAssertEqual(noteView!.getNumberOfVisibleNodes(), 1)
+            XCTAssertEqual(noteView!.getNumberOfVisibleNodes(), 2)
             let actualNoteValue = noteView.getNoteNodeValueByIndex(0)
             XCTAssertTrue(actualNoteValue == searchWord + " - Google Search" ||
                           actualNoteValue == searchWord + " - Recherche Google" ||
@@ -81,34 +81,34 @@ class EditorShortcutsTests: BaseTest {
         shortcutHelper.shortcutActionInvoke(action: .selectAll)
         noteView.typeKeyboardKey(.delete)
         step ("Then deleted 1st note successfully"){
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), firstNoteValue)
         }
         
         step ("Then deleted all notes successfully"){
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .selectAll, numberOfTimes: 3)
             noteView.typeKeyboardKey(.delete)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: noteView!.getNoteElementsQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 2, elementQuery: noteView!.getNoteElementsQueryForVisiblePart()))
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), emptyString)
             
         }
         
         step ("Then undo deletion successfully"){
             shortcutHelper.shortcutActionInvoke(action: .undo)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), firstNoteValue)
             
         }
         
         step ("Then redo deletion successfully"){
             shortcutHelper.shortcutActionInvoke(action: .redo)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 2, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), emptyString)
         }
         
         step ("Then undo redone successfully"){
             shortcutHelper.shortcutActionInvoke(action: .undo)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 5, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), firstNoteValue)
         }
         
@@ -116,7 +116,7 @@ class EditorShortcutsTests: BaseTest {
             noteView.getNoteNodeElementByIndex(0).tapInTheMiddle()
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .selectAll, numberOfTimes: 3)
             noteView.typeInNoteNodeByIndex(noteIndex: 0, text: textToType)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 2, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), textToType)
             
         }
@@ -127,7 +127,7 @@ class EditorShortcutsTests: BaseTest {
             noteView.typeKeyboardKey(.rightArrow)
             noteView.typeKeyboardKey(.return)
             noteView.pasteText(textToPaste: textToType)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 2, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 3, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), textToType)
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(1), textToType)
         }

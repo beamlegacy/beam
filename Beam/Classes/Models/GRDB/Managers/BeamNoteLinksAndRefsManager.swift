@@ -19,7 +19,8 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
     public static var id = UUID()
     public static var name = "BeamNoteLinksAndRefsManager"
 
-    public override var tableNames: [String] { ["BeamElementRecord", "BidirectionalLink", "BeamNoteIndexingRecord", "FrecencyNoteRecord"] }
+    public override var tableNames: [String] { ["BeamElementRecord", "BidirectionalLink", "BeamNoteIndexingRecord", "FrecencyNoteRecord",
+                                                "DailyNoteScoreRecord", "NoteLastWordCountChangeDayRecord"] }
 
     var needsPostMigrationReindexing = false
 
@@ -784,7 +785,6 @@ class BeamNoteLinksAndRefsManager: GRDBHandler, BeamManager {
             print("links: \(links)")
         }
     }
-
 }
 
 extension BeamManagerOwner {

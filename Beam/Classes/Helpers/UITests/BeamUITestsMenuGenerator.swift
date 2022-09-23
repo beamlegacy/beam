@@ -178,7 +178,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         AppDelegate.main.deleteSessionData()
         PinnedBrowserTabsManager().savePinnedTabs(tabs: [])
         ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }
-        KeychainDailyNoteScoreStore.shared.clear()
+        GRDBDailyNoteScoreStore.shared.clear()
         try? AppData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 

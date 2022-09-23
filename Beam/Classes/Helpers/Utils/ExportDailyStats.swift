@@ -140,7 +140,7 @@ class DailyStatsExporter {
     }
     static func exportNoteStats(daysAgo: Int, to url: URL?) {
         guard let url = url else { return }
-        let scorer = NoteDailySummary(dailyScoreStore: KeychainDailyNoteScoreStore.shared)
+        let scorer = NoteDailySummary(dailyScoreStore: GRDBDailyNoteScoreStore.shared)
         guard let noteStats = try? scorer.get(daysAgo: daysAgo, filtered: false) else { return }
         let noteStatsRows: [DailyNoteStatsRow] = noteStats.map { DailyNoteStatsRow(scoredDocument: $0) }
         let writer = CsvRowsWriter(header: DailyNoteStatsRow.header, rows: noteStatsRows)

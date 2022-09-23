@@ -9,6 +9,18 @@ import XCTest
 @testable import BeamCore
 
 class NoteScoreTest: XCTestCase {
+    var previousNoteScorer: NoteScorer!
+
+    override func setUp() {
+        super.setUp()
+        previousNoteScorer = NoteScorer.shared
+        NoteScorer.shared = NoteScorer(dailyStorage: InMemoryDailyNoteScoreStore())
+    }
+
+    override func tearDown() {
+        super.tearDown()
+        NoteScorer.shared = previousNoteScorer
+    }
 
     func testLocalDailyScores() throws {
         let noteIds = [UUID(), UUID()]
