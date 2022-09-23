@@ -50,7 +50,13 @@ struct UpdatePanel: View {
                     .overlay(loadingOverlay, alignment: .center)
                     .cornerRadius(10)
                     .padding(3)
-
+            } else {
+                // This is to prevent the UI of the Panel to break when we don't have any ReleaseNoteURL, it will be hidden for the user.
+                if let placeholderURL = URL(string: "https://beamapp.co/") {
+                    VStack {
+                        ReleaseNoteWebView(url: placeholderURL, viewModel: webViewModel).hidden()
+                    }
+                }
             }
         }.foregroundColor(BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.8, darkColor: .Mercury, darkAlpha: 0.7).swiftUI)
             .visualEffect(material: .hudWindow)
