@@ -1,3 +1,4 @@
+import BeamCore
 import GRDB
 
 // Declare a record struct, data, how it is stored within the DB.
@@ -47,14 +48,18 @@ struct BeamElementRecord {
 
         static func fromDatabaseValue(_ dbValue: DatabaseValue) -> LinkRanges? {
             guard let data = Data.fromDatabaseValue(dbValue) else {
-                return nil
+                // Avoid crash in GRDB by returning an empty value instead of nil.
+                Logger.shared.logError("Failed to decode link ranges from database value, no data in \(dbValue).", category: .database)
+                return LinkRanges([])
             }
 
             let stride = MemoryLayout<Int64>.stride
             let quotientAndRemainder = data.count.quotientAndRemainder(dividingBy: stride*2)
 
             guard quotientAndRemainder.remainder == 0 else {
-                return nil
+                // Avoid crash in GRDB by returning an empty value instead of nil.
+                Logger.shared.logError("Failed to decode link ranges from database value, unexpected content in \(dbValue).", category: .database)
+                return LinkRanges([])
             }
 
             let ranges = (0..<quotientAndRemainder.quotient).map { index -> Range<Int> in
