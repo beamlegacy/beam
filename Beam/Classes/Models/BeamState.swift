@@ -1188,9 +1188,17 @@ extension BeamState {
                 let groupTitle = group.title ?? "Tab Group"
                 let view = OmniboxCustomStatusView(title: "Shared ", suffix: groupTitle,
                                                    suffixColor: group.color?.mainColor?.swiftUI ?? .red).asAnyView
-                self.autocompleteManager.animateToMode(.customView(view: view))
+                let customMode: AutocompleteManager.Mode = .customView(view: view)
+                self.autocompleteManager.animateToMode(customMode)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    self.autocompleteManager.resetAutocompleteMode(to: previousMode)
+                    guard case .customView = self.autocompleteManager.mode else { return }
+                    if case .tabGroup(let group) = previousMode {
+                        let shared = self.data.tabGroupingManager.fetchTabGroupNote(for: group)
+                        self.autocompleteManager.resetAutocompleteMode(to: .tabGroup(group: shared?.group ?? group), updateResults: true)
+                    } else {
+                        self.autocompleteManager.resetAutocompleteMode(to: previousMode)
+                    }
+
                 }
             case .failure:
                 break

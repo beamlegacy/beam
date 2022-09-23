@@ -33,6 +33,7 @@ class BrowserTabsManager: ObservableObject {
     var browserTabManagerId = UUID()
     private var data: BeamData
     private weak var state: BeamState?
+    private var disableListItemsAnimation = false
     private var pauseListItemsUpdate = false
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
@@ -236,9 +237,14 @@ class BrowserTabsManager: ObservableObject {
         sections.pinnedItems = pinnedItems
         sections.unpinnedItems = unpinnedItems
         sections.allItems = pinnedItems + unpinnedItems
-        withAnimation(animationType.animation) {
+        if disableListItemsAnimation {
             self.visibleTabs = visibleTabs
             self.listItems = sections
+        } else {
+            withAnimation(animationType.animation) {
+                self.visibleTabs = visibleTabs
+                self.listItems = sections
+            }
         }
     }
 
@@ -430,8 +436,9 @@ extension BrowserTabsManager {
         return tabs.firstIndex(of: tab)
     }
 
-    func moveListItem(atListIndex: Int, toListIndex: Int, changeGroup destinationGroup: TabGroup?) {
-
+    func moveListItem(atListIndex: Int, toListIndex: Int, changeGroup destinationGroup: TabGroup?, disableAnimations: Bool = false) {
+        disableListItemsAnimation = disableAnimations
+        defer { disableListItemsAnimation = false }
         guard atListIndex < listItems.allItems.count && toListIndex < listItems.allItems.count else { return }
         let movedItem = listItems.allItems[atListIndex]
         guard let tab = movedItem.tab, let atIndexInTabs = tabs.firstIndex(of: tab) else { return }
