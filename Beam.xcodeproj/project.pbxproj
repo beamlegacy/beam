@@ -134,6 +134,7 @@
 		333E4F8D270AE2B7005B72CD /* BeamTextEdit+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333E4F8C270AE2B7005B72CD /* BeamTextEdit+Search.swift */; };
 		333E61842707094000847A0C /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 333E61832707094000847A0C /* Swime */; };
 		3343794327037578004EF5A4 /* BeamWindow+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3343794227037578004EF5A4 /* BeamWindow+Search.swift */; };
+		3344A9BD28D8C84A00A35AD1 /* NoteSwitcherViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3344A9BC28D8C84A00A35AD1 /* NoteSwitcherViewModel.swift */; };
 		334559B02800729200B4BF57 /* OmniboxIncognitoExplanation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 334559AF2800729200B4BF57 /* OmniboxIncognitoExplanation.swift */; };
 		33551D2727FC6F4600598164 /* nav-pivot_incognito.json in Resources */ = {isa = PBXBuildFile; fileRef = 33551D2127FC6F4600598164 /* nav-pivot_incognito.json */; };
 		33551D3E27FE2B0E00598164 /* CookiesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33551D3D27FE2B0E00598164 /* CookiesManager.swift */; };
@@ -1812,6 +1813,7 @@
 		333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
 		333E4F8C270AE2B7005B72CD /* BeamTextEdit+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Search.swift"; sourceTree = "<group>"; };
 		3343794227037578004EF5A4 /* BeamWindow+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWindow+Search.swift"; sourceTree = "<group>"; };
+		3344A9BC28D8C84A00A35AD1 /* NoteSwitcherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSwitcherViewModel.swift; sourceTree = "<group>"; };
 		334559AF2800729200B4BF57 /* OmniboxIncognitoExplanation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxIncognitoExplanation.swift; sourceTree = "<group>"; };
 		33551D2127FC6F4600598164 /* nav-pivot_incognito.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "nav-pivot_incognito.json"; sourceTree = "<group>"; };
 		33551D3D27FE2B0E00598164 /* CookiesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookiesManager.swift; sourceTree = "<group>"; };
@@ -7523,6 +7525,7 @@
 				A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */,
 				A5FDFA2827DB82160066A670 /* DestinationNoteAutocompleteListModel.swift */,
 				A5C1F049276BEF6A00EF750D /* Tabs */,
+				3344A9BC28D8C84A00A35AD1 /* NoteSwitcherViewModel.swift */,
 			);
 			path = Toolbar;
 			sourceTree = "<group>";
@@ -9685,6 +9688,7 @@
 				A56FFE0326971F8500BEE6A1 /* CalendarPickerFormatterView.swift in Sources */,
 				0325628E26051D3B006513E4 /* RBZip.m in Sources */,
 				37B85B7A27A2C81B003871F9 /* DownloadListFake.swift in Sources */,
+				3344A9BD28D8C84A00A35AD1 /* NoteSwitcherViewModel.swift in Sources */,
 				37DB5A1427BB515700534760 /* CollapsedContentLayer.swift in Sources */,
 				A5BD34DE27C4FBC7002AA8C6 /* DistributedRandomGenerator.swift in Sources */,
 				A0FB59BF2809D074001A1850 /* SummaryEngine.swift in Sources */,
