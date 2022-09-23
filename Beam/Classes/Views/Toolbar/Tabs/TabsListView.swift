@@ -681,7 +681,7 @@ extension TabsListView {
 // MARK: - After Drag methods
 extension TabsListView {
     private func moveItem(from currentIndex: Int, to newIndex: Int, inGroup group: TabGroup?) {
-        browserTabsManager.moveListItem(atListIndex: currentIndex, toListIndex: newIndex, changeGroup: group)
+        browserTabsManager.moveListItem(atListIndex: currentIndex, toListIndex: newIndex, changeGroup: group, disableAnimations: true)
     }
 
     private func updatePinTabAfterDrag(_ tab: BrowserTab, shouldBePinned: Bool) {
