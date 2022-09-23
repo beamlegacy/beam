@@ -43,11 +43,22 @@ extension BeamTextEdit: NSMenuItemValidation {
             menuItem.action == #selector(toggleBidiLinkAction(_:)) ||
             menuItem.action == #selector(toggleListAction(_:)) ||
             menuItem.action == #selector(toggleQuoteAction(_:)) ||
-            menuItem.action == #selector(toggleTodoAction(_:)) ||
-            menuItem.action == #selector(toggleCodeBlockAction(_:)){
-            if let node = focusedWidget as? ElementNode, !node.allowFormatting {
-                return false
+            menuItem.action == #selector(toggleTodoAction(_:)) {
+            if let node = focusedWidget as? ElementNode, node.allowFormatting {
+                return true
             }
+            return false
+        }
+        if menuItem.action == #selector(toggleCodeBlockAction(_:)) {
+            if focusedWidget is CodeNode {
+                menuItem.state = .on
+                return true
+            } else if focusedWidget is TextNode {
+                menuItem.state = .off
+                return true
+            }
+            menuItem.state = .off
+            return false
         }
 
         guard menuItem.action == #selector(Self.pasteAsPlainText(_:)) else { return true }
