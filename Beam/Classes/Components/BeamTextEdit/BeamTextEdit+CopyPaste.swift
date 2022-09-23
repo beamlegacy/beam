@@ -196,6 +196,16 @@ extension BeamTextEdit {
         disableAnimationAtNextLayout()
         if NSPasteboard.general.canReadObject(forClasses: supportedPasteObjects, options: nil) {
             let objects = NSPasteboard.general.readObjects(forClasses: supportedPasteObjects, options: nil)
+
+            if focusedWidget is CodeNode {
+                guard let firstObject = objects?.first else { return }
+                guard let string = (firstObject as? NSAttributedString)?.string ?? (firstObject as? String) else { return }
+
+                let attrString = NSAttributedString(string: removeExtraneousIndentation(string))
+                paste(attributedStrings: [attrString], fromRawPaste: true)
+                return
+            }
+
             if let elementHolder: BeamNoteDataHolder = objects?.first as? BeamNoteDataHolder {
                 paste(elementHolder: elementHolder)
             } else if let bTextHolder: BeamTextHolder = objects?.first as? BeamTextHolder {
@@ -205,23 +215,13 @@ extension BeamTextEdit {
             } else if let fileUrl = objects?.first as? NSURL {
                 paste(url: fileUrl as URL)
             } else if let attributedStr = objects?.first as? NSAttributedString {
-                if focusedWidget is CodeNode {
-                    let string = NSAttributedString(string: removeExtraneousIndentation(attributedStr.string))
-                    paste(attributedStrings: [string])
-                } else {
-                    paste(attributedStrings: attributedStr.split(separateBy: "\n"))
-                }
+                paste(attributedStrings: attributedStr.split(separateBy: "\n"))
             } else if let pastedStr: String = objects?.first as? String {
-                if focusedWidget is CodeNode {
-                    let string = NSAttributedString(string: removeExtraneousIndentation(pastedStr))
-                    paste(attributedStrings: [string])
-                } else {
-                    var lines = [NSAttributedString]()
-                    pastedStr.enumerateLines { line, _ in
-                        lines.append(NSAttributedString(string: line))
-                    }
-                    paste(attributedStrings: lines)
+                var lines = [NSAttributedString]()
+                pastedStr.enumerateLines { line, _ in
+                    lines.append(NSAttributedString(string: line))
                 }
+                paste(attributedStrings: lines)
             }
         }
     }
@@ -456,6 +456,8 @@ extension BeamTextEdit {
             }
         }
         cmdManager.endGroup()
+
+        guard !fromRawPaste else { return }
 
         guard let lastInsertedNode = lastInserted as? TextNode,
               insertedElements.count == 1, let lastInsertedElement = insertedElements.last  else { return }
