@@ -7,19 +7,17 @@
 
 import Foundation
 
-public class NoteScore: Codable {
-    let noteId: UUID
-    var minWordCount: Int?
-    var maxWordCount: Int = 0
-    var firstWordCount: Int?
-    public var lastWordCount: Int = 0
-    public var addedBidiLinkToCount: Int = 0
-    public var captureToCount: Int = 0
-    public var visitCount: Int = 0
-
-    public init(noteId: UUID) {
-        self.noteId = noteId
-    }
+public protocol NoteScoreProtocol: AnyObject {
+    var noteId: UUID { get }
+    var minWordCount: Int? { get set }
+    var maxWordCount: Int { get set }
+    var firstWordCount: Int? { get set }
+    var lastWordCount: Int { get set }
+    var addedBidiLinkToCount: Int { get set }
+    var captureToCount: Int { get set }
+    var visitCount: Int { get set }
+}
+extension NoteScoreProtocol {
     public var firstToLastDeltaWordCount: Int {
         lastWordCount - (firstWordCount ?? lastWordCount)
     }
@@ -32,6 +30,21 @@ public class NoteScore: Codable {
             + log(1 + Float(captureToCount))
             + 0.5 * log(1 + Float(visitCount))
             + log(1 + abs(Float(firstToLastDeltaWordCount)))
+    }
+}
+
+public class NoteScore: NoteScoreProtocol, Codable {
+    public let noteId: UUID
+    public var minWordCount: Int?
+    public var maxWordCount: Int = 0
+    public var firstWordCount: Int?
+    public var lastWordCount: Int = 0
+    public var addedBidiLinkToCount: Int = 0
+    public var captureToCount: Int = 0
+    public var visitCount: Int = 0
+
+    public init(noteId: UUID) {
+        self.noteId = noteId
     }
 }
 public struct NoteLastWordCountChangeDay: Codable {
@@ -51,12 +64,12 @@ public typealias DailyNoteScores = [String: NoteScoresById]
 public typealias NotesLastWordCountChangeDay = [UUID: NoteLastWordCountChangeDay]
 
 public protocol DailyNoteScoreStoreProtocol {
-    func apply(to noteId: UUID, changes: (NoteScore) -> Void)
+    func apply(to noteId: UUID, changes: @escaping (NoteScoreProtocol) -> Void)
     func recordLastWordCountChange(noteId: UUID, wordCount: Int)
     func getNoteIdsLastChangedAtAndAfter(daysAgo: Int) -> (Set<UUID>, Set<UUID>)
     func cleanup(daysToKeep: Int)
-    func getScore(noteId: UUID, daysAgo: Int) -> NoteScore?
-    func getScores(daysAgo: Int) -> [UUID: NoteScore]
+    func getScore(noteId: UUID, daysAgo: Int) -> NoteScoreProtocol?
+    func getScores(daysAgo: Int) -> [UUID: NoteScoreProtocol]
     func clear()
 }
 
@@ -66,7 +79,7 @@ open class InMemoryDailyNoteScoreStore: DailyNoteScoreStoreProtocol {
     public let lock = NSLock()
 
     public init() {}
-    public func apply(to noteId: UUID, changes: (NoteScore) -> Void) {
+    public func apply(to noteId: UUID, changes: (NoteScoreProtocol) -> Void) {
         guard let localDay = BeamDate.now.localDayString() else { return }
         lock {
             var dayScores = self.scores[localDay] ?? NoteScoresById()
@@ -113,7 +126,7 @@ open class InMemoryDailyNoteScoreStore: DailyNoteScoreStoreProtocol {
         }
     }
 
-    public func getScore(noteId: UUID, daysAgo: Int) -> NoteScore? {
+    public func getScore(noteId: UUID, daysAgo: Int) -> NoteScoreProtocol? {
         let day = Calendar(identifier: .iso8601).date(byAdding: .day, value: -daysAgo, to: BeamDate.now)?.localDayString()
         guard let day = day else { return nil }
         return lock {
@@ -121,7 +134,7 @@ open class InMemoryDailyNoteScoreStore: DailyNoteScoreStoreProtocol {
         }
     }
 
-    public func getScores(daysAgo: Int) -> [UUID: NoteScore] {
+    public func getScores(daysAgo: Int) -> [UUID: NoteScoreProtocol] {
         let day = Calendar(identifier: .iso8601).date(byAdding: .day, value: -daysAgo, to: BeamDate.now)?.localDayString()
         guard let day = day else { return  [UUID: NoteScore]() }
         return lock {
@@ -132,6 +145,7 @@ open class InMemoryDailyNoteScoreStore: DailyNoteScoreStoreProtocol {
     public func clear() {
         lock {
             scores = DailyNoteScores()
+            notesLastWordCountChangeDay = NotesLastWordCountChangeDay()
         }
     }
 }
@@ -147,7 +161,7 @@ public class NoteScorer {
         self.dailyStorage = dailyStorage
     }
 
-    private func updateLocalDaily(noteId: UUID, changes: (NoteScore) -> Void) {
+    private func updateLocalDaily(noteId: UUID, changes: @escaping (NoteScoreProtocol) -> Void) {
         dailyStorage.apply(to: noteId, changes: changes)
     }
 
@@ -190,11 +204,11 @@ public class NoteScorer {
         dailyStorage.cleanup(daysToKeep: daysToKeep)
     }
 
-    func getLocalDailyScore(noteId: UUID, daysAgo: Int = 1) -> NoteScore? {
+    func getLocalDailyScore(noteId: UUID, daysAgo: Int = 1) -> NoteScoreProtocol? {
         return dailyStorage.getScore(noteId: noteId, daysAgo: daysAgo)
     }
 
-    public func getLocalDailyScores(daysAgo: Int = 1) -> [UUID: NoteScore] {
+    public func getLocalDailyScores(daysAgo: Int = 1) -> [UUID: NoteScoreProtocol] {
         return dailyStorage.getScores(daysAgo: daysAgo)
     }
 }

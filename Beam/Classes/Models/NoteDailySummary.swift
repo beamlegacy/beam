@@ -14,14 +14,14 @@ struct ScoredDocument {
     public let createdAt: Date
     public let updatedAt: Date
     public let created: Bool
-    public let score: NoteScore
+    public let score: NoteScoreProtocol
     public let captureToCount: Int
 }
 
 class NoteDailySummary {
     let noteScorer: NoteScorer
 
-    init(dailyScoreStore: DailyNoteScoreStoreProtocol = KeychainDailyNoteScoreStore.shared) {
+    init(dailyScoreStore: DailyNoteScoreStoreProtocol = GRDBDailyNoteScoreStore.shared) {
         self.noteScorer = NoteScorer(dailyStorage: dailyScoreStore)
     }
 

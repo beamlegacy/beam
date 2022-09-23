@@ -54,7 +54,7 @@ class DeleteNotesTests: BaseTest {
             allNotes.waitForAllNotesViewToLoad()
             XCTAssertEqual(allNotes.getNumberOfNotes(), expectedNumberOfNotesAfterClearingDB, "Local data hasn't been cleared")
             openTodayNote()
-            XCTAssertEqual(NoteTestView().getNumberOfVisibleNodes(), 1, "Local data hasn't been cleared")
+            XCTAssertEqual(NoteTestView().getNumberOfVisibleNodes(), 2, "Local data hasn't been cleared")
         }
     }
 }

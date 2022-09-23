@@ -1501,6 +1501,7 @@
 		DA69304D268B4DD9008EF756 /* BrowsingTreeSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA69304C268B4DD9008EF756 /* BrowsingTreeSender.swift */; };
 		DA69305A268DB375008EF756 /* BrowsingTreeSenderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */; };
 		DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */; };
+		DA7B54D128B658D400F903C0 /* DailyNoteScore+GRDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7B54D028B658D400F903C0 /* DailyNoteScore+GRDB.swift */; };
 		DA8AB36A281A8AFD0001FC3D /* DailyUrlScorerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8AB369281A8AFD0001FC3D /* DailyUrlScorerTest.swift */; };
 		DA8D947F27FF17D90073AD2D /* NoteScores.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D947E27FF17D90073AD2D /* NoteScores.swift */; };
 		DA8D948127FF37250073AD2D /* NoteScoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D948027FF37250073AD2D /* NoteScoreTest.swift */; };
@@ -1521,8 +1522,10 @@
 		DABFF8072742731B00FAF364 /* BeamLinkDBTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */; };
 		DAC803E8284F815100D15371 /* BrowsingTreeDBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC803E7284F815100D15371 /* BrowsingTreeDBManager.swift */; };
 		DAC803F22850968B00D15371 /* UrlStatsDBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAC803F12850968B00D15371 /* UrlStatsDBManager.swift */; };
+		DACA05EB28B7C6AE00F88DEE /* GRDBDailyNoteScoreStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DACA05EA28B7C6AE00F88DEE /* GRDBDailyNoteScoreStoreTests.swift */; };
 		DAD24628282BB9BE0051F681 /* LinkStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD24627282BB9BE0051F681 /* LinkStoreTests.swift */; };
 		DAD4024A27908601005310DE /* BrowsingTree+Flatten.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD4024927908601005310DE /* BrowsingTree+Flatten.swift */; };
+		DAEB43AF28C0B9150014D645 /* NoteStatsDBmananger.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEB43AE28C0B9150014D645 /* NoteStatsDBmananger.swift */; };
 		DAEC880F2739953A0087FC18 /* BatchFrecencyUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEC880E2739953A0087FC18 /* BatchFrecencyUpdater.swift */; };
 		DAEEA74826A6B96A00AE72DE /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEEA74726A6B96A00AE72DE /* Utilities.swift */; };
 		DAF063ED27D10C94000406DE /* DomainPath0TreeStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF063EC27D10C94000406DE /* DomainPath0TreeStats.swift */; };
@@ -3486,6 +3489,7 @@
 		DA69304C268B4DD9008EF756 /* BrowsingTreeSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeSender.swift; sourceTree = "<group>"; };
 		DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowsingTreeSenderTest.swift; path = ../BrowsingTreeSenderTest.swift; sourceTree = "<group>"; };
 		DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScoreTests.swift; sourceTree = "<group>"; };
+		DA7B54D028B658D400F903C0 /* DailyNoteScore+GRDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DailyNoteScore+GRDB.swift"; sourceTree = "<group>"; };
 		DA8AB369281A8AFD0001FC3D /* DailyUrlScorerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyUrlScorerTest.swift; sourceTree = "<group>"; };
 		DA8D947E27FF17D90073AD2D /* NoteScores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteScores.swift; sourceTree = "<group>"; };
 		DA8D948027FF37250073AD2D /* NoteScoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteScoreTest.swift; sourceTree = "<group>"; };
@@ -3505,8 +3509,10 @@
 		DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamLinkDBTest.swift; sourceTree = "<group>"; };
 		DAC803E7284F815100D15371 /* BrowsingTreeDBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeDBManager.swift; sourceTree = "<group>"; };
 		DAC803F12850968B00D15371 /* UrlStatsDBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrlStatsDBManager.swift; sourceTree = "<group>"; };
+		DACA05EA28B7C6AE00F88DEE /* GRDBDailyNoteScoreStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBDailyNoteScoreStoreTests.swift; sourceTree = "<group>"; };
 		DAD24627282BB9BE0051F681 /* LinkStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStoreTests.swift; sourceTree = "<group>"; };
 		DAD4024927908601005310DE /* BrowsingTree+Flatten.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrowsingTree+Flatten.swift"; sourceTree = "<group>"; };
+		DAEB43AE28C0B9150014D645 /* NoteStatsDBmananger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteStatsDBmananger.swift; sourceTree = "<group>"; };
 		DAEC880E2739953A0087FC18 /* BatchFrecencyUpdater.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchFrecencyUpdater.swift; sourceTree = "<group>"; };
 		DAEEA74726A6B96A00AE72DE /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		DAF063EC27D10C94000406DE /* DomainPath0TreeStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainPath0TreeStats.swift; sourceTree = "<group>"; };
@@ -3811,6 +3817,7 @@
 				DAF063FC27D275D0000406DE /* DomainPath0TreeStatsStorage.swift */,
 				DA23C74E27F1B316005508EB /* DailyUrlScore.swift */,
 				96E2C188285FF11600087E67 /* LegacyDataImporter.swift */,
+				DA7B54D028B658D400F903C0 /* DailyNoteScore+GRDB.swift */,
 			);
 			path = GRDB;
 			sourceTree = "<group>";
@@ -3818,6 +3825,7 @@
 		0DD0DACA2681C7330005339A /* GRDB */ = {
 			isa = PBXGroup;
 			children = (
+				DACA05EA28B7C6AE00F88DEE /* GRDBDailyNoteScoreStoreTests.swift */,
 				DA905D51277CB20A00307146 /* FrecencyNoteStorageTest.swift */,
 				DA547BA427107DA00085EEC1 /* BrowsingTreeRecordTests.swift */,
 				0D4EC94426838FA800487B75 /* FrecencyUrlRecordTests.swift */,
@@ -6816,6 +6824,7 @@
 				DAC803F12850968B00D15371 /* UrlStatsDBManager.swift */,
 				968FD4842853BB6C0067D99C /* LinksDBManager.swift */,
 				96E2C15F2858E2DB00087E67 /* MnemonicManager.swift */,
+				DAEB43AE28C0B9150014D645 /* NoteStatsDBmananger.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -9394,6 +9403,7 @@
 				529826A62641A46E00E9448C /* GoogleButton.swift in Sources */,
 				A0F558E626BD51A70024C47E /* EditorDebugPreferencesView.swift in Sources */,
 				A050049F25DAEE73009CFEB6 /* ProgressIndicator.swift in Sources */,
+				DA7B54D128B658D400F903C0 /* DailyNoteScore+GRDB.swift in Sources */,
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
 				418172282581107C00317ED8 /* Range+Beam.swift in Sources */,
 				52842D552715CFDF0099602C /* FileDetail.swift in Sources */,
@@ -9435,6 +9445,7 @@
 				96E2C189285FF11600087E67 /* LegacyDataImporter.swift in Sources */,
 				A0E3150525ED1ECB001A5E55 /* FormatText.swift in Sources */,
 				418171EC2581107C00317ED8 /* UserMe.swift in Sources */,
+				DAEB43AF28C0B9150014D645 /* NoteStatsDBmananger.swift in Sources */,
 				A0CB5AE8268B20C200D1EF02 /* BrowserPreferencesView.swift in Sources */,
 				A5044311281CA8A900C91204 /* TabsListExternalDragViewModel.swift in Sources */,
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
@@ -9972,6 +9983,7 @@
 				05EDC3DD284DD126008FF545 /* BeamAccount+RemoteServerTest.swift in Sources */,
 				032562DC26051D57006513E4 /* RBContentBlockerTests.m in Sources */,
 				96D71D0527FF575F0094F54D /* BeamNoteDocumentWrapperTests.swift in Sources */,
+				DACA05EB28B7C6AE00F88DEE /* GRDBDailyNoteScoreStoreTests.swift in Sources */,
 				37C4131C278552A400954FD7 /* DuckDuckGoTests.swift in Sources */,
 				37B85B9227A2C83B003871F9 /* DownloadProxyMock.swift in Sources */,
 				562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */,
