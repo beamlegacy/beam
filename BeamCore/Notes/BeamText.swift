@@ -571,6 +571,19 @@ public struct BeamText: Codable {
         }
     }
 
+    public subscript(index: Int) -> Character {
+        var start = 0
+        for range in ranges {
+            let length = range.string.count
+            if index >= start && index <= start + length {
+                let i = range.string.index(range.string.startIndex, offsetBy: index - start)
+                return range.string[i]
+            }
+            start += length
+        }
+        return Character("")
+    }
+
     public func extract(range: Swift.Range<Int>) -> BeamText {
         var newText = self
         let endLength = text.count - range.upperBound
