@@ -411,4 +411,27 @@ extension BrowserTabsManagerTests {
         XCTAssertEqual(sut.currentTab, tabB)
     }
 
+    func testCopyAllLinksWithLinkStore() {
+        let linkStore = LinkStore.shared
+        let urls = ["pagea.com", "pageb.fr"]
+        let pageIds: [UUID] = urls.map {
+            let link = linkStore.visit($0)
+            return link.id
+        }
+        let groupA = TabGroup(pageIds: pageIds)
+        sut.copyAllLinks(ofGroup: groupA)
+        let pasteboardContent = NSPasteboard.general.string(forType: .string)
+        XCTAssertEqual(pasteboardContent, "\(urls[0])\n\(urls[1])")
+    }
+
+    func testCopyAllLinksWithoutLinkStore() {
+        let tabs = [
+            tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D With Very Long Title truncated")
+        ]
+        let groupA = TabGroup(pageIds: [tabs[1].pageId, tabs[3].pageId].compactMap { $0 })
+        sut.tabs = tabs
+        sut.copyAllLinks(ofGroup: groupA)
+        let pasteboardContent = NSPasteboard.general.string(forType: .string)
+        XCTAssertEqual(pasteboardContent, "\(tabs[1].preloadUrl!.absoluteString)\n\(tabs[3].preloadUrl!.absoluteString)")
+    }
 }
