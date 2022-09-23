@@ -727,6 +727,20 @@ extension BrowserTabsManager {
         AppDelegate.main.createWindow(withTabs: tabs, at: .zero)
     }
 
+    func copyAllLinks(ofGroup group: TabGroup) {
+        let urls: [String] = group.pageIds.compactMap { pageId in
+            if let link = LinkStore.linkFor(pageId){
+                return link.url
+            } else if let tab = tabs.first(where: { $0.pageId == pageId }) {
+                return tab.url?.absoluteString ?? tab.preloadUrl?.absoluteString
+            }
+            return nil
+        }
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(urls.joined(separator: "\n"), forType: .string)
+    }
+
     func createNewTab(inGroup group: TabGroup) {
         pauseListItemsUpdate = true
         defer {
