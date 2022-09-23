@@ -134,7 +134,7 @@ extension CachingEntry: Codable where Key: Codable, Value: Codable {}
 
 extension Caching where Key: Codable, Value: Codable, Self: Codable {
 
-    private static var ext: String { ".cache" }
+    private static var ext: String { "cache" }
 
     func saveToDisk(withName name: String, using fileManager: FileManager = .default) throws {
         let folderURLs = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)
