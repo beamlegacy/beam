@@ -66,6 +66,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private let networkMonitor = NetworkMonitor()
 
+    private(set) var terminating = false
+
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
     #endif
@@ -419,6 +421,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Tabs
     func applicationWillTerminate(_ aNotification: Notification) {
+        // BeamWindow.close() is called as part of NSApp.terminate() and we need this flag to tell
+        // whether this is part of application termination.
+        terminating = true
+
         guard let data = data.currentAccount?.data else { return }
 
         guard !skipTerminateMethods else { return }
@@ -597,11 +603,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var fullSyncOnQuitStatus: FullSyncOnQuitStatus = .notStarted
 
     // MARK: -
+
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard !skipTerminateMethods, fullSyncOnQuitStatus != .done else { return .terminateNow }
         guard fullSyncOnQuitStatus != .ongoing else {
             Logger.shared.logDebug("Tried to quit while full syncing")
-            return .terminateCancel }
+            return .terminateCancel
+        }
 
         data.saveData()
 
@@ -640,6 +648,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateCancel
         }
 
+        // BeamWindow.close() is called as part of NSApp.terminate() and we need this flag to tell
+        // whether this is part of application termination. In this flow here we are manually
+        // closing the windows but in other flows such as post-update app relaunch, we do not.
+        terminating = true
+
         // We need to notify all tabs of imminent termination *before* we store the current session.
         for window in windows {
             for tab in window.state.browserTabsManager.tabs {
@@ -658,7 +671,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         //We need to trigger full sync before quitting the app
         //To make it feel more instant, we first close all the windows
         windows.forEach {
-            $0.close(terminatingApplication: true)
+            $0.close()
         }
 
         //Then start the full sync.
