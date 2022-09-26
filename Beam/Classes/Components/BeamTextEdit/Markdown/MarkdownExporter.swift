@@ -129,8 +129,13 @@ private extension MarkdownExporter {
     ///   - filenamePrefix: a prefix to use for all the filenames attachment of the export.
     ///   - level: the level at which we render the element.
     /// - Returns: Markdown content if any, `nil` otherwise.
-    static func content(for child: BeamElement, filenamePrefix: String, level: Int = .zero, firstElement: Bool = false, fileManager: BeamFileDBManager
-) -> MarkdownContent? {
+    static func content(
+        for child: BeamElement,
+        filenamePrefix: String,
+        level: Int = .zero,
+        firstElement: Bool = false,
+        fileManager: BeamFileDBManager
+    ) -> MarkdownContent? {
         switch child.kind {
         case .bullet where child.children.isEmpty:
             guard !child.text.isEmpty else { return (.markdownHtmlLinebreak, []) }
@@ -171,11 +176,12 @@ private extension MarkdownExporter {
             return (render(checkify(child.text.markdown, checked: checked), deepLevel: level), [])
 
         case .code:
-            let content = render(codify(child.text.text), deepLevel: level)
-            if firstElement {
-                return (content + .newline, [])
+            var content = render(codify(child.text.text), deepLevel: level)
+            if !child.children.isEmpty {
+                let subContent = child.children.map { render(codify($0.text.text), deepLevel: level) }.joined(separator: .newline)
+                content += .newline + subContent
             }
-            return (.newline + content + .newline, [])
+            return firstElement ? (content + .newline, []) : (content.surround(with: .newline), [])
 
         case .divider:
             return (.markdownDivider, [])
