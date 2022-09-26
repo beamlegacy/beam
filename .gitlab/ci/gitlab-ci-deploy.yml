@@ -1,7 +1,6 @@
 build:upload:
   dependencies:
    - build:macos
-  needs: ["build:macos"]
   stage: deploy
   environment:
     name: review/$CI_COMMIT_REF_NAME
@@ -34,6 +33,11 @@ build:upload:
       when: never
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
   script:
     - bundle exec fastlane deploy
   tags:
@@ -66,6 +70,11 @@ build:cleanup:
       when: never
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
       when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
   when: manual
   script:
     - bundle exec fastlane delete_s3

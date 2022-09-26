@@ -2,7 +2,6 @@ build:publish:
   stage: deploy
   dependencies:
     - build:macos
-  needs: ["build:macos"]
   before_script:
     - direnv allow
     - eval "$(direnv export bash)"
