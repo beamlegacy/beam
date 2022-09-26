@@ -91,7 +91,7 @@ final class CodeNode: TextNode, Collapsible {
     }
 
     override var textPadding: NSEdgeInsets {
-        return NSEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
+        return NSEdgeInsets(top: 4, left: 6, bottom: 4, right: 6)
     }
 
     override func updateLayout() {
@@ -101,10 +101,7 @@ final class CodeNode: TextNode, Collapsible {
     }
 
     override func updateRendering() -> CGFloat {
-        if isCollapsed {
-            return firstLineHeight + 10
-        }
-        return super.updateRendering()
+        return super.updateRendering() - 6
     }
 
     override var frontmostHover: Bool {
@@ -134,10 +131,14 @@ final class CodeNode: TextNode, Collapsible {
     }
 
     private func displayFirstLine(of text: BeamText, in textFrame: TextFrame) {
-        if let line = textFrame.lines.first {
-            let newText = text.extract(range: line.range)
-            displayText(newText)
+        guard let line = textFrame.lines.first else { return }
+        guard !line.range.isEmpty else { return }
+        var range = line.range
+        if text[range.upperBound-1] == "\n" {
+            range = range.lowerBound..<(range.upperBound-1)
         }
+        let newText = text.extract(range: range)
+        displayText(newText)
     }
 
     private func displayText(_ text: BeamText) {
@@ -146,25 +147,16 @@ final class CodeNode: TextNode, Collapsible {
         self.invalidateText()
     }
 
-    static private var backgroundColor: CGColor { NSColor(named: "EditorCodeBackground")!.cgColor }
-    static private var backgroundBorderColor: CGColor { NSColor(named: "EditorCodeBorder")!.cgColor }
-
     private func addBackgroundLayer() {
-        let layer = Layer(name: "background", layer: CALayer(), display: { layer in
-            CATransaction.disableAnimations {
-                NSAppearance.withAppAppearance {
-                    layer.backgroundColor = Self.backgroundColor
-                    layer.borderColor = Self.backgroundBorderColor
-                }
-            }
-        })
+        let layer = CodeNodeBackgroundLayer()
+        layer.backgroundColor = CodeNodeBackgroundLayer.backgroundColor
+        layer.borderColor = CodeNodeBackgroundLayer.backgroundBorderColor
+        layer.cornerRadius = 3.0
+        layer.borderWidth = 1.0
+        layer.zPosition = -2 // below text selection
 
-        layer.layer.backgroundColor = Self.backgroundColor
-        layer.layer.borderColor = Self.backgroundBorderColor
-        layer.layer.cornerRadius = 3.0
-        layer.layer.borderWidth = 1.0
-        layer.layer.zPosition = -2 // below text selection
-        addLayer(layer)
+        let background = Layer(name: "background", layer: layer)
+        addLayer(background)
     }
 
     private func layoutBackgroundLayer() {
@@ -173,6 +165,8 @@ final class CodeNode: TextNode, Collapsible {
         CATransaction.disableAnimations {
             background.frame.origin = .zero
             background.frame.size = layer.frame.size
+            background.frame.origin.x += contentsLead
+            background.frame.size.width -= contentsLead
         }
     }
 
@@ -200,5 +194,23 @@ final class CodeNode: TextNode, Collapsible {
     override public func draw(_ layer: CALayer, in context: CGContext) {
         super.draw(layer, in: context)
         layers["background"]?.layer.setNeedsDisplay()
+    }
+}
+
+private final class CodeNodeBackgroundLayer: CALayer {
+    static var backgroundColor: CGColor {
+        BeamColor.combining(lightColor: .Mercury, darkColor: .Mercury).cgColor
+    }
+    static var backgroundBorderColor: CGColor {
+        BeamColor.combining(lightColor: .AlphaGray.alpha(0.4), darkColor: .AlphaGray).cgColor
+    }
+
+    override func display() {
+        CATransaction.disableAnimations {
+            NSAppearance.withAppAppearance {
+                backgroundColor = Self.backgroundColor
+                borderColor = Self.backgroundBorderColor
+            }
+        }
     }
 }
