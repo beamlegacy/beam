@@ -1030,6 +1030,11 @@ public extension CALayer {
                     toggleOpen(node)
                     return
                 }
+            case KeyCode.tab.rawValue:
+                if focusedWidget is CodeNode {
+                    insertText(string: "\t", replacementRange: nil)
+                    return
+                }
             default:
                 break
             }
