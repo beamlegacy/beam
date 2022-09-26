@@ -60,7 +60,7 @@ class AppLifecycleTests: BaseTest {
         }
 
         step("THEN I'm on the web view with 2 tabs reopened and the incognito window is not restored") {
-            XCTAssertTrue(app.windows.count == 1)
+            XCTAssertEqual(getNumberOfWindows(), 1)
             XCTAssertTrue(webView.waitForWebViewToLoad())
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
         }
@@ -80,6 +80,24 @@ class AppLifecycleTests: BaseTest {
         }
 
         step("THEN I'm on the web view with 2 tabs reopened") {
+            XCTAssertTrue(webView.waitForWebViewToLoad())
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+        }
+
+        step("THEN I close the windows in the right order") {
+            XCTAssertEqual(getNumberOfWindows(), 2)
+            _ = windowMenu.windowMenu().menuItem("Beam").firstMatch.hoverAndTapInTheMiddle()
+            shortcutHelper.shortcutActionInvoke(action: .closeWindow)
+            XCTAssertEqual(getNumberOfWindows(), 1)
+            shortcutHelper.shortcutActionInvoke(action: .closeWindow)
+            XCTAssertEqual(getNumberOfWindows(), 0)
+        }
+
+        step("THEN I restore the last session manually via the menu item") {
+            windowMenu.reopenAllWindowsFromLastSession()
+        }
+
+        step("THEN I have one window in web mode with 2 tabs reopened") {
             XCTAssertTrue(webView.waitForWebViewToLoad())
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
         }
