@@ -29,8 +29,6 @@ class MiniEditorPanel: NSPanel, WindowInfoCapable {
     }
 
     static func presentMiniEditor(with note: BeamNote, from window: BeamWindow, frame: CGRect? = nil) {
-        guard Configuration.branchType == .develop else { return }
-
         let state = window.state
         guard state.associatedPanel(for: note) == nil else {
             state.associatedPanel(for: note)?.makeKeyAndOrderFront(nil)
