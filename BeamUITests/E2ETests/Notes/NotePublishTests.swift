@@ -125,8 +125,9 @@ class NotePublishTests: BaseTest {
         }*/
     }
     
-    func testProfileAddAndRemovePublishedNote() {
-        
+    func testProfileAddAndRemovePublishedNote() throws {
+        try XCTSkipIf(true, "Reactivate after Vercel deployment")
+
         //let notPublishedNotesLabel = "No Published Notes - beam"
         let publishedNoteName = "Test1"
         
