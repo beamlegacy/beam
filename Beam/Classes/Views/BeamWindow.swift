@@ -250,7 +250,10 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
         self.initialFirstResponder = nil
 
         if !AppDelegate.main.terminating {
-            state.closeAllTabs()
+            // preparation for saving session
+            for tab in state.browserTabsManager.tabs {
+                tab.tabWillClose()
+            }
         }
 
         let idToRemove = state.browserTabsManager.browserTabManagerId
@@ -268,6 +271,9 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
         if !AppDelegate.main.terminating, AppDelegate.main.windows.count == 1 {
             AppDelegate.main.storeAllWindowsFromCurrentSession()
         }
+
+        // closing all tabs for good, session saving info should have been saved thanks to cleanup
+        state.closeAllTabs()
 
         AppDelegate.main.windows.removeAll { $0 === self }
 
