@@ -244,12 +244,12 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
         }
     }
 
-    private func cleanUpWindowContentBeforeClosing(terminatingApplication: Bool) {
+    private func cleanUpWindowContentBeforeClosing() {
         self.hostingView = nil
         self.contentView = nil
         self.initialFirstResponder = nil
 
-        if !terminatingApplication {
+        if !AppDelegate.main.terminating {
             state.closeAllTabs()
         }
 
@@ -261,11 +261,11 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
         NSApp.removeWindowsItem(self)
     }
 
-    func close(terminatingApplication: Bool) {
-        cleanUpWindowContentBeforeClosing(terminatingApplication: terminatingApplication)
+    override func close() {
+        cleanUpWindowContentBeforeClosing()
 
         // Store session if the user is closing the last window.
-        if !terminatingApplication, AppDelegate.main.windows.count == 1 {
+        if !AppDelegate.main.terminating, AppDelegate.main.windows.count == 1 {
             AppDelegate.main.storeAllWindowsFromCurrentSession()
         }
 
@@ -283,10 +283,6 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
         state.cachedJournalScrollView = nil
 
         super.close()
-    }
-
-    override func close() {
-        close(terminatingApplication: false)
     }
 
     override func restoreState(with coder: NSCoder) {
