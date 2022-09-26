@@ -2,4 +2,3 @@
 // https://help.apple.com/xcode/#/dev745c5c974
 
 CUSTOM_OTHER_SWIFT_FLAGS = $(inherited) -DBEAM_BETA
-STRIP_CLUSTERING_V2_MODEL = 1
