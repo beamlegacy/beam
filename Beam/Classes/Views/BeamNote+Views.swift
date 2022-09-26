@@ -28,13 +28,11 @@ extension BeamNote {
                 Button("Open in New Window") {
                     state.openNoteInNewWindow(id: note.id)
                 }
-                if Configuration.branchType == .develop {
-                    Button("Open in Side Window") {
-                        state.openNoteInMiniEditor(id: note.id)
-                    }
-                    Button("Open in Split View") {
-                        state.sideNote = note
-                    }
+                Button("Open in Side Window") {
+                    state.openNoteInMiniEditor(id: note.id)
+                }
+                Button("Open in Split View") {
+                    state.sideNote = note
                 }
             }
             if sections.contains(.actions) || sections.contains(.export) {
@@ -86,13 +84,11 @@ extension BeamNote {
                 state.openNoteInNewWindow(id: note.id)
             }
 
-            if Configuration.branchType == .develop {
-                menu.addItem(withTitle: loc("Open in Side Window")) { _ in
-                    state.openNoteInMiniEditor(id: note.id)
-                }
-                menu.addItem(withTitle: loc("Open in Split View")) { _ in
-                    state.sideNote = note
-                }
+            menu.addItem(withTitle: loc("Open in Side Window")) { _ in
+                state.openNoteInMiniEditor(id: note.id)
+            }
+            menu.addItem(withTitle: loc("Open in Split View")) { _ in
+                state.sideNote = note
             }
 
             if sections.contains(.actions) || sections.contains(.export) {
