@@ -16,7 +16,7 @@ enum ClusteringType {
     var isSupported: Bool {
         switch self {
         case .legacy: return true
-        case .smart: return Configuration.branchType != .beta
+        case .smart: return true
         }
     }
 
