@@ -223,7 +223,8 @@ extension AppDelegate {
     }
 
     @IBAction func exportToMarkdown(_ sender: Any) {
-        exportNotesToMarkdown([])
+        // we want to export the currentNote viewed when exporting to markdown and default to all notes otherwise
+        exportNotesToMarkdown(window?.state.currentNote.map { [$0] } ?? [])
     }
 }
 
