@@ -1,14 +1,12 @@
-workflow:
-  rules:
-    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
 build for testing:
   # This will build an app that will be reused on UI Tests Thread
   timeout: 20 minutes
   dependencies: []
   stage: build
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   cache:
     - key: build-product-$CI_COMMIT_SHA
       paths:
@@ -34,6 +32,10 @@ xctests:
   dependencies: []
   needs: []
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   artifacts:
     expire_in: 7d
     when: always
@@ -71,6 +73,10 @@ UITestThread1:
   dependencies: []
   needs: ["build for testing"]
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   artifacts:
     expire_in: 4d
     when: always
@@ -109,6 +115,10 @@ UITestThread2:
   dependencies: []
   needs: ["build for testing"]
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   artifacts:
     expire_in: 4d
     when: always
@@ -147,6 +157,10 @@ UITestThread3:
   dependencies: []
   needs: ["build for testing"]
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   artifacts:
     expire_in: 4d
     when: always
@@ -185,6 +199,10 @@ UITestThread4:
   dependencies: []
   needs: ["build for testing"]
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   artifacts:
     expire_in: 4d
     when: always
@@ -223,6 +241,10 @@ UITestThread5:
   dependencies: []
   needs: ["build for testing"]
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   artifacts:
     expire_in: 4d
     when: always
@@ -261,6 +283,10 @@ UITestThread6:
   dependencies: []
   needs: ["build for testing"]
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   artifacts:
     expire_in: 4d
     when: always
@@ -298,6 +324,10 @@ UITestThread7:
   timeout: 25 minutes
   dependencies: []
   needs: ["build for testing"]
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   stage: test
   artifacts:
     expire_in: 4d
@@ -337,6 +367,10 @@ UITestThread8:
   dependencies: []
   needs: ["build for testing"]
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   artifacts:
     expire_in: 4d
     when: always
@@ -375,6 +409,10 @@ UITestThread9:
   dependencies: []
   needs: ["build for testing"]
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   artifacts:
     expire_in: 4d
     when: always
@@ -412,6 +450,10 @@ js_test:
   variables:
     RUN_BENCHMARK: "true"
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   needs: []
   image: node:16.16-alpine
   before_script:
@@ -440,6 +482,10 @@ coverage_check:
     - date
   dependencies: []
   stage: test
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   needs: [xctests, UITestThread1, UITestThread2, UITestThread3, UITestThread4, UITestThread5, UITestThread6, UITestThread7]
   rules:
     - if: '$COVERAGE_CHECK_DISABLED'
