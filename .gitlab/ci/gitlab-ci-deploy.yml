@@ -1,34 +1,3 @@
-sentry:
-  timeout: 8 minutes
-  dependencies:
-    - build:macos
-  stage: deploy
-  artifacts:
-    expire_in: 14d
-    paths:
-      - builds/Beam.app.dSYM.zip
-  rules:
-    - if: '$SENTRY_DISABLED'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    - if: '$CI_COMMIT_BRANCH == "master"'
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
-    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  script:
-    - bundle exec fastlane ping_sentry --verbose
-  tags:
-    - macos-mono
-  interruptible: true
-  allow_failure: true
-  retry:
-    max: 2
-
 build:upload:
   dependencies:
    - build:macos
@@ -62,12 +31,8 @@ build:upload:
       when: never
     - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
       when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    - if: '$CI_COMMIT_BRANCH == "master"'
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
-    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
   script:
     - bundle exec fastlane deploy
   tags:
