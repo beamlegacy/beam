@@ -1,6 +1,7 @@
 build:upload:
   dependencies:
    - build:macos
+  needs: ["build:macos"]
   stage: deploy
   environment:
     name: review/$CI_COMMIT_REF_NAME
@@ -43,6 +44,7 @@ build:upload:
 
 build:cleanup:
   dependencies: []
+  needs: ["build:macos"]
   stage: deploy
   variables:
     GIT_STRATEGY: none
