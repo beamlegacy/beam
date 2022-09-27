@@ -216,18 +216,18 @@ struct MiniEditor: View {
                 HStack(spacing: 8) {
                     Spacer()
                     if let _ = windowInfo.window as? BeamWindow {
-                        ButtonLabel(icon: "tabs-side_detach", customStyle: buttonStyle) {
+                        ButtonLabel(icon: "side-detach", customStyle: buttonStyle) {
                             state.openNoteInMiniEditor(id: note.id)
                             state.sideNote = nil
                         }.frame(width: 12, height: 12)
                     } else if let window = windowInfo.window as? MiniEditorPanel {
-                        ButtonLabel(icon: "tabs-side_openmain", customStyle: buttonStyle) {
+                        ButtonLabel(icon: "side-openmain", customStyle: buttonStyle) {
                             state.sideNote = note
                             window.close()
                         }.frame(width: 12, height: 12)
                     }
                     if !isInWindow {
-                        ButtonLabel(icon: "tabs-side_close", customStyle: buttonStyle) {
+                        ButtonLabel(icon: "side-close", customStyle: buttonStyle) {
                             state.sideNote = nil
                         }.frame(width: 12, height: 12)
                     }
