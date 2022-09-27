@@ -274,17 +274,33 @@ import Sentry
     ///   - id: The is of the note to open
     ///   - frame: The frame of the panel. If no frame is provided, the panel will be located and sized based on the current BeamWindow's frame
     /// - Returns: True if we asked the MiniEditorPanel to open. False otherwise.
-    @discardableResult func openNoteInMiniEditor(id: UUID, frame: CGRect? = nil) -> Bool {
+    @discardableResult func openNoteInMiniEditor(id: UUID, existingPanel: MiniEditorPanel? = nil, frame: CGRect? = nil) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
         guard let note = BeamNote.fetch(id: id), let window = associatedWindow as? BeamWindow else {
             return false
+        }
+
+        if let existingPanel = existingPanel {
+            existingPanel.note = note
+            return true
         }
 
         var desiredFrame = frame
         if desiredFrame == nil, let windowFrame = associatedWindow?.frame {
             let currentWidth = sideNoteWidth
             let leftPartWidth = windowFrame.size.width - currentWidth
-            let sideWindowFrame = CGRect(x: windowFrame.minX + leftPartWidth, y: windowFrame.minY, width: currentWidth, height: windowFrame.height).offsetBy(dx: 20, dy: -20)
+            var sideWindowFrame = CGRect(x: windowFrame.minX + leftPartWidth, y: windowFrame.minY, width: currentWidth, height: windowFrame.height).offsetBy(dx: 20, dy: -20)
+            var positionOK = false
+
+            repeat {
+                let alreadyExistingPanelsAtPosition = AppDelegate.main.panels.values.filter({ $0.frame.origin == sideWindowFrame.origin })
+                if alreadyExistingPanelsAtPosition.isEmpty {
+                    positionOK = true
+                } else {
+                    sideWindowFrame = sideWindowFrame.offsetBy(dx: 20, dy: -20)
+                }
+            } while !positionOK
+
             desiredFrame = sideWindowFrame
         }
 
@@ -315,24 +331,24 @@ import Sentry
         return true
     }
 
-    @available(*, deprecated, message: "Using title might navigate to a different note if multiple databases, use ID if possible.")
-    @discardableResult func navigateToNote(named: String, elementId: UUID? = nil) -> Bool {
-        EventsTracker.logBreadcrumb(message: "\(#function) named \(named) - elementId \(String(describing: elementId))", category: "BeamState")
-        //Logger.shared.logDebug("load note named \(named)")
-        guard let note = try? BeamNote.fetchOrCreate(self, title: named) else { return false }
-        return navigateToNote(note, elementId: elementId)
-    }
-
-    @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
+    @discardableResult func navigateToNote(id: UUID, in editor: EditorType = .main, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) id \(id) - elementId \(String(describing: elementId))", category: "BeamState")
         //Logger.shared.logDebug("load note named \(named)")
         guard let note = BeamNote.fetch(id: id) else {
             return false
         }
-        return navigateToNote(note, elementId: elementId, unfold: unfold)
+
+        switch editor {
+        case .main:
+            return navigateToNote(note, elementId: elementId, unfold: unfold)
+        case .splitView:
+            return openNoteInSplitView(id: id)
+        case .panel(panel: let panel):
+            return openNoteInMiniEditor(id: id, existingPanel: panel)
+        }
     }
 
-    @discardableResult func navigateToNote(_ note: BeamNote, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
+    @discardableResult func navigateToNote(_ note: BeamNote, from: EditorType = .main, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) \(note) - elementId \(String(describing: elementId))", category: "BeamState")
         mode = .note
 
