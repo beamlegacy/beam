@@ -79,13 +79,7 @@ struct CalendarView: View, BeamDocumentSource {
                             .combined(with: .opacity.animation(.easeInOut(duration: 0.15)))
                     ))
                         .padding(6)
-                        .background(
-                            ZStack {
-                                Color.white.opacity(0.8)
-                                VisualEffectView(material: .headerView)
-                            }.cornerRadius(4)
-                                .padding(.leading, 4)
-                        )
+                        .background(background)
                 } else {
                     VStack(alignment: .leading, spacing: CalendarView.itemSpacing) {
                         ForEach(viewModel.meetings) { meeting in
@@ -112,7 +106,16 @@ struct CalendarView: View, BeamDocumentSource {
                     openAccountPreferences()
                 }
                 .cursorOverride(.pointingHand)
+                .background(background)
         }
+    }
+
+    @ViewBuilder private var background: some View {
+        ZStack {
+            Color.white.opacity(0.8)
+            VisualEffectView(material: .headerView)
+        }.cornerRadius(4)
+            .padding(.leading, 4)
     }
 
     private var shouldUseCompactMode: Bool {
