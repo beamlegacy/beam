@@ -646,6 +646,23 @@ import Sentry
         }
     }
 
+    private func openAsSideWindowIfEligible(url: URL) -> Bool {
+        guard PreferencesManager.videoCallsAlwaysInSideWindow else { return false }
+        if let currentTab = currentTab {
+            return currentTab.openAsSideWindowIfEligible(request: .init(url: url))
+        } else if videoCallsManager.isEligible(url: url) {
+            do {
+                try videoCallsManager.start(with: .init(url: url), faviconProvider: data.faviconProvider)
+                return true
+            } catch VideoCallsManager.Error.existingSession {
+                 // no-op, existing window already foreground
+            } catch {
+                Logger.shared.logError("error trying to open eligible url \(url): \(error)", category: .search)
+            }
+        }
+        return false
+    }
+
     private func selectAutocompleteResult(_ result: AutocompleteResult, modifierFlags: NSEvent.ModifierFlags? = nil) {
         EventsTracker.logBreadcrumb(message: "\(#function) - \(result)", category: "BeamState")
         switch result.source {
@@ -676,6 +693,8 @@ import Sentry
                 Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
                 return
             }
+
+            if openAsSideWindowIfEligible(url: url) { return }
 
             if !isIncognito,
                url == urlWithScheme,
@@ -736,6 +755,9 @@ import Sentry
         // Logger.shared.logDebug("Start query: \(url)")
 
         if !navigate { return }
+
+        if openAsSideWindowIfEligible(url: url) { return }
+
         if mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
             navigateCurrentTab(toURLRequest: URLRequest(url: url))
         } else {

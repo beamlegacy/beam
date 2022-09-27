@@ -10,6 +10,7 @@ final class VideoCallsManager: NSObject {
     enum Error: LocalizedError {
         case existingSession
         case tabNotEligible
+        case unableToScheduleAutoJoin
     }
 
     /// Current panel representing current video call session.
@@ -39,16 +40,24 @@ final class VideoCallsManager: NSObject {
             throw Error.existingSession
         }
         let webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
+        let tab = BrowserTab(state: BeamState(), browsingTreeOrigin: nil, originMode: .web, note: nil, webView: webView)
         webView.uiDelegate = self
         webViewController = WebViewController(with: webView)
-        let panel = panel(for: webView, faviconProvider: faviconProvider)
+        let panel = panel(for: tab, faviconProvider: faviconProvider)
         webView.load(request)
         display(panel: panel)
     }
 
-    /// Checks if the tab is eligible for being in video call.
+    /// Checks if the URL is eligible for being in a video call side window.
+    /// - Parameter url: the ``URL`` to check.
+    /// - Returns: `true` if it can be detached into a video call panel, `false` otherwise.
+    func isEligible(url: URL) -> Bool {
+        return currentPanel == nil && url.isEligibleForVideoCall
+    }
+
+    /// Checks if the tab is eligible for being in a video call side window.
     /// - Parameter tab: the ``BrowserTab`` to check.
-    /// - Returns: `true` if the tab can be detached in a video call panel, `false` otherwise.
+    /// - Returns: `true` if it can be detached into a video call panel, `false` otherwise.
     func isEligible(tab: BrowserTab) -> Bool {
         return currentPanel == nil && (tab.url?.isEligibleForVideoCall ?? false)
     }
@@ -56,10 +65,10 @@ final class VideoCallsManager: NSObject {
     /// Detaches the tab to a side panel if eligible.
     /// - Parameter tab: the ``BrowserTab`` to detach.
     func detachTabIntoSidePanel(_ tab: BrowserTab) throws {
-        guard isEligible(tab: tab) else {
+        guard let url = tab.url, isEligible(url: url) else {
             throw Error.tabNotEligible
         }
-        let panel = panel(for: tab.webView, faviconProvider: tab.data.faviconProvider)
+        let panel = panel(for: tab, faviconProvider: tab.data.faviconProvider)
         tab.removeFromWindow()
         display(panel: panel)
     }
@@ -87,8 +96,11 @@ final class VideoCallsManager: NSObject {
     /// - Parameters:
     ///   - meeting: the ``Meeting`` to join.
     ///   - faviconProvider: a ``FaviconProvider`` optional instance.
-    func autoJoinMeeting(_ meeting: Meeting, faviconProvider: FaviconProvider?) {
-        autoJoinTimer = Timer.scheduledTimer(withTimeInterval: meeting.startTime.timeIntervalSinceNow, repeats: false) { [weak self] _ in
+    func autoJoinMeeting(_ meeting: Meeting, faviconProvider: FaviconProvider?) throws {
+        guard let date = Calendar.current.date(byAdding: .second, value: -30, to: meeting.startTime) else {
+            throw Error.unableToScheduleAutoJoin
+        }
+        autoJoinTimer = Timer.scheduledTimer(withTimeInterval: date.timeIntervalSinceNow, repeats: false) { [weak self] _ in
             defer { self?.autoJoinTimer = nil }
             do {
                 let meetingLinkRequest = meeting.meetingLink.flatMap { URL(string: $0) }.map { URLRequest(url: $0) }
@@ -111,9 +123,9 @@ final class VideoCallsManager: NSObject {
 }
 
 private extension VideoCallsManager {
-    func panel(for webView: BeamWebView, faviconProvider: FaviconProvider?) -> VideoCallsPanel {
-        let viewModel = VideoCallsViewModel(client: .init(webView: webView), faviconProvider: faviconProvider)
-        return VideoCallsPanel(viewModel: viewModel, webView: webView)
+    func panel(for tab: BrowserTab, faviconProvider: FaviconProvider?) -> VideoCallsPanel {
+        let viewModel = VideoCallsViewModel(client: .init(browserTab: tab), faviconProvider: faviconProvider)
+        return VideoCallsPanel(viewModel: viewModel, webView: tab.webView)
     }
 
     func display(panel: VideoCallsPanel) {
@@ -158,6 +170,8 @@ extension VideoCallsManager.Error {
             return loc("A video call session is already ongoing.")
         case .tabNotEligible:
             return loc("This tab is not eligible for the side call window.")
+        case .unableToScheduleAutoJoin:
+            return loc("Unable to schedule auto-join for this meeting.")
         }
     }
 }

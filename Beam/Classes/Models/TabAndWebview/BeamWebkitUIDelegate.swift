@@ -14,6 +14,10 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
             return nil
         }
 
+        if (self.page as? BrowserTab)?.openAsSideWindowIfEligible(request: request) == true {
+            return nil
+        }
+
         if navigationAction.navigationType == .other {
             let defaultValue = true
             let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
