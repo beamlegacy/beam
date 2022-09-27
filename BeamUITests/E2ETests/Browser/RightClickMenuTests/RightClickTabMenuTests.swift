@@ -126,24 +126,32 @@ class RightClickTabMenuTests: BaseTest {
     func testMoveTabToSideWindowAndCloseConferenceDialog() {
         testrailId("C1187")
         let meetingId = "rox-yfpc-yqi"
+        var conferenceDialog: XCUIElement!
         
         step("GIVEN I open normal tab and tab with \(meetingId) conference meeting"){
-            OmniBoxTestView().openWebsite("meet.google.com/\(meetingId)")
             uiMenu.invoke(.loadUITestPage1)
             webView.waitForWebViewToLoad()
+            OmniBoxTestView().openWebsite("meet.google.com/\(meetingId)")
+            conferenceDialog = app.dialogs.firstMatch
+            let conferenceDialogPermissionDontAllowButton = app.sheets.buttons[AlertViewLocators.Buttons.dontAllowButton.accessibilityIdentifier]
+            
+            if conferenceDialogPermissionDontAllowButton.waitForExistence(timeout: BaseTest.implicitWaitTimeout) {
+                conferenceDialogPermissionDontAllowButton.hoverAndTapInTheMiddle()
+                XCTAssertTrue(waitForDoesntExist(conferenceDialog.sheets.firstMatch))
+            }
         }
         
-        step("WHEN I move \(meetingId) tab to a conference window"){
-            webView
-                .openTabMenu(tabIndex: 0)
-                .selectTabMenuItem(.moveTabToSideWindow)
-        }
+        // TODO with preferences of tab window
+//        step("WHEN I move \(meetingId) tab to a conference window"){
+//            webView
+//                .openTabMenu(tabIndex: 0)
+//                .selectTabMenuItem(.moveTabToSideWindow)
+//        }
         
-        let conferenceDialog = getAppDialogs(dialogTitle: "Meet - \(meetingId)")
          
         step("THEN I web meeting tab is moved to video conference window") {
             XCTAssertEqual(getNumberOfWindows(), 1)
-            XCTAssertTrue(conferenceDialog.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(conferenceDialog.waitForExistence(timeout: BaseTest.maximumWaitTimeout))
             XCTAssertEqual(webView.getNumberOfTabs(), 1)
             // Comment out due to flakiness when based on meeting state when the user cannot join the meeting the icons are not displayed - https://linear.app/beamapp/issue/BE-5646/ui-menu-to-invoke-mocked-conference-window
             /*for identifier in ConferencePopupViewLocators.Buttons.allCases {
@@ -153,17 +161,11 @@ class RightClickTabMenuTests: BaseTest {
         
         step("THEN only web conferences meetings has the option to be moved in a conference window") {
             XCTAssertFalse(webView.openTabMenu(tabIndex: 0).isTabMenuOptionDisplayed(.moveTabToSideWindow))
+            webView.typeKeyboardKey(.escape)
         }
         
         step("THEN I successfully move conference window back to tab"){
             conferenceDialog.hoverAndTapInTheMiddle() //required to activate the dialog
-            
-            let conterenceDialogPermissionDontAllowButton = conferenceDialog.sheets.buttons[AlertViewLocators.Buttons.dontAllowButton.accessibilityIdentifier]
-            if conterenceDialogPermissionDontAllowButton.exists {
-                conterenceDialogPermissionDontAllowButton.hoverAndTapInTheMiddle()
-                XCTAssertTrue(waitForDoesntExist(conferenceDialog.sheets.firstMatch))
-            }
-            
             conferenceDialog.buttons[ConferencePopupViewLocators.Buttons.openInMainWindowButton.accessibilityIdentifier].hoverAndTapInTheMiddle()
             XCTAssertTrue(waitForDoesntExist(conferenceDialog))
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
