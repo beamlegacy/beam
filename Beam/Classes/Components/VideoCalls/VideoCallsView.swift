@@ -146,13 +146,13 @@ struct VideoCallsView: View {
 private extension VideoCallsView {
     private var trafficLightsView: some View {
         HStack(spacing: itemSpacing) {
-            trafficLight(imageName: "tabs-side-close") {
+            trafficLight(imageName: "side-close") {
                 viewModel.close()
             }
             .onHover { trafficButtonHovered.close = $0 }
             .colorMultiply(trafficButtonHovered.close ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI)
 
-            trafficLight(imageName: "tabs-side-openmain") {
+            trafficLight(imageName: "side-openmain") {
                 do {
                     try viewModel.attach()
                 } catch {
@@ -162,7 +162,7 @@ private extension VideoCallsView {
             .onHover { trafficButtonHovered.main = $0 }
             .colorMultiply(trafficButtonHovered.main ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI)
 
-            trafficLight(imageName: viewModel.isFullscreen ? "tabs-side-exit-fullscreen" : "tabs-side-enter-fullscreen") {
+            trafficLight(imageName: viewModel.isFullscreen ? "side-fullscreen_exit" : "side-fullscreen") {
                 viewModel.toggleFullscreen()
             }
             .onHover { trafficButtonHovered.fullscreen = $0 }

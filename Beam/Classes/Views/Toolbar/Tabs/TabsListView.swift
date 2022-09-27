@@ -248,11 +248,7 @@ struct TabsListView: View {
                             disableAnimations: isAnimatingDrop,
                             disableHovering: dragModel.isDragging || isChangingTabsCountWhileHovering,
                             isInMainWindow: isMainWindow,
-                            onTouchDown: { onTabTouched(at: index) },
-                            onTap: { onTabTapped(at: index, isRightMouse: $0, event: $1) },
-                            onClose: { onItemClose(at: index) }, onCopy: { onItemCopy(at: index) },
-                            onToggleMute: { onTabToggleMute(at: index) },
-                            onFileDrop: dragModel.isDragging ? nil : { onFileDrop(at: index, url: $0) })
+                            delegate: self)
                 } else if let group = item.group, let color = group.color {
                     TabClusteringGroupCapsuleView(displayedText: item.displayedText,
                                                   groupTitle: group.title, color: color,
@@ -522,34 +518,6 @@ extension TabsListView {
         return path
     }
 
-    private func onTabTouched(at index: Int) {
-        guard !isDraggingATab, selectedIndex != index else {
-            viewModel.lastTouchWasOnUnselectedTab = false
-            return
-        }
-        viewModel.lastTouchWasOnUnselectedTab = true
-        if let tab = sections.allItems[index].tab {
-            browserTabsManager.setCurrentTab(tab)
-        }
-    }
-
-    private func onTabTapped(at index: Int, isRightMouse: Bool, event: NSEvent?) {
-        if isRightMouse {
-            onTabRightClick(at: index, event: event)
-            return
-        }
-        guard !isDraggingATab, selectedIndex == index, !viewModel.lastTouchWasOnUnselectedTab else { return }
-        state.startFocusOmnibox(fromTab: true)
-    }
-
-    private func onTabRightClick(at index: Int, event: NSEvent?) {
-        guard let tab = sections.allItems[index].tab else { return }
-        contextMenuManager.showContextMenu(forTab: tab, atListIndex: index, sections: sections, event: event,
-                                            onCloseItem: { _ in
-            onItemClose(at: index, fromContextMenu: true)
-        })
-    }
-
     private func startTrackingMouseMove() {
         guard viewModel.mouseMoveMonitor == nil else { return }
         viewModel.mouseMoveMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
@@ -588,24 +556,6 @@ extension TabsListView {
         state.closeTab(tabIndex, allowClosingPinned: fromContextMenu)
     }
 
-    private func onItemCopy(at index: Int) {
-        guard index < sections.allItems.count else { return }
-        let tab = sections.allItems[index].tab
-        tab?.copyURLToPasteboard()
-    }
-
-    private func onTabToggleMute(at index: Int) {
-        guard index < sections.allItems.count else { return }
-        let tab = sections.allItems[index].tab
-        tab?.mediaPlayerController?.toggleMute()
-    }
-
-    private func onFileDrop(at index: Int, url: URL) {
-        guard index < sections.allItems.count, let tab = sections.allItems[index].tab else { return }
-        guard BeamUniformTypeIdentifiers.supportsNavigation(toLocalFileURL: url) else { return }
-        tab.state?.navigateTab(tab, toURLRequest: .init(url: url))
-    }
-
     private func tabViewId(for tab: BrowserTab) -> String {
         return "browserTab-\(tab.id)"
     }
@@ -637,6 +587,57 @@ extension TabsListView {
         } else {
             scrollViewProxy.scrollTo(tabViewId(for: tab))
         }
+    }
+}
+
+// MARK: - Actions Delegate
+extension TabsListView: TabViewDelegate {
+    func tabDidTouchDown(_ tab: BrowserTab) {
+        guard let index = index(of: tab), !isDraggingATab, selectedIndex != index else {
+            viewModel.lastTouchWasOnUnselectedTab = false
+            return
+        }
+        viewModel.lastTouchWasOnUnselectedTab = true
+        browserTabsManager.setCurrentTab(tab)
+    }
+
+    func tabDidTap(_ tab: BrowserTab, isRightMouse: Bool, event: NSEvent?) {
+        guard let index = index(of: tab) else { return }
+        if isRightMouse {
+            contextMenuManager.showContextMenu(forTab: tab, atListIndex: index, sections: sections, event: event,
+                                               onCloseItem: { _ in
+                onItemClose(at: index, fromContextMenu: true)
+            })
+            return
+        }
+        guard !isDraggingATab, selectedIndex == index, !viewModel.lastTouchWasOnUnselectedTab else { return }
+        state.startFocusOmnibox(fromTab: true)
+    }
+
+    func tabWantsToClose(_ tab: BrowserTab) {
+        guard let index = index(of: tab) else { return }
+        onItemClose(at: index)
+    }
+
+    func tabWantsToCopy(_ tab: BrowserTab) {
+        tab.copyURLToPasteboard()
+    }
+
+    func tabDidToggleMute(_ tab: BrowserTab) {
+        tab.mediaPlayerController?.toggleMute()
+    }
+
+    func tabWantsToDetach(_ tab: BrowserTab) {
+        try? state.videoCallsManager.detachTabIntoSidePanel(tab)
+    }
+
+    func tabDidReceiveFileDrop(_ tab: BrowserTab, url: URL) {
+        guard BeamUniformTypeIdentifiers.supportsNavigation(toLocalFileURL: url) else { return }
+        state.navigateTab(tab, toURLRequest: .init(url: url))
+    }
+
+    func tabSupportsFileDrop(_ tab: BrowserTab) -> Bool {
+        !dragModel.isDragging
     }
 }
 
