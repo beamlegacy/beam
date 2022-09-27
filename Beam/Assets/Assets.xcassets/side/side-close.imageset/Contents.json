@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "tabs-side-exit-fullscreen.pdf",
+      "filename" : "tabs-side_close.pdf",
       "idiom" : "universal"
     }
   ],
@@ -10,7 +10,6 @@
     "version" : 1
   },
   "properties" : {
-    "preserves-vector-representation" : true,
     "template-rendering-intent" : "template"
   }
 }

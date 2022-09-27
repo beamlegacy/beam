@@ -9,6 +9,18 @@ import BeamCore
 import SwiftUI
 import UniformTypeIdentifiers
 
+protocol TabViewDelegate {
+    func tabDidTouchDown(_ tab: BrowserTab)
+    func tabDidTap(_ tab: BrowserTab, isRightMouse: Bool, event: NSEvent?)
+    func tabWantsToClose(_ tab: BrowserTab)
+    func tabWantsToCopy(_ tab: BrowserTab)
+    func tabDidToggleMute(_ tab: BrowserTab)
+    func tabWantsToDetach(_ tab: BrowserTab)
+
+    func tabDidReceiveFileDrop(_ tab: BrowserTab, url: URL)
+    func tabSupportsFileDrop(_ tab: BrowserTab) -> Bool
+}
+
 struct TabView: View {
     static let minimumWidth: CGFloat = 29
     static let maximumWidth: Double = 800 // for very wide screens BE-4571
@@ -32,12 +44,7 @@ struct TabView: View {
     var applyDraggingStyle: Bool = true
     var hueTint: Double?
     var isInMainWindow = true
-    var onTouchDown: (() -> Void)?
-    var onTap: ((_ isRightMouse: Bool, _ event: NSEvent?) -> Void)?
-    var onClose: (() -> Void)?
-    var onCopy: (() -> Void)?
-    var onToggleMute: (() -> Void)?
-    var onFileDrop: ((URL) -> Void)?
+    var delegate: TabViewDelegate?
 
     private let localCoordinateSpaceName = "TabCoordinateSpace"
     private let defaultFadeTransition = AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
@@ -74,15 +81,35 @@ struct TabView: View {
         return BeamFont.regular(size: 11).swiftUI
     }
 
-    private var audioIsPlaying: Bool {
+    private var mediaIsPlaying: Bool {
         tab.mediaPlayerController?.isPlaying == true
+    }
+
+    private var isDetachable: Bool {
+        tab.isDetachable
+    }
+
+    private var hasTrailingIcon: Bool {
+        isDetachable || mediaIsPlaying
     }
 
     private var copyMessage: String? {
         tab.hasCopiedURL ? loc("Link Copied") : nil
     }
 
-    private var audioView: some View {
+    @ViewBuilder
+    private var mainTrailingIconView: some View {
+        if isDetachable {
+            TabContentIcon(name: "side-detach", width: 12,
+                           invertedColors: isIncognito && isSelected,
+                           action: onDetach)
+                .frame(width: 16, height: 16)
+        } else if mediaIsPlaying {
+            mediaView
+        }
+    }
+
+    private var mediaView: some View {
         TabAudioView(tab: tab, invertedColors: isSelected && isIncognito, action: onToggleMute)
     }
 
@@ -109,14 +136,15 @@ struct TabView: View {
         }
     }
 
-    private func estimatedTrailingViewsWidth(shouldShowCopy: Bool, shouldShowMedia: Bool) -> CGFloat {
+    private func estimatedTrailingViewsWidth(shouldShowCopy: Bool, shouldShowTrailingIcon: Bool) -> CGFloat {
         let intericonSpacing = BeamSpacing._60
         let trailingViewLeadingPadding = BeamSpacing._40
-        return (shouldShowCopy ? 12 : 0) + (shouldShowMedia ? 16 : 0)
-        + (shouldShowCopy && shouldShowMedia ? intericonSpacing : 0)
-        + (shouldShowCopy || shouldShowMedia ? trailingViewLeadingPadding : 0)
+        return (shouldShowCopy ? 12 : 0) + (shouldShowTrailingIcon ? 16 : 0)
+        + (shouldShowCopy && shouldShowTrailingIcon ? intericonSpacing : 0)
+        + (shouldShowCopy || shouldShowTrailingIcon ? trailingViewLeadingPadding : 0)
     }
-    private func trailingViews(shouldShowCopy: Bool, shouldShowMedia: Bool) -> some View {
+
+    private func trailingViews(shouldShowCopy: Bool, shouldShowTrailingIcon: Bool) -> some View {
         return HStack(spacing: BeamSpacing._60) {
             if shouldShowCopy {
                 TabContentIcon(name: "editor-url_copy",
@@ -125,8 +153,8 @@ struct TabView: View {
                                action: onCopy)
                     .transition(sideViewsTransition)
             }
-            if shouldShowMedia {
-                audioView
+            if shouldShowTrailingIcon {
+                mainTrailingIconView
                     .transition(sideViewsTransition)
             }
         }
@@ -309,19 +337,19 @@ struct TabView: View {
         let shouldShowCopy = isHovering && shouldShowTitle && tab.url != nil
         let shouldShowCompactSize = shouldShowCompactSize(geometry: containerGeometry)
         let shouldShowClose = !isPinned && isHovering && !shouldShowCompactSize
-        let shouldShowMedia = !shouldShowCompactSize && audioIsPlaying
+        let shouldShowTrailingIcon = !shouldShowCompactSize && hasTrailingIcon
         let showForegroundHoverStyle = isHovering && isSelected
         let hPadding = shouldShowCompactSize ? 0 : BeamSpacing._80
         let spacerMinWidth = BeamSpacing._40
-        let isCompactWithAudio = audioIsPlaying && shouldShowCompactSize
+        let isCompactWithTrailingIcon = shouldShowTrailingIcon && shouldShowCompactSize
 
         let leadingViews = leadingViews(shouldShowClose: shouldShowClose)
-        let trailingViews = trailingViews(shouldShowCopy: shouldShowCopy, shouldShowMedia: shouldShowMedia)
+        let trailingViews = trailingViews(shouldShowCopy: shouldShowCopy, shouldShowTrailingIcon: shouldShowTrailingIcon)
         var estimatedTrailingViewsWidth: CGFloat = 0
         if isSingleTab {
-            estimatedTrailingViewsWidth = hPadding + self.estimatedTrailingViewsWidth(shouldShowCopy: true, shouldShowMedia: shouldShowMedia)
+            estimatedTrailingViewsWidth = hPadding + self.estimatedTrailingViewsWidth(shouldShowCopy: true, shouldShowTrailingIcon: shouldShowTrailingIcon)
         } else if !showForegroundHoverStyle {
-            estimatedTrailingViewsWidth = hPadding + self.estimatedTrailingViewsWidth(shouldShowCopy: shouldShowCopy, shouldShowMedia: shouldShowMedia)
+            estimatedTrailingViewsWidth = hPadding + self.estimatedTrailingViewsWidth(shouldShowCopy: shouldShowCopy, shouldShowTrailingIcon: shouldShowTrailingIcon)
         }
         let estimatedLeadingViewsWidth: CGFloat = hPadding + (shouldShowClose || isSingleTab ? 16 : 0) + (isSingleTab ? spacerMinWidth : 0)
         return HStack(spacing: 0) {
@@ -352,11 +380,11 @@ struct TabView: View {
                     .layoutPriority(2)
             } else {
                 HStack(spacing: BeamSpacing._40) {
-                    if !isCompactWithAudio || isPinned {
+                    if !isCompactWithTrailingIcon || isPinned {
                         faviconView
                     }
-                    if isCompactWithAudio {
-                        audioView
+                    if isCompactWithTrailingIcon {
+                        mainTrailingIconView
                     }
                 }
             }
@@ -371,7 +399,7 @@ struct TabView: View {
                     trailingViews.padding(.trailing, hPadding).opacity(0)
                 } else if isSingleTab {
                     // make space for the non-active-single hover style
-                    self.trailingViews(shouldShowCopy: true, shouldShowMedia: shouldShowMedia)
+                    self.trailingViews(shouldShowCopy: true, shouldShowTrailingIcon: shouldShowTrailingIcon)
                         .padding(.trailing, hPadding).opacity(0).accessibilityHidden(true)
                 } else {
                     Rectangle().fill(Color.clear)
@@ -405,20 +433,20 @@ struct TabView: View {
                                              tabStyle: true, hueTint: hueTint,
                                              label: { _, _ in Group { } }, action: nil)
                             .overlay(isDragging ? nil : ClickCatchingView(onRightTap: { event in
-                                onTap?(true, event)
+                                onTap(isRightMouse: true, event: event)
                             }))
                             .onTouchDown { down in
-                                if down { onTouchDown?() }
+                                if down { onTouchDown() }
                             }
                             .simultaneousGesture(TapGesture().onEnded {
-                                onTap?(false, nil)
+                                onTap(isRightMouse: false, event: nil)
                             })
                             .accessibilityHidden(true)
                     )
                     .background(!isSingleTab || isDragging ? nil : GeometryReader { prxy in
                         Color.clear.preference(key: TabsListView.SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
                     })
-                    .background(onFileDrop == nil ? nil :
+                    .background(delegate?.tabSupportsFileDrop(tab) != true ? nil :
                             Color.clear.onDrop(of: [UTType.fileURL], delegate: FileDropDelegate(onFileDrop: onFileDrop))
                             .accessibilityElement()
                     )
@@ -434,6 +462,39 @@ struct TabView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }
+}
+
+// MARK: - Delegate forward
+extension TabView {
+
+    func onTouchDown() {
+        delegate?.tabDidTouchDown(tab)
+    }
+
+    func onTap(isRightMouse: Bool, event: NSEvent?) {
+        delegate?.tabDidTap(tab, isRightMouse: isRightMouse, event: event)
+    }
+
+    func onClose() {
+        delegate?.tabWantsToClose(tab)
+    }
+
+    func onCopy() {
+        delegate?.tabWantsToCopy(tab)
+    }
+
+    func onToggleMute(){
+        delegate?.tabDidToggleMute(tab)
+    }
+
+    func onDetach() {
+        delegate?.tabWantsToDetach(tab)
+    }
+
+    func onFileDrop(_ url: URL) {
+        delegate?.tabDidReceiveFileDrop(tab, url: url)
+    }
+    
 }
 
 private struct FileDropDelegate: DropDelegate {

@@ -141,6 +141,7 @@ import BeamCore
     @Published var textSelection: String?
     @Published var pendingContextMenuPayload: ContextMenuMessageHandlerPayload?
     @Published var responseStatusCode: Int = 200
+    @Published var isDetachable: Bool = false
     @Published var mediaPlayerController: MediaPlayerController?
     @Published var hasError: Bool = false {
         didSet {
@@ -895,6 +896,7 @@ extension BrowserTab: WebViewControllerDelegate {
         let isLinkActivation = navigationDescription.isLinkActivation
 
         updateFavIcon(fromWebView: true)
+        isDetachable = state?.videoCallsManager.isEligible(tab: self) == true
         if isLinkActivation {
             pointAndShoot?.leavePage()
         }
