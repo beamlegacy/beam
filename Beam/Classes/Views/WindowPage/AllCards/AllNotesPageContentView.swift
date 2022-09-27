@@ -270,9 +270,6 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             model.setShowDailyNotes(state.showDailyNotes)
             model.refreshAllNotes()
         }
-        .onDisappear {
-            undoManager?.removeAllActions()
-        }
     }
 
     func handleMouseDown(for row: Int, column: TableViewColumn) {
