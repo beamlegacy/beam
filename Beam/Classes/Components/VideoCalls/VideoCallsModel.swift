@@ -15,7 +15,11 @@ protocol VideoCallsClientProtocol {
 }
 
 struct VideoCallsClient {
-    let webView: BeamWebView
+    let browserTab: BrowserTab
+
+    var webView: BeamWebView {
+        return browserTab.webView
+    }
 }
 
 extension VideoCallsClient: VideoCallsClientProtocol {
@@ -85,6 +89,7 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
     @Published private(set) var transitionSnapshot: NSImage?
 
     private(set) var isTransitioning = false
+
     var isShrinked: Bool {
         return states.contains(.shrinked)
     }
@@ -99,6 +104,10 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
 
     var isFullscreen: Bool {
         return states.contains(.fullscreen)
+    }
+
+    var isVisible: Bool {
+        return detailsClient.webView.window?.isVisible ?? false
     }
 
     @Published private(set) var isLoading: Bool = false
@@ -182,11 +191,12 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
 
         NotificationCenter.default
             .publisher(for: NSWindow.didResignKeyNotification)
-            .filter { [weak self] notification in
-                return (notification.object as? VideoCallsPanel) === self?.detailsClient.webView.window
-            }
-            .sink { [weak self] _ in
-                self?.shrink()
+            .compactMap { ($0.object as? VideoCallsPanel) }
+            .filter { [weak self] panel in panel === self?.detailsClient.webView.window }
+            .sink { [weak self] panel in
+                if panel.isVisible {
+                    self?.shrink()
+                }
             }
             .store(in: &cancellables)
     }
@@ -196,7 +206,7 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
     }
 
     func attach() throws {
-        guard let urlRequest = detailsClient.webView.url.map({ URLRequest(url: $0)}) else {
+        guard let request = detailsClient.webView.url.map({ URLRequest(url: $0)}) else {
             throw Error.unableToAttach
         }
         close()
@@ -204,11 +214,11 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
         detailsClient.webView.pageZoom = 1.0
         if AppDelegate.main.windows.isEmpty {
             let window = AppDelegate.main.createWindow(frame: nil, becomeMain: false)
-            window?.state.createTab(withURLRequest: urlRequest, setCurrent: true, loadRequest: false, webView: detailsClient.webView)
+            window?.state.createTab(withURLRequest: request, setCurrent: true, loadRequest: false, webView: detailsClient.webView)
             window?.makeKeyAndOrderFront(nil)
         } else {
             let mainWindow = AppDelegate.main.window ?? AppDelegate.main.windows[0]
-            mainWindow.state.createTab(withURLRequest: urlRequest, setCurrent: true, loadRequest: false, webView: detailsClient.webView)
+            mainWindow.state.createTab(withURLRequest: request, setCurrent: true, loadRequest: false, webView: detailsClient.webView)
             mainWindow.makeKeyAndOrderFront(nil)
         }
     }
