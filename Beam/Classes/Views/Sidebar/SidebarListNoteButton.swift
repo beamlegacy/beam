@@ -17,6 +17,8 @@ struct SidebarListNoteButton: View {
 
     @EnvironmentObject var state: BeamState
 
+    @Environment(\.undoManager) var undoManager
+
     var isSelected = false
     var action: (() -> Void)?
 
@@ -72,7 +74,7 @@ struct SidebarListNoteButton: View {
             if !$0 {
                 isPressed = false
             }
-        }.contextMenu { BeamNote.contextualMenu(for: note, state: state) }
+        }.contextMenu { BeamNote.contextualMenu(for: note, state: state, undoManager: undoManager) }
         .overlay(!isHoveringTrailingIcon ? nil : Tooltip(title: justCopied ? "Link Copied" : "Copy Link", icon: justCopied ? "tool-keep" : nil)
                     .fixedSize()
                     .offset(x: -30, y: 0)

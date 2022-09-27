@@ -10,26 +10,48 @@ import Foundation
 extension BeamTextEdit: NSMenuItemValidation {
     public func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         if menuItem.action == #selector(undo(_:)) {
-            if let undoManager = window?.firstResponder?.undoManager, undoManager.canUndo {
+            func validateCmdManager() -> Bool {
+                guard let rootNode = rootNode, rootNode.focusedCmdManager.canUndo else { return false }
+                menuItem.title = rootNode.focusedCmdManager.undoMenuItemTitle
+                return true
+            }
+            func validateUndoManager() -> Bool {
+                guard let undoManager = window?.firstResponder?.undoManager, undoManager.canUndo else { return false }
                 menuItem.title = undoManager.undoMenuItemTitle
                 return true
             }
-            if let cmdManager = rootNode?.focusedCmdManager, cmdManager.canUndo {
-                menuItem.title = cmdManager.undoMenuItemTitle
+
+            if window?.firstResponder == self {
+                if validateCmdManager() || validateUndoManager() {
+                    return true
+                }
+            } else if validateUndoManager() || validateCmdManager() {
                 return true
             }
+
             menuItem.title = NSLocalizedString("Undo", comment: "Menu Item")
             return false
         }
         if menuItem.action == #selector(redo(_:)) {
-            if let undoManager = window?.firstResponder?.undoManager, undoManager.canRedo {
+            func validateCmdManager() -> Bool {
+                guard let rootNode = rootNode, rootNode.focusedCmdManager.canRedo else { return false }
+                menuItem.title = rootNode.focusedCmdManager.redoMenuItemTitle
+                return true
+            }
+            func validateUndoManager() -> Bool {
+                guard let undoManager = window?.firstResponder?.undoManager, undoManager.canRedo else { return false }
                 menuItem.title = undoManager.redoMenuItemTitle
                 return true
             }
-            if let cmdManager = rootNode?.focusedCmdManager, cmdManager.canRedo {
-                menuItem.title = cmdManager.redoMenuItemTitle
+
+            if window?.firstResponder == self {
+                if validateCmdManager() || validateUndoManager() {
+                    return true
+                }
+            } else if validateUndoManager() || validateCmdManager() {
                 return true
             }
+
             menuItem.title = NSLocalizedString("Redo", comment: "Menu Item")
             return false
         }
