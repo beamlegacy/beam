@@ -1242,23 +1242,47 @@ public extension CALayer {
     // these undo/redo methods override the subviews undoManagers behavior
     // if we're not actually the first responder, let's just forward it.
     @IBAction func undo(_ sender: Any) {
-        guard let rootNode = rootNode, rootNode.note != nil else { return }
-        if let firstResponder = window?.firstResponder, let undoManager = firstResponder.undoManager, firstResponder != self {
-            undoManager.undo()
-            return
+        func undoWithCmdManager() -> Bool {
+            guard let rootNode = rootNode, rootNode.focusedCmdManager.canUndo else { return false }
+            hideInlineFormatter()
+            _ = rootNode.focusedCmdManager.undo(context: rootNode.cmdContext)
+            return true
         }
-        hideInlineFormatter()
-        _ = rootNode.focusedCmdManager.undo(context: rootNode.cmdContext)
+        func undoWithUndoManager() -> Bool {
+            guard let undoManager = window?.firstResponder?.undoManager, undoManager.canUndo else { return false }
+            undoManager.undo()
+            return true
+        }
+
+        let firstResponder = window?.firstResponder
+
+        if (firstResponder == nil || firstResponder == self) {
+            _ = undoWithCmdManager() || undoWithUndoManager()
+        } else {
+            _ = undoWithUndoManager() || undoWithCmdManager()
+        }
     }
 
     @IBAction func redo(_ sender: Any) {
-        guard let rootNode = rootNode else { return }
-        if let firstResponder = window?.firstResponder, let undoManager = firstResponder.undoManager, firstResponder != self {
-            undoManager.redo()
-            return
+        func redoWithCmdManager() -> Bool {
+            guard let rootNode = rootNode, rootNode.focusedCmdManager.canRedo else { return false }
+            hideInlineFormatter()
+            _ = rootNode.focusedCmdManager.redo(context: rootNode.cmdContext)
+            return true
         }
-        hideInlineFormatter()
-        _ = rootNode.focusedCmdManager.redo(context: rootNode.cmdContext)
+        func redoWithUndoManager() -> Bool {
+            guard let undoManager = window?.firstResponder?.undoManager, undoManager.canRedo else { return false }
+            undoManager.redo()
+            return true
+        }
+
+        let firstResponder = window?.firstResponder
+
+        if (firstResponder == nil || firstResponder == self) {
+            _ = redoWithCmdManager() || redoWithUndoManager()
+        } else {
+            _ = redoWithUndoManager() || redoWithCmdManager()
+        }
     }
 
     // MARK: Input detector properties

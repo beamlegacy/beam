@@ -12,6 +12,7 @@ struct CardSwitcher: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var windowInfo: BeamWindowInfo
     @EnvironmentObject var recentsManager: RecentsManager
+    @Environment(\.undoManager) var undoManager
 
     var currentNote: BeamNote?
     @ObservedObject var viewModel: NoteSwitcherViewModel
@@ -99,7 +100,7 @@ struct CardSwitcher: View {
                     }
                     .accessibilityIdentifier("card-switcher")
                     .contextMenu {
-                        BeamNote.contextualMenu(for: element.note, state: state)
+                        BeamNote.contextualMenu(for: element.note, state: state, undoManager: undoManager)
                     }
                 }
             }

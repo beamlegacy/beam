@@ -367,7 +367,7 @@ final class AllNotesPageContextualMenu {
 
 /// Using a separate struct that can be kept in memory by the UndoManager instead of the whole ContextualMenu class
 private class AllNotesMenuUndoRegisterer {
-    let undoManager: UndoManager?
+    let undoManager: UndoManager
     let cmdManager: CommandManagerAsync<BeamDocumentCollection>
     weak var menuDelegate: AllNotesPageContextualMenuDelegate?
 
@@ -382,7 +382,7 @@ private class AllNotesMenuUndoRegisterer {
     func registerUndo(redo: Bool = false, actionName: String) {
         guard let collection = BeamData.shared.currentDocumentCollection else { return }
 
-        undoManager?.registerUndo(withTarget: self, handler: { _ in
+        undoManager.registerUndo(withTarget: self, handler: { _ in
             self.registerUndo(redo: !redo, actionName: actionName)
             let completion: (Bool) -> Void = { _ in
                 self.menuDelegate?.contextualMenuWillUndoRedoDeleteDocuments()
@@ -393,6 +393,6 @@ private class AllNotesMenuUndoRegisterer {
                 self.cmdManager.undoAsync(context: collection, completion: completion)
             }
         })
-        undoManager?.setActionName(actionName)
+        undoManager.setActionName(actionName)
     }
 }

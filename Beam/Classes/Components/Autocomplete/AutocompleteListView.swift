@@ -11,6 +11,7 @@ import BeamCore
 
 struct AutocompleteListView: View {
     @EnvironmentObject var state: BeamState
+    @Environment(\.undoManager) var undoManager
     @Binding var selectedIndex: Int?
     var elements: [AutocompleteResult]
     var loadingElement: AutocompleteResult?
@@ -77,7 +78,7 @@ struct AutocompleteListView: View {
                     }
                     .contextMenu {
                         if let noteId = item.source.noteId {
-                            BeamNote.contextMenu(for: noteId, state: state)
+                            BeamNote.contextMenu(for: noteId, state: state, undoManager: undoManager)
                         }
                     }
             }
