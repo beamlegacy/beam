@@ -18,6 +18,7 @@ struct VideoCallsView: View {
     private let animationDuration: TimeInterval = 0.150
 
     @ObservedObject var viewModel: VideoCallsViewModel
+
     @State private var transitionSnapshot: NSImage?
     @State private var showSnapshot = false
     @State private var isHovering = false
@@ -38,12 +39,8 @@ struct VideoCallsView: View {
         guard !viewModel.isExpanded else { return .clear }
         return .black.opacity(showToolbar ? 0.3 : 0.15)
     }
-    private var shadowRadius: CGFloat {
-        showToolbar ? 17 : 12
-    }
-    private var shadowY: CGFloat {
-        showToolbar ? 10 : 5
-    }
+    private var shadowRadius: CGFloat { showToolbar ? 17 : 12 }
+    private var shadowY: CGFloat { showToolbar ? 10 : 5 }
 
     var body: some View {
         VStack(spacing: .zero) {
@@ -71,7 +68,6 @@ struct VideoCallsView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .opacity(showSnapshot ? 1 : 0)
                     }
-
                 }
                 .cornerRadius(cornerRadius)
                 .overlay(
@@ -96,18 +92,17 @@ struct VideoCallsView: View {
         .edgesIgnoringSafeArea(.all)
         .onChange(of: viewModel.isHovered) { isHovered in
             /// storing local isHovering state to manually animate
-            withAnimation(.easeInOut(duration: 0.15)) {
+            withAnimation(.easeInOut(duration: animationDuration)) {
                 isHovering = isHovered
             }
         }
         .onReceive(viewModel.$transitionSnapshot) { newSnapshot in
             if newSnapshot == nil {
                 // Manually handling the transition from snapshot to webView
-                let duration: TimeInterval = 0.15
-                withAnimation(.easeIn(duration: duration)) {
+                withAnimation(.easeIn(duration: animationDuration)) {
                     showSnapshot = false
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
                     self.transitionSnapshot = nil
                 }
             } else {
@@ -167,7 +162,7 @@ private extension VideoCallsView {
             .onHover { trafficButtonHovered.main = $0 }
             .colorMultiply(trafficButtonHovered.main ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI)
 
-            trafficLight(imageName: "tabs-side-fullscreen") {
+            trafficLight(imageName: viewModel.isFullscreen ? "tabs-side-exit-fullscreen" : "tabs-side-enter-fullscreen") {
                 viewModel.toggleFullscreen()
             }
             .onHover { trafficButtonHovered.fullscreen = $0 }

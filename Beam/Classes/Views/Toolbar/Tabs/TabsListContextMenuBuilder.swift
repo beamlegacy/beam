@@ -167,7 +167,7 @@ extension TabsListContextMenuBuilder {
 
         let videoCallsManager = tab.state?.videoCallsManager
 
-        if videoCallsManager?.isEligible(tab: tab) == true {
+        if let tabURL = tab.url, videoCallsManager?.isEligible(url: tabURL) == true {
             let enableMenu = tab.state?.associatedWindow?.sheets.isEmpty == true
             menu.addItem(withTitle: loc("Move Tab to Side Window"), enabled: enableMenu) { [weak tab, weak videoCallsManager] _ in
                 guard let tab = tab else { return }
