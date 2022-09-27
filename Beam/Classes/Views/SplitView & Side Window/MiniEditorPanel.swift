@@ -8,9 +8,13 @@
 import AppKit
 import BeamCore
 
-class MiniEditorPanel: NSPanel, WindowInfoCapable {
+public final class MiniEditorPanel: NSPanel, WindowInfoCapable {
 
-    let note: BeamNote
+    var note: BeamNote {
+        didSet {
+            setNote(note)
+        }
+    }
     let data: BeamData
     let state: BeamState
     var windowInfo: BeamWindowInfo = BeamWindowInfo()
@@ -57,7 +61,21 @@ class MiniEditorPanel: NSPanel, WindowInfoCapable {
         super.init(contentRect: rect, styleMask: [.titled, .closable, .miniaturizable, .resizable, .unifiedTitleAndToolbar, .fullSizeContentView], backing: .buffered, defer: false)
 
         self.title = note.title
+        self.isReleasedWhenClosed = false
+        self.titlebarAppearsTransparent = true
+        self.titleVisibility = .hidden
 
+        setNote(note)
+        AppDelegate.main.panels[note] = self
+
+        windowInfo.window = self
+        windowInfo.windowFrame = frame
+
+        self.delegate = self
+        self.collectionBehavior = .fullScreenPrimary
+    }
+
+    func setNote(_ note: BeamNote) {
         let mainView = MiniEditor(note: note, window: self)
             .environmentObject(state)
             .environmentObject(data)
@@ -68,17 +86,6 @@ class MiniEditorPanel: NSPanel, WindowInfoCapable {
 
         let hostingView = NSHostingView(rootView: mainView)
         self.contentView = hostingView
-        self.isReleasedWhenClosed = false
-        self.titlebarAppearsTransparent = true
-        self.titleVisibility = .hidden
-
-        AppDelegate.main.panels[note] = self
-
-        windowInfo.window = self
-        windowInfo.windowFrame = frame
-
-        self.delegate = self
-        self.collectionBehavior = .fullScreenPrimary
     }
 
     func reDock() {
@@ -108,16 +115,16 @@ class MiniEditorPanel: NSPanel, WindowInfoCapable {
         self.styleMask.insert(.resizable)
     }
 
-    override var canBecomeKey: Bool {
+    override public var canBecomeKey: Bool {
         return true
     }
 
-    override func mouseDown(with event: NSEvent) {
+    override public func mouseDown(with event: NSEvent) {
         super.mouseDown(with: event)
         isMouseDown = true
     }
 
-    override func mouseUp(with event: NSEvent) {
+    override public func mouseUp(with event: NSEvent) {
         super.mouseUp(with: event)
 
         if isCloseToMainWindow() && wasJustDragged && enableWindowDocking {
@@ -127,7 +134,7 @@ class MiniEditorPanel: NSPanel, WindowInfoCapable {
         isMouseDown = false
     }
 
-    override func close() {
+    override public func close() {
         AppDelegate.main.panels[note] = nil
         super.close()
     }
@@ -143,7 +150,7 @@ class MiniEditorPanel: NSPanel, WindowInfoCapable {
 
 extension MiniEditorPanel: NSWindowDelegate {
 
-    func windowDidResize(_ notification: Notification) {
+    public func windowDidResize(_ notification: Notification) {
         if let parent = parent, windowInfo.windowIsResizing {
             let topLeft = CGPoint(x: parent.frame.origin.x, y: parent.frame.origin.y + parent.frame.height)
             let newParentOrigin = CGPoint(x: topLeft.x, y: topLeft.y - self.frame.height)
@@ -154,7 +161,7 @@ extension MiniEditorPanel: NSWindowDelegate {
         windowInfo.windowFrame = self.frame
     }
 
-    func windowDidMove(_ notification: Notification) {
+    public func windowDidMove(_ notification: Notification) {
         if isCloseToMainWindow() && isMouseDown && PreferencesManager.isHapticFeedbackOn {
             NSHapticFeedbackManager.defaultPerformer.perform(.alignment, performanceTime: .now)
         }
@@ -166,21 +173,21 @@ extension MiniEditorPanel: NSWindowDelegate {
         windowInfo.windowFrame = self.frame
     }
 
-    func windowWillMove(_ notification: Notification) {
+    public func windowWillMove(_ notification: Notification) {
         if isMouseDown {
             wasJustDragged = true
         }
     }
 
-    func windowWillStartLiveResize(_ notification: Notification) {
+    public func windowWillStartLiveResize(_ notification: Notification) {
         self.windowInfo.windowIsResizing = true
     }
 
-    func windowDidEndLiveResize(_ notification: Notification) {
+    public func windowDidEndLiveResize(_ notification: Notification) {
         self.windowInfo.windowIsResizing = false
     }
 
-    func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
+    public func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
         let minSize = AppDelegate.defaultWindowMinimumSize
         return CGSize(width: max(frameSize.width, Self.minimumPanelWidth), height: max(frameSize.height, minSize.height + 51))
     }
@@ -189,7 +196,7 @@ extension MiniEditorPanel: NSWindowDelegate {
 import SwiftUI
 struct MiniEditor: View {
 
-    let note: BeamNote
+    @ObservedObject var note: BeamNote
     weak var window: MiniEditorPanel?
 
     @EnvironmentObject var state: BeamState
@@ -208,7 +215,7 @@ struct MiniEditor: View {
     var body: some View {
         ZStack(alignment: .top) {
             GeometryReader { proxy in
-                NoteView(note: note, isInMiniEditor: true, containerGeometry: proxy, topInset: 0, leadingPercentage: PreferencesManager.editorLeadingPercentage, centerText: false) { offset in
+                NoteView(note: note, editorType: editorType , containerGeometry: proxy, topInset: 0, leadingPercentage: PreferencesManager.editorLeadingPercentage, centerText: false) { offset in
                     showTitle = offset.y > titleHideVerticalOffset ? true : false
                     let isScrolled = offset.y > NoteView.topSpacingBeforeTitle - toolbarHeight
                     contentIsScrolled = isScrolled
@@ -251,6 +258,14 @@ struct MiniEditor: View {
                 .font(isInWindow ? Font.system(size: 13, weight: .bold, design: .default) : BeamFont.regular(size: 11).swiftUI)
                 .foregroundColor(BeamColor.Niobium.swiftUI)
                 .frame(maxWidth: width - 150)
+        }
+    }
+
+    private var editorType: EditorType {
+        if let window = window {
+            return .panel(window)
+        } else {
+            return .splitView
         }
     }
 
