@@ -19,7 +19,7 @@ struct NoteView: View {
     }
 
     var note: BeamNote
-    var isInMiniEditor = false
+    var editorType = EditorType.main
     var containerGeometry: GeometryProxy
     var onStartEditing: (() -> Void)?
     var topInset: CGFloat
@@ -59,12 +59,9 @@ struct NoteView: View {
                 openURL: { url, element, inBackground in
                     state.handleOpenURLFromNote(url, note: note, element: element, inBackground: inBackground)
                 },
-                openNote: { [weak state] noteId, elementId, unfold, inSplitView in
-                    if inSplitView == true {
-                        state?.openNoteInSplitView(id: noteId)
-                    } else {
-                        state?.navigateToNote(id: noteId, elementId: elementId, unfold: unfold ?? false)
-                    }
+                openNote: { [weak state] noteId, elementId, unfold, inOtherView in
+                    let editor = inOtherView == true ? editorType.alternate : editorType
+                    state?.navigateToNote(id: noteId, in: editor, elementId: elementId, unfold: unfold ?? false)
                 },
                 startQuery: { textNode, animated in
                     state.startQuery(textNode, animated: animated)
@@ -90,7 +87,7 @@ struct NoteView: View {
                 showTitle: false,
                 initialFocusedState: initialFocusedState,
                 initialScrollOffset: state.lastScrollOffset[note.id],
-                isInMiniEditor: isInMiniEditor,
+                editorType: editorType,
                 headerView: {
                     HeaderViewContainer(layoutModel: headerLayoutModel, headerViewModel: headerViewModel)
                         .frame(height: topOffset)
