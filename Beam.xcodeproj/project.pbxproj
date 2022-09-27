@@ -489,6 +489,7 @@
 		6615797228CB828100904C24 /* VideoCallsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6615796B28CB828000904C24 /* VideoCallsManager.swift */; };
 		6615797428CB83CA00904C24 /* Combine+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6615797328CB83CA00904C24 /* Combine+Beam.swift */; };
 		6615797628CBC1EA00904C24 /* VideoCallsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6615797528CBC1EA00904C24 /* VideoCallsTests.swift */; };
+		662E0ECD28DC9A8B00986C2C /* ContextMenuMessageHandlerPayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 662E0EC728DC9A8B00986C2C /* ContextMenuMessageHandlerPayloadTests.swift */; };
 		6633BA5E283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6633BA5D283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift */; };
 		6635D9832853E73A00F4B775 /* BeamWebContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */; };
 		6635D9842853E73A00F4B775 /* ContextMenuMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */; };
@@ -2197,6 +2198,7 @@
 		6615796B28CB828000904C24 /* VideoCallsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoCallsManager.swift; sourceTree = "<group>"; };
 		6615797328CB83CA00904C24 /* Combine+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Combine+Beam.swift"; sourceTree = "<group>"; };
 		6615797528CBC1EA00904C24 /* VideoCallsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCallsTests.swift; sourceTree = "<group>"; };
+		662E0EC728DC9A8B00986C2C /* ContextMenuMessageHandlerPayloadTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextMenuMessageHandlerPayloadTests.swift; sourceTree = "<group>"; };
 		6633BA5D283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseOverAndSelectionMessageHandlerTests.swift; sourceTree = "<group>"; };
 		6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebContextMenu.swift; sourceTree = "<group>"; };
 		6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextMenuMessageHandler.swift; sourceTree = "<group>"; };
@@ -6786,6 +6788,7 @@
 				666DE4E6289DA5C7008CB8E0 /* MarkdownExportTests.swift */,
 				669E244728BE1A5A002DEF82 /* MarkdownImportTests.swift */,
 				6615797528CBC1EA00904C24 /* VideoCallsTests.swift */,
+				662E0EC728DC9A8B00986C2C /* ContextMenuMessageHandlerPayloadTests.swift */,
 			);
 			path = BeamTests;
 			sourceTree = "<group>";
@@ -9962,6 +9965,7 @@
 				BF19CC0A287F10390048D9D0 /* FeatureFlagsTest.swift in Sources */,
 				DA3A84C52805DCCD00092200 /* NoteDailySummaryTest.swift in Sources */,
 				032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */,
+				662E0ECD28DC9A8B00986C2C /* ContextMenuMessageHandlerPayloadTests.swift in Sources */,
 				A50612DF26CC75C70053AD37 /* Calendar+AdditionsTests.swift in Sources */,
 				057E9FCA28408C8800FEF477 /* RestAPIserverTests.swift in Sources */,
 				527524EB26A1A9E100C2F385 /* BeamObjectTestsHelper.swift in Sources */,
