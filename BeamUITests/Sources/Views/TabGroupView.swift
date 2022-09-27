@@ -175,7 +175,7 @@ class TabGroupView: BaseView {
     }
     
     func isMatchingFullURL(_ URLtoMatch: String) -> Bool {
-        let regex = try! NSRegularExpression(pattern: "https://" + BaseTest().stagingEnvironmentServerAddress + "/.*/tabgroup/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.*")
+        let regex = try! NSRegularExpression(pattern: "https://(" + BaseTest().tempURLToRedirectedReactNativeApp + "|" + BaseTest().stagingEnvironmentServerAddress + ")/.*/tabgroup/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.*")
         let range = NSRange(location: 0, length: URLtoMatch.utf16.count)
         return regex.firstMatch(in: URLtoMatch, options: [], range: range) != nil
     }
