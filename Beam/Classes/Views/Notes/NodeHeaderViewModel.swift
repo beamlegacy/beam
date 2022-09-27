@@ -278,9 +278,9 @@ extension NoteHeaderView {
         }
 
         // MARK: Delete
-        func deleteNote() {
+        func deleteNote(undoManager: UndoManager?) {
             guard let note = note, let state = state else { return }
-            note.promptConfirmDelete(for: state)
+            note.promptConfirmDelete(state: state, undoManager: undoManager)
         }
 
         // MARK: - Pin note
