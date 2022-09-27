@@ -16,13 +16,19 @@ extension BeamNote {
         case export
     }
 
-    @ViewBuilder static func contextMenu(for noteId: UUID, state: BeamState, sections: Set<NoteContextualMenuSections> = [.open, .actions, .export]) -> some View {
+    @ViewBuilder static func contextMenu(for noteId: UUID,
+                                         state: BeamState,
+                                         undoManager: UndoManager?,
+                                         sections: Set<NoteContextualMenuSections> = [.open, .actions, .export]) -> some View {
         if let note = fetch(id: noteId) {
-            contextualMenu(for: note, state: state, sections: sections)
+            contextualMenu(for: note, state: state, undoManager: undoManager, sections: sections)
         }
     }
 
-    @ViewBuilder static func contextualMenu(for note: BeamNote, state: BeamState, sections: Set<NoteContextualMenuSections> = [.open, .actions, .export]) -> some View {
+    @ViewBuilder static func contextualMenu(for note: BeamNote,
+                                            state: BeamState,
+                                            undoManager: UndoManager?,
+                                            sections: Set<NoteContextualMenuSections> = [.open, .actions, .export]) -> some View {
         if sections.contains(.open) {
             Group {
                 Button("Open in New Window") {
@@ -63,7 +69,7 @@ extension BeamNote {
             }
             Divider()
             Button("Delete…") {
-                note.promptConfirmDelete(for: state)
+                note.promptConfirmDelete(state: state, undoManager: undoManager)
             }
         }
     }
