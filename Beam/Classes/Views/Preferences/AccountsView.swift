@@ -52,10 +52,11 @@ struct AccountsView: View {
     @State private var testAccountIsHover = false
     @State private var testAccountIsCopied = false
 
+    @State private var fullSyncRunning = false
+
     @ObservedObject var viewModel: AccountsViewModel
 
     private let contentWidth: Double = PreferencesManager.contentWidth
-    private let checkboxHelper = NSButtonCheckboxHelper()
 
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {
@@ -207,6 +208,10 @@ struct AccountsView: View {
                 .frame(width: 146, height: 20, alignment: .center)
                 .padding(.top, -4)
         })
+        .sheet(isPresented: $fullSyncRunning) {
+            ProgressView("Syncing data…")
+                .padding()
+        }
     }
 
     private var EncryptionKeyView: some View {
@@ -323,32 +328,38 @@ struct AccountsView: View {
 
     private func promptLogoutAlert() {
         let alert = NSAlert()
-        alert.messageText = "Are you sure you want to sign out?"
-        let customView = NSView(frame: NSRect(x: 0, y: 0, width: 252, height: 16))
-        let checkBox = NSButton(checkboxWithTitle: "Delete all data on this device", target: self.checkboxHelper, action: #selector(self.checkboxHelper.checkboxClicked))
+        alert.messageText = loc("Are you sure you want to sign out?", comment: "Alert Message")
+        let checkBox = NSButton(checkboxWithTitle: loc("Delete all data on this device", comment: "Alert Button"),
+                                target: nil,
+                                action: nil)
         checkBox.state = .on
-        self.checkboxHelper.isOn = checkBox.state == .on
-        checkBox.frame.origin = CGPoint(x: 0, y: 0)
         checkBox.font = BeamFont.regular(size: 12).nsFont
-        customView.addSubview(checkBox)
-        checkBox.frame.origin = CGPoint(x: customView.frame.width / 2 - checkBox.fittingSize.width / 2, y: 0)
-        alert.accessoryView = customView
-        alert.addButton(withTitle: "Sign Out")
-        alert.addButton(withTitle: "Cancel")
+        alert.accessoryView = checkBox
+        alert.addButton(withTitle: loc("Sign Out", comment: "Alert Button"))
+        alert.addButton(withTitle: loc("Cancel", comment: "Alert Button"))
         alert.alertStyle = .warning
         guard let window = AppDelegate.main.settingsWindowController.window else { return }
         alert.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else { return }
-            if self.checkboxHelper.isOn {
+            if checkBox.state == .on {
                 for window in AppDelegate.main.windows {
                     window.state.closeAllTabs(closePinnedTabs: true)
                 }
             }
-            AuthenticationManager.shared.account?.logout()
-            if self.checkboxHelper.isOn {
-                AppDelegate.main.deleteAllLocalData()
+            fullSyncRunning = true
+
+            Task { @MainActor in
+                _ = try? await AppDelegate.main.syncDataWithBeamObject(force: true)
+
+                fullSyncRunning = false
+
+                AuthenticationManager.shared.account?.logout()
+
+                if checkBox.state == .on {
+                    AppDelegate.main.deleteAllLocalData()
+                }
+                viewModel.isloggedIn = AuthenticationManager.shared.isLoggedIn
             }
-            viewModel.isloggedIn = AuthenticationManager.shared.isLoggedIn
         }
     }
 
