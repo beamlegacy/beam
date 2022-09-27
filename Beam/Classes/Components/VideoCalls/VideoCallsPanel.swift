@@ -58,6 +58,7 @@ final class VideoCallsPanel: SimpleClearHostingPanel {
 
         titleCancellable = viewModel
             .$title
+            .filter(\.isEmpty)
             .assign(to: \.title, onWeak: self)
 
         eventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseUp, .leftMouseDragged]) { [weak self, weak viewModel] event in

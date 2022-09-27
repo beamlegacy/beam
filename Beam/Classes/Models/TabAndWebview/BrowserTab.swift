@@ -499,7 +499,11 @@ import BeamCore
                     let response = alert.runModal()
                     let shouldAutoJoin = response == .alertFirstButtonReturn
                     if shouldAutoJoin {
-                        self.state?.videoCallsManager.autoJoinMeeting(meeting, faviconProvider: self.data.faviconProvider)
+                        do {
+                            try self.state?.videoCallsManager.autoJoinMeeting(meeting, faviconProvider: self.data.faviconProvider)
+                        } catch {
+                            UserAlert.showError(error: error)
+                        }
                     }
                     // don't forget to call completionHandler
                     completionHandler()
@@ -514,6 +518,22 @@ import BeamCore
         }
     }
 
+    func openAsSideWindowIfEligible(request: URLRequest) -> Bool {
+        guard let manager = state?.videoCallsManager else { return false }
+        let currentURLIsNotEligible = !manager.isEligible(tab: self)
+        let requestIsEligible = request.url.map { manager.isEligible(url: $0) } ?? false
+        guard PreferencesManager.videoCallsAlwaysInSideWindow, requestIsEligible, currentURLIsNotEligible else { return false }
+        do {
+            try manager.start(with: request, faviconProvider: data.faviconProvider, bounceIfExistingSession: false)
+            return true
+        } catch let err as VideoCallsManager.Error {
+            Logger.shared.logInfo("Could not open video call link \(err)", category: .general)
+        } catch {
+            Logger.shared.logError("An error occured when opening video call link", category: .general)
+        }
+        return false
+    }
+
     /// Loads a request to webView.
     /// - Parameters:
     ///   - request: the request to load.
@@ -522,16 +542,8 @@ import BeamCore
     public func load(request: URLRequest, entirely: Bool = true) {
         guard let url = request.url else { return }
 
-        if PreferencesManager.videoCallsAlwaysInSideWindow, state?.videoCallsManager.isEligible(tab: self) == true {
-            do {
-                try state?.videoCallsManager.start(with: request, faviconProvider: data.faviconProvider, bounceIfExistingSession: false)
-                // If it succeeds, let's return!
-                return
-            } catch let err as VideoCallsManager.Error {
-                Logger.shared.logInfo("Could not open video call link \(err)", category: .general)
-            } catch {
-                Logger.shared.logError("An error occured when opening video call link", category: .general)
-            }
+        if entirely, openAsSideWindowIfEligible(request: request) {
+            return
         }
 
         hasError = false
