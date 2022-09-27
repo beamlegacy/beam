@@ -199,10 +199,17 @@ extension BeamTextEdit {
 
             if focusedWidget is CodeNode {
                 guard let firstObject = objects?.first else { return }
-                guard let string = (firstObject as? NSAttributedString)?.string ?? (firstObject as? String) else { return }
-
-                let attrString = NSAttributedString(string: removeExtraneousIndentation(string))
-                paste(attributedStrings: [attrString], fromRawPaste: true)
+                if let bTextHolder: BeamTextHolder = objects?.first as? BeamTextHolder {
+                    paste(beamTextHolder: bTextHolder, fromRawPaste: true)
+                } else if let fileURL = objects?.first as? NSURL {
+                    if let string = fileURL.absoluteString {
+                        let attrString = NSAttributedString(string: string)
+                        paste(attributedStrings: [attrString], fromRawPaste: true)
+                    }
+                } else if let string = (firstObject as? NSAttributedString)?.string ?? (firstObject as? String) {
+                    let attrString = NSAttributedString(string: removeExtraneousIndentation(string))
+                    paste(attributedStrings: [attrString], fromRawPaste: true)
+                }
                 return
             }
 
