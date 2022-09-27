@@ -123,7 +123,8 @@ class RightClickTabMenuTests: BaseTest {
         }
     }
     
-    func testMoveTabToSideWindowAndCloseConferenceDialog() {
+    func testMoveTabToSideWindowAndCloseConferenceDialog() throws {
+        try XCTSkipIf(isBigSurOS(), "not running on BigSur for meet behavior")
         testrailId("C1187")
         let meetingId = "rox-yfpc-yqi"
         var conferenceDialog: XCUIElement!
