@@ -17,7 +17,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     var note: BeamNote
     var state: BeamState
     var openURL: (URL, BeamElement, _ inBackground: Bool) -> Void
-    var openNote: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?, _ inSplitView: Bool?) -> Void
+    var openNote: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?, _ inOtherView: Bool?) -> Void
     var startQuery: (TextNode, Bool) -> Void = { _, _ in }
 
     var onStartEditing: () -> Void = { }
@@ -36,7 +36,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     var showTitle = true
     var initialFocusedState: NoteEditFocusedState?
     var initialScrollOffset: CGFloat?
-    var isInMiniEditor: Bool = false
+    let editorType: EditorType
 
     var headerView: () -> Content
 
@@ -47,7 +47,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     }
 
     public func makeNSView(context: Context) -> NSViewType {
-        let edit = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: initialScrollOffset == nil, state: state, isInMiniEditor: isInMiniEditor)
+        let edit = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: initialScrollOffset == nil, state: state, editorType: editorType)
 
         edit.initialScrollOffset = initialScrollOffset
         updateEditorProperties(edit, context: context)
