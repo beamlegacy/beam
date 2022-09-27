@@ -17,6 +17,7 @@ struct NoteHeaderView: View {
     @ObservedObject var pinnedManager: PinnedNotesManager
     @EnvironmentObject var data: BeamData
     @EnvironmentObject var windowInfo: BeamWindowInfo
+    @Environment(\.undoManager) var undoManager
 
     var topPadding: CGFloat = Self.topPadding
     private let errorColor = BeamColor.Shiraz
@@ -142,8 +143,10 @@ struct NoteHeaderView: View {
             //            ButtonLabel(icon: "editor-sources", state: .disabled)
             Separator(horizontal: false, hairline: false, rounded: true, color: BeamColor.Generic.separator)
                 .frame(height: 16)
-            AnimatedActionButton(iconName: "editor-delete", lottieName: "editor-delete", disable: model.note?.isTodaysNote ?? false, action: model.deleteNote)
-                .offset(x: 0, y: -1) // alignment adjustment for the eye
+            AnimatedActionButton(iconName: "editor-delete", lottieName: "editor-delete", disable: model.note?.isTodaysNote ?? false) {
+                model.deleteNote(undoManager: undoManager)
+            }
+            .offset(x: 0, y: -1) // alignment adjustment for the eye
         }
     }
 
