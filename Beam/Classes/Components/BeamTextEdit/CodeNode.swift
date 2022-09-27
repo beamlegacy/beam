@@ -100,10 +100,6 @@ final class CodeNode: TextNode, Collapsible {
         layoutToggleButton()
     }
 
-    override func updateRendering() -> CGFloat {
-        return super.updateRendering() - 6
-    }
-
     override var frontmostHover: Bool {
         didSet {
             toggleButtonBeamLayer?.layer.isHidden = !isCollapsed && !frontmostHover
