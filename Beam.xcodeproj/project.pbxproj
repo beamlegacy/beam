@@ -136,6 +136,7 @@
 		3343794327037578004EF5A4 /* BeamWindow+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3343794227037578004EF5A4 /* BeamWindow+Search.swift */; };
 		3344A9BD28D8C84A00A35AD1 /* NoteSwitcherViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3344A9BC28D8C84A00A35AD1 /* NoteSwitcherViewModel.swift */; };
 		334559B02800729200B4BF57 /* OmniboxIncognitoExplanation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 334559AF2800729200B4BF57 /* OmniboxIncognitoExplanation.swift */; };
+		3349581228E2FD1B005D5A1D /* EditorType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3349581128E2FD1B005D5A1D /* EditorType.swift */; };
 		33551D2727FC6F4600598164 /* nav-pivot_incognito.json in Resources */ = {isa = PBXBuildFile; fileRef = 33551D2127FC6F4600598164 /* nav-pivot_incognito.json */; };
 		33551D3E27FE2B0E00598164 /* CookiesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33551D3D27FE2B0E00598164 /* CookiesManager.swift */; };
 		33551D6327FF74AE00598164 /* IncognitoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33551D6227FF74AD00598164 /* IncognitoTests.swift */; };
@@ -1818,6 +1819,7 @@
 		3343794227037578004EF5A4 /* BeamWindow+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWindow+Search.swift"; sourceTree = "<group>"; };
 		3344A9BC28D8C84A00A35AD1 /* NoteSwitcherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSwitcherViewModel.swift; sourceTree = "<group>"; };
 		334559AF2800729200B4BF57 /* OmniboxIncognitoExplanation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxIncognitoExplanation.swift; sourceTree = "<group>"; };
+		3349581128E2FD1B005D5A1D /* EditorType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorType.swift; sourceTree = "<group>"; };
 		33551D2127FC6F4600598164 /* nav-pivot_incognito.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "nav-pivot_incognito.json"; sourceTree = "<group>"; };
 		33551D3D27FE2B0E00598164 /* CookiesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookiesManager.swift; sourceTree = "<group>"; };
 		33551D6227FF74AD00598164 /* IncognitoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncognitoTests.swift; sourceTree = "<group>"; };
@@ -4512,6 +4514,7 @@
 				96C9AAB82593BB67007D3D98 /* Widget.swift */,
 				418171B92581107C00317ED8 /* TextNode.swift */,
 				9691E3D725AD9F3300A13080 /* TextRoot.swift */,
+				3349581128E2FD1B005D5A1D /* EditorType.swift */,
 				418171BF2581107C00317ED8 /* BeamTextEdit.swift */,
 				A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */,
 				4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */,
@@ -9173,6 +9176,7 @@
 				A0F49B3A28293C4B00D75330 /* SocialShareContextMenu.swift in Sources */,
 				37C413172785529300954FD7 /* DuckDuckGo.swift in Sources */,
 				37278A4C27EDB3FF00D495FD /* EmbedProvider.swift in Sources */,
+				3349581228E2FD1B005D5A1D /* EditorType.swift in Sources */,
 				A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */,
 				A5946826265D29350044A892 /* CGPath+Union.swift in Sources */,
 				418172522581107C00317ED8 /* OmniboxSearchField.swift in Sources */,

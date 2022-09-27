@@ -58,7 +58,7 @@ public extension CALayer {
 
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var data: BeamData?
-    var isInMiniEditor: Bool
+    let editorType: EditorType
     public private(set) weak var state: BeamState?
 
     var cardTopSpace: CGFloat {
@@ -207,13 +207,13 @@ public extension CALayer {
     public override var wantsUpdateLayer: Bool { true }
     internal var scope = Set<AnyCancellable>()
 
-    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool, frame: CGRect? = nil, state: BeamState? = nil, isInMiniEditor: Bool = false) {
+    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool, frame: CGRect? = nil, state: BeamState? = nil, editorType: EditorType = .main) {
         self.enableDelayedInit = enableDelayedInit
         self.delayedInit = enableDelayedInit
         self.journalMode = journalMode
         self.state = state
         self.data = state?.data ?? BeamData.shared
-        self.isInMiniEditor = isInMiniEditor
+        self.editorType = editorType
 
         note = root
 
@@ -649,7 +649,7 @@ public extension CALayer {
         rootNode.availableWidth = textNodeWidth
         let noteHeight = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
         let leadingGutterHeight = leadingGutterSize.height + topOffsetActual + footerHeight + cardTopSpace + cardHeaderPosY
-        let minWidth = isInMiniEditor ?  MiniEditorPanel.minimumPanelWidth : AppDelegate.minimumSize(for: window).width
+        let minWidth = editorType.isMiniEditor ?  MiniEditorPanel.minimumPanelWidth : AppDelegate.minimumSize(for: window).width
         realContentSize = NSSize(width: max(minWidth, textNodeWidth), height: max(noteHeight, leadingGutterHeight))
         safeContentSize = realContentSize
         if !journalMode {
