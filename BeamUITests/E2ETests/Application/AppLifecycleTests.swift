@@ -88,9 +88,9 @@ class AppLifecycleTests: BaseTest {
             XCTAssertEqual(getNumberOfWindows(), 2)
             _ = windowMenu.windowMenu().menuItem("Beam").firstMatch.hoverAndTapInTheMiddle()
             shortcutHelper.shortcutActionInvoke(action: .closeWindow)
-            XCTAssertEqual(getNumberOfWindows(), 1)
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 1, elementQuery: getWindowsQuery()))
             shortcutHelper.shortcutActionInvoke(action: .closeWindow)
-            XCTAssertEqual(getNumberOfWindows(), 0)
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 0, elementQuery: getWindowsQuery()))
         }
 
         step("THEN I restore the last session manually via the menu item") {
