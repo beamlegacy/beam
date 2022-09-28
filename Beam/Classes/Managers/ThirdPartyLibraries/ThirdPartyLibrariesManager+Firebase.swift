@@ -55,7 +55,7 @@ extension ThirdPartyLibrariesManager {
         // see https://github.com/firebase/quickstart-ios/issues/75#issuecomment-312556370
         // Use -FIRAnalyticsDebugEnabled scheme argument to see changes in debug view.
 
-        guard Configuration.env != .test else {
+        guard Configuration.env != .test, Configuration.env != .uiTest else {
             // Disabling Firebase for tests build because it would require another setup (different bundle id)
             return
         }
