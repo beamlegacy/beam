@@ -101,11 +101,11 @@ class BrowserTabsPreferencesTests: BaseTest {
         }
         
         step("WHEN I open multiple time the same tab") {
-            uiMenu.invoke(.loadUITestPage1)
-                .invoke(.loadUITestPage1)
+            uiMenu.invoke(.loadUITestPage2)
+                .invoke(.loadUITestPage2)
             webView.waitForWebViewToLoad()
         }
-        
+
         step("THEN tab group is automatically created") {
             XCTAssertFalse(tabGroupView.isTabGroupDisplayed(index: 0))
         }

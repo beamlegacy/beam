@@ -353,7 +353,6 @@
 		41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */; };
 		4E0556E127B4004E00B4A42F /* TabGroupingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0556E027B4004E00B4A42F /* TabGroupingManager.swift */; };
 		4E15C19227B583A100E3DD0D /* TabGroupingManagerOpenPageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E15C19127B583A100E3DD0D /* TabGroupingManagerOpenPageTests.swift */; };
-		4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6097A326CE8A6F00F90260 /* ActiveSources.swift */; };
 		4E9F4C8326F8C75D00420DED /* ClusteringManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9F4C8226F8C75D00420DED /* ClusteringManagerTests.swift */; };
 		520088B82613265900AED835 /* Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088B72613265900AED835 /* Database.swift */; };
 		520088BC2613266600AED835 /* Database+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520088BB2613266600AED835 /* Database+CoreDataProperties.swift */; };
@@ -2051,7 +2050,6 @@
 		41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+Animation.swift"; sourceTree = "<group>"; };
 		4E0556E027B4004E00B4A42F /* TabGroupingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingManager.swift; sourceTree = "<group>"; };
 		4E15C19127B583A100E3DD0D /* TabGroupingManagerOpenPageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingManagerOpenPageTests.swift; sourceTree = "<group>"; };
-		4E6097A326CE8A6F00F90260 /* ActiveSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSources.swift; sourceTree = "<group>"; };
 		4E9F4C8226F8C75D00420DED /* ClusteringManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringManagerTests.swift; sourceTree = "<group>"; };
 		520088B72613265900AED835 /* Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Database.swift; sourceTree = "<group>"; };
 		520088BB2613266600AED835 /* Database+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -6613,7 +6611,6 @@
 			isa = PBXGroup;
 			children = (
 				05EBF2042845417F000889F0 /* ThreeWayMerge */,
-				4E6097A326CE8A6F00F90260 /* ActiveSources.swift */,
 				96F93617258CFDD2006D8E53 /* BeamText.swift */,
 				8ABC6518274FD7230068166E /* SourceMetadata.swift */,
 				418171702581107C00317ED8 /* BeamElement.swift */,
@@ -9020,7 +9017,6 @@
 				96319D3A2616233E00D1CF31 /* CommandManager.swift in Sources */,
 				DAF063F127D122D2000406DE /* Date+DayTruncated.swift in Sources */,
 				969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */,
-				4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */,
 				05EBF208284541ED000889F0 /* Dictionary.swift in Sources */,
 				37B85B4527A2C21D003871F9 /* URL+AvailableFileURL.swift in Sources */,
 				DA8D947F27FF17D90073AD2D /* NoteScores.swift in Sources */,
@@ -12469,7 +12465,7 @@
 			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
 			requirement = {
 				kind = revision;
-				revision = 1f33513fa7fb770c023466f458af54d440eff116;
+				revision = 33469030542dd936641179d9c104cb4cd92b2f05;
 			};
 		};
 		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
