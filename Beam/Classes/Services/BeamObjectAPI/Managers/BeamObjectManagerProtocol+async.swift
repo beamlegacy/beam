@@ -272,8 +272,7 @@ extension BeamObjectManagerDelegate {
         return newObject
     }
 
-    internal func manageInvalidChecksum(_ error: Error,
-                                        deep: Int) async throws -> [BeamObjectType] {
+    internal func manageInvalidChecksum(_ error: Error, deep: Int) async throws -> [BeamObjectType] {
         // Early return except for checksum issues.
         guard case BeamObjectManagerObjectError<BeamObjectType>.invalidChecksum(let conflictedObjects,
                                                                                 let goodObjects,
@@ -287,6 +286,10 @@ extension BeamObjectManagerDelegate {
             if let remoteObject = remoteObjects.first(where: { $0.beamObjectId == conflictedObject.beamObjectId }) {
                 let mergedObject = try manageConflict(conflictedObject, remoteObject)
                 mergedObjects.append(mergedObject)
+
+                if BeamObjectType.self != BeamDocument.self {
+                    try BeamObjectChecksum.savePreviousChecksum(object: remoteObject)
+                }
             } else {
                 // The remote object doesn't exist, we can just resend it without a `previousChecksum` to create it
                 // server-side
@@ -348,6 +351,7 @@ extension BeamObjectManagerDelegate {
             return objects
         }
         if !objects.isEmpty {
+            Logger.shared.logDebug("syncAllFromAPI: saving \(objects.count) changed objects.", category: .sync)
             try await saveOnBeamObjectsAPI(objects)
         }
     }
