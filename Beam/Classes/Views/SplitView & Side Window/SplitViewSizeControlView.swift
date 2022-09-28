@@ -16,7 +16,7 @@ struct SplitViewSizeControlView: View {
         HStack {
             SplitViewButtonView(iconName: "side-split_onethird") {
                 guard let width = state?.associatedWindow?.frame.width else { return }
-                setWidth(width / 3)
+                setWidth(width / 3 * 2)
             }.frame(maxWidth: .infinity)
             SplitViewButtonView(iconName: "side-split_equal") {
                 guard let width = state?.associatedWindow?.frame.width else { return }
@@ -24,7 +24,7 @@ struct SplitViewSizeControlView: View {
             }.frame(maxWidth: .infinity)
             SplitViewButtonView(iconName: "side-split_thirdone") {
                 guard let width = state?.associatedWindow?.frame.width else { return }
-                setWidth(width / 3 * 2)
+                setWidth(width / 3)
             }.frame(maxWidth: .infinity)
         }
         .padding(.horizontal, 2)
@@ -32,8 +32,9 @@ struct SplitViewSizeControlView: View {
     }
 
     private func setWidth(_ width: CGFloat) {
+        guard let state = state else { return }
         withAnimation {
-            state?.sideNoteWidth = width
+            state.sideNoteWidth = width.clamp(440, state.maxWidthForSplitView)
         }
         closeAction?()
     }
