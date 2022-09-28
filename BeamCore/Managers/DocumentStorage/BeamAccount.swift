@@ -419,7 +419,8 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     // MARK: - Database
     @MainActor
     func syncDataWithBeamObject(force: Bool = false, showAlert: Bool = true) async throws -> Bool {
-        guard Configuration.env != .test,
+        let isRunningUnitTests = Configuration.env == .test && !ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument)
+        guard !isRunningUnitTests,
               AuthenticationManager.shared.isAuthenticated,
               NetworkMonitor.isNetworkAvailable else {
             return false

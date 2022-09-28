@@ -80,7 +80,7 @@ class OnboardingManager: ObservableObject {
     init(onlyImport: Bool = false, analyticsCollector: AnalyticsCollector? = nil) {
         self.analyticsCollector = analyticsCollector
 
-        let needsToDisplayOnboard = Configuration.env != .test && Persistence.Authentication.hasSeenOnboarding != true
+        let needsToDisplayOnboard = Configuration.env != .test && Configuration.env != .uiTest && Persistence.Authentication.hasSeenOnboarding != true
         var step: OnboardingStep?
         if needsToDisplayOnboard {
             if AuthenticationManager.shared.isAuthenticated {

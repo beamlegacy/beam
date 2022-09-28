@@ -68,9 +68,15 @@ class OnboardingLandingTestView: BaseView {
         return self
     }
     
+    
+    @discardableResult
+    func getGoogleAuthButton() -> XCUIElement {
+        return button(OnboardingLandingViewLocators.Buttons.continueWithGoogleButton.accessibilityIdentifier)
+    }
+    
     @discardableResult
     func clickContinueWithGoogleButton() -> OnboardingLandingTestView {
-        button(OnboardingLandingViewLocators.Buttons.continueWithGoogleButton.accessibilityIdentifier).clickOnExistence()
+        getGoogleAuthButton().clickOnExistence()
         return self
     }
     
@@ -98,6 +104,7 @@ class OnboardingLandingTestView: BaseView {
         return waitFor(PredicateFormat.isHittable.rawValue, getConnectWithEmailButton(), minimumWaitTimeout)  
     }
     
+    @discardableResult
     func waitForLandingViewToLoad() -> Bool {
         return staticText(OnboardingLandingViewLocators.StaticTexts.onboardingWelcomeTitle.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
     }

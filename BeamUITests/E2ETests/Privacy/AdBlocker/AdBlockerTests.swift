@@ -19,8 +19,7 @@ class AdBlockerTests: BaseTest {
 
     override func setUp() {
         super.setUp()
-        uiMenu.invoke(.destroyDB)
-            .invoke(.startMockHttpServer)
+        uiMenu.invoke(.startMockHttpServer)
     }
     
     private func verifyWebsiteIsBlocked(index: Int, url: String, hostUrl: String) {

@@ -78,7 +78,7 @@ extension PreferencesManager {
     @UserDefault(key: enableTabGroupingKey, defaultValue: enableTabGroupingDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var enableTabGrouping: Bool
     static var enableTabGroupingFeedback: Bool {
-        Configuration.branchType == .develop && Configuration.env != .test && enableTabGrouping
+        Configuration.branchType == .develop && Configuration.env != .test && Configuration.env != .uiTest && enableTabGrouping
     }
 
     @UserDefault(key: createJournalOncePerWindowKey, defaultValue: createJournalOncePerWindowDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)

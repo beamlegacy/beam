@@ -510,7 +510,7 @@ extension BeamData {
 
         advertiseUpdateOnStartup()
 
-        if Configuration.env != .test {
+        if Configuration.env != .test && Configuration.env != .uiTest {
             Task {
                 await versionChecker.performUpdateIfAvailable()
             }

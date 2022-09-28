@@ -58,12 +58,10 @@ class BaseTest: XCTestCase {
         uiMenu.invoke(.deleteRemoteAccount)
         if isAppRunning() {
             storeScreenshot()
-            uiMenu.invoke(.destroyDB)
-            usleep(500) //wait until DB is destroyed to be used
         }
+        uiMenu.invoke(.destroyDB)
         uiMenu.invoke(.deletePrivateKeys)
         self.clearPasteboard()
-        terminateAppInstance()
     }
     
     override func setUp() {
@@ -111,7 +109,6 @@ class BaseTest: XCTestCase {
         var args: [String] = arguments
         args.append(contentsOf: ["-NSQuitAlwaysKeepsWindows", storeSessionWhenTerminated ? "1" : "0"])
         args.append(contentsOf: ["-WindowsRestorationPrevented", preventSessionRestore ? "1" : "0"])
-        args.append(uiTestModeLaunchArgument)
         app.launchArguments = args
         app.launch()
         hiddenCommand.resizeAndCenterAppForE2ETests()
@@ -151,7 +148,7 @@ class BaseTest: XCTestCase {
         var args: [String] = arguments
         args.append(contentsOf: ["-NSQuitAlwaysKeepsWindows", storeSessionWhenTerminated ? "1" : "0"])
         args.append(contentsOf: ["-WindowsRestorationPrevented", preventSessionRestore ? "1" : "0"])
-        args.append(uiTestModeLaunchArgument)
+        args.append(contentsOf: [uiTestModeLaunchArgument])
         app.launchArguments = args
         app.launch()
         return JournalTestView()
@@ -176,12 +173,6 @@ class BaseTest: XCTestCase {
     @discardableResult
     func deleteAllNotes() -> NoteTestView {
         hiddenCommand.deleteAllNotes()
-    }
-
-    func terminateAppInstance() {
-        if isAppRunning() {
-            beamAppInstance.terminate()
-        }
     }
     
     func isAppRunning() -> Bool {
@@ -309,6 +300,21 @@ class BaseTest: XCTestCase {
         view.typeKeyboardKey(.space)
         let expectedTextAfterChange = "Type xt at"
         return expectedTextAfterChange
+    }
+    
+    func signInWithoutPkKeyCheck(email: String, password: String) -> OnboardingImportDataTestView {
+        let onboardingView = OnboardingLandingTestView()
+        let onboardingUsernameView = OnboardingUsernameTestView()
+        
+        onboardingView.getEmailTextField().tapInTheMiddle()
+        onboardingView.getEmailTextField().typeText(email)
+        onboardingView.clickContinueWithEmailButton()
+        
+        onboardingUsernameView.getPasswordTextField().tapInTheMiddle()
+        onboardingUsernameView.getPasswordTextField().typeText(password)
+        onboardingUsernameView.typeKeyboardKey(.escape) //get rid of the pop-up window if exists
+        onboardingUsernameView.clickConnectButton()
+        return OnboardingImportDataTestView()
     }
 }
 
