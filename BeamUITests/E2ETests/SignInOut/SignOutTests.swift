@@ -105,7 +105,7 @@ class SignOutTests: BaseTest {
         }
         
         step("THEN I'm successfully signed out") {
-            XCTAssertTrue(accountView.getConnectToBeamButtonElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(accountView.getConnectToBeamButtonElement().waitForExistence(timeout: BaseTest.maximumWaitTimeout))
         }
         
         step("THEN notes still exists") {

@@ -25,7 +25,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         self.beeper = CrossTargetNotificationCenterBeeper()
         self.appData = appData
         self.beeper.delegate = self
-        if Configuration.env == .test {
+        if Configuration.env == .test || Configuration.env == .uiTest {
             self.hiddenIdentifiersBuilder = .init(data: appData.currentAccount?.data, beeper: beeper)
             appData.$currentAccount.sink { [unowned self] currentAccount in
                 self.hiddenIdentifiersBuilder = .init(data: currentAccount?.data, beeper: self.beeper)
@@ -180,6 +180,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }
         GRDBDailyNoteScoreStore.shared.clear()
         try? AppData.shared.clearAllAccountsAndSetupDefaultAccount()
+        AppDelegate.main.deleteAllLocalData()
     }
 
     private func urlForTestPage(identifier: String) -> URL? {
