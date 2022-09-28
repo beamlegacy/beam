@@ -45,7 +45,7 @@ class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
 
                 if database.deletedAt != nil {
                     // unload the database
-                    try account.deleteDatabase(database.id)
+                    account.deleteDatabase(database.id)
                     continue
                 }
             }
@@ -82,7 +82,7 @@ class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
                 guard let self = self else { return }
                 Task {
                     do {
-                        Logger.shared.logError("Previous checksum for \(database) is: \(String(describing: database.previousChecksum))", category: .database)
+                        Logger.shared.logInfo("Previous checksum for \(database) is: \(String(describing: database.previousChecksum))", category: .database)
                         try await self.saveOnBeamObjectAPI(database)
                     } catch {
                         Logger.shared.logError("Failed to send database \(database) to remote sync: \(error)", category: .database)
@@ -96,7 +96,7 @@ class BeamDatabaseSynchronizer: BeamObjectManagerDelegate, BeamDocumentSource {
                 guard let self = self else { return }
                 Task {
                     let database = deletedDatabase.database
-                    Logger.shared.logError("Previous checksum for \(database) is? \(String(describing: database.previousChecksum))", category: .database)
+                    Logger.shared.logInfo("Previous checksum for \(database) is: \(String(describing: database.previousChecksum))", category: .database)
                     if database.hasBeenSyncedOnce {
                         do {
                             Logger.shared.logInfo("Sending delete database to server \(database)", category: .database)

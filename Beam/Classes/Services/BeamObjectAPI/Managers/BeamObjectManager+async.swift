@@ -47,11 +47,10 @@ extension BeamObjectManager {
             synchronizationStatus = .uploading(0)
             let objectsCount = try await self.saveAllToAPI(force: force)
             synchronizationStatus = .uploading(100)
-            Logger.shared.logDebug("syncAllFromAPI: Called saveAllToAPI, saved \(objectsCount) objects",
-                                   category: .sync,
-                                   localTimer: localTimer)
 
             // Save all changed objects.
+            Logger.shared.logDebug("syncAllFromAPI: saving changed objects", category: .sync, localTimer: localTimer)
+
             while true {
                 for (_, manager) in managerInstances {
                     do {
@@ -64,6 +63,7 @@ extension BeamObjectManager {
                 }
                 let done = lock { () -> Bool in
                     if managerInstances.values.allSatisfy({ $0.isChangedObjectsEmpty() }) {
+                        synchronizationStatus = .finished
                         fullSyncRunning = false
                         return true
                     }
@@ -73,8 +73,9 @@ extension BeamObjectManager {
                     break
                 }
             }
-
-            synchronizationStatus = .finished
+            Logger.shared.logDebug("syncAllFromAPI: Called saveAllToAPI, saved \(objectsCount) objects",
+                                   category: .sync,
+                                   localTimer: localTimer)
         } catch {
             synchronizationStatus = .failure(error)
             lock { fullSyncRunning = false }
