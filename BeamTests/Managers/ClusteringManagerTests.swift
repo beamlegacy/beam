@@ -10,7 +10,6 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
     var sessionLinkRanker: SessionLinkRanker!
-    var activeSources: ActiveSources!
     var tabGroupingManager: TabGroupingManager!
     var clusteringManager: ClusteringManager!
 
@@ -24,10 +23,9 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
 
     override func setUp() {
         sessionLinkRanker = SessionLinkRanker()
-        activeSources = ActiveSources()
         tabGroupingManager = TabGroupingManager()
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4,
-                                              sessionId: UUID(), activeSources: activeSources,
+                                              sessionId: UUID(),
                                               tabGroupingManager: tabGroupingManager,
                                               objectManager: objectManager,
                                               forcedClusteringType: .legacy)
@@ -192,11 +190,8 @@ class ClusteringManagerTests: XCTestCase, BeamDocumentSource {
         let noteGroups = [[noteId], [], []]
         let urlGroups: [[UUID]] = [
             [self.pageIDs[0]], //this page is in the same cluster as noteId note
-            [self.pageIDs[1], self.pageIDs[2]], //this cluster contains noteId's note active source
             [self.pageIDs[3]]] //this cluster can't be linked to any note
-        let activeSources = ActiveSources()
-        activeSources.activeSources = [noteId: [self.pageIDs[2]]]
-        expect(self.clusteringManager.getOrphanedUrlGroups(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources)) == [[self.pageIDs[3]]]
+        expect(self.clusteringManager.getOrphanedUrlGroups(urlGroups: urlGroups, noteGroups: noteGroups)) == [[self.pageIDs[3]]]
     }
 
     /// Test that text cleaning for notes is done correctly

@@ -50,7 +50,6 @@ class ClusteringManager: ObservableObject {
     }
     var sendRanking = false
     var ranker: SessionLinkRanker
-    var activeSources: ActiveSources
     let noteToAdd = PassthroughSubject<BeamNote, Never>()
     @Published var clusteredTabs: [[TabIndexingInfo?]] = [[]]
     @Published var clusteredNotes: [[String?]] = [[]]
@@ -65,19 +64,17 @@ class ClusteringManager: ObservableObject {
     weak private(set) var tabGroupingManager: TabGroupingManager?
     var sessionId: UUID
     var navigationBasedPageGroups = [[UUID]]()
-    var similarities = [UUID: [UUID: Float]]()
     var notesChangedByUserInSession = [UUID]()
     var openBrowsing = AllBrowsingTreesOpenInTabs()
     public var continueToNotes = [UUID]()
     public var continueToPage: PageID?
     private var resultProcessQueue = DispatchQueue(label: "ClusteringManagerResultProcessing", target: .userInitiated)
     // swiftlint:disable:next function_body_length
-    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources, tabGroupingManager: TabGroupingManager?, objectManager: BeamObjectManager, forcedClusteringType: ClusteringType? = nil) {
+    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, tabGroupingManager: TabGroupingManager?, objectManager: BeamObjectManager, forcedClusteringType: ClusteringType? = nil) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text
         self.weightEntities = entities
-        self.activeSources = activeSources
         self.tabGroupingManager = tabGroupingManager
         let clusteringType = forcedClusteringType ?? ClusteringType.current
         self.clusteringBridge = clusteringType.buildBridge(selectedTabGroupingCandidate: candidate,
@@ -198,7 +195,7 @@ class ClusteringManager: ObservableObject {
         if self.sendRanking {
             ranking = self.ranker.clusteringRemovalSorted(links: self.clusteredPagesId.reduce([], +))
         }
-        clusteringBridge.add(textualItem: clusteringNote.toTextualItem(), ranking: ranking, activeSources: Array(Set(activeSources.urls))) { result in
+        clusteringBridge.add(textualItem: clusteringNote.toTextualItem(), ranking: ranking) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
@@ -234,8 +231,7 @@ class ClusteringManager: ObservableObject {
     func change(candidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double) {
         isClustering = true
         clusteringBridge.changeCandidate(to: candidate, withWeightNavigation: weightNavigation,
-                                         weightText: weightText, weightEntities: weightEntities,
-                                         activeSources: Array(Set(activeSources.urls))) { result in
+                                         weightText: weightText, weightEntities: weightEntities) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
@@ -248,14 +244,25 @@ class ClusteringManager: ObservableObject {
         }
     }
 
+    private func splitByType(groups: [[UUID]]) {
+        let pageIds = self.tabsInfo.map { $0.document.id }
+        self.clusteredPagesId = groups.map { group in
+            group.filter { id in
+                pageIds.contains(id)
+            }
+        }
+        self.clusteredNotesId = groups.map { group in
+            group.filter { id in
+                !pageIds.contains(id)
+            }
+        }
+    }
     private func updateClustersWithResult(_ result: ClusteringResultValue, changeCandidate: Bool) {
         resultProcessQueue.async {
-            self.similarities = result.similarities
-            self.clusteredPagesId = result.pageGroups
-            self.clusteredNotesId = result.noteGroups
+            self.splitByType(groups: result.groups)
             self.sendRanking = result.legacyFlag == .sendRanking
         }
-        self.logForClustering(result: result.pageGroups, changeCandidate: changeCandidate)
+        self.logForClustering(result: self.clusteredPagesId, changeCandidate: changeCandidate)
     }
 
     private func reorganizeGroups(clusters: [[UUID]]) -> [[UUID]] {
@@ -461,8 +468,7 @@ extension ClusteringManager: ClusteringManagerProtocol {
         let replaceContent = newContent != nil
         guard let pageToAdd = pageToAdd else { return }
 
-        clusteringBridge.add(textualItem: pageToAdd.toTextualItem(), ranking: ranking,
-                             activeSources: Array(Set(activeSources.urls)), replaceContent: replaceContent) { result in
+        clusteringBridge.add(textualItem: pageToAdd.toTextualItem(), ranking: ranking, replaceContent: replaceContent) { result in
             DispatchQueue.main.async {
                 self.isClustering = false
             }
@@ -508,9 +514,7 @@ extension ClusteringManager: ClusteringManagerProtocol {
             case .failure(let error):
                 Logger.shared.logError("\(error)", category: .clustering)
             case .success(let result):
-                self.clusteredPagesId = result.pageGroups
-                self.clusteredNotesId = result.noteGroups
-                self.similarities = result.similarities
+                self.splitByType(groups: result.groups)
             }
         }
     }
@@ -540,16 +544,14 @@ extension ClusteringManager {
         return informationForId
     }
 
-    public func getOrphanedUrlGroups(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: ActiveSources) -> [[UUID]] {
-        let activeSourcesUrls = Set(activeSources.urls)
+    public func getOrphanedUrlGroups(urlGroups: [[UUID]], noteGroups: [[UUID]]) -> [[UUID]] {
         return zip(urlGroups, noteGroups)
             .filter { _, noteGroup in return noteGroup.count == 0 } //not suggested via direct grouping
-            .filter { urlGroup, _ in return activeSourcesUrls.intersection(urlGroup).count == 0 } //not suggested via active source grouping
             .map { urlGroup, _ in return urlGroup }
     }
 
     public func addOrphanedUrlsFromCurrentSession(orphanedUrlManager: ClusteringOrphanedUrlManager) {
-        let orphanedUrlGroups = getOrphanedUrlGroups(urlGroups: clusteredPagesId, noteGroups: clusteredNotesId, activeSources: activeSources)
+        let orphanedUrlGroups = getOrphanedUrlGroups(urlGroups: clusteredPagesId, noteGroups: clusteredNotesId)
         let savedAt = BeamDate.now
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
@@ -562,7 +564,7 @@ extension ClusteringManager {
     }
 
     public func saveOrphanedUrlsAtSessionClose(orphanedUrlManager: ClusteringOrphanedUrlManager) {
-        let orphanedUrlGroups = getOrphanedUrlGroups(urlGroups: clusteredPagesId, noteGroups: clusteredNotesId, activeSources: activeSources)
+        let orphanedUrlGroups = getOrphanedUrlGroups(urlGroups: clusteredPagesId, noteGroups: clusteredNotesId)
         let savedAt = BeamDate.now
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {

@@ -6,6 +6,7 @@
 //
 
 import Clustering
+import BeamCore
 
 enum ClusteringType {
     /// v1
@@ -71,9 +72,7 @@ enum ClusteringType {
 }
 
 struct ClusteringResultValue {
-    var pageGroups: [[UUID]]
-    var noteGroups: [[UUID]]
-    var similarities: [UUID: [UUID: Float]]
+    var groups: [[UUID]]
     var legacyFlag: LegacyClustering.Flag?
 }
 
@@ -90,24 +89,19 @@ protocol ClusteringBridge {
 
     typealias CompletionResult = Result<ClusteringResultValue, Error>
 
-    func add(textualItem: TextualItem, ranking: [UUID]?, activeSources: [UUID]?, replaceContent: Bool, completion: @escaping (CompletionResult) -> Void)
+    func add(textualItem: TextualItem, ranking: [UUID]?, replaceContent: Bool, completion: @escaping (CompletionResult) -> Void)
     func removeTextualItem(textualItemUUID: UUID, textualItemTabId: UUID, completion: @escaping (CompletionResult) -> Void)
     func changeCandidate(to candidate: Int?,
                          withWeightNavigation weightNavigation: Double?, weightText: Double?, weightEntities: Double?,
-                         activeSources: [UUID]?, completion: @escaping (CompletionResult) -> Void)
+                         completion: @escaping (CompletionResult) -> Void)
     func getExportInformationForId(id: UUID) -> Clustering.InformationForId
 }
 
 extension ClusteringBridge {
 
     /// convenient method with default parameter for`replaceContent`
-    func add(textualItem: TextualItem, ranking: [UUID]?, activeSources: [UUID]?, completion: @escaping (CompletionResult) -> Void) {
-        add(textualItem: textualItem, ranking: ranking, activeSources: activeSources, replaceContent: false, completion: completion)
-    }
-
-    /// convenient method with default parameters for `activeSources` and `replaceContent`
     func add(textualItem: TextualItem, ranking: [UUID]?, completion: @escaping (CompletionResult) -> Void) {
-        add(textualItem: textualItem, ranking: ranking, activeSources: nil, replaceContent: false, completion: completion)
+        add(textualItem: textualItem, ranking: ranking, replaceContent: false, completion: completion)
     }
 }
 
@@ -134,7 +128,6 @@ final class SmartClusteringBridge: ClusteringBridge {
         } else {
             sc = SmartClustering()
         }
-        sc.prepare()
         return sc
     }()
 
@@ -145,11 +138,11 @@ final class SmartClusteringBridge: ClusteringBridge {
         self.weightEntities = weightEntities
     }
 
-    func add(textualItem: TextualItem, ranking: [UUID]?, activeSources: [UUID]?, replaceContent: Bool, completion: @escaping (CompletionResult) -> Void) {
+    func add(textualItem: TextualItem, ranking: [UUID]?, replaceContent: Bool, completion: @escaping (CompletionResult) -> Void) {
         Task {
             do {
                 let result = try await clustering.add(textualItem: textualItem)
-                completion(.success(.init(pageGroups: result.pageGroups, noteGroups: result.noteGroups, similarities: result.similarities)))
+                completion(.success(.init(groups: result)))
             } catch {
                 completion(.failure(error))
             }
@@ -160,15 +153,16 @@ final class SmartClusteringBridge: ClusteringBridge {
                            completion: @escaping (CompletionResult) -> Void) {
         Task {
             do {
-                let result = try await clustering.removeTextualItem(textualItemUUID: textualItemUUID, textualItemTabId: textualItemTabId)
-                completion(.success(.init(pageGroups: result.pageGroups, noteGroups: result.noteGroups, similarities: result.similarities)))
+                let result = try await clustering.remove(textualItemUUID: textualItemUUID, textualItemTabId: textualItemTabId)
+                completion(.success(.init(groups: result)))
             } catch {
                 completion(.failure(error))
             }
         }
     }
 
-    func changeCandidate(to candidate: Int?, withWeightNavigation weightNavigation: Double?, weightText: Double?, weightEntities: Double?, activeSources: [UUID]? = nil, completion: @escaping (CompletionResult) -> Void) {
+    func changeCandidate(to candidate: Int?, withWeightNavigation weightNavigation: Double?, weightText: Double?, weightEntities: Double?,
+                         completion: @escaping (CompletionResult) -> Void) {
         completion(.failure(ClusteringBridgeError.notImplemented))
     }
 
@@ -209,15 +203,13 @@ final class LegacyClusteringBridge: ClusteringBridge {
         switch result {
         case .failure(let error): return .failure(error)
         case .success(let v):
-            return .success(.init(pageGroups: v.pageGroups,
-                                  noteGroups: v.noteGroups,
-                                  similarities: v.similarities,
-                                  legacyFlag: v.flag))
+            let groups = zip(v.pageGroups, v.noteGroups).map { $0.0 + $0.1 }
+            return .success(.init(groups: groups, legacyFlag: v.flag))
         }
 
     }
-    func add(textualItem: TextualItem, ranking: [UUID]?, activeSources: [UUID]?, replaceContent: Bool, completion: @escaping (CompletionResult) -> Void) {
-        legacy.add(textualItem: textualItem, ranking: ranking, activeSources: activeSources, replaceContent: replaceContent) { [weak self] in
+    func add(textualItem: TextualItem, ranking: [UUID]?, replaceContent: Bool, completion: @escaping (CompletionResult) -> Void) {
+        legacy.add(textualItem: textualItem, ranking: ranking, activeSources: nil, replaceContent: replaceContent) { [weak self] in
             guard let self = self else { return }
             completion(self.convertLegacyClusteringResult($0))
         }
@@ -226,11 +218,11 @@ final class LegacyClusteringBridge: ClusteringBridge {
     func removeTextualItem(textualItemUUID: UUID, textualItemTabId: UUID,
                            completion: @escaping (CompletionResult) -> Void) {
         legacy.removeTextualItem(textualItemUUID: textualItemUUID)
-        completion(.success(.init(pageGroups: [], noteGroups: [], similarities: [:])))
+        completion(.success(.init(groups: [])))
     }
 
-    func changeCandidate(to candidate: Int?, withWeightNavigation weightNavigation: Double?, weightText: Double?, weightEntities: Double?, activeSources: [UUID]? = nil, completion: @escaping (CompletionResult) -> Void) {
-        legacy.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities, activeSources: activeSources) { [weak self] in
+    func changeCandidate(to candidate: Int?, withWeightNavigation weightNavigation: Double?, weightText: Double?, weightEntities: Double?, completion: @escaping (CompletionResult) -> Void) {
+        legacy.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities, activeSources: nil) { [weak self] in
             guard let self = self else { return }
             completion(self.convertLegacyClusteringResult($0))
         }
