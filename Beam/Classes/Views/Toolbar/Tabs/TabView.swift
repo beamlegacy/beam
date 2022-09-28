@@ -446,8 +446,12 @@ struct TabView: View {
                     .background(!isSingleTab || isDragging ? nil : GeometryReader { prxy in
                         Color.clear.preference(key: TabsListView.SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
                     })
-                    .background(delegate?.tabSupportsFileDrop(tab) != true ? nil :
-                            Color.clear.onDrop(of: [UTType.fileURL], delegate: FileDropDelegate(onFileDrop: onFileDrop))
+                    .background(!enableFileDrop() ? nil :
+                                    Color.clear.onDrop(of: [UTType.fileURL], delegate: FileDropDelegate(onFileDrop: { [weak tab, capturedDelegate = delegate] url in
+                        // capturing delegate to avoid captured self. See BE-5695
+                        guard let tab = tab else { return }
+                        capturedDelegate?.tabDidReceiveFileDrop(tab, url: url)
+                    }))
                             .accessibilityElement()
                     )
                     .if(isDragging && applyDraggingStyle) {
@@ -491,10 +495,9 @@ extension TabView {
         delegate?.tabWantsToDetach(tab)
     }
 
-    func onFileDrop(_ url: URL) {
-        delegate?.tabDidReceiveFileDrop(tab, url: url)
+    func enableFileDrop() -> Bool {
+        delegate?.tabSupportsFileDrop(tab) == true
     }
-    
 }
 
 private struct FileDropDelegate: DropDelegate {
