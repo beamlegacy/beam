@@ -10,7 +10,7 @@ enum BranchType: String {
 struct Configuration {
     // Build configuration
     static private(set) var bundleIdentifier: String = Configuration.value(for: "CFBundleIdentifier")
-    static private(set) var env = Configuration.Env(rawValue: EnvironmentVariables.env) ?? .debug
+    static private(set) var env = ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument) ? .uiTest : Configuration.Env(rawValue: EnvironmentVariables.env) ?? .debug
     static private(set) var testAccountEmail = EnvironmentVariables.Account.testEmail
     static private(set) var testAccountPassword = EnvironmentVariables.Account.testPassword
     static private(set) var autoUpdate = EnvironmentVariables.autoUpdate
@@ -360,6 +360,7 @@ extension Configuration {
     enum Env: String {
         case debug
         case test
+        case uiTest
         case release
     }
 }

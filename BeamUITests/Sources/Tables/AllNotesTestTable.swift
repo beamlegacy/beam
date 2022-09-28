@@ -57,7 +57,7 @@ class AllNotesTestTable: BaseView, Rowable {
         for index in 0..<numberOfVisibleItems {
             let rowComparisonResult =  self.rows[index].isEqualTo(externalTable.rows[index])
             if !rowComparisonResult.0 {
-                failedValues.append("Row number:\(index+1) comparison failed, where:\(rowComparisonResult.0)")
+                failedValues.append("Row number:\(index+1) comparison failed, where:\(rowComparisonResult.1)")
             }
         }
         return (failedValues.count == 0, failedValues.joined(separator: " || "))
