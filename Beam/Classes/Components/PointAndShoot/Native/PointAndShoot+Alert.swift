@@ -86,7 +86,7 @@ extension PointAndShoot {
     }
 
     func sendFeedback(_ group: ShootGroup, _ message: String = "") {
-        guard Configuration.env != .test else { return }
+        guard Configuration.env != .test, Configuration.env != .uiTest else { return }
         guard PreferencesManager.isCollectFeedbackEnabled else { return }
         var host = group.href
         if let url = URL(string: group.href), let urlHost = url.minimizedHost {

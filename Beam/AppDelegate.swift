@@ -97,7 +97,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Importing legacy data may fail so make sure the pinned tabs are ok anyway:
         data.currentAccount?.data.resetPinnedTabs()
-
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
         if Configuration.env.rawValue == "$(ENV)" || Configuration.Sentry.key == "$(SENTRY_KEY)", !isSwiftUIPreview {
             fatalError("The ENV wasn't detected properly, please run `direnv allow` and restart your build. (Should only happen in SwiftUI Previews)")
@@ -172,7 +171,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         prepareMenuForTestEnv()
 
         // In test mode, we want to start fresh without auth tokens as they may have expired
-        if Configuration.env == .test {
+        if Configuration.env == .test || Configuration.env == .uiTest {
             data.currentAccount?.logout()
         }
         #endif

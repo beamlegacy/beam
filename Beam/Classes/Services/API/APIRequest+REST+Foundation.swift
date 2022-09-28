@@ -52,7 +52,7 @@ extension APIRequest {
         }
         #endif
 
-        if Configuration.env == .test, !BeamURLSession.shouldNotBeVinyled, !(BeamURLSession.shared is Turntable), !ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument) {
+        if Configuration.env == .test, !BeamURLSession.shouldNotBeVinyled, !(BeamURLSession.shared is Turntable), Configuration.env != .uiTest {
             fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
         }
 

@@ -74,7 +74,7 @@ struct AccountsView: View {
             }
             calendarSection
             if viewModel.isloggedIn && Persistence.Authentication.email != nil {
-                if Configuration.env == .test {
+                if Configuration.env == .test || Configuration.env == .uiTest {
                     Settings.Row(hasDivider: viewModel.isloggedIn) {
                         Text("Test account:")
                     } content: {
@@ -306,7 +306,7 @@ struct AccountsView: View {
     }
 
     fileprivate func getTestCredentials() -> String {
-        guard Configuration.env == .test else { return "" }
+        guard Configuration.env == .test || Configuration.env == .uiTest else { return "" }
         guard let username = Persistence.Authentication.username else {
             return ""
         }
@@ -318,7 +318,7 @@ struct AccountsView: View {
     }
 
     fileprivate func copyTestAccountToPasteboard() {
-        guard Configuration.env == .test else { return }
+        guard Configuration.env == .test || Configuration.env == .uiTest else { return }
 
         let content = getTestCredentials()
         let pasteboard = NSPasteboard.general
