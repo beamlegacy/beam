@@ -147,10 +147,18 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     }
 
     /// Remove the database from the account, in memory and from disk
-    public func deleteDatabase(_ id: UUID) throws {
+    public func deleteDatabase(_ id: UUID) {
         guard let database = databases[id] else { return }
-        try removeDatabase(id)
-        try database.delete(self)
+        do {
+            try database.delete(self)
+        } catch {
+            Logger.shared.logError("Cannot delete database \(id): \(error)", category: .sync)
+        }
+        do {
+            try removeDatabase(id)
+        } catch {
+            Logger.shared.logError("Cannot remove database \(id): \(error)", category: .sync)
+        }
     }
 
     public func unloadDatabase(_ id: UUID) throws {
@@ -303,8 +311,8 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     func delete(_ source: BeamDocumentSource) throws {
         guard let grdbStore = grdbStore else { return }
 
-        try allDatabases.forEach {
-            try deleteDatabase($0.id)
+        allDatabases.forEach {
+            deleteDatabase($0.id)
         }
 
         unloadManagers()
