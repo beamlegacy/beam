@@ -664,7 +664,7 @@ import Sentry
 
     private func openAsSideWindowIfEligible(url: URL) -> Bool {
         guard PreferencesManager.videoCallsAlwaysInSideWindow else { return false }
-        if let currentTab = currentTab {
+        if omniboxInfo.wasFocusedFromTab, let currentTab = currentTab {
             return currentTab.openAsSideWindowIfEligible(request: .init(url: url))
         } else if videoCallsManager.isEligible(url: url) {
             do {
