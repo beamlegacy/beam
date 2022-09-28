@@ -80,10 +80,21 @@ struct Omnibox: View {
                     .frame(height: Self.defaultHeight, alignment: .top)
                     if shouldShowAutocompleteResults {
                         ScrollView {
-                            AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex,
-                                                 elements: autocompleteManager.autocompleteResults,
-                                                 loadingElement: autocompleteManager.autocompleteLoadingResult,
-                                                 modifierFlagsPressed: modifierFlagsPressed)
+                            ScrollViewReader { scrollViewProxy in
+                                AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex,
+                                                     elements: autocompleteManager.autocompleteResults,
+                                                     loadingElement: autocompleteManager.autocompleteLoadingResult,
+                                                     modifierFlagsPressed: modifierFlagsPressed)
+                                .onReceive(autocompleteManager.$autocompleteSelectedIndex
+                                    .removeDuplicates()
+                                    .debounce(for: .milliseconds(10), scheduler: DispatchQueue.main)
+                                ) { newIndex in
+                                    guard let newIndex = newIndex,
+                                          newIndex < autocompleteManager.autocompleteResults.count else { return }
+                                    let result = autocompleteManager.autocompleteResults[newIndex]
+                                    scrollViewProxy.scrollTo(result.id, anchor: .bottom)
+                                }
+                            }
                         }
                         .frame(maxHeight: 380)
                     } else if state.isIncognito && isInsideNote {
