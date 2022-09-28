@@ -1424,7 +1424,17 @@ public extension CALayer {
     }
 
     override public func mouseMoved(with event: NSEvent) {
+
         mouseCursorManager.mouseMoved()
+
+        let frameInWindow = self.window?.contentView?.convert(frame, from: self.superview)
+        guard let frame = window?.contentView?.frame, frame.contains(event.locationInWindow),
+              let frameInWindow = frameInWindow, frameInWindow.contains(event.locationInWindow)
+        else {
+            super.mouseMoved(with: event)
+            return
+        }
+
         guard let rootNode = rootNode, shouldAllowMouseEvents() && shouldAllowHoverEvents() else { return }
         if showTitle {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
@@ -1434,11 +1444,6 @@ public extension CALayer {
                 mouseCursorManager.setMouseCursor(cursor: .pointingHand)
                 return
             }
-        }
-
-        if !(window?.contentView?.frame.contains(event.locationInWindow) ?? false) {
-            super.mouseMoved(with: event)
-            return
         }
 
         let point = convert(event.locationInWindow)
@@ -1486,7 +1491,6 @@ public extension CALayer {
 
     public override func cursorUpdate(with event: NSEvent) {
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
-
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
         let preciseViews = rootNode.getWidgetsAt(point, point, ignoreX: false)
