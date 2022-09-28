@@ -61,7 +61,7 @@ struct ContentView: View {
     @ViewBuilder var sideNoteSeparator: some View {
         if state.sideNote != nil {
             Rectangle()
-                .frame(width: 3)
+                .frame(width: BeamWindow.middleSeparatorWidth)
                 .foregroundColor(.clear)
                 .overlay(sideNoteSeparatorOverlay, alignment: .center)
         }
@@ -85,16 +85,8 @@ struct ContentView: View {
                 }
                 previousDragChangeTime = value.time
                 let newWidth = state.sideNoteWidth - value.translation.width
-                state.sideNoteWidth = newWidth.clamp(440, maxWidthForSplitView)
+                state.sideNoteWidth = newWidth.clamp(440, state.maxWidthForSplitView)
             })
-    }
-
-    private var maxWidthForSplitView: CGFloat {
-        guard let associatedWindow = state.associatedWindow else { return 500 }
-        let currentWindowWidth = associatedWindow.frame.width
-        let minWidth = AppDelegate.minimumSize(for: associatedWindow).width
-
-        return currentWindowWidth - minWidth
     }
 
     //This disable the radius in split view for now, as they break the display of the NoteView after pivoting from the web
