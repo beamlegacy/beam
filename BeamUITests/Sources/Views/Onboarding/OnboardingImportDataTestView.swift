@@ -24,7 +24,7 @@ class OnboardingImportDataTestView: BaseView {
     
     @discardableResult
     func waitForImportDataViewLoad() -> Bool {
-        return staticText(OnboardingImportDataViewLocators.StaticTexts.viewTitle.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        return staticText(OnboardingImportDataViewLocators.StaticTexts.viewTitle.accessibilityIdentifier).waitForExistence(timeout: maximumWaitTimeout)
     }
     
     func getHistoryCheckboxTitle() -> XCUIElement {

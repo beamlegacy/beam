@@ -9,10 +9,8 @@ import Foundation
 
 extension AppDelegate {
     func getUserInfos(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
-        let uiTestsAreRunning = ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument)
-        let testsAreRunning = Configuration.env == .test && !uiTestsAreRunning
 
-        guard !testsAreRunning,
+        guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
               NetworkMonitor.isNetworkAvailable else {
                   completionHandler?(.success(false))
@@ -25,10 +23,8 @@ extension AppDelegate {
 
     @MainActor
     func getUserInfosAsync() async throws -> Bool {
-        let uiTestsAreRunning = ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument)
-        let testsAreRunning = Configuration.env == .test && !uiTestsAreRunning
 
-        guard !testsAreRunning,
+        guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
               NetworkMonitor.isNetworkAvailable else {
                   return false

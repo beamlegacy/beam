@@ -9,11 +9,14 @@ import Foundation
 import XCTest
 
 class SyncTests: BaseTest {
+
+    let accountTestView = AccountTestView()
+    let alertTestView = AlertTestView()
+    let allNotes = AllNotesTestView()
     
     func testMergeNotesForNewlyCreatedAccount() {
         testrailId("C1158")
         var notesBeforeSync: AllNotesTestTable!
-        let allNotes = AllNotesTestView()
         
         step("GIVEN I start using app without being signed in") {
             uiMenu.invoke(.showOnboarding)
@@ -41,6 +44,95 @@ class SyncTests: BaseTest {
         }
     }
     
-    //Other tests so far are blocked by https://linear.app/beamapp/issue/BE-4342/randomly-created-account-is-displayed-as-not-signed-in
+    func testSyncCreatedNotes() throws {
+        testrailId("C1016")
+        var onboardingImportDataTestView: OnboardingImportDataTestView!
+        var firstAccountNotes: AllNotesTestTable!
+        step("GIVEN I start using app without being signed in") {
+            signUpStagingWithRandomAccount()
+        }
+        
+        step("WHEN I create note with data"){
+            uiMenu.invoke(.createNote)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotes.waitForAllNotesViewToLoad()
+            allNotes.sortTableBy(.title).waitForAllNotesViewToLoad()
+            firstAccountNotes = AllNotesTestTable()
+        }
+        
+        let accountInfo = getCredentials() // will also open Preferences > Account
+
+        step("AND I signout deleting all data ") {
+            accountTestView.signOutButtonClick()
+            alertTestView.signOutButtonClick()
+        }
+        
+        step("AND I sign in with the same account") {
+            OnboardingLandingTestView().waitForLandingViewToLoad()
+            onboardingImportDataTestView = signInWithoutPkKeyCheck(email: accountInfo!.email, password: accountInfo!.password)
+        }
+        
+        step("THEN I am on Journal view"){
+            onboardingImportDataTestView.waitForImportDataViewLoad()
+            XCTAssertTrue(onboardingImportDataTestView
+                                    .clickSkipButton()
+                                    .waitForJournalViewToLoad()
+                                    .isJournalOpened())
+        }
+        
+        step("AND all data is correctly synchronised"){
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotes.waitForAllNotesViewToLoad()
+            allNotes.sortTableBy(.title).waitForAllNotesViewToLoad()
+            let comparisonResult = AllNotesTestTable().isEqualTo(firstAccountNotes)
+            XCTAssertTrue(comparisonResult.0, comparisonResult.1)
+        }
+    }
     
+    func testSynchroniseDataOnAccountsSwitching() {
+        testrailId("C1188")
+
+        let preferencesView = PreferencesBaseView()
+        step("GIVEN I setup staging environment creating an account and notes") {
+            signUpStagingWithRandomAccount()
+            uiMenu.invoke(.create10NormalNotes)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+        }
+        
+        let userOneCredentials = getCredentials()
+        
+        step("WHEN I sign out deleting all data") {
+            accountTestView.signOutButtonClick()
+            alertTestView.signOutButtonClick()
+        }
+        
+        step("AND I sign up with a new random account adding more notes") {
+            OnboardingLandingTestView().waitForLandingViewToLoad()
+            signUpStagingWithRandomAccount()
+            uiMenu.invoke(.create10NormalNotes)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+        }
+
+        step("AND I sign out leaving all data") {
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+            preferencesView.navigateTo(preferenceView: .account)
+            accountTestView.signOutButtonClick()
+            alertTestView.getDeleteAllCheckbox().tapInTheMiddle()
+            alertTestView.signOutButtonClick()
+        }
+        
+        step("AND I sign in using first account") {
+            XCTAssertTrue(accountTestView.getConnectToBeamButtonElement().waitForExistence(timeout: BaseTest.maximumWaitTimeout))
+            accountTestView.connectToBeamButtonClick()
+            _ = signInWithoutPkKeyCheck(email: userOneCredentials!.email, password: userOneCredentials!.password)
+            XCTAssertTrue(preferencesView.waitForPreferencesToBeDisplayedAfterSync())
+            shortcutHelper.shortcutActionInvoke(action: .close)
+        }
+        
+        step("THEN notes of user1 and user2 are merged as I didn't delete locally"){
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            allNotes.waitForAllNotesViewToLoad()
+            XCTAssertEqual(allNotes.getNumberOfNotes(), 24) // we remove the merge of onboarding notes (14 + 14 - 4)
+        }
+    }
 }
