@@ -24,7 +24,9 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
 
     var windowInfo: BeamWindowInfo = BeamWindowInfo()
 
-    private let composedWindowMargin: CGFloat = 3.0
+    static let composedWindowMargin: CGFloat = 3.0
+    static let middleSeparatorWidth: CGFloat = 3.0
+
     private var isComposed: Bool {
         state.sideNote != nil
     }
@@ -131,7 +133,7 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
     func setHostingViewConstraints() {
         guard let contentView = contentView, let hostingView = hostingView else { return }
 
-        let neededMargin = isComposed ? composedWindowMargin : 0
+        let neededMargin = isComposed ? Self.composedWindowMargin : 0
 
         if hostingViewConstraints.isEmpty {
             hostingViewConstraints = [hostingView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: neededMargin),
@@ -406,8 +408,7 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
     /// [composedWindowMargin(3)][contentView][middleSeparator(3)][sideNote][composedWindowMargin(3)]
     var estimatedContentViewWidth: CGFloat {
         if state.sideNote != nil {
-            let middleSeparator = 3.0
-            let margin = 2 * composedWindowMargin - middleSeparator
+            let margin = 2 * Self.composedWindowMargin - Self.middleSeparatorWidth
             return windowInfo.windowFrame.width - state.sideNoteWidth - margin
         }
         return windowInfo.windowFrame.size.width
