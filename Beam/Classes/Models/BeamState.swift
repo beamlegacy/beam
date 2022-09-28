@@ -113,7 +113,16 @@ import Sentry
             }
         }
     }
+
     @Published var sideNoteWidth: CGFloat = 440
+    var maxWidthForSplitView: CGFloat {
+        guard let associatedWindow = self.associatedWindow else { return 500 }
+        let currentWindowWidth = associatedWindow.frame.width
+        let minWidth = AppDelegate.minimumSize(for: associatedWindow).width
+
+        let margins = 2 * BeamWindow.composedWindowMargin + BeamWindow.middleSeparatorWidth
+        return currentWindowWidth - minWidth - margins
+    }
 
     var associatedWindow: NSWindow? {
         AppDelegate.main.windows.first { $0.state === self }
