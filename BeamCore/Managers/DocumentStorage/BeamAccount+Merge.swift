@@ -85,11 +85,14 @@ extension BeamAccount {
             }
 
             // set new database
+            var reindexDocuments = false
+
             if let currentDatabase = BeamData.shared.currentDatabase {
                 if currentDatabase != newDefaultDB {
                     do {
                         try BeamData.shared.setCurrentDatabase(newDefaultDB)
                         try newDefaultDB.save(self)
+                        reindexDocuments = true
                     } catch {
                         Logger.shared.logInfo("Cannot set \(newDefaultDB) as default database: \(error)", category: .database)
                     }
@@ -98,19 +101,20 @@ extension BeamAccount {
                 do {
                     try BeamData.shared.setCurrentDatabase(newDefaultDB)
                     try newDefaultDB.save(self)
+                    reindexDocuments = true
                 } catch {
                     Logger.shared.logInfo("Cannot set \(newDefaultDB) as default database: \(error)", category: .database)
                 }
             }
+
+            if reindexDocuments {
+                BeamNote.indexAllNotes(interactive: false)
+            }
         }
 
-        do {
-            try databasesToDelete.forEach {
-                Logger.shared.logInfo("Deleting \($0)", category: .sync)
-                try self.deleteDatabase($0.id)
-            }
-        } catch {
-            Logger.shared.logError("Cannot delete databases: \(error)", category: .sync)
+        databasesToDelete.forEach {
+            Logger.shared.logInfo("Deleting \($0)", category: .sync)
+            self.deleteDatabase($0.id)
         }
     }
 
@@ -124,7 +128,7 @@ extension BeamAccount {
             let recordCount = database.recordsCount()
             if recordCount == 0 {
                 Logger.shared.logInfo("Deleting empty database \(database)", category: .database)
-                try self.deleteDatabase(database.id)
+                self.deleteDatabase(database.id)
             }
         }
     }
