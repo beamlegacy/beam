@@ -52,16 +52,17 @@ struct AutocompleteListView: View {
                 let isSelected = isSelectedItem(item)
                 let displaySubtitle = shouldItemDisplaySubtitle(item, atIndex: index)
                 let allowsShortcut = item.shortcut != nil || (isSelected && !isItemSelectedByHovering(item))
-                if item.shouldDisplayTopDivider && elements.count > 1 && index > 0 {
-                    Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
-                        .blendModeLightMultiplyDarkScreen()
-                        .padding(.vertical, BeamSpacing._60)
-                }
-                AutocompleteItemView(item: item, selected: isSelected, loading: loadingElement?.id == item.id,
-                                     displaySubtitle: displaySubtitle,
-                                     allowsShortcut: allowsShortcut,
-                                     colorPalette: Self.colorPalette(for: item, mode: state.autocompleteManager.animatingToMode ?? state.autocompleteManager.mode),
-                                     modifierFlagsPressed: modifierFlagsPressed)
+                VStack(spacing: 0) { // wrapping to fix issues with multiple views returned in a ForEach on BigSur 
+                    if item.shouldDisplayTopDivider && elements.count > 1 && index > 0 {
+                        Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
+                            .blendModeLightMultiplyDarkScreen()
+                            .padding(.vertical, BeamSpacing._60)
+                    }
+                    AutocompleteItemView(item: item, selected: isSelected, loading: loadingElement?.id == item.id,
+                                         displaySubtitle: displaySubtitle,
+                                         allowsShortcut: allowsShortcut,
+                                         colorPalette: Self.colorPalette(for: item, mode: state.autocompleteManager.animatingToMode ?? state.autocompleteManager.mode),
+                                         modifierFlagsPressed: modifierFlagsPressed)
                     .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
@@ -81,6 +82,7 @@ struct AutocompleteListView: View {
                             BeamNote.contextMenu(for: noteId, state: state, undoManager: undoManager)
                         }
                     }
+                }
             }
         }
         .padding(.vertical, BeamSpacing._60)
