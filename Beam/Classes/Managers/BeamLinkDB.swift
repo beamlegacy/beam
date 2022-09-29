@@ -287,8 +287,8 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
         return try manager?.allLinks(updatedSince: updatedSince) ?? []
     }
 
-    func fetchWithIds(_ ids: [UUID]) throws -> [Link] {
-        return try manager?.getLinks(ids: ids) ?? []
+    func fetchWithIds(_ ids: [UUID], includeDeleted: Bool = false) throws -> [Link] {
+        return try manager?.getLinks(ids: ids, includeDeleted: includeDeleted) ?? []
     }
 
     func saveAllOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
