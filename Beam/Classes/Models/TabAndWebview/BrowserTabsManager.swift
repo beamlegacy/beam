@@ -350,6 +350,9 @@ extension BrowserTabsManager {
             currentTab = nil
             return
         }
+        if visibleTabs.isEmpty, let groupContainer = localTabsGroup[tab.id], groupContainer.collapsed {
+            toggleGroupCollapse(groupContainer)       
+        }
         guard !visibleTabs.isEmpty else { return }
         while !visibleTabs.contains(tab) && index < tabs.count-1 {
             index += 1
@@ -702,7 +705,7 @@ extension BrowserTabsManager {
         collapsedTabsInGroup[group.id] = tabsInGroup
         gatherTabsInGroupTogether(group)
         updateListItems(animationType: .groupCollapse)
-        if let currentTab = currentTab, tabsInGroup.contains(currentTab.id) {
+        if let currentTab = currentTab, tabsInGroup.contains(currentTab.id), !visibleTabs.isEmpty {
             changeCurrentTabIfNotVisible(previousTabsList: tabs)
         }
     }
