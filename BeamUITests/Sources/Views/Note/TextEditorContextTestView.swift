@@ -53,6 +53,18 @@ class TextEditorContextTestView: BaseView {
         return getNoteNodeElementByIndex(index).getStringValue()
     }
     
+    func getAllCodeBlockElements() -> [XCUIElement] {
+        return app.buttons.matching(identifier: NoteViewLocators.Buttons.background.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    func getCodeBlockByIndex(_ index: Int) -> XCUIElement {
+        return app.buttons.matching(identifier: NoteViewLocators.Buttons.background.accessibilityIdentifier).allElementsBoundByIndex[index]
+    }
+    
+    func isNoteNodeACodeBlock(_ index: Int) -> Bool {
+        return app.buttons.matching(identifier: NoteViewLocators.Buttons.background.accessibilityIdentifier).allElementsBoundByIndex[index].exists
+    }
+    
     func getNoteNodeElementByIndex(_ index: Int) -> XCUIElement {
         return self.getNoteNodesForVisiblePart()[index]
     }

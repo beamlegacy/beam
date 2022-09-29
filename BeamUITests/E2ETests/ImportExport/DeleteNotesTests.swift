@@ -30,7 +30,7 @@ class DeleteNotesTests: BaseTest {
         let expectedNumberOfNotesAfterPopulatingDB = 14
         let expectedNumberOfNotesAfterClearingDB = 4
         step("Given I populate the app with random notes"){
-            launchAppAndOpenTodayNote()
+            openTodayNote()
             uiMenu.invoke(.insertTextInCurrentNote)
                 .invoke(.create10NormalNotes)
         }
