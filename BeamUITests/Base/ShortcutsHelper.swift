@@ -104,6 +104,8 @@ class ShortcutsHelper {
         case browserHistoryBack
         case insertLink
         case pinUnpinNote
+        case codeBlock
+        case outOfCodeBlock
     }
     
     @discardableResult
@@ -166,6 +168,8 @@ class ShortcutsHelper {
         case .browserHistoryBack: invokeCMDKey("[")
         case .insertLink: invokeCntrlCMDKey("k")
         case .pinUnpinNote: invokeCMDOptionKey("p")
+        case .codeBlock: invokeCntrlCMDKey("c")
+        case .outOfCodeBlock: invokeShiftKey(.enter)
         }
         return BaseView()
     }
