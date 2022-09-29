@@ -42,6 +42,10 @@ class BrowserPreferencesTestView: PreferencesBaseView {
         return checkBox(BrowserPreferencesViewLocators.Checkboxes.groupTabs.accessibilityIdentifier)
     }
     
+    func getVideoCallSideWindowCheckbox() -> XCUIElement {
+        return checkBox(BrowserPreferencesViewLocators.Checkboxes.videoCallWindow.accessibilityIdentifier)
+    }
+    
     @discardableResult
     func selectDownloadFolder(_ item: BrowserPreferencesViewLocators.MenuItemsDownload) -> BrowserPreferencesTestView {
         popUpButton(BrowserPreferencesViewLocators.Buttons.downloadFolderButton.accessibilityIdentifier).tapInTheMiddle()
