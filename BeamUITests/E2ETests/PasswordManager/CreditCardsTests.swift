@@ -19,7 +19,7 @@ class CreditCardsTests: BaseTest {
     var passwordPreferencesView: PasswordPreferencesTestView!
     var creditCardView: CreditCardTestView!
     
-    private func launchAppAndOpenEditCreditCardsTable(populateCardsDB: Bool) {
+    private func openEditCreditCardsTable(populateCardsDB: Bool) {
         
         step("GIVEN I open Credit cards table in Preferences") {
             uiMenu.invoke(.disablePasswordProtect)
@@ -61,7 +61,7 @@ class CreditCardsTests: BaseTest {
     
     func testCreditCardCreation() {
         testrailId("C639")
-        launchAppAndOpenEditCreditCardsTable(populateCardsDB: false)
+        openEditCreditCardsTable(populateCardsDB: false)
 
         step("When I add a Credit Card in Preferences ") {
             creditCardView
@@ -83,7 +83,7 @@ class CreditCardsTests: BaseTest {
     
     func testCreditCardDeletion() {
         testrailId("C640")
-        launchAppAndOpenEditCreditCardsTable(populateCardsDB: true)
+        openEditCreditCardsTable(populateCardsDB: true)
         
         step("WHEN I cancel Credit card item deletion") {
             XCTAssertFalse(creditCardView.isDeleteCreditCardButtonEnabled())
@@ -112,7 +112,7 @@ class CreditCardsTests: BaseTest {
     func testCancelCreditCardItemEditing() {
         testrailId("C1108")
         var rowBeforeEdit = RowCreditCardsTestTable()
-        launchAppAndOpenEditCreditCardsTable(populateCardsDB: true)
+        openEditCreditCardsTable(populateCardsDB: true)
         
         step("WHEN edit Credit card data and click Cancel") {
             rowBeforeEdit = CreditCardsTestTable().rows[0]
@@ -129,7 +129,7 @@ class CreditCardsTests: BaseTest {
     
     func testConfirmCreditCardItemEditing() {
         testrailId("C1107")
-        launchAppAndOpenEditCreditCardsTable(populateCardsDB: true)
+        openEditCreditCardsTable(populateCardsDB: true)
         var expectedRowAfterEdit: RowCreditCardsTestTable!
         
         step("WHEN edit Credit card data and click Done") {
