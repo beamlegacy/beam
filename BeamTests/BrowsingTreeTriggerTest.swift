@@ -34,7 +34,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
             clickExpectation.fulfill()
         }
         wait(for: [clickExpectation], timeout: 1)
-        wait(for: [indexExpectation], timeout: 1)
+        wait(for: [indexExpectation], timeout: 10)
         current = try XCTUnwrap(tab.browsingTree.current)
         let id1 = current.id
         let url1 = current.url
