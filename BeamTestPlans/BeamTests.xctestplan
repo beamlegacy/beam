@@ -67,7 +67,6 @@
         "BeamAccountSynchronisationTest",
         "BeamLinkDBTests\/testMoveFrecencyToLinkDB()",
         "BrowserImportManagerTest\/testSpeed()",
-        "BrowsingTreeTriggerTests\/testNavigation()",
         "DailyUrlStorageTest\/testGetRepeatingUrlsSpeed()",
         "DocumentManagerReceiveObjectTests",
         "OLD_BeamNote_DocumentManagerTests"
