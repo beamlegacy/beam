@@ -1458,6 +1458,7 @@
 		D79394B028C0A0BA00AEADA1 /* TabGroupDeleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79394AF28C0A0BA00AEADA1 /* TabGroupDeleteTests.swift */; };
 		D7C98FD3284F4044001E057C /* TodayNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C98FD2284F4044001E057C /* TodayNoteTests.swift */; };
 		D7CC5971289970350036A02B /* TabGroupManualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CC5970289970350036A02B /* TabGroupManualTests.swift */; };
+		D7D544B428E56A94003152F6 /* BrowserVideoSideWindowPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D544B328E56A94003152F6 /* BrowserVideoSideWindowPreferencesTests.swift */; };
 		D7D6F00C2849DF7E00C3EE7F /* TrackersBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F00B2849DF7E00C3EE7F /* TrackersBlockerTests.swift */; };
 		D7D6F016284A0A7900C3EE7F /* CookieBannerBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F015284A0A7900C3EE7F /* CookieBannerBlockerTests.swift */; };
 		D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F029284E2BA100C3EE7F /* AddLinkViewLocators.swift */; };
@@ -3448,6 +3449,7 @@
 		D79394AF28C0A0BA00AEADA1 /* TabGroupDeleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupDeleteTests.swift; sourceTree = "<group>"; };
 		D7C98FD2284F4044001E057C /* TodayNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayNoteTests.swift; sourceTree = "<group>"; };
 		D7CC5970289970350036A02B /* TabGroupManualTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupManualTests.swift; sourceTree = "<group>"; };
+		D7D544B328E56A94003152F6 /* BrowserVideoSideWindowPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserVideoSideWindowPreferencesTests.swift; sourceTree = "<group>"; };
 		D7D6F00B2849DF7E00C3EE7F /* TrackersBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersBlockerTests.swift; sourceTree = "<group>"; };
 		D7D6F015284A0A7900C3EE7F /* CookieBannerBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieBannerBlockerTests.swift; sourceTree = "<group>"; };
 		D7D6F029284E2BA100C3EE7F /* AddLinkViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLinkViewLocators.swift; sourceTree = "<group>"; };
@@ -7194,6 +7196,7 @@
 			children = (
 				A3B6C97C2862FC0000E7F78C /* BrowserPreferencesTests.swift */,
 				A36F2A332864A0F500B0F971 /* BrowserTabsPreferencesTests.swift */,
+				D7D544B328E56A94003152F6 /* BrowserVideoSideWindowPreferencesTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -10213,6 +10216,7 @@
 				D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */,
 				D77A5A9C287C55C800652727 /* RightClickPageMenuTests.swift in Sources */,
 				D7F5BF0528756231008FE546 /* RightClickImageMenuTests.swift in Sources */,
+				D7D544B428E56A94003152F6 /* BrowserVideoSideWindowPreferencesTests.swift in Sources */,
 				A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */,
 				A3E7B4BD27AC23D50074C9BB /* SignInAutocompleteTests.swift in Sources */,
 				B5D2A1802805E91E00C833B9 /* OnboardingPrivateKeyViewLocators.swift in Sources */,
