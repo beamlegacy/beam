@@ -37,6 +37,7 @@ class BaseTest: XCTestCase {
     let copyLinkShareAction = "Copy Link"
     
     let welcomeTourURL = "https://welcometour.beamapp.co"
+    let meetingTestUrl = "https://zoom.us/wc/join/99166381562?wpk=wcpk3fe593748f47c7b9774ebde3650dae7d&_x_zm_rtaid=X_itykmcS52hw4BpB-NwCQ.1664430384941.f58312bdec889b861646d2e27f8794ea&_x_zm_rhtaid=711"
     
     let uiMenu = UITestsMenuBar()
     let hiddenCommand = HiddenCommandHelper()

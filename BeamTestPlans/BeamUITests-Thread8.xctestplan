@@ -50,6 +50,7 @@
         "BrowserStatusBarTests",
         "BrowserTabViewTests",
         "BrowserTabsPreferencesTests",
+        "BrowserVideoSideWindowPreferencesTests",
         "CaptureCopyShareTests",
         "CookieBannerBlockerTests",
         "CreditCardAutocompleteTests",
