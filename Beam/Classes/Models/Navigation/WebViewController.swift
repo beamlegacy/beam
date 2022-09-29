@@ -246,9 +246,15 @@ protocol WebViewNavigationHandler: AnyObject {
 
     /// the webView requested to open a new webView or window
     func webView(_ webView: WKWebView, didCreateANewWebViewFor navigationAction: WKNavigationAction)
+
+    func resetRequestedURL()
 }
 
 extension WebViewController: WebViewNavigationHandler {
+
+    func resetRequestedURL() {
+        requestedURL = nil
+    }
 
     func webViewIsInstructedToLoadURLFromUI(_ url: URL) {
         requestedURL = url
