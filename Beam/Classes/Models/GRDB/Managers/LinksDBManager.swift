@@ -285,9 +285,13 @@ class LinksDBManager: GRDBHandler, BeamManager {
         }
     }
 
-    func getLinks(ids: [UUID]) throws -> [Link] {
+    func getLinks(ids: [UUID], includeDeleted: Bool = false) throws -> [Link] {
         try self.read { db in
-            try Link.filter(keys: ids).filter(Link.Columns.deletedAt == nil).fetchAll(db)
+            if includeDeleted {
+                return try Link.filter(keys: ids).fetchAll(db)
+            } else {
+                return try Link.filter(keys: ids).filter(Link.Columns.deletedAt == nil).fetchAll(db)
+            }
         }
     }
 
