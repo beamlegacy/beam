@@ -2,6 +2,7 @@ import {BeamMessageHandler, BeamWindow} from "@beam/native-beamtypes"
 
 export interface NavigationMessages {
   nav_locationChanged: BeamMessageHandler
+  nav_clickEvent: BeamMessageHandler
 }
 
 export type NavigationWindow = BeamWindow<NavigationMessages>
@@ -9,6 +10,21 @@ export type NavigationWindow = BeamWindow<NavigationMessages>
 export class BeamNavigation {
 
   constructor(private win: NavigationWindow) {
+    this.registerEventListeners()
+  }
+
+  /**
+  * Registers all Event Listeners Beam Navigation requires.
+  *
+  * @memberof PointAndShoot
+  */
+  registerEventListeners(): void {
+    this.win.addEventListener("click", this.onClick.bind(this), true)
+  }
+
+  onClick() {
+    const href = this.win.location.href
+    this.win.webkit.messageHandlers.nav_clickEvent.postMessage({ href })
   }
 
   linkWithoutListeners(link: HTMLAnchorElement): HTMLAnchorElement {

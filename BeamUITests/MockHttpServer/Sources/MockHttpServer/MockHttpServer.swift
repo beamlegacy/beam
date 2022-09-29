@@ -351,6 +351,8 @@ extension MockHttpServer {
         /// Performs a javascript history.replaceState on page load
         case javascriptReplace
         /// .javascriptReplace redirect but the redirection happens 700mss after page load
+        case javascriptReplaceClick
+        /// .javascriptReplace redirect with intermediary mouse click
         case javascriptReplaceSlow
         case none
         case navigation
@@ -402,6 +404,7 @@ extension MockHttpServer {
         var port: Int
         var replace: String?
         var delay: String?
+        var click: String?
     }
 
     private func redirectionPathHandler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
@@ -446,14 +449,17 @@ extension MockHttpServer {
         case .html:
             renderStencil(request, response, "redirection/html_redirect", additionalParams: parameters)
             break
-        case .javascriptPush, .javascriptPushSlow, .javascriptReplace, .javascriptReplaceSlow:
-            if type == .javascriptReplace || type == .javascriptReplaceSlow {
+        case .javascriptPush, .javascriptPushSlow, .javascriptReplace, .javascriptReplaceSlow, .javascriptReplaceClick:
+            if type == .javascriptReplace || type == .javascriptReplaceSlow || type == .javascriptReplaceClick {
                 parameters.replace = "true"
             }
             if type == .javascriptPushSlow || type == .javascriptReplaceSlow {
                 parameters.delay = "700"
-            } else if type == .javascriptPush {
+            } else if type == .javascriptPush || type == .javascriptReplaceClick || type == .javascriptReplace {
                 parameters.delay = "200" //
+            }
+            if type == .javascriptReplaceClick {
+                parameters.click = "true"
             }
             renderStencil(request, response, "redirection/javascript_redirect", additionalParams: parameters)
             break

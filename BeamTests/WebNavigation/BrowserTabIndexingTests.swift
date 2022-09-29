@@ -110,6 +110,13 @@ class BrowserTabIndexingTests: WebBrowsingBaseTests {
         XCTAssertEqual(currentNode.children[1].url, redirectURL(for: .none).absoluteString)
     }
 
+    func testJavascriptReplaceRedirectionInteruptedByClickIsNotStoredAsAlias() {
+        let redirectionType: MockHttpServer.RedirectionType = .javascriptReplaceClick
+        let expectedNumberOfIndexingCalls = 2
+        performAndTestAliasRedirection(ofType: redirectionType, expectedNumberOfIndexingCalls: expectedNumberOfIndexingCalls,
+                                       initialURLShouldBeAlias: false, destinationTitle: jsDestinationPageTitle)
+    }
+
     func testConsecutiveRedirectionsSeparatedByUILoads() {
 
         var expectation: XCTestExpectation?
