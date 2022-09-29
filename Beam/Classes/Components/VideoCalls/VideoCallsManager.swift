@@ -144,9 +144,9 @@ private extension VideoCallsManager {
         if let regex = try? NSRegularExpression(pattern: #"\((.*?)\)"#) {
             let matches = regex.matches(in: originalMessage, range: .init(location: .zero, length: originalMessage.utf16.count))
             if let match = matches.first, var calendar = originalMessage.substring(fromMatch: match) {
-                calendar.removeFirst()
-                calendar.removeLast()
-                title += "\n\(String(calendar))"
+                calendar.removeFirst() // removing opening parenthese
+                calendar.removeLast() // removing closing parenthese
+                title += "\n\(String(calendar))" // appending name of the calendar
             }
         }
 
