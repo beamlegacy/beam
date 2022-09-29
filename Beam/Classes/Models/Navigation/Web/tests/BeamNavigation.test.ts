@@ -17,7 +17,8 @@ export class NavigationWindowMock
 {
   webkit: BeamWebkit<NavigationMessages> = {
     messageHandlers: {
-      nav_locationChanged: new MessageHandlerMock()
+      nav_locationChanged: new MessageHandlerMock(),
+      nav_clickEvent: new MessageHandlerMock()
     }
   }
 
