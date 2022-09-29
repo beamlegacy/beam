@@ -38,5 +38,6 @@ enum BrowserPreferencesViewLocators {
         case switchTabs = "switch-tabs-checkbox"
         case captureSounds = "capture-sounds-checkbox"
         case groupTabs = "group-tabs-checkbox"
+        case videoCallWindow = "videoCalls-always-in-side-window-checkbox"
     }
 }
