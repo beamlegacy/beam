@@ -123,16 +123,14 @@ class RightClickTabMenuTests: BaseTest {
         }
     }
     
-    func testMoveTabToSideWindowAndCloseConferenceDialog() throws {
-        try XCTSkipIf(true, "deactivate for the moment. will be refactored with BE-5685")
+    func testMoveTabToSideWindowAndCloseConferenceDialog() {
         testrailId("C1187")
-        let meetingId = "qoe-agdw-zmj"
         var conferenceDialog: XCUIElement!
         
-        step("GIVEN I open normal tab and tab with \(meetingId) conference meeting"){
+        step("GIVEN I open normal tab and tab with conference URL"){
             uiMenu.invoke(.loadUITestPage1)
             webView.waitForWebViewToLoad()
-            OmniBoxTestView().openWebsite("meet.google.com/\(meetingId)")
+            OmniBoxTestView().openWebsite(meetingTestUrl)
             conferenceDialog = app.dialogs.firstMatch
             let conferenceDialogPermissionDontAllowButton = app.sheets.buttons[AlertViewLocators.Buttons.dontAllowButton.accessibilityIdentifier]
             
@@ -141,14 +139,6 @@ class RightClickTabMenuTests: BaseTest {
                 XCTAssertTrue(waitForDoesntExist(conferenceDialog.sheets.firstMatch))
             }
         }
-        
-        // TODO with preferences of tab window
-//        step("WHEN I move \(meetingId) tab to a conference window"){
-//            webView
-//                .openTabMenu(tabIndex: 0)
-//                .selectTabMenuItem(.moveTabToSideWindow)
-//        }
-        
          
         step("THEN I web meeting tab is moved to video conference window") {
             XCTAssertEqual(getNumberOfWindows(), 1)
@@ -172,7 +162,7 @@ class RightClickTabMenuTests: BaseTest {
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
         }
         
-        step("THEN I can move \(meetingId) tab back to a conference window again"){
+        step("THEN I can move meeting tab back to a conference window again"){
             webView
                 .openTabMenu(tabIndex: 1)
                 .selectTabMenuItem(.moveTabToSideWindow)

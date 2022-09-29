@@ -91,6 +91,7 @@
         "BrowserStatusBarTests",
         "BrowserTabViewTests",
         "BrowserTabsPreferencesTests",
+        "BrowserVideoSideWindowPreferencesTests",
         "CaptureCopyShareTests",
         "CardCreationTests",
         "CardEditTests",
