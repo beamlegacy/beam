@@ -115,7 +115,7 @@ class NoteEditorTests: BaseTest {
     func testOpenTabOnBackground() {
         testrailId("C810")
         step("Given I open a note") {
-            launchAppAndOpenTodayNote()
+            openTodayNote()
         }
         
         step("Given I type a URL in text editor"){
@@ -142,7 +142,7 @@ class NoteEditorTests: BaseTest {
     
     func testBulletFoldUnfold() {
         testrailId("C952")
-        launchAppAndOpenTodayNote()
+        openTodayNote()
 
         step("Given I create note with indented content") {
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
@@ -244,7 +244,7 @@ class NoteEditorTests: BaseTest {
     
     func testTextNodeIndentationLevels() {
         testrailId("C803, C951")
-        launchAppAndOpenTodayNote()
+        openTodayNote()
         
         step("Given I create indentation levels") {
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
@@ -362,7 +362,7 @@ class NoteEditorTests: BaseTest {
         let expectedBiDiLink = textToAddLink + textAppended
                 
         step("Given I add text in a note") {
-            launchAppAndOpenTodayNote()
+            openTodayNote()
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: textToAddLink,  needsActivation: true)
         }
         
@@ -410,4 +410,60 @@ class NoteEditorTests: BaseTest {
             XCTAssertEqual(webView.getTabUrlAtIndex(index: 1), urlAdded)
         }
     }
+    
+    func testCodeBlockFromFormatMenu() throws {
+        testrailId("C1190")
+        let textToAddCodeBlock = "Test Code Block"
+        let textToType = " modification"
+        let textToReplaceWith = "Hello World"
+        var noteView = NoteTestView()
+        let formatMenu = FormatMenu()
+        
+        step("Given I add text in a note") {
+            noteView = JournalTestView().createNoteViaOmniboxSearch("Test Code Block")
+            noteView.typeInNoteNodeByIndex(noteIndex: 0, text: textToAddCodeBlock,  needsActivation: true)
+        }
+
+        step("When I turn the node into Code Block with Format Menu") {
+            formatMenu.invoke(.codeBlock)
+        }
+        
+        step("Then node has been changed to code block") {
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 1)
+            XCTAssertTrue(noteView.isNoteNodeACodeBlock(0))
+        }
+        
+        step ("And text can be added in code block"){
+            noteView.typeInNoteNodeByIndex(noteIndex: 0, text: textToType)
+            XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), textToAddCodeBlock + textToType)
+            XCTAssertTrue(noteView.isNoteNodeACodeBlock(0))
+        }
+        
+        step ("And text can be deleted in code block"){
+            noteView.typeKeyboardKey(.delete)
+            XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), textToAddCodeBlock + " modificatio")
+            XCTAssertTrue(noteView.isNoteNodeACodeBlock(0))
+        }
+        
+        step ("And text can be replaced in code block"){
+            noteView.getNoteNodeElementByIndex(0).tapInTheMiddle()
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
+            shortcutHelper.shortcutActionInvoke(action: .copy)
+            noteView.typeInNoteNodeByIndex(noteIndex: 0, text: textToReplaceWith)
+            XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), textToReplaceWith)
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
+            shortcutHelper.shortcutActionInvoke(action: .paste)
+            XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), textToAddCodeBlock + " modificatio")
+        }
+        
+        step("When I use the same shortcut a second time") {
+            formatMenu.invoke(.codeBlock)
+        }
+        
+        step("Then code block is reverted") {
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 1)
+            XCTAssertTrue(noteView.getAllCodeBlockElements().isEmpty)
+        }
+    }
+    
 }
