@@ -120,6 +120,8 @@ class NavigationHandlerMock: WebViewNavigationHandler {
     }
 
     func webView(_ webView: WKWebView, didCreateANewWebViewFor navigationAction: WKNavigationAction) {}
+
+    func resetRequestedURL() {}
 }
 
 class PointAndShootTest: XCTestCase {

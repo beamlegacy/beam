@@ -6,6 +6,10 @@
 <script>
     function redirect() {
         var replace = "{{ params.replace }}"
+        var click = "{{ params.click }}"
+        if (click) {
+            document.querySelector("h1").click();
+        }
         setTimeout(function() {
             if (replace) {
                 window.history.replaceState(null, "", "{{ params.destination }}");
