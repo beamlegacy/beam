@@ -18,7 +18,7 @@ class EditorShortcutsTests: BaseTest {
         let searchWord = "Everest"
         
         step ("Given I search for \(searchWord)"){
-            noteView = launchAppAndOpenTodayNote()
+            noteView = openTodayNote()
             noteView.typeInNoteNodeByIndex(noteIndex: 0, text: searchWord)
             shortcutHelper.shortcutActionInvoke(action: .instantSearch)
         }
@@ -66,7 +66,7 @@ class EditorShortcutsTests: BaseTest {
         testrailId("C1112, C1113, C1114, C1115, C1117, C1120")
         let textToType = "This text replaces selected notes text"
         step ("Then app doesn't crash after using text edit shortcuts on empty note"){
-            noteView = launchAppAndOpenTodayNote()
+            noteView = openTodayNote()
             shortcutHelper.shortcutActionInvoke(action: .selectAll)
             shortcutHelper.shortcutActionInvoke(action: .copy)
             noteView.typeKeyboardKey(.delete)
@@ -130,6 +130,47 @@ class EditorShortcutsTests: BaseTest {
             XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 3, elementQuery: noteView.getNoteElementsQueryForVisiblePart()))
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), textToType)
             XCTAssertEqual(noteView.getNoteNodeValueByIndex(1), textToType)
+        }
+    }
+    
+    func testCodeBlockFromShortcut() {
+        testrailId("C1190")
+        let textToAddCodeBlock = "Test Code Block"
+        var noteView = NoteTestView()
+        
+        step("Given I add text in a note") {
+            noteView = JournalTestView().createNoteViaOmniboxSearch("Test Code Block")
+            noteView.typeInNoteNodeByIndex(noteIndex: 0, text: textToAddCodeBlock,  needsActivation: true)
+        }
+
+        step("When I turn the node into Code Block with shortcut") {
+            shortcutHelper.shortcutActionInvoke(action: .codeBlock)
+        }
+        
+        step("Then node has been changed to code block") {
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 1)
+            XCTAssertTrue(noteView.isNoteNodeACodeBlock(0))
+            XCTAssertEqual(noteView.getAllCodeBlockElements().count, 1)
+        }
+        
+        step("When I press Shift-Enter") {
+            shortcutHelper.shortcutActionInvoke(action: .outOfCodeBlock)
+        }
+        
+        step("Then I can go out of code block") {
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 2)
+            XCTAssertTrue(noteView.isNoteNodeACodeBlock(0))
+            XCTAssertEqual(noteView.getAllCodeBlockElements().count, 1)
+        }
+        
+        step("When I use the same shortcut a second time") {
+            noteView.typeKeyboardKey(.upArrow)
+            shortcutHelper.shortcutActionInvoke(action: .codeBlock)
+        }
+        
+        step("Then code block is reverted") {
+            XCTAssertEqual(noteView.getNumberOfVisibleNodes(), 2)
+            XCTAssertTrue(noteView.getAllCodeBlockElements().isEmpty)
         }
     }
     
