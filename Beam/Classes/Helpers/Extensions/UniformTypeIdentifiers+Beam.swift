@@ -7,6 +7,8 @@ enum BeamUniformTypeIdentifiers {
 
     static let plainTextType: UTType = .plainText
 
+    static let roamAllowedFileTypes: [String] = [Self.markdownExtension] + (UTType.json.preferredFilenameExtension.map { [$0] } ?? [])
+
     private static let supportedSuperTypes: [UTType] = [
         .audiovisualContent,
         .image,
