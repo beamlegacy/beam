@@ -728,7 +728,6 @@ import BeamCore
         authenticationViewModel?.cancel()
         browsingTree.closeApp()
         saveTree(grouped: true)
-        sendTree(grouped: true)
     }
 
     func pin() {
