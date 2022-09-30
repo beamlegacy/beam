@@ -100,8 +100,8 @@ extension AppDelegate {
         openPanel.canChooseDirectories = true
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
-        // TODO: i18n
-        openPanel.title = loc("Choose the files to import")
+        openPanel.title = loc("Choose the files to import") // TODO: i18n
+        openPanel.allowedFileTypes = [BeamNoteDocumentWrapper.fileExtension]
         openPanel.begin { [weak openPanel] result in
             guard result == .OK
             else { openPanel?.close(); return }
