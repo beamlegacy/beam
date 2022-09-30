@@ -133,7 +133,6 @@ extension BrowserTab: WebPage {
         authenticationViewModel?.cancel()
         browsingTree.closeTab()
         saveTree()
-        sendTree()
         state?.webIndexingController?.tabDidClose(self)
         if !(webviewWindow is BeamWindow) && webviewWindow?.styleMask.contains(.fullScreen) == true {
             // Webview is in fullscreen, we need to manually dismiss it to prevent crash in WKFullScreenWindowController
