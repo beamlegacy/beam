@@ -48,8 +48,9 @@ extension TabsListContextMenuBuilder {
 
     private func buildExternalCaptureView(for group: TabGroup, in window: NSWindow, state: BeamState) -> some View {
         FormatterViewBackgroundV2 {
-            PointAndShootCardPicker(allowAnimation: .constant(true), onComplete: { [weak self] targetNote, _, completion in
-                self?.addGroup(group, toNote: targetNote, from: window, completion: completion)
+            PointAndShootCardPicker(allowAnimation: .constant(true), onComplete: { targetNote, _, completion in
+                    self.addGroup(group, toNote: targetNote, from: window, completion: completion)
+
             }, canShowCopyShareView: false, captureFromOutsideWebPage: true)
         }
         .environmentObject(state)
@@ -60,21 +61,24 @@ extension TabsListContextMenuBuilder {
     }
 
     private func addGroup(_ group: TabGroup, toNote targetNote: BeamNote?,
-                          from window: NSWindow, completion: (PointAndShootCardPicker.ExternalCaptureConfirmation?) -> Void) {
+                          from window: NSWindow, completion: @escaping (PointAndShootCardPicker.ExternalCaptureConfirmation?) -> Void) {
         guard let note = targetNote, let tabsManager = state?.browserTabsManager else {
             let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
             window.contentView?.layer?.add(anim, forKey: "disappear")
             return
         }
         let tabGroupingManager = tabsManager.tabGroupingManager
-        if tabGroupingManager.addGroup(group, toNote: note) {
-            completion(.success)
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
-                let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
-                window.contentView?.layer?.add(anim, forKey: "disappear")
+        Task { @MainActor in
+            let result = await tabGroupingManager.addGroup(group, toNote: note)
+            if result {
+                completion(.success)
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+                    let anim = PointAndShootCardPicker.captureWindowDisappearAnimationAndClose(in: window)
+                    window.contentView?.layer?.add(anim, forKey: "disappear")
+                }
+            } else {
+                completion(.failure)
             }
-        } else {
-            completion(.failure)
         }
     }
 

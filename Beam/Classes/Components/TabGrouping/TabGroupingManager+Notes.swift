@@ -45,8 +45,9 @@ extension TabGroupingManager: BeamDocumentSource {
                 group.lockGroup()
             }
 
-            let (note, groupCopy) = try fetchOrCreateTabGroupNote(for: group)
             Task { @MainActor in
+                let (note, groupCopy) = try await fetchOrCreateTabGroupNote(for: group)
+
                 if shouldSaveParentGroup {
                     await saveGroupToDBIfNeeded(group, copyOf: nil)
                 }
@@ -132,12 +133,13 @@ extension TabGroupingManager: BeamDocumentSource {
         return (note, groupUsed)
     }
 
-    func fetchOrCreateTabGroupNote(for group: TabGroup) throws -> (note: BeamNote, group: TabGroup) {
+    @MainActor
+    func fetchOrCreateTabGroupNote(for group: TabGroup) async throws -> (note: BeamNote, group: TabGroup) {
         let result = fetchTabGroupNote(for: group)
         var note = result?.note
         var groupUsed = result?.group ?? group
         if result == nil {
-            let frozenGroup = self.copyForSharing(group)
+            let frozenGroup = await self.copyForSharing(group)
             groupUsed = frozenGroup
             do {
                 note = try BeamNote.fetchOrCreate(self, tabGroupId: frozenGroup.id)
@@ -170,12 +172,13 @@ extension TabGroupingManager: BeamDocumentSource {
     }
 
     /// - Returns: true if save was successful
-    func addGroup(_ group: TabGroup, toNote note: BeamNote) -> Bool {
+    @MainActor
+    func addGroup(_ group: TabGroup, toNote note: BeamNote) async -> Bool {
         var newTitle: String?
         if group.title?.isEmpty != false {
             newTitle = TabGroupingStoreManager.suggestedDefaultTitle(for: group, withTabs: allOpenTabs(inGroup: group), truncated: false)
         }
-        let copiedGroup = self.copyForNoteInsertion(group, newTitle: newTitle)
+        let copiedGroup = await self.copyForNoteInsertion(group, newTitle: newTitle)
         note.addTabGroup(copiedGroup.id)
         if note.save(self) {
             Logger.shared.logInfo("Added group '\(copiedGroup.descriptionForLogs)' into note '\(note)'", category: .tabGrouping)

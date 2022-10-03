@@ -529,7 +529,7 @@ public extension CALayer {
 
             self.doRunAfterNextLayout()
         }
-        if isResizing || shouldDisableAnimationAtNextLayout || didJustMoveToWindow {
+        if isResizing || shouldDisableAnimationAtNextLayout || didJustMoveToWindow || state?.isResizingSplitView == true {
             shouldDisableAnimationAtNextLayout = false
             CATransaction.disableAnimations {
                 workBlock()
