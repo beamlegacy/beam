@@ -564,6 +564,7 @@
 		874111A22825894A0024C348 /* WebAutofillPositionModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 874111A12825894A0024C348 /* WebAutofillPositionModifier.swift */; };
 		874111A9282592D60024C348 /* autofill-display.json in Resources */ = {isa = PBXBuildFile; fileRef = 874111A8282592D60024C348 /* autofill-display.json */; };
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
+		8750344428BF6CE3009D1C83 /* TextNode+SpellChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */; };
 		8749F3372893DF5B00098600 /* KeyEventHijacker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749F3362893DF5B00098600 /* KeyEventHijacker.swift */; };
 		87572B9E27B26EB9003DACFB /* ChromiumImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */; };
 		8757CB7127FB616B00A611D6 /* WebFieldAutofillOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */; };
@@ -592,6 +593,7 @@
 		87892A8428C13D26007DFD5C /* IdentifiableString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87892A8328C13D26007DFD5C /* IdentifiableString.swift */; };
 		87892A9328C14965007DFD5C /* XCTests-Passwords-UTF8-noBOM.binary in Resources */ = {isa = PBXBuildFile; fileRef = 87892A8C28C14964007DFD5C /* XCTests-Passwords-UTF8-noBOM.binary */; };
 		87892A9428C14965007DFD5C /* XCTests-Passwords-UTF8-BOM.binary in Resources */ = {isa = PBXBuildFile; fileRef = 87892A9228C14964007DFD5C /* XCTests-Passwords-UTF8-BOM.binary */; };
+		878F77E528DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878F77E428DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift */; };
 		87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */; };
 		879157372799EECF00AE1040 /* BrowserImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879157362799EECF00AE1040 /* BrowserImporter.swift */; };
 		8795070328B422AA00E23758 /* KeyEventHijackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8795070228B422AA00E23758 /* KeyEventHijackerTests.swift */; };
@@ -604,6 +606,7 @@
 		87A551C527ADA1F100D6A22D /* WebAutofillPopoverContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */; };
 		87A87CE426C2F620009D9EE2 /* PasswordExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */; };
 		87AD4BF4286A530C0058F8BE /* PasswordEncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AD4BF3286A530C0058F8BE /* PasswordEncryptionManager.swift */; };
+		87AE993028EB149500AA49D0 /* AppDelegate+SpellChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AE992F28EB149500AA49D0 /* AppDelegate+SpellChecking.swift */; };
 		87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */; };
 		87C539BD26162C3400D51877 /* WebFieldAutofillMenuCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539BC26162C3400D51877 /* WebFieldAutofillMenuCell.swift */; };
 		87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */; };
@@ -2285,6 +2288,7 @@
 		874111A12825894A0024C348 /* WebAutofillPositionModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutofillPositionModifier.swift; sourceTree = "<group>"; };
 		874111A8282592D60024C348 /* autofill-display.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "autofill-display.json"; sourceTree = "<group>"; };
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
+		8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextNode+SpellChecking.swift"; sourceTree = "<group>"; };
 		8749F3362893DF5B00098600 /* KeyEventHijacker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHijacker.swift; sourceTree = "<group>"; };
 		87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumImporter.swift; sourceTree = "<group>"; };
 		8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillOverlay.swift; sourceTree = "<group>"; };
@@ -2313,6 +2317,7 @@
 		87892A8328C13D26007DFD5C /* IdentifiableString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifiableString.swift; sourceTree = "<group>"; };
 		87892A8C28C14964007DFD5C /* XCTests-Passwords-UTF8-noBOM.binary */ = {isa = PBXFileReference; explicitFileType = compiled; fileEncoding = 4; path = "XCTests-Passwords-UTF8-noBOM.binary"; sourceTree = "<group>"; };
 		87892A9228C14964007DFD5C /* XCTests-Passwords-UTF8-BOM.binary */ = {isa = PBXFileReference; explicitFileType = compiled; fileEncoding = 4; path = "XCTests-Passwords-UTF8-BOM.binary"; sourceTree = "<group>"; };
+		878F77E428DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+SpellChecking.swift"; sourceTree = "<group>"; };
 		8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserImportErrors.swift"; sourceTree = "<group>"; };
 		879157362799EECF00AE1040 /* BrowserImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserImporter.swift; sourceTree = "<group>"; };
 		8795070228B422AA00E23758 /* KeyEventHijackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHijackerTests.swift; sourceTree = "<group>"; };
@@ -2325,6 +2330,7 @@
 		87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutofillPopoverContainer.swift; sourceTree = "<group>"; };
 		87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordExporterTests.swift; sourceTree = "<group>"; };
 		87AD4BF3286A530C0058F8BE /* PasswordEncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordEncryptionManager.swift; sourceTree = "<group>"; };
+		87AE992F28EB149500AA49D0 /* AppDelegate+SpellChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+SpellChecking.swift"; sourceTree = "<group>"; };
 		87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModel.swift; sourceTree = "<group>"; };
 		87C539BC26162C3400D51877 /* WebFieldAutofillMenuCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillMenuCell.swift; sourceTree = "<group>"; };
 		87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSuggestionCell.swift; sourceTree = "<group>"; };
@@ -4517,6 +4523,7 @@
 				A50241CB26D8FA5500C93E1E /* Gutter */,
 				96C9AAB82593BB67007D3D98 /* Widget.swift */,
 				418171B92581107C00317ED8 /* TextNode.swift */,
+				8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */,
 				9691E3D725AD9F3300A13080 /* TextRoot.swift */,
 				3349581128E2FD1B005D5A1D /* EditorType.swift */,
 				418171BF2581107C00317ED8 /* BeamTextEdit.swift */,
@@ -4525,6 +4532,7 @@
 				A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */,
 				333E4F8C270AE2B7005B72CD /* BeamTextEdit+Search.swift */,
 				6ECDE71328C1FDDC00954E4C /* BeamTextEdit+MenuValidation.swift */,
+				878F77E428DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift */,
 				418171BE2581107C00317ED8 /* TextEditMovements.swift */,
 				418171B82581107C00317ED8 /* TextEditOperations.swift */,
 				96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */,
@@ -4660,6 +4668,7 @@
 				A599F8D227849AF200657CD5 /* AppDelegate+Onboarding.swift */,
 				962AC88727901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift */,
 				9670B8FA285011A800BEC4A0 /* AppDelegate+DataTree.swift */,
+				87AE992F28EB149500AA49D0 /* AppDelegate+SpellChecking.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -9392,6 +9401,7 @@
 				A0DB19F026829BF900956579 /* AllowListViewModel.swift in Sources */,
 				9617815526934ACC0019D9CA /* ReferencesSection.swift in Sources */,
 				0325629226051D3B006513E4 /* RBUtils.m in Sources */,
+				8750344428BF6CE3009D1C83 /* TextNode+SpellChecking.swift in Sources */,
 				A0E9B0E326668C1300FC99A5 /* FaviconView.swift in Sources */,
 				37B85B8227A2C81B003871F9 /* DownloadProxyDelegate.swift in Sources */,
 				8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */,
@@ -9877,6 +9887,7 @@
 				960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */,
 				37DB5A0F27BB514400534760 /* EmbedLoadingView.swift in Sources */,
 				BAA6703B2414F077ED3A09D8 /* WebAutofillMessageHandler.swift in Sources */,
+				87AE993028EB149500AA49D0 /* AppDelegate+SpellChecking.swift in Sources */,
 				3343794327037578004EF5A4 /* BeamWindow+Search.swift in Sources */,
 				BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */,
 				BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */,
@@ -9885,6 +9896,7 @@
 				8768566427709413002A8069 /* ChromiumPasswordImporter.swift in Sources */,
 				8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */,
 				5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */,
+				878F77E528DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift in Sources */,
 				A0CC0AFE2892F0D300DD6B4D /* AdvancedPreferencesJournalAndNotes.swift in Sources */,
 				87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */,
 				BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */,

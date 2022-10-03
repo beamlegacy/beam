@@ -69,7 +69,8 @@ extension BeamText {
     func buildAttributedString(node: TextNode,
                                caret: Caret?,
                                selectedRange: Swift.Range<Int>?,
-                               mouseInteraction: MouseInteraction? = nil) -> NSMutableAttributedString {
+                               mouseInteraction: MouseInteraction? = nil,
+                               spellChecking: [NSTextCheckingResult] = []) -> NSMutableAttributedString {
         var referencesRanges: [Swift.Range<Int>]?
         if let proxyNode = node as? ProxyTextNode, !proxyNode.isLink {
             referencesRanges = proxyNode.referencesRanges
@@ -83,7 +84,8 @@ extension BeamText {
                                                             selectedRange: selectedRange, referencesRanges: referencesRanges,
                                                             searchedRanges: node.searchHighlightRanges,
                                                             currentSearchRangeIndex: node.currentSearchHightlight,
-                                                            mouseInteraction: mouseInteraction)
+                                                            mouseInteraction: mouseInteraction,
+                                                            spellChecking: spellChecking)
 
         //If current node contains the current search result, block invalidate on hover during the bump animation
         //If not, the layer is redrawn before animation is over.
