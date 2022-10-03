@@ -60,6 +60,8 @@ final class CodeNode: TextNode, Collapsible {
     override var moveDownInsertsNewElementIfNeeded: Bool { true }
     override var allowFormatting: Bool { false }
 
+    override var isSpellCheckable: Bool { false }
+
     override func subscribeToElement(_ element: BeamElement) {
         elementScope.removeAll()
 

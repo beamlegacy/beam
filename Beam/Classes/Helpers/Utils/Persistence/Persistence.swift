@@ -112,6 +112,12 @@ struct Persistence {
             Persistence.Sync.BeamObjects.last_updated_at = nil
         }
     }
+
+    enum SpellChecking {
+        @StandardStorable("spellChecking.enable") static var enable: Bool?
+        @StandardStorable("spellChecking.ignored") static var ignoredWords: [String]?
+    }
+
     /// Clean all stored informations on logout
     static func cleanUp() {
         Persistence.Authentication.accessToken = nil
