@@ -24,6 +24,7 @@ struct BeamTextAttributedStringBuilder {
         var currentSearchRangeIndex: Int?
 
         var mouseInteraction: MouseInteraction?
+        var spellChecking: [NSTextCheckingResult] = []
     }
 
     func build(config: Config) -> NSMutableAttributedString {
@@ -56,6 +57,23 @@ struct BeamTextAttributedStringBuilder {
                         let r = NSRange(location: refRange.lowerBound, length: max(0, min(strRange.length - refRange.lowerBound, refRange.count)))
                         guard r.length > 0 else { continue }
                         attributedString.addAttribute(.foregroundColor, value: BeamColor.Editor.reference.staticColor, range: r)
+                    }
+                }
+            }
+
+            if !range.attributes.contains(where: { $0.isLink }) {
+                for spellCheck in config.spellChecking {
+                    guard spellCheck.resultType == .spelling else { continue }
+                    let checkRanges = (0..<spellCheck.numberOfRanges)
+                        .map { spellCheck.range(at: $0) }
+                        .filter { range.range.contains($0.lowerBound) && range.range.contains(max(0, $0.upperBound - 1)) }
+                    for checkRange in checkRanges {
+                        let r = NSRange(location: checkRange.location - range.range.lowerBound, length: checkRange.length)
+                        attributedString.removeAttribute(.underlineStyle, range: r)
+                        attributedString.removeAttribute(.underlineColor, range: r)
+
+                        attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.patternDot.rawValue, range: r)
+                        attributedString.addAttribute(.underlineColor, value: NSColor.red, range: r)
                     }
                 }
             }
