@@ -114,6 +114,7 @@ import Sentry
         }
     }
 
+    @Published var isResizingSplitView = false
     @Published var sideNoteWidth: CGFloat = 440
     var maxWidthForSplitView: CGFloat {
         guard let associatedWindow = self.associatedWindow else { return 500 }
