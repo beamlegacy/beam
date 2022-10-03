@@ -1126,7 +1126,7 @@ public extension CALayer {
     /// also known as searchFromNode
     /// - Returns: true if action is possible
     private func triggerCmdReturn(from node: TextNode) -> Bool {
-        guard node.text.count > 0, !(node is BlockReferenceNode), !(node is ProxyNode)
+        guard node.text.count > 0, !(node is BlockReferenceNode), !(node is ProxyNode), !(node is CodeNode)
         else { return false }
 
         let animator = TextEditCmdReturnAnimator(node: node, editorLayer: self.layer)
