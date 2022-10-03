@@ -294,13 +294,13 @@ class TabGroupingManagerTests: XCTestCase {
     }
 
     // MARK: -
-    func testFetchOrCreateTabGroupNote() throws {
+    func testFetchOrCreateTabGroupNote() async throws {
         let group = TabGroup(pageIds: [UUID(), UUID()], title: "Group A")
         let pages = group.pageIds.map { TabGroupBeamObject.PageInfo(id: $0, url: URL(string: "beamapp.co")!, title: $0.uuidString) }
         let groupBO = TabGroupingStoreManager.convertGroupToBeamObject(group, pages: pages)
         store?.save(groups: [groupBO])
 
-        let (note, newGroup) = try sut.fetchOrCreateTabGroupNote(for: group)
+        let (note, newGroup) = try await sut.fetchOrCreateTabGroupNote(for: group)
         XCTAssertNotNil(note)
         XCTAssertNotEqual(group, newGroup)
         XCTAssertEqual(newGroup.title, group.title)
@@ -330,10 +330,10 @@ class TabGroupingManagerTests: XCTestCase {
 
 
         // calling again doesn't create new copy or group
-        let (note2ndCall, group2ndCall) = try sut.fetchOrCreateTabGroupNote(for: group)
+        let (note2ndCall, group2ndCall) = try await sut.fetchOrCreateTabGroupNote(for: group)
         XCTAssertEqual(note2ndCall, note)
         XCTAssertEqual(group2ndCall, newGroup)
-        let (noteFromGroupCopy, groupFromGroupCopy) = try sut.fetchOrCreateTabGroupNote(for: groupCopy)
+        let (noteFromGroupCopy, groupFromGroupCopy) = try await sut.fetchOrCreateTabGroupNote(for: groupCopy)
         XCTAssertEqual(noteFromGroupCopy, note)
         XCTAssertEqual(groupFromGroupCopy, groupCopy)
         XCTAssertEqual(store?.fetch(copiesOfGroup: group.id).count, 1)

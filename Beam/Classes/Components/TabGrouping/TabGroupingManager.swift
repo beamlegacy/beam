@@ -94,17 +94,17 @@ class TabGroupingManager {
 extension TabGroupingManager {
 
     /// create a copy of the group, updates it with existing tabs and save it into DB.
-    func copyForNoteInsertion(_ group: TabGroup, newTitle: String? = nil) -> TabGroup {
+    func copyForNoteInsertion(_ group: TabGroup, newTitle: String? = nil) async -> TabGroup {
         let newGroup = group.copy(locked: true, discardPages: false)
         if let newTitle = newTitle {
             newGroup.changeTitle(newTitle)
         }
-        groupDidChangeMetadata(newGroup)
+        await groupDidChangeMetadata(newGroup)
         return newGroup
     }
 
     /// creates a copy of the tab group beam object as is, and save it into DB.
-    func copyForSharing(_ group: TabGroup) -> TabGroup {
+    func copyForSharing(_ group: TabGroup) async -> TabGroup {
         var title: String = group.title ?? ""
         if title.isEmpty {
             title = TabGroupingStoreManager.suggestedDefaultTitle(for: group, withTabs: allOpenTabs(inGroup: group), truncated: false)
@@ -114,18 +114,22 @@ extension TabGroupingManager {
         } else if group.title?.isEmpty != false, let existingCopy = storeManager?.fetch(copiesOfGroup: group.id).first {
             return TabGroup(id: existingCopy.id, pageIds: group.pageIds, title: title, color: group.color, isLocked: true, parentGroup: group.id)
         }
-        return copyForNoteInsertion(group, newTitle: title)
+        return await copyForNoteInsertion(group, newTitle: title)
     }
 
     func renameGroup(_ group: TabGroup, title: String) {
         group.changeTitle(title)
         Logger.shared.logInfo("Tab Group renamed to '\(title)' (\(group.id))", category: .tabGrouping)
-        groupDidChangeMetadata(group)
+        Task { @MainActor in
+            await groupDidChangeMetadata(group)
+        }
     }
 
     func changeGroupColor(_ group: TabGroup, color: TabGroupingColor) {
         group.changeColor(color)
-        groupDidChangeMetadata(group)
+        Task { @MainActor in
+            await groupDidChangeMetadata(group)
+        }
     }
 
     func pageWasMovedInsideSameGroup(pageId: ClusteringManager.PageID, group: TabGroup) {
@@ -237,10 +241,11 @@ extension TabGroupingManager {
         return confirmed
     }
 
-    private func groupDidChangeMetadata(_ group: TabGroup) {
-        Task { @MainActor in
+    @MainActor
+    private func groupDidChangeMetadata(_ group: TabGroup) async {
+//        Task { @MainActor in
             await storeManager?.groupDidUpdate(group, origin: .userGroupMetadataChange, updatePagesWithOpenedTabs: allOpenTabs())
-        }
+//        }
     }
 
     private func groupDidChangeContent(_ group: TabGroup, fromUser: Bool) {
