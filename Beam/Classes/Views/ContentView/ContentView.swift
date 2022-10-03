@@ -83,10 +83,13 @@ struct ContentView: View {
                    value.time.timeIntervalSince(previousDragChangeTime) < 0.01 {
                     return
                 }
+                state.isResizingSplitView = true
                 previousDragChangeTime = value.time
                 let newWidth = state.sideNoteWidth - value.translation.width
                 state.sideNoteWidth = newWidth.clamp(440, state.maxWidthForSplitView)
-            })
+            }.onEnded({ _ in
+                state.isResizingSplitView = false
+            }))
     }
 
     //This disable the radius in split view for now, as they break the display of the NoteView after pivoting from the web
