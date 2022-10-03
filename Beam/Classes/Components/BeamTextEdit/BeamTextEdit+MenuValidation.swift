@@ -55,6 +55,10 @@ extension BeamTextEdit: NSMenuItemValidation {
             menuItem.title = NSLocalizedString("Redo", comment: "Menu Item")
             return false
         }
+        if menuItem.action == #selector(toggleContinuousSpellChecking(_:)) {
+            menuItem.state = Persistence.SpellChecking.enable == false ? .off : .on
+            return true
+        }
         if menuItem.action == #selector(toggleHeadingOneAction(_:)) ||
             menuItem.action == #selector(toggleHeadingTwoAction(_:)) ||
             menuItem.action == #selector(toggleBoldAction(_:)) ||

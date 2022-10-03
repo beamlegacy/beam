@@ -181,6 +181,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
         data.currentAccount?.updateInitialState()
 
+        initializeSpellChecker()
         fetchTopDomains()
         getUserInfos()
         LoggerRecorder.shared.deleteEntries(olderThan: DateComponents(hour: -2))
