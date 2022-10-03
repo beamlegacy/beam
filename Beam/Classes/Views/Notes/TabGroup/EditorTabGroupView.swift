@@ -106,7 +106,7 @@ struct EditorTabGroupView: View {
     }
 
     private var allowAnimation: Bool {
-        !windowInfo.windowIsResizing
+        !windowInfo.windowIsResizing && !state.isResizingSplitView
     }
 
     @ViewBuilder private var title: some View {
