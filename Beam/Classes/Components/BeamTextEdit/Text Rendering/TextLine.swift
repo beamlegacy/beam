@@ -175,9 +175,10 @@ public class TextLine {
         CTLineGetGlyphRuns(ctLine) as! [CTRun]
     }
 
+    //swiftlint:disable:next cyclomatic_complexity function_body_length
     public func draw(_ context: CGContext, translate: Bool = true) {
         context.saveGState()
-        context.textPosition = NSPoint()//line.frame.origin
+        context.textPosition = NSPoint()
         if translate {
             context.translateBy(x: frame.origin.x, y: frame.origin.y)
         }
@@ -197,6 +198,7 @@ public class TextLine {
 
                 if let color = attributes[.strikethroughColor] as? NSColor,
                    attributes[.strikethroughStyle] as? NSNumber != nil {
+                    context.saveGState()
                     context.setStrokeColor(color.cgColor)
 
                     let  y = CGFloat(roundf(Float(ascent / 3.0)))
@@ -204,8 +206,42 @@ public class TextLine {
                     context.move(to: CGPoint(x: offset, y: y))
                     context.addLine(to: CGPoint(x: offset + CGFloat(width), y: y))
                     context.strokePath()
+                    context.restoreGState()
                 }
+
+                if let color = attributes[.underlineColor] as? NSColor,
+                   let styleRaw = attributes[.underlineStyle] as? NSNumber {
+                    let style = NSUnderlineStyle(rawValue: styleRaw.intValue)
+                    if style != .single {
+                        context.saveGState()
+                        context.setStrokeColor(color.cgColor)
+
+                        let y = -CGFloat(roundf(Float(descent)))
+
+                        context.move(to: CGPoint(x: offset, y: y))
+                        context.setLineWidth(1)
+                        switch style {
+                        case .patternDot:
+                            context.setLineDash(phase: 0, lengths: [2, 2])
+                        case .patternDash:
+                            context.setLineDash(phase: 0, lengths: [4, 2])
+                        case .patternDashDot:
+                            context.setLineDash(phase: 0, lengths: [4, 2, 2, 2])
+                        case .patternDashDotDot:
+                            context.setLineDash(phase: 0, lengths: [4, 2, 2, 2, 2, 2])
+                        case .thick:
+                            context.setLineWidth(2)
+                        default:
+                            break
+                        }
+                        context.addLine(to: CGPoint(x: offset + CGFloat(width), y: y))
+                        context.strokePath()
+                        context.restoreGState()
+                    }
+                }
+
                 if let delegateAttribute = attributes[kCTRunDelegateAttributeName as NSAttributedString.Key] {
+                    context.saveGState()
                     let delegate: CTRunDelegate = delegateAttribute as! CTRunDelegate
                     let imageRunRef = CTRunDelegateGetRefCon(delegate)
                     let imageRunPtr = imageRunRef.assumingMemoryBound(to: ImageRunStruct.self)
@@ -224,6 +260,7 @@ public class TextLine {
                         context.setFillColor(imageColor.cgColor)
                         context.fill(rect)
                     }
+                    context.restoreGState()
                 }
             }
 
