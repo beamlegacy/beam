@@ -242,18 +242,22 @@ extension BeamWindow {
                 return
             }
         case KeyCode.one.rawValue, KeyCode.two.rawValue, KeyCode.three.rawValue, KeyCode.four.rawValue, KeyCode.five.rawValue, KeyCode.six.rawValue, KeyCode.seven.rawValue, KeyCode.eight.rawValue:
-            guard PreferencesManager.cmdNumberSwitchTabs, command else { return }
-            if state.mode == .web && keyValue <= state.browserTabsManager.tabs.count {
-                state.browserTabsManager.setCurrentTab(atAbsoluteIndex: keyValue - 1)
-            } else if state.mode != .web {
-                let recents = state.recentsManager.recentNotes
-                if keyValue <= recents.count {
-                    state.navigateToNote(id: recents[keyValue - 1].id)
+            if PreferencesManager.cmdNumberSwitchTabs, command {
+                if state.mode == .web && keyValue <= state.browserTabsManager.tabs.count {
+                    state.browserTabsManager.setCurrentTab(atAbsoluteIndex: keyValue - 1)
+                } else if state.mode != .web {
+                    let recents = state.recentsManager.recentNotes
+                    if keyValue <= recents.count {
+                        state.navigateToNote(id: recents[keyValue - 1].id)
+                    }
                 }
+                return
             }
         case KeyCode.nine.rawValue:
-            guard PreferencesManager.cmdNumberSwitchTabs, command, case .web = state.mode else { return }
-            state.browserTabsManager.setCurrentTab(at: state.browserTabsManager.tabs.count - 1)
+            if PreferencesManager.cmdNumberSwitchTabs, command, case .web = state.mode {
+                state.browserTabsManager.setCurrentTab(at: state.browserTabsManager.tabs.count - 1)
+                return
+            }
         default:
             break
         }
