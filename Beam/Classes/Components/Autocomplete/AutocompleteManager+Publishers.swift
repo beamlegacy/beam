@@ -372,7 +372,8 @@ extension AutocompleteManager {
             var results = [AutocompleteResult]()
             let links = LinkStore.shared.getLinks(for: group.pageIds)
             let groupInDB = self.beamState?.data.tabGroupingDBManager?.fetch(byIds: [group.id]).first
-            let pagesInDB: [UUID: TabGroupBeamObject.PageInfo] = Dictionary(uniqueKeysWithValues: groupInDB?.pages.map{ ($0.id, $0) } ?? [])
+            let tuples = groupInDB?.pages.map { ($0.id, $0) } ?? []
+            let pagesInDB: [UUID: TabGroupBeamObject.PageInfo] = Dictionary(tuples, uniquingKeysWith: { (first, _) in first })
             if query.isEmpty {
                 results.append(
                     AutocompleteResult(text: loc("Open All Tabs"), source: .action, customIcon: "field-web", score: .greatestFiniteMagnitude,
