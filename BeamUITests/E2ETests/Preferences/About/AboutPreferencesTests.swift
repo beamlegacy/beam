@@ -15,8 +15,8 @@ class AboutPreferencesTests: BaseTest {
     let expectedBugsTabTitle = "beamapp.canny.io/bugs"
     let expectedFeatureTabTitle = "beamapp.canny.io/feature-r"
     let expectedTwitterTabTitle = "twitter.com/getonbeam"
-    let expectedTermsOfServicesTabTitle = "public.beamapp.co/beam/note/e2a2291f-37d5-443b-aa88-af6b04520fee/Terms-of-Services"
-    let expectedPrivacyPolicyTabTitle = "public.beamapp.co/beam/note/1085ef50-2df0-4ac6-b8af-9c0b10d82b34/Privacy-Policy"
+    let expectedTermsOfServicesTabTitle = "next.beamapp.co/beam/note/e2a2291f-37d5-443b-aa88-af6b04520fee/Terms-of-Services"
+    let expectedPrivacyPolicyTabTitle = "next.beamapp.co/beam/note/1085ef50-2df0-4ac6-b8af-9c0b10d82b34/Privacy-Policy"
     
     @discardableResult
     private func openAboutPreferences() -> AboutPreferencesTestView {
