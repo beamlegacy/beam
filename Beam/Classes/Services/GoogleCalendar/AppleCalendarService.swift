@@ -72,6 +72,9 @@ private extension EKEvent {
             if url.contains("zoom.us") {
                 return String(url)
             }
+            if url.contains("facetime.apple.com") {
+                return String(url)
+            }
         }
 
         return nil
