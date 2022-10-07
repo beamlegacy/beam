@@ -9,7 +9,7 @@ import Foundation
 
 protocol BeamNSTableViewDelegate: AnyObject {
     func tableViewDidChangeEffectiveAppearance(_ tableView: BeamNSTableView)
-    func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint) -> Bool
+    func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint, modifiers: NSEvent.ModifierFlags) -> Bool
     func tableView(_ tableView: BeamNSTableView, rightMouseDownFor row: Int, column: Int, locationInWindow: NSPoint)
     func tableView(_ tableView: BeamNSTableView, didDoubleTap row: Int)
 }
@@ -55,7 +55,7 @@ class BeamNSTableView: NSTableView {
         var shouldPropagate = true
         if let additionalDelegate = additionalDelegate,
               let (row, column) = rowAndColumnForWindowLocation(event.locationInWindow) {
-            shouldPropagate = additionalDelegate.tableView(self, mouseDownFor: row, column: column, locationInWindow: event.locationInWindow)
+            shouldPropagate = additionalDelegate.tableView(self, mouseDownFor: row, column: column, locationInWindow: event.locationInWindow, modifiers: event.modifierFlags)
         }
         guard shouldPropagate else { return }
         super.mouseDown(with: event)
