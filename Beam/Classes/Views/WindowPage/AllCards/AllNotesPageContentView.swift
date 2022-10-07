@@ -226,8 +226,8 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                     }
                     hoveredRowIndex = hoveredIndex
                     hoveredRowFrame = frame
-                } onMouseDown: { (rowIndex, column) in
-                    handleMouseDown(for: rowIndex, column: column)
+                } onMouseDown: { (rowIndex, column, modifier) in
+                    handleMouseDown(for: rowIndex, column: column, modifiers: modifier)
                 } onRightMouseDown: { (rowIndex, _, location) in
                     let forRow = selectedRowsIndexes.contains(rowIndex) ? nil : rowIndex
                     showGlobalContextualMenu(at: location, for: forRow)
@@ -272,11 +272,18 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
         }
     }
 
-    func handleMouseDown(for row: Int, column: TableViewColumn) {
+    func handleMouseDown(for row: Int, column: TableViewColumn, modifiers: NSEvent.ModifierFlags) {
         guard column.isLink else { return }
         let items = currentNotesList
         let item = items[row]
-        state.navigateToNote(id: item.id)
+
+        if modifiers.contains(.shift) {
+            state.openNoteInNewWindow(id: item.id)
+        } else if modifiers.contains(.command) {
+            state.navigateToNote(id: item.id, in: .splitView)
+        } else {
+            state.navigateToNote(id: item.id, in: .main)
+        }
     }
 
     func showContextualMenuForHoveredRow(tableViewGeometry: GeometryProxy) {
