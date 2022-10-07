@@ -199,6 +199,15 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
                 }
             }
             .store(in: &cancellables)
+
+        NotificationCenter.default
+            .publisher(for: NSWindow.willBeginSheetNotification)
+            .compactMap { ($0.object as? VideoCallsPanel) }
+            .filter { [weak self] panel in panel === self?.detailsClient.webView.window }
+            .sink { [weak self] _ in
+                self?.expand()
+            }
+            .store(in: &cancellables)
     }
 
     func close() {
