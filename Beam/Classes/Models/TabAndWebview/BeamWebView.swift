@@ -238,8 +238,7 @@ class BeamWebView: WKWebView {
             .webKitDownloadImage,
             .webKitSearchWeb,
             .webKitDownloadMedia,
-            .webKitOpenMediaInNewWindow,
-            .webKitToggleEnhancedFullscreen
+            .webKitOpenMediaInNewWindow
         ]
 
         let filteredItems = menu.items.filter { menuItem in
