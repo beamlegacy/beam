@@ -43,6 +43,19 @@ final class AllNotesPageContextualMenu {
 
         let count = selectedNotes.count
         var countSuffix = " All"
+
+        if selectedNotes.count == 1 {
+            menu.addItem(NSMenuItem(title: loc("Open in New Window"),
+                                    action: #selector(openInNewWindow),
+                                    keyEquivalent: ""))
+            menu.addItem(NSMenuItem(title: loc("Open in Side Window"),
+                                    action: #selector(openInSideWindow),
+                                    keyEquivalent: ""))
+            menu.addItem(NSMenuItem(title: loc("Open in Split View"),
+                                    action: #selector(openInSplitView),
+                                    keyEquivalent: ""))
+            menu.addItem(NSMenuItem.separator())
+        }
         if selectedNotes.count > 0 {
             countSuffix = count == 1 ? "" : " \(count) Notes"
 
@@ -362,6 +375,21 @@ final class AllNotesPageContextualMenu {
     @objc private func unpin() {
         guard let state = AppDelegate.main.window?.state else { return }
         state.data.pinnedManager.unpin(notes: selectedNotes)
+    }
+
+    @objc private func openInSplitView() {
+        guard let state = AppDelegate.main.window?.state, let note = selectedNotes.first else { return }
+        state.navigateToNote(id: note.id, in: .splitView)
+    }
+
+    @objc private func openInNewWindow() {
+        guard let state = AppDelegate.main.window?.state, let note = selectedNotes.first else { return }
+        state.openNoteInNewWindow(id: note.id)
+    }
+
+    @objc private func openInSideWindow() {
+        guard let state = AppDelegate.main.window?.state, let note = selectedNotes.first else { return }
+        state.navigateToNote(id: note.id, in: .panel(nil))
     }
 }
 
