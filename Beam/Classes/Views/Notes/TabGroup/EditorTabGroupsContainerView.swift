@@ -19,16 +19,9 @@ struct EditorTabGroupsContainerView: View {
     @State private var hoveredTabGroupFrame: CGPoint?
     @State private var hoveredTabGroupColor: Color?
 
-    let columns = [
-        GridItem(.flexible(minimum: 100, maximum: 200)),
-        GridItem(.flexible(minimum: 100, maximum: 200)),
-        GridItem(.flexible(minimum: 100, maximum: 200)),
-        GridItem(.flexible(minimum: 100, maximum: 200))
-    ]
-
     var body: some View {
         GeometryReader { proxy in
-            LazyVGrid(columns: columns, alignment: .leading, spacing: 10) {
+            LazyVGrid(columns: columns(for: proxy.size.width), alignment: .leading, spacing: 10) {
                 ForEach(tabGroups) { group in
                     EditorTabGroupView(tabGroup: group,
                                        note: note,
@@ -40,6 +33,19 @@ struct EditorTabGroupsContainerView: View {
             .accessibilityValue( "Tab Groups container with \(tabGroups.count)")
             .accessibility(identifier: "TabGroupsContainerView")
             .overlay(previewOverlay(for: hoveredTab, localProxy: proxy.frame(in: .global)), alignment: .top)
+        }
+    }
+
+    private func columns(for width: CGFloat) -> [GridItem] {
+        if width > 400 {
+            return [
+                GridItem(.flexible(minimum: 100, maximum: 200)),
+                GridItem(.flexible(minimum: 100, maximum: 200)),
+                GridItem(.flexible(minimum: 100, maximum: 200)),
+                GridItem(.flexible(minimum: 100, maximum: 200))
+            ]
+        } else {
+            return [GridItem(.adaptive(minimum: 100, maximum: 200))]
         }
     }
 
