@@ -88,7 +88,7 @@ struct EditorTabGroupView: View {
                                 }
                             }
                     }
-                }.animation(allowAnimation ? .easeIn(duration: 0.1) : nil)
+                }.animation(allowAnimation ? .easeIn(duration: 0.1) : nil, value: hoveredTab)
             }
             .padding(.horizontal, 8)
             .padding(.top, 5)
