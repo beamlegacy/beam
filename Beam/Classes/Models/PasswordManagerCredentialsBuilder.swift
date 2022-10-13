@@ -96,7 +96,7 @@ final class PasswordManagerCredentialsBuilder {
         switch usernameField {
         case .autofilled:
             Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Suggested entry: \(username) on \(minimizedHost)", category: .webAutofillInternal)
-            return PasswordManagerEntry(minimizedHost: minimizedHost, username: username)
+            return PasswordManagerEntry(minimizedHost: minimizedHost, username: username, neverSaved: false)
         default:
             let matchingEntries = passwordManager.bestMatchingEntries(hostname: minimizedHost, username: username)
             Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Suggested entries: \(matchingEntries)", category: .webAutofillInternal)

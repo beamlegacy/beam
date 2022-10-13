@@ -64,7 +64,7 @@ final class PasswordManager {
     }
 
     private func passwordManagerEntries(for passwordsRecord: [LocalPasswordRecord]) -> [PasswordManagerEntry] {
-        passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.hostname, username: $0.username) }
+        passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.hostname, username: $0.username, neverSaved: $0.disabledForHost) }
     }
 
     func fetchAll() -> [PasswordManagerEntry] {
@@ -82,28 +82,35 @@ final class PasswordManager {
     }
 
     func entries(for host: String, options: PasswordManagerHostLookupOptions) -> [PasswordManagerEntry] {
-        guard let passwordsDB = passwordsDB else { return [] }
-
         do {
-            let canonicalHost = options.contains(.genericHost) ? hostnameCanonicalizer.canonicalHostname(for: host) : nil
-            let hostGroup = options.contains(.sharedCredentials) ? hostnameCanonicalizer.hostsSharingCredentials(with: canonicalHost ?? host) : nil
-            let records: [LocalPasswordRecord]
-            if let hostGroup = hostGroup {
-                records = try hostGroup.flatMap {
-                    try passwordsDB.entries(for: $0, options: .exact)
-                }
-            } else if let canonicalHost = canonicalHost {
-                records = try passwordsDB.entries(for: canonicalHost, options: .subdomains)
-            } else {
-                records = try passwordsDB.entries(for: host, options: options)
-            }
-            return passwordManagerEntries(for: records)
+            let allRecords = try records(for: host, options: options)
+            let enabledRecords = allRecords.filter { !$0.disabledForHost }
+            return passwordManagerEntries(for: enabledRecords)
         } catch PasswordDBError.errorFetchingPassword(let errorMsg) {
             Logger.shared.logError("Error while fetching password entries for \(host): \(errorMsg)", category: .passwordsDB)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
         }
         return []
+    }
+
+    func records(for host: String, options: PasswordManagerHostLookupOptions) throws -> [LocalPasswordRecord] {
+        guard let passwordsDB = passwordsDB else {
+            throw Error.databaseError(errorMsg: "database not available")
+        }
+        let canonicalHost = options.contains(.genericHost) ? hostnameCanonicalizer.canonicalHostname(for: host) : nil
+        let hostGroup = options.contains(.sharedCredentials) ? hostnameCanonicalizer.hostsSharingCredentials(with: canonicalHost ?? host) : nil
+        let records: [LocalPasswordRecord]
+        if let hostGroup = hostGroup {
+            records = try hostGroup.flatMap {
+                try passwordsDB.entries(for: $0, options: .exact)
+            }
+        } else if let canonicalHost = canonicalHost {
+            records = try passwordsDB.entries(for: canonicalHost, options: .subdomains)
+        } else {
+            records = try passwordsDB.entries(for: host, options: options)
+        }
+        return records
     }
 
     func bestMatchingEntries(hostname: String, username: String) -> [PasswordManagerEntry] {
@@ -158,11 +165,17 @@ final class PasswordManager {
         }
     }
 
+    func isSaveDisabled(forHost hostname: String) -> Bool {
+        guard let records = try? records(for: hostname, options: .exact) else { return false }
+        return records.contains(where: { $0.disabledForHost })
+    }
+
     @discardableResult
     func save(entry: PasswordManagerEntry? = nil,
               hostname: String,
               username: String,
               password: String,
+              disabledForHost: Bool = false,
               uuid: UUID? = nil,
               _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) -> LocalPasswordRecord? {
         guard let passwordsDB = passwordsDB else {
@@ -188,7 +201,7 @@ final class PasswordManager {
             if let previousRecord = try? passwordsDB.passwordRecord(hostname: previousHostname, username: previousUsername) {
                 passwordRecord = try passwordsDB.update(record: previousRecord, hostname: hostname, username: username, encryptedPassword: encryptedPassword, privateKeySignature: privateKeySignature, uuid: uuid)
             } else {
-                passwordRecord = try passwordsDB.save(hostname: hostname, username: username, encryptedPassword: encryptedPassword, privateKeySignature: privateKeySignature, uuid: uuid)
+                passwordRecord = try passwordsDB.save(hostname: hostname, username: username, encryptedPassword: encryptedPassword, disabledForHost: disabledForHost, privateKeySignature: privateKeySignature, uuid: uuid)
             }
             passwordRecord = (try? passwordsDB.markUsed(record: passwordRecord)) ?? passwordRecord
             changeSubject.send()

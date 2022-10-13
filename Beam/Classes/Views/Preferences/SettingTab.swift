@@ -50,7 +50,7 @@ enum SettingTab: String, CaseIterable {
         case .notes: return NSHostingView(rootView: NotesPreferencesView().fixedSize())
         case .privacy: return NSHostingView(rootView: PrivacyPreferencesView().fixedSize())
         case .passwords:
-            return NSHostingView(rootView: PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordManager: BeamData.shared.passwordManager), creditCardsViewModel: CreditCardListViewModel()).fixedSize())
+            return NSHostingView(rootView: PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordManager: BeamData.shared.passwordManager, showNeverSavedEntries: true), creditCardsViewModel: CreditCardListViewModel()).fixedSize())
         case .accounts: return NSHostingView(rootView: AccountsView(viewModel: AccountsViewModel(calendarManager: BeamData.shared.calendarManager)).fixedSize())
         case .about: return NSHostingView(rootView: AboutPreferencesView().fixedSize())
         case .beta:

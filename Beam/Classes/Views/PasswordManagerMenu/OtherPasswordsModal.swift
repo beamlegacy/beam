@@ -147,7 +147,7 @@ fileprivate extension Sequence where Element == (offset: Int, element: PasswordT
 
 struct OtherPasswordModal_Previews: PreviewProvider {
     static var previews: some View {
-        OtherPasswordModal(viewModel: PasswordListViewModel(passwordManager: PasswordManager(objectManager: BeamObjectManager())),
+        OtherPasswordModal(viewModel: PasswordListViewModel(passwordManager: PasswordManager(objectManager: BeamObjectManager()), showNeverSavedEntries: true),
                            onFill: { _ in },
                            onRemove: { _ in },
                            onDismiss: {})

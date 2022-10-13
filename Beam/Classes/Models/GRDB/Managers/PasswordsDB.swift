@@ -27,6 +27,7 @@ struct RemotePasswordRecord {
     var name: String? // TODO: Remove the support of old keys
     var username: String
     var password: String
+    var disabledForHost: Bool
     var createdAt: Date
     var updatedAt: Date
     var usedAt: Date
@@ -50,6 +51,7 @@ extension RemotePasswordRecord: BeamObjectProtocol {
         case username
         case name // TODO: Remove the support of old keys
         case password
+        case disabledForHost
         case createdAt
         case updatedAt
         case usedAt
@@ -71,6 +73,7 @@ extension RemotePasswordRecord: BeamObjectProtocol {
         username = try (try? container.decode(String.self, forKey: .username)) ?? (try container.decode(String.self, forKey: .name))
 
         password = try container.decode(String.self, forKey: .password)
+        disabledForHost = try container.decodeIfPresent(Bool.self, forKey: .disabledForHost) ?? false
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         usedAt = try container.decodeIfPresent(Date.self, forKey: .usedAt) ?? BeamDate.now
@@ -87,6 +90,7 @@ struct LocalPasswordRecord {
     var hostname: String
     var username: String
     var password: String
+    var disabledForHost: Bool
     var createdAt: Date
     var updatedAt: Date
     var usedAt: Date
@@ -106,7 +110,7 @@ extension LocalPasswordRecord: TableRecord {
     static let databaseTableName = "passwordRecord"
 
     enum Columns: String, ColumnExpression {
-        case uuid, entryId, hostname, username, password, createdAt, updatedAt, usedAt, deletedAt, privateKeySignature
+        case uuid, entryId, hostname, username, password, disabledForHost, createdAt, updatedAt, usedAt, deletedAt, privateKeySignature
     }
 }
 
@@ -118,6 +122,7 @@ extension LocalPasswordRecord: FetchableRecord {
         hostname = row[Columns.hostname]
         username = row[Columns.username]
         password = row[Columns.password]
+        disabledForHost = row[Columns.disabledForHost]
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
         usedAt = row[Columns.usedAt]
@@ -138,6 +143,7 @@ extension LocalPasswordRecord: MutablePersistableRecord {
         container[Columns.hostname] = hostname
         container[Columns.username] = username
         container[Columns.password] = password
+        container[Columns.disabledForHost] = disabledForHost
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.usedAt] = usedAt
@@ -182,10 +188,16 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
                 table.add(column: "usedAt", .datetime).notNull().defaults(sql: "\"1970-01-01\"")
             }
         }
+
+        migrator.registerMigration("disablePasswordAutofillForHost") { db in
+            try db.alter(table: PasswordsDB.tableName) { table in
+                table.add(column: "disabledForHost", .boolean).notNull().defaults(to: false)
+            }
+        }
     }
 
     private func id(for hostname: String, and username: String) -> String {
-        return PasswordManagerEntry(minimizedHost: hostname, username: username).id
+        return PasswordManagerEntry(minimizedHost: hostname, username: username, neverSaved: false).id
     }
 
     private func credentials(for passwordRecords: [LocalPasswordRecord]) -> [Credential] {
@@ -282,11 +294,11 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
         }
     }
 
-    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String) throws -> LocalPasswordRecord {
-        try save(hostname: hostname, username: username, encryptedPassword: encryptedPassword, privateKeySignature: privateKeySignature, uuid: nil)
+    func save(hostname: String, username: String, encryptedPassword: String, disabledForHost: Bool, privateKeySignature: String) throws -> LocalPasswordRecord {
+        try save(hostname: hostname, username: username, encryptedPassword: encryptedPassword, disabledForHost: disabledForHost, privateKeySignature: privateKeySignature, uuid: nil)
     }
 
-    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID? = nil) throws -> LocalPasswordRecord {
+    func save(hostname: String, username: String, encryptedPassword: String, disabledForHost: Bool, privateKeySignature: String, uuid: UUID? = nil) throws -> LocalPasswordRecord {
         do {
             return try write { db in
                 var passwordRecord = LocalPasswordRecord(
@@ -295,6 +307,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
                     hostname: hostname,
                     username: username,
                     password: encryptedPassword,
+                    disabledForHost: disabledForHost,
                     createdAt: BeamDate.now,
                     updatedAt: BeamDate.now,
                     usedAt: BeamDate.now,

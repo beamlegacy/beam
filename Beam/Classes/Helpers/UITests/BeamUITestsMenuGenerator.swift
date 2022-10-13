@@ -210,6 +210,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         }
         do {
             _ = try PasswordImporter.importPasswords(fromCSV: url)
+            BeamData.shared.passwordManager.save(hostname: "neversaved.form.lvh.me", username: "", password: "", disabledForHost: true)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .passwordManager)
         }
@@ -221,8 +222,10 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
             CreditCardEntry(cardDescription: "Jane's company Amex", cardNumber: "374912345678910", cardHolder: "Jane Appleseed", expirationMonth: 8, expirationYear: 2024)
         ]
         for creditCard in creditCards {
-            CreditCardAutofillManager.shared.save(entry: creditCard)
+            CreditCardAutofillManager.shared.save(entry: creditCard, disabled: false)
         }
+        let neverSaved = CreditCardEntry(cardDescription: "", cardNumber: "4001000100010009", cardHolder: "Nobody", expirationMonth: 8, expirationYear: 2025)
+        CreditCardAutofillManager.shared.save(entry: neverSaved, disabled: true)
     }
 
     private func disablePasswordProtection() {
