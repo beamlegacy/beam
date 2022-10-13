@@ -60,6 +60,7 @@ final class PasswordListViewModel: ObservableObject {
     }
 
     let passwordManager: PasswordManager
+    let showNeverSavedEntries: Bool
     private var allPasswordEntries: [PasswordManagerEntry] = []
     private var allPasswordTableViewItems: [PasswordTableViewItem] = []
     private var filteredIndices: [Int] = []
@@ -94,8 +95,9 @@ final class PasswordListViewModel: ObservableObject {
         filteredIndices.map { allPasswordTableViewItems[$0] }
     }
 
-    init(passwordManager: PasswordManager) {
+    init(passwordManager: PasswordManager, showNeverSavedEntries: Bool) {
         self.passwordManager = passwordManager
+        self.showNeverSavedEntries = showNeverSavedEntries
         refresh()
         passwordManager.changePublisher
             .receive(on: DispatchQueue.main)
@@ -139,7 +141,7 @@ final class PasswordListViewModel: ObservableObject {
 
     private func refresh() {
         let savedSelection = Set(selectedEntries)
-        let entries = passwordManager.fetchAll()
+        let entries = passwordManager.fetchAll().filter { showNeverSavedEntries || !$0.neverSaved }
         self.allPasswordEntries = entries
         currentSelection = IndexSet(
             entries.enumerated()
