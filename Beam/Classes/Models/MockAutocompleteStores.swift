@@ -17,7 +17,7 @@ class MockCreditCardStore: CreditCardStore {
     private var creditCards: [UUID: CreditCardRecord] = [:]
 
     init() {
-        _ = addRecord(description: "Black Card", cardNumber: "000000000000000", holder: "Jean-Louis Darmon", expirationMonth: 6, expirationYear: 2022)
+        _ = addRecord(description: "Black Card", cardNumber: "000000000000000", holder: "Jean-Louis Darmon", expirationMonth: 6, expirationYear: 2022, disabled: false)
     }
 
     func fetchRecord(uuid: UUID) -> CreditCardRecord? {
@@ -36,8 +36,8 @@ class MockCreditCardStore: CreditCardStore {
     }
 
     @discardableResult
-    func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) -> CreditCardRecord {
-        var creditCard = CreditCardRecord(cardDescription: description, encryptedCardNumber: cardNumber, cardHolder: holder, expirationMonth: expirationMonth, expirationYear: expirationYear, createdAt: BeamDate.now, updatedAt: BeamDate.now, usedAt: BeamDate.now)
+    func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int, disabled: Bool) -> CreditCardRecord {
+        var creditCard = CreditCardRecord(cardDescription: description, encryptedCardNumber: cardNumber, cardHolder: holder, expirationMonth: expirationMonth, expirationYear: expirationYear, disabled: disabled, createdAt: BeamDate.now, updatedAt: BeamDate.now, usedAt: BeamDate.now)
         let uuid = UUID()
         creditCard.uuid = uuid
         creditCards[uuid] = creditCard
@@ -45,13 +45,14 @@ class MockCreditCardStore: CreditCardStore {
     }
 
     @discardableResult
-    func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord {
+    func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int, disabled: Bool) throws -> CreditCardRecord {
         var updatedRecord = try creditCard(matching: record.uuid)
         updatedRecord.cardDescription = description
         updatedRecord.encryptedCardNumber = cardNumber
         updatedRecord.cardHolder = holder
         updatedRecord.expirationMonth = expirationMonth
         updatedRecord.expirationYear = expirationYear
+        updatedRecord.disabled = disabled
         updatedRecord.updatedAt = BeamDate.now
         updatedRecord.usedAt = BeamDate.now
         creditCards[record.uuid] = updatedRecord

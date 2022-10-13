@@ -17,10 +17,17 @@ struct WebFieldAutofill: Codable {
     var background: String?
 }
 
-enum PasswordSaveAction: Equatable {
+enum PasswordSaveAlertAction: Equatable {
     case save
     case update(entry: PasswordManagerEntry)
+    case saveNoDisable
     case saveSilently
+}
+
+enum PasswordSaveAlertResult {
+    case save
+    case neverSave
+    case cancel
 }
 
 class WebAutofillController: NSObject, WebPageRelated {
@@ -114,7 +121,15 @@ class WebAutofillController: NSObject, WebPageRelated {
     }
 
     private func isSaveEnabled(for action: WebAutofillAction) -> Bool {
-        isAutofillEnabled(for: action)
+        guard isAutofillEnabled(for: action), let hostname = getPageHost() else {
+            return false
+        }
+        switch action {
+        case .login, .createAccount:
+            return !passwordManager.isSaveDisabled(forHost: hostname)
+        default:
+            return true
+        }
     }
 
     func requestInputFields(frameInfo: WKFrameInfo?) {
@@ -475,56 +490,77 @@ class WebAutofillController: NSObject, WebPageRelated {
         credentialsBuilder.markSaved()
         // TODO: make special case for credentials.username == nil
         Logger.shared.logDebug("Saving password for \(credentials.username ?? "<empty username>")", category: .webAutofillInternal)
-        confirmSavePassword(username: credentials.username ?? "", action: saveAction) { save in
-            guard save else { return }
-            if saveAction != .saveSilently, let browserTab = (self.page as? BrowserTab) {
-                browserTab.passwordManagerToast(saved: saveAction == .save)
+        confirmSavePassword(username: credentials.username ?? "", action: saveAction) { result in
+            switch result {
+            case .save:
+                if saveAction != .saveSilently, let browserTab = (self.page as? BrowserTab) {
+                    browserTab.passwordManagerToast(saved: saveAction == .save)
+                }
+                let savedHostname: String
+                switch saveAction {
+                case .save, .saveNoDisable, .saveSilently:
+                    savedHostname = HostnameCanonicalizer.shared.canonicalHostname(for: hostname) ?? hostname
+                case .update(let entry):
+                    savedHostname = entry.minimizedHost
+                }
+                self.passwordManager.save(hostname: savedHostname, username: credentials.username ?? "", password: credentials.password)
+            case .neverSave:
+                let savedHostname = HostnameCanonicalizer.shared.canonicalHostname(for: hostname) ?? hostname
+                self.passwordManager.save(hostname: savedHostname, username: "", password: "", disabledForHost: true)
+            case .cancel:
+                break
             }
-            let savedHostname: String
-            switch saveAction {
-            case .save, .saveSilently:
-                savedHostname = HostnameCanonicalizer.shared.canonicalHostname(for: hostname) ?? hostname
-            case .update(let entry):
-                savedHostname = entry.minimizedHost
-            }
-            self.passwordManager.save(hostname: savedHostname, username: credentials.username ?? "", password: credentials.password)
         }
     }
 
-    private func saveCredentialsAction(hostname: String, credentials: PasswordManagerCredentialsBuilder.StoredCredentials) -> PasswordSaveAction? {
+    private func saveCredentialsAction(hostname: String, credentials: PasswordManagerCredentialsBuilder.StoredCredentials) -> PasswordSaveAlertAction? {
         if let storedEntry = passwordManager.bestMatchingEntry(hostname: hostname, exactUsername: credentials.username ?? ""),
            let storedPassword = try? passwordManager.password(hostname: storedEntry.minimizedHost, username: credentials.username ?? "", markUsed: false) {
             guard credentials.password != storedPassword else { return nil }
             return .update(entry: storedEntry)
         }
-        return credentials.askSaveConfirmation ? .save : .saveSilently
+        if credentials.askSaveConfirmation {
+            return passwordManager.entries(for: hostname, options: .exact).isEmpty ? .save : .saveNoDisable
+        }
+        return .saveSilently
     }
 
-    private func confirmSavePassword(username: String, action: PasswordSaveAction, onDismiss: @escaping (Bool) -> Void) {
+    private func confirmSavePassword(username: String, action: PasswordSaveAlertAction, onDismiss: @escaping (PasswordSaveAlertResult) -> Void) {
+        let neverForThisWebsiteTag = 1003
         guard let window = self.page?.webviewWindow else {
-            return onDismiss(true)
+            return onDismiss(.save)
         }
         let alertMessage: String
         let saveButtonTitle: String
         switch action {
-        case .save:
+        case .save, .saveNoDisable:
             alertMessage = "Would you like to save this password?"
             saveButtonTitle = "Save Password"
         case .update:
             alertMessage = "Would you like to update the saved password for \(username)?"
             saveButtonTitle = "Update Password"
         case .saveSilently:
-            return onDismiss(true)
+            return onDismiss(.save)
         }
         let alert = NSAlert()
         alert.messageText = alertMessage
         alert.informativeText = "You can view and remove saved passwords in Beam Passwords preferences."
         let saveButton = alert.addButton(withTitle: saveButtonTitle)
+        if action == .save {
+            let neverButton = alert.addButton(withTitle: "Never for this website")
+            neverButton.tag = neverForThisWebsiteTag
+        }
         let cancelButton = alert.addButton(withTitle: "Not Now")
         saveButton.tag = NSApplication.ModalResponse.OK.rawValue
         cancelButton.tag = NSApplication.ModalResponse.cancel.rawValue
         alert.beginSheetModal(for: window) { response in
-            onDismiss(response == .OK)
+            if response == .OK {
+                onDismiss(.save)
+            } else if response.rawValue == neverForThisWebsiteTag {
+                onDismiss(.neverSave)
+            } else {
+                onDismiss(.cancel)
+            }
         }
     }
 
@@ -536,33 +572,47 @@ class WebAutofillController: NSObject, WebPageRelated {
         if creditCard.databaseID == nil && creditCard.cardDescription.isEmpty {
             creditCard.cardDescription = creditCard.cardHolder
         }
-        confirmSaveCreditCard(update: creditCard.databaseID != nil, description: creditCard.cardDescription) { [weak self] save in
-            guard save else { return }
-            self?.creditCardManager.save(entry: creditCard)
+        confirmSaveCreditCard(update: creditCard.databaseID != nil, description: creditCard.cardDescription) { [weak self] result in
+            guard let self = self, result != .cancel else { return }
+            self.creditCardManager.save(entry: creditCard, disabled: result == .neverSave)
         }
     }
 
-    private func confirmSaveCreditCard(update: Bool, description: String, onDismiss: @escaping (Bool) -> Void) {
+    private func confirmSaveCreditCard(update: Bool, description: String, onDismiss: @escaping (PasswordSaveAlertResult) -> Void) {
+        let neverForThisCardTag = 1003
         guard let window = self.page?.webviewWindow else {
-            return onDismiss(false)
+            return onDismiss(.cancel)
         }
         let alertMessage: String
         let saveButtonTitle: String
+        let neverButtonTitle: String?
         if update {
             alertMessage = "Would you like to update this credit card?"
             saveButtonTitle = "Update Credit Card"
+            neverButtonTitle = nil
         } else {
             alertMessage = "Would you like to save this credit card?"
             saveButtonTitle = "Save Credit Card"
+            neverButtonTitle = "Never Save This Card"
         }
         let alert = NSAlert()
         alert.messageText = alertMessage
         let saveButton = alert.addButton(withTitle: saveButtonTitle)
+        if let neverButtonTitle = neverButtonTitle {
+            let neverButton = alert.addButton(withTitle: neverButtonTitle)
+            neverButton.tag = neverForThisCardTag
+        }
         let cancelButton = alert.addButton(withTitle: "Not Now")
         saveButton.tag = NSApplication.ModalResponse.OK.rawValue
         cancelButton.tag = NSApplication.ModalResponse.cancel.rawValue
         alert.beginSheetModal(for: window) { response in
-            onDismiss(response == .OK)
+            if response == .OK {
+                onDismiss(.save)
+            } else if response.rawValue == neverForThisCardTag {
+                onDismiss(.neverSave)
+            } else {
+                onDismiss(.cancel)
+            }
         }
     }
 

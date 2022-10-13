@@ -25,7 +25,7 @@ class PasswordListViewModelTests: XCTestCase {
     }
 
     func testFilteringEntries() throws {
-        let viewModel = PasswordListViewModel(passwordManager: passwordManager)
+        let viewModel = PasswordListViewModel(passwordManager: passwordManager, showNeverSavedEntries: true)
         XCTAssertEqual(viewModel.filteredPasswordEntries.count, 6)
         XCTAssertEqual(viewModel.selectedEntries.count, 0)
         viewModel.updateSelection(IndexSet([4, 5]))

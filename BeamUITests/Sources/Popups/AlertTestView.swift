@@ -121,4 +121,12 @@ class AlertTestView: BaseView {
     func isAlertDialogDisplayed() -> Bool {
         return getAlertDialog().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
+
+    func notNowButtonExists() -> Bool {
+        button(AlertViewLocators.Buttons.notNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
+
+    func neverSaveCardButtonExists() -> Bool {
+        button(AlertViewLocators.Buttons.neverSaveCCButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
 }
