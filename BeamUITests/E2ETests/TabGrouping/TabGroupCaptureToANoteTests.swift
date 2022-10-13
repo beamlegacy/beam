@@ -40,7 +40,7 @@ class TabGroupCaptureToANoteTests: BaseTest {
             XCTAssertTrue(pnsView.assertAddedToNoteLabelDisplayed())
             pnsView.typeKeyboardKey(.escape)
         }
-        
+
         testrailId("C813")
         step("Then tab group is captured on note") {
             verifyTabGroupCapturedInNote(tabGroupName: uiTestPageOne + " & 3 more tab group")
