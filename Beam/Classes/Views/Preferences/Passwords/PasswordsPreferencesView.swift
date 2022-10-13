@@ -214,6 +214,7 @@ struct Passwords: View {
             } label: {
                 Text("Details…")
             }.buttonStyle(.bordered)
+                .keyboardShortcut(.defaultAction)
                 .sheet(item: $editedPassword) {
                     PasswordEditView(entry: $0.entry, password: $0.password, editType: .update)
                 }
