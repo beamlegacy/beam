@@ -117,7 +117,11 @@ extension ImportsManager.ImportSuccess {
     var successInformation: String {
         switch action {
         case .passwords:
-            return "Beam successfully imported your \(count) passwords from \(source.description)."
+            if count == 0 {
+                return "There were no passwords to import from \(source.description)."
+            } else {
+                return "Beam successfully imported your \(count) passwords from \(source.description)."
+            }
         case .history:
             return "Beam successfully imported your history from \(source.description)."
         }
