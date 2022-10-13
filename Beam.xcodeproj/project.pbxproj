@@ -564,8 +564,8 @@
 		874111A22825894A0024C348 /* WebAutofillPositionModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 874111A12825894A0024C348 /* WebAutofillPositionModifier.swift */; };
 		874111A9282592D60024C348 /* autofill-display.json in Resources */ = {isa = PBXBuildFile; fileRef = 874111A8282592D60024C348 /* autofill-display.json */; };
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
-		8750344428BF6CE3009D1C83 /* TextNode+SpellChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */; };
 		8749F3372893DF5B00098600 /* KeyEventHijacker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749F3362893DF5B00098600 /* KeyEventHijacker.swift */; };
+		8750344428BF6CE3009D1C83 /* TextNode+SpellChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */; };
 		87572B9E27B26EB9003DACFB /* ChromiumImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */; };
 		8757CB7127FB616B00A611D6 /* WebFieldAutofillOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
@@ -1461,8 +1461,8 @@
 		D79394B028C0A0BA00AEADA1 /* TabGroupDeleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D79394AF28C0A0BA00AEADA1 /* TabGroupDeleteTests.swift */; };
 		D7C98FD3284F4044001E057C /* TodayNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C98FD2284F4044001E057C /* TodayNoteTests.swift */; };
 		D7CC5971289970350036A02B /* TabGroupManualTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CC5970289970350036A02B /* TabGroupManualTests.swift */; };
-		D7D544BC28E58BF4003152F6 /* FormatMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D544BB28E58BF4003152F6 /* FormatMenu.swift */; };
 		D7D544B428E56A94003152F6 /* BrowserVideoSideWindowPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D544B328E56A94003152F6 /* BrowserVideoSideWindowPreferencesTests.swift */; };
+		D7D544BC28E58BF4003152F6 /* FormatMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D544BB28E58BF4003152F6 /* FormatMenu.swift */; };
 		D7D6F00C2849DF7E00C3EE7F /* TrackersBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F00B2849DF7E00C3EE7F /* TrackersBlockerTests.swift */; };
 		D7D6F016284A0A7900C3EE7F /* CookieBannerBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F015284A0A7900C3EE7F /* CookieBannerBlockerTests.swift */; };
 		D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F029284E2BA100C3EE7F /* AddLinkViewLocators.swift */; };
@@ -2288,8 +2288,8 @@
 		874111A12825894A0024C348 /* WebAutofillPositionModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutofillPositionModifier.swift; sourceTree = "<group>"; };
 		874111A8282592D60024C348 /* autofill-display.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "autofill-display.json"; sourceTree = "<group>"; };
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
-		8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextNode+SpellChecking.swift"; sourceTree = "<group>"; };
 		8749F3362893DF5B00098600 /* KeyEventHijacker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHijacker.swift; sourceTree = "<group>"; };
+		8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextNode+SpellChecking.swift"; sourceTree = "<group>"; };
 		87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumImporter.swift; sourceTree = "<group>"; };
 		8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillOverlay.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
@@ -3456,8 +3456,8 @@
 		D79394AF28C0A0BA00AEADA1 /* TabGroupDeleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupDeleteTests.swift; sourceTree = "<group>"; };
 		D7C98FD2284F4044001E057C /* TodayNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayNoteTests.swift; sourceTree = "<group>"; };
 		D7CC5970289970350036A02B /* TabGroupManualTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupManualTests.swift; sourceTree = "<group>"; };
-		D7D544BB28E58BF4003152F6 /* FormatMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatMenu.swift; sourceTree = "<group>"; };
 		D7D544B328E56A94003152F6 /* BrowserVideoSideWindowPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserVideoSideWindowPreferencesTests.swift; sourceTree = "<group>"; };
+		D7D544BB28E58BF4003152F6 /* FormatMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatMenu.swift; sourceTree = "<group>"; };
 		D7D6F00B2849DF7E00C3EE7F /* TrackersBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersBlockerTests.swift; sourceTree = "<group>"; };
 		D7D6F015284A0A7900C3EE7F /* CookieBannerBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieBannerBlockerTests.swift; sourceTree = "<group>"; };
 		D7D6F029284E2BA100C3EE7F /* AddLinkViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLinkViewLocators.swift; sourceTree = "<group>"; };
