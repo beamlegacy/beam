@@ -244,5 +244,85 @@ class SignInAutocompleteTests: BaseTest {
             XCTAssertTrue(passPrefView.staticTextTables("facebook.com").exists)
         }
     }
-    
+
+    func testSaveAlertDoesNotAppearIfHostHasDoNotSave() {
+        uiMenu.invoke(.startMockHttpServer)
+            .invoke(.populatePasswordsDB)
+        mockPage.openMockPage(.neverSavedShortForm)
+
+        step("When I click on username field"){
+            mockPage.getUsernameFieldElement(title: "Username: ").tapInTheMiddle()
+        }
+        step("And I type credentials"){
+            mockPage.app.typeText("username999")
+            mockPage.typeKeyboardKey(.tab)
+            mockPage.app.typeText("password999")
+        }
+
+        step("When I submit the form") {
+            mockPage.getContinueButtonElement().clickOnExistence()
+        }
+        step("Then the save alert is not displayed"){
+            XCTAssertFalse(mockPage.button(AlertViewLocators.Buttons.savePasswordButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        step("And the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear()
+            XCTAssertEqual(mockPage.getResultValue(label: "username"), "username999")
+            XCTAssertEqual(mockPage.getResultValue(label: "password"), "password999")
+        }
+    }
+
+    func testDoNotSaveOptionIsAvailable() {
+        uiMenu.invoke(.startMockHttpServer)
+            .invoke(.populatePasswordsDB)
+        mockPage.openMockPage(.notSavedShortForm)
+
+        step("When I click on username field"){
+            mockPage.getUsernameFieldElement(title: "Username: ").tapInTheMiddle()
+        }
+        step("And I type credentials"){
+            mockPage.app.typeText("username999")
+            mockPage.typeKeyboardKey(.tab)
+            mockPage.app.typeText("password999")
+        }
+
+        step("When I submit the form") {
+            mockPage.getContinueButtonElement().clickOnExistence()
+        }
+        step("Then the save alert is displayed"){
+            XCTAssertTrue(mockPage.button(AlertViewLocators.Buttons.savePasswordButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        step("And the 'Never for this website' button is available"){
+            XCTAssertTrue(mockPage.button(AlertViewLocators.Buttons.neverSavePasswordButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+
+        step("When I click on 'Never save'"){
+            mockPage.button(AlertViewLocators.Buttons.neverSavePasswordButton.accessibilityIdentifier).clickInTheMiddle()
+        }
+        step("Then the save alert is dismissed"){
+            XCTAssertFalse(mockPage.button(AlertViewLocators.Buttons.savePasswordButton.accessibilityIdentifier).exists)
+        }
+        step("And the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear()
+            XCTAssertEqual(mockPage.getResultValue(label: "username"), "username999")
+            XCTAssertEqual(mockPage.getResultValue(label: "password"), "password999")
+        }
+
+        step("When I sign in as another user"){
+            mockPage.getLinkElement("Back", inView: "Mock Form Server").tapInTheMiddle()
+            mockPage.getUsernameFieldElement(title: "Username: ").tapInTheMiddle()
+            mockPage.app.typeText("username000")
+            mockPage.typeKeyboardKey(.tab)
+            mockPage.app.typeText("password000")
+            mockPage.getContinueButtonElement().clickOnExistence()
+        }
+        step("Then the save alert is not displayed"){
+            XCTAssertFalse(mockPage.button(AlertViewLocators.Buttons.savePasswordButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        step("And the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear()
+            XCTAssertEqual(mockPage.getResultValue(label: "username"), "username000")
+            XCTAssertEqual(mockPage.getResultValue(label: "password"), "password000")
+        }
+    }
 }

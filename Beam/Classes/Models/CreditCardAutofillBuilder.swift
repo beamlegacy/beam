@@ -88,9 +88,9 @@ final class CreditCardAutofillBuilder {
             }
             return changed ? updatedCard : nil
         } else {
-            let matchingCards = creditCardManager.find(cardNumber: canonicalCardNumber)
+            let matchingCards = creditCardManager.find(cardNumber: canonicalCardNumber, includingDisabled: true)
             if matchingCards.contains(where: { $0.expirationMonth == expirationMonth && $0.expirationYear == expirationYear }) {
-                return nil // the card is already in the database
+                return nil // the card is already in the database (either available for autofill or disabled)
             }
         }
         return CreditCardEntry(cardDescription: "", cardNumber: canonicalCardNumber, cardHolder: cardHolder, expirationMonth: expirationMonth, expirationYear: expirationYear)
