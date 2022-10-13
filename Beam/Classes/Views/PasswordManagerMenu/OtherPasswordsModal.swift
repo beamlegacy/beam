@@ -38,6 +38,7 @@ struct OtherPasswordModal: View {
                         viewModel.searchString = $0
                     }
             }
+            .foregroundColor(BeamColor.Generic.background.swiftUI)
             Spacer()
             PasswordsTableView(passwordEntries: viewModel.filteredPasswordTableViewItems) { idx in
                 viewModel.updateSelection(idx)
@@ -86,7 +87,6 @@ struct OtherPasswordModal: View {
                 }
             }
         }
-        .foregroundColor(BeamColor.Generic.background.swiftUI)
         .padding(20)
         .if(!viewModel.isUnlocked) {
             $0.opacity(0)
@@ -164,13 +164,11 @@ struct OtherPasswordModalButton: View {
         Button(action: action, label: {
             Text(title)
                 .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
                 .frame(width: 72, alignment: .center)
         })
-            .disabled(isDisabled)
-            .buttonStyle(BorderedButtonStyle())
-            .foregroundColor(BeamColor.Generic.background.swiftUI)
-            .opacity(isDisabled ? 0.35 : 1)
+        .disabled(isDisabled)
+        .buttonStyle(.bordered)
+        .opacity(isDisabled ? 0.35 : 1)
     }
 }
 
