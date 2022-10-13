@@ -51,6 +51,9 @@ class BeamWebView: WKWebView {
 
     override var frame: NSRect {
         didSet {
+#if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+            guard !self._isBeingInspected() else { return }
+#endif
             subviews.first?.frame = frame // only subview should be a WKFlippedView instance, sometimes not in sync with its parent frame
         }
     }
