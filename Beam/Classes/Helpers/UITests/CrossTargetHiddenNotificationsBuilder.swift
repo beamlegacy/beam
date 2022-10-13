@@ -72,6 +72,18 @@ class CrossTargetHiddenNotificationsBuilder {
                 deleteAllNotes()
             case .resizeAndCenterAppE2E:
                 resizeAndCenterAppForE2ETests()
+            case .tabGroupCaptured:
+                createTabGroupsCaptured(count: 1)
+            case .tabGroupCapturedNamed:
+                createTabGroupsCaptured(named: true, count: 1)
+            case .tabGroupCapturedAndShared:
+                createTabGroupsCaptured(count: 1, shared: true)
+            case .tabGroupCapturedNamedAndShared:
+                createTabGroupsCaptured(named: true, count: 1, shared: true)
+            case .tabGroupsCaptured:
+                createTabGroupsCaptured(count: 4)
+            case .tabGroupsCapturedNamed:
+                createTabGroupsCaptured(named: true, count: 4)
             default: break
             }
             return
@@ -103,6 +115,59 @@ class CrossTargetHiddenNotificationsBuilder {
     private func resizeAndCenterAppForE2ETests() {
         AppDelegate.main.resizeWindow(width: 1500, height: 1000)
         AppDelegate.main.window?.center()
+    }
+
+    private func urlForTestPage(identifier: String) -> URL? {
+        Bundle.main.url(forResource: "UITests-\(identifier)",
+                        withExtension: "html", subdirectory: nil)
+    }
+    private func titleForTestPage(identifier: String) -> String? {
+        [
+            "1": "Point And Shoot Test Fixture Ultralight Beam",
+            "2": "Point And Shoot Test Fixture I-Beam",
+            "3": "Point And Shoot Test Fixture Cursor",
+            "4": "Point And Shoot Test Fixture Background image"
+        ][identifier]
+    }
+
+    func createTabGroupsCaptured(named: Bool = false, count: Int = 1, shared: Bool = false) {
+        Task { @MainActor in
+            let tabGroupingManager = data?.tabGroupingManager
+            guard let note = try? BeamNote.fetchOrCreate(BeamUITestsMenuGeneratorSource(), title: "Note With Tab Groups") else { return }
+            note.addChild(BeamElement("Content"))
+            for i in 0..<count {
+                let pages = ["1", "2", "3", "4"]
+                let links: [Link] = pages.compactMap {
+                    guard let url = urlForTestPage(identifier: $0) else { return nil }
+                    return LinkStore.shared.visit(url.absoluteString, title: titleForTestPage(identifier: $0), content: nil)
+                }
+                let group = TabGroup(pageIds: links.map({ $0.id }), title: named ? "Test\(i+1)" : nil,
+                                     color: .init(TabGroupingColor(designColor: TabGroupingColor.DesignColor.allCases.randomElement())),
+                                     isLocked: true, parentGroup: nil)
+                let groupObject = TabGroupingStoreManager.convertGroupToBeamObject(group, pages: links.map {
+                    .init(id: $0.id, url: URL(string: $0.url)!, title: $0.title ?? "")
+                })
+                data?.tabGroupingDBManager?.save(groups: [groupObject])
+                _ = await tabGroupingManager?.addGroup(group, toNote: note)
+
+                if shared {
+                    guard let capturedGroupObject = data?.tabGroupingDBManager?.fetch(copiesOfGroup: group.id).first,
+                          let state = AppDelegate.main.window?.state else {
+                        fatalError("Group was not copied to insert into note?")
+                    }
+                    let capturedGroup = TabGroupingStoreManager.convertBeamObjectToGroup(capturedGroupObject)
+                    let dispatchGroup = DispatchGroup()
+                    dispatchGroup.enter()
+                    tabGroupingManager?.shareGroup(capturedGroup, state: state, completion: { _ in
+                        dispatchGroup.leave()
+                    })
+                    guard case .success = dispatchGroup.wait(timeout: .now() + .seconds(10)) else {
+                        fatalError("Timed out while sharing the tab group")
+                    }
+                }
+            }
+            AppDelegate.main.window?.state.navigateToNote(note)
+        }
     }
 
 }
