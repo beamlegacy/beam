@@ -15,6 +15,7 @@ class PasswordPreferencesTests: BaseTest {
     let hostnameGoogle = "google.com"
     let hostnameApple = "apple.com"
     let hostnameFacebook = "facebook.com"
+    let hostnameNeverSaved = "neversaved.form.lvh.me"
     let hostnameLvh = "signin.form.lvh.me"
     let badHostname = "g"
     let usernameExample = "quentin"
@@ -269,8 +270,9 @@ class PasswordPreferencesTests: BaseTest {
             XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(0).getStringValue(), hostnameLvh)
             XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(1).getStringValue(), hostnameLvh)
             XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(2).getStringValue(), hostnameLvh)
-            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(3).getStringValue(), hostnameFacebook)
-            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(4).getStringValue(), hostnameApple)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(3).getStringValue(), hostnameNeverSaved)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(4).getStringValue(), hostnameFacebook)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(5).getStringValue(), hostnameApple)
         }
         
         
@@ -281,9 +283,10 @@ class PasswordPreferencesTests: BaseTest {
         step ("THEN password entries are correctly sorted"){
             XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(0).getStringValue(), hostnameApple)
             XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(1).getStringValue(), hostnameFacebook)
-            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(2).getStringValue(), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(2).getStringValue(), hostnameNeverSaved)
             XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(3).getStringValue(), hostnameLvh)
             XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(4).getStringValue(), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(5).getStringValue(), hostnameLvh)
         }
         
     }
@@ -325,6 +328,24 @@ class PasswordPreferencesTests: BaseTest {
         }
     }
     
+    func testNeverSavedPasswordItem() {
+        setup()
+
+        step ("WHEN I search for \(hostnameNeverSaved)"){
+            passwordPreferencesView.searchForPasswordBy("neversaved")
+        }
+        step ("THEN the password is 'never saved'"){
+            XCTAssertTrue(passwordPreferencesView.isPasswordDisplayedBy(hostnameNeverSaved))
+            XCTAssertTrue(passwordPreferencesView.isPasswordDisplayedBy("never saved"))
+        }
+        step ("WHEN I click on \(hostnameNeverSaved)"){
+            passwordPreferencesView.selectFirstPasswordItem(hostnameNeverSaved)
+        }
+        step ("THEN details button is disabled"){
+            XCTAssertFalse(passwordPreferencesView.button(PasswordPreferencesViewLocators.Buttons.detailsButton.accessibilityIdentifier).isEnabled)
+        }
+    }
+
     func testImportPasswords() throws {
         try XCTSkipIf(true, "WIP")
     }

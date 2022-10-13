@@ -15,7 +15,7 @@ enum PasswordEncryptionManager {
             }
             if let localPrivateKey = try? EncryptionManager.shared.localPrivateKey(), let privateKeySignature = try? localPrivateKey.asString().SHA256(), (try? EncryptionManager.shared.decryptString(networkPassword.password, localPrivateKey)) != nil {
                 Logger.shared.logWarning("Network password was encrypted with valid local key: \(networkPassword.hostname)", category: .passwordNetwork)
-                return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: networkPassword.password, createdAt: networkPassword.createdAt, updatedAt: networkPassword.updatedAt, usedAt: networkPassword.usedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
+                return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: networkPassword.password, disabledForHost: networkPassword.disabledForHost, createdAt: networkPassword.createdAt, updatedAt: networkPassword.updatedAt, usedAt: networkPassword.usedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
             }
             Logger.shared.logError("Network password can't be decrypted with either remote or local key, deleting: \(networkPassword.hostname)", category: .passwordNetwork)
             return nil
@@ -29,7 +29,7 @@ enum PasswordEncryptionManager {
             do {
                 let password = try reEncrypt(networkPassword.password, deleted: networkPassword.deletedAt != nil, encryptKey: EncryptionManager.shared.localPrivateKey())
                 let privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
-                return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: password, createdAt: networkPassword.createdAt, updatedAt: networkPassword.updatedAt, usedAt: networkPassword.usedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
+                return LocalPasswordRecord(uuid: networkPassword.uuid, entryId: networkPassword.entryId, hostname: networkPassword.hostname, username: networkPassword.username, password: password, disabledForHost: networkPassword.disabledForHost, createdAt: networkPassword.createdAt, updatedAt: networkPassword.updatedAt, usedAt: networkPassword.usedAt, deletedAt: networkPassword.deletedAt, privateKeySignature: privateKeySignature)
             } catch {
                 Logger.shared.logError("Converting received password failed for \(networkPassword.hostname): \(error.localizedDescription)", category: .passwordNetwork)
                 throw error
@@ -44,7 +44,7 @@ enum PasswordEncryptionManager {
             do {
                 let password = try reEncrypt(localPassword.password, deleted: localPassword.deletedAt != nil, decryptKey: EncryptionManager.shared.localPrivateKey())
                 let privateKeySignature = try EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString().SHA256()
-                return RemotePasswordRecord(uuid: localPassword.uuid, entryId: localPassword.entryId, hostname: localPassword.hostname, username: localPassword.username, password: password, createdAt: localPassword.createdAt, updatedAt: localPassword.updatedAt, usedAt: localPassword.usedAt, deletedAt: localPassword.deletedAt, privateKeySignature: privateKeySignature)
+                return RemotePasswordRecord(uuid: localPassword.uuid, entryId: localPassword.entryId, hostname: localPassword.hostname, username: localPassword.username, password: password, disabledForHost: localPassword.disabledForHost, createdAt: localPassword.createdAt, updatedAt: localPassword.updatedAt, usedAt: localPassword.usedAt, deletedAt: localPassword.deletedAt, privateKeySignature: privateKeySignature)
             } catch {
                 Logger.shared.logError("Converting password before sending failed for \(localPassword.hostname): \(error.localizedDescription)", category: .passwordNetwork)
                 throw error

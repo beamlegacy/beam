@@ -15,6 +15,7 @@ protocol BrowserPasswordItem {
     var password: Data { get }
     var dateCreated: Date? { get }
     var dateLastUsed: Date? { get }
+    var blacklisted: Bool { get }
 }
 
 struct BrowserPasswordResult {

@@ -63,7 +63,7 @@ struct PasswordsPreferencesView: View {
 
 struct PasswordsPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordManager: PasswordManager(objectManager: BeamObjectManager())), creditCardsViewModel: CreditCardListViewModel())
+        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordManager: PasswordManager(objectManager: BeamObjectManager()), showNeverSavedEntries: true), creditCardsViewModel: CreditCardListViewModel())
     }
 }
 
@@ -165,6 +165,7 @@ struct Passwords: View {
                 passwordsViewModel.updateSelection(idx)
             } onDoubleTap: { row in
                 let entry = passwordsViewModel.filteredPasswordEntries[row]
+                guard !entry.neverSaved else { return }
                 do {
                     let password = try passwordsViewModel.passwordManager.password(hostname: entry.minimizedHost, username: entry.username, markUsed: false)
                     editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
@@ -218,7 +219,7 @@ struct Passwords: View {
                 .sheet(item: $editedPassword) {
                     PasswordEditView(entry: $0.entry, password: $0.password, editType: .update)
                 }
-                .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1)
+                .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1 || passwordsViewModel.selectedEntries[0].neverSaved)
             Spacer()
             HStack {
                 Menu("Import…") {
