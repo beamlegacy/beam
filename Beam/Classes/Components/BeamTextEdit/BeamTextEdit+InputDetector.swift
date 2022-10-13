@@ -29,6 +29,12 @@ extension BeamTextEdit {
         cmdManager.endGroup()
     }
 
+    /// - Returns: `true` if the cursor has text right before it
+    private func inputPositionIsRightAfterText(in node: TextNode) -> Bool {
+        let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
+        return pos != 0 && left != " "
+    }
+
     func preDetectInput(_ input: String) -> Bool {
         guard let rootNode = rootNode else { return true }
         guard inputDetectorEnabled else { return true }
@@ -38,8 +44,8 @@ extension BeamTextEdit {
 
         let handlers: [String: () -> Bool] = [
             "@": { [unowned self] in
-                let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
-                guard left == " " || pos == 0 else { return true }
+                guard !inputPositionIsRightAfterText(in: node) else { return true }
+                let (pos, _) = inputDetectorGetPositionAndPrecedingChar(in: node)
                 self.showCardReferenceFormatter(atPosition: pos + 1, searchCardContent: false, prefix: 1, suffix: 0)
                 return true
             },
@@ -98,12 +104,12 @@ extension BeamTextEdit {
                 return false
             },
             "\"": { [unowned self] in
+                guard !inputPositionIsRightAfterText(in: node) else { return true }
                 insertPair(node: node, "\"", "\"")
                 return false
             },
             "/": { [unowned self] in
-                let (pos, left) = inputDetectorGetPositionAndPrecedingChar(in: node)
-                guard left == " " || pos == 0 else { return true }
+                guard !inputPositionIsRightAfterText(in: node) else { return true }
                 self.showSlashFormatter()
                 return true
             },
