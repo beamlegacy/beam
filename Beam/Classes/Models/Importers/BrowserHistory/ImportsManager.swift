@@ -193,7 +193,6 @@ public class ImportsManager: NSObject, ObservableObject {
     }
 
     private func sendSuccess(action: ImportAction, source: ImportSource, count: Int) {
-        guard count != 0 else { return }
         let importSuccess = ImportSuccess(source: source, action: action, count: count)
         importSuccessSubject.send(importSuccess)
     }
