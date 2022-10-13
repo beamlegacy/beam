@@ -20,8 +20,7 @@ class TabGroupInOmniboxTests: BaseTest {
     let tabGroupNamed = "Test1"
 
     private func createAndCaptureTabGroup (named: Bool){
-        createTabGroupAndSwitchToWeb(named: named)
-        tabGroupView.captureTabGroup(index: 0)
+        hiddenCommand.createTabGroupsCaptured(named: named)
     }
     
     func testTabGroupNavigationInOmnibox() throws {
@@ -39,10 +38,10 @@ class TabGroupInOmniboxTests: BaseTest {
         testrailId("C1148")
         step("Given I capture an unnamed tab group") {
             createAndCaptureTabGroup(named: false)
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
         
         step("Then tab group is displayed in omnibox") {
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
             omniboxView.searchInOmniBox("Point", false)
             XCTAssertEqual(omniboxView.getAutocompleteResults().firstMatch.getStringValue(), uiTestPageOne + tabGroupUnnamedSuffix)
         }
@@ -89,10 +88,10 @@ class TabGroupInOmniboxTests: BaseTest {
         
         step("Given I capture an unnamed tab group") {
             createAndCaptureTabGroup(named: false)
-            tabGroupView.closeTabGroup(index: 0)
         }
         
         step("When I reopen all tabs") {
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
             omniboxView.searchInOmniBox("Point", false)
             omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
@@ -114,10 +113,10 @@ class TabGroupInOmniboxTests: BaseTest {
         testrailId("C1059")
         step("Given I capture an unnamed tab group") {
             createAndCaptureTabGroup(named: false)
-            tabGroupView.closeTabGroup(index: 0)
         }
         
         step("When I open one tab") {
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
             omniboxView.searchInOmniBox("Point", false)
             omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
@@ -135,10 +134,10 @@ class TabGroupInOmniboxTests: BaseTest {
         testrailId("C1060")
         step("Given I capture a named tab group") {
             createAndCaptureTabGroup(named: true)
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
         
         step("Then tab group name is displayed in omnibox") {
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
             omniboxView.searchInOmniBox("Test", false)
             XCTAssertEqual(omniboxView.getAutocompleteResults().firstMatch.getStringValue(), tabGroupNamed)
         }
@@ -149,10 +148,10 @@ class TabGroupInOmniboxTests: BaseTest {
 
         step("Given I capture an unnamed tab group") {
             createAndCaptureTabGroup(named: false)
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
         
         step("When I share tab group") {
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
             omniboxView.searchInOmniBox("Point", false)
             omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
@@ -168,12 +167,11 @@ class TabGroupInOmniboxTests: BaseTest {
         testrailId("C1163")
         step("Given I capture an unnamed tab group") {
             signUpStagingWithRandomAccount()
-            createTabGroupAndSwitchToWeb()
-            tabGroupView.captureTabGroup(index: 0)
+            createAndCaptureTabGroup(named: false)
         }
         
         step("When I share tab group") {
-            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
             omniboxView.searchInOmniBox("Point", false)
             omniboxView.selectAutocompleteResult(autocompleteResult: uiTestPageOne + tabGroupUnnamedSuffix)
             XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
