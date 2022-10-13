@@ -37,6 +37,21 @@ class HiddenCommandHelper {
         beeper.beep(identifier: UITestsHiddenMenuAvailableCommands.resizeAndCenterAppE2E.rawValue)
         return JournalTestView()
     }
+
+    @discardableResult
+    func createTabGroupsCaptured(named: Bool = false, multiple: Bool = false, shared: Bool = false) -> NoteTestView {
+        var identifier: UITestsHiddenMenuAvailableCommands
+        if multiple {
+            identifier = named ? .tabGroupsCapturedNamed : .tabGroupsCaptured
+        } else if shared {
+            identifier = named ? .tabGroupCapturedNamedAndShared : .tabGroupCapturedAndShared
+        } else {
+            identifier = named ? .tabGroupCapturedNamed : .tabGroupCaptured
+        }
+        beeper.beep(identifier: identifier.rawValue)
+        NoteTestView().waitForTodayNoteViewToLoad()
+        return NoteTestView()
+    }
 }
 
 class HiddenNotificationHelper {
