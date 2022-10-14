@@ -425,14 +425,23 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="tcS-4s-DGt"/>
-                                        <menuItem title="Close Window" keyEquivalent="W" id="bvf-vf-Qoo" userLabel="Close Beam">
+                                        <menuItem title="Close Window" keyEquivalent="W" id="wFo-f0-fpo" userLabel="Close Beam">
                                             <connections>
-                                                <action selector="performHardClose:" target="Ady-hI-5gd" id="0rF-Pr-VsW"/>
+                                                <action selector="performHardClose:" target="Ady-hI-5gd" id="xUO-mZ-Zuy"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
                                             <connections>
                                                 <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Close Split View" tag="4000" enabled="NO" identifier="close_split_view" id="bvf-vf-Qoo" userLabel="Close Beam">
+                                            <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="closeSplitView:" target="Ady-hI-5gd" id="slU-9i-zal"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Capture Page to Note..." tag="4" enabled="NO" keyEquivalent="s" identifier="collect_page" id="IqJ-4H-Bqz" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
@@ -1397,13 +1406,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="636"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="623"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="634"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="621"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="908" height="634"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="908" height="621"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1565,7 +1574,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0zW-aA-Txg">
-                                    <rect key="frame" x="1" y="619" width="798" height="16"/>
+                                    <rect key="frame" x="1" y="606" width="798" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="sMU-KD-F4T">
