@@ -11,6 +11,7 @@ import BeamCore
 class TabsListExternalDragViewModel: ObservableObject {
 
     @Published var isDraggingTabOutside = false
+    @Published var isDraggingGroupOutside = false
     var dropStartLocation: CGPoint?
     var isDroppingAnExternalTab = false
     var isDroppingATabGroup = false
@@ -106,7 +107,8 @@ extension TabsListExternalDragViewModel {
 
     /// Triggers a dragging session for the specified tab group
     func startExternalDraggingOfTabGroup(_ group: TabGroup, tabs: [BrowserTab], atLocation location: CGPoint, itemSize: CGSize, title: String) {
-        guard !isDroppingATabGroup, data?.currentDraggingSession == nil, let state = self.state else { return }
+        guard !isDraggingGroupOutside, data?.currentDraggingSession == nil, let state = self.state else { return }
+        isDraggingGroupOutside = true
         guard let event = NSApp.currentEvent, let view = state.associatedWindow?.contentView else { return }
 
         let dragSource = TabGroupExternalDraggingSource(state: state, delegate: self)
@@ -118,18 +120,12 @@ extension TabsListExternalDragViewModel {
         let performer = NSHapticFeedbackManager.defaultPerformer
         performer.perform(.alignment, performanceTime: .default)
 
-        if let dragSource = data?.currentDraggingSession?.draggingSource as? TabGroupExternalDraggingSource,
-           let dragItem = data?.currentDraggingSession?.draggingItem {
-            dragSource.updateInitialDragginItemLocation(dragItem, location: location)
-        } else {
-            prepareExternalDraggingOfCurrentTab(atLocation: location)
-        }
-
-        guard let dragSource = data?.currentDraggingSession?.draggingSource,
+        guard let dragSource = data?.currentDraggingSession?.draggingSource as? TabGroupExternalDraggingSource,
               let dragItem = data?.currentDraggingSession?.draggingItem else {
             Logger.shared.logError("Couldn't start tab group external dragging session", category: .ui)
             return
         }
+        dragSource.updateInitialDragginItemLocation(dragItem, location: location)
 
         DispatchQueue.main.async { // starting the drag async to let the internal drag gesture finish properly
             let dragSession = view.beginDraggingSession(with: [dragItem], event: event, source: dragSource)
@@ -139,12 +135,8 @@ extension TabsListExternalDragViewModel {
     }
 
     private func removeTabGroupFromWindow(_ group: TabGroup) {
-        // remove the entire group
-        let tabs = tabsManager?.tabs.filter {
-            guard let pageId = $0.pageId else { return false }
-            return group.pageIds.contains(pageId)            
-        }
-        tabs?.forEach { tabsManager?.removeTab(tabId: $0.id) }
+        let tabsIds = tabsManager?.tabs(inGroup: group).map { $0.id }
+        tabsManager?.removeTabs(tabsIds: tabsIds ?? [])
         if tabsManager?.tabs.filter({ !$0.isPinned }).isEmpty == true {
             // hide the origin window, we will close it if tab is moved to another window, or unhide instead of creating a new one.
             state?.associatedWindow?.orderOut(self)
@@ -155,6 +147,7 @@ extension TabsListExternalDragViewModel {
         data?.currentDraggingSession?.dropHandledByBeamUI = true
         dropStartLocation = location
         isDroppingATabGroup = true
+        isDraggingGroupOutside = false
     }
 
     func dropOfExternalTabGroupExitedWindow(group: TabGroup) {
@@ -166,5 +159,6 @@ extension TabsListExternalDragViewModel {
 extension TabsListExternalDragViewModel: TabGroupExternalDraggingSourceDelegate {
     func tabGroupExternalDragSessionEnded() {
         isDroppingATabGroup = false
+        isDraggingGroupOutside = false
     }
 }
