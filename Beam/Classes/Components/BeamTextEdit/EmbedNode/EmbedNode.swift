@@ -267,8 +267,8 @@ class EmbedNode: ResizableNode {
         expandedContent?.layer?.setAffineTransform(transform)
     }
 
-    override func translateForMove(_ offset: CGPoint) {
-        super.translateForMove(offset)
+    override func translateForMove(_ offset: CGPoint, outOfEditor: Bool) {
+        super.translateForMove(offset, outOfEditor: outOfEditor)
 
         // Create the transform for the expandedContent and apply it without animations to avoid lag
         let scale = CGAffineTransform(scaleX: moveScaleFactor, y: moveScaleFactor)
