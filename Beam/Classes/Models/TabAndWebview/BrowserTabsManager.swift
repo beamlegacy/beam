@@ -478,6 +478,19 @@ extension BrowserTabsManager {
         }
     }
 
+    public func removeTabs(tabsIds: [BrowserTab.TabID]) {
+        var currentTabIndex: Int?
+        if let currentTab = currentTab {
+            currentTabIndex = tabs.firstIndex(of: currentTab)
+        }
+        tabs.removeAll(where: { tab in
+            tabsIds.contains(tab.id)
+        })
+        guard let currentTabId = currentTab?.id, tabsIds.contains(currentTabId) else { return }
+        let nextTabIndex = min(currentTabIndex ?? tabs.count, tabs.count - 1)
+        setCurrentTab(at: nextTabIndex)
+    }
+
     public func removeTab(tabId: BrowserTab.TabID, suggestedNextCurrentTab: BrowserTab? = nil) {
         guard let index = tabs.firstIndex(where: { $0.id == tabId }) else { return }
         let tab = tabs[index]
@@ -636,7 +649,7 @@ extension BrowserTabsManager {
 
     private func tabsIds(inGroup group: TabGroup) -> [BrowserTab.TabID] {
         let clusteringTabs: [BrowserTab.TabID] = localTabsGroup.compactMap { (key: BrowserTab.TabID, value: TabGroup) in
-            guard tabGroupingManager.forcedTabsGroup[key]?.outOfGroup != value else { return nil }
+            guard tabGroupingManager.forcedTabsGroup[key] == nil else { return nil }
             return value.id == group.id ? key : nil
         }
         let forcedTabs = tabGroupingManager.forcedTabsGroup.filter { $0.value.inGroup?.id == group.id }.keys
