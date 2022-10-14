@@ -10949,24 +10949,6 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_TESTING_SEARCH_PATHS = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					"UITests-1.html",
-					"UITests-Playground.html",
-					"UITests-Media.html",
-					"UITests-Password.html",
-					"UITests-4.html",
-					"UITests-3.html",
-					"UITests-2.html",
-					"UITests-Alerts.html",
-					audio.mp3,
-					"beam-logo-test.png",
-					Beam.css,
-					video.mov,
-					"XCTests-Passwords-UTF8-BOM.binary",
-					"XCTests-Passwords-UTF8-noBOM.binary",
-					"UITests-Passwords.csv",
-					gcp_service_account_credentials.json,
-				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -11422,24 +11404,6 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_TESTING_SEARCH_PATHS = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					"UITests-1.html",
-					"UITests-Playground.html",
-					"UITests-Media.html",
-					"UITests-Password.html",
-					"UITests-4.html",
-					"UITests-3.html",
-					"UITests-2.html",
-					"UITests-Alerts.html",
-					audio.mp3,
-					"beam-logo-test.png",
-					Beam.css,
-					video.mov,
-					"XCTests-Passwords-UTF8-BOM.binary",
-					"XCTests-Passwords-UTF8-noBOM.binary",
-					"UITests-Passwords.csv",
-					gcp_service_account_credentials.json,
-				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -11876,24 +11840,6 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_TESTING_SEARCH_PATHS = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					"UITests-1.html",
-					"UITests-Playground.html",
-					"UITests-Media.html",
-					"UITests-Password.html",
-					"UITests-4.html",
-					"UITests-3.html",
-					"UITests-2.html",
-					"UITests-Alerts.html",
-					audio.mp3,
-					"beam-logo-test.png",
-					Beam.css,
-					video.mov,
-					"XCTests-Passwords-UTF8-BOM.binary",
-					"XCTests-Passwords-UTF8-noBOM.binary",
-					"UITests-Passwords.csv",
-					gcp_service_account_credentials.json,
-				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
