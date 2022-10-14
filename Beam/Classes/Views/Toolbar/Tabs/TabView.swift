@@ -82,7 +82,7 @@ struct TabView: View {
     }
 
     private var mediaIsPlaying: Bool {
-        tab.mediaPlayerController?.isPlaying == true
+        tab.mediaPlayerController?.isPlaying == true && !isDragging
     }
 
     private var isDetachable: Bool {
