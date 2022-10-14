@@ -1209,7 +1209,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    func translateForMove(_ offset: CGPoint) {
+    func translateForMove(_ offset: CGPoint, outOfEditor: Bool) {
 
         let scale = CGAffineTransform(scaleX: moveScaleFactor, y: moveScaleFactor)
         let translate = CGAffineTransform(translationX: offset.x, y: offset.y)
@@ -1217,9 +1217,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         CATransaction.disableAnimations {
             self.layer.setAffineTransform(final)
+            self.layer.opacity = outOfEditor ? 0 : 1
         }
         for c in children {
-            c.translateForMove(offset)
+            c.translateForMove(offset, outOfEditor: outOfEditor)
+            c.layer.opacity = outOfEditor ? 0 : 1
         }
     }
 
