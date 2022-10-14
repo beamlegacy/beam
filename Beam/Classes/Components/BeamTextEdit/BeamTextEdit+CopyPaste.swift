@@ -365,7 +365,7 @@ extension BeamTextEdit {
         }
     }
 
-    private func importImageIfNeeded(id: UUID, elementHolder: BeamNoteDataHolder) {
+    func importImageIfNeeded(id: UUID, elementHolder: BeamNoteDataHolder) {
         let existingFileRecord = try? data?.fileDBManager?.fetch(uid: id)
         guard let fileRecord = elementHolder.imageData[id], existingFileRecord == nil else { return }
         try? data?.fileDBManager?.insert(files: [fileRecord])
