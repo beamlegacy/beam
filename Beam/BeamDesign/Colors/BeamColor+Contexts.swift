@@ -207,9 +207,11 @@ extension BeamColor {
 extension BeamColor {
     enum ActionableButtonBeam {
         static let background = BeamColor.Beam
-        static let backgroundHovered = BeamColor.Beam
-        static let backgroundClicked = BeamColor.Beam
-        static let backgroundDisabled = BeamColor.Generic.transparent
+        static let backgroundHovered = BeamColor.combining(lightColor: BeamColor.From(color: NSColor(red: 0.196, green: 0, blue: 0.898, alpha: 1)), lightAlpha: 1,
+                                                           darkColor: BeamColor.From(color: NSColor(red: 0.482, green: 0.38, blue: 1, alpha: 1)), darkAlpha: 1)
+        static let backgroundClicked = BeamColor.combining(lightColor: BeamColor.From(color: NSColor(red: 0.173, green: 0, blue: 0.8, alpha: 1)), lightAlpha: 1,
+                                                           darkColor: BeamColor.From(color: NSColor(red: 0.4, green: 0.278, blue: 1, alpha: 1)), darkAlpha: 1)
+        static let backgroundDisabled = BeamColor.Generic.background.alpha(0)
         static let strokeDisabled = BeamColor.Beam
         static let foreground = BeamColor.From(color: .white)
         static let disabledForeground = BeamColor.Beam.alpha(0.4)
