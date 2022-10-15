@@ -93,5 +93,13 @@ class PreferencesBaseView: BaseView {
     func waitForPreferencesToBeDisplayedAfterSync() -> Bool {
         return waitFor(PredicateFormat.isHittable.rawValue, self.app.toolbars.buttons.matching(identifier: PreferenceMenus.account.rawValue).firstMatch, BaseTest.maximumWaitTimeout)
     }
+
+    func getPreferenceWindow(_ preferenceView: PreferenceMenus) -> XCUIElement {
+        return app.windows[preferenceView.rawValue]
+    }
+
+    func close(_ preferenceView: PreferenceMenus) {
+        self.getPreferenceWindow(preferenceView).buttons[XCUIIdentifierCloseWindow].clickOnExistence()
+    }
     
 }
