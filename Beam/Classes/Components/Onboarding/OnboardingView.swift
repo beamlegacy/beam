@@ -47,8 +47,12 @@ struct OnboardingView: View {
                         OnboardingLostPrivateKey(finish: finishCallback)
                     case .savePrivateKey:
                         OnboardingSaveEncryptionView(actions: $model.actions, finish: finishCallback)
-                    default:
+                    case .welcome:
                         OnboardingWelcomeView(welcoming: !model.onlyConnect, viewIsLoading: $model.viewIsLoading, finish: finishCallback)
+                    case .setupCalendar:
+                        OnboardingCalendarView(actions: $model.actions, finish: finishCallback)
+                    default:
+                        OnboardingMinimalWelcomeView(finish: finishCallback)
                     }
                 }
                 .offset(x: 0, y: stepOffset[currentStep.type] ?? 0)
@@ -152,16 +156,17 @@ struct OnboardingView: View {
                 }
                 Spacer()
                 HStack(spacing: BeamSpacing._200) {
-                    ForEach(model.actions) { action in
-                        ActionableButton(text: action.title, defaultState: !action.enabled ? .disabled : .normal,
-                                         variant: action.secondary ? secondarActionVariant : .primaryPurple,
-                                         minWidth: action.customWidth ?? (action.secondary ? 100 : 150),
-                                         height: buttonsHeight,
-                                         action: !action.enabled ? nil : {
-                            if action.onClick?() != false {
-                                model.advanceToNextStep()
-                            }
-                        })
+                    ForEach(model.actions.filter({ $0.alignment == .center })) { action in
+                        actionableButton(for: action)
+                            .disabled(!action.enabled)
+                            .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.15).delay(0.2)))
+                            .accessibilityIdentifier(action.id)
+                    }
+                }
+                Spacer()
+                HStack(spacing: BeamSpacing._200) {
+                    ForEach(model.actions.filter({ $0.alignment == .trailing })) { action in
+                        actionableButton(for: action)
                             .disabled(!action.enabled)
                             .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.15).delay(0.2)))
                             .accessibilityIdentifier(action.id)
@@ -177,6 +182,18 @@ struct OnboardingView: View {
         .frame(height: bottomBarHeight, alignment: .bottom)
     }
 
+    private func actionableButton(for action: OnboardingManager.StepAction) -> ActionableButton {
+        ActionableButton(text: action.title, defaultState: !action.enabled ? .disabled : .normal,
+                         variant: action.customVariant ?? (action.secondary ? secondarActionVariant : .primaryPurple),
+                         minWidth: action.customWidth ?? (action.secondary ? 100 : 150),
+                         height: buttonsHeight,
+                         action: !action.enabled ? nil : {
+            if action.onClick?() != false {
+                model.advanceToNextStep()
+            }
+        })
+    }
+
     private func openExternalURL(_ urlString: String, title: String) {
         guard let url = URL(string: urlString) else { return }
         AppDelegate.main.openMinimalistWebWindow(url: url, title: title)
@@ -189,6 +206,30 @@ struct OnboardingView: View {
                 .font(BeamFont.medium(size: 24).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
                 .padding(.bottom, 40)
+        }
+    }
+
+    struct SubTitle: View {
+        var title: String
+        var body: some View {
+            Text(title)
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .padding(.bottom, 40)
+        }
+    }
+    
+    struct TitleAndSubtitle: View {
+        var title: String
+        var subtitle: String
+        var body: some View {
+            VStack(spacing: 0) {
+                Text(title)
+                    .font(BeamFont.regular(size: 24).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .padding(.bottom, 6)
+                SubTitle(title: subtitle)
+            }
         }
     }
 

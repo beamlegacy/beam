@@ -26,9 +26,12 @@ class DailySummaryTests: BaseTest {
         step("Given I populate daily summary"){
             uiMenu.invoke(.showOnboarding)
                 .invoke(.createFakeDailySummary)
-            OnboardingLandingTestView()
-                .signUpLater()
+            OnboardingMinimalTestView()
+                .continueOnboarding()
                 .clickSkipButton()
+                .closeTab()
+            JournalTestView()
+                .waitForJournalViewToLoad()
         }
     }
     
