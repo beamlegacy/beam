@@ -52,6 +52,7 @@ class SyncTests: BaseTest {
         var onboardingImportDataTestView: OnboardingImportDataTestView!
         var firstAccountNotes: AllNotesTestTable!
         step("GIVEN I start using app without being signed in") {
+            hiddenCommand.deleteAllNotes()
             signUpStagingWithRandomAccount()
         }
         
