@@ -20,7 +20,7 @@ enum OnboardingMinimalViewLocators {
 class OnboardingMinimalTestView: BaseView {
     @discardableResult
     func waitForLandingViewToLoad() -> Bool {
-        return staticText(OnboardingMinimalViewLocators.StaticTexts.onboardingWelcomeTitle.accessibilityIdentifier).waitForExistence(timeout: maximumWaitTimeout)
+        return staticText(OnboardingMinimalViewLocators.StaticTexts.onboardingWelcomeTitle.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
     }
 
     @discardableResult
