@@ -15,6 +15,8 @@ class SigninTests: BaseTest {
     let onboardingImportView = OnboardingImportDataTestView()
     var accountInfo: AccountInformation!
 
+    let onboardingMinimalView = OnboardingMinimalTestView()
+    let onboardingCalendarView = OnboardingCalendarTestView()
     override func setUp()  {
         super.setUp()
         step("Given I enable onboarding") {
@@ -31,14 +33,12 @@ class SigninTests: BaseTest {
     func testUseAppWithoutSignIn() {
         testrailId("C658")
         step("WHEN I choose to sign up later"){
-            onboardingView.signUpLater()
+            onboardingMinimalView.continueOnboarding()
         }
             
         step("THEN I am not asked for credentials and I'm on Journal"){
-            XCTAssertTrue(onboardingImportView
-                .clickSkipButton()
-                .waitForJournalViewToLoad()
-                .isJournalOpened(), "Journal view didn't load")
+            XCTAssertEqual(onboardingCalendarView.clickSkipButton().closeTab().getNumberOfTabs(), 0)
+            XCTAssertTrue(JournalTestView().waitForJournalViewToLoad().isJournalOpened(), "Journal view didn't load")
         }
             
         step("THEN I'm not in signed in state"){

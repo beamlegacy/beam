@@ -780,6 +780,106 @@
                ReferencedContainer = "container:Beam.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "965A78472514F149009980D4"
+               BuildableName = "BeamUITests.xctest"
+               BlueprintName = "BeamUITests"
+               ReferencedContainer = "container:Beam.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
