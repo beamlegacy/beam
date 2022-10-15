@@ -14,13 +14,17 @@ struct Icon: View {
     var size: CGSize?
     var color = BeamColor.Button.text.swiftUI
     var alignment: Alignment = .center
+    var isTemplate: Bool = true
 
     var body: some View {
-        Image(name).renderingMode(.template)
+        Image(name)
             .resizable()
+            .if(isTemplate) {
+                $0.renderingMode(.template)
+                    .foregroundColor(.white)
+                    .colorMultiply(color) // foregroundColor cannot be animated while colorMultiply can
+            }
             .scaledToFill()
-            .foregroundColor(.white)
-            .colorMultiply(color) // foregroundColor cannot be animated while colorMultiply can
             .frame(width: size?.width ?? width, height: size?.height ?? width, alignment: alignment)
     }
 }
