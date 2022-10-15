@@ -47,8 +47,9 @@ class OnboardingTests: BaseTest {
             
     }
     
-    func testTermsConditionsAndPrivacyPolicy() {
+    func testTermsConditionsAndPrivacyPolicy() throws {
         testrailId("C659")
+        try XCTSkipIf(true, "This is testing the old onboarding")
         step("Then by default no terms / privacy pop-up windows opened"){
             XCTAssertFalse(onboardingView.isTermsAndConditionsWindowOpened())
             XCTAssertFalse(onboardingView.isPrivacyPolicyWindowOpened())
@@ -73,8 +74,9 @@ class OnboardingTests: BaseTest {
         }
     }
     
-    func testConnectWithGoogle() {
+    func testConnectWithGoogle() throws {
         testrailId("C657")
+        try XCTSkipIf(true, "This is testing the old onboarding")
         step("Then Google auth window is opened on Continue with Google button click"){
             XCTAssertTrue(onboardingView.clickContinueWithGoogleButton().isGoogleAuthWindowOpened())
         }
@@ -94,6 +96,7 @@ class OnboardingTests: BaseTest {
     
     func testConnectWithEmailUsernameSignInCaseInsensitive() throws {
         testrailId("C660")
+        try XCTSkipIf(true, "This is testing the old onboarding")
         step("GIVEN I sign up an account and take credentials") {
             signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
@@ -117,6 +120,7 @@ class OnboardingTests: BaseTest {
     
     func testConnectWithEmailUsernameSignInRequirements() throws {
         testrailId("C669")
+        try XCTSkipIf(true, "This is testing the old onboarding")
         step("GIVEN I sign up an account and take credentials") {
             signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
@@ -177,8 +181,9 @@ class OnboardingTests: BaseTest {
         }
     }
     
-    func testConnectWithEmailSignUpPasswrdRequirements() {
+    func testConnectWithEmailSignUpPasswrdRequirements() throws {
         testrailId("C661")
+        try XCTSkipIf(true, "This is testing the old onboarding")
         let onboardingSignupView = OnboardingSignupWithEmailTestView()
         
         step("Given I set correct password and click Continue with Email button") {
@@ -243,8 +248,9 @@ class OnboardingTests: BaseTest {
 
     }
     
-    func testConnectWithEmailFormatRequirements() {
+    func testConnectWithEmailFormatRequirements() throws {
         testrailId("C660")
+        try XCTSkipIf(true, "This is testing the old onboarding")
         step("Given I type correct format email") {
             onboardingView.getEmailTextField().tapInTheMiddle()
             onboardingView.getEmailTextField().typeText("ab1@xyz.com")
@@ -309,14 +315,13 @@ class OnboardingTests: BaseTest {
     func testSignUpLater() throws {
         try XCTSkipIf(true, "duplicate of testUseAppWithoutSignIn")
         step("Then Journal is opened on Sign up later click"){
-            XCTAssertTrue(onboardingView.signUpLater()
-                            .clickSkipButton()
-                            .waitForJournalViewToLoad()
-                            .isJournalOpened())
+            XCTAssertEqual(OnboardingMinimalTestView().continueOnboarding().clickSkipButton().closeTab().getNumberOfTabs(), 0)
+            XCTAssertTrue(JournalTestView().waitForJournalViewToLoad().isJournalOpened(), "Journal view didn't load")
         }
     }
     
-    func testOnboardingPrivateKeyVerification() {
+    func testOnboardingPrivateKeyVerification() throws {
+        try XCTSkipIf(true, "This is testing the old onboarding")
         step("GIVEN I sign up an account and take credentials") {
             signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
@@ -373,8 +378,9 @@ class OnboardingTests: BaseTest {
         }
     }
     
-    func testSignInSuccessfullyFromOnboarding() {
+    func testSignInSuccessfullyFromOnboarding() throws {
         testrailId("C1156")
+        try XCTSkipIf(true, "This is testing the old onboarding")
         step("GIVEN I sign up an account and take credentials") {
             signUpStagingWithRandomAccount()
             accountInfo = getCredentials()
@@ -467,6 +473,7 @@ class OnboardingTests: BaseTest {
             XCTAssertEqual(webView.getNumberOfTabs(wait: true), expectedTabs)
         }
     }
+    
     
     func testOnboardingWelcomeWebViewsCorrectness() throws {
         testrailId("C691, C692, C693, C694, C695")

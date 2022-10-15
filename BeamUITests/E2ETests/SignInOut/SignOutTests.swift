@@ -63,9 +63,12 @@ class SignOutTests: BaseTest {
         }
         
         step("THEN the previously added notes are removed") {
-            onboardingView.signUpLater()
-                            .clickSkipButton()
-                            .waitForJournalViewToLoad()
+            OnboardingMinimalTestView()
+                .continueOnboarding()
+                .clickSkipButton()
+                .closeTab()
+            JournalTestView()
+                .waitForJournalViewToLoad()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
             waitForCountValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 4, elementQuery: allNotes.getNotesNamesElementQuery())
