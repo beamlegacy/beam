@@ -109,7 +109,43 @@ class BeamAccountMergeDatabasesTest: QuickSpec, BeamDocumentSource {
                         fail(error.localizedDescription)
                     }
                 }
+                it("soft deletes frecencies") {
+                    do {
+                        let now = BeamDate.now
+                        let doc0 = try databases[0].collection?.fetchOrCreate(self, type: .note(title: "title1"))
+                        let doc1 = try databases[0].collection?.fetchOrCreate(self, type: .note(title: "title2"))
 
+                        let doc2 = try databases[1].collection?.fetchOrCreate(self, type: .note(title: "title3"))
+
+                        if let noteId = doc0?.id {
+                            try databases[0].noteLinksAndRefsManager?.saveFrecencyNote(FrecencyNoteRecord(noteId: noteId, lastAccessAt: now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d0))
+                        }
+                        if let noteId = doc1?.id {
+                            try databases[0].noteLinksAndRefsManager?.saveFrecencyNote(FrecencyNoteRecord(noteId: noteId, lastAccessAt: now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d0))
+                        }
+                        if let noteId = doc2?.id {
+                            try databases[1].noteLinksAndRefsManager?.saveFrecencyNote(FrecencyNoteRecord(noteId: noteId, lastAccessAt: now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d0))
+                        }
+
+                        var frecencies0 = try databases[0].noteLinksAndRefsManager?.allNoteFrecencies(updatedSince: nil)
+                        expect(frecencies0?.count).to(equal(2))
+                        var frecencies1 = try databases[1].noteLinksAndRefsManager?.allNoteFrecencies(updatedSince: nil)
+                        expect(frecencies1?.count).to(equal(1))
+
+                        sut.mergeAllDatabases(initialDBs: [databases[0]], deleteDatabases: false)
+
+                        frecencies0 = try databases[0].noteLinksAndRefsManager?.allNoteFrecencies(updatedSince: nil)
+
+                        expect(frecencies0?.count).to(equal(2))
+                        expect(frecencies0?.filter { $0.deletedAt == nil }.count).to(equal(0))
+
+                        frecencies1 = try databases[1].noteLinksAndRefsManager?.allNoteFrecencies(updatedSince: nil)
+                        expect(frecencies1?.count).to(equal(3))
+                        expect(frecencies1?.filter { $0.deletedAt == nil }.count).to(equal(3))
+                    } catch {
+                        fail(error.localizedDescription)
+                    }
+                }
                 it("merge documents") {
                     do {
                         _ = try databases[0].collection?.fetchOrCreate(self, type: .note(title: "title1"))
