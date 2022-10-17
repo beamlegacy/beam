@@ -484,4 +484,22 @@ export class PointAndShootHelper {
 
     return array
   }
+
+  /**
+   * Disable the entire setup for some pages that struggles with performance.
+   * Mostly google services for now.
+   *
+   * @static
+   * @param {BeamWindow} win
+   * @return {*}  {boolean}
+   * @memberof PointAndShootHelper
+   */
+   static isPageAllowed(win: BeamWindow): boolean {
+    let hostname = win.location.hostname
+    const disallowedRegex = new RegExp("^(?!(www)).+\.google\.com", "g")
+    if (disallowedRegex.test(hostname)) {
+      return false
+    }
+    return true    
+  }
 }
