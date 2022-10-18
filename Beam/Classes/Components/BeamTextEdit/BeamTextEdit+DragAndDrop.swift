@@ -145,8 +145,8 @@ extension BeamTextEdit {
             return false
         }
 
-        let newParent: ElementNode = dragResult.shouldBeAfter ? dragResult.element : dragResult.element.previousVisibleNode(ElementNode.self) ?? rootNode
-        let afterNode: ElementNode? = dragResult.shouldBeAfter ? nil : dragResult.element.previousSibbling() as? ElementNode
+        let newParent: ElementNode = dragResult.shouldBeAfter && dragResult.shouldBeChild ? dragResult.element : dragResult.element.parent as? ElementNode ?? rootNode
+        let afterNode: ElementNode? = dragResult.shouldBeAfter ? dragResult.element : dragResult.element.previousSibbling() as? ElementNode
 
         guard let pastedElements = sender.draggingPasteboard.readObjects(forClasses: supportedPasteObjects, options: nil)
         else {
@@ -413,9 +413,11 @@ extension BeamTextEdit {
         }
     }
 
-    private func isMovedNodeSibbling(_ movedNode: ElementNode, andBeforeDestinationNode: ElementNode) -> Bool {
-        if movedNode.isSibblingWith(andBeforeDestinationNode),
-           let destinationIndex = andBeforeDestinationNode.indexInParent,
+    private func isMovedNodeSibbling(_ movedNode: ElementNode, andBefore destinationNode: ElementNode) -> Bool {
+
+        guard let movedParent = movedNode.parent as? ElementNode, let destinationNodeParent = destinationNode.parent as? ElementNode else { return false }
+        if movedParent.elementId == destinationNodeParent.elementId,
+           let destinationIndex = destinationNode.indexInParent,
             let movedElementIndex = movedNode.indexInParent,
             destinationIndex > movedElementIndex {
             return true
@@ -425,7 +427,7 @@ extension BeamTextEdit {
 
     private func move(node movedNode: ElementNode, with dragResult: DragResult, in rootNode: TextRoot) {
         let newParent: ElementNode
-        let index: Int
+        var index: Int
         let destinationElementIndex = dragResult.element.indexInParent ?? 0
         let selectedNodes = sortedSelectedRootsToMoveAlong(for: movedNode)
 
@@ -435,10 +437,13 @@ extension BeamTextEdit {
         } else {
             var previousNodeMovingOffset = 0
             // If the moving node is a sibbling of the destination, and is located before, we need to offet by one
-            if isMovedNodeSibbling(movedNode, andBeforeDestinationNode: dragResult.element) {
+            if isMovedNodeSibbling(movedNode, andBefore: dragResult.element) {
                 previousNodeMovingOffset = 1
             }
             index = destinationElementIndex + (dragResult.shouldBeAfter ? 1 : 0) - previousNodeMovingOffset
+            if movedNode.elementId == dragResult.element.elementId {
+                index -= 1
+            }
             newParent = dragResult.element.parent as? ElementNode ?? rootNode
         }
 
@@ -450,7 +455,7 @@ extension BeamTextEdit {
         if !selectedNodes.isEmpty {
             var offset = 0
             rootNode.cmdManager.beginGroup(with: "Move Multiple Elements")
-            let shouldIncreaseIndex = !isMovedNodeSibbling(selectedNodes.first ?? movedNode, andBeforeDestinationNode: dragResult.element) || dragResult.shouldBeChild
+            let shouldIncreaseIndex = !isMovedNodeSibbling(selectedNodes.first ?? movedNode, andBefore: dragResult.element) || dragResult.shouldBeChild
             for node in selectedNodes {
                 rootNode.cmdManager.reparentElement(node, to: newParent, atIndex: index + offset)
                 if shouldIncreaseIndex {
