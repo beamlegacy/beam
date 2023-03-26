@@ -343,6 +343,8 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>ENABLE_JS_BUILD</key>
+	<string>$(ENABLE_JS_BUILD)</string>
 	<key>GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED</key>
 	<false/>
 	<key>LSApplicationCategoryType</key>
