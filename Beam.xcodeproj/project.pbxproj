@@ -8950,7 +8950,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n    # export GITLAB_PENSO_TOKEN=$GITLAB_PENSO_TOKEN\n    \n    ./scripts/build_js.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ] || [ $ENABLE_JS_BUILD == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n    # export GITLAB_PENSO_TOKEN=$GITLAB_PENSO_TOKEN\n    \n    ./scripts/build_js.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		8ADD05ED272963CA004C3EC9 /* Web: Write xcfilelist */ = {
@@ -8972,7 +8972,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n    ./scripts/build_xcfilelist_web.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ] || [ $ENABLE_JS_BUILD == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n    ./scripts/build_xcfilelist_web.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
