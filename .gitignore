@@ -76,7 +76,7 @@ iOSInjectionProject/
 # Node artifact files
 node_modules/
 scripts/decrypt/node/node_modules/
-dist/
+
 
 # Compiled Java class files
 *.class
@@ -92,7 +92,6 @@ dist/
 
 # Maven
 target/
-dist/
 
 # JetBrains IDE
 .idea/
@@ -147,8 +146,6 @@ fastlane/codequality_report_gitlab.json
 fastlane/swiftlint.json
 
 # Generated JS files
-/Beam/Classes/Components/PointAndShoot/index_prod.css
-/Beam/Classes/**/*_prod.js
 **/junit.xml
 /Beam/Classes/Components/PointAndShoot/test.http
 BeamCore/Configuration/EnvironmentVariables_generated.swift

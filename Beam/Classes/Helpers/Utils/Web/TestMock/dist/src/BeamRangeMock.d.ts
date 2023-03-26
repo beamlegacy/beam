@@ -1,0 +1,38 @@
+import { BeamNode, BeamRange, BeamDOMRectList } from "@beam/native-beamtypes";
+export declare class BeamRangeMock implements BeamRange {
+    cloneRange(): BeamRange;
+    collapse(toStart?: boolean): void;
+    compareBoundaryPoints(how: number, sourceRange: BeamRange): number;
+    comparePoint(node: BeamNode, offset: number): number;
+    createContextualFragment(fragment: string): DocumentFragment;
+    deleteContents(): void;
+    detach(): void;
+    extractContents(): DocumentFragment;
+    getClientRects(): BeamDOMRectList;
+    insertNode(node: BeamNode): void;
+    intersectsNode(node: BeamNode): boolean;
+    isPointInRange(node: BeamNode, offset: number): boolean;
+    selectNodeContents(node: BeamNode): void;
+    setEnd(node: BeamNode, offset: number): void;
+    setEndAfter(node: BeamNode): void;
+    setEndBefore(node: BeamNode): void;
+    setStart(node: BeamNode, offset: number): void;
+    setStartAfter(node: BeamNode): void;
+    setStartBefore(node: BeamNode): void;
+    surroundContents(newParent: BeamNode): void;
+    toString(): string;
+    END_TO_END: number;
+    END_TO_START: number;
+    START_TO_END: number;
+    START_TO_START: number;
+    collapsed: boolean;
+    endContainer: BeamNode;
+    endOffset: number;
+    startContainer: BeamNode;
+    startOffset: number;
+    commonAncestorContainer: BeamNode;
+    cloneContents(): DocumentFragment;
+    private node;
+    getBoundingClientRect(): DOMRect;
+    selectNode(node: BeamNode): void;
+}
