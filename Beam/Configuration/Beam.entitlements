@@ -11,6 +11,10 @@
 		<string>webcredentials:app.beamapp.co</string>
 		<string>applinks:app.beamapp.co</string>
 	</array>
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.apple.PIPAgent</string>
+	</array>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
 	<key>com.apple.security.assets.movies.read-only</key>

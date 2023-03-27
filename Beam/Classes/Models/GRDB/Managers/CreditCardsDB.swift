@@ -28,6 +28,7 @@ struct CreditCardRecord {
     var cardHolder: String
     var expirationMonth: Int
     var expirationYear: Int
+    var disabled: Bool
     var createdAt: Date
     var updatedAt: Date
     var usedAt: Date
@@ -50,6 +51,7 @@ extension CreditCardRecord: BeamObjectProtocol {
         case cardHolder
         case expirationMonth
         case expirationYear
+        case disabled
         case createdAt
         case updatedAt
         case usedAt
@@ -63,6 +65,7 @@ extension CreditCardRecord: BeamObjectProtocol {
                          cardHolder: cardHolder,
                          expirationMonth: expirationMonth,
                          expirationYear: expirationYear,
+                         disabled: disabled,
                          createdAt: createdAt,
                          updatedAt: updatedAt,
                          usedAt: usedAt,
@@ -78,6 +81,7 @@ extension CreditCardRecord: BeamObjectProtocol {
         cardHolder = try container.decode(String.self, forKey: .cardHolder)
         expirationMonth = try container.decode(Int.self, forKey: .expirationMonth)
         expirationYear = try container.decode(Int.self, forKey: .expirationYear)
+        disabled = try container.decodeIfPresent(Bool.self, forKey: .disabled) ?? false
 
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
@@ -91,7 +95,7 @@ extension CreditCardRecord: Equatable { }
 
 extension CreditCardRecord: TableRecord {
     enum Columns: String, ColumnExpression {
-        case uuid, cardDescription, cardNumber, cardHolder, expirationMonth, expirationYear, createdAt, updatedAt, usedAt, deletedAt, privateKeySignature
+        case uuid, cardDescription, cardNumber, cardHolder, expirationMonth, expirationYear, disabled, createdAt, updatedAt, usedAt, deletedAt, privateKeySignature
     }
 }
 
@@ -104,6 +108,7 @@ extension CreditCardRecord: FetchableRecord {
         cardHolder = row[Columns.cardHolder]
         expirationMonth = row[Columns.expirationMonth]
         expirationYear = row[Columns.expirationYear]
+        disabled = row[Columns.disabled]
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
         usedAt = row[Columns.usedAt]
@@ -125,6 +130,7 @@ extension CreditCardRecord: MutablePersistableRecord {
         container[Columns.cardHolder] = cardHolder
         container[Columns.expirationMonth] = expirationMonth
         container[Columns.expirationYear] = expirationYear
+        container[Columns.disabled] = disabled
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.usedAt] = usedAt
@@ -177,6 +183,12 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
                 table.column("privateKeySignature", .text).notNull()
             }
         }
+
+        migrator.registerMigration("disableCreditCardAutofill") { db in
+            try db.alter(table: CreditCardsDB.tableName) { table in
+                table.add(column: "disabled", .boolean).notNull().defaults(to: false)
+            }
+        }
     }
 
     func fetchRecord(uuid: UUID) throws -> CreditCardRecord? {
@@ -227,7 +239,7 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
     }
 
     @discardableResult
-    func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord {
+    func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int, disabled: Bool) throws -> CreditCardRecord {
         do {
             return try write { db in
                 guard let encryptedCardNumber = try? EncryptionManager.shared.encryptString(cardNumber, EncryptionManager.shared.localPrivateKey()) else {
@@ -241,6 +253,7 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
                     cardHolder: holder,
                     expirationMonth: expirationMonth,
                     expirationYear: expirationYear,
+                    disabled: disabled,
                     createdAt: BeamDate.now,
                     updatedAt: BeamDate.now,
                     usedAt: BeamDate.now,
@@ -255,7 +268,7 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
     }
 
     @discardableResult
-    func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord {
+    func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int, disabled: Bool) throws -> CreditCardRecord {
         do {
             return try write { db in
                 guard let encryptedCardNumber = try? EncryptionManager.shared.encryptString(cardNumber, EncryptionManager.shared.localPrivateKey()) else {
@@ -268,6 +281,7 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
                 updatedRecord.cardHolder = holder
                 updatedRecord.expirationMonth = expirationMonth
                 updatedRecord.expirationYear = expirationYear
+                updatedRecord.disabled = disabled
                 updatedRecord.updatedAt = BeamDate.now
                 updatedRecord.usedAt = BeamDate.now
                 updatedRecord.privateKeySignature = privateKeySignature

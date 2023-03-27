@@ -20,10 +20,13 @@ class SyncTests: BaseTest {
         
         step("GIVEN I start using app without being signed in") {
             uiMenu.invoke(.showOnboarding)
-            XCTAssertTrue(OnboardingLandingTestView().waitForLandingViewToLoad(), "Onboarding view wasn't loaded")
-            OnboardingLandingTestView()
-                .signUpLater()
+            XCTAssertTrue(OnboardingMinimalTestView().waitForLandingViewToLoad(), "Onboarding view wasn't loaded")
+            OnboardingMinimalTestView()
+                .continueOnboarding()
                 .clickSkipButton()
+                .closeTab()
+            JournalTestView()
+                .waitForJournalViewToLoad()
             uiMenu.invoke(.create10NormalNotes)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
@@ -49,6 +52,7 @@ class SyncTests: BaseTest {
         var onboardingImportDataTestView: OnboardingImportDataTestView!
         var firstAccountNotes: AllNotesTestTable!
         step("GIVEN I start using app without being signed in") {
+            hiddenCommand.deleteAllNotes()
             signUpStagingWithRandomAccount()
         }
         
@@ -65,19 +69,22 @@ class SyncTests: BaseTest {
         step("AND I signout deleting all data ") {
             accountTestView.signOutButtonClick()
             alertTestView.signOutButtonClick()
+            OnboardingMinimalTestView().waitForLandingViewToLoad()
+            OnboardingMinimalTestView().continueOnboarding().clickSkipButton().closeTab()
+            hiddenCommand.deleteAllNotes() // delete the new onboarding notes
         }
         
         step("AND I sign in with the same account") {
-            OnboardingLandingTestView().waitForLandingViewToLoad()
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+            PreferencesBaseView().navigateTo(preferenceView: .account)
+            accountTestView.connectToBeamButtonClick()
             onboardingImportDataTestView = signInWithoutPkKeyCheck(email: accountInfo!.email, password: accountInfo!.password)
         }
         
-        step("THEN I am on Journal view"){
+        step("THEN I am on Journal view") {
             onboardingImportDataTestView.waitForImportDataViewLoad()
-            XCTAssertTrue(onboardingImportDataTestView
-                                    .clickSkipButton()
-                                    .waitForJournalViewToLoad()
-                                    .isJournalOpened())
+            PreferencesBaseView().close(.account)
+            XCTAssertTrue(JournalTestView().waitForJournalViewToLoad().isJournalOpened())
         }
         
         step("AND all data is correctly synchronised"){

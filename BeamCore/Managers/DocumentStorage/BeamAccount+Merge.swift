@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 
 extension BeamAccount {
-    func mergeAllDatabases(initialDBs: Set<BeamDatabase>) {
+    func mergeAllDatabases(initialDBs: Set<BeamDatabase>, deleteDatabases: Bool = true) {
         // We have just synced all the databases
         // We now need to check if a new database was added from the sync and move all the notes to it
         let allDatabases = self.allDatabases
@@ -112,9 +112,11 @@ extension BeamAccount {
             }
         }
 
-        databasesToDelete.forEach {
-            Logger.shared.logInfo("Deleting \($0)", category: .sync)
-            self.deleteDatabase($0.id)
+        if deleteDatabases {
+            databasesToDelete.forEach {
+                Logger.shared.logInfo("Deleting \($0)", category: .sync)
+                self.deleteDatabase($0.id)
+            }
         }
     }
 
@@ -164,21 +166,21 @@ extension BeamAccount {
         fileDBManager.deleteAll(includedRemote: false)
     }
 
-    fileprivate func moveNoteFrecencies(_ source: BeamDatabase, _ destination: BeamDatabase, _ deletedDocuments: [BeamDocument]) throws {
+    fileprivate func moveNoteFrecencies(_ source: BeamDatabase, _ destination: BeamDatabase, _ movedDocuments: [BeamDocument]) throws {
         guard let sourceManager = source.noteLinksAndRefsManager else { return }
         guard let destinationManager = destination.noteLinksAndRefsManager else { return }
 
-        let deletedDocumentIds = deletedDocuments.map { $0.id }
+        let movedDocumentsIds = movedDocuments.map { $0.id }
 
         let frecencies = try sourceManager.allNoteFrecencies(updatedSince: nil).filter {
-            $0.deletedAt == nil && !deletedDocumentIds.contains($0.noteId)
+            $0.deletedAt == nil && movedDocumentsIds.contains($0.noteId)
         }
         Logger.shared.logInfo("Moving the following frecencies: \(frecencies.map { $0.id })", category: .sync)
 
         try GRDBNoteFrecencyStorage(db: destinationManager, objectManager: data.objectManager).receivedObjects(frecencies)
 
         // remove from original source
-        try sourceManager.clearNoteFrecencies()
+        let sourceStorage = GRDBNoteFrecencyStorage(db: sourceManager, objectManager: data.objectManager)
+        frecencies.forEach { sourceStorage.remoteSoftDelete(noteId: $0.noteId) }
     }
-
 }

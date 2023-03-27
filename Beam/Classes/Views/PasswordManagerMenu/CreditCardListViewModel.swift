@@ -62,7 +62,7 @@ final class CreditCardListViewModel: ObservableObject {
         guard !matchingCards.contains(where: { $0.expirationMonth == entry.expirationMonth && $0.expirationYear == entry.expirationYear }) else {
             return false // the card is already in the database
         }
-        creditCardManager.save(entry: entry)
+        creditCardManager.save(entry: entry, disabled: false)
         return true
     }
 

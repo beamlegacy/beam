@@ -154,6 +154,7 @@
 		338981C12795B9BD00477941 /* Bundle+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338981C02795B9BD00477941 /* Bundle+Beam.swift */; };
 		338A66A0268DC26000B056EB /* LayerRemoverAnimationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */; };
 		338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */; };
+		338AAD3828F9798A00614961 /* BeamTextEdit+DragAndDrop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338AAD3728F9798A00614961 /* BeamTextEdit+DragAndDrop.swift */; };
 		3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3392E56C269D82FE000FA401 /* ClickCatchingView.swift */; };
 		339D193926AED9E1006DE745 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 339D193826AED9E1006DE745 /* AuthenticationView.swift */; };
 		33A6EDBF286B3A7E00905057 /* BeamNote+Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33A6EDBE286B3A7E00905057 /* BeamNote+Views.swift */; };
@@ -350,7 +351,7 @@
 		41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41855A3925D1334F00DA49DC /* BeamCollectionView.swift */; };
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
 		41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 41B4277A25E52DCA00A8243F /* Localizable.stringsdict */; };
-		41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */; };
+		41FAD34F25E5742800D78B36 /* CALayer+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FAD34E25E5742800D78B36 /* CALayer+Extension.swift */; };
 		4E0556E127B4004E00B4A42F /* TabGroupingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0556E027B4004E00B4A42F /* TabGroupingManager.swift */; };
 		4E15C19227B583A100E3DD0D /* TabGroupingManagerOpenPageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E15C19127B583A100E3DD0D /* TabGroupingManagerOpenPageTests.swift */; };
 		4E9F4C8326F8C75D00420DED /* ClusteringManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9F4C8226F8C75D00420DED /* ClusteringManagerTests.swift */; };
@@ -565,6 +566,7 @@
 		874111A9282592D60024C348 /* autofill-display.json in Resources */ = {isa = PBXBuildFile; fileRef = 874111A8282592D60024C348 /* autofill-display.json */; };
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
 		8749F3372893DF5B00098600 /* KeyEventHijacker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749F3362893DF5B00098600 /* KeyEventHijacker.swift */; };
+		8750344428BF6CE3009D1C83 /* TextNode+SpellChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */; };
 		87572B9E27B26EB9003DACFB /* ChromiumImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */; };
 		8757CB7127FB616B00A611D6 /* WebFieldAutofillOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
@@ -592,6 +594,7 @@
 		87892A8428C13D26007DFD5C /* IdentifiableString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87892A8328C13D26007DFD5C /* IdentifiableString.swift */; };
 		87892A9328C14965007DFD5C /* XCTests-Passwords-UTF8-noBOM.binary in Resources */ = {isa = PBXBuildFile; fileRef = 87892A8C28C14964007DFD5C /* XCTests-Passwords-UTF8-noBOM.binary */; };
 		87892A9428C14965007DFD5C /* XCTests-Passwords-UTF8-BOM.binary in Resources */ = {isa = PBXBuildFile; fileRef = 87892A9228C14964007DFD5C /* XCTests-Passwords-UTF8-BOM.binary */; };
+		878F77E528DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 878F77E428DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift */; };
 		87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */; };
 		879157372799EECF00AE1040 /* BrowserImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879157362799EECF00AE1040 /* BrowserImporter.swift */; };
 		8795070328B422AA00E23758 /* KeyEventHijackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8795070228B422AA00E23758 /* KeyEventHijackerTests.swift */; };
@@ -604,6 +607,7 @@
 		87A551C527ADA1F100D6A22D /* WebAutofillPopoverContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */; };
 		87A87CE426C2F620009D9EE2 /* PasswordExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */; };
 		87AD4BF4286A530C0058F8BE /* PasswordEncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AD4BF3286A530C0058F8BE /* PasswordEncryptionManager.swift */; };
+		87AE993028EB149500AA49D0 /* AppDelegate+SpellChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AE992F28EB149500AA49D0 /* AppDelegate+SpellChecking.swift */; };
 		87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */; };
 		87C539BD26162C3400D51877 /* WebFieldAutofillMenuCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539BC26162C3400D51877 /* WebFieldAutofillMenuCell.swift */; };
 		87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */; };
@@ -884,6 +888,9 @@
 		A0125A0626DE8AF300590CB5 /* WebCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0125A0526DE8AF300590CB5 /* WebCommand.swift */; };
 		A0129BD32758E87900522183 /* NSApplication+Relaunch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0129BD22758E87900522183 /* NSApplication+Relaunch.swift */; };
 		A0184F7126AF56AB00993C32 /* PreferencesManager+Advanced.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */; };
+		A01A1F2A28DC63A200079118 /* OnboardingMinimalWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01A1F2928DC63A200079118 /* OnboardingMinimalWelcomeView.swift */; };
+		A01AB44D28F72D5100F9CFA6 /* OnboardingMinimalTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01AB44C28F72D5100F9CFA6 /* OnboardingMinimalTestView.swift */; };
+		A01AB44F28F73F5A00F9CFA6 /* OnboardingCalendarTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01AB44E28F73F5A00F9CFA6 /* OnboardingCalendarTestView.swift */; };
 		A01EB6BC2840DE430032962D /* NoteMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01EB6BB2840DE430032962D /* NoteMetadata.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
 		A02E837127AEDE6500CEF688 /* OnboardingLostPrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02E837027AEDE6500CEF688 /* OnboardingLostPrivateKey.swift */; };
@@ -926,6 +933,7 @@
 		A06B27D42758DC4900688A83 /* NSButtonCheckboxHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06B27D32758DC4900688A83 /* NSButtonCheckboxHelper.swift */; };
 		A06D5FA32683454C009D7C38 /* DeepCopyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06D5FA22683454C009D7C38 /* DeepCopyTests.swift */; };
 		A06EF0AB26984400007B3BB3 /* CreditCardsModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06EF0AA26984400007B3BB3 /* CreditCardsModalView.swift */; };
+		A073534F28F41AB00030A347 /* OnboardingCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A073534E28F41AB00030A347 /* OnboardingCalendarView.swift */; };
 		A075AB0F268F5C9400FC85B1 /* BeamDataFolderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A075AB0E268F5C9400FC85B1 /* BeamDataFolderTests.swift */; };
 		A07A90E5268E1804000C502C /* PreferencesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07A90E4268E1804000C502C /* PreferencesManager.swift */; };
 		A07B03EE279AF1D200D14C45 /* Inter-LightItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = A07B03E5279AF1D100D14C45 /* Inter-LightItalic.otf */; };
@@ -1838,6 +1846,7 @@
 		338981C02795B9BD00477941 /* Bundle+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Bundle+Beam.swift"; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
+		338AAD3728F9798A00614961 /* BeamTextEdit+DragAndDrop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+DragAndDrop.swift"; sourceTree = "<group>"; };
 		338F276D26DD14B900D4AC97 /* Test.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Test.xcconfig; sourceTree = "<group>"; };
 		3392E56C269D82FE000FA401 /* ClickCatchingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickCatchingView.swift; sourceTree = "<group>"; };
 		339D193826AED9E1006DE745 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
@@ -2049,7 +2058,7 @@
 		418EA94125D696EA005894AA /* HyperlinkFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperlinkFormatterView.swift; sourceTree = "<group>"; };
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		41B4277A25E52DCA00A8243F /* Localizable.stringsdict */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; path = Localizable.stringsdict; sourceTree = "<group>"; };
-		41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+Animation.swift"; sourceTree = "<group>"; };
+		41FAD34E25E5742800D78B36 /* CALayer+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+Extension.swift"; sourceTree = "<group>"; };
 		4E0556E027B4004E00B4A42F /* TabGroupingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingManager.swift; sourceTree = "<group>"; };
 		4E15C19127B583A100E3DD0D /* TabGroupingManagerOpenPageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingManagerOpenPageTests.swift; sourceTree = "<group>"; };
 		4E9F4C8226F8C75D00420DED /* ClusteringManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringManagerTests.swift; sourceTree = "<group>"; };
@@ -2286,6 +2295,7 @@
 		874111A8282592D60024C348 /* autofill-display.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "autofill-display.json"; sourceTree = "<group>"; };
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
 		8749F3362893DF5B00098600 /* KeyEventHijacker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHijacker.swift; sourceTree = "<group>"; };
+		8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextNode+SpellChecking.swift"; sourceTree = "<group>"; };
 		87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumImporter.swift; sourceTree = "<group>"; };
 		8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillOverlay.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
@@ -2313,6 +2323,7 @@
 		87892A8328C13D26007DFD5C /* IdentifiableString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentifiableString.swift; sourceTree = "<group>"; };
 		87892A8C28C14964007DFD5C /* XCTests-Passwords-UTF8-noBOM.binary */ = {isa = PBXFileReference; explicitFileType = compiled; fileEncoding = 4; path = "XCTests-Passwords-UTF8-noBOM.binary"; sourceTree = "<group>"; };
 		87892A9228C14964007DFD5C /* XCTests-Passwords-UTF8-BOM.binary */ = {isa = PBXFileReference; explicitFileType = compiled; fileEncoding = 4; path = "XCTests-Passwords-UTF8-BOM.binary"; sourceTree = "<group>"; };
+		878F77E428DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+SpellChecking.swift"; sourceTree = "<group>"; };
 		8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserImportErrors.swift"; sourceTree = "<group>"; };
 		879157362799EECF00AE1040 /* BrowserImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserImporter.swift; sourceTree = "<group>"; };
 		8795070228B422AA00E23758 /* KeyEventHijackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHijackerTests.swift; sourceTree = "<group>"; };
@@ -2325,6 +2336,7 @@
 		87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutofillPopoverContainer.swift; sourceTree = "<group>"; };
 		87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordExporterTests.swift; sourceTree = "<group>"; };
 		87AD4BF3286A530C0058F8BE /* PasswordEncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordEncryptionManager.swift; sourceTree = "<group>"; };
+		87AE992F28EB149500AA49D0 /* AppDelegate+SpellChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+SpellChecking.swift"; sourceTree = "<group>"; };
 		87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModel.swift; sourceTree = "<group>"; };
 		87C539BC26162C3400D51877 /* WebFieldAutofillMenuCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillMenuCell.swift; sourceTree = "<group>"; };
 		87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSuggestionCell.swift; sourceTree = "<group>"; };
@@ -2874,6 +2886,9 @@
 		A0129BD22758E87900522183 /* NSApplication+Relaunch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApplication+Relaunch.swift"; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Advanced.swift"; sourceTree = "<group>"; };
+		A01A1F2928DC63A200079118 /* OnboardingMinimalWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMinimalWelcomeView.swift; sourceTree = "<group>"; };
+		A01AB44C28F72D5100F9CFA6 /* OnboardingMinimalTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingMinimalTestView.swift; sourceTree = "<group>"; };
+		A01AB44E28F73F5A00F9CFA6 /* OnboardingCalendarTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCalendarTestView.swift; sourceTree = "<group>"; };
 		A01EB6BB2840DE430032962D /* NoteMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMetadata.swift; sourceTree = "<group>"; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
 		A02E837027AEDE6500CEF688 /* OnboardingLostPrivateKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPrivateKey.swift; sourceTree = "<group>"; };
@@ -2916,6 +2931,7 @@
 		A06B27D32758DC4900688A83 /* NSButtonCheckboxHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSButtonCheckboxHelper.swift; sourceTree = "<group>"; };
 		A06D5FA22683454C009D7C38 /* DeepCopyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepCopyTests.swift; sourceTree = "<group>"; };
 		A06EF0AA26984400007B3BB3 /* CreditCardsModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardsModalView.swift; sourceTree = "<group>"; };
+		A073534E28F41AB00030A347 /* OnboardingCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCalendarView.swift; sourceTree = "<group>"; };
 		A075AB0E268F5C9400FC85B1 /* BeamDataFolderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDataFolderTests.swift; sourceTree = "<group>"; };
 		A07A90E4268E1804000C502C /* PreferencesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesManager.swift; sourceTree = "<group>"; };
 		A07B03E5279AF1D100D14C45 /* Inter-LightItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-LightItalic.otf"; sourceTree = "<group>"; };
@@ -4434,7 +4450,7 @@
 				414B98F925A23A4F002E81A3 /* NSView+Xib.swift */,
 				417628A425B05DFB0082FFDF /* NSBezierPath+CGPath.swift */,
 				A5946825265D29350044A892 /* CGPath+Union.swift */,
-				41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */,
+				41FAD34E25E5742800D78B36 /* CALayer+Extension.swift */,
 				524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */,
 				524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */,
 				96319D6C26163AAD00D1CF31 /* BeamNote+CommandManager.swift */,
@@ -4517,14 +4533,17 @@
 				A50241CB26D8FA5500C93E1E /* Gutter */,
 				96C9AAB82593BB67007D3D98 /* Widget.swift */,
 				418171B92581107C00317ED8 /* TextNode.swift */,
+				8750344328BF6CE3009D1C83 /* TextNode+SpellChecking.swift */,
 				9691E3D725AD9F3300A13080 /* TextRoot.swift */,
 				3349581128E2FD1B005D5A1D /* EditorType.swift */,
 				418171BF2581107C00317ED8 /* BeamTextEdit.swift */,
+				338AAD3728F9798A00614961 /* BeamTextEdit+DragAndDrop.swift */,
 				A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */,
 				4100D96A25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift */,
 				A5C7F109267CC9FD002EE550 /* BeamTextEdit+InputDetector.swift */,
 				333E4F8C270AE2B7005B72CD /* BeamTextEdit+Search.swift */,
 				6ECDE71328C1FDDC00954E4C /* BeamTextEdit+MenuValidation.swift */,
+				878F77E428DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift */,
 				418171BE2581107C00317ED8 /* TextEditMovements.swift */,
 				418171B82581107C00317ED8 /* TextEditOperations.swift */,
 				96E4CF2F258DFB0800D6DE22 /* BeamText+NSAttributedString.swift */,
@@ -4660,6 +4679,7 @@
 				A599F8D227849AF200657CD5 /* AppDelegate+Onboarding.swift */,
 				962AC88727901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift */,
 				9670B8FA285011A800BEC4A0 /* AppDelegate+DataTree.swift */,
+				87AE992F28EB149500AA49D0 /* AppDelegate+SpellChecking.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -7352,6 +7372,8 @@
 				A5336C0A273AB6050075AF92 /* OnboardingView.swift */,
 				A52596EA273EB8FB004B27E4 /* OnboardingManager.swift */,
 				A52596E4273EB83B004B27E4 /* OnboardingWelcomeView.swift */,
+				A01A1F2928DC63A200079118 /* OnboardingMinimalWelcomeView.swift */,
+				A073534E28F41AB00030A347 /* OnboardingCalendarView.swift */,
 				A52596E8273EB8AC004B27E4 /* OnboardingImportsView.swift */,
 				A51C4C252771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift */,
 				A52596E2273EAA75004B27E4 /* OnboardingEmailConnectView.swift */,
@@ -8036,6 +8058,8 @@
 				B5A76EBA27FC7D0900964340 /* OnboardingAccountConfirmationTestView.swift */,
 				B5D2A1862805EAA600C833B9 /* OnboardingPrivateKeyTestView.swift */,
 				A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */,
+				A01AB44C28F72D5100F9CFA6 /* OnboardingMinimalTestView.swift */,
+				A01AB44E28F73F5A00F9CFA6 /* OnboardingCalendarTestView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -9230,6 +9254,7 @@
 				968948AA2840DF2500F97AAD /* BeamStore.swift in Sources */,
 				A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+Data.swift in Sources */,
+				A073534F28F41AB00030A347 /* OnboardingCalendarView.swift in Sources */,
 				DA3A84BE2805C3D500092200 /* NoteDailySummary.swift in Sources */,
 				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
 				A57BFEA12615B45C00CFB646 /* BeamTableCellView.swift in Sources */,
@@ -9392,6 +9417,7 @@
 				A0DB19F026829BF900956579 /* AllowListViewModel.swift in Sources */,
 				9617815526934ACC0019D9CA /* ReferencesSection.swift in Sources */,
 				0325629226051D3B006513E4 /* RBUtils.m in Sources */,
+				8750344428BF6CE3009D1C83 /* TextNode+SpellChecking.swift in Sources */,
 				A0E9B0E326668C1300FC99A5 /* FaviconView.swift in Sources */,
 				37B85B8227A2C81B003871F9 /* DownloadProxyDelegate.swift in Sources */,
 				8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */,
@@ -9680,6 +9706,7 @@
 				9688F2BC2851EFF300FAA51B /* TreeDetailView.swift in Sources */,
 				A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */,
 				5284894E26C54C460064878B /* String+TitleConflict.swift in Sources */,
+				338AAD3828F9798A00614961 /* BeamTextEdit+DragAndDrop.swift in Sources */,
 				87DB0CD527EC5F5D0071A410 /* WebFieldLocator.swift in Sources */,
 				8718E15F2805E63A00CFF53D /* ExclusiveRunner.swift in Sources */,
 				524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */,
@@ -9698,7 +9725,7 @@
 				A51C4C262771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift in Sources */,
 				A0379C43266E6C5B00D75D6B /* AllowListTableView.swift in Sources */,
 				A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */,
-				41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */,
+				41FAD34F25E5742800D78B36 /* CALayer+Extension.swift in Sources */,
 				524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */,
 				DA6452C02809A7EA00C2F831 /* BatchHistoryImporter.swift in Sources */,
 				A5D8858C274E4EB600F37859 /* OmniboxClearButton.swift in Sources */,
@@ -9742,6 +9769,7 @@
 				A50241D426D8FA6600C93E1E /* GutterItemView.swift in Sources */,
 				96D71CEF27FB2F3E0094F54D /* BeamNoteDocumentWrapper.swift in Sources */,
 				A0B0681A2892029C0059DBBD /* SettingsController.swift in Sources */,
+				A01A1F2A28DC63A200079118 /* OnboardingMinimalWelcomeView.swift in Sources */,
 				418172202581107C00317ED8 /* Information.swift in Sources */,
 				37DB5A1627BB518400534760 /* AnimationHandler.swift in Sources */,
 				4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */,
@@ -9877,6 +9905,7 @@
 				960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */,
 				37DB5A0F27BB514400534760 /* EmbedLoadingView.swift in Sources */,
 				BAA6703B2414F077ED3A09D8 /* WebAutofillMessageHandler.swift in Sources */,
+				87AE993028EB149500AA49D0 /* AppDelegate+SpellChecking.swift in Sources */,
 				3343794327037578004EF5A4 /* BeamWindow+Search.swift in Sources */,
 				BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */,
 				BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */,
@@ -9885,6 +9914,7 @@
 				8768566427709413002A8069 /* ChromiumPasswordImporter.swift in Sources */,
 				8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */,
 				5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */,
+				878F77E528DB86D800CB06D1 /* BeamTextEdit+SpellChecking.swift in Sources */,
 				A0CC0AFE2892F0D300DD6B4D /* AdvancedPreferencesJournalAndNotes.swift in Sources */,
 				87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */,
 				BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */,
@@ -10237,6 +10267,7 @@
 				B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */,
 				A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */,
 				B5FAE306270EE17800EAC8A3 /* AccountViewLocators.swift in Sources */,
+				A01AB44F28F73F5A00F9CFA6 /* OnboardingCalendarTestView.swift in Sources */,
 				A3DA64E327706FCB0086C142 /* TextEditorContextViewTests.swift in Sources */,
 				A315D57A282BFE1D00579362 /* CreditCardsTestTable.swift in Sources */,
 				B5E8010A26AEA1E100C8BD61 /* JournalTestView.swift in Sources */,
@@ -10270,6 +10301,7 @@
 				B5DC1F8A26B19C8700A4C94B /* OmniBoxTestView.swift in Sources */,
 				A3AF8CF02888918B00FB6310 /* NotesPreferencesTests.swift in Sources */,
 				D7251BC0288ED32200CD5D64 /* TabGroupUngroupTests.swift in Sources */,
+				A01AB44D28F72D5100F9CFA6 /* OnboardingMinimalTestView.swift in Sources */,
 				A3539E2428326EA100035A21 /* CreditCardTestView.swift in Sources */,
 				D75EEB402844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift in Sources */,
 				A340D039288035CF00980545 /* GeneralPreferencesTests.swift in Sources */,
@@ -10511,7 +10543,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -10546,7 +10578,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -10570,7 +10602,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -10595,7 +10627,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -10727,7 +10759,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -10761,7 +10793,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -10785,7 +10817,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -10809,7 +10841,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -10937,24 +10969,6 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_TESTING_SEARCH_PATHS = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					"UITests-1.html",
-					"UITests-Playground.html",
-					"UITests-Media.html",
-					"UITests-Password.html",
-					"UITests-4.html",
-					"UITests-3.html",
-					"UITests-2.html",
-					"UITests-Alerts.html",
-					audio.mp3,
-					"beam-logo-test.png",
-					Beam.css,
-					video.mov,
-					"XCTests-Passwords-UTF8-BOM.binary",
-					"XCTests-Passwords-UTF8-noBOM.binary",
-					"UITests-Passwords.csv",
-					gcp_service_account_credentials.json,
-				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -10969,7 +10983,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -11002,7 +11016,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -11025,7 +11039,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -11049,7 +11063,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -11200,7 +11214,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -11234,7 +11248,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -11258,7 +11272,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -11282,7 +11296,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -11410,24 +11424,6 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_TESTING_SEARCH_PATHS = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					"UITests-1.html",
-					"UITests-Playground.html",
-					"UITests-Media.html",
-					"UITests-Password.html",
-					"UITests-4.html",
-					"UITests-3.html",
-					"UITests-2.html",
-					"UITests-Alerts.html",
-					audio.mp3,
-					"beam-logo-test.png",
-					Beam.css,
-					video.mov,
-					"XCTests-Passwords-UTF8-BOM.binary",
-					"XCTests-Passwords-UTF8-noBOM.binary",
-					"UITests-Passwords.csv",
-					gcp_service_account_credentials.json,
-				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -11442,7 +11438,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -11475,7 +11471,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -11498,7 +11494,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -11522,7 +11518,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -11589,7 +11585,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -11617,7 +11613,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -11829,7 +11825,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -11864,24 +11860,6 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_TESTING_SEARCH_PATHS = YES;
-				EXCLUDED_SOURCE_FILE_NAMES = (
-					"UITests-1.html",
-					"UITests-Playground.html",
-					"UITests-Media.html",
-					"UITests-Password.html",
-					"UITests-4.html",
-					"UITests-3.html",
-					"UITests-2.html",
-					"UITests-Alerts.html",
-					audio.mp3,
-					"beam-logo-test.png",
-					Beam.css,
-					video.mov,
-					"XCTests-Passwords-UTF8-BOM.binary",
-					"XCTests-Passwords-UTF8-noBOM.binary",
-					"UITests-Passwords.csv",
-					gcp_service_account_credentials.json,
-				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -11896,7 +11874,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -11929,7 +11907,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -11958,7 +11936,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -11981,7 +11959,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
@@ -12004,7 +11982,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -12105,7 +12083,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -12138,7 +12116,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -12161,7 +12139,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -12186,7 +12164,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.17.0;
+				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

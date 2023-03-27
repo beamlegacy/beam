@@ -46,7 +46,7 @@ class PasswordsDBTests: XCTestCase {
         let initialEntries = passwordManager.fetchAll()
         XCTAssertEqual(initialEntries.count, 1, "After first save, entry count should be 1")
 
-        let initialEntry = PasswordManagerEntry(minimizedHost: Self.host.minimizedHost!, username: Self.username)
+        let initialEntry = PasswordManagerEntry(minimizedHost: Self.host.minimizedHost!, username: Self.username, neverSaved: false)
         passwordManager.save(entry: initialEntry, hostname: Self.host.minimizedHost!, username: "newuser@beamapp.co", password: Self.password)
 
         let updatedEntries = passwordManager.fetchAll()

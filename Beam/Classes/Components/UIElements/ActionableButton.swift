@@ -74,6 +74,7 @@ struct ActionableButtonStyle {
         var size: CGFloat = 12
         var palette: ActionableButtonState.Palette?
         var alignment = HorizontalAlignment.trailing
+        var isTemplate: Bool = true
     }
 }
 
@@ -86,6 +87,7 @@ struct ActionableButton: View {
     var minWidth: CGFloat = 0
     var maximizeWidth = false
     var height: CGFloat = 30
+    var cornerRadius: CGFloat = 4
     var invertBlendMode: Bool = false
     var action: (() -> Void)?
 
@@ -122,25 +124,38 @@ struct ActionableButton: View {
         return hasTrailingIcon ? 0 : hPadding
     }
 
+    var actionableButtonText: some View {
+        Text(LocalizedStringKey(text))
+            .font(variant.style.font)
+            .foregroundColor(foregroundColor)
+            .blendModeLightMultiplyDarkScreen(invert: invertBlendMode ? colorScheme == .light : false)
+            .if(maximizeWidth) {
+                $0.frame(maxWidth: .infinity, alignment: .leading)
+            }
+    }
+
     var body: some View {
         HStack(spacing: hSpacing) {
             if let icon = variant.style.icon, icon.alignment == .leading {
-                Icon(name: icon.name, width: icon.size, color: iconColor)
+                Icon(name: icon.name, width: icon.size, color: iconColor, isTemplate: icon.isTemplate)
                     .blendModeLightMultiplyDarkScreen(invert: invertBlendMode && colorScheme == .light)
                     .padding(.leading, hPadding)
             }
-            Text(LocalizedStringKey(text))
-                .font(variant.style.font)
-                .foregroundColor(foregroundColor)
-                .padding(.leading, textLeadingPadding)
-                .padding(.trailing, textTrailingPadding)
-                .blendModeLightMultiplyDarkScreen(invert: invertBlendMode ? colorScheme == .light : false)
-                .if(minWidth > 0) {
-                    $0.frame(minWidth: textMinWidth, alignment: Alignment(horizontal: variant.style.textAlignment, vertical: .center))
-                }
-                .if(maximizeWidth) {
-                    $0.frame(maxWidth: .infinity, alignment: .leading)
-                }
+
+            if let icon = variant.style.icon, icon.alignment == .center {
+                HStack(alignment: .center, spacing: 8) {
+                    Icon(name: icon.name, width: icon.size, color: iconColor, isTemplate: icon.isTemplate)
+                        .blendModeLightMultiplyDarkScreen(invert: invertBlendMode && colorScheme == .light)
+                    actionableButtonText
+                }.frame(minWidth: minWidth)
+            } else {
+                actionableButtonText
+                    .padding(.leading, textLeadingPadding)
+                    .padding(.trailing, textTrailingPadding)
+                    .if(minWidth > 0) {
+                        $0.frame(minWidth: textMinWidth, alignment: Alignment(horizontal: variant.style.textAlignment, vertical: .center))
+                    }
+            }
             if let icon = variant.style.icon, icon.alignment == .trailing {
                 Icon(name: icon.name, width: icon.size, color: iconColor)
                     .blendModeLightMultiplyDarkScreen(invert: invertBlendMode && colorScheme == .light)
@@ -149,13 +164,13 @@ struct ActionableButton: View {
         }
         .frame(height: height)
         .background(Group {
-            if let color = strokeColor {
-                RoundedRectangle(cornerRadius: 4).stroke(color, lineWidth: 2)
+            if let color = strokeColor, let lineWidth = strokeLineWidth {
+                RoundedRectangle(cornerRadius: cornerRadius).stroke(color, lineWidth: lineWidth)
             }
         })
         .background(customBackground)
         .background(backgroundColor)
-        .cornerRadius(4.0)
+        .cornerRadius(cornerRadius)
         .animation(.easeInOut(duration: 0.2), value: isTouched)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
         .onHover(perform: { hovering in
@@ -221,13 +236,22 @@ struct ActionableButton: View {
     }
 
     private var strokeColor: Color? {
-        let palette = variant.style.backgroundColor
+        guard let strokePalette = variant.style.backgroundColor.stroke else { return nil }
         switch actualState {
+        case .normal:
+            return strokePalette.normal?.swiftUI
+        case .hovered:
+            return strokePalette.hovered?.swiftUI
+        case .clicked:
+            return strokePalette.clicked?.swiftUI
         case .disabled:
-            return palette.disabledStroke?.swiftUI
-        default:
-            return nil
+            return strokePalette.disabled?.swiftUI
         }
+    }
+
+    private var strokeLineWidth: CGFloat? {
+        guard let strokePalette = variant.style.backgroundColor.stroke else { return nil }
+        return strokePalette.lineWidth
     }
 
     private var iconColor: Color {
@@ -248,12 +272,24 @@ struct ActionableButton: View {
 }
 
 extension ActionableButtonState {
+    struct StrokePalette {
+        var normal: BeamColor?
+        var hovered: BeamColor?
+        var clicked: BeamColor?
+        var disabled: BeamColor?
+        var lineWidth: CGFloat = 2
+
+        static let primaryBeamStroke = ActionableButtonState.StrokePalette(normal: nil, hovered: nil, clicked: nil, disabled: .ActionableButtonBeam.strokeDisabled)
+        static let primaryBlueStroke = ActionableButtonState.StrokePalette(normal: nil, hovered: nil, clicked: nil, disabled: .ActionableButtonBeam.strokeDisabled)
+        static let primaryPurpleStroke = ActionableButtonState.StrokePalette(normal: nil, hovered: nil, clicked: nil, disabled: .ActionableButtonBeam.strokeDisabled)
+        static let ghostStroke = ActionableButtonState.StrokePalette(normal: nil, hovered: nil, clicked: nil, disabled: BeamColor.Generic.background.alpha(0))
+    }
     struct Palette {
         var normal: BeamColor
         var hovered: BeamColor
         var clicked: BeamColor
         var disabled: BeamColor
-        var disabledStroke: BeamColor?
+        var stroke: StrokePalette?
 
         static let primaryBeamForeground = ActionableButtonState.Palette(normal: .ActionableButtonBeam.foreground,
                                                                          hovered: .ActionableButtonBeam.foreground,
@@ -262,8 +298,7 @@ extension ActionableButtonState {
         static let primaryBeamBackground = ActionableButtonState.Palette(normal: .ActionableButtonBeam.background,
                                                                          hovered: .ActionableButtonBeam.backgroundHovered,
                                                                          clicked: .ActionableButtonBeam.backgroundClicked,
-                                                                         disabled: .ActionableButtonBeam.backgroundDisabled,
-                                                                         disabledStroke: .ActionableButtonBeam.strokeDisabled)
+                                                                         disabled: .ActionableButtonBeam.backgroundDisabled, stroke: .primaryBeamStroke)
 
         static let primaryBlueForeground = ActionableButtonState.Palette(normal: .ActionableButtonBlue.foreground,
                                                                          hovered: .ActionableButtonBlue.foreground,
@@ -272,8 +307,8 @@ extension ActionableButtonState {
         static let primaryBlueBackground = ActionableButtonState.Palette(normal: .ActionableButtonBlue.background,
                                                                          hovered: .ActionableButtonBlue.backgroundHovered,
                                                                          clicked: .ActionableButtonBlue.backgroundClicked,
-                                                                         disabled: .ActionableButtonBlue.backgroundDisabled,
-                                                                         disabledStroke: .ActionableButtonBlue.strokeDisabled)
+                                                                         disabled: .ActionableButtonBlue.backgroundDisabled, stroke: .primaryBlueStroke)
+
 
         static let primaryPurpleForeground = ActionableButtonState.Palette(normal: .ActionableButtonPurple.foreground,
                                                                            hovered: .ActionableButtonPurple.foreground,
@@ -282,8 +317,7 @@ extension ActionableButtonState {
         static let primaryPurpleBackground = ActionableButtonState.Palette(normal: .ActionableButtonPurple.background,
                                                                            hovered: .ActionableButtonPurple.backgroundHovered,
                                                                            clicked: .ActionableButtonPurple.backgroundClicked,
-                                                                           disabled: .ActionableButtonPurple.backgroundDisabled,
-                                                                           disabledStroke: .ActionableButtonPurple.strokeDisabled)
+                                                                           disabled: .ActionableButtonPurple.backgroundDisabled, stroke: .primaryPurpleStroke)
 
         static let secondaryForeground = ActionableButtonState.Palette(normal: .ActionableButtonSecondary.foreground,
                                                                        hovered: .ActionableButtonSecondary.foreground,
@@ -315,8 +349,7 @@ extension ActionableButtonState {
         static let ghostBackground = ActionableButtonState.Palette(normal: BeamColor.Generic.background.alpha(0),
                                                                    hovered: BeamColor.combining(lightColor: .Mercury, lightAlpha: 1, darkColor: .AlphaGray, darkAlpha: 0.64),
                                                                    clicked: BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.6, darkColor: .LightStoneGray, darkAlpha: 0.6),
-                                                                   disabled: BeamColor.Generic.background.alpha(0),
-                                                                   disabledStroke: BeamColor.Generic.background.alpha(0))
+                                                                   disabled: BeamColor.Generic.background.alpha(0), stroke: .ghostStroke)
     }
 }
 

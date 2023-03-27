@@ -97,6 +97,8 @@ struct NoteHeaderPublishButton: View {
                         .frame(width: 16, height: 16)
                         if let title = publishTitle {
                             Text(title)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.9)
                                 .font(BeamFont.regular(size: 12).swiftUI)
                                 .foregroundColor(BeamColor.Niobium.swiftUI)
                                 .transition(.asymmetric(insertion: AnyTransition.opacity.combined(with: .move(edge: .trailing)),

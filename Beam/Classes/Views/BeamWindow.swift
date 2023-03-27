@@ -246,6 +246,10 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
         }
     }
 
+    @IBAction func closeSplitView(_ sender: Any?) {
+        self.state.sideNote = nil
+    }
+
     private func cleanUpWindowContentBeforeClosing() {
         self.hostingView = nil
         self.contentView = nil

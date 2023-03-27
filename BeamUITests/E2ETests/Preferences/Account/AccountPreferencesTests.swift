@@ -78,9 +78,11 @@ class AccountPreferencesTests: BaseTest {
         }
         
         step ("WHEN I open all notes") {
-            OnboardingLandingTestView()
-                .signUpLater()
+            OnboardingMinimalTestView()
+                .continueOnboarding()
                 .clickSkipButton()
+                .closeTab()
+            JournalTestView()
                 .waitForJournalViewToLoad()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()

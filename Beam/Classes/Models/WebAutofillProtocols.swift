@@ -10,6 +10,7 @@
 struct PasswordManagerEntry: Hashable {
     var minimizedHost: String
     var username: String
+    var neverSaved: Bool
 }
 
 struct Credential {
@@ -21,6 +22,7 @@ extension PasswordManagerEntry {
     init(host: URL, username: String) {
         self.minimizedHost = host.minimizedHost ?? host.urlStringWithoutScheme
         self.username = username
+        self.neverSaved = false
     }
 }
 
@@ -48,7 +50,7 @@ protocol PasswordStore {
     func fetchAll() throws -> [LocalPasswordRecord]
     func allRecords(_ updatedSince: Date?) throws -> [LocalPasswordRecord]
     func passwordRecord(hostname: String, username: String) throws -> LocalPasswordRecord?
-    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord
+    func save(hostname: String, username: String, encryptedPassword: String, disabledForHost: Bool, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord
     func save(passwords: [LocalPasswordRecord]) throws
     func update(record: LocalPasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord
     @discardableResult func markUsed(record: LocalPasswordRecord) throws -> LocalPasswordRecord
@@ -257,8 +259,8 @@ protocol CreditCardStore {
     func fetchRecord(uuid: UUID) throws -> CreditCardRecord?
     func fetchAll() throws -> [CreditCardRecord]
     func allRecords(updatedSince: Date?) throws -> [CreditCardRecord]
-    @discardableResult func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord
-    @discardableResult func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord
+    @discardableResult func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int, disabled: Bool) throws -> CreditCardRecord
+    @discardableResult func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int, disabled: Bool) throws -> CreditCardRecord
     @discardableResult func markUsed(record: CreditCardRecord) throws -> CreditCardRecord
     @discardableResult func markDeleted(record: CreditCardRecord) throws -> CreditCardRecord
     @discardableResult func markAllDeleted() throws -> [CreditCardRecord]

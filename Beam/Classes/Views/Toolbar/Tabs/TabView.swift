@@ -82,7 +82,7 @@ struct TabView: View {
     }
 
     private var mediaIsPlaying: Bool {
-        tab.mediaPlayerController?.isPlaying == true
+        tab.mediaPlayerController?.isPlaying == true && !isDragging
     }
 
     private var isDetachable: Bool {
@@ -341,7 +341,7 @@ struct TabView: View {
         let showForegroundHoverStyle = isHovering && isSelected
         let hPadding = shouldShowCompactSize ? 0 : BeamSpacing._80
         let spacerMinWidth = BeamSpacing._40
-        let isCompactWithTrailingIcon = shouldShowTrailingIcon && shouldShowCompactSize
+        let isCompactWithTrailingIcon = hasTrailingIcon && shouldShowCompactSize
 
         let leadingViews = leadingViews(shouldShowClose: shouldShowClose)
         let trailingViews = trailingViews(shouldShowCopy: shouldShowCopy, shouldShowTrailingIcon: shouldShowTrailingIcon)

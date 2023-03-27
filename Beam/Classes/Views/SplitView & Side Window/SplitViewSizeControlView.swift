@@ -33,9 +33,7 @@ struct SplitViewSizeControlView: View {
 
     private func setWidth(_ width: CGFloat) {
         guard let state = state else { return }
-        withAnimation {
-            state.sideNoteWidth = width.clamp(440, state.maxWidthForSplitView)
-        }
+        state.sideNoteWidth = width.clamp(440, state.maxWidthForSplitView)
         closeAction?()
     }
 }

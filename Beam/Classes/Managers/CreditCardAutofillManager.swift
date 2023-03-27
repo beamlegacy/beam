@@ -30,10 +30,11 @@ final class CreditCardAutofillManager {
         }
     }
 
-    func fetchAll() -> [CreditCardEntry] {
+    func fetchAll(includingDisabled includeDisabled: Bool = false) -> [CreditCardEntry] {
         do {
             guard let allEntries = try creditCardsDB?.fetchAll() else { return [] }
-            return try creditCardEntries(for: allEntries)
+            let filteredEntries = allEntries.filter { includeDisabled || !$0.disabled }
+            return try creditCardEntries(for: filteredEntries)
         } catch CreditCardsDBError.errorFetchingCreditCards(let errorMsg) {
             Logger.shared.logError("Error while fetching all credit cards: \(errorMsg)", category: .creditCardsDB)
         } catch {
@@ -42,13 +43,13 @@ final class CreditCardAutofillManager {
         return []
     }
 
-    func find(cardNumber: String) -> [CreditCardEntry] {
+    func find(cardNumber: String, includingDisabled includeDisabled: Bool = false) -> [CreditCardEntry] {
         // Can't make a database query for card number because the column is encrypted.
-        fetchAll().filter { $0.cardNumber == cardNumber }
+        fetchAll(includingDisabled: includeDisabled).filter { $0.cardNumber == cardNumber }
     }
 
     @discardableResult
-    func save(entry: CreditCardEntry) -> CreditCardRecord? {
+    func save(entry: CreditCardEntry, disabled: Bool) -> CreditCardRecord? {
         guard let creditCardsDB = creditCardsDB else {
             return nil
         }
@@ -56,9 +57,9 @@ final class CreditCardAutofillManager {
         do {
             let savedRecord: CreditCardRecord
             if let uuid = entry.databaseID, let updatedRecord = try creditCardsDB.fetchRecord(uuid: uuid) {
-                savedRecord = try creditCardsDB.update(record: updatedRecord, description: entry.cardDescription, cardNumber: entry.cardNumber, holder: entry.cardHolder, expirationMonth: entry.expirationMonth, expirationYear: entry.expirationYear)
+                savedRecord = try creditCardsDB.update(record: updatedRecord, description: entry.cardDescription, cardNumber: entry.cardNumber, holder: entry.cardHolder, expirationMonth: entry.expirationMonth, expirationYear: entry.expirationYear, disabled: disabled)
             } else {
-                savedRecord = try creditCardsDB.addRecord(description: entry.cardDescription, cardNumber: entry.cardNumber, holder: entry.cardHolder, expirationMonth: entry.expirationMonth, expirationYear: entry.expirationYear)
+                savedRecord = try creditCardsDB.addRecord(description: entry.cardDescription, cardNumber: entry.cardNumber, holder: entry.cardHolder, expirationMonth: entry.expirationMonth, expirationYear: entry.expirationYear, disabled: disabled)
             }
             changeSubject.send()
             return savedRecord

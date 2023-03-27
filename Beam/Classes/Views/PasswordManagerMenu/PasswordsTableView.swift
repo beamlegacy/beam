@@ -62,7 +62,7 @@ class PasswordTableViewItem: IconAndTextTableViewItem {
 
 extension PasswordTableViewItem {
     convenience init(_ entry: PasswordManagerEntry) {
-        self.init(hostname: entry.minimizedHost, username: entry.username, password: "••••••••")
+        self.init(hostname: entry.minimizedHost, username: entry.username, password: entry.neverSaved ? "never saved" : "••••••••")
     }
 }
 

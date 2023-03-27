@@ -8,9 +8,12 @@
 import Foundation
 import Combine
 import BeamCore
+import SwiftUI
 
 struct OnboardingStep: Equatable {
     enum StepType: String {
+        case minimalWelcome
+        case setupCalendar
         case welcome
         case profile
         case emailConnect
@@ -27,7 +30,7 @@ struct OnboardingStep: Equatable {
 
     var canGoBack: Bool {
         switch type {
-        case .welcome, .profile, .imports, .savePrivateKey, .loading:
+        case .welcome, .profile, .imports, .savePrivateKey, .loading, .minimalWelcome, .setupCalendar:
             return false
         default:
             return true
@@ -36,7 +39,7 @@ struct OnboardingStep: Equatable {
 }
 
 protocol OnboardingManagerDelegate: AnyObject {
-    func onboardingManagerDidFinish(userDidSignUp: Bool)
+    func onboardingManagerDidFinish(isNewUser: Bool)
 }
 
 class OnboardingManager: ObservableObject {
@@ -50,7 +53,9 @@ class OnboardingManager: ObservableObject {
         var title: String
         var enabled: Bool
         var secondary: Bool = false
+        var customVariant: ActionableButtonVariant?
         var customWidth: CGFloat?
+        var alignment = HorizontalAlignment.trailing
         /// return true to go to the next step
         var onClick: (() -> Bool)?
     }
@@ -83,15 +88,16 @@ class OnboardingManager: ObservableObject {
         let needsToDisplayOnboard = Configuration.env != .test && Configuration.env != .uiTest && Persistence.Authentication.hasSeenOnboarding != true
         var step: OnboardingStep?
         if needsToDisplayOnboard {
-            if AuthenticationManager.shared.isAuthenticated {
-                if AuthenticationManager.shared.username != nil {
-                    step = OnboardingStep(type: .imports)
-                } else {
-                    step = OnboardingStep(type: .profile)
-                }
-            } else {
-                step = OnboardingStep(type: .welcome)
-            }
+            step = OnboardingStep(type: .minimalWelcome)
+//            if AuthenticationManager.shared.isAuthenticated {
+//                if AuthenticationManager.shared.username != nil {
+//                    step = OnboardingStep(type: .imports)
+//                } else {
+//                    step = OnboardingStep(type: .profile)
+//                }
+//            } else {
+//                step = OnboardingStep(type: .welcome)
+//            }
         }
         if onlyImport {
             step = OnboardingStep(type: .imports)
@@ -101,7 +107,7 @@ class OnboardingManager: ObservableObject {
     }
 
     func resetOnboarding() {
-        currentStep = OnboardingStep(type: .welcome)
+        currentStep = OnboardingStep(type: .minimalWelcome)
         actions = []
         stepsHistory.removeAll()
         cancellables.removeAll()
@@ -123,6 +129,7 @@ class OnboardingManager: ObservableObject {
         resetOnboarding()
         needsToDisplayOnboard = true
         onlyConnect = true
+        currentStep = OnboardingStep(type: .welcome)
     }
 
     func showOnboardingForConnectOnly(withConfirmationAlert: Bool = false, message: String? = nil) {
@@ -181,8 +188,10 @@ class OnboardingManager: ObservableObject {
             return importStepIfNeeded(onlyConnect: onlyConnect)
         case .setupPrivateKey:
             return stepAfterProfile()
-        case .imports, .loading, .lostPrivateKey:
+        case .imports, .loading, .lostPrivateKey, .setupCalendar:
             return nil
+        case .minimalWelcome:
+            return OnboardingStep(type: .setupCalendar)
         }
     }
 
@@ -210,13 +219,13 @@ class OnboardingManager: ObservableObject {
     }
 
     private func onboardingDidFinish() {
-        let userDidSignUp = userDidSignUp
-        Persistence.Authentication.hasSeenOnboarding = true
-        resetOnboarding()
-        delegate?.onboardingManagerDidFinish(userDidSignUp: userDidSignUp)
-        if userDidSignUp {
+        let isNewUser = userDidSignUp || (!onlyConnect && !onlyImport)
+        delegate?.onboardingManagerDidFinish(isNewUser: isNewUser)
+        if isNewUser {
             onboardingNoteCreator.createOnboardingNotes(data: BeamData.shared)
         }
+        Persistence.Authentication.hasSeenOnboarding = true
+        resetOnboarding()
     }
 
     func userHasUsername() -> Bool {
@@ -264,9 +273,9 @@ extension OnboardingManager {
     }
 
     func dismissOnboardingWindow() {
+        onboardingDidFinish()
         window?.close()
         window = nil
-        onboardingDidFinish()
     }
 
     func windowDidClose() {
