@@ -67,7 +67,7 @@ struct TableView: NSViewRepresentable {
     var onEditingText: ((String?, Int) -> Void)?
     var onSelectionChanged: ((IndexSet) -> Void)?
     var onHover: ((_ row: Int?, _ location: NSRect?) -> Void)?
-    var onMouseDown: ((_ row: Int, _ column: TableViewColumn) -> Void)?
+    var onMouseDown: ((_ row: Int, _ column: TableViewColumn, _ modifiers: NSEvent.ModifierFlags) -> Void)?
     var onRightMouseDown: ((Int, _ column: TableViewColumn, NSPoint) -> Void)?
     var onDoubleTap: ((_ row: Int) -> Void)?
 
@@ -659,7 +659,7 @@ extension TableViewCoordinator: BeamNSTableViewDelegate {
         self.reloadData(soft: true)
     }
 
-    func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint) -> Bool {
+    func tableView(_ tableView: BeamNSTableView, mouseDownFor row: Int, column: Int, locationInWindow: NSPoint, modifiers: NSEvent.ModifierFlags) -> Bool {
         let view = tableView.view(atColumn: column, row: row, makeIfNecessary: false)
 
         // if mouseDown in checkbox column
@@ -679,7 +679,7 @@ extension TableViewCoordinator: BeamNSTableViewDelegate {
               column < parent.columns.count,
               cellView.shouldHandleMouseDown(at: cellView.convert(locationInWindow, from: nil)) {
             let columnData = parent.columns[column]
-            onMouseDown(originalRow, columnData)
+            onMouseDown(originalRow, columnData, modifiers)
             return false
         }
 

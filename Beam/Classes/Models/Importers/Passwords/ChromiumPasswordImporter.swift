@@ -241,11 +241,10 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
             var importedCount = 0
             while let row = rows.nextPasswordItem(using: symmetricKey) {
                 Logger.shared.logDebug("Successfully decoded row for \(row.username) at \(row.url.absoluteString)", category: .browserImport)
+                currentSubject?.send(BrowserPasswordResult(itemCount: itemCount, item: row))
+                importedCount += 1
                 if row.blacklisted {
-                    Logger.shared.logDebug("Skipping row for \(row.url.absoluteString) (blacklisted)", category: .browserImport)
-                } else {
-                    currentSubject?.send(BrowserPasswordResult(itemCount: itemCount, item: row))
-                    importedCount += 1
+                    Logger.shared.logDebug("Row for \(row.url.absoluteString) is blacklisted", category: .browserImport)
                 }
             }
             importedCountCallback(importedCount)

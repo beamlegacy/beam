@@ -11,4 +11,8 @@ extension NSRange {
     init(range: CFRange) {
         self = NSMakeRange(range.location == kCFNotFound ? NSNotFound : range.location, range.length)
     }
+
+    func containsInclusively(_ index: Int) -> Bool {
+        index >= location && index <= location + length
+    }
 }

@@ -71,6 +71,8 @@ class MockHTTPWebPages: BaseView {
         case ambiguousShortForm
         case signupShortForm
         case signinShortForm
+        case notSavedShortForm
+        case neverSavedShortForm
         case paymentBookingShortForm
         case paymentNetflixShortForm
 
@@ -147,6 +149,8 @@ class MockHTTPWebPages: BaseView {
             case .ambiguousShortForm: return "http://ambiguous.form.lvh.me:\(port)/"
             case .signupShortForm: return "http://signup.form.lvh.me:\(port)/"
             case .signinShortForm: return "http://signin.form.lvh.me:\(port)"
+            case .notSavedShortForm: return "http://notsaved.form.lvh.me:\(port)"
+            case .neverSavedShortForm: return "http://neversaved.form.lvh.me:\(port)"
             case .paymentBookingShortForm: return "http://payment-booking.form.lvh.me:\(port)/"
             case .paymentNetflixShortForm: return "http://payment-netflix.form.lvh.me:\(port)/"
 

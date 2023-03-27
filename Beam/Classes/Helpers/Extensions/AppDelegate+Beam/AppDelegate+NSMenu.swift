@@ -22,6 +22,7 @@ private enum MenuEnablingConditionTag: Int {
     case isDebugMode = 1111
     case sidebarEnabled = 2000
     case reopenAllWindowsFromLastSession = 3000
+    case closeSplitView = 4000
 }
 
 extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
@@ -87,6 +88,8 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             return state?.useSidebar ?? false
         } else if tagEnum == .reopenAllWindowsFromLastSession {
             return canRestoreSession
+        } else if tagEnum == .closeSplitView {
+            return state?.sideNote != nil
         }
         return false
     }

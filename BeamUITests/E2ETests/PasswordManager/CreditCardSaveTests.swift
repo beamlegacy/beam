@@ -18,6 +18,11 @@ class CreditCardSaveTests: BaseCreditCardTest {
     let expectedCardOwnerName = "Quentin Tester"
     let expectedCardExpDate = "04/23"
     let expectedCardHiddenNumber = "xxxx-xxxx-xxxx-9903"
+
+    let neverSavedCardNumber = "4001000100010009"
+    let neverSavedSecurityCode = "000"
+    let neverSavedOwnerName = "Somebody"
+    let neverSavedExpDate = "08/25"
         
     override func setUp() {
         super.setUp()
@@ -77,7 +82,12 @@ class CreditCardSaveTests: BaseCreditCardTest {
             mockPage.getContinueButtonElement(inView: view).clickOnExistence()
         }
         
-        step("And I do not save the CC") {
+        step("Then save alert is displayed") {
+            XCTAssertTrue(alertView.notNowButtonExists())
+            XCTAssertTrue(alertView.neverSaveCardButtonExists())
+        }
+
+        step("When I do not save the CC") {
             alertView.notNowClick()
         }
         
@@ -90,4 +100,26 @@ class CreditCardSaveTests: BaseCreditCardTest {
         }
     }
     
+    func testNeverSavedCreditCard(){
+        uiMenu.invoke(.populateCreditCardsDB)
+
+        step("Given I navigate to \(mockPage.getMockPageUrl(.paymentForm))") {
+            mockPage.openMockPage(.paymentForm)
+        }
+
+        fillDataWithoutPwManager(field: creditCardNumberLabel, data: neverSavedCardNumber)
+        fillDataWithoutPwManager(field: creditCardExpDateLabel, data: neverSavedExpDate)
+        fillDataWithoutPwManager(field: creditCardSecCodeLabel, data: neverSavedSecurityCode)
+        fillDataWithoutPwManager(field: creditCardOwnerNameLabel, data: neverSavedOwnerName)
+
+        step("When I submit the form") {
+            mockPage.getContinueButtonElement(inView: view).clickOnExistence()
+        }
+
+        step("Then save alert is not displayed") {
+            XCTAssertFalse(alertView.notNowButtonExists())
+            XCTAssertFalse(alertView.neverSaveCardButtonExists())
+        }
+    }
+
 }

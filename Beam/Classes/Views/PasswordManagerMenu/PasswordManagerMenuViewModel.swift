@@ -112,7 +112,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
         self.autofillMenuItems = []
         self.otherMenuItems = []
         self.passwordManager = passwordManager
-        self.otherPasswordsViewModel = PasswordListViewModel(passwordManager: passwordManager)
+        self.otherPasswordsViewModel = PasswordListViewModel(passwordManager: passwordManager, showNeverSavedEntries: false)
 
         if options.suggestNewPassword {
             let passwordGeneratorViewModel = PasswordGeneratorViewModel()

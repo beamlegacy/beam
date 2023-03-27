@@ -9,3 +9,6 @@ NETWORK_ENABLED = 1
 DEBUG = 0
 BEAM_OBJECT_SEND_PRIVATE_KEY = 0
 ENABLE_JS_BUILD = 0
+
+#include "ExcludedSourceFiles.xcconfig"
+

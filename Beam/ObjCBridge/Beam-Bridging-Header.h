@@ -38,6 +38,8 @@ typedef NS_OPTIONS(NSUInteger, _WKMediaMutedState) {
 
 -(BOOL)_automaticallyAdjustsContentInsets;
 -(void)_setAutomaticallyAdjustsContentInsets:(BOOL)enabled;
+
+-(BOOL)_isBeingInspected;
 @end
 
 @interface WKWebsiteDataStore ()

@@ -126,7 +126,7 @@ public class ImportsManager: NSObject, ObservableObject {
                 }, receiveValue: { record in
                     if let hostname = record.item.url.minimizedHost, let password = String(data: record.item.password, encoding: .utf8) {
                         Logger.shared.logDebug("[\(record.itemCount)] Saving password for \(record.item.username) at \(record.item.url)", category: .browserImport)
-                        if BeamData.shared.passwordManager.save(hostname: hostname, username: record.item.username, password: password) == nil {
+                        if BeamData.shared.passwordManager.save(hostname: hostname, username: record.item.username, password: password, disabledForHost: record.item.blacklisted) == nil {
                             Logger.shared.logError("Failed to save password for \(record.item.username) at \(record.item.url)", category: .browserImport)
                         } else {
                             importedCount += 1
@@ -193,7 +193,6 @@ public class ImportsManager: NSObject, ObservableObject {
     }
 
     private func sendSuccess(action: ImportAction, source: ImportSource, count: Int) {
-        guard count != 0 else { return }
         let importSuccess = ImportSuccess(source: source, action: action, count: count)
         importSuccessSubject.send(importSuccess)
     }

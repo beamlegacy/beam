@@ -50,8 +50,8 @@ final class MockPasswordsDB: PasswordStore {
         }
     }
 
-    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord {
-        let record = LocalPasswordRecord(entryId: UUID().uuidString, hostname: hostname, username: username, password: encryptedPassword, createdAt: Date(), updatedAt: Date(), usedAt: Date())
+    func save(hostname: String, username: String, encryptedPassword: String, disabledForHost: Bool = false, privateKeySignature: String, uuid: UUID?) throws -> LocalPasswordRecord {
+        let record = LocalPasswordRecord(entryId: UUID().uuidString, hostname: hostname, username: username, password: encryptedPassword, disabledForHost: disabledForHost, createdAt: Date(), updatedAt: Date(), usedAt: Date())
         passwords.append(record)
         return record
     }

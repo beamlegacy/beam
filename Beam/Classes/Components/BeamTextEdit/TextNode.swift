@@ -34,6 +34,28 @@ public class TextNode: ElementNode {
         }
     }
 
+    var isSpellCheckable: Bool { elementKind.isSpellCheckable }
+
+    var spellCheckingResults = [NSTextCheckingResult]() {
+        didSet {
+            if oldValue.map(\.range) != spellCheckingResults.map(\.range) {
+                invalidateText()
+            }
+            if let editor = editor {
+                NSSpellChecker.shared.dismissCorrectionIndicator(for: editor)
+            }
+        }
+    }
+    var spellCheckingOrthography: NSOrthography?
+
+    override var elementText: BeamText {
+        didSet {
+            if oldValue.text != elementText.text {
+                triggerSpellChecking()
+            }
+        }
+    }
+
     static func fontSizeFor(kind: ElementKind) -> CGFloat {
         switch kind {
         case .heading(let level):
@@ -702,9 +724,12 @@ public class TextNode: ElementNode {
             } else {
                 guard allowSelection else { return true }
                 focus(position: clickPos)
+
                 root?.wordSelection(from: clickPos)
                 if allowFormatting && !selectedTextRange.isEmpty {
-                    editor.showInlineFormatterOnKeyEventsAndClick()
+                    if !displayManualSpellCheckingMenuIfNeeded(at: clickPos, event: mouseInfo.event) {
+                        editor.showInlineFormatterOnKeyEventsAndClick()
+                    }
                 }
             }
             return true
@@ -1232,7 +1257,8 @@ public class TextNode: ElementNode {
         let str = beamText.buildAttributedString(node: self,
                                                  caret: caret,
                                                  selectedRange: selectedRange,
-                                                 mouseInteraction: mouseInteraction)
+                                                 mouseInteraction: mouseInteraction,
+                                                 spellChecking: spellCheckingResults)
         let paragraphStyle = NSMutableParagraphStyle()
         //        paragraphStyle.alignment = .justified
         paragraphStyle.lineBreakMode = .byWordWrapping

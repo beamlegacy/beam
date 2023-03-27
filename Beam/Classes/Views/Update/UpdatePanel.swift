@@ -36,8 +36,6 @@ struct UpdatePanel: View {
             if let releaseNoteURL = appRelease.releaseNoteURL {
                 VStack {
                     ReleaseNoteWebView(url: releaseNoteURL, viewModel: webViewModel)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 30)
                         .if(webViewModel.isLoading, transform: {
                             $0.hidden()
                         })
@@ -154,14 +152,18 @@ private struct ReleaseNoteWebView: View, NSViewRepresentable {
         webView.navigationDelegate = context.coordinator
         webView.load(URLRequest(url: url))
 
-        let style = "body { padding-top: 0 } .main-header { display: none } header .date { display: none; }".data(using: .utf8)!.base64EncodedString()
         let cssStyle = """
                     javascript:(function() {
-                    var parent = document.getElementsByTagName('head').item(0);
-                    var style = document.createElement('style');
-                    style.type = 'text/css';
-                    style.innerHTML = window.atob('\(style)');
-                    parent.appendChild(style)})()
+                    const style = document.createElement("style")
+                    style.textContent=`
+                    #__next > header { display: none !important; }
+                    #__next > footer { display: none !important; }
+                    #__next aside[class^=TocComponent] { display: none !important; }
+                    #__next main header [class^=Note_menu] { display: none !important; }
+                    #__next main header [class^=Note_date] { display: none !important; }
+                    body { --layout-padding-top: 30px; --layout-padding-h: 45px;}
+                    `
+                    document.body.append(style)})()
                 """
 
         webView.configuration.userContentController.addUserScript(WKUserScript(source: cssStyle, injectionTime: .atDocumentEnd, forMainFrameOnly: false))

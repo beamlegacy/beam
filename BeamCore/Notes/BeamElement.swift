@@ -93,6 +93,15 @@ public enum ElementKind: Codable, Equatable {
         }
     }
 
+    public var isSpellCheckable: Bool {
+        switch self {
+        case .bullet, .heading, .quote, .check:
+            return true
+        default:
+            return false
+        }
+    }
+
     enum CodingKeys: String, CodingKey {
         case type
         case level

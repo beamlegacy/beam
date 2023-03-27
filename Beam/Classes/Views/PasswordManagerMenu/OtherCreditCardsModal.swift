@@ -58,11 +58,11 @@ struct OtherCreditCardsModal: View {
                         onFill(selectedEntry)
                         dismiss()
                     }
+                    .buttonStyle(.bordered)
                     .keyboardShortcut(.defaultAction)
                 }
             }
         }
-        .foregroundColor(BeamColor.Generic.background.swiftUI)
         .padding(20)
         .if(!viewModel.isUnlocked) {
             $0.opacity(0)

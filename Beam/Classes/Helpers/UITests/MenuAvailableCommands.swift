@@ -160,6 +160,13 @@ public enum UITestsHiddenMenuAvailableCommands: String, CaseIterable {
     case deleteAllNotes
     case resizeAndCenterAppE2E
 
+    case tabGroupCaptured
+    case tabGroupCapturedNamed
+    case tabGroupCapturedAndShared
+    case tabGroupCapturedNamedAndShared
+    case tabGroupsCaptured
+    case tabGroupsCapturedNamed
+
     static func openNoteIdentifier(title: String) -> String {
         UITestsHiddenMenuAvailableCommands.openNotePrefix.rawValue + title
     }

@@ -89,6 +89,23 @@ extension NSImage {
 
         self.init(cgImage: image, size: CGSize(width: imageWidth, height: imageHeight))
     }
+
+    func flipHorizontally() -> NSImage {
+        let existingImage: NSImage = self
+        let existingSize = existingImage.size
+        let flippedImage = NSImage(size: self.size)
+        flippedImage.lockFocus()
+
+        let t = NSAffineTransform()
+        t.translateX(by: 0.0, yBy: existingSize.height)
+        t.scaleX(by: 1.0, yBy: -1.0)
+        t.concat()
+
+        let rect = CGRect(origin: .zero, size: existingSize)
+        existingImage.draw(at: .zero, from: rect, operation: .sourceOver, fraction: 1.0)
+        flippedImage.unlockFocus()
+        return flippedImage
+    }
 }
 
 extension CGImage {
