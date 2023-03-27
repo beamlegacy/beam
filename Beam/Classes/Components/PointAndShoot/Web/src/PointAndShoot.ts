@@ -66,6 +66,10 @@ export class PointAndShoot {
    * @memberof PointAndShoot
    */
   registerEventListeners(): void {
+    if (!PointAndShootHelper.isPageAllowed(this.win)) {
+      this.logger.log("Point and Shoot disabled for this website.")
+      return
+    }
     this.win.addEventListener("mousemove", this.onMouseMove.bind(this))
     this.win.addEventListener("click", this.onClick.bind(this), true)
     this.win.addEventListener("touchstart", this.onTouchstart.bind(this), false)

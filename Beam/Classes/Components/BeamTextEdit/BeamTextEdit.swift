@@ -252,7 +252,7 @@ public extension CALayer {
         unpreparedRoot = root
 
         setupCardHeader()
-        registerForDraggedTypes([.fileURL])
+        registerForDraggedTypes([.fileURL, .string, .png, .tiff, .noteDataHolder])
         refreshAndHandleDeletionsAsync()
 
         if let frame = frame {
@@ -529,7 +529,7 @@ public extension CALayer {
 
             self.doRunAfterNextLayout()
         }
-        if isResizing || shouldDisableAnimationAtNextLayout || didJustMoveToWindow {
+        if isResizing || shouldDisableAnimationAtNextLayout || didJustMoveToWindow || state?.isResizingSplitView == true {
             shouldDisableAnimationAtNextLayout = false
             CATransaction.disableAnimations {
                 workBlock()
@@ -665,6 +665,7 @@ public extension CALayer {
     private var dragging = false
     func startSelectionDrag() { dragging = true }
     func stopSelectionDrag() { dragging = false }
+    var mouseMoveOrigin: CGPoint?
 
     public func setHotSpot(_ spot: NSRect) {
         guard !disableFocusScroll else { return }
@@ -1126,7 +1127,7 @@ public extension CALayer {
     /// also known as searchFromNode
     /// - Returns: true if action is possible
     private func triggerCmdReturn(from node: TextNode) -> Bool {
-        guard node.text.count > 0, !(node is BlockReferenceNode), !(node is ProxyNode)
+        guard node.text.count > 0, !(node is BlockReferenceNode), !(node is ProxyNode), !(node is CodeNode)
         else { return false }
 
         let animator = TextEditCmdReturnAnimator(node: node, editorLayer: self.layer)
@@ -1292,7 +1293,7 @@ public extension CALayer {
     internal var inputDetectorLastInput: String = ""
 
     // MARK: Paste properties
-    internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSURL.self, NSImage.self, NSAttributedString.self, NSString.self]
+    internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSImage.self, NSURL.self, NSAttributedString.self, NSString.self]
     internal let supportedPasteAsPlainTextObjects = [BeamTextHolder.self, NSAttributedString.self, NSString.self]
 
     func initBlinking() {
@@ -2035,317 +2036,8 @@ public extension CALayer {
 
     // MARK: - Drag and drop:
 
-    private struct DragResult: Equatable {
-        let element: ElementNode
-        let shouldBeAfter: Bool
-        let shouldBeChild: Bool
-
-        func onlyDiffersByIndentation(from otherResult: DragResult) -> Bool {
-            return self.element == otherResult.element && self.shouldBeAfter == otherResult.shouldBeAfter && self.shouldBeChild != otherResult.shouldBeChild
-        }
-    }
-
     var dragIndicator = CALayer()
-    private var previousDragResult: DragResult?
-
-    /// Updates the drag indicator for the desired cursor position
-    /// - Parameter point: The position of the cursor
-    /// - Returns: A DragResult with the hovered ElementNode, a bool if we should add the dragged element after this node and
-    /// another bool if we should make the element a child or a sibbling
-    @discardableResult private func updateDragIndicator(at point: CGPoint?) -> DragResult? {
-        guard let rootNode = rootNode else { return nil }
-        guard let point = point,
-              let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode else {
-            dragIndicator.isHidden = true
-            previousDragResult = nil
-            return nil
-        }
-
-        if dragIndicator.superlayer == nil {
-            layer?.addSublayer(dragIndicator)
-        }
-
-        dragIndicator.backgroundColor = BeamColor.Bluetiful.cgColor
-        dragIndicator.borderWidth = 0
-        dragIndicator.isHidden = false
-        dragIndicator.zPosition = 10
-        dragIndicator.cornerRadius = 1
-        dragIndicator.opacity = 0.5
-
-        // Should the dragged element be after or before the hovered widget?
-        let shouldBeAfter: Bool
-        if point.y < (node.offsetInDocument.y + node.contentsFrame.height / 2) {
-            shouldBeAfter = false
-        } else {
-            shouldBeAfter = true
-        }
-
-        let yPos = shouldBeAfter ? node.offsetInDocument.y + node.contentsFrame.maxY : node.offsetInDocument.y + node.contentsFrame.minY
-        var initialFrame = CGRect(x: node.offsetInDocument.x + node.contentsLead, y: yPos, width: node.frame.width - node.contentsLead, height: 2)
-
-        // Should the dragged element be a child or a sibbling?
-        let beginningOfContentInNode = node.contentsFrame.minX + node.offsetInDocument.x
-        let makeChildOffset = beginningOfContentInNode + node.childInset
-        let shouldBeChild: Bool
-        if (point.x - beginningOfContentInNode) > node.childInset && shouldBeAfter {
-            shouldBeChild = true
-            CATransaction.disableAnimations {
-                initialFrame.origin.x = makeChildOffset
-                initialFrame.size.width -= node.childInset
-                dragIndicator.frame = initialFrame
-            }
-        } else {
-            shouldBeChild = false
-            CATransaction.disableAnimations {
-                dragIndicator.frame = initialFrame
-            }
-        }
-
-        let result = DragResult(element: node, shouldBeAfter: shouldBeAfter, shouldBeChild: shouldBeChild)
-        performHapticFeedback(for: result)
-        previousDragResult = result
-        return result
-    }
-
-    private func performHapticFeedback(for dragResult: DragResult) {
-        guard dragResult != previousDragResult, PreferencesManager.isHapticFeedbackOn else { return }
-        let performer = NSHapticFeedbackManager.defaultPerformer
-        if let previousDragResult = previousDragResult, previousDragResult.onlyDiffersByIndentation(from: dragResult) {
-            performer.perform(.levelChange, performanceTime: .drawCompleted)
-        } else {
-            performer.perform(.alignment, performanceTime: .drawCompleted)
-        }
-    }
-
-    public override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        if NSImage.canInit(with: sender.draggingPasteboard) {
-//            self.layer?.backgroundColor = NSColor.blue.cgColor
-            updateDragIndicator(at: convert(sender.draggingLocation))
-            return .copy
-        } else {
-            return NSDragOperation()
-        }
-    }
-
-    public override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
-        updateDragIndicator(at: convert(sender.draggingLocation, from: nil))
-        return .copy
-    }
-
-    public override func draggingExited(_ sender: NSDraggingInfo?) {
-//        self.layer?.backgroundColor = NSColor.white.cgColor
-        updateDragIndicator(at: nil)
-    }
-
-    public override func draggingEnded(_ sender: NSDraggingInfo) {
-//        self.layer?.backgroundColor = NSColor.white.cgColor
-        updateDragIndicator(at: nil)
-    }
-
-    static let maximumImageSize = 40*1024*1024
-
-    public override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        guard let rootNode = rootNode,
-              let fileManager = data?.fileDBManager
-        else { return false }
-        defer {
-            updateDragIndicator(at: nil)
-        }
-        guard let dragResult = updateDragIndicator(at: convert(sender.draggingLocation)) else {
-            return false
-        }
-
-        guard let files = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self], options: nil)
-        else {
-            Logger.shared.logError("unable to get files from drag operation", category: .noteEditor)
-            return false
-        }
-
-        let newParent: ElementNode = dragResult.shouldBeAfter ? dragResult.element : dragResult.element.previousVisibleNode(ElementNode.self) ?? rootNode
-        let afterNode: ElementNode? = dragResult.shouldBeAfter ? nil : dragResult.element.previousSibbling() as? ElementNode
-        for url in files.reversed() {
-            guard let url = url as? URL,
-                  let data = try? Data(contentsOf: url)
-            else { continue }
-            //Logger.shared.logInfo("File dropped: \(url) - \(data) - \(data.SHA256)")
-
-            guard let image = NSImage(contentsOf: url)
-            else {
-                Logger.shared.logError("Unable to load image from url \(url)", category: .noteEditor)
-                return false
-            }
-
-            if data.count > Self.maximumImageSize {
-                guard let data = image.jpegRepresentation else {
-                    Logger.shared.logError("Error while getting jpeg representation from NSImage", category: .noteEditor)
-                    return false
-                }
-                if data.count > Self.maximumImageSize {
-                    UserAlert.showError(message: "This image is too large for beam.", informativeText: "Please use images that are smaller than 40MB.", buttonTitle: "Cancel")
-                    return false
-                }
-            }
-
-            do {
-                let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
-                let newElement = BeamElement()
-                newElement.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
-                rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
-                try fileManager.addReference(fromNote: rootNode.elementId, element: newElement.id, to: uid)
-                Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
-            } catch {
-                Logger.shared.logError("Unable to insert image in FileDB \(error)", category: .fileDB)
-                return false
-            }
-        }
-
-        return true
-    }
-
-    // MARK: - Reordering bullet
-
-    private var mouseMoveOrigin: CGPoint?
-
-    func widgetDidStartMoving(_ widget: Widget, at point: CGPoint) -> Bool {
-        guard canMove(widget) else { return false }
-        guard let movedNode = widget as? ElementNode else { return false }
-
-        let selectedNodesToMove = selectedNodesToMoveAlong(for: movedNode)
-        for node in selectedNodesToMove {
-            node.isDraggedForMove = true
-        }
-        focusedWidget = nil
-        mouseMoveOrigin = point
-        widget.isDraggedForMove = true
-        return true
-    }
-
-    func widgetDidStopMoving(_ widget: Widget, at point: CGPoint) {
-
-        defer {
-            cleanupAfterDraggingWidget(widget)
-        }
-
-        let dragResult: DragResult?
-
-        let canDrop = canDrop(widget, at: point)
-        if !canDrop, let previous = previousDragResult {
-            dragResult = previous
-        } else if canDrop {
-            dragResult = updateDragIndicator(at: point)
-        } else {
-            return
-        }
-
-        guard let dragResult = dragResult, let rootNode = rootNode else { return }
-        guard let movedNode = widget as? ElementNode else { return }
-
-        let newParent: ElementNode
-        let index: Int
-        let destinationElementIndex = dragResult.element.indexInParent ?? 0
-        let selectedNodes = sortedSelectedRootsToMoveAlong(for: movedNode)
-
-        if dragResult.shouldBeAfter && dragResult.shouldBeChild {
-            newParent = dragResult.element
-            index = 0
-        } else {
-            var previousNodeMovingOffset = 0
-            // If the moving node is a sibbling of the destination, and is located before, we need to offet by one
-            if isMovedNodeSibbling(movedNode, andBeforeDestinationNode: dragResult.element) {
-                previousNodeMovingOffset = 1
-            }
-            index = destinationElementIndex + (dragResult.shouldBeAfter ? 1 : 0) - previousNodeMovingOffset
-            newParent = dragResult.element.parent as? ElementNode ?? rootNode
-        }
-
-        if !selectedNodes.isEmpty {
-            var offset = 0
-            rootNode.cmdManager.beginGroup(with: "Move Multiple Elements")
-            let shouldIncreaseIndex = !isMovedNodeSibbling(selectedNodes.first ?? movedNode, andBeforeDestinationNode: dragResult.element) || dragResult.shouldBeChild
-            for node in selectedNodes {
-                rootNode.cmdManager.reparentElement(node, to: newParent, atIndex: index + offset)
-                if shouldIncreaseIndex {
-                    offset += 1
-                }
-            }
-            rootNode.cmdManager.endGroup()
-        } else {
-            rootNode.cmdManager.reparentElement(movedNode, to: newParent, atIndex: index)
-        }
-    }
-
-    func widgetMoved(_ widget: Widget, at point: CGPoint) {
-        guard let mouseMoveOrigin = self.mouseMoveOrigin else { return }
-        guard let movedNode = widget as? ElementNode else { return }
-
-        let offset = CGPoint(x: point.x - mouseMoveOrigin.x, y: point.y -  mouseMoveOrigin.y)
-        widget.translateForMove(offset)
-        let selectedNodesToMove = selectedNodesToMoveAlong(for: movedNode)
-        for node in selectedNodesToMove {
-            node.translateForMove(offset)
-        }
-
-        if canDrop(widget, at: point) {
-            updateDragIndicator(at: point)
-        }
-    }
-
-    private func canMove(_ widget: Widget) -> Bool {
-        guard widget as? ProxyNode == nil else { return false }
-        return true
-    }
-
-    private func canDrop(_ widget: Widget, at point: NSPoint) -> Bool {
-        guard let rootNode = rootNode else { return false }
-        guard let movedNode = widget as? ElementNode else { return false }
-
-        if let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode,
-           !(node is ProxyNode), node.elementKind != .dailySummary,
-           node !== widget,
-           node.parent !== widget,
-           !widget.allChildren.contains(node),
-           !selectedNodesToMoveAlong(for: movedNode).contains(node) {
-            return true
-        }
-        return false
-    }
-
-    private func cleanupAfterDraggingWidget(_ widget: Widget) {
-        guard let movedNode = widget as? ElementNode else { return }
-        widget.isDraggedForMove = false
-        mouseMoveOrigin = nil
-        updateDragIndicator(at: nil)
-
-        for node in selectedNodesToMoveAlong(for: movedNode) {
-            node.isDraggedForMove = false
-        }
-    }
-
-    private func selectedNodesToMoveAlong(for initialNode: ElementNode) -> Set<ElementNode> {
-        if let nodes = rootNode?.state.nodeSelection?.nodes, nodes.contains(initialNode) {
-            return nodes
-        } else {
-            return []
-        }
-    }
-
-    private func sortedSelectedRootsToMoveAlong(for initialNode: ElementNode) -> [ElementNode] {
-        if let nodes = rootNode?.state.nodeSelection?.sortedRoots, nodes.contains(initialNode) {
-            return nodes
-        } else {
-            return []
-        }
-    }
-
-    private func isMovedNodeSibbling(_ movedNode: ElementNode, andBeforeDestinationNode: ElementNode) -> Bool {
-        if movedNode.isSibblingWith(andBeforeDestinationNode),
-           let destinationIndex = andBeforeDestinationNode.indexInParent,
-            let movedElementIndex = movedNode.indexInParent,
-            destinationIndex > movedElementIndex {
-            return true
-        }
-        return false
-    }
+    var previousDragResult: DragResult?
 
     // MARK: - Note sources
 

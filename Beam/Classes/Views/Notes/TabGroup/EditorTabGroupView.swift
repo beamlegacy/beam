@@ -88,7 +88,7 @@ struct EditorTabGroupView: View {
                                 }
                             }
                     }
-                }.animation(allowAnimation ? .easeIn(duration: 0.1) : nil)
+                }.animation(allowAnimation ? .easeIn(duration: 0.1) : nil, value: hoveredTab)
             }
             .padding(.horizontal, 8)
             .padding(.top, 5)
@@ -106,7 +106,7 @@ struct EditorTabGroupView: View {
     }
 
     private var allowAnimation: Bool {
-        !windowInfo.windowIsResizing
+        !windowInfo.windowIsResizing && !state.isResizingSplitView
     }
 
     @ViewBuilder private var title: some View {

@@ -216,6 +216,9 @@ private extension URL {
         if host.contains(Self.zoomHost) {
             return path.contains("wc") // "webclient"
         }
+        if host.contains(Self.facetimeHost) {
+            return path.contains("join")
+        }
         return false
     }
 
@@ -229,5 +232,9 @@ private extension URL {
 
     static var zoomHost: String {
         "zoom.us"
+    }
+
+    static var facetimeHost: String {
+        "facetime.apple.com"
     }
 }

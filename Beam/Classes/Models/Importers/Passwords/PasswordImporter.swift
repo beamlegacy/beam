@@ -92,7 +92,7 @@ enum PasswordImporter {
         let serialQueue = DispatchQueue(label: "exportPasswordsQueue", target: .userInitiated)
 
         serialQueue.async {
-            let allEntries = BeamData.shared.passwordManager.fetchAll()
+            let allEntries = BeamData.shared.passwordManager.fetchAll().filter { !$0.neverSaved }
             var csvString = "\("URL"),\("Username"),\("Password")\n"
             var failedEntries: [PasswordManagerEntry] = []
             for entry in allEntries {

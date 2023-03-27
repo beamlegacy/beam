@@ -1,0 +1,3 @@
+// Source and resource files to exclude from the release builds
+
+EXCLUDED_SOURCE_FILE_NAMES = $(inherited) UITests-*.html UITests-*.csv XCTests-*.binary audio.mp3 beam-logo-test.png Beam.css video.mov gcp_service_account_credentials.json test_SVG.svg topdomains_test.txt topdomains_v0.1.txt

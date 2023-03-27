@@ -10,10 +10,10 @@ import SwiftUI
 extension BeamColor.Cursor: Identifiable {
     var id: Self { self }
 
-    fileprivate  var title: LocalizedStringKey {
+    fileprivate func title(for appearance: NSAppearance) -> LocalizedStringKey {
         switch self {
         case .whiteBlack:
-            return NSApp.effectiveAppearance.isDarkMode ? "White" : "Black"
+            return appearance.isDarkMode ? "White" : "Black"
         default:
             return .init(rawValue.capitalized)
         }
@@ -26,15 +26,18 @@ private struct CursorColorOption: View {
     // cached to avoid computing it again when redrawing
     private let drawingColor: NSColor
 
-    init(cursor: BeamColor.Cursor) {
+    private let appearance: NSAppearance
+
+    init(cursor: BeamColor.Cursor, appearance: NSAppearance) {
         self.cursor = cursor
         self.drawingColor = cursor.color.nsColor
+        self.appearance = appearance
     }
 
     var body: some View {
         HStack {
             Image(nsImage: colorImage)
-            Text(cursor.title)
+            Text(cursor.title(for: appearance))
         }
     }
 
@@ -54,6 +57,7 @@ private struct CursorColorOption: View {
 struct NotesPreferencesView: View {
     @State private var alwaysShowBullets: Bool = PreferencesManager.alwaysShowBullets
     @State private var cursorColor: BeamColor.Cursor = .current
+    @State private var appearance: NSAppearance = NSApp.effectiveAppearance
 
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {
@@ -62,7 +66,7 @@ struct NotesPreferencesView: View {
             } content: {
                 Picker(selection: $cursorColor, content: {
                     ForEach(BeamColor.Cursor.allCases) { value in
-                        CursorColorOption(cursor: value)
+                        CursorColorOption(cursor: value, appearance: appearance)
                     }
                 }, label: {
                     EmptyView()
@@ -76,6 +80,9 @@ struct NotesPreferencesView: View {
                 .pickerStyle(MenuPickerStyle())
                 .fixedSize()
                 .accessibilityIdentifier("cursor_color")
+            }
+            .onReceive(NSApp.publisher(for: \.effectiveAppearance)) { newAppearance in
+                appearance = newAppearance
             }
 
             Settings.Row {

@@ -16,6 +16,7 @@ struct TabGestureValue {
 }
 
 class TabsDragModel: ObservableObject {
+    @Published var draggedItem: TabsListItem?
     @Published var offset = CGPoint.zero
     @Published var draggingOverIndex: Int?
     @Published var dragStartIndex: Int?
@@ -138,7 +139,8 @@ class TabsDragModel: ObservableObject {
         self.dragStartIndex = targetIndex
     }
 
-    func prepareForDraggingUnlistedItem(ofWidth width: CGFloat) {
+    func prepareForDraggingUnlistedItem(item: TabsListItem? = nil, ofWidth width: CGFloat?) {
+        draggedItem = item
         unlistedDraggedItemWidth = width
     }
 
@@ -149,6 +151,7 @@ class TabsDragModel: ObservableObject {
     }
 
     func cleanAfterDrag() {
+        draggedItem = nil
         offset = .zero
         widthProvider = nil
         activeItemWidth = 0
