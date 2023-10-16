@@ -509,10 +509,6 @@
 		66F1A23728D079FB00DAAC79 /* VideoCallsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F1A23628D079FB00DAAC79 /* VideoCallsModel.swift */; };
 		66F9AEBE283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */; };
 		66F9AEBF283E215100C28EE3 /* MouseOverAndSelection_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA1283E215100C28EE3 /* MouseOverAndSelection_prod.js */; };
-		66F9AEC0283E215100C28EE3 /* MouseOverAndSelection.d.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA3283E215100C28EE3 /* MouseOverAndSelection.d.ts */; };
-		66F9AEC1283E215100C28EE3 /* MouseOverAndSelectionUI.d.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA4283E215100C28EE3 /* MouseOverAndSelectionUI.d.ts */; };
-		66F9AEC2283E215100C28EE3 /* MouseOverAndSelectionUI_native.d.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA5283E215100C28EE3 /* MouseOverAndSelectionUI_native.d.ts */; };
-		66F9AEC3283E215100C28EE3 /* MouseOverAndSelectionUI_web.d.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA6283E215100C28EE3 /* MouseOverAndSelectionUI_web.d.ts */; };
 		66F9AEC4283E215100C28EE3 /* jest.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA7283E215100C28EE3 /* jest.config.js */; };
 		66F9AEC5283E215100C28EE3 /* MouseOverAndSelectionUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA9283E215100C28EE3 /* MouseOverAndSelectionUIMock.ts */; };
 		66F9AEC6283E215100C28EE3 /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEAA283E215100C28EE3 /* webpack.config.js */; };
@@ -8678,14 +8674,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				66F9AEC3283E215100C28EE3 /* MouseOverAndSelectionUI_web.d.ts in Resources */,
 				A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				8A27DCA427EDC8CA0044A9A2 /* PasswordManager_prod.js in Resources */,
 				6635D9852853E73A00F4B775 /* ContextMenu_prod.js in Resources */,
 				8A27DCA327EDC8CA0044A9A2 /* EmbedNode_prod.js in Resources */,
 				874111A9282592D60024C348 /* autofill-display.json in Resources */,
-				66F9AEC1283E215100C28EE3 /* MouseOverAndSelectionUI.d.ts in Resources */,
 				A3A89D952837CD2E00A47B2E /* test_SVG.svg in Resources */,
 				A03B908D27BE99AC001FBE64 /* Capture.json in Resources */,
 				8AE3EA9627F36D5E0010A42C /* UITests-Media.html in Resources */,
@@ -8747,7 +8741,6 @@
 				33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */,
 				0521EB24282BFC9800A922CE /* delete_account.graphql in Resources */,
 				6ED5E8CB287DA62F00EA7DA1 /* download-file.json in Resources */,
-				66F9AEC0283E215100C28EE3 /* MouseOverAndSelection.d.ts in Resources */,
 				A5347A6A2763B53A006EEF8C /* nav-pivot_web.json in Resources */,
 				52F78D2827872F55007A9F53 /* prepare_beam_objects.graphql in Resources */,
 				A07B03EF279AF1D200D14C45 /* Inter-BoldItalic.otf in Resources */,
@@ -8787,7 +8780,6 @@
 				52EA56CE274F8F8B00F092C8 /* beam_object_data_url.graphql in Resources */,
 				8AE3EA7D27F330050010A42C /* EmbedNode.css in Resources */,
 				520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */,
-				66F9AEC2283E215100C28EE3 /* MouseOverAndSelectionUI_native.d.ts in Resources */,
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
 				A526E27E2785E02600597F89 /* resend_verification_email.graphql in Resources */,
 				8A4723C227C539E100E76893 /* WindowCleanup.js in Resources */,
@@ -8941,7 +8933,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ] || [ $ENABLE_JS_BUILD == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n    # export GITLAB_PENSO_TOKEN=$GITLAB_PENSO_TOKEN\n    \n    ./scripts/build_js.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ] || [ $ENABLE_JS_BUILD == \"NO\" ]\nthen\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n    # export GITLAB_PENSO_TOKEN=$GITLAB_PENSO_TOKEN\n    \n    # ./scripts/build_js.sh\n    # commented for now, built prod js files are included in the repo.\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		8ADD05ED272963CA004C3EC9 /* Web: Write xcfilelist */ = {

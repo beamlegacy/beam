@@ -45,7 +45,7 @@ struct NoteMediaPlayingButton: View {
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(hovering ? 500 : 1000)), execute: block)
             }
             .accessibilityIdentifier("note-media-\(isAnyMediaUnmuted ? "playing" : "muted")")
-            if let contextMenuModel = contextMenuModel, contextMenuModel.visible {
+            if contextMenuModel.visible {
                 ContextMenuView(viewModel: contextMenuModel)
                     .frame(width: contextMenuSize.width, height: contextMenuSize.height)
                     .onHover { hovering in

@@ -59,8 +59,7 @@ struct FileDetail: View {
                                 Spacer()
                             }
                             if file.type[0..<6] == "image/",
-                               let data = file.data,
-                               let image = NSImage(data: data) {
+                               let image = NSImage(data: file.data) {
                                 HStack {
                                     Text("Width:").bold()
                                     Text("\(image.size.width)")
@@ -108,8 +107,7 @@ struct FileDetail: View {
                         Divider()
 
                         if file.type[0..<6] == "image/",
-                           let data = file.data,
-                           let image = NSImage(data: data) {
+                           let image = NSImage(data: file.data) {
                             Image(nsImage: image)
                                 .resizable()
                                 .scaledToFit()
