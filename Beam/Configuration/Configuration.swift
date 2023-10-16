@@ -375,32 +375,6 @@ extension Configuration {
 }
 
 extension Configuration {
-    struct Firebase {
-        static let clientID = env == .release ? EnvironmentVariables.Firebase.clientID : EnvironmentVariables.Firebase.clientIDDev
-        static let apiKey =  env == .release ? EnvironmentVariables.Firebase.apiKey : EnvironmentVariables.Firebase.apiKeyDev
-        static let googleAppID =  env == .release ? EnvironmentVariables.Firebase.googleAppID : EnvironmentVariables.Firebase.googleAppIDDev
-        static let projectID =  env == .release ? EnvironmentVariables.Firebase.projectID : EnvironmentVariables.Firebase.projectIDDev
-        static let reversedClientID = clientID.split(separator: ".").reversed().joined(separator: ".")
-
-        static let plistDictionary: [String: Any] = [
-            "API_KEY": apiKey,
-            "BUNDLE_ID": bundleIdentifier,
-            "CLIENT_ID": clientID,
-            "GOOGLE_APP_ID": googleAppID,
-            "PLIST_VERSION": "1",
-            "PROJECT_ID": projectID,
-            "REVERSED_CLIENT_ID": reversedClientID,
-            "STORAGE_BUCKET": "\(projectID).appspot.com",
-            "IS_ADS_ENABLED": 0,
-            "IS_ANALYTICS_ENABLED": 1,
-            "IS_APPINVITE_ENABLED": 0,
-            "IS_GCM_ENABLED": 0,
-            "IS_SIGNIN_ENABLED": 1
-        ]
-    }
-}
-
-extension Configuration {
     struct DailyUrlStats {
         static let daysToKeep = branchType == .develop ? 60 : 15
     }
