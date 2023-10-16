@@ -768,7 +768,6 @@
 		9634DD91264B203E0065383E /* ShapeLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9634DD90264B203E0065383E /* ShapeLayer.swift */; };
 		9635C97427696C5700015575 /* DebugHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635C97327696C5700015575 /* DebugHelpers.swift */; };
 		9635C980276AABB300015575 /* SignPost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9635C97F276AABB300015575 /* SignPost.swift */; };
-		9639AA75276906820006C724 /* EnvironmentVariables_generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */; };
 		9639FB1D2616FCA300C85B95 /* BeamCore.h in Headers */ = {isa = PBXBuildFile; fileRef = 96319C91261614C000D1CF31 /* BeamCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		963DBB3B2698605600080928 /* BeamText+LinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 963DBB3A2698605600080928 /* BeamText+LinksTests.swift */; };
 		963DBB3D2698655C00080928 /* BeamElementLinksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */; };
@@ -1149,7 +1148,8 @@
 		A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */; };
 		A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D30525F7D93B00E68F94 /* MathsTests.swift */; };
 		A546C32428CA388D001DD461 /* ClusteringPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A546C32328CA388D001DD461 /* ClusteringPreferencesView.swift */; };
-		A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */; };
+		A54883F72ADDDE450076B9B6 /* EnvironmentVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */; };
+		A54883F92ADDE38B0076B9B6 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = A54883F82ADDE38B0076B9B6 /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */; };
 		A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */ = {isa = PBXBuildFile; fileRef = A54A452927677F9A00B9AE1B /* set_username.graphql */; };
 		A54A45312767970E00B9AE1B /* UserInfoRequest+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A45302767970E00B9AE1B /* UserInfoRequest+async.swift */; };
@@ -2765,7 +2765,6 @@
 		9634DD90264B203E0065383E /* ShapeLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLayer.swift; sourceTree = "<group>"; };
 		9635C97327696C5700015575 /* DebugHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugHelpers.swift; sourceTree = "<group>"; };
 		9635C97F276AABB300015575 /* SignPost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignPost.swift; sourceTree = "<group>"; };
-		9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentVariables_generated.swift; sourceTree = "<group>"; };
 		963DBB3A2698605600080928 /* BeamText+LinksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+LinksTests.swift"; sourceTree = "<group>"; };
 		963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BeamElementLinksTests.swift; path = BeamTests/TextLayout/BeamElementLinksTests.swift; sourceTree = SOURCE_ROOT; };
 		9645489F2523B3550064D062 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
@@ -3591,11 +3590,11 @@
 				8A7AA042289960A700B271E2 /* FaviconFinder in Frameworks */,
 				3315DC952667859A002A47CF /* GRDB in Frameworks */,
 				52466B22270DA966002D1716 /* Clustering in Frameworks */,
-				A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */,
 				BFEA487D286A1519007A73BD /* AsyncHTTPClient in Frameworks */,
 				878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */,
 				33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */,
+				A54883F92ADDE38B0076B9B6 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
 				66C9179928B38DD5007B4636 /* Markdown in Frameworks */,
 				6E9FB88228C24B0C00EB0138 /* Atomics in Frameworks */,
@@ -4959,7 +4958,6 @@
 			isa = PBXGroup;
 			children = (
 				52B9A38B264562E60063AEEF /* EnvironmentVariables.swift */,
-				9639AA74276906820006C724 /* EnvironmentVariables_generated.swift */,
 			);
 			path = Configuration;
 			sourceTree = "<group>";
@@ -8379,7 +8377,6 @@
 			buildConfigurationList = 96319D262616232700D1CF31 /* Build configuration list for PBXNativeTarget "BeamCore" */;
 			buildPhases = (
 				96319D0A2616232600D1CF31 /* Headers */,
-				523A32DC26776D0400606768 /* Variable env injector */,
 				96319D0B2616232600D1CF31 /* Sources */,
 				96319D0C2616232600D1CF31 /* Frameworks */,
 				96319D0D2616232600D1CF31 /* Resources */,
@@ -8460,12 +8457,12 @@
 				873528C027354295005E7CBC /* INI */,
 				33B2FF2C274C3F8500518F12 /* Lottie */,
 				878417BD276FB1FB005EB5B0 /* MockHttpServer */,
-				A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */,
 				0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */,
 				BFEA487C286A1519007A73BD /* AsyncHTTPClient */,
 				8A7AA041289960A700B271E2 /* FaviconFinder */,
 				66C9179828B38DD5007B4636 /* Markdown */,
 				6E9FB88128C24B0C00EB0138 /* Atomics */,
+				A54883F82ADDE38B0076B9B6 /* FirebaseAnalyticsWithoutAdIdSupport */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -8914,29 +8911,6 @@
 			shellPath = /bin/sh;
 			shellScript = "scripts/copy_vinyl.sh\n";
 		};
-		523A32DC26776D0400606768 /* Variable env injector */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/.envrc",
-				"$(SRCROOT)/.envrc.private",
-				"$(SRCROOT)//BeamCore/Configuration/EnvironmentVariables.swift",
-			);
-			name = "Variable env injector";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ $ACTION == \"indexbuild\" ]\nthen\n    echo \"Skipping the script because of Xcode indexing\"\nelif [ $ENABLE_PREVIEWS == \"YES\" ]\nthen\n    echo \"Skipping the script because of SwiftUI preview mode\"\nelse\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    cp ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n      exit 1\n    fi\nfi\n";
-			showEnvVarsInLog = 0;
-		};
 		870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -9062,9 +9036,9 @@
 				96319D3F2616233E00D1CF31 /* String+Ranges.swift in Sources */,
 				96319D3B2616233E00D1CF31 /* String+MD5.swift in Sources */,
 				96319D6726162F7800D1CF31 /* BID.swift in Sources */,
-				9639AA75276906820006C724 /* EnvironmentVariables_generated.swift in Sources */,
 				96319D392616233E00D1CF31 /* WeakReference.swift in Sources */,
 				96C1D7EB2624C0ED0085FD23 /* BeamElement+Text.swift in Sources */,
+				A54883F72ADDDE450076B9B6 /* EnvironmentVariables.swift in Sources */,
 				96319D452616233E00D1CF31 /* String+Regex.swift in Sources */,
 				DAF063FB27D2737E000406DE /* DomainPath0TreeStatsStorage.swift in Sources */,
 				05EBF20A284541ED000889F0 /* Merge.swift in Sources */,
@@ -12450,8 +12424,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
 			requirement = {
-				kind = revision;
-				revision = 33469030542dd936641179d9c104cb4cd92b2f05;
+				branch = "open-source-prep";
+				kind = branch;
 			};
 		};
 		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
@@ -12736,7 +12710,7 @@
 			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
-		A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */ = {
+		A54883F82ADDE38B0076B9B6 /* FirebaseAnalyticsWithoutAdIdSupport */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAnalyticsWithoutAdIdSupport;

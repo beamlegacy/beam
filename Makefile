@@ -28,7 +28,6 @@ install_gitlab_runner:
 	sudo gem install fastlane -N
 
 	make install_swiftlint
-	make install_variable_injector
 
 	# DMG
 	brew install create-dmg
@@ -91,12 +90,6 @@ lint:
 	fastlane lint
 	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run lint
 	yarn --cwd ./Beam/Classes/Models/Navigation/Web run lint
-
-install_variable_injector:
-	rm -rf variable-injector
-	git clone --depth 1 https://github.com/LucianoPAlmeida/variable-injector.git
-	(cd variable-injector && make install)
-	rm -rf variable-injector
 
 install_direnv:
 	brew install direnv
@@ -184,7 +177,7 @@ update_curl_jq_image:
 	@echo "Pushing image"
 	docker push registry.gitlab.com/beamgroup/beam/curl-jq
 
-setup: git_checkout install_dependencies install_swiftlint install_cmake install_direnv install_variable_injector install_js setup_js_xcfilelists
+setup: git_checkout install_dependencies install_swiftlint install_cmake install_direnv install_js setup_js_xcfilelists
 
 #Feature Flags
 
