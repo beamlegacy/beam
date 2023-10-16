@@ -205,7 +205,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         setupSubscribers()
         configureAutoUpdate()
 
-        analyticsCollector.add(backend: FirebaseAnalyticsBackend())
+        analyticsCollector.add(backend: InMemoryAnalyticsBackend())
     }
 
     private func setupSubscribers() {
