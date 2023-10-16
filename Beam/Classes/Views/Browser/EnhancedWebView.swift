@@ -97,7 +97,8 @@ struct EnhancedWebView: View {
                     .padding(.top, topContentInset)
                 }
 
-                if data.showTabStats, let score = tab.browsingTree.current.score {
+                if data.showTabStats {
+                    let score = tab.browsingTree.current.score
                     TabStats(score: score)
                 }
 
