@@ -3,28 +3,19 @@ import Combine
 import BeamCore
 import Sentry
 
-/// Hold all external librairies needing initialisation (ex: sentry, firebase, etc). Is also used to raise non fatal errors
+/// Hold all external librairies needing initialisation (ex: crash tool, analytics, etc). Is also used to raise non fatal errors
 /// `configure()` is called on app launch.
 class ThirdPartyLibrariesManager: NSObject {
     static let shared = ThirdPartyLibrariesManager()
-
-    let firebaseReadyPublisher = CurrentValueSubject<Bool, Never>(false)
-    var firebaseReady: Bool = false {
-        didSet {
-            firebaseReadyPublisher.send(firebaseReady)
-        }
-    }
 
     var sentryUser: Sentry.User?
 
     func configure() {
         setupSentry()
-        setupFirebase()
     }
 
     func updateUser() {
         setSentryUser()
-        setFirebaseUser()
     }
 }
 
