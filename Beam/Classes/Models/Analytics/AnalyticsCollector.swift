@@ -4,12 +4,11 @@
 //
 //  Created by Paul Lefkopoulos on 20/05/2022.
 //
-import Firebase
 import BeamCore
 import Foundation
 import Combine
 
-struct FirebaseMetrics {
+struct GlobalMetrics {
     enum Omnibox: String {
         case queryLength = "omnibox_query_length"
         case chosenItemPosition = "omnibox_chosen_item_position"
@@ -20,6 +19,7 @@ struct FirebaseMetrics {
         case step = "onboarding_step"
     }
 }
+
 enum AnalyticsUserProperties: String {
     case branchType = "application_branch_type"
 }
@@ -31,7 +31,6 @@ enum AnalyticsEventType: String {
 
 enum AnalyticsBackendType {
     case inMemory
-    case firebase
 }
 
 protocol AnalyticsBackend {
@@ -47,7 +46,7 @@ extension AnalyticsBackend {
 }
 protocol AnalyticsEvent {
     var type: AnalyticsEventType { get }
-    var firebaseEventParameters: [String: Any] { get }
+    var eventParameters: [String: Any] { get }
 }
 
 enum OmniboxExitState: Equatable {
@@ -73,12 +72,12 @@ struct OmniboxQueryAnalyticsEvent: AnalyticsEvent {
     var chosenItemPosition: Int?
     var resultCount: Int = 0
     var exitState: OmniboxExitState = .aborted
-    var firebaseEventParameters: [String: Any] {
+    var eventParameters: [String: Any] {
         [
-            FirebaseMetrics.Omnibox.queryLength.rawValue: queryLength,
-            FirebaseMetrics.Omnibox.chosenItemPosition.rawValue: chosenItemPosition ?? -1,
-            FirebaseMetrics.Omnibox.resultCount.rawValue: resultCount,
-            FirebaseMetrics.Omnibox.exitState.rawValue: exitState.shortDescription
+            GlobalMetrics.Omnibox.queryLength.rawValue: queryLength,
+            GlobalMetrics.Omnibox.chosenItemPosition.rawValue: chosenItemPosition ?? -1,
+            GlobalMetrics.Omnibox.resultCount.rawValue: resultCount,
+            GlobalMetrics.Omnibox.exitState.rawValue: exitState.shortDescription
         ]
     }
 }
@@ -87,9 +86,9 @@ struct OnboardingEvent: AnalyticsEvent {
     let type: AnalyticsEventType = .onboarding
     let step: OnboardingStep?
 
-    var firebaseEventParameters: [String: Any] {
+    var eventParameters: [String: Any] {
         [
-            FirebaseMetrics.Onboarding.step.rawValue: step?.type.rawValue ?? "done"
+            GlobalMetrics.Onboarding.step.rawValue: step?.type.rawValue ?? "done"
         ]
     }
 }
@@ -110,43 +109,6 @@ class InMemoryAnalyticsBackend: AnalyticsBackend {
     }
     init() {
         setUserPropertiesAtLaunch()
-    }
-}
-
-class FirebaseAnalyticsBackend: AnalyticsBackend {
-    let type: AnalyticsBackendType = .firebase
-    private var pendingEvents: [AnalyticsEvent] = []
-    private var cancelable: Cancellable?
-
-    func send(event: AnalyticsEvent) {
-        if ThirdPartyLibrariesManager.shared.firebaseReady {
-            Analytics.logEvent(event.type.rawValue, parameters: event.firebaseEventParameters)
-        } else {
-            pendingEvents.append(event)
-        }
-    }
-    
-    func setUserProperty(property: AnalyticsUserProperties, value: String?) {
-        Analytics.setUserProperty(value, forName: property.rawValue)
-    }
-
-    private func delaySetup() {
-        if !ThirdPartyLibrariesManager.shared.firebaseReady {
-            cancelable = ThirdPartyLibrariesManager.shared.firebaseReadyPublisher.sink { [self] ready in
-                if ready {
-                    setUserPropertiesAtLaunch()
-                    cancelable?.cancel()
-
-                    pendingEvents.forEach(send(event:))
-                    pendingEvents.removeAll()
-                }
-            }
-        } else {
-            setUserPropertiesAtLaunch()
-        }
-    }
-    init() {
-        delaySetup()
     }
 }
 
