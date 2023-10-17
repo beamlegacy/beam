@@ -10,7 +10,7 @@ import SwiftUI
 struct SidebarListSectionTitle: View {
 
     var title: String
-    var iconName: String
+    var iconName: String?
 
     var body: some View {
         HStack(spacing: 6.0) {
