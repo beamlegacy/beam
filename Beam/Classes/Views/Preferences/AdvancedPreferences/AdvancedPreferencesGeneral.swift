@@ -6,12 +6,10 @@
 //
 
 import SwiftUI
-import Sentry
 
 struct AdvancedPreferencesGeneral: View {
     @State private var bundleIdentifier: String = Configuration.bundleIdentifier
     @State private var env: String = Configuration.env.rawValue
-    @State private var sentryEnabled = Configuration.sentryEnabled
     @State private var useSidebar = PreferencesManager.useSidebar
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
     @State private var loggedIn: Bool = AuthenticationManager.shared.isAuthenticated    
@@ -28,23 +26,9 @@ struct AdvancedPreferencesGeneral: View {
             } content: {
                 Text(env)
             }
-            Settings.Row {
-                Text("Sentry enabled")
-            } content: {
-                Text(String(describing: sentryEnabled)).fixedSize(horizontal: false, vertical: true)
-            }
-            Settings.Row(hasDivider: true) {
-                Text("Sentry dsn")
-            } content: {
-                Text(Configuration.Sentry.DSN)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .lineLimit(4)
-                    .frame(maxWidth: 387)
-            }
             Settings.Row(hasDivider: true) {
                 Text("Actions")
             } content: {
-                CrashButton
                 CopyAccessToken
                 ResetOnboarding
             }
@@ -59,15 +43,6 @@ struct AdvancedPreferencesGeneral: View {
                 StateRestorationEnabledButton
             }
         }
-    }
-
-    private var CrashButton: some View {
-        Button(action: {
-            SentrySDK.crash()
-        }, label: {
-            // TODO: loc
-            Text("Force a crash").frame(minWidth: 100)
-        })
     }
 
     private var CopyAccessToken: some View {

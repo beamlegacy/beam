@@ -137,8 +137,6 @@ extension APIRequest {
 
             guard AuthenticationManager.shared.isAuthenticated,
                   let accessToken = AuthenticationManager.shared.accessToken else {
-                      ThirdPartyLibrariesManager.shared.nonFatalError(error: APIRequestError.notAuthenticated,
-                                               addedInfo: AuthenticationManager.shared.hashTokensInfos())
 
                 NotificationCenter.default.post(name: .networkUnauthorized, object: self)
                 throw APIRequestError.notAuthenticated
