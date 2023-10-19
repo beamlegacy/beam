@@ -86,16 +86,13 @@ class AuthenticationManager {
     func updateAccessTokenIfNeeded() {
         // Refresh the token in a sync matter
         if !accessTokenIsValid(), refreshTokenIsValid() {
-            EventsTracker.logBreadcrumb(message: "AccessToken is invalid, refresh token is valid",
-                                               category: "app.lifecycle",
-                                               type: "system")
+            Logger.shared.logDebug("AccessToken is invalid, refresh token is valid", category: .appLifeCycle)
             updateAccessToken()
         }
     }
 
     private func log(message: String) {
         Logger.shared.logDebug(message, category: .network)
-        EventsTracker.logBreadcrumb(message: message, category: "app.lifecycle", type: "system")
     }
 
     // We want to make sure only one call to refresh token is done at a time, as we have many parallels
@@ -125,9 +122,6 @@ class AuthenticationManager {
             }
 
             Logger.shared.logInfo("accessToken has expired, updating it", category: .network)
-            EventsTracker.logBreadcrumb(message: "accessToken has expired, updating it",
-                                               category: "app.lifecycle",
-                                               type: "system")
 
             self.account?.refreshToken { result in
                 switch result {
@@ -146,10 +140,7 @@ class AuthenticationManager {
     }
 
     private func handleUpdateAccessTokenFailure(_ error: Error) {
-        ThirdPartyLibrariesManager.shared.nonFatalError("Can't refresh token, removing existing tokens", error: error)
-        EventsTracker.logBreadcrumb(message: "Can't refresh token, removing existing tokens",
-                                           category: "app.lifecycle",
-                                           type: "system")
+        Logger.shared.logDebug("Can't refresh token, removing existing tokens", category: .appLifeCycle)
         self.accessToken = nil
         self.refreshToken = nil
     }
@@ -157,19 +148,13 @@ class AuthenticationManager {
     private func handleUpdateAccessTokenSuccess(_ refresh: UserSessionRequest.RenewCredentials, accessToken: String) {
         guard let newAccessToken = refresh.accessToken,
               let newRefreshToken = refresh.refreshToken else {
-                  ThirdPartyLibrariesManager.shared.nonFatalError("Can't refresh token, returned success, no error and no token. Removing existing tokens")
-                  EventsTracker.logBreadcrumb(message: "Can't refresh token, returned success, no error and no token. Removing existing tokens",
-                                               category: "app.lifecycle",
-                                               type: "system")
+            Logger.shared.logDebug("Can't refresh token, returned success, no error and no token. Removing existing tokens", category: .appLifeCycle)
             self.accessToken = nil
             self.refreshToken = nil
             return
         }
 
         Logger.shared.logInfo("Expiration \(String(describing: Self.expirationDate(accessToken))) -> \(String(describing: Self.expirationDate(newAccessToken)))", category: .network)
-        EventsTracker.logBreadcrumb(message: "Refreshed access token and refresh token",
-                                           category: "app.lifecycle",
-                                           type: "system")
 
         self.accessToken = newAccessToken
         self.refreshToken = newRefreshToken
