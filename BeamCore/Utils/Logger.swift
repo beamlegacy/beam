@@ -61,7 +61,6 @@ public enum LogCategory: String, CaseIterable {
     case favIcon
     case embed
     case marker
-    case sentry
     case contactsDB
     case browserImport
     case autoUpdate
@@ -71,6 +70,7 @@ public enum LogCategory: String, CaseIterable {
     case tabGrouping
     case analyticsCollection
     case sync
+    case appLifeCycle
     case featureFlags
 }
 

@@ -8,11 +8,9 @@
 import Cocoa
 import SwiftUI
 import Combine
-import Sentry
 import BeamCore
 import UUIDKit
 
-#if DEBUG
 @objc(BeamApplication)
 public class BeamApplication: NSApplication {
     override init() {
@@ -24,19 +22,6 @@ public class BeamApplication: NSApplication {
         super.init(coder: coder)
     }
 }
-#else
-@objc(BeamApplication)
-public class BeamApplication: SentryCrashExceptionApplication {
-    override init() {
-        Logger.setup(subsystem: Configuration.bundleIdentifier)
-        super.init()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-}
-#endif
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -98,7 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Importing legacy data may fail so make sure the pinned tabs are ok anyway:
         data.currentAccount?.data.resetPinnedTabs()
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
-        if Configuration.env.rawValue == "$(ENV)" || Configuration.Sentry.key == "$(SENTRY_KEY)", !isSwiftUIPreview {
+        if Configuration.env.rawValue == "$(ENV)", !isSwiftUIPreview {
             fatalError("The ENV wasn't detected properly, please run `direnv allow` and restart your build. (Should only happen in SwiftUI Previews)")
         }
 
@@ -107,7 +92,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             DistributedNotificationCenter.default.addObserver(self, selector: #selector(interfaceModeChanged(sender:)), name: NSNotification.Name(rawValue: "AppleInterfaceThemeChangedNotification"), object: nil)
         }
 
-        ThirdPartyLibrariesManager.shared.configure()
         // We set our own ExceptionHandler but first we get the already set one in that case Sentry
         // We do what we want when there is an exception, in this case saving the tabs then we pass it back to Sentry
         NSSetUncaughtExceptionHandler { _ in

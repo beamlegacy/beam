@@ -369,7 +369,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
         }
         let localPasswords = passwords.compactMap(PasswordEncryptionManager.laxReEncryptAfterReceive)
         if localPasswords.count != passwords.count {
-            EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - localPasswords.count)/\(passwords.count)"))
+            Logger.shared.logError(Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - localPasswords.count)/\(passwords.count)").localizedDescription, category: .tracking)
         }
         try passwordsDB.save(passwords: localPasswords)
         changeSubject.send()
@@ -387,7 +387,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
 
         let localPasswords = passwords.compactMap(PasswordEncryptionManager.laxReEncryptAfterReceive)
         if localPasswords.count != passwords.count {
-            EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - localPasswords.count)/\(passwords.count)"))
+            Logger.shared.logError(Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - localPasswords.count)/\(passwords.count)").localizedDescription, category: .tracking)
         }
         try passwordsDB.save(passwords: localPasswords)
         changeSubject.send()
@@ -405,7 +405,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
     func saveAllOnNetwork(_ passwords: [LocalPasswordRecord], _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) {
         let networkPasswords = passwords.compactMap(PasswordEncryptionManager.tryReEncryptBeforeSend)
         if networkPasswords.count != passwords.count {
-            EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - networkPasswords.count)/\(passwords.count)"))
+            Logger.shared.logError(Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - networkPasswords.count)/\(passwords.count)").localizedDescription, category: .tracking)
         }
         Task.detached(priority: .userInitiated) { [self] in
             do {
@@ -437,7 +437,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
                 }
             }
         } catch {
-            EventsTracker.sendManualReport(forError: error)
+            Logger.shared.logError(error.localizedDescription, category: .passwordNetwork)
             networkCompletion?(.failure(error))
         }
     }
