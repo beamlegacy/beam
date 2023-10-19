@@ -211,7 +211,6 @@ public class GRDBStore {
                     try db.execute(sql: "PRAGMA main.quick_check(\(table))")
                 } catch {
                     Logger.shared.logWarning("Integrity issue detected on '\(table)' table", category: .database)
-                    EventsTracker.sendManualReport(forError: error)
                     if let dbError = error as? GRDB.DatabaseError,
                        [DBError.SQLITE_CORRUPT, DBError.SQLITE_CORRUPT_VTAB, DBError.SQLITE_CORRUPT_INDEX].map({ $0.primaryResultCode }).contains(dbError.resultCode) {
                         // check if FTS is enabled by requesting the column with the same name as the table in the table
@@ -220,7 +219,7 @@ public class GRDBStore {
                             do {
                                 try db.execute(sql: "INSERT INTO \(table)(\(table)) VALUES('rebuild')")
                             } catch {
-                                EventsTracker.sendManualReport(forError: error)
+                                Logger.shared.logError(error.localizedDescription, category: .database)
                             }
                         }
                     }
