@@ -16,7 +16,6 @@ struct Configuration {
     static private(set) var autoUpdate = EnvironmentVariables.autoUpdate
     static private(set) var networkStubs = EnvironmentVariables.networkStubs
     static private(set) var updateFeedURL: String = Configuration.value(for: "SUFeedURL")
-    static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
     static private(set) var networkEnabledDefault = EnvironmentVariables.networkEnabled
     static private var websocketEnabledDefault = true
     static private(set) var topDomainDBMaxSize = 10000
@@ -362,15 +361,6 @@ extension Configuration {
         case test
         case uiTest
         case release
-    }
-}
-
-extension Configuration {
-    struct Sentry {
-        static let key = EnvironmentVariables.Sentry.key
-        static let hostname = "o477543.ingest.sentry.io"
-        static let projectID = "5518785"
-        static let DSN = "https://\(key)@\(hostname)/\(projectID)"
     }
 }
 

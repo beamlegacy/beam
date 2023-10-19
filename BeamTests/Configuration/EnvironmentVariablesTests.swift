@@ -23,8 +23,6 @@ class EnvironmentVariablesTests: QuickSpec {
             expect(EnvironmentVariables.Oauth.Github.consumerSecret) != "$(GITHUB_CONSUMER_SECRET)"
             expect(EnvironmentVariables.Oauth.Github.callbackURL) != "$(GITHUB_REDIRECT_URL)"
 
-            expect(EnvironmentVariables.Sentry.key) != "$(SENTRY_KEY)"
-
         }
     }
 }
