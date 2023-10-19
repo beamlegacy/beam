@@ -1,5 +1,4 @@
 import SwiftUI
-import Sentry
 import Combine
 import BeamCore
 

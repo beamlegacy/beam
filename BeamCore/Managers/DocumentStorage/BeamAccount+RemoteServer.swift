@@ -47,9 +47,6 @@ extension BeamAccount {
                 }
 
                 Logger.shared.logInfo("Expiration \(String(describing: AuthenticationManager.expirationDate(accessToken))) -> \(String(describing: AuthenticationManager.expirationDate(newAccessToken)))", category: .accountManager)
-                EventsTracker.logBreadcrumb(message: "Refreshed access token and refresh token",
-                                            category: "app.lifecycle",
-                                            type: "system")
 
                 Persistence.Authentication.accessToken = refresh.accessToken
                 Persistence.Authentication.refreshToken = refresh.refreshToken
@@ -77,7 +74,6 @@ extension BeamAccount {
                 Persistence.Authentication.email = email
                 Persistence.Authentication.password = password
                 AuthenticationManager.shared.persistenceDidUpdate()
-                ThirdPartyLibrariesManager.shared.updateUser()
 
                 EncryptionManager.shared.privateKey(for: email)
 
@@ -116,7 +112,6 @@ extension BeamAccount {
                 }
                 EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError())
                 AuthenticationManager.shared.persistenceDidUpdate()
-                ThirdPartyLibrariesManager.shared.updateUser()
 
                 // Syncing with remote API, AppDelegate needs to be called in mainthread
                 // TODO: move this syncData to a manager instead.

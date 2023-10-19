@@ -44,10 +44,6 @@ public struct EnvironmentVariables {
         static public private(set) var publishServer = "$(PUBLIC_API_PUBLISH_URL)"
     }
 
-    public struct Sentry {
-        static public private(set) var key = "$(SENTRY_KEY)"
-    }
-
     public struct Account {
         static public private(set) var testPassword = "$(TEST_ACCOUNT_PASSWORD)"
         static public private(set) var testEmail = "$(TEST_ACCOUNT_EMAIL)"
@@ -60,7 +56,6 @@ public struct EnvironmentVariables {
     static public private(set) var env = "debug" //"$(ENV)"
     static public private(set) var autoUpdate = NSString("$(AUTOMATIC_UPDATE)").boolValue
     static public private(set) var networkStubs = NSString("$(NETWORK_STUBS)").boolValue
-    static public private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
     static public private(set) var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
     static public private(set) var beamObjectSendPrivateKey = NSString("$(BEAM_OBJECT_SEND_PRIVATE_KEY)").boolValue
     static public private(set) var hideCategories = "$(HIDE_CATEGORIES)".split(separator: " ").compactMap {
