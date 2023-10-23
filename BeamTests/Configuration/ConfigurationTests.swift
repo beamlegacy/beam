@@ -15,9 +15,5 @@ class ConfigurationTests: QuickSpec {
         it("doesn't have sparkle") {
             expect(Configuration.autoUpdate).to(beFalse())
         }
-
-        it("does have sentry") {
-            expect(Configuration.sentryEnabled).to(beTrue())
-        }
     }
 }

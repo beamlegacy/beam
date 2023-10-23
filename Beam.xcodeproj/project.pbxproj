@@ -335,7 +335,6 @@
 		418172542581107C00317ED8 /* ToolbarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171DA2581107C00317ED8 /* ToolbarContentView.swift */; };
 		418172592581107C00317ED8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E02581107C00317ED8 /* ContentView.swift */; };
 		4181725D2581107C00317ED8 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E72581107C00317ED8 /* AuthenticationManager.swift */; };
-		418172602581107C00317ED8 /* ThirdPartyLibrariesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171EA2581107C00317ED8 /* ThirdPartyLibrariesManager.swift */; };
 		4181727B258110D100317ED8 /* AppDelegate+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41817277258110D100317ED8 /* AppDelegate+Data.swift */; };
 		4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181727A258110D100317ED8 /* AppDelegate+URL.swift */; };
 		418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A825811A3A00317ED8 /* BeamTextField.swift */; };
@@ -785,8 +784,6 @@
 		9670B8FB285011A800BEC4A0 /* AppDelegate+DataTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9670B8FA285011A800BEC4A0 /* AppDelegate+DataTree.swift */; };
 		9674080625F237B2000AC2B8 /* String+URLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9674080525F237B2000AC2B8 /* String+URLTests.swift */; };
 		9678217526726005001413EF /* LockButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9678217426726005001413EF /* LockButton.swift */; };
-		9684F26F270F8DDA006BF53E /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 9684F26E270F8DDA006BF53E /* Sentry */; };
-		9684F273270F9C25006BF53E /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 9684F272270F9C25006BF53E /* Sentry */; };
 		96851B3926D55772008032E4 /* String+NLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96851B3826D55772008032E4 /* String+NLTests.swift */; };
 		9686B47B26D6B9A400749455 /* NoteIndexingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */; };
 		9688F2B52851EFD600FAA51B /* TreeCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9688F2B42851EFD600FAA51B /* TreeCellView.swift */; };
@@ -870,7 +867,6 @@
 		96F2DEC827BDBE39007CF466 /* BeamNote+Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F2DEC727BDBE39007CF466 /* BeamNote+Merge.swift */; };
 		96F2DED227BE3504007CF466 /* BeamNoteMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F2DED127BE3504007CF466 /* BeamNoteMergeTests.swift */; };
 		96F2DEE127BE5361007CF466 /* BeamNoteMerge in Resources */ = {isa = PBXBuildFile; fileRef = 96F2DEE027BE5361007CF466 /* BeamNoteMerge */; };
-		96F5354A27104BE400B719C6 /* EventsTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181718C2581107C00317ED8 /* EventsTracker.swift */; };
 		96F5355A271DADDD00B719C6 /* BeamLinkDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F53559271DADDD00B719C6 /* BeamLinkDB.swift */; };
 		96F936632590FA59006D8E53 /* BTextEdit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F936622590FA59006D8E53 /* BTextEdit.swift */; };
 		96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FACC512604B0EE0088DD67 /* DeleteElement.swift */; };
@@ -1099,7 +1095,6 @@
 		A5208E27261F7419006193AF /* String+Calculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208E26261F7419006193AF /* String+Calculations.swift */; };
 		A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */; };
 		A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5233DE425FB682700BE6F05 /* FaviconProvider.swift */; };
-		A523402E279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A523402D279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift */; };
 		A52393A826541A06008D4C85 /* ModeViewTransitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52393A726541A06008D4C85 /* ModeViewTransitions.swift */; };
 		A52393AA26541A18008D4C85 /* ModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52393A926541A18008D4C85 /* ModeView.swift */; };
 		A52596E3273EAA75004B27E4 /* OnboardingEmailConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52596E2273EAA75004B27E4 /* OnboardingEmailConnectView.swift */; };
@@ -1992,7 +1987,6 @@
 		418171852581107C00317ED8 /* BID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BID.swift; sourceTree = "<group>"; };
 		418171862581107C00317ED8 /* NoteBackForwardList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteBackForwardList.swift; sourceTree = "<group>"; };
 		4181718B2581107C00317ED8 /* Readability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Readability.swift; sourceTree = "<group>"; };
-		4181718C2581107C00317ED8 /* EventsTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventsTracker.swift; sourceTree = "<group>"; };
 		4181718D2581107C00317ED8 /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		4181718F2581107C00317ED8 /* NSContainerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSContainerView.swift; sourceTree = "<group>"; };
 		418171922581107C00317ED8 /* PerformanceDebug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerformanceDebug.swift; sourceTree = "<group>"; };
@@ -2034,7 +2028,6 @@
 		418171DA2581107C00317ED8 /* ToolbarContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ToolbarContentView.swift; sourceTree = "<group>"; };
 		418171E02581107C00317ED8 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		418171E72581107C00317ED8 /* AuthenticationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
-		418171EA2581107C00317ED8 /* ThirdPartyLibrariesManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThirdPartyLibrariesManager.swift; sourceTree = "<group>"; };
 		41817277258110D100317ED8 /* AppDelegate+Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Data.swift"; sourceTree = "<group>"; };
 		4181727A258110D100317ED8 /* AppDelegate+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+URL.swift"; sourceTree = "<group>"; };
 		418172A825811A3A00317ED8 /* BeamTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextField.swift; sourceTree = "<group>"; };
@@ -3095,7 +3088,6 @@
 		A5208E26261F7419006193AF /* String+Calculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Calculations.swift"; sourceTree = "<group>"; };
 		A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchDownModifier.swift; sourceTree = "<group>"; };
 		A5233DE425FB682700BE6F05 /* FaviconProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconProvider.swift; sourceTree = "<group>"; };
-		A523402D279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ThirdPartyLibrariesManager+Sentry.swift"; sourceTree = "<group>"; };
 		A52393A726541A06008D4C85 /* ModeViewTransitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeViewTransitions.swift; sourceTree = "<group>"; };
 		A52393A926541A18008D4C85 /* ModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeView.swift; sourceTree = "<group>"; };
 		A52596E2273EAA75004B27E4 /* OnboardingEmailConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingEmailConnectView.swift; sourceTree = "<group>"; };
@@ -3557,7 +3549,6 @@
 				96C0F72D26FCAE6100385449 /* UUIDKit in Frameworks */,
 				A0A84FC02636FA99008F0326 /* CocoaLumberjackSwift in Frameworks */,
 				96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */,
-				9684F26F270F8DDA006BF53E /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3621,7 +3612,6 @@
 				96DDEE31282C96C900D9101A /* GRDB in Frameworks */,
 				A0A84FC42636FA9A008F0326 /* Nimble in Frameworks */,
 				A0A84FC52636FA9A008F0326 /* CocoaLumberjackSwift in Frameworks */,
-				9684F273270F9C25006BF53E /* Sentry in Frameworks */,
 				9624A6592743212500B8D012 /* Atomics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4620,7 +4610,6 @@
 			children = (
 				96EFDA392817FC4900A8DF8E /* DocumentStorage */,
 				5298EADE26272C2C0033862C /* CoreData */,
-				A523402C279DED950027E339 /* ThirdPartyLibraries */,
 				418171E72581107C00317ED8 /* AuthenticationManager.swift */,
 				A0C3D65627DB69AB007C0BFF /* NetworkMonitor.swift */,
 				03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */,
@@ -6675,7 +6664,6 @@
 				6E42097928942F79007F72EB /* NSLocking.swift */,
 				418171852581107C00317ED8 /* BID.swift */,
 				4181718D2581107C00317ED8 /* Logger.swift */,
-				4181718C2581107C00317ED8 /* EventsTracker.swift */,
 				9676141F25CA989D00BDA862 /* WeakReference.swift */,
 				9676143725CAAD5300BDA862 /* RWLock.swift */,
 				9635C97F276AABB300015575 /* SignPost.swift */,
@@ -7325,15 +7313,6 @@
 				A09F26102833A06600543C3E /* AllNotesPageFiltersContextualMenu.swift */,
 			);
 			path = AllCards;
-			sourceTree = "<group>";
-		};
-		A523402C279DED950027E339 /* ThirdPartyLibraries */ = {
-			isa = PBXGroup;
-			children = (
-				418171EA2581107C00317ED8 /* ThirdPartyLibrariesManager.swift */,
-				A523402D279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift */,
-			);
-			path = ThirdPartyLibraries;
 			sourceTree = "<group>";
 		};
 		A5239392265419DD008D4C85 /* ContentView */ = {
@@ -8395,7 +8374,6 @@
 				96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */,
 				96D5AE84264C01AD003AD516 /* TLDExtract */,
 				96C0F72C26FCAE6100385449 /* UUIDKit */,
-				9684F26E270F8DDA006BF53E /* Sentry */,
 			);
 			productName = BeamCore;
 			productReference = 96319D0F2616232600D1CF31 /* BeamCore.framework */;
@@ -8516,7 +8494,6 @@
 				9639FAF42616614D00C85B95 /* CocoaLumberjackSwift */,
 				A5946845265E30350044A892 /* Fakery */,
 				96C0F73326FCBC0D00385449 /* UUIDKit */,
-				9684F272270F9C25006BF53E /* Sentry */,
 				9624A6582743212500B8D012 /* Atomics */,
 				96DDEE30282C96C900D9101A /* GRDB */,
 			);
@@ -8587,7 +8564,6 @@
 			mainGroup = 965A781C2514F147009980D4;
 			packageReferences = (
 				527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */,
-				527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 				527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */,
 				527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */,
 				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */,
@@ -8997,7 +8973,6 @@
 				96F2DEC827BDBE39007CF466 /* BeamNote+Merge.swift in Sources */,
 				96319D472616233E00D1CF31 /* String+Data.swift in Sources */,
 				9609AF502617159B00322141 /* URL+Beam.swift in Sources */,
-				96F5354A27104BE400B719C6 /* EventsTracker.swift in Sources */,
 				522BC3D726A6EAEE0018B51E /* Date+IntValue.swift in Sources */,
 				9635C97427696C5700015575 /* DebugHelpers.swift in Sources */,
 				96319D3D2616233E00D1CF31 /* BeamText+String.swift in Sources */,
@@ -9774,7 +9749,6 @@
 				A043B800265A547100E267E5 /* TabGroupingSettingsContentView.swift in Sources */,
 				A51A4112285C833F0009EF20 /* AutocompleteManagerMode.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
-				418172602581107C00317ED8 /* ThirdPartyLibrariesManager.swift in Sources */,
 				9670B8F928500CD400BEC4A0 /* DataTreeView.swift in Sources */,
 				032562B126051D3B006513E4 /* RBStat.m in Sources */,
 				6635D99F2853E8AD00F4B775 /* NSWorkspace+Beam.swift in Sources */,
@@ -9801,7 +9775,6 @@
 				8770E0CB2768D9E30078288E /* WebFieldAutofillButton.swift in Sources */,
 				873528BE2735335F005E7CBC /* FirefoxImporter.swift in Sources */,
 				A0C77A2226694D2300DCC85C /* AllowListModalView.swift in Sources */,
-				A523402E279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift in Sources */,
 				032562AA26051D3B006513E4 /* RBClient.m in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				52842D462715B2610099602C /* AppDelegate+File.swift in Sources */,
@@ -12444,14 +12417,6 @@
 				minimumVersion = 3.7.0;
 			};
 		};
-		527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 7.3.0;
-			};
-		};
 		527FB71D25B9A9B600959146 /* XCRemoteSwiftPackageReference "JWTDecode.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/auth0/JWTDecode.swift.git";
@@ -12651,16 +12616,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
-		};
-		9684F26E270F8DDA006BF53E /* Sentry */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
-			productName = Sentry;
-		};
-		9684F272270F9C25006BF53E /* Sentry */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 527FB71825B9A97A00959146 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
-			productName = Sentry;
 		};
 		96C0F72C26FCAE6100385449 /* UUIDKit */ = {
 			isa = XCSwiftPackageProductDependency;

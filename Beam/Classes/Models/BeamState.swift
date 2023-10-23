@@ -9,7 +9,6 @@ import Foundation
 import Combine
 import WebKit
 import BeamCore
-import Sentry
 
 @objc public class BeamState: NSObject, ObservableObject, Codable, BeamDocumentSource {
     var data: BeamData
@@ -41,7 +40,7 @@ import Sentry
 
     @Published var currentNote: BeamNote? {
         didSet {
-            EventsTracker.logBreadcrumb(message: "currentNote changed to \(String(describing: currentNote))", category: "BeamState")
+            Logger.shared.logDebug("currentNote changed to \(String(describing: currentNote))", category: .tracking)
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
             }
@@ -52,7 +51,7 @@ import Sentry
 
     @Published var journalNoteToFocus: BeamNote? {
         didSet {
-            EventsTracker.logBreadcrumb(message: "current journal Note to focus changed to \(String(describing: currentNote))", category: "BeamState")
+            Logger.shared.logDebug("current journal Note to focus changed to \(String(describing: currentNote))", category: .tracking)
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
             }
@@ -134,7 +133,7 @@ import Sentry
 
     @Published var mode: Mode = .today {
         didSet {
-            EventsTracker.logBreadcrumb(message: "mode changed to \(mode)", category: "BeamState")
+            Logger.shared.logDebug("mode changed to \(mode)", category: .tracking)
             browserTabsManager.updateTabsForStateModeChange(mode, previousMode: oldValue)
             updateCanGoBackForward()
 
@@ -194,7 +193,7 @@ import Sentry
 
     func goBack(openingInNewTab: Bool = false) {
         guard canGoBackForward.back else { return }
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         switch mode {
         case .note, .page, .today:
             if let back = backForwardList.goBack() {
@@ -220,7 +219,7 @@ import Sentry
 
     func goForward(openingInNewTab: Bool = false) {
         guard canGoBackForward.forward else { return }
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         switch mode {
         case .note, .page, .today:
             if let forward = backForwardList.goForward() {
@@ -245,7 +244,7 @@ import Sentry
     }
 
     func toggleBetweenWebAndNote() {
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         switch mode {
         case .web:
             let noteController = currentTab?.noteController
@@ -287,7 +286,7 @@ import Sentry
     ///   - frame: The frame of the panel. If no frame is provided, the panel will be located and sized based on the current BeamWindow's frame
     /// - Returns: True if we asked the MiniEditorPanel to open. False otherwise.
     @discardableResult func openNoteInMiniEditor(id: UUID, existingPanel: MiniEditorPanel? = nil, frame: CGRect? = nil) -> Bool {
-        EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
+        Logger.shared.logDebug("\(#function) id \(id))", category: .tracking)
         guard let note = BeamNote.fetch(id: id), let window = associatedWindow as? BeamWindow else {
             return false
         }
@@ -322,7 +321,7 @@ import Sentry
     }
 
     @discardableResult func openNoteInSplitView(id: UUID) -> Bool {
-        EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
+        Logger.shared.logDebug("\(#function) id \(id))", category: .tracking)
         guard let note = BeamNote.fetch(id: id) else {
             return false
         }
@@ -333,7 +332,7 @@ import Sentry
     }
 
     @discardableResult func openNoteInNewWindow(id: UUID) -> Bool {
-        EventsTracker.logBreadcrumb(message: "\(#function) id \(id))", category: "BeamState")
+        Logger.shared.logDebug("\(#function) id \(id))", category: .tracking)
 
         guard let window = AppDelegate.main.createWindow(frame: nil) else { return false }
         window.state.navigateToNote(id: id)
@@ -344,7 +343,7 @@ import Sentry
     }
 
     @discardableResult func navigateToNote(id: UUID, in editor: EditorType = .main, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
-        EventsTracker.logBreadcrumb(message: "\(#function) id \(id) - elementId \(String(describing: elementId))", category: "BeamState")
+        Logger.shared.logDebug("\(#function) id \(id) - elementId \(String(describing: elementId))", category: .tracking)
         //Logger.shared.logDebug("load note named \(named)")
         guard let note = BeamNote.fetch(id: id) else {
             return false
@@ -361,7 +360,7 @@ import Sentry
     }
 
     @discardableResult func navigateToNote(_ note: BeamNote, from: EditorType = .main, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
-        EventsTracker.logBreadcrumb(message: "\(#function) \(note) - elementId \(String(describing: elementId))", category: "BeamState")
+        Logger.shared.logDebug("\(#function) \(note) - elementId \(String(describing: elementId))", category: .tracking)
         mode = .note
 
         guard note != currentNote else { return true }
@@ -388,7 +387,7 @@ import Sentry
     }
 
     @discardableResult func navigateToJournal(note: BeamNote?, clearNavigation: Bool = false) -> Bool {
-        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note))", category: "BeamState")
+        Logger.shared.logDebug("\(#function) \(String(describing: note))", category: .tracking)
         if mode == .today, note == nil {
             self.cachedJournalStackView?.scrollToTop(animated: true)
             return true
@@ -409,7 +408,7 @@ import Sentry
     }
 
     func navigateToPage(_ page: WindowPage) {
-        EventsTracker.logBreadcrumb(message: "\(#function) \(page)", category: "BeamState")
+        Logger.shared.logDebug("\(#function) \(page)", category: .tracking)
 
         if page.id == WindowPage.shortcutsWindowPage.id {
             navigateBackFromShortcutsToWeb = (mode == .web)
@@ -438,7 +437,7 @@ import Sentry
     }
 
     func navigateTab(_ tab: BrowserTab, toURLRequest request: URLRequest) {
-        EventsTracker.logBreadcrumb(message: "\(#function) toURLRequest \(request)", category: "BeamState")
+        Logger.shared.logDebug("\(#function) toURLRequest \(request)", category: .tracking)
         tab.willSwitchToNewUrl(url: request.url)
         tab.load(request: request)
 
@@ -456,7 +455,7 @@ import Sentry
     }
 
     func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, request: URLRequest? = nil, loadRequest: Bool = true, webView: BeamWebView? = nil) -> BrowserTab {
-        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: request))", category: "BeamState")
+        Logger.shared.logDebug("\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: request))", category: .tracking)
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: setCurrent, withURLRequest: request, loadRequest: loadRequest)
         if setCurrent {
@@ -479,7 +478,7 @@ import Sentry
     ///   - webView: optional webview to create a new tab with
     /// - Returns: Returns the newly created tab. The returned tab can safely be discarded.
     @discardableResult func createTab(withURLRequest request: URLRequest, originalQuery: String? = nil, setCurrent: Bool = true, loadRequest: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
-        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: request.url))", category: "BeamState")
+        Logger.shared.logDebug("\(#function) \(String(describing: note)) \(String(describing: request.url))", category: .tracking)
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>", referringRootId: browserTabsManager.currentTab?.browsingTree.rootId)
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, request: request, loadRequest: loadRequest, webView: webView)
 
@@ -493,20 +492,20 @@ import Sentry
     }
 
     func createTabFromNote(_ note: BeamNote, element: BeamElement, withURLRequest request: URLRequest, setCurrent: Bool = true) {
-        EventsTracker.logBreadcrumb(message: "createTabFromNote \(note.id)/\(note.title) element \(element.id)/\(element.kind) withURLRequest \(request)", category: "BeamState")
+        Logger.shared.logDebug("createTabFromNote \(note.id)/\(note.title) element \(element.id)/\(element.kind) withURLRequest \(request)", category: .tracking)
         let origin = BrowsingTreeOrigin.linkFromNote(noteName: note.title)
         _ = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: element, request: request)
     }
 
     func createEmptyTab() -> BrowserTab {
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         let tab = addNewTab(origin: nil)
         tab.title = loc("New Tab")
         return tab
     }
 
     func startNewSearchWithCurrentDestinationCard() {
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         keepDestinationNote = true
         startNewSearch()
     }
@@ -519,7 +518,7 @@ import Sentry
     }
 
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
-        EventsTracker.logBreadcrumb(message: "createTabFromNode \(node) withURL \(url)", category: "BeamState")
+        Logger.shared.logDebug("createTabFromNode \(node) withURL \(url)", category: .tracking)
         guard let note = node.root?.note else { return }
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: node.strippedText)
         _ = addNewTab(origin: origin, note: note, element: node.element, request: URLRequest(url: url))
@@ -543,14 +542,14 @@ import Sentry
 
     func closeTab(_ index: Int, allowClosingPinned: Bool = false) {
         guard self.browserTabsManager.tabs.count - 1 >= index else { return }
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         let tab = self.browserTabsManager.tabs[index]
         closeTabIfPossible(tab, allowClosingPinned: allowClosingPinned)
     }
 
     /// returns true if the tab was closed
     func closeCurrentTab(allowClosingPinned: Bool = false) -> Bool {
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         guard let currentTab = self.browserTabsManager.currentTab else { return false }
         return closeTabIfPossible(currentTab, allowClosingPinned: allowClosingPinned)
     }
@@ -613,7 +612,7 @@ import Sentry
     }
 
     func fetchOrCreateNoteForQuery(_ query: String) throws -> BeamNote {
-        EventsTracker.logBreadcrumb(message: "fetchOrCreateNoteForQuery \(query)", category: "BeamState")
+        Logger.shared.logDebug("fetchOrCreateNoteForQuery \(query)", category: .tracking)
         return try BeamNote.fetchOrCreate(self, title: query)
     }
 
@@ -647,7 +646,7 @@ import Sentry
     }
 
     func startQuery(_ node: TextNode, animated: Bool) {
-        EventsTracker.logBreadcrumb(message: "startQuery \(node)", category: "BeamState")
+        Logger.shared.logDebug("startQuery \(node)", category: .tracking)
         // if no links create link from search query
         if node.element.outLinks.isEmpty {
             let query = node.currentSelectionWithFullSentences()
@@ -692,7 +691,7 @@ import Sentry
     }
 
     private func selectAutocompleteResult(_ result: AutocompleteResult, modifierFlags: NSEvent.ModifierFlags? = nil) {
-        EventsTracker.logBreadcrumb(message: "\(#function) - \(result)", category: "BeamState")
+        Logger.shared.logDebug("\(#function) - \(result)", category: .tracking)
         switch result.source {
         case .searchEngine:
             guard let url = searchEngine.searchURL(forQuery: result.text) else {
@@ -761,7 +760,7 @@ import Sentry
     }
 
     func startOmniboxQuery(selectingNewIndex: Int? = nil, navigate: Bool = true, modifierFlags: NSEvent.ModifierFlags? = nil) {
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let index = selectingNewIndex ?? autocompleteManager.autocompleteSelectedIndex
@@ -1011,7 +1010,7 @@ import Sentry
     }
 
     func startFocusOmnibox(fromTab: Bool = false, updateResults: Bool = true, autocompleteMode: AutocompleteManager.Mode = .general) {
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         autocompleteManager.resetAnalyticsEvent()
         omniboxInfo.wasFocusedFromTab = fromTab && mode == .web
         omniboxInfo.wasFocusedFromJournalTop = mode == .today && omniboxInfo.isShownInJournal
@@ -1074,7 +1073,7 @@ import Sentry
     }
 
     func startNewSearch() {
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         if omniboxInfo.isFocused && (!omniboxInfo.isShownInJournal || !autocompleteManager.autocompleteResults.isEmpty) {
             // disabling shake from users feedback - https://linear.app/beamapp/issue/BE-2546/cmd-t-on-already-summoned-omnibox-makes-it-bounce
             // autocompleteManager.shakeOmniBox()
@@ -1093,7 +1092,7 @@ import Sentry
     }
 
     func resetDestinationCard() {
-        EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        Logger.shared.logDebug(#function, category: .tracking)
         destinationCardName = currentTab?.noteController.noteOrDefault.title ?? data.todaysName
         destinationCardNameSelectedRange = nil
         destinationCardIsFocused = false
