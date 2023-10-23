@@ -180,6 +180,8 @@ import BeamCore
 
     var downloadButtonPosition: CGPoint?
 
+    var summaryButtonPosition: CGPoint?
+
     private var navigateBackFromShortcutsToWeb = false
 
     private var lastQuickSearchDate: Date = .init()

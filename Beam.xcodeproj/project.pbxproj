@@ -637,6 +637,8 @@
 		8A4801A426A1EB66008F33FE /* PointAndShoot+DrawRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */; };
 		8A4801AD26A1EBBF008F33FE /* PointAndShoot+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801AC26A1EBBF008F33FE /* PointAndShoot+Helpers.swift */; };
 		8A50A53426E1035E0094BA97 /* BeamElementJoinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A50A53326E1035E0094BA97 /* BeamElementJoinTests.swift */; };
+		8A5ECD572AE6AD0F006C27D7 /* SwiftSummarize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5ECD562AE6AD0F006C27D7 /* SwiftSummarize.swift */; };
+		8A5ECD592AE6AD2C006C27D7 /* SummarizerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5ECD582AE6AD2C006C27D7 /* SummarizerView.swift */; };
 		8A5EDB1A278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDB19278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift */; };
 		8A5EDB21278C584E007C0C59 /* BrowserTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDB20278C584E007C0C59 /* BrowserTabTests.swift */; };
 		8A68F4652671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */; };
@@ -2572,6 +2574,8 @@
 		8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+DrawRules.swift"; sourceTree = "<group>"; };
 		8A4801AC26A1EBBF008F33FE /* PointAndShoot+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Helpers.swift"; sourceTree = "<group>"; };
 		8A50A53326E1035E0094BA97 /* BeamElementJoinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementJoinTests.swift; sourceTree = "<group>"; };
+		8A5ECD562AE6AD0F006C27D7 /* SwiftSummarize.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftSummarize.swift; sourceTree = "<group>"; };
+		8A5ECD582AE6AD2C006C27D7 /* SummarizerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummarizerView.swift; sourceTree = "<group>"; };
 		8A5EDB19278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebNoteControllerTest+BrowsingCollect.swift"; sourceTree = "<group>"; };
 		8A5EDB20278C584E007C0C59 /* BrowserTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabTests.swift; sourceTree = "<group>"; };
 		8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPositionsMessageHandlerFrameBoundsTest.swift; sourceTree = "<group>"; };
@@ -4667,6 +4671,7 @@
 		418172A625811A3A00317ED8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				8A5ECD552AE6ACF8006C27D7 /* Summarizer */,
 				6615796928CB828000904C24 /* VideoCalls */,
 				9670B8F028500C2D00BEC4A0 /* Debug */,
 				8AEF14AF27F1D16C00A27C1B /* MediaPlayer */,
@@ -6109,6 +6114,15 @@
 				8A27DCA127EDC86A0044A9A2 /* PasswordManagerHelper.ts */,
 			);
 			path = src;
+			sourceTree = "<group>";
+		};
+		8A5ECD552AE6ACF8006C27D7 /* Summarizer */ = {
+			isa = PBXGroup;
+			children = (
+				8A5ECD562AE6AD0F006C27D7 /* SwiftSummarize.swift */,
+				8A5ECD582AE6AD2C006C27D7 /* SummarizerView.swift */,
+			);
+			path = Summarizer;
 			sourceTree = "<group>";
 		};
 		8A7C80F326F9E03F00D3BA72 /* Omnibar */ = {
@@ -9402,6 +9416,7 @@
 				52FB30CA25E3D7B3001BF098 /* String+Title.swift in Sources */,
 				A5011E4A2754E6E800A76667 /* ToolbarCapsuleButton.swift in Sources */,
 				A5EBF15526D8F2FD00597A1C /* VisualEffectView.swift in Sources */,
+				8A5ECD592AE6AD2C006C27D7 /* SummarizerView.swift in Sources */,
 				A5336C0B273AB6050075AF92 /* OnboardingView.swift in Sources */,
 				A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */,
 				8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */,
@@ -9510,6 +9525,7 @@
 				37520B0B27EAA40000A1C20B /* ElementNodeDisplaySizeCache.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				A54A45422768A72400B9AE1B /* ImportsManager.swift in Sources */,
+				8A5ECD572AE6AD0F006C27D7 /* SwiftSummarize.swift in Sources */,
 				37B85B7E27A2C81B003871F9 /* WebKitDownloadProxy.swift in Sources */,
 				96F2BF0F263B208500F02F16 /* Caret.swift in Sources */,
 				A5AD646327C53D27005FC3B1 /* TabContentIcon.swift in Sources */,
