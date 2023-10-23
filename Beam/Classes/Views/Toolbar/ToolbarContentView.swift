@@ -151,6 +151,19 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
                         return Color.clear
                     })
             }
+
+            ToolbarButton(icon: "nav-summary", action: {
+                onSummaryButtonPressed(containerGeometry: containerGeometry)
+            })
+            .background(GeometryReader { proxy -> Color in
+                let rect = proxy.safeTopLeftGlobalFrame(in: nil)
+                let center = CGPoint(x: rect.origin.x + rect.width / 2, y: rect.origin.y + rect.height / 2)
+                state.summaryButtonPosition = center
+                return Color.clear
+            })
+//            .tooltipOnHover(LocalizedStringKey(Shortcut.AvailableShortcut.newSearch.description))
+            .accessibilityIdentifier("nav-summary")
+
             ToolbarButton(icon: "nav-omnibox", action: {
                 if state.omniboxInfo.isFocused {
                     state.stopFocusOmnibox()
@@ -214,6 +227,30 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
                 origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
             }
             window.setView(with: downloaderView, at: origin, fromTopLeft: true)
+            window.makeKey()
+            downloadList.presentingWindow = window
+        }
+    }
+
+    private func onSummaryButtonPressed(containerGeometry: GeometryProxy) {
+        if let presentingWindow = downloadList.presentingWindow {
+            CustomPopoverPresenter.shared.dismissPopoverWindow(presentingWindow)
+        } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true, movable: false) {
+            guard let linkUUID = self.browserTabsManager.currentTab?.browsingTree.current.link else {
+                print("failed to get browsing tree link")
+                return
+            }
+            // probably not the first first?
+            let link = LinkStore.shared.getLinks(for: [linkUUID]).values.first
+            let summaryView = SummarizerView(text: link?.content) {
+                CustomPopoverPresenter.shared.dismissPopovers(animated: false)
+            }
+            let toolbarFrame = containerGeometry.safeTopLeftGlobalFrame(in: window.parent)
+            var origin = CGPoint(x: toolbarFrame.origin.x + toolbarFrame.width - summaryView.preferredWidth - 18, y: toolbarFrame.maxY)
+            if let parentWindow = window.parent {
+                origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
+            }
+            window.setView(with: summaryView, at: origin, fromTopLeft: true)
             window.makeKey()
             downloadList.presentingWindow = window
         }
