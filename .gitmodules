@@ -1,6 +1,6 @@
 [submodule "Extern/AutoUpdate"]
 	path = Extern/AutoUpdate
-	url = ../autoupdate.git
+	url = git@github.com:beamlegacy/AutoUpdate.git
 [submodule "Extern/RadBlock"]
 	path = Extern/RadBlock
 	url = ../adblock.git
