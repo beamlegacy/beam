@@ -78,7 +78,7 @@ private extension PreferencesManager {
     static let fontSizeIndexPreferenceDefault = 5
     static let isTabToHighlightOnDefault = false
     static let isHapticFeedbackOnDefault = true
-    static let isAutoUpdateOnDefault = true
+    static let isAutoUpdateOnDefault = false
     static let isDataBackupOnUpdateOnDefault = true
     static let defaultWindowModeDefault = PreferencesDefaultWindowMode.journal
 }

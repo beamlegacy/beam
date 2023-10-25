@@ -481,7 +481,7 @@ extension BeamData {
 // MARK: - AutoUpdate
 extension BeamData {
     private static func createVersionChecker() -> VersionChecker {
-        let enableUpdateAutoCheck = ![.debug, .test].contains(Configuration.env)
+        let enableUpdateAutoCheck = false
         if let feed = URL(string: Configuration.updateFeedURL) {
             return VersionChecker(feedURL: feed, autocheckEnabled: enableUpdateAutoCheck)
         } else {
