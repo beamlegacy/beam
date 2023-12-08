@@ -48,10 +48,10 @@
       },
       {
         "package": "Clustering",
-        "repositoryURL": "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git",
+        "repositoryURL": "https://github.com/beamlegacy/Clustering",
         "state": {
-          "branch": "open-source-prep",
-          "revision": "74db77a180ce7c1aa53972e93a0818e77dd9593a",
+          "branch": "main",
+          "revision": "9ae50f50c7492b71233ef2174ef01c8c61e46835",
           "version": null
         }
       },
@@ -230,9 +230,9 @@
         "package": "LASwift",
         "repositoryURL": "https://github.com/alexandertar/LASwift",
         "state": {
-          "branch": "master",
-          "revision": "4b464f8a11b10f616b73a24bfc47c61c322ee542",
-          "version": null
+          "branch": null,
+          "revision": "c7adfe775805c05d484b53c497e9f74898a50858",
+          "version": "0.2.6"
         }
       },
       {
