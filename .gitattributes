@@ -1,6 +1,0 @@
-*.bz2 filter=lfs diff=lfs merge=lfs -text
-*.db filter=lfs diff=lfs merge=lfs -text
-*.db-wal filter=lfs diff=lfs merge=lfs -text
-*.db-shm filter=lfs diff=lfs merge=lfs -text
-/.yarn/releases/** binary
-/.yarn/plugins/** binary
