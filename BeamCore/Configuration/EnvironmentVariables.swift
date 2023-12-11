@@ -54,7 +54,7 @@ public struct EnvironmentVariables {
     }
 
     static public private(set) var env = "debug" //"$(ENV)"
-    static public private(set) var autoUpdate = NSString("$(AUTOMATIC_UPDATE)").boolValue
+    static public private(set) var autoUpdate = false //NSString("$(AUTOMATIC_UPDATE)").boolValue
     static public private(set) var networkStubs = NSString("$(NETWORK_STUBS)").boolValue
     static public private(set) var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
     static public private(set) var beamObjectSendPrivateKey = NSString("$(BEAM_OBJECT_SEND_PRIVATE_KEY)").boolValue
