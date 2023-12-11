@@ -131,17 +131,17 @@ struct AccountsView: View {
             })
             .padding(.bottom, 6)
             .disabled(true)
-            VStack {
+            VStack(spacing: 4) {
                 Settings.SubtitleLabel("Sync your notes between device and share them easily.")
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
                     .opacity(0.5)
-                Settings.SubtitleLabel("⚠️ Beam is now open-source and serverless, you can no longer login")
+                Settings.SubtitleLabel("⚠️ Beam is now open-source and serverless, you can no longer login.")
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
-            }.frame(width: 238, height: 26, alignment: .leading)
+            }.frame(width: 238, height: 50, alignment: .leading)
         }
     }
 
