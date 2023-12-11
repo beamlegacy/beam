@@ -15,7 +15,6 @@ For now we're focusing on making the project run in debug, locally from Xcode.
 ### How to run
 * Clone this repo
 * `cd` inside the project and run: `make setup`
-* in Xcode, change the signin team to use one you have access to.
 
 
 
