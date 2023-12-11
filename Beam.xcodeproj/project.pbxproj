@@ -168,7 +168,6 @@
 		33AC9D9826AFF453004E7EF4 /* FocusableTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */; };
 		33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */; };
 		33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; };
-		33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */; };
 		33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 33B2FF2C274C3F8500518F12 /* Lottie */; };
 		33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */ = {isa = PBXBuildFile; fileRef = 33BBA504274423E200FE92DB /* editor-embed_collapse.json */; };
@@ -1155,6 +1154,7 @@
 		A55C98BD2805F60200717D3E /* ShareHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98BC2805F60200717D3E /* ShareHelper.swift */; };
 		A55C98C52806FB5F00717D3E /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98C42806FB5F00717D3E /* ShareService.swift */; };
 		A55C98C7280767CA00717D3E /* ShareHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98C6280767CA00717D3E /* ShareHelperTests.swift */; };
+		A55CCC792B27366F006C942F /* AutoUpdate.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 33B27450264C0CDC00A318CD /* AutoUpdate.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A5614804287C5EC4005F921A /* SplashScreenWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5614803287C5EC4005F921A /* SplashScreenWindow.swift */; };
 		A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */; };
 		A56696B12614CF7F00B814D2 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56696B02614CF7F00B814D2 /* TableView.swift */; };
@@ -1630,8 +1630,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				A55CCC792B27366F006C942F /* AutoUpdate.framework in Embed Frameworks */,
 				96319D252616232700D1CF31 /* BeamCore.framework in Embed Frameworks */,
-				33B27468264C0F7100A318CD /* AutoUpdate.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -8400,7 +8400,6 @@
 				965A78232514F147009980D4 /* Resources */,
 				5259C3AA258A7DC300DD67E7 /* Embed Frameworks */,
 				52C60BFF258B63A5008B7C10 /* Embed XPC Services */,
-				3390376A26529BD700089E25 /* Sign AutoUpdate XPC */,
 				A0C83F12276E408400DD29FB /* Embed BeamHelper Tool */,
 				870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */,
 				332CE7142889B023007E585A /* Remove SmartClustering model in beta */,
@@ -8834,24 +8833,6 @@
 			shellPath = /bin/sh;
 			shellScript = "scripts/delete_smart_clustering_model.sh\n";
 			showEnvVarsInLog = 0;
-		};
-		3390376A26529BD700089E25 /* Sign AutoUpdate XPC */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 8;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Sign AutoUpdate XPC";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nscripts/codesign-xpc-autoupdate.sh\n";
 		};
 		521FEC702604F1FF009000F9 /* Copy Vinyl Cassettes */ = {
 			isa = PBXShellScriptBuildPhase;
