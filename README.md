@@ -6,8 +6,8 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/assets/mainwindow_dark_optimized.png?raw=true">
-  <source media="(prefers-color-scheme: light)" srcset=".github/assets/mainwindow_dark_optimized.png?raw=true">
-  <img alt="Beam Browser Preview" src=".github/assets/mainwindow_dark_optimized.png?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset=".github/assets/mainwindow_light_optimized.png?raw=true">
+  <img alt="Beam Browser Preview" src=".github/assets/mainwindow_light_optimized.png?raw=true">
 </picture>
 
 <p align="center">
