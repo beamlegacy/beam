@@ -18,43 +18,54 @@
 
 <!-- omit in toc -->
 ## Table of Contents
-- [Running the project](#running-the-project)
-  - [Setup](#setup)
-  - [Tests](#tests)
-  - [Development](#development)
-  - [Web Components](#web-components)
-- [Contributors](#contributors)
-- [License](#license)
+- [🚀 Getting Started](#-getting-started)
+  - [🔧 Setup](#-setup)
+  - [🩺 Tests](#-tests)
+  - [⌨️ Development](#️-development)
+  - [🌐 Web Components](#-web-components)
+- [👨‍💻 Contributors](#-contributors)
+- [📖 License](#-license)
 
 
-## Running the project
+## 🚀 Getting Started 
 
 > [!IMPORTANT]
 > The official development of **beam** macOS app [has stopped in November 2022](https://twitter.com/getonbeam/status/1592134355371331585). Because the app is still used by some of us, and we still believe in a webkit-based ML-powered browser + note editor. We decided to open source it. This is still far from done, please reach out if you want to contribute [TBD]
 
-For now we're focusing on making the project run in debug, locally from Xcode.
+Pull Requests with bug fixes and new features are much appreciated. We will be happy to review them and merge it once ready. If you have suggestions or want to report bugs please open an [issue](https://github.com/beamlegacy/beam/issues).
 
+Our current focus is making the project build and run in debug mode, locally from Xcode.
 
-### Setup
-* Clone this repo
-* `cd` inside the project and run: `make setup`
+### 🔧 Setup
+Start by cloning the repo:
+```shell
+git clone git@github.com:beamlegacy/beam.git
+```
+Go inside the project inside the project:
+```
+cd beam
+``` 
+Run the setup script with:
+```
+make setup
+```
 
-### Tests
+### 🩺 Tests
 
 TBD - Checkout README_previous.md to see old instructions.
 
-### Development
+### ⌨️ Development
 
 TBD - The process
 
-### Web Components
-Run `yarn generate` to use the CLI wizard to generate a preconfigured TS component.
+### 🌐 Web Components
+Run `yarn generate` to use the CLI wizard to generate a preconfigured TS component. Then add the newly created message handler to the browsertab at BrowserTab.swift#83. Add simple example component to follow is the MediaPlayerMessageHandler.
 
 
-## Contributors
+## 👨‍💻 Contributors
 
 TBD 
 
-## License
+## 📖 License
 
 TBD
