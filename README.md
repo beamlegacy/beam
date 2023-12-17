@@ -24,7 +24,7 @@
   - [⌨️ Development](#️-development)
   - [🌐 Web Components](#-web-components)
 - [👨‍💻 Contributors](#-contributors)
-- [License](#license)
+- [📖 License](#-license)
 
 
 ## 🚀 Getting Started 
@@ -66,6 +66,6 @@ Run `yarn generate` to use the CLI wizard to generate a preconfigured TS compone
 
 TBD 
 
-## License
+## 📖 License
 
 TBD
