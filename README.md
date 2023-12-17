@@ -32,10 +32,9 @@
 > [!IMPORTANT]
 > The official development of **beam** macOS app [has stopped in November 2022](https://twitter.com/getonbeam/status/1592134355371331585). Because the app is still used by some of us, and we still believe in a webkit-based ML-powered browser + note editor. We decided to open source it. This is still far from done, please reach out if you want to contribute [TBD]
 
-Pull Requests with bug fixes and new features are much appreciated. We will be happy to review them and merge it once ready. While the official development of **beam** macOS app [has stopped in November 2022](https://twitter.com/getonbeam/status/1592134355371331585) the app is still used my some of us. We believe that a WebKit-based ML-powered browser and note editor is too cool to dissapear. So we decided to open source it and welcome all users and contributors to contribute. If you have suggestions or want to report bugs please open an [issue](https://github.com/beamlegacy/beam/issues). For contributing code please open a [pull request](https://github.com/beamlegacy/beam/pulls) and someone from the team will review it.
+Pull Requests with bug fixes and new features are much appreciated. We will be happy to review them and merge it once ready. If you have suggestions or want to report bugs please open an [issue](https://github.com/beamlegacy/beam/issues).
 
-Our current focus for now is making the project build and run in debug mode, locally from Xcode.
-
+Our current focus is making the project build and run in debug mode, locally from Xcode.
 
 ### 🔧 Setup
 Start by cloning the repo:
