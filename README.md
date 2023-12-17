@@ -26,8 +26,6 @@
 - [Contributors](#contributors)
 - [License](#license)
 
---- 
-
 
 ## Running the project
 
