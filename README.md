@@ -16,9 +16,8 @@
     </a>
 </p>
 
+<!-- omit in toc -->
 ## Table of Contents
-- [Table of Contents](#table-of-contents)
-- [⚠️ Open Sourcing in progress ⚠️](#️-open-sourcing-in-progress-️)
 - [Running the project](#running-the-project)
   - [Setup](#setup)
   - [Tests](#tests)
@@ -27,7 +26,6 @@
 - [Contributors](#contributors)
 - [License](#license)
 
-## ⚠️ Open Sourcing in progress ⚠️ 
 
 > [!IMPORTANT]
 > The official development of **beam** macOS app [has stopped in November 2022](https://twitter.com/getonbeam/status/1592134355371331585). Because the app is still used by some of us, and we still believe in a webkit-based ML-powered browser + note editor. We decided to open source it. This is still far from done, please reach out if you want to contribute [TBD]
