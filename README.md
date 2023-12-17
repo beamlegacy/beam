@@ -5,14 +5,14 @@
 </p>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/beamlegacy/beam/blob/main/.github/assets/mainwindow_dark_optimized.png?raw=true">
-  <source media="(prefers-color-scheme: light)" srcset="https://github.com/beamlegacy/beam/blob/main/.github/assets/mainwindow_dark_optimized.png?raw=true">
-  <img alt="Beam Browser Preview" src="https://github.com/beamlegacy/beam/blob/main/.github/assets/mainwindow_dark_optimized.png?raw=true">
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/mainwindow_dark_optimized.png?raw=true">
+  <source media="(prefers-color-scheme: light)" srcset=".github/assets/mainwindow_dark_optimized.png?raw=true">
+  <img alt="Beam Browser Preview" src=".github/assets/mainwindow_dark_optimized.png?raw=true">
 </picture>
 
 <p align="center">
   <a href="https://www.dropbox.com/s/gwliqsubg64oaf1/Beam.dmg?dl=1">
-    <img src="https://github.com/beamlegacy/beam/blob/main/.github/assets/download_button.png?raw=true" width="160">
+    <img src=".github/assets/download_button.png?raw=true" width="160">
     </a>
 </p>
 
