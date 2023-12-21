@@ -121,14 +121,25 @@ extension AppleCalendarService: CalendarService {
     }
 
     func requestAccess(completionHandler: @escaping (Bool) -> Void) {
-        eventStore.requestAccess(to: .event) { [weak self] granted, error in
-            if let error = error {
-                Logger.shared.logError("Access to macOS calendars failed: \(error)", category: .eventCalendar)
+        if #available(macOS 14.0, *) {
+            eventStore.reset()
+            eventStore.requestFullAccessToEvents { [weak self] granted, error in
+                self?.requestAccessToEvents(granted: granted, error: error, completionHandler: completionHandler)
             }
-            self?.inNeedOfPermission = !granted
-            DispatchQueue.main.async {
-                completionHandler(granted)
+        } else {
+            eventStore.requestAccess(to: .event) { [weak self] granted, error in
+                self?.requestAccessToEvents(granted: granted, error: error, completionHandler: completionHandler)
             }
+        }
+    }
+    
+    private func requestAccessToEvents(granted: Bool, error: Error?, completionHandler: @escaping (Bool) -> Void) {
+        if let error = error {
+            Logger.shared.logError("Access to macOS calendars failed: \(error)", category: .eventCalendar)
+        }
+        self.inNeedOfPermission = !granted
+        DispatchQueue.main.async {
+            completionHandler(granted)
         }
     }
 

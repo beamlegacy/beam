@@ -356,6 +356,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Beam uses your events to help you create meeting notes.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Beam uses your events to help you create meeting notes.</string>
 	<key>NSCameraUsageDescription</key>
