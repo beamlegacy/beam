@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CalendarContent: View {
-    @ObservedObject var viewModel: AccountsViewModel
+    @ObservedObject var viewModel: CalendarsViewModel
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -60,7 +60,7 @@ struct CalendarContent: View {
 }
 
 struct GoogleAccountView: View {
-    @ObservedObject var viewModel: AccountsViewModel
+    @ObservedObject var viewModel: CalendarsViewModel
     var account: AccountCalendar
     var onDisconnect: (() -> Void)?
 
@@ -112,7 +112,7 @@ struct GoogleAccountView: View {
 }
 
 struct AppleAccountView: View {
-    @ObservedObject var viewModel: AccountsViewModel
+    @ObservedObject var viewModel: CalendarsViewModel
     var account: AccountCalendar
     var onDisconnect: (() -> Void)?
 

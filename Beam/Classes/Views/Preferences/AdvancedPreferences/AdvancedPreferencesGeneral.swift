@@ -12,7 +12,6 @@ struct AdvancedPreferencesGeneral: View {
     @State private var env: String = Configuration.env.rawValue
     @State private var useSidebar = PreferencesManager.useSidebar
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
-    @State private var loggedIn: Bool = AuthenticationManager.shared.isAuthenticated    
 
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {
@@ -29,7 +28,6 @@ struct AdvancedPreferencesGeneral: View {
             Settings.Row(hasDivider: true) {
                 Text("Actions")
             } content: {
-                CopyAccessToken
                 ResetOnboarding
             }
             Settings.Row {
@@ -45,23 +43,9 @@ struct AdvancedPreferencesGeneral: View {
         }
     }
 
-    private var CopyAccessToken: some View {
-        Button(action: {
-            if let accessToken = AuthenticationManager.shared.accessToken {
-                let pasteboard = NSPasteboard.general
-                pasteboard.clearContents()
-                pasteboard.setString(accessToken, forType: .string)
-            }
-        }, label: {
-            // TODO: loc
-            Text("Copy Access Token").frame(minWidth: 100)
-        }).disabled(!loggedIn)
-    }
-
     private var ResetOnboarding: some View {
         Button(action: {
             Persistence.Authentication.hasSeenOnboarding = false
-            AuthenticationManager.shared.username = nil
         }, label: {
             Text("Reset Onboarding").frame(minWidth: 100)
         })

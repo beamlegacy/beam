@@ -103,7 +103,7 @@ struct CalendarView: View, BeamDocumentSource {
                 .animation(.easeInOut(duration: 0.3))
                 .onHover { isHoveringNotConnect = $0 }
                 .onTapGesture {
-                    openAccountPreferences()
+                    openCalendarsPreferences()
                 }
                 .cursorOverride(.pointingHand)
         }
@@ -153,8 +153,8 @@ struct CalendarView: View, BeamDocumentSource {
         .background(background(if: isHoveringNotConnect))
     }
 
-    private func openAccountPreferences() {
-        (NSApp.delegate as? AppDelegate)?.openPreferencesWindow(to: .accounts)
+    private func openCalendarsPreferences() {
+        (NSApp.delegate as? AppDelegate)?.openPreferencesWindow(to: .calendars)
     }
 
     private func prompt(_ meeting: Meeting) {
