@@ -456,11 +456,11 @@ extension BeamTextEdit {
             var offset = 0
             rootNode.cmdManager.beginGroup(with: "Move Multiple Elements")
             let shouldIncreaseIndex = !isMovedNodeSibbling(selectedNodes.first ?? movedNode, andBefore: dragResult.element) || dragResult.shouldBeChild
-            for node in selectedNodes {
+            for node in selectedNodes where index >= 0 {
+                rootNode.cmdManager.reparentElement(node, to: newParent, atIndex: index + offset)
                 if shouldIncreaseIndex {
                     offset += 1
                 }
-                rootNode.cmdManager.reparentElement(node, to: newParent, atIndex: index + offset)
             }
             rootNode.cmdManager.endGroup()
         } else {
