@@ -15,10 +15,13 @@ struct AboutPreferencesView: View {
             Settings.Row(hasDivider: true) {} content: {
                 BeamAboutSection()
             }
+            Settings.Row(hasDivider: true) {} content: {
+                BeamOpenSourceSection()
+            }
             Settings.Row {} content: {
                 BeamSocialSection()
             }
-        }.frame(height: 322, alignment: .center)
+        }.frame(alignment: .center)
     }
 }
 
@@ -28,7 +31,7 @@ struct AboutPreferencesView_Previews: PreviewProvider {
     }
 }
 
-struct BeamAboutSection: View {
+private struct BeamAboutSection: View {
     @Environment(\.openURL) var openURL
 
     private var TermsAndConditionsButton: some View {
@@ -42,9 +45,9 @@ struct BeamAboutSection: View {
                         .font(BeamFont.regular(size: 11).swiftUI)
                 }.foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI)
             )
-        }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
+        }, state: .normal, customStyle: .minimalButtonLabel) {
             PreferencesManager.openLink(url: URL(string: Configuration.beamTermsConditionsLink))
-        })
+        }
     }
 
     private var PrivacyPolicyButton: some View {
@@ -58,9 +61,9 @@ struct BeamAboutSection: View {
                         .font(BeamFont.regular(size: 11).swiftUI)
                 }.foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI)
             )
-        }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
+        }, state: .normal, customStyle: .minimalButtonLabel) {
             PreferencesManager.openLink(url: URL(string: Configuration.beamPrivacyPolicyLink))
-        })
+        }
     }
 
     var body: some View {
@@ -73,67 +76,81 @@ struct BeamAboutSection: View {
                         .frame(width: 128, height: 128, alignment: .top)
                     Spacer()
                 }
-                GeometryReader { _ in
-                    VStack(alignment: .leading) {
-                        Text("Beam")
-                            .font(BeamFont.medium(size: 20).swiftUI)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
-                            .frame(height: 24, alignment: .center)
-                        Text("Version \(Information.appVersion ?? "0") (\(Information.appBuild ?? "0")) \(buildTypeSuffix())")
-                            .font(BeamFont.medium(size: 10).swiftUI)
-                            .foregroundColor(BeamColor.Corduroy.swiftUI)
-                            .frame(height: 12, alignment: .center)
-                            .padding(.bottom, 2)
+                VStack(alignment: .leading) {
+                    Text("Beam")
+                        .font(BeamFont.medium(size: 20).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        .frame(height: 24, alignment: .center)
+                    Text("Version \(Information.appVersion ?? "0") (\(Information.appBuild ?? "0")) \(buildTypeSuffix)")
+                        .font(BeamFont.medium(size: 10).swiftUI)
+                        .foregroundColor(BeamColor.Corduroy.swiftUI)
+                        .frame(height: 12, alignment: .center)
+                        .padding(.bottom, 2)
 
-                        TermsAndConditionsButton
-                            .frame(height: 21)
-                        PrivacyPolicyButton
-                            .frame(height: 21)
-                            .padding(.bottom, 26)
+                    TermsAndConditionsButton
+                        .frame(height: 21)
+                    PrivacyPolicyButton
+                        .frame(height: 21)
+                        .padding(.bottom, 20)
 
-                        Button {
-                            PreferencesManager.openLink(url: HelpMenuSection.featureRequest.url)
-                        } label: {
-                            Text("Feature Request...")
-                                .frame(minWidth: 132)
-                                .font(BeamFont.regular(size: 13).swiftUI)
-                        }.buttonStyle(BorderedButtonStyle())
-                            .padding(.bottom, 3)
-                        Button {
-                            PreferencesManager.openLink(url: HelpMenuSection.bugReport.url)
-                        } label: {
-                            Text("Report a bug...")
-                                .frame(minWidth: 110)
-                                .font(BeamFont.regular(size: 13).swiftUI)
-                        }.buttonStyle(BorderedButtonStyle())
-//                            .padding(.bottom, 5)
-//                        Button {
-//                            let email = "help@beamapp.com"
-//                            let subject = "I have an issue with Beam Version \(Information.appVersion ?? "0") (\(Information.appBuild ?? "0"))"
-//                            let mailtoStr = "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")"
-//                            guard let url = URL(string: mailtoStr) else { return }
-//                            openURL(url)
-//                        } label: {
-//                            Text("Contact Support...")
-//                                .frame(minWidth: 132)
-//                                .font(BeamFont.regular(size: 13).swiftUI)
-//                        }.buttonStyle(BorderedButtonStyle())
-//                            .padding(.bottom, 15)
-                    }.padding(.top, 16)
-                        .padding(.leading, 2)
+                    Button {
+                        PreferencesManager.openLink(url: HelpMenuSection.featureRequest.url)
+                    } label: {
+                        Text("Feature Request...")
+                            .frame(minWidth: 132)
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                    }
+                    .buttonStyle(BorderedButtonStyle())
+                    .padding(.bottom, 3)
+                    Button {
+                        PreferencesManager.openLink(url: HelpMenuSection.bugReport.url)
+                    } label: {
+                        Text("Report a bug...")
+                            .frame(minWidth: 110)
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                    }
+                    .buttonStyle(BorderedButtonStyle())
                 }
+                .padding(.top, 16)
+                .padding(.leading, 2)
+
                 Spacer()
             }
         }
     }
 
-    private func buildTypeSuffix() -> String {
+    private var buildTypeSuffix: String {
         guard let type = Configuration.branchType, type != .publicRelease else { return "" }
         return "\(type.rawValue)"
     }
 }
 
-struct BeamSocialSection: View {
+private struct BeamOpenSourceSection: View {
+    var body: some View {
+        VStack(alignment: .center) {
+            HStack(alignment: .top) {
+                Spacer(minLength: 172)
+                VStack(alignment: .leading) {
+                    Text("beam is now Open Source!")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    Settings.SubtitleLabel("Follow development on GitHub.")
+                }
+                Spacer()
+                Button {
+                    PreferencesManager.openLink(url: URL(string: Configuration.beamOpenSourceRepoLink))
+                } label: {
+                    Text("Open on GitHub")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .frame(width: 110)
+                }.buttonStyle(BorderedButtonStyle())
+                Spacer(minLength: 179)
+            }
+        }
+    }
+}
+
+private struct BeamSocialSection: View {
     var body: some View {
         VStack(alignment: .center) {
             HStack(alignment: .top) {
@@ -150,7 +167,7 @@ struct BeamSocialSection: View {
                 } label: {
                     Text("Follow")
                         .font(BeamFont.regular(size: 13).swiftUI)
-                        .frame(width: 70)
+                        .frame(width: 110)
                 }.buttonStyle(BorderedButtonStyle())
                 Spacer(minLength: 179)
             }

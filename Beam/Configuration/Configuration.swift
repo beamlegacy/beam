@@ -34,6 +34,7 @@ struct Configuration {
 
     static let beamPrivacyPolicyLink = "https://beamapp.co/privacy"
     static let beamTermsConditionsLink = "https://beamapp.co/tos"
+    static let beamOpenSourceRepoLink = "https://github.com/beamlegacy/beam"
 
     static var shouldDeleteEmptyDatabase = true
 
