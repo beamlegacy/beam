@@ -9,12 +9,12 @@ import Foundation
 import SwiftUI
 
 enum SettingTab: String, CaseIterable {
-    case general, browser, notes, privacy, passwords, accounts, about, beta, advanced, editor, clustering
+    case general, browser, notes, privacy, passwords, calendars, about, beta, advanced, editor, clustering
 
     var label: String {
         switch self {
         case .general:  return "General"
-        case .accounts: return "Account"
+        case .calendars: return "Calendars"
         case .about: return "About"
         case .browser: return "Browser"
         case .notes: return "Notes"
@@ -30,7 +30,7 @@ enum SettingTab: String, CaseIterable {
     var imageName: String {
         switch self {
         case .general:  return "preferences-general-on"
-        case .accounts: return "preferences-account"
+        case .calendars: return "preferences-account_calendars"
         case .about: return "preferences-about"
         case .browser: return "preferences-browser"
         case .notes: return "preferences-cards"
@@ -51,7 +51,7 @@ enum SettingTab: String, CaseIterable {
         case .privacy: return NSHostingView(rootView: PrivacyPreferencesView().fixedSize())
         case .passwords:
             return NSHostingView(rootView: PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordManager: BeamData.shared.passwordManager, showNeverSavedEntries: true), creditCardsViewModel: CreditCardListViewModel()).fixedSize())
-        case .accounts: return NSHostingView(rootView: AccountsView(viewModel: AccountsViewModel(calendarManager: BeamData.shared.calendarManager)).fixedSize())
+        case .calendars: return NSHostingView(rootView: CalendarsView(viewModel: CalendarsViewModel(calendarManager: BeamData.shared.calendarManager)).fixedSize())
         case .about: return NSHostingView(rootView: AboutPreferencesView().fixedSize())
         case .beta:
             return NSHostingView(rootView: BetaPreferencesView(viewModel: BetaPreferencesViewModel(objectManager: BeamData.shared.objectManager)).environment(\.managedObjectContext, CoreDataManager.shared.mainContext).fixedSize())
@@ -62,7 +62,7 @@ enum SettingTab: String, CaseIterable {
     }
 
     static var userSettings: [SettingTab] {
-        return [.general, .browser, .notes, .privacy, .passwords, .accounts, .about, .beta]
+        return [.general, .browser, .notes, .privacy, .passwords, .calendars, .about, .beta]
     }
 
     static var privateSettings: [SettingTab] {

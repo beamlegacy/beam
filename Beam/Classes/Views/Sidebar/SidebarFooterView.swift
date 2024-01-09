@@ -64,7 +64,7 @@ struct SidebarFooterView: View {
     }
 
     private func openAccountPreferences() {
-        (NSApp.delegate as? AppDelegate)?.openPreferencesWindow(to: .accounts)
+        (NSApp.delegate as? AppDelegate)?.openPreferencesWindow(to: .calendars)
     }
 
     private func openGeneralPreferences() {
