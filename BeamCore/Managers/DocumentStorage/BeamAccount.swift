@@ -396,20 +396,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
 
     // MARK: - Private Key Check
     @MainActor
-    func checkPrivateKey() async {
-        if await checkPrivateKey(useBuiltinPrivateKeyUI: true) {
-            objectManager.liveSync { (_, _) in
-                Task { @MainActor in
-                    do {
-                        _ = try await self.syncDataWithBeamObject()
-                    } catch {
-                        Logger.shared.logError("Error while syncing data: \(error)", category: .document)
-                    }
-                    self.data.updateNoteCount()
-                }
-            }
-        }
-    }
+    func checkPrivateKey() async {}
 
     // MARK: - Web sockets
     func disconnectWebSockets() {

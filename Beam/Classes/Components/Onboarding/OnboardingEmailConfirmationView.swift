@@ -121,38 +121,6 @@ struct OnboardingEmailConfirmationView: View {
         errorState = nil
         loadingState = .signinin
         updateActions()
-        AppData.shared.currentAccount?.signIn(email: email, password: password, runFirstSync: false) { result in
-            DispatchQueue.main.async {
-                updateActions()
-                switch result {
-                case .failure(let error):
-                    loadingState = nil
-                    if error as? APIRequestError != nil {
-                        errorState = .notConfirmed
-                    } else {
-                        errorState = .genericError(description: error.localizedDescription)
-                    }
-                    updateActions()
-                case .success:
-                    Logger.shared.logInfo("Sign in after email confirmation succeeded", category: .network)
-                    loadingState = .gettingInfos
-                    let loadingStartTime = BeamDate.now
-
-                    onboardingManager.checkForPrivateKey { nextStep in
-                        guard nextStep != nil else {
-                            handleSyncCompletion(startTime: loadingStartTime)
-                            return
-                        }
-                        DispatchQueue.main.async {
-                            // This is a failsafe but we should never end-up in such a case
-                            UserAlert.showMessage(message: "Private Key Error", informativeText: "The private key was unable to be created.", buttonTitle: "Restart Beam") {
-                                NSApp.relaunch()
-                            }
-                        }
-                    }
-                }
-            }
-        } syncCompletion: { _ in }
     }
 
     private func handleSyncCompletion(startTime: Date) {
@@ -168,17 +136,6 @@ struct OnboardingEmailConfirmationView: View {
             return
         }
         errorState = nil
-        AppData.shared.currentAccount?.resendVerificationEmail(email: email) { result in
-            switch result {
-            case .failure(let error):
-                emailConfirmationTooltip = LocalizedStringKey(error.localizedDescription)
-            case .success:
-                emailConfirmationTooltip = "Another confirmation email has been sent"
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
-                emailConfirmationTooltip = nil
-            }
-        }
     }
 }
 

@@ -241,50 +241,6 @@ struct OnboardingEmailConnectView: View {
         isPasswordEditing = false
         loadingState = .signinin
         updateButtonState()
-        AppData.shared.currentAccount?.signIn(email: emailField, password: passwordField, runFirstSync: false) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .failure(let error):
-                    loadingState = nil
-                    if case APIRequestError.apiErrors(let errorable) = error,
-                       errorable.errors?.first(where: { $0.code == .userNotConfirmed }) != nil {
-                        showEmailConfirmationStep()
-                    } else if error as? APIRequestError != nil {
-                        errorState = .invalidCredentials
-                    } else {
-                        errorState = .genericError(description: error.localizedDescription)
-                    }
-                case .success:
-                    Logger.shared.logInfo("Sign in succeeded", category: .network)
-                    loadingState = .gettingInfos
-                    let loadingStartTime = BeamDate.now
-                    updateButtonState()
-
-                    Task {
-                        if let pkStatus = try? await BeamData.shared.privateKeySignatureManager.distantKeyStatus(), pkStatus == .none {
-                            // We do this to show the saveEncyptionView, user probably reset his account
-                            onboardingManager.userDidSignUp = true
-                        }
-
-                        onboardingManager.checkForPrivateKey { nextStep in
-                            guard nextStep != nil else {
-                                return
-                            }
-                            finish(nextStep)
-                        } syncCompletion: { result in
-                            switch result {
-                            case .failure(let error):
-                                Logger.shared.logError("Run first Sync failed when trying to connect with Email: \(error)", category: .network)
-                            default:
-                                break
-                            }
-                            handleSyncCompletion(startTime: loadingStartTime)
-                        }
-                    }
-                }
-            }
-
-        } syncCompletion: { _ in }
     }
 
     private func showEmailConfirmationStep() {
@@ -297,22 +253,6 @@ struct OnboardingEmailConnectView: View {
     private func createAccount() {
         guard areCredentialsValid, loadingState == nil else { return }
         loadingState = .signinup
-        AppData.shared.currentAccount?.signUp(emailField, passwordField) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .failure(let error):
-                    loadingState = nil
-                    if error as? APIRequestError != nil {
-                        errorState = .invalidCredentials
-                    } else {
-                        errorState = .genericError(description: error.localizedDescription)
-                    }
-                case .success:
-                    onboardingManager.userDidSignUp = true
-                    showEmailConfirmationStep()
-                }
-            }
-        }
     }
 
     private func handleSyncCompletion(startTime: Date) {
@@ -328,17 +268,6 @@ struct OnboardingEmailConnectView: View {
         guard email.mayBeEmail, forgotPasswordTooltip == nil else {
             errorState = .invalidEmail
             return
-        }
-        AppData.shared.currentAccount?.forgotPassword(email: email) { result in
-            switch result {
-            case .failure(let error):
-                forgotPasswordTooltip = LocalizedStringKey(error.localizedDescription)
-            case .success:
-                forgotPasswordTooltip = "Instructions to reset password have been sent."
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
-                forgotPasswordTooltip = nil
-            }
         }
     }
 

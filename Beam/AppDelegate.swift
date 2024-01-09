@@ -153,21 +153,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         #if DEBUG
         prepareMenuForTestEnv()
-
-        // In test mode, we want to start fresh without auth tokens as they may have expired
-        if Configuration.env == .test || Configuration.env == .uiTest {
-            data.currentAccount?.logout()
-        }
         #endif
 
         setupNetworkMonitor()
 
-        // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-        data.currentAccount?.updateInitialState()
-
         initializeSpellChecker()
         fetchTopDomains()
-        getUserInfos()
         LoggerRecorder.shared.deleteEntries(olderThan: DateComponents(hour: -2))
         if !isRunningTests {
             let tenMinutes: TimeInterval = 60*10
@@ -547,8 +538,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if flags.contains(.shift), flags.contains(.command), flags.contains(.option), flags.contains(.control) {
             if Persistence.Authentication.email != nil {
                 UserAlert.showAlert(message: "Logout from account \(Persistence.emailOrRaiseError())", informativeText: "Do you want to logout?", buttonTitle: "Cancel", secondaryButtonTitle: "Logout", secondaryButtonAction: {
-                    self.data.currentAccount?.logout()
-
                     UserAlert.showAlert(message: "Reset all private keys", informativeText: "Do you want to reset all accounts? (make sure your private keys are backuped first!). The following accounts will be removed:\n\(EncryptionManager.shared.accounts.joined(separator: "\n"))", buttonTitle: "Cancel", secondaryButtonTitle: "Reset all accounts", secondaryButtonAction: {
                         EncryptionManager.shared.resetPrivateKeys(andMigrateOldSharedKey: false)
                     }, style: .critical)

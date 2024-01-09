@@ -123,7 +123,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         for window in AppDelegate.main.windows {
             window.state.closeAllTabs(closePinnedTabs: true)
         }
-        currentAccount?.logout()
         AppDelegate.main.deleteAllLocalData()
     }
 
@@ -314,17 +313,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
             completionHandler(false)
             return
         }
-
-        let email = Configuration.testAccountEmail
-        let password = Configuration.testAccountPassword
-        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
-
-        currentAccount?.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
-            defer { completionHandler(true) }
-            if case .failure(let error) = result {
-                fatalError(error.localizedDescription)
-            }
-        })
     }
 
     private func signUpWithRandomTestAccount() {
@@ -339,58 +327,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
             showAlert("Already authenticated", "You are already authenticated")
             completionHandler(false)
             return
-        }
-
-        let randomString = UUID()
-        let emailComponents = Configuration.testAccountEmail.split(separator: "@")
-        let email = "\(emailComponents[0])_\(randomString)@\(emailComponents[1])"
-        let username = "\(emailComponents[0])_\(randomString)".replacingOccurrences(of: "+", with: "_").substring(from: 0, to: 30)
-        let password = Configuration.testAccountPassword
-
-        currentAccount?.signUp(email, password) { [weak currentAccount] result in
-            if case .failure(let error) = result {
-                DispatchQueue.main.async {
-                    self.showAlert("Cannot sign up", "Cannot sign up with \(email): \(error.localizedDescription)")
-                    completionHandler(false)
-                }
-                return
-            }
-            currentAccount?.signIn(email: email, password: password, runFirstSync: false, completionHandler: { result in
-                if case .failure(let error) = result {
-                    DispatchQueue.main.async {
-                        self.showAlert("Cannot sign in", "Cannot sign in with \(email): \(error.localizedDescription)")
-                        completionHandler(false)
-                    }
-                } else {
-                    currentAccount?.setUsername(username: username) { result in
-                        DispatchQueue.main.async {
-                            defer { completionHandler(true) }
-                            switch result {
-                            case .failure(let error):
-                                let errorMessage: String?
-                                if case APIRequestError.apiErrors(let errorable) = error, let firstError = errorable.errors?.first {
-                                    errorMessage = firstError.message
-                                } else {
-                                    errorMessage = error.localizedDescription
-                                }
-                                if let errorMessage = errorMessage {
-                                    self.showAlert("Cannot set username \(username)", errorMessage)
-                                }
-                            case .success:
-                                if BeamData.shared.onboardingManager.needsToDisplayOnboard {
-                                    BeamData.shared.onboardingManager.userDidSignUp = true
-                                    BeamData.shared.onboardingManager.advanceToNextStep(OnboardingStep(type: .imports))
-                                    BeamData.shared.onboardingManager.advanceToNextStep()
-                                }
-                                NSPasteboard.general.clearContents()
-                                NSPasteboard.general.setString(email, forType: .string)
-
-                                currentAccount?.runFirstSync(useBuiltinPrivateKeyUI: false)
-                            }
-                        }
-                    }
-                }
-            })
         }
     }
 
@@ -474,16 +410,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         AppDelegate.main.deleteAllLocalData()
     }
 
-    private func deleteRemoteAccount() {
-        currentAccount?.deleteAccount { result in
-            switch result {
-            case .failure(let error):
-                Logger.shared.logError("Error while deleting account: \(error)", category: .accountManager)
-            case .success:
-                Logger.shared.logDebug("Account deleted", category: .accountManager)
-            }
-        }
-    }
+    private func deleteRemoteAccount() {}
 
     private func resetUserPreferences() {
         BeamUserDefaultsManager.clear()

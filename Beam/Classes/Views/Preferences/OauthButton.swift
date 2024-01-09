@@ -46,37 +46,5 @@ struct OauthButton<Content: View>: View {
 
         // OAuthSwift.setLogLevel(.warn)
         let state = generateState(withLength: 20)
-
-        authClient.authorize(
-            withCallbackURL: callbackURL,
-            scope: scope,
-            state: state) { result in
-            switch result {
-            case .success(let (credential, _, _)):
-                Logger.shared.logDebug("\(type.rawValue) Token: \(credential.oauthToken)", category: .network)
-
-                switch buttonType {
-                case .connect:
-                    Task {
-                        do {
-                            _ = try await IdentityRequest().create(credential.oauthToken, type)
-                            onConnect?()
-                        } catch {
-                            Logger.shared.logError(error.localizedDescription, category: .network)
-                            onFailure?()
-                        }
-                    }
-                case .signin:
-                    AppData.shared.currentAccount?.signInWithProvider(provider: type, accessToken: credential.oauthToken, runFirstSync: false) { _ in
-                        onConnect?()
-                    } syncCompletion: { _ in
-                        onDataSync?()
-                    }
-                }
-            case .failure(let error):
-                Logger.shared.logError(error.localizedDescription, category: .network)
-                onFailure?()
-            }
-        }
     }
 }
