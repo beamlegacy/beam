@@ -9,15 +9,20 @@ import Foundation
 import Combine
 import SwiftUI
 
-class PreferencesManager {
-    static let contentWidth = 726.0
+final class PreferencesManager {
+    enum Error: Swift.Error {
+        case unableToOpenLink
+    }
+
     static let shared: PreferencesManager = PreferencesManager()
-    var scope = Set<AnyCancellable>()
+    static let contentWidth = 726.0
+
+    private var scope = Set<AnyCancellable>()
 
     @Published var beamAppearance: BeamAppearance = .system
     var fontSizes = 8..<22
 
-    init() {
+    private init() {
         beamAppearance = BeamAppearance(rawValue: PreferencesManager.beamAppearancePreference) ?? .system
 
         $beamAppearance.sink { newValue in
@@ -45,11 +50,14 @@ class PreferencesManager {
         ContentBlockingManager.shared.synchronize()
     }
 
-    static func openLink(url: URL?) {
-        if let url = url, let state = AppDelegate.main.windows.first?.state {
-            state.mode = .web
-            _ = state.createTab(withURLRequest: URLRequest(url: url), originalQuery: nil)
+    @discardableResult
+    static func openLink(url: URL?) -> Bool {
+        guard let url, let state = AppDelegate.main.windows.first?.state else {
+            return false
         }
+        state.mode = .web
+        _ = state.createTab(withURLRequest: URLRequest(url: url), originalQuery: nil)
+        return true
     }
 }
 
