@@ -29,16 +29,7 @@ class AuthenticationManager {
     }
     var accessToken: String? {
         get { Persistence.Authentication.accessToken }
-        set {
-            Persistence.Authentication.accessToken = newValue
-            persistenceDidUpdate()
-            guard let account = account else { return }
-            if isAuthenticated && !account.signedIn {
-                account.moveToSignedIn()
-            } else if !isAuthenticated && account.signedIn {
-                account.moveToSignedOff()
-            }
-        }
+        set { }
     }
     var refreshToken: String? {
         get { Persistence.Authentication.refreshToken }
@@ -122,18 +113,6 @@ class AuthenticationManager {
             }
 
             Logger.shared.logInfo("accessToken has expired, updating it", category: .network)
-
-            self.account?.refreshToken { result in
-                switch result {
-                case .failure(let error):
-                    Logger.shared.logInfo("Could not refresh token: \(error.localizedDescription)", category: .network)
-                case .success(let success):
-                    Logger.shared.logInfo("Refresh Token succeeded: \(success)", category: .network)
-                }
-
-                self.group.leave()
-                self.semaphore.signal()
-            }
         }
 
         group.wait()

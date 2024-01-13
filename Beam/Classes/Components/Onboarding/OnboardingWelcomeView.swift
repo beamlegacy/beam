@@ -133,7 +133,6 @@ struct OnboardingWelcomeView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
             error = nil
         }
-        AppData.shared.currentAccount?.logoutIfNeeded()
     }
 
     private func onSigninDone() {

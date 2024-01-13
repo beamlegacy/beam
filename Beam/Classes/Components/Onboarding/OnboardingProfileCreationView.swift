@@ -93,20 +93,6 @@ struct OnboardingProfileCreationView: View {
     private func saveUsernameAndFinish() {
         let username = textField.trimmingCharacters(in: .whitespacesAndNewlines)
         guard isUsernameValid(username) else { return }
-        AppData.shared.currentAccount?.setUsername(username: username) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .failure(let error):
-                    if case APIRequestError.apiErrors(let errorable) = error, let firstError = errorable.errors?.first {
-                        errorMessage = firstError.message
-                    } else {
-                        errorMessage = error.localizedDescription
-                    }
-                case .success:
-                    finish(nil)
-                }
-            }
-        }
     }
 }
 

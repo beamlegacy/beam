@@ -147,9 +147,6 @@ class OnboardingManager: ObservableObject {
 
     func backToPreviousStep() {
         guard let previous = stepsHistory.popLast() else { return }
-        if [.emailConnect, .welcome].contains(previous.type) {
-            AppData.shared.currentAccount?.logoutIfNeeded()
-        }
         actions = []
         currentStepIsFromHistory = true
         currentStep = previous
@@ -239,14 +236,7 @@ class OnboardingManager: ObservableObject {
     func checkForPrivateKey(completionHandler: @escaping (OnboardingStep?) -> Void, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         Task { @MainActor in
             if let currentAccount = AppData.shared.currentAccount {
-                if await currentAccount.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
-                    completionHandler(nil)
-                    currentAccount.runFirstSync(useBuiltinPrivateKeyUI: false) { result in
-                        syncCompletion?(result)
-                    }
-                } else {
-                    completionHandler(OnboardingStep(type: .setupPrivateKey))
-                }
+                completionHandler(OnboardingStep(type: .setupPrivateKey))
             } else {
                 assert(false)
             }

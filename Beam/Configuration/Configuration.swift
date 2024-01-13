@@ -165,7 +165,6 @@ struct Configuration {
         set {
             if newValue != apiHostname {
                 UserDefaults.standard.set(newValue, forKey: apiHostnameKey)
-                AppData.shared.currentAccount?.logout()
             }
         }
     }
@@ -320,9 +319,6 @@ struct Configuration {
 
         // Websocket
         UserDefaults.standard.removeObject(forKey: websocketEnabledKey)
-
-        // Logout
-        AppData.shared.currentAccount?.logout()
     }
 
     static func setAPIEndPointsToStaging() {
