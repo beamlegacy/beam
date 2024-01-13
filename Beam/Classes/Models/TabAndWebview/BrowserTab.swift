@@ -809,6 +809,7 @@ import BeamCore
         guard fetchTitle else { return }
         Task.detached(priority: .background) {
             let fetchedTitle = await WebNoteController.convertURLToBeamTextLink(url: url)
+            let pasteboard = NSPasteboard.general
             guard pasteboard.string(forType: .string) == urlString else { return }
             let bTextHolder = BeamTextHolder(bText: fetchedTitle)
             let beamTextData = try PropertyListEncoder().encode(bTextHolder)

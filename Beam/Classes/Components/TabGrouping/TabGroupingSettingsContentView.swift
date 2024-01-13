@@ -20,7 +20,7 @@ struct TabGroupingSettingsContentView: View {
         ScrollView {
             VStack(alignment: .center) {
                 ZStack {
-                    if clusteringManager.clusteredTabs.flatMap { $0 }.isEmpty {
+                    if clusteringManager.clusteredTabs.flatMap({ $0 }).isEmpty {
                         ClusterLoadingView(isLoading: false)
                     }
                     if clusteringManager.isClustering {

@@ -104,16 +104,17 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
             return (tab, id)
         }
 
-        let screenshots = group.isLocked ? await screenshots(for: tabs) : [:]
-
-        return tabs.compactMap { (tab, id) -> TabGroupBeamObject.PageInfo? in
-            guard let url = tab.url else { return nil }
-            var snapshotData: Data?
-            if let snapshot = screenshots[tab], snapshot.isValid {
-                snapshotData = snapshot.jpegRepresentation
+        return await Task { @MainActor in
+            let screenshots = group.isLocked ? await screenshots(for: tabs) : [:]
+            return tabs.compactMap { (tab, id) -> TabGroupBeamObject.PageInfo? in
+                guard let url = tab.url else { return nil }
+                var snapshotData: Data?
+                if let snapshot = screenshots[tab], snapshot.isValid {
+                    snapshotData = snapshot.jpegRepresentation
+                }
+                return TabGroupBeamObject.PageInfo(id: id, url: url, title: tab.title, snapshot: snapshotData)
             }
-            return TabGroupBeamObject.PageInfo(id: id, url: url, title: tab.title, snapshot: snapshotData)
-        }
+        }.value
     }
 
     @discardableResult
@@ -144,6 +145,7 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
         group.updatePageIds(sortedPageIds)
     }
 
+    @MainActor
     private func screenshots(for tabs: [(BrowserTab, UUID)]) async -> [BrowserTab: NSImage] {
         var screenshots: [BrowserTab: NSImage] = [:]
         for (tab, _) in tabs {

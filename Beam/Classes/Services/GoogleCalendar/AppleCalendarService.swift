@@ -108,7 +108,7 @@ extension AppleCalendarService: CalendarService {
                 NSWorkspace.shared.open(prefsURL)
             })
             return false
-        case .authorized, .notDetermined:
+        case .authorized, .fullAccess, .notDetermined, .writeOnly:
             return true
         @unknown default:
             break

@@ -59,6 +59,7 @@ extension TextNode {
                 checker.ignoreWord(word, inSpellDocumentWithTag: 0)
                 self.triggerSpellChecking()
                 Task.detached {
+                    let checker = NSSpellChecker.shared
                     Persistence.SpellChecking.ignoredWords = checker.ignoredWords(inSpellDocumentWithTag: 0)
                 }
             case .learnWord:

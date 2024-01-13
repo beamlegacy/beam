@@ -89,7 +89,7 @@ final class DownloadList<T: DownloadListItem>: NSObject, ObservableObject, Downl
 
 extension DownloadList: DownloadItemDelegate {
 
-    func downloadItem<T: DownloadListItem>(_ downloadItem: T, stateDidChange state: DownloadListItemState) {
+    func downloadItem<D: DownloadListItem>(_ downloadItem: D, stateDidChange state: DownloadListItemState) {
         isDownloading = downloads.contains(where: \.isRunning)
     }
 
