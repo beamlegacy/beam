@@ -61,9 +61,9 @@ enum HelpMenuSection: String, CaseIterable, Identifiable {
         case .shortcuts:
             return nil
         case .featureRequest:
-            return URL(string: "https://beamapp.canny.io/feature-r")
+            return URL(string: "https://github.com/beamlegacy/beam/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title=")
         case .bugReport:
-            return URL(string: "https://beamapp.canny.io/bugs")
+            return URL(string: "https://github.com/beamlegacy/beam/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=")
         case .twitter:
             return URL(string: "https://twitter.com/getonbeam")
         }
