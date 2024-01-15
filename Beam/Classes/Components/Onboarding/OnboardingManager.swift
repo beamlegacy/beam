@@ -235,7 +235,7 @@ class OnboardingManager: ObservableObject {
 
     func checkForPrivateKey(completionHandler: @escaping (OnboardingStep?) -> Void, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         Task { @MainActor in
-            if let currentAccount = AppData.shared.currentAccount {
+            if let _ = AppData.shared.currentAccount {
                 completionHandler(OnboardingStep(type: .setupPrivateKey))
             } else {
                 assert(false)

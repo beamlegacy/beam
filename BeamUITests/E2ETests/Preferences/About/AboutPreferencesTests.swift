@@ -12,8 +12,8 @@ class AboutPreferencesTests: BaseTest {
     
     var aboutPreferencesView: AboutPreferencesTestView!
     var tabIndex = 0
-    let expectedBugsTabTitle = "beamapp.canny.io/bugs"
-    let expectedFeatureTabTitle = "beamapp.canny.io/feature-r"
+    let expectedBugsTabTitle = "github.com/beamlegacy/beam/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title="
+    let expectedFeatureTabTitle = "github.com/beamlegacy/beam/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title="
     let expectedTwitterTabTitle = "twitter.com/getonbeam"
     let expectedTermsOfServicesTabTitle = "next.beamapp.co/beam/note/e2a2291f-37d5-443b-aa88-af6b04520fee/Terms-of-Services"
     let expectedPrivacyPolicyTabTitle = "next.beamapp.co/beam/note/1085ef50-2df0-4ac6-b8af-9c0b10d82b34/Privacy-Policy"

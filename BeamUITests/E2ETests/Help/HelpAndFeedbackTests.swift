@@ -25,7 +25,7 @@ class HelpAndFeedbackTests: BaseTest {
     }
     
     func testHelpAndFeedbackAppearance() {
-        let expectedCannyLink = "beamapp.canny.io"
+        let expectedBugReportLink = "github.com"
         let expectedTwitterTabTitle = "twitter.com/getonbeam"
         var menuTitle: XCUIElement?
         
@@ -51,15 +51,15 @@ class HelpAndFeedbackTests: BaseTest {
         step("When I open Bug report"){
             journalView.openHelpMenu().openBugReport()
         }
-        assertCorrectTabIsOpened(expectedCannyLink)
-        
+        assertCorrectTabIsOpened(expectedBugReportLink)
+
         testrailId("C705")
         step("When I open Feature request"){
             let omnibox = OmniBoxTestView()
             omnibox.navigateToNoteViaPivotButton()
             journalView.openHelpMenu().openFeatureRequest()
         }
-        assertCorrectTabIsOpened(expectedCannyLink)
+        assertCorrectTabIsOpened(expectedBugReportLink)
 
         testrailId("C707")
         step("When I open Beam twitter account"){
