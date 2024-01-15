@@ -13,8 +13,8 @@ struct StandardStorable<T> {
         get {
             switch T.self {
             case is UUID.Type:
-                if let unarchivedObject = store.object(forKey: key) as? Data {
-                    return try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(unarchivedObject) as? T
+                if let stringValue = store.object(forKey: key) as? String {
+                    return UUID(uuidString: stringValue) as? T
                 }
 
                 return nil
@@ -30,10 +30,9 @@ struct StandardStorable<T> {
                     store.set(nil, forKey: key)
                     return
                 }
-                let data: Data? = try? NSKeyedArchiver.archivedData(withRootObject: newValue,
-                                                                    requiringSecureCoding: true)
+                let stringValue: String? = (newValue as? UUID)?.uuidString
 
-                store.set(data, forKey: key)
+                store.set(stringValue, forKey: key)
             default:
                 store.set(newValue, forKey: key)
             }

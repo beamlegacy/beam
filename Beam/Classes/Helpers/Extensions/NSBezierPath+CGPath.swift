@@ -30,6 +30,9 @@ extension NSBezierPath {
             case .closePath:
               path.closeSubpath()
 
+            case .cubicCurveTo, .quadraticCurveTo:
+                // unsupported types
+                break
             @unknown default:
               break
             }

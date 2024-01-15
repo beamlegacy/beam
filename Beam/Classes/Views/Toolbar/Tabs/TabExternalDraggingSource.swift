@@ -140,7 +140,7 @@ final class TabExternalDraggingSource: NSObject {
         session.enumerateDraggingItems(options: .concurrent,
                                        for: state?.associatedWindow?.contentView,
                                        classes: [NSPasteboardItem.self]) { [weak self] item, _, _ in
-            item.setDraggingFrame(draggingItemFrame(location: session.draggingLocation, convertToWindow: nil),
+            item.setDraggingFrame(self?.draggingItemFrame(location: session.draggingLocation, convertToWindow: nil) ?? .zero,
                                   contents: handled ? self?.transparentDraggingImage : self?.draggingImage)
         }
     }

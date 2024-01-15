@@ -156,13 +156,26 @@ class CrossTargetHiddenNotificationsBuilder {
                         fatalError("Group was not copied to insert into note?")
                     }
                     let capturedGroup = TabGroupingStoreManager.convertBeamObjectToGroup(capturedGroupObject)
-                    let dispatchGroup = DispatchGroup()
-                    dispatchGroup.enter()
-                    tabGroupingManager?.shareGroup(capturedGroup, state: state, completion: { _ in
-                        dispatchGroup.leave()
-                    })
-                    guard case .success = dispatchGroup.wait(timeout: .now() + .seconds(10)) else {
-                        fatalError("Timed out while sharing the tab group")
+                    // Calling shareGroup with a timeout of 10s using task groups
+                    _ = try await withThrowingTaskGroup(of: Bool.self) { group -> Bool in
+                        group.addTask {
+                            await withUnsafeContinuation { continuation in
+                                tabGroupingManager?.shareGroup(capturedGroup, state: state, completion: { _ in
+                                    continuation.resume(returning: true)
+                                })
+                            }
+                        }
+                        group.addTask {
+                            try await Task.sleep(nanoseconds: 10_000_000_000) // 10s
+                            throw CancellationError()
+                        }
+
+                        guard let value = try await group.next() else {
+                            return false
+                        }
+
+                        group.cancelAll()
+                        return value
                     }
                 }
             }
