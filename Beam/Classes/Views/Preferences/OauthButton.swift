@@ -45,6 +45,6 @@ struct OauthButton<Content: View>: View {
         authClient.authorizeURLHandler = oauthController
 
         // OAuthSwift.setLogLevel(.warn)
-        let state = generateState(withLength: 20)
+        let _ = generateState(withLength: 20)
     }
 }
