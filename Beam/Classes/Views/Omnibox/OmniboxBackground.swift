@@ -99,8 +99,6 @@ extension Omnibox {
             (isLow ? 0 : 14) * (isPressingCharacter ? 1/3 : 1.0)
         }
 
-        private let animationDuration: Double = 0.3
-
         @State private var useBeams = PreferencesManager.enableOmnibeams
 
         var body: some View {

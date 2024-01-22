@@ -9,13 +9,6 @@ import Foundation
 import BeamCore
 
 class BeamTextVisitor {
-    struct Configuration {
-        init() {
-        }
-    }
-
-    var anchorPosition: Int = -1
-
     init() {
     }
 

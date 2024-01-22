@@ -262,12 +262,11 @@ private struct MeetingModalAddAttendeeRow: View {
 
 extension MeetingModalView {
 
-    class ViewModel: ObservableObject, BeamDocumentSource {
+    final class ViewModel: ObservableObject, BeamDocumentSource {
         static var sourceId: String { "\(Self.self)" }
         @Published fileprivate var meetingName: String
         @Published fileprivate var startTime: Date
         @Published fileprivate var attendees: [Meeting.Attendee]
-        @Published fileprivate var additionalAttendee = Meeting.Attendee(email: "", name: "")
         @Published fileprivate var linkCards: Bool = true
 
         private var onFinish: ((Meeting?) -> Void)?

@@ -11,7 +11,6 @@ final class DownloadList<T: DownloadListItem>: NSObject, ObservableObject, Downl
     @Published private(set) var progressFractionCompleted: Double = 0
     @Published private(set) var downloads = [T]()
 
-    private var progress = Progress()
     private var cancellables = Set<AnyCancellable>()
     private let fileManager = FileManager.default
 

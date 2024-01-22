@@ -12,10 +12,7 @@ struct PointAndShootFrameOffsetView: ViewModifier {
     @ObservedObject var pns: PointAndShoot
     var target: PointAndShoot.Target
     @State var offset = NSPoint(x: 0, y: 0)
-    @State var timer: Timer?
     @State var ignoreOffset: Bool = false
-    @State var lastID: String = ""
-    @State var space: CGFloat = 1
 
     func body(content: Content) -> some View {
         let computedOffset = pns.activeShootGroup != nil || ignoreOffset ? NSPoint(x: 0, y: 0) : offset

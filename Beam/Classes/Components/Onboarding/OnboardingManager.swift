@@ -26,7 +26,6 @@ struct OnboardingStep: Equatable {
     }
 
     let type: StepType
-    var title: String?
 
     var canGoBack: Bool {
         switch type {

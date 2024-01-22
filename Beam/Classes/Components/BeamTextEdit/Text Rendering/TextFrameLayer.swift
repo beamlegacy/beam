@@ -9,7 +9,7 @@ import Foundation
 
 class TextFrameLayer: CALayer {
     let debug = false
-    weak var textFrame: TextFrame?
+    
     init(_ textFrame: TextFrame) {
         super.init()
         self.frame = CGRect(origin: textFrame.frame.origin, size: textFrame.frame.size)

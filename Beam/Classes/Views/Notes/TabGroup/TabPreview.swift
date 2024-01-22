@@ -13,7 +13,6 @@ struct TabPreview: View {
     let tab: TabGroupBeamObject.PageInfo
     var faviconProvider: FaviconProvider?
 
-    @State private var isHovered: Bool = false
     @State private var favicon: Image?
     @State var requestedFaviconURL: URL?
 

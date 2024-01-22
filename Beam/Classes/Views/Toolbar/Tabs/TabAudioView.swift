@@ -12,10 +12,6 @@ struct TabAudioView: View {
     var invertedColors: Bool = false
     var action: (() -> Void)?
 
-    private var audioIsPlaying: Bool {
-        tab.mediaPlayerController?.isPlaying == true
-    }
-
     private var audioIsMuted: Bool {
         tab.mediaPlayerController?.isMuted == true
     }
@@ -39,4 +35,4 @@ struct TabAudioView: View {
             }
         }
     }
-    }
+}

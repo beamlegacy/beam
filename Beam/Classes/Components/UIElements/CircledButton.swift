@@ -10,9 +10,6 @@ import SwiftUI
 struct CircledButton: View {
 
     struct CircledButtonStyle {
-        var horizontalPadding: CGFloat = 6
-        var verticalPadding: CGFloat = 3
-        var iconSize: CGFloat = 16
         var foregroundColor: Color = BeamColor.Button.text.swiftUI
         var activeForegroundColor: Color = BeamColor.Button.activeText.swiftUI
         var activeBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI

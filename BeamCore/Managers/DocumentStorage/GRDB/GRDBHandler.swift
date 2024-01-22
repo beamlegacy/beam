@@ -18,8 +18,6 @@ public enum GRDBHandlerError: Error {
 
 open class GRDBHandler {
     private let store: GRDBStore
-    private var writer: DatabaseWriter { store.writer }
-    private var reader: DatabaseReader { store.reader }
 
     var tableNames: [String] { [] }
 

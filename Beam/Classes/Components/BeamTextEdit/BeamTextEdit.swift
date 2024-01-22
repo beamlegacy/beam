@@ -197,7 +197,6 @@ public extension CALayer {
     }
 
     let cardHeaderLayer = CALayer()
-    let cardSeparatorLayer = CALayer()
     let cardTitleLayer = CATextLayer()
     let cardTimeLayer = CATextLayer()
 
@@ -2048,7 +2047,7 @@ public extension CALayer {
 
     public static var signPost = SignPost("BeamTextEdit")
     public var sign: SignPostId!
-    struct Signs {
+    enum Signs {
         static let updateRoot: StaticString = "updateRoot"
         static let prepareRoot: StaticString = "prepareRoot"
         static let relayoutRoot: StaticString = "relayoutRoot"

@@ -13,7 +13,6 @@ struct PointAndShootView: View {
 
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
     @ObservedObject var pns: PointAndShoot
-    @State private var isConfirmation: Bool = false
     @State private var offset: CGFloat = 0
     @State private var allowAnimation: Bool = false
     @State private var wiggleValue: CGFloat = 0
@@ -40,10 +39,10 @@ struct PointAndShootView: View {
 //            .combined(with: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.3)))
 //        return AnyTransition.asymmetric(insertion: transitionIn, removal: transitionOut)
 //    }
-
-    var shouldAnimateRect: Bool {
-        pns.activeShootGroup == nil
-    }
+//
+//    var shouldAnimateRect: Bool {
+//        pns.activeShootGroup == nil
+//    }
 
     let padding: CGFloat = 4
 

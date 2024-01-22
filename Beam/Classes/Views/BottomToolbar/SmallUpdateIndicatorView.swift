@@ -14,7 +14,6 @@ struct SmallUpdateIndicatorView: View {
     @ObservedObject var versionChecker: VersionChecker
     @EnvironmentObject var state: BeamState
 
-    @State private var showReleaseNotes = false
     @State private var opacity = 1.0
     @State private var opacityTimer = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
 

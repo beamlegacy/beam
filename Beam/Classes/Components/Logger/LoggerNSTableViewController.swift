@@ -256,9 +256,3 @@ extension LoggerNSTableController: NSTableViewDelegate {
         return formatter
     }()
 }
-
-fileprivate extension String {
-    var quotedForCSV: String {
-        "\"" + replacingOccurrences(of: "\"", with: "\"\"") + "\""
-    }
-}

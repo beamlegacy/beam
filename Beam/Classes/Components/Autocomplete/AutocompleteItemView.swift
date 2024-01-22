@@ -67,14 +67,6 @@ struct AutocompleteItemView: View {
             return colorPalette.informationTextColor.swiftUI
         }
     }
-    private var shortcutColor: Color {
-        switch item.source {
-        case .note, .createNote:
-            return cardColor
-        default:
-            return subtitleLinkColor
-        }
-    }
 
     private func highlightedTextRanges(secondaryText: Bool = false) -> ((String) -> [Range<String.Index>]) {
         { text in

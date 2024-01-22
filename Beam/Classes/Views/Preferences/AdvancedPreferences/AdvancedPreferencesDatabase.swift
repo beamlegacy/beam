@@ -12,7 +12,6 @@ struct AdvancedPreferencesDatabase: View {
     @State private var cancellables = [AnyCancellable]()
 
     // Database
-    @State private var newDatabaseTitle = ""
     @State private var selectedDatabase = BeamData.shared.currentDatabase
     var databases: [BeamDatabase] {
         AppData.shared.currentAccount?.allDatabases ?? []

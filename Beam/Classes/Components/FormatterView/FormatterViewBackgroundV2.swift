@@ -31,8 +31,6 @@ struct FormatterViewBackgroundV2<Content: View>: View {
         10
     }
 
-    private let animationDuration: Double = 0.3
-
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: boxCornerRadius)

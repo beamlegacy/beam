@@ -37,7 +37,7 @@ extension NoteHeaderView {
         @Published var publishState: NoteHeaderPublishButton.PublishButtonState = .isPrivate
         @Published var isOnUserProfile: Bool = false
         @Published var justCopiedLinkFrom: NoteHeaderView.CopyLinkSource?
-        var profileLink: URL?
+
         private var publishingDispatchItem: DispatchWorkItem?
         private var copyLinkDispatchItem: DispatchWorkItem?
         private var noteObservers = Set<AnyCancellable>()

@@ -17,9 +17,6 @@ struct DestinationNotePickerBackground<Content: View>: View {
 
     @State private var isHoveringBox = false
     private let boxCornerRadius: CGFloat = 6
-    private var boxHeight: CGFloat {
-        isEditing ? 40 : 32
-    }
 
     private var backgroundColor: Color {
         isEditing ? BeamColor.Autocomplete.focusedBackground.swiftUI : BeamColor.Generic.background.swiftUI

@@ -12,7 +12,6 @@ class DeleteDocument: DocumentCommand, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
     static let name: String = "Delete Document"
 
-    private let shouldClearData = true
     private var allDocuments = false
     private var savedReferences: [UUID: Set<UUID>]?
 

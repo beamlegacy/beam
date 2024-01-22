@@ -13,9 +13,7 @@ struct Toolbar: View {
     static let height: CGFloat = 52
 
     @EnvironmentObject var state: BeamState
-    @EnvironmentObject var browserTabsManager: BrowserTabsManager
     @Environment(\.isMainWindow) private var isMainWindow
-    @Environment(\.colorScheme) private var colorScheme
 
     var isAboveContent = false
 

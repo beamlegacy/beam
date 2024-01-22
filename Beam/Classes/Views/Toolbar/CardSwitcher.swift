@@ -11,7 +11,6 @@ import BeamCore
 struct CardSwitcher: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var windowInfo: BeamWindowInfo
-    @EnvironmentObject var recentsManager: RecentsManager
     @Environment(\.undoManager) var undoManager
 
     var currentNote: BeamNote?
@@ -20,9 +19,7 @@ struct CardSwitcher: View {
 
     private let maxNoteTitleLength = 40
     static let elementSpacing = 5.0
-    static var usePinnedInsteadOfRecentsNotes: Bool {
-        true
-    }
+    static let usePinnedInsteadOfRecentsNotes = true
 
     private var separator: some View {
         Separator(rounded: true, color: BeamColor.ToolBar.horizontalSeparator)

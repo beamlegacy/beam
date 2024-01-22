@@ -10,7 +10,6 @@ import AppKit
 import BeamCore
 
 public struct TextState {
-    var text = BeamText()
     var selectedTextRange: Range<Int> = 0..<0
     var markedTextRange: Range<Int>?
     var caretIndex: Int = 0

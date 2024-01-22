@@ -85,7 +85,6 @@ class PasswordManagerMenuViewModel: ObservableObject {
     @Published var suggestNewPassword = false
     @Published var autofillMenuItems: [MenuItem]
     @Published var otherMenuItems: [MenuItem]
-    @Published var scrollingListHeight: CGFloat?
 
     let host: URL
     let minimizedHost: String
@@ -94,11 +93,9 @@ class PasswordManagerMenuViewModel: ObservableObject {
     private let userInfoStore: UserInformationsStore
     private var entriesForHost: [PasswordManagerEntry]
     private let selectionHandler = WebAutofillMenuSelectionHandler()
-    private var revealFullList = false
     private var revealMoreItemsInList = false
     private var showPasswordGenerator = false
     private var otherPasswordsDialog: PopoverWindow?
-    private var subscribers = Set<AnyCancellable>()
 
     private let passwordManager: PasswordManager
 

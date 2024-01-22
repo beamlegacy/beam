@@ -69,7 +69,6 @@ final class CreditCardsMenuViewModel: ObservableObject {
     private var entryDisplayLimit: Int
     private var otherCreditCardsDialog: PopoverWindow?
     private var waitingForAuthentication = false
-    private var subscribers = Set<AnyCancellable>()
 
     init(entries: [CreditCardEntry]) {
         self.entries = entries

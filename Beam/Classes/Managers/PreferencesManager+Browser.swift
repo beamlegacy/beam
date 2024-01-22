@@ -59,7 +59,6 @@ enum DownloadFolder: Int, CaseIterable, Identifiable {
 
 // MARK: - Keys
 extension PreferencesManager {
-    static let isDefaultBrowserKey = "isDefaultBrowser"
     static let selectedDefaultSearchEngineKey = "selectedDefaultSearchEngine"
     static let searchEngineSuggestionKey = "searchEngineSuggestion"
     static let selectedDownloadFolderKey = "selectedDownloadFolder"

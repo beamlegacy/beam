@@ -11,19 +11,13 @@ import BeamCore
 struct Omnibox: View {
 
     static let defaultHeight: CGFloat = 57
-    static let incognitoDefaultHeight: CGFloat = 207
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
-    @EnvironmentObject var browserTabsManager: BrowserTabsManager
-    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     var isInsideNote = false
     @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
 
-    private var enableAnimations: Bool {
-        !windowInfo.windowIsResizing
-    }
     private var isEditing: Bool {
         state.omniboxInfo.isFocused
     }

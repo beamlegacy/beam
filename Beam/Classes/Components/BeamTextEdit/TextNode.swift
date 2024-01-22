@@ -170,7 +170,6 @@ public class TextNode: ElementNode {
     }
 
     private var debounceClickTimer: Timer?
-    private var actionLayerIsHovered = false
 
     private let debounceClickInterval = 0.23
     var actionLayerPadding = CGFloat(11)

@@ -35,8 +35,6 @@ class BetaPreferencesViewModel: ObservableObject {
 struct BetaPreferencesView: View, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
-    private let contentWidth: Double = PreferencesManager.contentWidth
-
     @State private var loading: Bool = false
 
     @State private var selectedDatabase = BeamData.shared.currentDatabase

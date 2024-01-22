@@ -37,8 +37,6 @@ final class GoogleCalendarService {
     var accessToken: String?
     var refreshToken: String?
 
-    var calendarList: GoogleCalendarList?
-
     let authClient = OAuth2Swift(
         consumerKey: EnvironmentVariables.Oauth.Google.consumerKey,
         consumerSecret: EnvironmentVariables.Oauth.Google.consumerSecret,

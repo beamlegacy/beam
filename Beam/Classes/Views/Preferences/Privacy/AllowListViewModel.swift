@@ -9,12 +9,10 @@ import Foundation
 import BeamCore
 import Combine
 
-class AllowListViewModel: ObservableObject {
-
+final class AllowListViewModel: ObservableObject {
     @Published private(set) var allowListItems: [AllowListViewItem] = []
 
     private var currentAllowListItems: [AllowListViewItem] = []
-    private var subscribers = Set<AnyCancellable>()
 
     func refreshAllAllowListItems() {
         RadBlockDatabase.shared.allowlistEntryEnumerator(forGroup: nil, domain: nil, sortOrder: .createDate) { entries, error in

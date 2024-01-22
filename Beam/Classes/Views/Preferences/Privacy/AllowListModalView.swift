@@ -14,7 +14,6 @@ struct AllowListModalView: View {
     @State var viewModel = AllowListViewModel()
     @State private var searchString: String = ""
     @State private var selectedItems = [AllowListViewItem]()
-    @State private var stepperTest: Double = 0.0
     @State private var creationRowTitle: String?
 
     var body: some View {

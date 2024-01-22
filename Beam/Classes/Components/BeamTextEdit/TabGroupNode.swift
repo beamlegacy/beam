@@ -19,10 +19,6 @@ public class TabGroupNode: ElementNode {
         0 // skippable node
     }
 
-    private var visibleSize: CGSize {
-        .zero
-    }
-
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
         selfVisible = false

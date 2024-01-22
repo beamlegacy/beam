@@ -25,7 +25,6 @@ struct MeetingsListView: View {
     var isLoading = false
 
     @State private var maxTimeWidth: CGFloat = 0
-    @State private var isHovering: Bool = false
     @State private var hoveredMeeting: Meeting?
 
     private static var dayFormatter: DateFormatter {

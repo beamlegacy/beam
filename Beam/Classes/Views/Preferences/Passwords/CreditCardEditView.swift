@@ -31,8 +31,6 @@ fileprivate extension String {
         String(unicodeScalars.filter { CharacterSet.decimalDigits.contains($0) })
     }
 
-    private static let digitsAndSpaces = CharacterSet.decimalDigits.union(.whitespaces)
-
     private func truncatedToSignificantLength(_ maxLength: Int) -> String {
         var characters = Substring(self).unicodeScalars
         repeat {

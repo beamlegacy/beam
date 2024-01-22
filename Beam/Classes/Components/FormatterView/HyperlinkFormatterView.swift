@@ -28,7 +28,6 @@ private struct HyperlinkEditorView: View {
     }
 
     private static let sectionHeight: CGFloat = 40
-    private static let containerVerticalPadding = BeamSpacing._20
 
     @ObservedObject var viewModel: HyperlinkEditorViewModel = HyperlinkEditorViewModel()
 
@@ -40,13 +39,6 @@ private struct HyperlinkEditorView: View {
 
     @State private var isHoveringURLCopyIcon = false
     @State private var showOverlayForCopyIcon: Bool = false
-
-    private var titleTextColor: NSColor {
-        isEditingTitle ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor
-    }
-    private var urlTextColor: NSColor {
-        isEditingUrl ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor
-    }
 
     var body: some View {
         FormatterViewBackground(showBorder: true) {

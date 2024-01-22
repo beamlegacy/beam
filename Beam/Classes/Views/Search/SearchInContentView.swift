@@ -11,7 +11,6 @@ struct SearchInContentView: View {
 
     @ObservedObject var viewModel: SearchViewModel
     @EnvironmentObject var state: BeamState
-    @Environment(\.colorScheme) var colorScheme
 
     private let searchFieldFont = BeamFont.regular(size: 13).nsFont
     private let searchFieldTextColor = BeamColor.Niobium.nsColor

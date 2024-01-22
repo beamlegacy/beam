@@ -263,7 +263,6 @@ class Parser {
         var node: Node {
             nodeStack.last!
         }
-        var index: Int = 0
 
         var token: Lexer.Token
         var isDone = false

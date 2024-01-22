@@ -21,8 +21,6 @@ final class TabsListWidthProvider {
     private var currentItemIsPinned: Bool
 
     private var defaultWidth: CGFloat = 0
-    private var activeWidth: CGFloat = 0
-    private var pinnedWidth: CGFloat = 0
     private(set) var computedFixedWidths: [String: CGFloat] = [:]
 
     private weak var dragModel: TabsDragModel?

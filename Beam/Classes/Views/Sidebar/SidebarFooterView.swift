@@ -12,7 +12,6 @@ struct SidebarFooterView: View {
 
     let username: String?
 
-    @State private var showMenu: Bool = false
     @EnvironmentObject var state: BeamState
 
     var body: some View {

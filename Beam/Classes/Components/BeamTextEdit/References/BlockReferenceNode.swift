@@ -10,7 +10,6 @@ import AppKit
 import BeamCore
 
 class BlockReferenceNode: TextNode {
-    var blockReference: ProxyTextNode?
     private var gutterItem: GutterItem?
 
     override var hover: Bool {

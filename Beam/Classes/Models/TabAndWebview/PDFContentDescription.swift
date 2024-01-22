@@ -12,10 +12,7 @@ final class PDFContentDescription: BrowserContentDescription {
     let estimatedProgressPublisher: AnyPublisher<Double, Never>
     let contentState: PDFContentState
 
-    private(set) var pdfDocument: PDFDocument?
-
     private let urlSession: URLSession
-    private var cancellables = Set<AnyCancellable>()
 
     init(url: URL, urlSession: URLSession) {
         self.url = url

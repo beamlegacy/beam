@@ -41,12 +41,6 @@ struct OnboardingEmailConnectView: View {
     }
     @State private var passwordMissingRequirements: [PasswordRequirements] = [.length, .number, .symbol, .matches]
 
-    private var buttonVariant: ActionableButtonVariant {
-        var style = ActionableButtonVariant.gradient(icon: nil).style
-        style.textAlignment = .center
-        return .custom(style)
-    }
-
     private var errorMessage: String? {
         guard let errorState = errorState else { return nil }
         switch errorState {

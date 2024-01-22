@@ -45,9 +45,7 @@ enum SynchronizeInterval: String, CaseIterable {
     }
 }
 
-class RadBlockPreferencesManager {
-    var activatedFiltersGroup: [String] = []
-
+final class RadBlockPreferencesManager {
     init() {
         if FilterManager.default.synchronizeAutomatically {
             // We disable the automatic sync provided by RadBlock's timer because it used to cause crashes.
