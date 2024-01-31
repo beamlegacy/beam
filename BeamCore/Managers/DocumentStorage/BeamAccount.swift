@@ -486,6 +486,34 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     }
 }
 
+@available(*, deprecated, message: "This method has been kept to make tests pass but will probably be removed soon.")
+extension BeamAccount {
+    public func logout() {
+        Logger.shared.logError("This endpoint is a NO-OP and should be removed.", category: .general)
+    }
+
+    public func signIn(
+        email: String,
+        password: String,
+        runFirstSync: Bool,
+        completionHandler: ((Result<Bool, Error>) -> Void)? = nil,
+        syncCompletion: ((Result<Bool, Error>) -> Void)? = nil
+    ) {
+        Logger.shared.logError("This endpoint is a NO-OP and should be removed.", category: .general)
+    }
+
+    public func forgotPassword(email: String, _ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
+        Logger.shared.logError("This endpoint is a NO-OP and should be removed.", category: .general)
+    }
+
+    public func signUp(_ email: String, _ password: String, _ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
+        Logger.shared.logError("This endpoint is a NO-OP and should be removed.", category: .general)
+    }
+
+    public func resendVerificationEmail(email: String, _ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
+        Logger.shared.logError("This endpoint is a NO-OP and should be removed.", category: .general)
+    }
+}
 
 extension BeamAccount {
     var fileDBManager: BeamFileDBManager? {

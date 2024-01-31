@@ -108,6 +108,7 @@ protocol WaitHelper {
     @discardableResult
     static func waitForKeyboardUnfocus(_ element: XCUIElement) -> Bool
 
+    @Sendable
     func expectation(for predicate: NSPredicate,
                      evaluatedWith object: Any?,
                      handler: XCTNSPredicateExpectation.Handler?) -> XCTestExpectation
