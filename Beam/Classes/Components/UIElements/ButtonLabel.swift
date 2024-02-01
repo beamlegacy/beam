@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import enum Lottie.LottieLoopMode
+import Lottie
 
 enum ButtonLabelState {
     case normal
@@ -132,12 +132,16 @@ struct ButtonLabel: View {
                         .blendModeLightMultiplyDarkScreen()
                 }
                 if let lottie = lottieName {
-                    LottieView(name: lottie,
-                               playing: lottiePlaying ?? true,
-                               color: foregroundNSColor,
-                               loopMode: lottieLoopMode ?? .loop,
-                               animationSize: CGSize(width: style.iconSize, height: style.iconSize),
-                               completion: lottieCompletion)
+                    let playbackMode: LottiePlaybackMode = lottiePlaying == false ?
+                        .paused : .playing(.fromProgress(0, toProgress: 1, loopMode: lottieLoopMode ?? .loop))
+                    LottieView(animation: .named(lottie))
+                        .playbackMode(playbackMode)
+                        .setColor(foregroundNSColor)
+                        .animationDidFinish { _ in
+                            lottieCompletion?()
+                        }
+                        .resizable()
+                        .frame(width: style.iconSize, height: style.iconSize)
                         .alignmentGuide(.lastTextBaseline) { dimensions in dimensions[VerticalAlignment.center] }
                 }
                 if let text = text, (!isCompactMode || (iconName == nil && lottieName == nil)) {

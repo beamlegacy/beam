@@ -246,10 +246,10 @@
       },
       {
         "package": "Lottie",
-        "repositoryURL": "https://github.com/eLud/lottie-ios",
+        "repositoryURL": "https://github.com/McNight/lottie-ios",
         "state": {
           "branch": "master",
-          "revision": "13a8764f5164651f6db74ec0d859f1ae69120a3a",
+          "revision": "02d45e874cd27615b0a02cf01c028b9956f33d30",
           "version": null
         }
       },

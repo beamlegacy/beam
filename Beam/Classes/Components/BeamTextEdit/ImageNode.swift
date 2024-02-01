@@ -44,7 +44,7 @@ class ImageNode: ResizableNode {
 
     private var geometryDescription: MediaContentGeometryDescription
 
-    var lottieView: AnimationView?
+    var lottieView: LottieAnimationView?
 
     private var toggleButtonBeamLayer: CollapseButtonLayer?
 

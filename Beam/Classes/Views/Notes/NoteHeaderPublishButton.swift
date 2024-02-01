@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Lottie
 
 struct NoteHeaderPublishButton: View {
 
@@ -45,6 +46,7 @@ struct NoteHeaderPublishButton: View {
 
     @State private var hovering = false
     @State private var title: String?
+    @State private var lottiePlaybackMode: LottiePlaybackMode = .paused
 
     var isWaitingChanges: Bool {
         [.publishing, .unpublishing].contains(publishState)
@@ -56,7 +58,8 @@ struct NoteHeaderPublishButton: View {
         var publishTitle: String?
         var displayCheckIcon = false
         let isPublic = publishState == .isPublic || publishState == .unpublishing
-        let animateLottie = hovering && !isWaitingChanges || forceHovering && !isWaitingChanges
+
+        let playbackMode: LottiePlaybackMode = (forceHovering && !isWaitingChanges) ? .playing(.fromProgress(0, toProgress: 1, loopMode: .loop)) : lottiePlaybackMode
 
         if displayTitle {
             if publishState == .justPublished || justCopiedLink {
@@ -86,10 +89,11 @@ struct NoteHeaderPublishButton: View {
                 AnyView(
                     HStack(spacing: BeamSpacing._20) {
                         ZStack {
-                            LottieView(name: "editor-publish", playing: animateLottie,
-                                       color: displayTitle ? BeamColor.Niobium.nsColor : BeamColor.LightStoneGray.nsColor,
-                                       loopMode: .loop, speed: 1)
+                            LottieView(animation: .named("editor-publish"))
+                                .playbackMode(playbackMode)
+                                .setColor(displayTitle ? BeamColor.Niobium.nsColor : BeamColor.LightStoneGray.nsColor)
                                 .opacity(isPublic ? 0 : 1)
+
                             Icon(name: "editor-url_link", color: displayTitle ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
                                 .blendModeLightMultiplyDarkScreen()
                                 .opacity(isPublic ? 1 : 0)
@@ -119,6 +123,7 @@ struct NoteHeaderPublishButton: View {
             .animation(containerAnimation, value: publishTitle)
             .onHover { h in
                 hovering = h
+                lottiePlaybackMode = h && !isWaitingChanges ? .playing(.fromProgress(0, toProgress: 1, loopMode: .loop)) : .paused
             }
             .accessibilityElement(children: .ignore)
             .accessibility(addTraits: .isButton)

@@ -9,13 +9,13 @@ import Foundation
 import Lottie
 
 class BeamTableCellLottieView: NSTableCellView {
-    private let lottieView: Lottie.AnimationView
+    private let lottieView: LottieAnimationView
     private var animationName: String?
 
     override var wantsUpdateLayer: Bool { true }
 
     override init(frame frameRect: NSRect) {
-        lottieView = Lottie.AnimationView()
+        lottieView = LottieAnimationView()
         super.init(frame: frameRect)
 
         lottieView.loopMode = .loop
@@ -45,7 +45,7 @@ class BeamTableCellLottieView: NSTableCellView {
 
     func updateWithLottie(named: String) {
         guard animationName != named else { return }
-        let animation = Animation.named(named, animationCache: LottieView.cache)
+        let animation = LottieAnimation.named(named) // FIXME: we used a cache here? why the shared is not enough ?
         lottieView.animation = animation
         lottieView.setColor(BeamColor.LightStoneGray)
         lottieView.play()

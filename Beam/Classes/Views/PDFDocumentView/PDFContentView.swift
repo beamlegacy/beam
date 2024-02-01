@@ -1,5 +1,5 @@
-import Foundation
 import SwiftUI
+import Lottie
 import PDFKit
 
 struct PDFContentView: View {
@@ -29,12 +29,11 @@ struct PDFContentView: View {
             )
 
         } else {
-            LottieView(
-                name: "status-update_restart",
-                playing: true,
-                color: BeamColor.LightStoneGray.nsColor,
-                animationSize: CGSize(width: loadingAnimationSize, height: loadingAnimationSize)
-            )
+            LottieView(animation: .named("status-update_restart"))
+                .playing(loopMode: .loop)
+                .setColor(BeamColor.LightStoneGray.nsColor)
+                .resizable()
+                .frame(width: loadingAnimationSize, height: loadingAnimationSize)
         }
     }
 
