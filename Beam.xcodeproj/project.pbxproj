@@ -10447,6 +10447,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -10477,6 +10478,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -10499,6 +10501,7 @@
 				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
 			};
@@ -10525,6 +10528,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -10548,6 +10552,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -10666,6 +10671,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -10695,6 +10701,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -10717,6 +10724,7 @@
 				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
 			};
@@ -10742,6 +10750,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -10765,6 +10774,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -10893,6 +10903,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -10921,6 +10932,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -10943,6 +10955,7 @@
 				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
 			};
@@ -10968,6 +10981,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -10990,6 +11004,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -11129,6 +11144,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -11158,6 +11174,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -11180,6 +11197,7 @@
 				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
 			};
@@ -11205,6 +11223,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -11228,6 +11247,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -11356,6 +11376,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -11384,6 +11405,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -11406,6 +11428,7 @@
 				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
 			};
@@ -11431,6 +11454,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -11453,6 +11477,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -11528,6 +11553,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -11573,6 +11599,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -11799,6 +11826,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -11857,6 +11885,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -11902,6 +11931,7 @@
 				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
 			};
@@ -12011,6 +12041,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -12039,6 +12070,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
@@ -12061,6 +12093,7 @@
 				MARKETING_VERSION = 0.19.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
 			};
@@ -12087,6 +12120,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -12109,6 +12143,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
 			};
