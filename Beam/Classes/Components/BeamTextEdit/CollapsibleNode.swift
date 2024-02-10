@@ -5,10 +5,9 @@
 //  Created by Ludovic Ollagnier on 09/11/2021.
 //
 
-import Foundation
 import AppKit
-import Lottie
 import BeamCore
+@_spi(Internal) import Lottie
 
 protocol Collapsible: AnyObject {
     var isCollapsed: Bool { get set }
@@ -17,7 +16,7 @@ protocol Collapsible: AnyObject {
     var mediaName: String { get }
     var mediaURL: URL? { get }
 
-    var lottieView: AnimationView? { get set }
+    var lottieView: LottieAnimationView? { get set }
     var tokenColor: CGColor { get }
     var textColor: BeamColor { get }
 
@@ -142,7 +141,7 @@ extension Collapsible where Self: ElementNode {
     }
 
     private func buildLottieLayer() -> CALayer? {
-        lottieView = AnimationView(name: isCollapsed ? "editor-embed_expand" : "editor-embed_collapse" )
+        lottieView = LottieAnimationView(name: isCollapsed ? "editor-embed_expand" : "editor-embed_collapse" )
         setLottieViewColor(color: BeamColor.Editor.collapseExpandButton.nsColor)
         lottieView?.loopMode = .playOnce
 

@@ -1,5 +1,5 @@
 import AppKit
-import Lottie
+@_spi(Internal) import Lottie
 
 final class CollapseButtonLayer: ButtonLayer {
 
@@ -41,7 +41,7 @@ final class CollapseButtonLayer: ButtonLayer {
     }()
 
     private var symbolLayer: CALayer!
-    private var symbolAnimationView: AnimationView!
+    private var symbolAnimationView: LottieAnimationView!
 
     private var state: State = .default {
         didSet {
@@ -143,9 +143,9 @@ final class CollapseButtonLayer: ButtonLayer {
         symbolAnimationView.play()
     }
 
-    private func makeSymbolAnimationView() -> AnimationView {
+    private func makeSymbolAnimationView() -> LottieAnimationView {
         let animationName = isCollapsed ? "editor-embed_expand" : "editor-embed_collapse"
-        return AnimationView(name: animationName)
+        return LottieAnimationView(name: animationName)
     }
 
     private func preferredFrameSize() -> CGSize {

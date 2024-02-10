@@ -34,7 +34,7 @@ final class CodeNode: TextNode, Collapsible {
         }
     }
     var isHoverCollapseExpandButton = false
-    var lottieView: Lottie.AnimationView?
+    var lottieView: LottieAnimationView?
 
     var mediaName: String {
         return "media name"

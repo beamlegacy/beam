@@ -5,8 +5,9 @@
 //  Created by Remi Santos on 10/12/2021.
 //
 
-import SwiftUI
 import BeamCore
+import SwiftUI
+import Lottie
 
 struct ToolbarModeSwitcher: View {
     @Environment(\.isMainWindow) private var isMainWindow
@@ -48,9 +49,15 @@ struct ToolbarModeSwitcher: View {
 
     private func lottieView(name: String) -> some View {
         ZStack {
-            LottieView(name: name, playing: true, color: (isMainWindow ? defaultColor : inactiveColor).nsColor, loopMode: .playOnce, speed: 2.5)
+            LottieView(animation: .named(name))
+                .setColor((isMainWindow ? defaultColor : inactiveColor).nsColor)
+                .playing(loopMode: .playOnce)
+                .animationSpeed(2.5)
                 .opacity(isHovering ? 0 : 1)
-            LottieView(name: name, playing: true, color: hoveringColor.nsColor, loopMode: .playOnce, speed: 2.5)
+            LottieView(animation: .named(name))
+                .setColor(hoveringColor.nsColor)
+                .playing(loopMode: .playOnce)
+                .animationSpeed(2.5)
                 .opacity(isHovering ? 1 : 0)
         }
         .opacity(showLottie ? 1 : 0)

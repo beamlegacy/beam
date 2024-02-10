@@ -5,9 +5,10 @@
 //  Created by Remi Santos on 10/05/2021.
 //
 
-import SwiftUI
 import BeamCore
 import Combine
+import SwiftUI
+import Lottie
 
 struct NoteHeaderView: View {
 
@@ -100,10 +101,12 @@ struct NoteHeaderView: View {
             ButtonLabel(icon: isHovering ? "transparent" : iconName, state: disable ? .disabled : .normal, action: action)
                 .overlay(
                     !isHovering ? nil :
-                        LottieView(name: lottieName, playing: true,
-                                   color: BeamColor.Niobium.nsColor, loopMode: .playOnce)
-                        .frame(width: 16, height: 16)
-                        .allowsHitTesting(false)
+                        LottieView(animation: .named(lottieName))
+                            .setColor(BeamColor.Niobium.nsColor)
+                            .playing(loopMode: .playOnce)
+                            .resizable()
+                            .frame(width: 16, height: 16)
+                            .allowsHitTesting(false)
                 )
                 .onHover { isHovering = $0 && !disable }
                 .disabled(disable)

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Lottie
 
 struct TabClusteringGroupCapsuleView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -63,12 +64,11 @@ struct TabClusteringGroupCapsuleView: View {
                         .truncationMode(.middle)
                     if loading {
                         Spacer(minLength: BeamSpacing._40)
-                        LottieView(
-                            name: "status-update_restart",
-                            playing: true,
-                            color: color.textColor?.nsColor,
-                            animationSize: CGSize(width: 12, height: 12)
-                        )
+                        LottieView(animation: .named("status-update_restart"))
+                            .playing(loopMode: .loop)
+                            .setColor(color.textColor?.nsColor ?? .black)
+                            .resizable()
+                            .frame(width: 12, height: 12)
                     }
                 }
 

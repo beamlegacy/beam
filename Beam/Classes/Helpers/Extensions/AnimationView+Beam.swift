@@ -1,11 +1,11 @@
 import Foundation
 import Lottie
 
-extension AnimationView {
+extension LottieAnimationView {
 
     func setColor(_ color: NSColor) {
         NSAppearance.withAppAppearance {
-            let lottieColor = Lottie.Color(color: color)
+            let lottieColor = LottieColor(color: color)
             let colorProvider = ColorValueProvider(lottieColor)
             let fillKeypath = AnimationKeypath(keypath: "**.Color")
             setValueProvider(colorProvider, keypath: fillKeypath)
