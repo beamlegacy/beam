@@ -30,12 +30,6 @@ struct OnboardingEmailConfirmationView: View {
     }
     @State private var errorState: ConnectError?
 
-    private var buttonVariant: ActionableButtonVariant {
-        var style = ActionableButtonVariant.gradient(icon: nil).style
-        style.textAlignment = .center
-        return .custom(style)
-    }
-
     private var errorMessage: String? {
         guard let errorState = errorState else { return nil }
         switch errorState {

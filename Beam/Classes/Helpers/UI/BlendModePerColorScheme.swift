@@ -9,10 +9,10 @@ import SwiftUI
 
 private struct BlendModeMultiplyScreenModifier: ViewModifier {
     @Environment(\.colorScheme) var colorScheme
+    
     var lightBlendingMode: BlendMode
     var darkBlendingMode: BlendMode
 
-    var invert: Bool = false
     func body(content: Content) -> some View {
         content
             .blendMode(colorScheme == .dark ? darkBlendingMode : lightBlendingMode)

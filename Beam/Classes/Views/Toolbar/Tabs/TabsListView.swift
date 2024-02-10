@@ -82,7 +82,6 @@ struct TabsListView: View {
 
     var globalContainerGeometry: GeometryProxy?
 
-    @State private var disableAnimation: Bool = false
     @State private var isAnimatingDrop: Bool = false
 
     @State private var hoveredIndex: Int?

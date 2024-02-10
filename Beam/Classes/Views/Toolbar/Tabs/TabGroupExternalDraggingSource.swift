@@ -64,7 +64,6 @@ final class TabGroupExternalDraggingSource: NSObject {
     private var tabs: [BrowserTab]?
 
     private var draggingImage: NSImage?
-    private var transparentDraggingImage: NSImage?
 
     init(state: BeamState, delegate: TabGroupExternalDraggingSourceDelegate) {
         self.state = state

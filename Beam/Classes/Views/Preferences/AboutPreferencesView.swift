@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct AboutPreferencesView: View {
-    private let contentWidth: Double = PreferencesManager.contentWidth
-
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {
             Settings.Row(hasDivider: true) {} content: {
@@ -32,8 +30,6 @@ struct AboutPreferencesView_Previews: PreviewProvider {
 }
 
 private struct BeamAboutSection: View {
-    @Environment(\.openURL) var openURL
-
     private var TermsAndConditionsButton: some View {
         ButtonLabel(customView: { hovered, _ in
             AnyView(

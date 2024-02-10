@@ -20,7 +20,6 @@ final class PreferencesManager {
     private var scope = Set<AnyCancellable>()
 
     @Published var beamAppearance: BeamAppearance = .system
-    var fontSizes = 8..<22
 
     private init() {
         beamAppearance = BeamAppearance(rawValue: PreferencesManager.beamAppearancePreference) ?? .system

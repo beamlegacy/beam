@@ -19,14 +19,6 @@ struct OnboardingSaveEncryptionView: View {
 
     private let defaultContentWidth: Double = 290
 
-    private var iconButtonStyle: ButtonLabelStyle {
-        var style = ButtonLabelStyle.tinyIconStyle
-        style.iconSize = 12
-        style.verticalPadding = 3
-        style.horizontalPadding = style.verticalPadding
-        return style
-    }
-
     private var keyField: some View {
         HStack(spacing: 0) {
             HStack(spacing: BeamSpacing._100) {

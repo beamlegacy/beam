@@ -13,7 +13,6 @@ struct OtherPasswordModal: View {
     @State private var searchString = ""
     @State private var isEditing = true
     @State private var showingAlert = false
-    @State private var selectedEntries = IndexSet()
     @State private var editedPassword: PasswordListViewModel.EditedPassword?
     @State private var alertMessage: PasswordListViewModel.AlertMessage?
 

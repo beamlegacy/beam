@@ -9,7 +9,6 @@ import BeamCore
 import SwiftUI
 
 struct PointAndShootCardPicker: View {
-    private static let rowHeight: CGFloat = 24
     var completedGroup: PointAndShoot.ShootGroup?
     @Binding var allowAnimation: Bool
 
@@ -17,7 +16,6 @@ struct PointAndShootCardPicker: View {
     @EnvironmentObject var data: BeamData
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
-    var focusOnAppear = true
     var onShare: ((_ service: ShareService?) -> Void)?
     var onComplete: ((_ targetNote: BeamNote?, _ comment: String?, _ completion: @escaping (ExternalCaptureConfirmation?) -> Void) -> Void)?
     var canShowCopyShareView: Bool = true
@@ -42,7 +40,6 @@ struct PointAndShootCardPicker: View {
     @State private var textColor = BeamColor.Generic.text.nsColor
     private let font = BeamFont.regular(size: 13).nsFont
     private let placeholderColor = BeamColor.PointShoot.placeholder.nsColor
-    private let secondLabelTextColor = BeamColor.Generic.text.nsColor
     @State private var shootCompleted: Bool = false
     @State private var userInputtedText: Bool = false
 
@@ -227,9 +224,6 @@ extension PointAndShootCardPicker {
     struct PrefixLabel: View {
         var completed: Bool
         var confirmation: PointAndShoot.ShootConfirmation?
-
-        @State private var addToOpacity: Double = 1
-        @State private var addedToOpacity: Double = 0
 
         var confirmationLabel: String {
             confirmation == .success ? "Added to" : "Failed to collect"

@@ -6,12 +6,9 @@ struct OmniboxContentDebuggerView: View {
         $autocompleteManager.searchQuery
     }
     private let textFont = BeamFont.regular(size: 15)
-    private let backgroundColor = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
     @State private var isEditing = false
     @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
     @State private var selection: ResultSource? = .all
-
-    let cornerSize = CGSize(width: 3, height: 3)
 
     enum ResultSource: String, Identifiable, CaseIterable {
         var id: Int {

@@ -26,7 +26,6 @@ struct NoteHeaderView: View {
     }
 
     @State private var publishShowError: NoteHeaderPublishButton.ErrorMessage?
-    @State private var hoveringLinkButton = false
 
     private var titleView: some View {
         ZStack(alignment: .leading) {

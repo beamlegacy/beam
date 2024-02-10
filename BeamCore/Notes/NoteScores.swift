@@ -152,7 +152,6 @@ open class InMemoryDailyNoteScoreStore: DailyNoteScoreStoreProtocol {
 
 public class NoteScorer {
     static let daysToKeep: Int = 2
-    static let isoCalendar = Calendar(identifier: .iso8601)
     public static var shared = NoteScorer(dailyStorage: InMemoryDailyNoteScoreStore())
 
     let dailyStorage: DailyNoteScoreStoreProtocol

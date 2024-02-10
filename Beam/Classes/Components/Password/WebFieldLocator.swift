@@ -18,7 +18,6 @@ final class WebFieldLocator {
     let elementId: String
     private weak var frameInfo: WKFrameInfo?
     private var parentFrames: [String: WebFrames.FrameInfo]
-    private var subscription: AnyCancellable?
     private var scope = Set<AnyCancellable>()
 
     private var fieldFrameSubject = CurrentValueSubject<CGRect, Never>(.zero)

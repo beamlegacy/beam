@@ -10,22 +10,9 @@ import BeamCore
 import AutoUpdate
 
 struct WindowBottomToolBar: View {
-    @EnvironmentObject var state: BeamState
-    @EnvironmentObject var windowInfo: BeamWindowInfo
-
-    private var isJournal: Bool {
-        state.mode == .today
-    }
-
-    private var animationEnabled: Bool {
-        !windowInfo.windowIsResizing
-    }
-
-    private var currentNote: BeamNote? {
-        state.currentNote
-    }
-
     static let height: CGFloat = 42
+    
+    @EnvironmentObject var state: BeamState
 
     private static let scrollLabelStyle: ButtonLabelStyle = {
         var style = ButtonLabelStyle.tinyIconStyle
@@ -96,11 +83,8 @@ struct WindowBottomToolBar: View {
 }
 
 private struct HelpButtonView: View {
-
-    @EnvironmentObject var state: BeamState
     @Environment(\.showHelpAction) var showHelpAction
     @Environment(\.isCompactContentView) private var isCompactContentView
-    @State private var buttonFrameInGlobalCoordinates: CGRect?
     @State private var isHovering: Bool = false
     private let title = loc("Help")
 

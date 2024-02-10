@@ -30,10 +30,6 @@ extension String {
         return "\u{200D}"
     }
 
-    static var zeroWidthNonJoiner: String {
-        return "\u{200C}"
-    }
-
     static var nonBreakingSpace: String {
         return "\u{202F}"
     }

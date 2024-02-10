@@ -126,7 +126,6 @@ struct TabClusteringGroupCapsuleView: View {
 }
 
 struct TabViewGroupUnderline: View {
-    @Environment(\.colorScheme) var colorScheme
     var color: TabGroupingColor
     var isBeginning: Bool = true
     var isEnd: Bool = true

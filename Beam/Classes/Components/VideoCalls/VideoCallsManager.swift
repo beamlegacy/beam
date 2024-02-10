@@ -199,12 +199,6 @@ private extension String {
         guard let range = Range(match.range, in: self) else { return nil }
         return self[range]
     }
-
-    var firstDate: String? {
-        guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.date.rawValue) else { return nil }
-        guard let match = detector.matches(in: self, range: NSRange(location: .zero, length: utf16.count)).first else { return nil }
-        return substring(fromMatch: match).map(String.init)
-    }
 }
 
 private extension URL {

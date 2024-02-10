@@ -11,7 +11,6 @@ import BeamCore
 
 struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: View {
     @EnvironmentObject var state: BeamState
-    @EnvironmentObject var browserTabsManager: BrowserTabsManager
     @ObservedObject private var downloadList: List
     @Environment(\.isMainWindow) private var isMainWindow: Bool
     @Environment(\.colorScheme) private var colorScheme

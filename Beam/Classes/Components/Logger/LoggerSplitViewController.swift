@@ -5,12 +5,11 @@ class LoggerSplitViewController: NSSplitViewController {
     var liveButton: NSButton?
 
     private var searchTask: DispatchWorkItem?
-    var categoryController: LoggerCategoryTableViewController? {
-        splitViewItems.first?.viewController as? LoggerCategoryTableViewController
-    }
+    
     var logsController: LoggerNSTableController? {
         splitViewItems[1].viewController as? LoggerNSTableController
     }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -29,7 +28,6 @@ class LoggerSplitViewController: NSSplitViewController {
 }
 
 extension LoggerSplitViewController: NSWindowDelegate {
-
 }
 
 extension LoggerSplitViewController: NSTextFieldDelegate, NSSearchFieldDelegate {

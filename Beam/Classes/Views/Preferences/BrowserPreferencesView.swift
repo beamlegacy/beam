@@ -9,10 +9,9 @@ import SwiftUI
 import Combine
 import BeamCore
 
-class BrowserPreferencesViewModel: ObservableObject {
+final class BrowserPreferencesViewModel: ObservableObject {
     var accountData: BeamData
     @ObservedObject var onboardingManager: OnboardingManager = OnboardingManager(onlyImport: true)
-    var scope = Set<AnyCancellable>()
 
     init(accountData: BeamData) {
         self.accountData = accountData
@@ -374,9 +373,9 @@ private struct DownloadSection: View {
 
 private struct TabsSection: View {
     @State private var cmdClickOpenTab = PreferencesManager.cmdClickOpenTab
-    @State private var newTabWindowMakeActive = PreferencesManager.newTabWindowMakeActive
+//    @State private var newTabWindowMakeActive = PreferencesManager.newTabWindowMakeActive
     @State private var cmdNumberSwitchTabs = PreferencesManager.cmdNumberSwitchTabs
-    @State private var showWebsiteIconTab = PreferencesManager.showWebsiteIconTab
+//    @State private var showWebsiteIconTab = PreferencesManager.showWebsiteIconTab
     @State private var enableTabGrouping = PreferencesManager.enableTabGrouping
 
     var body: some View {

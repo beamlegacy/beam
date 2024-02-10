@@ -88,7 +88,6 @@ class GutterContainerView: NSView {
             setupUI()
         }
     }
-    private var hostingView: NSHostingView<GutterView>?
     private var trailingGutterViewModel = TrailingGutterView.Model(items: [])
 
     init(frame frameRect: NSRect, isLeading: Bool, leadingGutterViewType: LeadingGutterView.LeadingGutterViewType? = nil) {

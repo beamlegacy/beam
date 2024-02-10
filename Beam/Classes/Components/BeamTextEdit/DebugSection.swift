@@ -12,7 +12,6 @@ class DebugSection: Widget {
     var note: BeamNote
     let textLayer = CATextLayer()
     let separatorLayer = CALayer()
-    let chevronLayer = CALayer()
 
     let savingLayer = CATextLayer()
     let updatesLayer = CATextLayer()

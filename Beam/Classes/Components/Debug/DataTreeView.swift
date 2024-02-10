@@ -144,7 +144,6 @@ class GenericManagerTreeNode: DataTreeNode {
 
 class NoteCollectionTreeNode: DataTreeNode {
     weak var collection: BeamDocumentCollection?
-    var documentIds = Set<UUID>()
     override var label: String { "🗃 " + name }
 
     init(parent: DataTreeNode?, _ collection: BeamDocumentCollection) {

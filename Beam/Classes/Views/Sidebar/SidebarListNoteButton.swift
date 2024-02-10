@@ -28,8 +28,6 @@ struct SidebarListNoteButton: View {
     @State var isHoveringTrailingIcon: Bool = false
     @State var justCopied = false
 
-    @Environment(\.colorScheme) var colorScheme
-
     var body: some View {
         HStack(spacing: 6) {
             if isHovering { // This is preliminary work for BE-4114

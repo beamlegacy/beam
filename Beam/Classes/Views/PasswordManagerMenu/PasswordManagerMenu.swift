@@ -11,8 +11,6 @@ import BeamCore
 struct PasswordManagerMenu: View {
     @ObservedObject var viewModel: PasswordManagerMenuViewModel
 
-    @State private var searchString = ""
-    @State private var suggestedPassword = ""
     @State private var height: CGFloat?
 
     var body: some View {

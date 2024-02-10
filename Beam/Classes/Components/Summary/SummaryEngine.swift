@@ -8,10 +8,9 @@
 import Foundation
 import BeamCore
 
-class SummaryEngine {
+final class SummaryEngine {
     static private let maxUrlDisplayLength: Int = 50
 
-    static let shared = SummaryEngine()
     static let summaryDecoratedValue = AttributeDecoratedValueAttributedString(attributes: [.foregroundColor: BeamColor.LightStoneGray.nsColor],
                                                                                editable: false)
 

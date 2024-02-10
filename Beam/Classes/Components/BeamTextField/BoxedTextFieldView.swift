@@ -21,8 +21,6 @@ struct BoxedTextFieldView: View {
     var onTab: (() -> Bool)?
     var onBacktab: (() -> Bool)?
 
-    @Environment(\.colorScheme) private var colorScheme
-
     var body: some View {
         ZStack {
             BeamTextField(text: $text, isEditing: $isEditing, placeholder: title,

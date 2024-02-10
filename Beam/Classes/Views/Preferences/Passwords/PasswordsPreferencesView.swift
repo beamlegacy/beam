@@ -123,10 +123,6 @@ struct Passwords: View {
     @State private var searchString = ""
     @State private var isEditing = false
 
-    @State private var selectedEntries = IndexSet()
-    @State private var passwordSelected = false
-    @State private var multipleSelection = false
-
     @State private var showingAddPasswordSheet = false
     @State private var editedPassword: PasswordListViewModel.EditedPassword?
     @State private var alertMessage: PasswordListViewModel.AlertMessage?
@@ -136,8 +132,6 @@ struct Passwords: View {
     @State private var autofillUsernamePasswords = PreferencesManager.autofillUsernamePasswords
 
     @State private var availableImportSources: [OnboardingImportsView.ImportSource] = [.passwordsCSV]
-
-    @State private var isViewUnlocked = false
 
     private var topRow: some View {
         HStack {
@@ -383,10 +377,10 @@ struct Passwords: View {
 struct Webforms: View {
     var creditCardsViewModel: CreditCardListViewModel
 
-    @State private var showingAdressesSheet: Bool = false
+    // @State private var showingAdressesSheet: Bool = false
     @State private var showingCreditCardsSheet: Bool = false
 
-    @State private var autofillAdresses = PreferencesManager.autofillAdresses
+    // @State private var autofillAdresses = PreferencesManager.autofillAdresses
     @State private var autofillCreditCards = PreferencesManager.autofillCreditCards
 
     var body: some View {

@@ -9,15 +9,9 @@ import SwiftUI
 import Combine
 
 struct ToolbarDownloadButton<List: DownloadListProtocol>: View {
-
     @ObservedObject private var downloadList: List
+    
     var action: () -> Void
-
-    @State private var isHovering: Bool = false
-
-    private let disabledContentColor = BeamColor.Button.text.swiftUI.opacity(0.13)
-    private let contentColor = BeamColor.Button.text.swiftUI
-    private let activeContentColor = BeamColor.Button.activeText.swiftUI
 
     init(downloadList: List, action: @escaping () -> Void) {
         self.downloadList = downloadList

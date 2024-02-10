@@ -9,7 +9,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         lhs.id == rhs.id
     }
 
-    struct URLFields: OptionSet {
+    struct URLFields: OptionSet, CustomStringConvertible {
         let rawValue: Int
 
         static let text = URLFields(rawValue: 1 << 0)

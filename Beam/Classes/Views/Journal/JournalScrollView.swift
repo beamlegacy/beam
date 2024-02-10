@@ -25,7 +25,6 @@ struct JournalScrollView: NSViewRepresentable {
 
     @State private var isEditing = false
     @EnvironmentObject var state: BeamState
-    @EnvironmentObject var data: BeamData
 
     public func makeCoordinator() -> JournalScrollViewCoordinator {
         return JournalScrollViewCoordinator(scrollView: self, data: state.data)

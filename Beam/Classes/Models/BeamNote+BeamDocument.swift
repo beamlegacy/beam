@@ -692,12 +692,11 @@ public extension BeamNote {
         }
     }
 
-    struct Signs {
+    enum Signs {
         static let indexContents: StaticString = "indexContents"
         static let indexContentsReferences: StaticString = "indexContents.references"
         static let indexContentsLinks: StaticString = "indexContents.links"
         static let save: StaticString = "save"
-        static let syncedSave: StaticString = "syncedSave"
         static let fetchTitle: StaticString = "fetchTitle"
         static let fetchJournalDate: StaticString = "fetchJournalDate"
         static let fetchTabGroupNote: StaticString = "fetchTabGroupNote"
@@ -709,7 +708,6 @@ public extension BeamNote {
         static let createJournalDate: StaticString = "createJournalDate"
         static let createTabGroupNote: StaticString = "createTabGroupNote"
         static let fetchOrCreate: StaticString = "fetchOrCreate"
-        static let fetchOrCreateJournal: StaticString = "fetchOrCreateJournal"
         static let indexAllNotes: StaticString = "indexAllNotes"
         static let rebuildAllNotes: StaticString = "rebuildAllNotes"
         static let loadNotes: StaticString = "loadNotes"

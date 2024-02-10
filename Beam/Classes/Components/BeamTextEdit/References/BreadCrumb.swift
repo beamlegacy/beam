@@ -38,7 +38,6 @@ class BreadCrumb: Widget, BeamDocumentSource {
 
     private var currentNote: BeamNote?
     private var currentLinkedRefNode: ProxyNode?
-    private var firstBreadcrumbText = ""
     private var breadcrumbPlaceholder = "..."
 
     private let containerLayer = CALayer()

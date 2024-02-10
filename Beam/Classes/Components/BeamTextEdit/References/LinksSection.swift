@@ -20,7 +20,6 @@ class LinksSection: Widget {
 
     let sectionTitleLayer = CATextLayer()
     let separatorLayer = CALayer()
-    let offsetY: CGFloat = 40
 
     var titles: [UUID: RefNoteTitle] = [:]
 
@@ -43,7 +42,7 @@ class LinksSection: Widget {
     }
 
     // signposts names:
-    struct Signs {
+    enum Signs {
         static let updateLinkedReferences: StaticString = "LinksSection.updateLinkedReferences"
         static let updateLinkedReferencesEvaluateSource: StaticString = "LinksSection.updateLinkedReferencesEvaluateSource"
         static let firstInit: StaticString = "LinksSection.firstInit"

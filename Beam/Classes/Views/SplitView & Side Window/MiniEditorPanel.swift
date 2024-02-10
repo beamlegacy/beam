@@ -20,11 +20,9 @@ public final class MiniEditorPanel: NSPanel, WindowInfoCapable {
     var windowInfo: BeamWindowInfo = BeamWindowInfo()
 
     private(set) var wasJustDragged = false
-    private var moveNotificationToken: NSObjectProtocol?
     private var isMouseDown = false
 
     static let minimumPanelWidth: CGFloat = 440
-    static let maximumPanelWidth: CGFloat = 614
 
     private let enableWindowDocking = false
 

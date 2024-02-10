@@ -111,14 +111,6 @@ struct AdvancedPreferencesMisc: View {
             Text("Logs").frame(minWidth: 100)
         })
     }
-
-    private var ExportBrowsingSession: some View {
-        Button(action: {
-
-        }, label: {
-            Text("Browsing Sessions").frame(minWidth: 100)
-        })
-    }
 }
 
 struct AdvancedPreferencesMisc_Previews: PreviewProvider {

@@ -29,13 +29,7 @@ class CalendarsViewModel: ObservableObject {
 
 /// The main view of “Accounts” preference pane.
 struct CalendarsView: View {
-    @State private var enableLogging = true
-    @State private var errorMessage: Error!
-    @State private var loading = false
-
     @ObservedObject var viewModel: CalendarsViewModel
-
-    private let contentWidth: Double = PreferencesManager.contentWidth
 
     var body: some View {
         Settings.Container(contentWidth: PreferencesManager.contentWidth) {

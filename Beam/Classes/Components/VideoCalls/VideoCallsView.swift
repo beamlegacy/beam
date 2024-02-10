@@ -6,8 +6,6 @@ struct VideoCallsView: View {
 
     static let shadowPadding: CGFloat = 50
 
-    private static let panelToolbarHeight: CGFloat = 28.0
-
     let webView: BeamWebView
 
     private let toolbarHeight: CGFloat = 36.0

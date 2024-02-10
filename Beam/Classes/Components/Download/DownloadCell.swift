@@ -16,8 +16,6 @@ struct DownloadCell<ListItem, List: DownloadListProtocol>: View where ListItem =
         case view
     }
 
-    @Environment(\.colorScheme) var colorScheme
-
     @ObservedObject private var download: ListItem
     @State private var hoverState: OnHoverState?
     var isSelected: Bool

@@ -47,7 +47,6 @@ extension PreferencesManager {
     static let includeHistoryContentsInOmniBoxDefault = false
     static let enableOmnibeamsDefault = false
     private static let enableDailySummaryDefault: Bool = Configuration.branchType == .develop
-    private static let enableFallbackReadabilityParserDefault: Bool = false
     private static let showClusteringV1SettingsMenuDefault = Configuration.branchType == .develop
     private static let enableClusteringV2Default: Bool = false
     private static let clusteringV2ThresholdDefault: Float? = nil

@@ -7,28 +7,17 @@
 
 import SwiftUI
 
-class TableViewItem: NSObject {
-    var placeholder: String?
-}
+class TableViewItem: NSObject {}
 
 class IconButtonTableViewItem: TableViewItem {
     var iconName: String?
     var hasPopover: Bool = false
     var popoverAlignment: Edge = .top
     var buttonAction: ((NSPoint?) -> Void)?
-
-    override init() {
-        super.init()
-    }
 }
 
 class IconAndTextTableViewItem: TableViewItem {
-    var favIcon: NSImage?
     var text: String?
-
-    override init() {
-        super.init()
-    }
 
     func loadRemoteFavIcon(provider: FaviconProvider?, completion: @escaping (NSImage) -> Void) {}
 }
@@ -45,7 +34,6 @@ class TwoTextFieldViewItem: IconAndTextTableViewItem {
 }
 
 struct TableView: NSViewRepresentable {
-
     static let rowHeight: CGFloat = 28.0
     static let headerHeight: CGFloat = 28.0
 

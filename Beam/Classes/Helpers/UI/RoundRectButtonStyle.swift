@@ -32,7 +32,6 @@ struct RoundedRectangleDecoration: View {
 }
 
 struct RoundRectButtonStyle: ButtonStyle {
-    @Environment(\.isEnabled) var isEnabled: Bool
     var size: CGFloat?
     var defaultSize: CGFloat = 26
     func makeBody(configuration: ButtonStyle.Configuration) -> some View {
