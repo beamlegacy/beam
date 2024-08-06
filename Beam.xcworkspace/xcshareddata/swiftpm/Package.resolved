@@ -48,10 +48,10 @@
       },
       {
         "package": "Clustering",
-        "repositoryURL": "https://github.com/beamlegacy/Clustering",
+        "repositoryURL": "https://github.com/beamlegacy/Clustering.git",
         "state": {
           "branch": "main",
-          "revision": "9ae50f50c7492b71233ef2174ef01c8c61e46835",
+          "revision": "bfcc9927508243ad4a142975cdc20f6bb0711d09",
           "version": null
         }
       },
