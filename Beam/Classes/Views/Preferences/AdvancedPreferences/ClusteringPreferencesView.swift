@@ -15,7 +15,7 @@ struct ClusteringPreferencesView: View {
         ScrollView(.vertical, showsIndicators: false) {
             Settings.Container(contentWidth: PreferencesManager.contentWidth) {
                 Settings.Row {
-                    Text("Clustering V1")
+                    Text("Clustering")
                 } content: {
                     EnableClusteringSettingsCheckbox
                 }
