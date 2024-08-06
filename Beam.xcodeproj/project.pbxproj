@@ -1063,7 +1063,6 @@
 		A5044313281CB27900C91204 /* ExternalDragginSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5044312281CB27900C91204 /* ExternalDragginSession.swift */; };
 		A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612D526CC75200053AD37 /* Calendar+Additions.swift */; };
 		A50612DF26CC75C70053AD37 /* Calendar+AdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */; };
-		A5092E5C2B232B3B00C83C8F /* Clustering in Frameworks */ = {isa = PBXBuildFile; productRef = A5092E5B2B232B3B00C83C8F /* Clustering */; };
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
 		A51058102786E7E600E4F1F2 /* BrowserTab+WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A510580F2786E7E600E4F1F2 /* BrowserTab+WebPage.swift */; };
 		A5105ADF26F3863B00E9A0BA /* TableHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */; };
@@ -1269,6 +1268,7 @@
 		A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EC426F8D6A9004B7CDE /* LottieView.swift */; };
 		A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC726F8D718004B7CDE /* editor-publish.json */; };
 		A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */; };
+		A5F782F02C629C00007431FC /* Clustering in Frameworks */ = {isa = PBXBuildFile; productRef = A5F782EF2C629C00007431FC /* Clustering */; };
 		A5FD982B2890153900842673 /* TabGroupingManager+Notes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FD982A2890153900842673 /* TabGroupingManager+Notes.swift */; };
 		A5FDFA1C27DA44510066A670 /* FormatterViewBackgroundV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FDFA1B27DA44510066A670 /* FormatterViewBackgroundV2.swift */; };
 		A5FDFA2927DB82160066A670 /* DestinationNoteAutocompleteListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FDFA2827DB82160066A670 /* DestinationNoteAutocompleteListModel.swift */; };
@@ -3575,7 +3575,7 @@
 				873528C127354295005E7CBC /* INI in Frameworks */,
 				3315DC962667859A002A47CF /* OAuthSwift in Frameworks */,
 				33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */,
-				A5092E5C2B232B3B00C83C8F /* Clustering in Frameworks */,
+				A5F782F02C629C00007431FC /* Clustering in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8408,8 +8408,8 @@
 				8A7AA041289960A700B271E2 /* FaviconFinder */,
 				66C9179828B38DD5007B4636 /* Markdown */,
 				6E9FB88128C24B0C00EB0138 /* Atomics */,
-				A5092E5B2B232B3B00C83C8F /* Clustering */,
 				D607EEAA2B6A84BC00422B87 /* Lottie */,
+				A5F782EF2C629C00007431FC /* Clustering */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -8548,8 +8548,8 @@
 				BFEA487B286A1519007A73BD /* XCRemoteSwiftPackageReference "async-http-client" */,
 				8A7AA040289960A700B271E2 /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 				66C9179728B38DD4007B4636 /* XCRemoteSwiftPackageReference "swift-markdown" */,
-				A5237AA02AEA6A8400E57897 /* XCRemoteSwiftPackageReference "Clustering" */,
 				D607EEA92B6A84BC00422B87 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				A5F782EE2C629C00007431FC /* XCRemoteSwiftPackageReference "Clustering" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -12489,9 +12489,9 @@
 				kind = branch;
 			};
 		};
-		A5237AA02AEA6A8400E57897 /* XCRemoteSwiftPackageReference "Clustering" */ = {
+		A5F782EE2C629C00007431FC /* XCRemoteSwiftPackageReference "Clustering" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/beamlegacy/Clustering";
+			repositoryURL = "https://github.com/beamlegacy/Clustering.git";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -12655,11 +12655,6 @@
 			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
 		};
-		A5092E5B2B232B3B00C83C8F /* Clustering */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A5237AA02AEA6A8400E57897 /* XCRemoteSwiftPackageReference "Clustering" */;
-			productName = Clustering;
-		};
 		A5946845265E30350044A892 /* Fakery */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 527FB72225B9AAA200959146 /* XCRemoteSwiftPackageReference "Fakery" */;
@@ -12674,6 +12669,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
+		};
+		A5F782EF2C629C00007431FC /* Clustering */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5F782EE2C629C00007431FC /* XCRemoteSwiftPackageReference "Clustering" */;
+			productName = Clustering;
 		};
 		BFEA487C286A1519007A73BD /* AsyncHTTPClient */ = {
 			isa = XCSwiftPackageProductDependency;
