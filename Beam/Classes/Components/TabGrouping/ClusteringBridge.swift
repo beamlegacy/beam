@@ -17,14 +17,12 @@ enum ClusteringType {
     var isSupported: Bool {
         switch self {
         case .legacy: return true
-        case .smart: return true
+        // we're disabling the support for clustering v2.
+        case .smart: return false
         }
     }
 
     static var current: ClusteringType {
-        if ClusteringType.smart.isSupported && PreferencesManager.enableClusteringV2 {
-            return .smart
-        }
         return .legacy
     }
 
@@ -35,8 +33,7 @@ enum ClusteringType {
             return LegacyClusteringBridge(selectedTabGroupingCandidate: selectedTabGroupingCandidate,
                                           weightNavigation: weightNavigation, weightText: weightText, weightEntities: weightEntities)
         case .smart:
-            return SmartClusteringBridge(selectedTabGroupingCandidate: selectedTabGroupingCandidate,
-                                         weightNavigation: weightNavigation, weightText: weightText, weightEntities: weightEntities)
+            fatalError("Smart Clustering is not supported anymore")
         }
     }
 
@@ -107,70 +104,6 @@ extension ClusteringBridge {
 
 enum ClusteringBridgeError: Error {
     case notImplemented
-}
-
-// MARK: - Smart Clustering
-/// Wrapper for Clustering.SmartClustering
-final class SmartClusteringBridge: ClusteringBridge {
-
-    var type: ClusteringType { .smart }
-    var selectedTabGroupingCandidate: Int
-    var weightNavigation: Double
-    var weightText: Double
-    var weightEntities: Double
-    var threshold: Float? {
-        clustering.getThreshold()
-    }
-    private lazy var clustering: SmartClustering = {
-        let sc: SmartClustering
-        if let threshold = PreferencesManager.clusteringV2Threshold {
-            sc = SmartClustering(threshold: threshold)
-        } else {
-            sc = SmartClustering()
-        }
-        return sc
-    }()
-
-    init(selectedTabGroupingCandidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double) {
-        self.selectedTabGroupingCandidate = selectedTabGroupingCandidate
-        self.weightNavigation = weightNavigation
-        self.weightText = weightText
-        self.weightEntities = weightEntities
-    }
-
-    func add(textualItem: TextualItem, ranking: [UUID]?, replaceContent: Bool, completion: @escaping (CompletionResult) -> Void) {
-        Task {
-            do {
-                let result = try await clustering.add(textualItem: textualItem)
-                completion(.success(.init(groups: result)))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-
-    func removeTextualItem(textualItemUUID: UUID, textualItemTabId: UUID,
-                           completion: @escaping (CompletionResult) -> Void) {
-        Task {
-            do {
-                let result = try await clustering.remove(textualItemUUID: textualItemUUID, textualItemTabId: textualItemTabId)
-                completion(.success(.init(groups: result)))
-            } catch {
-                completion(.failure(error))
-            }
-        }
-    }
-
-    func changeCandidate(to candidate: Int?, withWeightNavigation weightNavigation: Double?, weightText: Double?, weightEntities: Double?,
-                         completion: @escaping (CompletionResult) -> Void) {
-        completion(.failure(ClusteringBridgeError.notImplemented))
-    }
-
-    public func getExportInformationForId(id: UUID) -> Clustering.InformationForId {
-        // Need to be implemented by Clustering.SmartClustering
-        InformationForId()
-    }
-
 }
 
 // MARK: - Legacy Clustering

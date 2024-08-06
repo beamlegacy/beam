@@ -25,7 +25,6 @@ extension PreferencesManager {
     private static let enableDailySummaryKey = "enableDailySummary"
     private static let enableFallbackReadabilityParserKey = "enableFallbackReadabilityParser"
     private static let showClusteringV1SettingsMenuKey = "showClusteringSettingsMenuKey"
-    private static let enableClusteringV2Key = "enableClusteringV2"
     private static let clusteringV2ThresholdKey = "clusteringV2ThresholdKey"
 }
 
@@ -48,7 +47,6 @@ extension PreferencesManager {
     static let enableOmnibeamsDefault = false
     private static let enableDailySummaryDefault: Bool = Configuration.branchType == .develop
     private static let showClusteringV1SettingsMenuDefault = Configuration.branchType == .develop
-    private static let enableClusteringV2Default: Bool = false
     private static let clusteringV2ThresholdDefault: Float? = nil
 }
 
@@ -99,8 +97,6 @@ extension PreferencesManager {
 
 // MARK: - Clustering
 extension PreferencesManager {
-    @UserDefault(key: enableClusteringV2Key, defaultValue: enableClusteringV2Default, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
-    static var enableClusteringV2: Bool
 
     @UserDefault(key: showClusteringV1SettingsMenuKey, defaultValue: showClusteringV1SettingsMenuDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showClusteringSettingsMenu: Bool
