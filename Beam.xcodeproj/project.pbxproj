@@ -8382,7 +8382,6 @@
 				52C60BFF258B63A5008B7C10 /* Embed XPC Services */,
 				A0C83F12276E408400DD29FB /* Embed BeamHelper Tool */,
 				870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */,
-				332CE7142889B023007E585A /* Remove SmartClustering model in beta */,
 			);
 			buildRules = (
 			);
@@ -8794,26 +8793,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		332CE7142889B023007E585A /* Remove SmartClustering model in beta */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Remove SmartClustering model in beta";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "scripts/delete_smart_clustering_model.sh\n";
-			showEnvVarsInLog = 0;
-		};
 		521FEC702604F1FF009000F9 /* Copy Vinyl Cassettes */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
