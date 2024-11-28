@@ -723,7 +723,7 @@ public extension BeamDocument {
     }
 }
 
-extension BeamNote: BeamNoteDocument {
+extension BeamNote: @retroactive BeamNoteDocument {
     public var lastChangedElement: BeamElement? {
         get {
             var element: BeamElement?

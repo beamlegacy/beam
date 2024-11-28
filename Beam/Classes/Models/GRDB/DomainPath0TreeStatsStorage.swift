@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 import GRDB
 
-extension ScoredDomainPath0: FetchableRecord {}
+extension ScoredDomainPath0: @retroactive FetchableRecord {}
 
 class DomainPath0TreeStatsStorage: DomainPath0TreeStatsStorageProtocol {
     let providedDb: TabPinSuggestionDBManager?

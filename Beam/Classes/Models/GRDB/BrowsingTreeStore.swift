@@ -22,27 +22,27 @@ extension BrowsingTree {
         )
     }
 }
-extension BrowsingTree: DatabaseValueConvertible {}
-extension FlatennedBrowsingTree: DatabaseValueConvertible {}
+extension BrowsingTree: @retroactive DatabaseValueConvertible { }
+extension FlatennedBrowsingTree: @retroactive DatabaseValueConvertible { }
 
-extension BrowsingTree: Equatable {
+extension BrowsingTree: @retroactive Equatable {
     static public func == (lhs: BrowsingTree, rhs: BrowsingTree) -> Bool {
         lhs.rootId == rhs.rootId
     }
 }
-extension FlatennedBrowsingTree: Equatable {
+extension FlatennedBrowsingTree: @retroactive Equatable {
     static public func == (lhs: FlatennedBrowsingTree, rhs: FlatennedBrowsingTree) -> Bool {
         lhs.root?.id == rhs.root?.id
     }
 }
 
-extension BrowsingTree: Hashable {
+extension BrowsingTree: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
        hasher.combine(rootId)
     }
 }
 
-extension FlatennedBrowsingTree: Hashable {
+extension FlatennedBrowsingTree: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(root?.id)
     }

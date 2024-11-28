@@ -200,8 +200,8 @@ public extension CALayer {
     let cardTitleLayer = CATextLayer()
     let cardTimeLayer = CATextLayer()
 
-    private (set) var isResizing = false
-    public private (set) var journalMode: Bool
+    private(set) var isResizing = false
+    public private(set) var journalMode: Bool
 
     public override var wantsUpdateLayer: Bool { true }
     internal var scope = Set<AnyCancellable>()

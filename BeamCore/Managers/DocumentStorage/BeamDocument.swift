@@ -280,7 +280,7 @@ extension BeamDocument: Hashable {
     }
 }
 
-extension BeamVersion: DatabaseValueConvertible {
+extension BeamVersion: @retroactive DatabaseValueConvertible {
     public var databaseValue: DatabaseValue {
         let encoder = JSONEncoder()
         let data: Data

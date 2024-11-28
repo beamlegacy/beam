@@ -241,17 +241,27 @@ extension FaviconProvider {
     class Finder {
 
         func find(with url: URL, completion:  @escaping (Result<Favicon, FinderError>) -> Void) {
-            FaviconFinder(url: url, preferredType: .html, preferences: [
-                FaviconDownloadType.html: FaviconType.appleTouchIcon.rawValue,
-                FaviconDownloadType.ico: "favicon.ico"
-            ]).downloadFavicon { result in
-                switch result {
-                case .success(let icon):
-                    let favicon = Favicon(url: icon.url, origin: .url, image: icon.image)
-                    completion(.success(favicon))
-                case .failure(let error):
-                    Logger.shared.logDebug("FaviconFinder Package failure: \(error.localizedDescription)", category: .favIcon)
-                    completion(.failure(.dataNotFound))
+            Task {
+                var url = url
+                if url.scheme == nil {
+                    url = URL(string: "https://\(url.absoluteString)") ?? url
+                }
+                let finder = FaviconFinder(url: url, configuration: .init(preferredSource: .html, preferences: [
+                    FaviconSourceType.html: FaviconFormatType.appleTouchIcon.rawValue,
+                    FaviconSourceType.ico: "favicon.ico"
+                ]))
+                do {
+                    let urls = try await finder.fetchFaviconURLs()
+                    if let url = urls.first {
+                        let icon = try await url.download()
+                        let favicon = Favicon(url: icon.url.source, origin: .url, image: icon.image?.image)
+                        completion(.success(favicon))
+                    } else {
+                        completion(.failure(.urlNotFound))
+                    }
+                } catch {
+                    Logger.shared.logError("FaviconFinder Package failure: \(error.localizedDescription)", category: .favIcon)
+                    completion(.failure(.urlNotFound))
                 }
             }
         }

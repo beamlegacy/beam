@@ -51,7 +51,7 @@
         "repositoryURL": "https://github.com/beamlegacy/Clustering.git",
         "state": {
           "branch": "main",
-          "revision": "bfcc9927508243ad4a142975cdc20f6bb0711d09",
+          "revision": "664c2131d60c1b16e6248fbdfb84acfb2fbeee34",
           "version": null
         }
       },
@@ -102,11 +102,11 @@
       },
       {
         "package": "FaviconFinder",
-        "repositoryURL": "https://github.com/StefKors/FaviconFinder.git",
+        "repositoryURL": "https://github.com/will-lumley/FaviconFinder.git",
         "state": {
-          "branch": "stef/fix-retain-cycle",
-          "revision": "42332f338f1681b656b402822e8db5f6346720a1",
-          "version": null
+          "branch": null,
+          "revision": "9279f4371f4877ca302ba3bf1015f3f58ae4a56c",
+          "version": "5.1.4"
         }
       },
       {
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/groue/GRDB.swift.git",
         "state": {
           "branch": null,
-          "revision": "dd7e7f39e8e4d7a22d258d9809a882f914690b01",
-          "version": "5.26.1"
+          "revision": "2cf6c756e1e5ef6901ebae16576a7e4e4b834622",
+          "version": "6.29.3"
         }
       },
       {
@@ -150,8 +150,8 @@
         "repositoryURL": "https://github.com/michaeleisel/JJLISO8601DateFormatter",
         "state": {
           "branch": null,
-          "revision": "99fadf2e6425a0f827b1b485ea60bc2b7ecdd22c",
-          "version": "0.1.4"
+          "revision": "741a9e45db01148a8ac60c5e12f7c978181a22d3",
+          "version": "0.1.8"
         }
       },
       {
@@ -246,7 +246,7 @@
       },
       {
         "package": "Lottie",
-        "repositoryURL": "https://github.com/McNight/lottie-ios",
+        "repositoryURL": "https://github.com/beamlegacy/lottie-ios",
         "state": {
           "branch": "master",
           "revision": "02d45e874cd27615b0a02cf01c028b9956f33d30",
@@ -255,7 +255,7 @@
       },
       {
         "package": "Macaw",
-        "repositoryURL": "https://github.com/eLud/Macaw/",
+        "repositoryURL": "https://github.com/beamlegacy/Macaw/",
         "state": {
           "branch": "master",
           "revision": "f46e715a5dbd68297c6fc6705ccae2433c88b7b9",
@@ -456,13 +456,13 @@
         "repositoryURL": "https://github.com/scinfu/SwiftSoup.git",
         "state": {
           "branch": null,
-          "revision": "6778575285177365cbad3e5b8a72f2a20583cfec",
-          "version": "2.4.3"
+          "revision": "0837db354faf9c9deb710dc597046edaadf5360f",
+          "version": "2.7.6"
         }
       },
       {
         "package": "Swime",
-        "repositoryURL": "https://github.com/meeloo/Swime",
+        "repositoryURL": "https://github.com/beamlegacy/Swime",
         "state": {
           "branch": "master",
           "revision": "2dd7e4a252e5aa95a22a45ba37ef186047a77413",
@@ -507,11 +507,11 @@
       },
       {
         "package": "Vinyl",
-        "repositoryURL": "https://github.com/penso/Vinyl",
+        "repositoryURL": "https://github.com/beamlegacy/Vinyl",
         "state": {
-          "branch": null,
+          "branch": "master",
           "revision": "c4d04bc6f1e4be2dbd535fedf8d93efeec8f68d0",
-          "version": "0.10.5"
+          "version": null
         }
       },
       {

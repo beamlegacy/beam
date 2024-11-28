@@ -25,8 +25,7 @@ extension FrecencyUrlRecord: TableRecord {
     // static let history = belongsTo(HistoryUrlRecord.self, using: ForeignKey([HistoryUrlRecord.Columns.urlId]))
 }
 
-extension FrecencyParamKey: DatabaseValueConvertible {
-}
+extension FrecencyParamKey: @retroactive DatabaseValueConvertible { }
 
 // Fetching methods
 extension FrecencyUrlRecord: FetchableRecord {

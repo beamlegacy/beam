@@ -8382,7 +8382,6 @@
 				52C60BFF258B63A5008B7C10 /* Embed XPC Services */,
 				A0C83F12276E408400DD29FB /* Embed BeamHelper Tool */,
 				870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */,
-				332CE7142889B023007E585A /* Remove SmartClustering model in beta */,
 			);
 			buildRules = (
 			);
@@ -8794,26 +8793,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		332CE7142889B023007E585A /* Remove SmartClustering model in beta */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Remove SmartClustering model in beta";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "scripts/delete_smart_clustering_model.sh\n";
-			showEnvVarsInLog = 0;
-		};
 		521FEC702604F1FF009000F9 /* Copy Vinyl Cassettes */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -10432,6 +10411,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
@@ -10656,6 +10636,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
@@ -10889,6 +10870,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
@@ -11129,6 +11111,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
@@ -11362,6 +11345,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
@@ -11762,6 +11746,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
@@ -11812,6 +11797,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
@@ -12027,6 +12013,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
@@ -12342,7 +12329,7 @@
 			repositoryURL = "https://github.com/michaeleisel/JJLISO8601DateFormatter";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.4;
+				minimumVersion = 0.1.8;
 			};
 		};
 		33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
@@ -12355,7 +12342,7 @@
 		};
 		333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/meeloo/Swime";
+			repositoryURL = "https://github.com/beamlegacy/Swime";
 			requirement = {
 				branch = master;
 				kind = branch;
@@ -12363,15 +12350,15 @@
 		};
 		33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/penso/Vinyl";
+			repositoryURL = "https://github.com/beamlegacy/Vinyl";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.10.5;
+				branch = master;
+				kind = branch;
 			};
 		};
 		33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/eLud/Macaw/";
+			repositoryURL = "https://github.com/beamlegacy/Macaw/";
 			requirement = {
 				branch = master;
 				kind = branch;
@@ -12451,10 +12438,10 @@
 		};
 		8A7AA040289960A700B271E2 /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/StefKors/FaviconFinder.git";
+			repositoryURL = "https://github.com/will-lumley/FaviconFinder.git";
 			requirement = {
-				branch = "stef/fix-retain-cycle";
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.4;
 			};
 		};
 		9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
@@ -12470,7 +12457,7 @@
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.12.0;
+				minimumVersion = 6.0.0;
 			};
 		};
 		96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */ = {
@@ -12507,7 +12494,7 @@
 		};
 		D607EEA92B6A84BC00422B87 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/McNight/lottie-ios";
+			repositoryURL = "https://github.com/beamlegacy/lottie-ios";
 			requirement = {
 				branch = master;
 				kind = branch;

@@ -10,13 +10,13 @@ import GRDB
 import BeamCore
 
 public class GRDBStore {
-    var writer: DatabaseWriter!
+    var writer: DatabaseWriter
     var reader: DatabaseReader { writer }
     private var migrator = DatabaseMigrator()
     var instances = Set<String>()
 
-    static func empty() -> GRDBStore {
-        return GRDBStore(writer: DatabaseQueue())
+    static func empty() throws -> GRDBStore {
+        return GRDBStore(writer: try DatabaseQueue())
     }
 
     static func createWriter(at path: String) throws -> DatabaseWriter {
@@ -40,10 +40,8 @@ public class GRDBStore {
     }
 
     func close() {
-        guard writer != nil else { return }
         do {
             try writer.close()
-            writer = nil
         } catch {
             Logger.shared.logError("Error while closing SQLite DB \(error)", category: .database)
         }
