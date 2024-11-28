@@ -10411,6 +10411,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
@@ -10635,6 +10636,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
@@ -10868,6 +10870,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
@@ -11108,6 +11111,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
@@ -11341,6 +11345,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
@@ -11741,6 +11746,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
@@ -11791,6 +11797,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
@@ -12006,6 +12013,7 @@
 					"@executable_path/../Frameworks",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MARKETING_VERSION = 0.19.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
@@ -12430,10 +12438,10 @@
 		};
 		8A7AA040289960A700B271E2 /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/beamlegacy/FaviconFinder.git";
+			repositoryURL = "https://github.com/will-lumley/FaviconFinder.git";
 			requirement = {
-				branch = beamlegacy/main;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.4;
 			};
 		};
 		9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {

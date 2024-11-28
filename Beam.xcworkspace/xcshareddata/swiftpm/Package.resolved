@@ -102,11 +102,11 @@
       },
       {
         "package": "FaviconFinder",
-        "repositoryURL": "https://github.com/beamlegacy/FaviconFinder.git",
+        "repositoryURL": "https://github.com/will-lumley/FaviconFinder.git",
         "state": {
-          "branch": "beamlegacy/main",
-          "revision": "cdf05fffddb7a1d471bd782049f279e0d66b6b7f",
-          "version": null
+          "branch": null,
+          "revision": "9279f4371f4877ca302ba3bf1015f3f58ae4a56c",
+          "version": "5.1.4"
         }
       },
       {
