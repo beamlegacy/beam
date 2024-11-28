@@ -104,8 +104,8 @@
         "package": "FaviconFinder",
         "repositoryURL": "https://github.com/beamlegacy/FaviconFinder.git",
         "state": {
-          "branch": "stef/fix-retain-cycle",
-          "revision": "42332f338f1681b656b402822e8db5f6346720a1",
+          "branch": "beamlegacy/main",
+          "revision": "cdf05fffddb7a1d471bd782049f279e0d66b6b7f",
           "version": null
         }
       },
@@ -255,7 +255,7 @@
       },
       {
         "package": "Macaw",
-        "repositoryURL": "https://github.com/eLud/Macaw/",
+        "repositoryURL": "https://github.com/beamlegacy/Macaw/",
         "state": {
           "branch": "master",
           "revision": "f46e715a5dbd68297c6fc6705ccae2433c88b7b9",
@@ -462,7 +462,7 @@
       },
       {
         "package": "Swime",
-        "repositoryURL": "https://github.com/meeloo/Swime",
+        "repositoryURL": "https://github.com/beamlegacy/Swime",
         "state": {
           "branch": "master",
           "revision": "2dd7e4a252e5aa95a22a45ba37ef186047a77413",
@@ -507,11 +507,11 @@
       },
       {
         "package": "Vinyl",
-        "repositoryURL": "https://github.com/penso/Vinyl",
+        "repositoryURL": "https://github.com/beamlegacy/Vinyl",
         "state": {
-          "branch": null,
+          "branch": "master",
           "revision": "c4d04bc6f1e4be2dbd535fedf8d93efeec8f68d0",
-          "version": "0.10.5"
+          "version": null
         }
       },
       {

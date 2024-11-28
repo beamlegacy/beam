@@ -12344,8 +12344,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/beamlegacy/Vinyl";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.10.5;
+				branch = master;
+				kind = branch;
 			};
 		};
 		33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */ = {
@@ -12432,7 +12432,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/beamlegacy/FaviconFinder.git";
 			requirement = {
-				branch = "stef/fix-retain-cycle";
+				branch = beamlegacy/main;
 				kind = branch;
 			};
 		};
