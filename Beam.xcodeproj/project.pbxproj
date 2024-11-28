@@ -12334,7 +12334,7 @@
 		};
 		333E61822707094000847A0C /* XCRemoteSwiftPackageReference "Swime" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/meeloo/Swime";
+			repositoryURL = "https://github.com/beamlegacy/Swime";
 			requirement = {
 				branch = master;
 				kind = branch;
@@ -12342,7 +12342,7 @@
 		};
 		33F0F1C626DE87E000FF8B48 /* XCRemoteSwiftPackageReference "Vinyl" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/penso/Vinyl";
+			repositoryURL = "https://github.com/beamlegacy/Vinyl";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 0.10.5;
@@ -12350,7 +12350,7 @@
 		};
 		33F64F1027283201004EB0CD /* XCRemoteSwiftPackageReference "Macaw" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/eLud/Macaw/";
+			repositoryURL = "https://github.com/beamlegacy/Macaw/";
 			requirement = {
 				branch = master;
 				kind = branch;
@@ -12430,7 +12430,7 @@
 		};
 		8A7AA040289960A700B271E2 /* XCRemoteSwiftPackageReference "FaviconFinder" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/StefKors/FaviconFinder.git";
+			repositoryURL = "https://github.com/beamlegacy/FaviconFinder.git";
 			requirement = {
 				branch = "stef/fix-retain-cycle";
 				kind = branch;
@@ -12486,7 +12486,7 @@
 		};
 		D607EEA92B6A84BC00422B87 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/McNight/lottie-ios";
+			repositoryURL = "https://github.com/beamlegacy/lottie-ios";
 			requirement = {
 				branch = master;
 				kind = branch;

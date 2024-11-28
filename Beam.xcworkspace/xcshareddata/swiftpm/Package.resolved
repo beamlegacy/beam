@@ -102,7 +102,7 @@
       },
       {
         "package": "FaviconFinder",
-        "repositoryURL": "https://github.com/StefKors/FaviconFinder.git",
+        "repositoryURL": "https://github.com/beamlegacy/FaviconFinder.git",
         "state": {
           "branch": "stef/fix-retain-cycle",
           "revision": "42332f338f1681b656b402822e8db5f6346720a1",
@@ -246,7 +246,7 @@
       },
       {
         "package": "Lottie",
-        "repositoryURL": "https://github.com/McNight/lottie-ios",
+        "repositoryURL": "https://github.com/beamlegacy/lottie-ios",
         "state": {
           "branch": "master",
           "revision": "02d45e874cd27615b0a02cf01c028b9956f33d30",
@@ -456,8 +456,8 @@
         "repositoryURL": "https://github.com/scinfu/SwiftSoup.git",
         "state": {
           "branch": null,
-          "revision": "6778575285177365cbad3e5b8a72f2a20583cfec",
-          "version": "2.4.3"
+          "revision": "0837db354faf9c9deb710dc597046edaadf5360f",
+          "version": "2.7.6"
         }
       },
       {
