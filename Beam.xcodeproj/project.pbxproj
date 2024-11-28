@@ -12321,7 +12321,7 @@
 			repositoryURL = "https://github.com/michaeleisel/JJLISO8601DateFormatter";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.4;
+				minimumVersion = 0.1.8;
 			};
 		};
 		33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
@@ -12449,7 +12449,7 @@
 			repositoryURL = "https://github.com/groue/GRDB.swift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 5.12.0;
+				minimumVersion = 6.0.0;
 			};
 		};
 		96AC99F626E65CFB0016E941 /* XCRemoteSwiftPackageReference "uuid-kit" */ = {

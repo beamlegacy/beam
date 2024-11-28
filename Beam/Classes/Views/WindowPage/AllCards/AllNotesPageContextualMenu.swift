@@ -257,7 +257,7 @@ final class AllNotesPageContextualMenu {
     }
 
     private func updateProfileGroup(publish: Bool) async {
-        guard let fileManager = data.fileDBManager else { return }
+        guard let fileManager = await data.fileDBManager else { return }
         await withTaskGroup(of: Void.self, body: { group in
             for note in selectedNotes where note.publicationStatus.isPublic {
                 group.addTask {
@@ -298,7 +298,7 @@ final class AllNotesPageContextualMenu {
     }
 
     private func makeNotes(isPublic: Bool) async {
-        guard let fileManager = data.fileDBManager else { return }
+        guard let fileManager = await data.fileDBManager else { return }
         await withTaskGroup(of: Void.self, body: { group in
             _ = selectedNotes.map { note in
                 group.addTask {

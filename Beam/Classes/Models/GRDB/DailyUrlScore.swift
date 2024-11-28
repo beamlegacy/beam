@@ -9,16 +9,16 @@ import Foundation
 import GRDB
 import BeamCore
 
-extension DailyURLScore: FetchableRecord {}
-extension DailyURLScore: PersistableRecord {}
-extension DailyURLScore: TableRecord {
+extension DailyURLScore: @retroactive FetchableRecord {}
+extension DailyURLScore: @retroactive PersistableRecord {}
+extension DailyURLScore: @retroactive TableRecord {
     enum Columns: String, ColumnExpression {
             case id, createdAt, updatedAt, urlId, localDay
         }
 }
-extension DailyURLScore: Identifiable {}
+extension DailyURLScore: @retroactive Identifiable {}
 
-extension AggregatedURLScore: FetchableRecord {}
+extension AggregatedURLScore: @retroactive FetchableRecord {}
 
 class GRDBDailyUrlScoreStore: DailyUrlScoreStoreProtocol {
     let providedDb: UrlStatsDBManager?

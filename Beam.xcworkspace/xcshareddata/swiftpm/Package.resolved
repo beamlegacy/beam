@@ -51,7 +51,7 @@
         "repositoryURL": "https://github.com/beamlegacy/Clustering.git",
         "state": {
           "branch": "main",
-          "revision": "bfcc9927508243ad4a142975cdc20f6bb0711d09",
+          "revision": "664c2131d60c1b16e6248fbdfb84acfb2fbeee34",
           "version": null
         }
       },
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/groue/GRDB.swift.git",
         "state": {
           "branch": null,
-          "revision": "dd7e7f39e8e4d7a22d258d9809a882f914690b01",
-          "version": "5.26.1"
+          "revision": "2cf6c756e1e5ef6901ebae16576a7e4e4b834622",
+          "version": "6.29.3"
         }
       },
       {
@@ -150,8 +150,8 @@
         "repositoryURL": "https://github.com/michaeleisel/JJLISO8601DateFormatter",
         "state": {
           "branch": null,
-          "revision": "99fadf2e6425a0f827b1b485ea60bc2b7ecdd22c",
-          "version": "0.1.4"
+          "revision": "741a9e45db01148a8ac60c5e12f7c978181a22d3",
+          "version": "0.1.8"
         }
       },
       {

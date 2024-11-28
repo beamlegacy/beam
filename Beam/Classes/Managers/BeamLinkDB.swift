@@ -11,7 +11,7 @@ import BeamCore
 
 //public struct Link:
 // SQL generation
-extension Link: TableRecord {
+extension Link: @retroactive TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
         case id, url, title, content, destination, createdAt, updatedAt, deletedAt, frecencyVisitLastAccessAt, frecencyVisitScore, frecencyVisitSortScore
@@ -25,7 +25,7 @@ extension Link: TableRecord {
 }
 
 // Fetching methods
-extension Link: Identifiable, FetchableRecord {
+extension Link: @retroactive Identifiable, @retroactive FetchableRecord {
     /// Creates a record from a database row
     public init(row: Row) {
         self.init(url: row[Columns.url],
@@ -52,7 +52,7 @@ extension Link {
 }
 
 // Persistence methods
-extension Link: MutablePersistableRecord {
+extension Link: @retroactive MutablePersistableRecord {
     /// The values persisted in the database
     public static let persistenceConflictPolicy = PersistenceConflictPolicy(
             insert: .replace,
@@ -92,13 +92,13 @@ extension Link: BeamObjectProtocol {
     }
 }
 
-extension Link: Equatable {
+extension Link: @retroactive Equatable {
     static public func == (lhs: Link, rhs: Link) -> Bool {
         lhs.id == rhs.id
     }
 }
 
-extension Link: Hashable {
+extension Link: @retroactive Hashable {
     public func hash(into hasher: inout Hasher) {
        hasher.combine(id)
     }

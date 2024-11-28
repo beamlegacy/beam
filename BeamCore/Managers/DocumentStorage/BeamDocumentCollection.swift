@@ -126,7 +126,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                 .forEach({ document in
                     var document = document
                     document.source = "BeamDocumentColletionMigrator"
-                    try document.updateChanges(db, with: { document in
+                    try document.updateChanges(db, modify: { document in
                         do {
                             let beamNote = try BeamNote.instanciateNote(document,
                                                                         keepInMemory: false,
@@ -203,7 +203,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                 .forEach({ document in
                     var document = document
                     document.source = source.sourceId
-                    try document.updateChanges(db, with: {
+                    try document.updateChanges(db, modify: {
                             try updater(&$0)
                         try self.checkValidations($0)
                         toNotify.append($0)
