@@ -89,7 +89,8 @@ class ShareHelper {
         if let text = content.text ?? content.url?.absoluteString {
             pasteboard.declareTypes([.string], owner: nil)
             if let url = content.url {
-                let attributedString = NSMutableAttributedString(string: text, attributes: [.link: url])
+                let urlWithFragment = PreferencesManager.isLinkTextFragmentEnabled ? url.withTextFragment(text) : url
+                let attributedString = NSMutableAttributedString(string: text, attributes: [.link: urlWithFragment])
                 pasteboard.writeObjects([attributedString])
             } else {
                 pasteboard.setString(text, forType: .string)
