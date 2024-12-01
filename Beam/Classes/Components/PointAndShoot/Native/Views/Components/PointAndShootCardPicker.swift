@@ -101,7 +101,8 @@ struct PointAndShootCardPicker: View {
         } onModifierFlagPressed: { event in
             if shouldShowCopyShareView &&
                 event.modifierFlags.contains(.command) && event.keyCode == KeyCode.c.rawValue {
-                copyShoot()
+                let withURL = event.modifierFlags.contains(.shift)
+                copyShoot(withURL: withURL)
                 return true
             }
             return false
@@ -429,9 +430,9 @@ extension PointAndShootCardPicker {
         }
     }
 
-    private func copyShoot() {
+    private func copyShoot(withURL: Bool) {
         guard !justCopied else { return }
-        onShare?(.copy)
+        onShare?(withURL ? .copyWithURL : .copy)
         SoundEffectPlayer.shared.playSound(.beginRecord)
         justCopied = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -477,7 +478,7 @@ extension PointAndShootCardPicker {
             HStack {
                 ButtonLabel(justCopied ? loc("Copied") : loc("Copy"),
                             icon: justCopied ? "collect-generic" : "editor-url_copy_16") {
-                    copyShoot()
+                    copyShoot(withURL: false)
                 }
                 Spacer()
                 HStack(spacing: 0) {

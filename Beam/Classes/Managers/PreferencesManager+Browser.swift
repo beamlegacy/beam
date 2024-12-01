@@ -71,6 +71,7 @@ extension PreferencesManager {
     static let showsStatusBarKey = "showsStatusBar"
     static let collectSoundsKey = "collectSounds"
     static let videoCallsAlwaysInSideWindowKey = "videoCallsAlwaysInSideWindow"
+    static let linkTextFragmentKey = "linkTextFragment"
 }
 
 // MARK: - Default Values
@@ -87,6 +88,7 @@ extension PreferencesManager {
     static let showsStatusBarDefault = false
     static let collectSoundsDefault = true
     static let videoCallsAlwaysInSideWindowDefault = true
+    static let linkTextFragmentDefault = true
 }
 
 extension PreferencesManager {
@@ -125,5 +127,8 @@ extension PreferencesManager {
 
     @UserDefault(key: videoCallsAlwaysInSideWindowKey, defaultValue: videoCallsAlwaysInSideWindowDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var videoCallsAlwaysInSideWindow: Bool
+
+    @UserDefault(key: linkTextFragmentKey, defaultValue: linkTextFragmentDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
+    static var isLinkTextFragmentEnabled: Bool
 
 }

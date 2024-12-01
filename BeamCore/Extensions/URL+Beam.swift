@@ -169,6 +169,25 @@ public extension URL {
         return components.url
     }
 
+    /// Add `:~:text=` url fragment to url to link directly to a text on a page
+    /// will strip previous link fragments and truncate long text fragments to <starts-with>,<ends-with>
+    func withTextFragment(_ text: String) -> URL {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return self }
+
+        var truncatedText = text
+        let limit = 100
+        if text.count > limit {
+            let leader = ","
+            let words = text.split(separator: " ")
+            let prefix = words.prefix(through: 4).joined(separator: " ")
+            let suffix = words.suffix(4).joined(separator: " ")
+            truncatedText = "\(prefix)\(leader)\(suffix)"
+        }
+        components.fragment = ":~:text=\(truncatedText)"
+        return components.url ?? self
+    }
+
+
     var isSearchEngineResultPage: Bool {
         guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
               let host = components.host,

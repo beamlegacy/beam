@@ -16,6 +16,7 @@ enum ShareService: CaseIterable {
     case reddit
     // os
     case copy
+    case copyWithURL
     case email
     case messages
 
@@ -29,7 +30,7 @@ enum ShareService: CaseIterable {
             return "LinkedIn"
         case .reddit:
             return "Reddit"
-        case .copy:
+        case .copy, .copyWithURL:
             return "Copy"
         case .email:
             return "Email"
@@ -48,7 +49,7 @@ enum ShareService: CaseIterable {
             return "social-linkedin_fill"
         case .reddit:
             return "social-reddit_fill"
-        case .copy:
+        case .copy, .copyWithURL:
             return "editor-url_copy_16"
         case .email:
             return "social-mail_fill"
@@ -68,7 +69,7 @@ enum ShareService: CaseIterable {
         }
         var queryItems: [String: String?] = [:]
         switch self {
-        case .copy:
+        case .copy, .copyWithURL:
             return nil
         case .twitter:
             baseURLString = "https://twitter.com/intent/tweet"

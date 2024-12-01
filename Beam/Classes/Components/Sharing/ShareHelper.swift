@@ -26,10 +26,12 @@ class ShareHelper {
 
     func shareContent(_ elements: [BeamElement], originURL: URL, service: ShareService) async {
         switch service {
-        case .copy:
+        case .copy, .copyWithURL:
+            let url: URL? = service == .copyWithURL ? originURL : nil
             if elements.isEmpty {
-                await setContentToPasteboard(ReadShareableContent(text: originURL.absoluteString))
-            } else if let shareContent = getShareableContent(from: elements) {
+                await setContentToPasteboard(ReadShareableContent(text: originURL.absoluteString, url: url))
+            } else if var shareContent = getShareableContent(from: elements) {
+                shareContent.url = url
                 await setContentToPasteboard(shareContent)
             } else {
                 Logger.shared.logError("Unable to get any content to share", category: .pointAndShoot)
@@ -86,7 +88,13 @@ class ShareHelper {
 
         if let text = content.text ?? content.url?.absoluteString {
             pasteboard.declareTypes([.string], owner: nil)
-            pasteboard.setString(text, forType: .string)
+            if let url = content.url {
+                let urlWithFragment = PreferencesManager.isLinkTextFragmentEnabled ? url.withTextFragment(text) : url
+                let attributedString = NSMutableAttributedString(string: text, attributes: [.link: urlWithFragment])
+                pasteboard.writeObjects([attributedString])
+            } else {
+                pasteboard.setString(text, forType: .string)
+            }
         }
 
         // When we have a single image, let's put the file directly in pasteboard

@@ -30,7 +30,7 @@ struct BrowserPreferencesView: View {
     }
 
     private func getSettingsRows() -> [Settings.Row] {
-        var rows = [searchEngineRow, importBrowserDataRow, historyRow, downloadsRow, tabsRow, soundsRow, videoCallsRow, clearCachesRow]
+        var rows = [searchEngineRow, importBrowserDataRow, historyRow, downloadsRow, tabsRow, soundsRow, videoCallsRow, linksRow, clearCachesRow]
 
         if !BeamData.isDefaultBrowser {
             rows.insert(defaultBrowserRow, at: 0)
@@ -99,6 +99,14 @@ struct BrowserPreferencesView: View {
             Text("Video Calls:")
         } content: {
             VideoCallsSection()
+        }
+    }
+
+    private var linksRow: Settings.Row {
+        Settings.Row(hasDivider: true) {
+            Text("Links:")
+        } content: {
+            CopyLinksSection()
         }
     }
 
@@ -453,3 +461,21 @@ struct VideoCallsSection: View {
         }
     }
 }
+
+private struct CopyLinksSection: View {
+    @State private var isLinkTextFragmentEnabled = PreferencesManager.isLinkTextFragmentEnabled
+
+    var body: some View {
+        Toggle(isOn: $isLinkTextFragmentEnabled) {
+            Text("Enable Link Text Fragment on Copy")
+        }
+        .accessibilityIdentifier("link-fragment-checkbox")
+        .toggleStyle(CheckboxToggleStyle())
+        .font(BeamFont.regular(size: 13).swiftUI)
+        .foregroundColor(BeamColor.Generic.text.swiftUI)
+        .onChange(of: isLinkTextFragmentEnabled) {
+            PreferencesManager.isLinkTextFragmentEnabled = $0
+        }
+    }
+}
+
