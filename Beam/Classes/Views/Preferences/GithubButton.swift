@@ -9,7 +9,7 @@ struct GithubButton: View {
     var onDataSync: (() -> Void)?
     var onFailure: (() -> Void)?
 
-    private let type = IdentityRequest.Provider.github
+    private let type = OAuthIdentityProvider.github
 
     private let authClient = OAuth2Swift(
         consumerKey: EnvironmentVariables.Oauth.Github.consumerKey,

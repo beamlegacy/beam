@@ -59,9 +59,10 @@ class BrowsingTreeSender {
     public let group = DispatchGroup()
 
     init?(session: URLSessionProtocol = URLSession.shared, config: BrowsingTreeSenderConfig, appSessionId: UUID) {
-        guard config.dataStoreApiToken != "$(BROWSING_TREE_ACCESS_TOKEN)",
-              config.dataStoreUrl != "$(BROWSING_TREE_URL)",
-              let url = URL(string: config.dataStoreUrl)
+        guard !config.dataStoreUrl.isEmpty,
+              !config.dataStoreApiToken.isEmpty,
+              let url = URL(string: config.dataStoreUrl),
+              url.scheme == "http" || url.scheme == "https"
         else {
             Logger.shared.logError("Sender credential issue", category: .browsingTreeSender)
             return nil

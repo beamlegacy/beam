@@ -37,8 +37,7 @@ protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol
     /// When doing manual conflict management. `object` and `remoteObject` can be the same if the conflict was only
     /// because of a checksum issue, when we locally have stored previousChecksum but it's been deleted on the server
     /// side
-    /// You only need to use this when you have manual conflict management, see `BeamDocumentSynchronizer` for an example of how to implement it, and
-    /// `DatabaseManager` if you don't handle conflict manually
+    /// You only need to use this when you have manual conflict management.
     func manageConflict(_ object: BeamObjectType,
                         _ remoteObject: BeamObjectType) throws -> BeamObjectType
 
@@ -73,7 +72,7 @@ extension BeamObjectManagerDelegate {
         }
         #endif
 
-        return Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+        return .multipartUpload
     }
 
     func registerOnBeamObjectManager(_ objectManager: BeamObjectManager) {

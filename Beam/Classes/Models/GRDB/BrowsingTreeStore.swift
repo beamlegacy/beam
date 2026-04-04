@@ -170,9 +170,6 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
         self.objectManager = objectManager
         self.providedDb = db
 
-        if Configuration.browsingTreeApiSyncEnabled {
-            registerOnBeamObjectManager(objectManager)
-        }
     }
 
     func process(tree: BrowsingTree) {
@@ -181,11 +178,6 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     func save(browsingTree: BrowsingTree, appSessionId: UUID? = nil) throws {
         guard let db = db, let record = browsingTree.toRecord(appSessionId: appSessionId) else { return }
         try db.save(browsingTreeRecord: record)
-        if AuthenticationManager.shared.isAuthenticated,
-            NetworkMonitor.isNetworkAvailable,
-            Configuration.browsingTreeApiSyncEnabled {
-            try self.saveOnNetwork(record)
-        }
     }
     func save(browsingTree: BrowsingTree, appSessionId: UUID? = nil, completion:  @escaping () -> Void) {
         DispatchQueue.database.async { [weak self] in
@@ -287,7 +279,7 @@ enum BrowsingTreeStoreManagerError: Error, Equatable {
 extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
     static var uploadType: BeamObjectRequestUploadType {
-        Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+        .multipartUpload
     }
 
     func willSaveAllOnBeamObjectApi() {}

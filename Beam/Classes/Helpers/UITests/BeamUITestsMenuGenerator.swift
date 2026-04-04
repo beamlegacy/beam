@@ -398,7 +398,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         for window in AppDelegate.main.windows {
             window.state.closeAllTabs(closePinnedTabs: true)
         }
-        Configuration.setAPIEndPointsToStaging()
         AppDelegate.main.deleteAllLocalData()
     }
 

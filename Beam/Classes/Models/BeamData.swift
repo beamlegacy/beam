@@ -147,15 +147,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     let browsingTreeStoreManager: BrowsingTreeStoreManager
     let linkDB: BeamLinkDB
 
-    func registerSyncDelegates() {
-        self.contactsManager.registerOnBeamObjectManager(objectManager)
-        self.passwordManager.registerOnBeamObjectManager(objectManager)
-        self.privateKeySignatureManager.registerOnBeamObjectManager(objectManager)
-        //self.browsingTreeStoreManager.registerOnBeamObjectManager(objectManager)
-        ((self.noteFrecencyScorer as? ExponentialFrecencyScorer)?.storage as? GRDBNoteFrecencyStorage)?.registerOnBeamObjectManager(objectManager)
-        self.linkDB.registerOnBeamObjectManager(objectManager)
-    }
-
     override init() {
         self.contactsManager = ContactsManager(objectManager: objectManager)
         self.passwordManager = PasswordManager(objectManager: objectManager)
@@ -176,13 +167,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         cookieManager = CookiesManager()
         versionChecker = Self.createVersionChecker()
 
-        let treeConfig = BrowsingTreeSenderConfig(
-            dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
-            dataStoreApiToken: EnvironmentVariables.BrowsingTree.accessToken,
-            waitTimeOut: 2.0,
-            anonymized: Configuration.branchType != .develop
-        )
-        browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
+        browsingTreeSender = nil
         super.init()
         BeamNote.idForNoteNamed = { [weak self] title in
             guard let collection = self?.currentDocumentCollection,

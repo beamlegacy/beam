@@ -17,7 +17,7 @@ import Nimble
 class RestAPIserverTests: QuickSpec {
     override func spec() {
 
-        afterEach() {
+        afterEach {
             Configuration.reset()
         }
 
@@ -25,36 +25,18 @@ class RestAPIserverTests: QuickSpec {
             describe("with embed") {
                 let request = RestAPIServer.Request.embed(url: URL.init(string: "foo")!)
 
-                describe("with default configuration") {
-                    it("Returns the env url") {
-                        Configuration.reset()
-                        XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.embed))
-                    }
-                }
-
-                describe("with custom URL") {
-                    it("Returns the custom url") {
-                        Configuration.publicAPIembed = "https://custom"
-                        XCTAssertEqual(request.baseURL, URL.init(string: "https://custom"))
-                    }
+                it("Returns the env url") {
+                    Configuration.reset()
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIembed))
                 }
             }
 
             describe("with providers") {
                 let request = RestAPIServer.Request.providers
 
-                describe("with default configuration") {
-                    it("Returns the env url") {
-                        Configuration.reset()
-                        XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.embed))
-                    }
-                }
-
-                describe("with custom URL") {
-                    it("Returns the custom url") {
-                        Configuration.publicAPIembed = "https://custom"
-                        XCTAssertEqual(request.baseURL, URL.init(string: "https://custom"))
-                    }
+                it("Returns the env url") {
+                    Configuration.reset()
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIembed))
                 }
             }
 
@@ -65,36 +47,18 @@ class RestAPIserverTests: QuickSpec {
                 }
                 let request = RestAPIServer.Request.publishNote(note: note, tabGroups: nil, publicationGroups: [], fileManager: BeamData.shared.fileDBManager!)
 
-                describe("with default configuration") {
-                    it("Returns the env url") {
-                        Configuration.reset()
-                        XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.publishServer))
-                    }
-                }
-
-                describe("with custom URL") {
-                    it("Returns the custom url") {
-                        Configuration.publicAPIpublishServer = "https://custom"
-                        XCTAssertEqual(request.baseURL, URL.init(string: "https://custom"))
-                    }
+                it("Returns the env url") {
+                    Configuration.reset()
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIpublishServer))
                 }
             }
 
             describe("with unpublishNote") {
                 let request = RestAPIServer.Request.unpublishNote(noteId: UUID())
 
-                describe("with default configuration") {
-                    it("Returns the env url") {
-                        Configuration.reset()
-                        XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.publishServer))
-                    }
-                }
-
-                describe("with custom URL") {
-                    it("Returns the custom url") {
-                        Configuration.publicAPIpublishServer = "https://custom"
-                        XCTAssertEqual(request.baseURL, URL.init(string: "https://custom"))
-                    }
+                it("Returns the env url") {
+                    Configuration.reset()
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIpublishServer))
                 }
             }
 
@@ -105,18 +69,9 @@ class RestAPIserverTests: QuickSpec {
                 }
                 let request = RestAPIServer.Request.updatePublicationGroup(note: note, tabGroups: nil, publicationGroups: [], fileManager: BeamData.shared.fileDBManager!)
 
-                describe("with default configuration") {
-                    it("Returns the env url") {
-                        Configuration.reset()
-                        XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.publishServer))
-                    }
-                }
-
-                describe("with custom URL") {
-                    it("Returns the custom url") {
-                        Configuration.publicAPIpublishServer = "https://custom"
-                        XCTAssertEqual(request.baseURL, URL.init(string: "https://custom"))
-                    }
+                it("Returns the env url") {
+                    Configuration.reset()
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIpublishServer))
                 }
             }
         }

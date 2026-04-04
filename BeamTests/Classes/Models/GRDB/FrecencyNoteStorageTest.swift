@@ -118,7 +118,6 @@ class FrecencyNoteStorageWithNetworkTest: XCTestCase {
         db = try BeamNoteLinksAndRefsManager(store: store)
         try store.migrate()
         objectManager.disableSendingObjects = false
-        Configuration.beamObjectDirectCall = false
         beforeNetworkTests()
 
     }

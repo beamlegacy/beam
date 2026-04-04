@@ -29,19 +29,8 @@ public struct EnvironmentVariables {
         }
     }
 
-    public struct BrowsingTree {
-        static public private(set) var accessToken = "$(BROWSING_TREE_ACCESS_TOKEN)"
-        static public private(set) var url = "$(BROWSING_TREE_URL)"
-        static public private(set) var apiSyncEnabled = NSString("$(BROWSING_TREE_API_SYNC_ENABLED)").boolValue
-    }
-
     public struct Clustering {
         static public private(set) var tabColoring = NSString("$(TAB_COLORING)").boolValue
-    }
-
-    public struct PublicAPI {
-        static public private(set) var embed = "$(PUBLIC_API_EMBED_URL)"
-        static public private(set) var publishServer = "$(PUBLIC_API_PUBLISH_URL)"
     }
 
     public struct Account {
@@ -55,9 +44,6 @@ public struct EnvironmentVariables {
 
     static public private(set) var env = "debug" //"$(ENV)"
     static public private(set) var autoUpdate = false //NSString("$(AUTOMATIC_UPDATE)").boolValue
-    static public private(set) var networkStubs = NSString("$(NETWORK_STUBS)").boolValue
-    static public private(set) var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
-    static public private(set) var beamObjectSendPrivateKey = NSString("$(BEAM_OBJECT_SEND_PRIVATE_KEY)").boolValue
     static public private(set) var hideCategories = "$(HIDE_CATEGORIES)".split(separator: " ").compactMap {
         LogCategory(rawValue: String($0))
     }

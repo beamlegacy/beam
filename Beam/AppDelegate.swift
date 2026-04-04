@@ -104,13 +104,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         #if DEBUG
         if areE2ETestsRunning {
-            Configuration.setAPIEndPointsToStaging()
-            // add onboarding notes and clear daily summary
             OnboardingNoteCreator().createOnboardingNotes(data: BeamData.shared)
             KeychainDailyNoteScoreStore.shared.clear()
         }
         #endif
-        
+
         ContentBlockingManager.shared.setup()
 
         //TODO: - Remove when everyone has its local links data moved from old db to grdb
@@ -141,16 +139,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         Logger.shared.logInfo("This version of Beam was built from a \(EnvironmentVariables.branchType) branch", category: .general)
 
-        // So we remember we're not currently using the default api server
-        if Configuration.apiHostnameDefault != Configuration.apiHostname {
-            Logger.shared.logWarning("API HOSTNAME is \(Configuration.apiHostname)", category: .general)
-        }
-
-        // So we remember we're not currently using the default api server
-        if Configuration.restApiHostname != Configuration.restApiHostnameDefault {
-            Logger.shared.logWarning("REST API HOSTNAME is \(Configuration.restApiHostname)", category: .general)
-        }
-
         #if DEBUG
         prepareMenuForTestEnv()
         #endif
@@ -160,10 +148,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         initializeSpellChecker()
         fetchTopDomains()
         LoggerRecorder.shared.deleteEntries(olderThan: DateComponents(hour: -2))
-        if !isRunningTests {
-            let tenMinutes: TimeInterval = 60*10
-            FeatureFlags.startUpdate(refreshInterval: tenMinutes)
-        }
     }
 
     // MARK: - Network Monitor
@@ -193,34 +177,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Web sockets
     func disconnectWebSockets() {
         data.currentAccount?.disconnectWebSockets()
-    }
-
-    // MARK: - Database
-    @MainActor
-    func syncDataWithBeamObject(force: Bool = false, showAlert: Bool = true) async throws -> Bool {
-        guard let account = data.currentAccount else { return false }
-        return try await account.syncDataWithBeamObject(force: force, showAlert: showAlert)
-    }
-
-    private func indexAllNotes() {
-        DispatchQueue.main.async {
-            BeamNote.indexAllNotes(interactive: false)
-        }
-    }
-
-    private func deleteEmptyDatabases(showAlert: Bool = true,
-                                      _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-
-        guard let currentAccount = data.currentAccount else { return }
-        do {
-            try currentAccount.deleteEmptyDatabases()
-            completionHandler?(.success(true))
-        } catch {
-            Logger.shared.logInfo("deleteEmptyDatabases failed: \(error)",
-                                  category: .database)
-            completionHandler?(.failure(error))
-            return
-        }
     }
 
     // MARK: -
@@ -433,11 +389,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func migrateLegacyData() {
-        BeamAccount.disableSync()
-        defer {
-            BeamAccount.enableSync()
-        }
-
         if !BeamAccount.hasValidAccount(in: data.accountsPath) {
             splashScreenWindow = SplashScreenWindow()
             splashScreenWindow?.presentWindow()
@@ -571,18 +522,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var filesWindow: FilesWindow?
     var tabClusterinV1SettingsWindow: TabClusteringV1SettingsWindow?
     weak var tabGroupingFeedbackWindow: TabGroupingFeedbackWindow?
-    ///Should only be used to say that the full sync on quit is done
-    ///Set to true to directly return .terminateNow in shouldTerminate
-    var fullSyncOnQuitStatus: FullSyncOnQuitStatus = .notStarted
-
     // MARK: -
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard !skipTerminateMethods, fullSyncOnQuitStatus != .done else { return .terminateNow }
-        guard fullSyncOnQuitStatus != .ongoing else {
-            Logger.shared.logDebug("Tried to quit while full syncing")
-            return .terminateCancel
-        }
+        guard !skipTerminateMethods else { return .terminateNow }
 
         data.saveData()
 
@@ -641,26 +584,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             restoreSession = false
         }
 
-        //We need to trigger full sync before quitting the app
-        //To make it feel more instant, we first close all the windows
         windows.forEach {
             $0.close()
         }
 
-        //Then start the full sync.
-        //As this code is async, but uses at some point the main thread, we could not ."terminateLater"
-        //because it will set its RunLoop in the modalPanel mode and that will make dispatch to main queue fail
-        //More explanations here: https://www.thecave.com/2015/08/10/dispatch-async-to-main-queue-doesnt-work-with-modal-window-on-mac-os-x
-        fullSyncOnQuitStatus = .ongoing
-        Task { @MainActor in
-            _ = try? await syncDataWithBeamObject(force: false, showAlert: false)
-            Logger.shared.logDebug("Full sync finished. Asking again to quit, without full sync")
-            self.fullSyncOnQuitStatus = .done
-            NSApp.terminate(nil)
-        }
-
-        //We cancel the quit for now. Will ask again after full sync is over
-        return .terminateCancel
+        return .terminateNow
     }
 
     private func cancelQuitAlertForImports() -> Bool {
@@ -764,15 +692,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return handleOpenFileURL(URL(fileURLWithPath: filename))
     }
 
-}
-
-// MARK: - Full sync on quit
-extension AppDelegate {
-    enum FullSyncOnQuitStatus {
-        case notStarted
-        case ongoing
-        case done
-    }
 }
 
 // MARK: - NSAppearance

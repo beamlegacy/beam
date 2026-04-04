@@ -9,7 +9,7 @@ enum OAuthButtonType {
 }
 
 struct OauthButton<Content: View>: View {
-    var type: IdentityRequest.Provider
+    var type: OAuthIdentityProvider
     var authClient: OAuth2Swift
     var callbackURL: String
     var scope: String

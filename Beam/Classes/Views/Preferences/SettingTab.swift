@@ -54,7 +54,7 @@ enum SettingTab: String, CaseIterable {
         case .calendars: return NSHostingView(rootView: CalendarsView(viewModel: CalendarsViewModel(calendarManager: BeamData.shared.calendarManager)).fixedSize())
         case .about: return NSHostingView(rootView: AboutPreferencesView().fixedSize())
         case .beta:
-            return NSHostingView(rootView: BetaPreferencesView(viewModel: BetaPreferencesViewModel(objectManager: BeamData.shared.objectManager)).environment(\.managedObjectContext, CoreDataManager.shared.mainContext).fixedSize())
+            return NSHostingView(rootView: BetaPreferencesView().environment(\.managedObjectContext, CoreDataManager.shared.mainContext).fixedSize())
         case .advanced: return NSHostingView(rootView: AdvancedPreferencesView().environment(\.managedObjectContext, CoreDataManager.shared.mainContext).fixedSize())
         case .editor: return NSHostingView(rootView: EditorDebugPreferencesView().fixedSize())
         case .clustering: return NSHostingView(rootView: ClusteringPreferencesView().fixedSize())

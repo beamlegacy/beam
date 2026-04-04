@@ -70,7 +70,6 @@ public final class BeamObjectManager {
     var disableSendingObjects = true
 
     let lock = NSLock()
-    var fullSyncRunning = false
 
     var synchronizationStatusSubject = CurrentValueSubject<BeamObjectObjectSynchronizationStatus, Never>(.notStarted)
     var synchronizationStatus: BeamObjectObjectSynchronizationStatus {
@@ -85,9 +84,6 @@ public final class BeamObjectManager {
     #if DEBUG
     var networkRequests: [APIRequest] = []
     #endif
-
-    var webSocketRequest: APIWebSocketRequest?
-    var websocketRetryDelay = 0
 
     func register<M: BeamObjectManagerDelegateProtocol, O: BeamObjectProtocol>(_ manager: M, object: O.Type) {
         managerInstances[object.beamObjectType] = manager
@@ -195,18 +191,11 @@ public final class BeamObjectManager {
     }
 
     func setup() {
-        let treeSyncEnabled = Configuration.browsingTreeApiSyncEnabled
-
         /*
          Not yet used: In what order should we proceed when receiving new objects? We might have objects with
          dependencies. Ex: `Document` needs `Database`.
-
-         We should use that order when sending objects to the API, and when receiving new objects.
          */
         managerOrder = [.privateKeySignature, .database, .contact, .file, .tabGroup, .document, .password, .link, .noteFrecency]
-        if treeSyncEnabled {
-            managerOrder.append(.browsingTree)
-        }
 
         if managerOrder.count != managerInstances.count {
             Logger.shared.logError("Wrong number of BeamObjectManagers. Should be \(managerOrder.count): \(managerOrder)\nbut had \(managerInstances.count): \(managerInstances.values)", category: .beamObjectDebug)
@@ -225,16 +214,6 @@ public final class BeamObjectManager {
         }
 
         return filteredObjects
-    }
-
-    func parseObjectChecksums(_ objects: [BeamObject]) -> [BeamObject] {
-        let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objects)
-
-        let changedObjects = objects.filter {
-            $0.dataChecksum != checksums[$0] || checksums[$0] == nil
-        }
-
-        return changedObjects
     }
 
     func parseFilteredObjects(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws {
@@ -388,6 +367,12 @@ public final class BeamObjectManager {
         result.previousChecksum = remoteObject.dataChecksum
         return result
     }
+
+    func liveSync(_ firstCall: Bool = true, _ handler: @escaping (Bool, Bool) -> Void) {
+        handler(false, false)
+    }
+
+    func disconnectLiveSync() {}
 }
 
 // MARK: - BeamObjectProtocol

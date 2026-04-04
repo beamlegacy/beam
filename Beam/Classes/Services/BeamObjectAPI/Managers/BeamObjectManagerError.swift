@@ -10,7 +10,6 @@ enum BeamObjectManagerError: Error {
     case encodingError
     case invalidObjectType(BeamObject, BeamObject)
     case beamObjectAPIDisabled
-    case fullSyncAlreadyRunning
     case fetchError
     case saveError
     case nestedTooDeep
@@ -48,9 +47,7 @@ extension BeamObjectManagerError: LocalizedError {
         case .noData:
             return "Object has no data"
         case .sendingObjectsDisabled:
-            return "Sending objects is disabled until first sync is complete"
-        case .fullSyncAlreadyRunning:
-            return "Full sync is already running"
+            return "Sending objects is disabled"
         }
     }
 }

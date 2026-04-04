@@ -8,55 +8,7 @@ extension APIRequest {
     func performRequest<T: Decodable & Errorable, E: GraphqlParametersProtocol>(bodyParamsRequest: E,
                                                                                 authenticatedCall: Bool? = nil,
                                                                                 completionHandler: @escaping (Swift.Result<T, Error>) -> Void) throws -> Foundation.URLSessionDataTask {
-        guard FeatureFlags.current.syncEnabled else {
-            throw APIRequestError.syncDisabledByFeatureFlag
-        }
-
-        let request = try makeUrlRequest(bodyParamsRequest, authenticatedCall: authenticatedCall)
-
-        let filename = bodyParamsRequest.fileName ?? "no filename"
-
-        #if DEBUG
-        Self.networkCallFilesLock {
-            Self.networkCallFiles.append(filename)
-        }
-
-        if !Self.expectedCallFiles.isEmpty, !Self.expectedCallFiles.starts(with: Self.networkCallFiles) {
-            Logger.shared.logDebug("Expected network calls: \(Self.expectedCallFiles)", category: .network)
-            Logger.shared.logDebug("Current network calls: \(Self.networkCallFiles)", category: .network)
-            Logger.shared.logError("Current network calls is different from expected", category: .network)
-        }
-        #endif
-
-        if Configuration.env == .test, !BeamURLSession.shouldNotBeVinyled, !(BeamURLSession.shared is Turntable), !ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument) {
-            fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
-        }
-
-        // Note: all `completionHandler` call must use `backgroundQueue.async` because if the
-        // code called in the completion handler is blocking, it will prevent new following requests
-        // to be parsed in the NSURLSession delegate callback thread
-
-        let localTimer = Date()
-
-        #if DEBUG
-        Logger.shared.logDebug("Calling \(filename)", category: .network)
-        #endif
-
-        dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
-            self.parseDataTask(data: data,
-                               response: response,
-                               error: error,
-                               filename: filename,
-                               authenticatedCall: authenticatedCall,
-                               localTimer: localTimer,
-                               completionHandler: completionHandler)
-        }
-
-        dataTask?.resume()
-
-        if self.cancelRequest { dataTask?.cancel() }
-
-        return dataTask!
+        throw APIRequestError.networkUnavailable
     }
 
     static var networkCallFiles: [String] = []
