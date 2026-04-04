@@ -239,7 +239,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                 let note = try decoder.decode(BeamNote.self, from: document.data)
                 try BeamData.shared.noteLinksAndRefsManager?.append(note: note)
             } catch {
-                Logger.shared.logError("Error while trying to index synced note '\(document.title)' [\(document.id)]: \(error)", category: .document)
+                Logger.shared.logError("Error while trying to index note '\(document.title)' [\(document.id)]: \(error)", category: .document)
             }
         }
     }

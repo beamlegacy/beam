@@ -57,7 +57,7 @@ class PrivateKeySignatureManager: BeamObjectManagerDelegate {
     
     internal static var conflictPolicy: BeamObjectConflictResolution = .replace
     static var uploadType: BeamObjectRequestUploadType {
-        Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+        .multipartUpload
     }
     var privateKeySignature: PrivateKeySignature { PrivateKeySignature() }
 
@@ -74,23 +74,7 @@ class PrivateKeySignatureManager: BeamObjectManagerDelegate {
     }
 
     func distantKeyStatus() async throws -> DistantKeyStatus {
-        var status = DistantKeyStatus.none
-        do {
-            let signatures = try await self.fetchAllFromBeamObjectAPI(raisePrivateKeyError: true)
-            status = signatures.isEmpty ? .none : .valid
-        } catch {
-            switch error {
-            case let BeamObjectRequest.BeamObjectRequestError.privateKeyError(validObjects: _, invalidObjects: invalidObjects):
-                assert(!invalidObjects.isEmpty)
-                assert(invalidObjects.first?.beamObjectType == BeamObjectObjectType.privateKeySignature.rawValue)
-            default:
-                throw error
-            }
-
-            Logger.shared.logError("Error fetching distant key from API: \(error)", category: .privateKeySignature)
-            status = .invalid
-        }
-        return status
+        .none
     }
 
     func willSaveAllOnBeamObjectApi() {}

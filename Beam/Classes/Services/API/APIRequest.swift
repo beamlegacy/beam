@@ -40,7 +40,8 @@ class BeamURLSessionDelegate: NSObject, URLSessionDelegate {
 }
 
 class APIRequest: NSObject {
-    var route: String { "\(Configuration.apiHostname)/graphql" }
+    /// Unused: GraphQL is disabled (no remote Beam API). `performRequest` throws before building a URL.
+    var route: String { "about:blank" }
     var authenticatedAPICall = true
     static var callsCount = 0
     static var uploadedBytes: Int64 = 0

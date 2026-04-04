@@ -102,10 +102,11 @@ final class BeamNoteDocumentWrapper: NSDocument {
         guard let note = note,
               let database = BeamData.shared.currentDatabase else { return }
         note.owner = database
-        guard let doc = note.document else { return }
-
-        // We use the same mecanism than when recieving notes from the sync, so that we can go thru a tested and well known code path:
-        try AppData.shared.currentAccount?.documentSynchroniser?.receivedObjects([doc])
+        guard var doc = note.document else { return }
+        doc.database = database
+        guard let collection = database.collection else { return }
+        _ = try collection.save(BeamData.shared, doc, indexDocument: true, autoIncrementVersion: false)
+        note.recalculateFileReferences()
 
         let fileElements = note.allFileElements
         if !fileElements.isEmpty {

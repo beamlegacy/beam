@@ -9,10 +9,6 @@ struct AdvancedPreferencesView: View {
                 .tabItem {
                     Text("General")
                 }
-            AdvancedPreferencesNetwork()
-                .tabItem {
-                    Text("Network")
-                }
             AdvancedPreferencesDatabase()
                 .tabItem {
                     Text("Database")

@@ -4,13 +4,6 @@ import BeamCore
 extension BeamObjectManagerDelegate {
     func saveAllOnBeamObjectApi(force: Bool = false,
                                 progress: ((Float) -> Void)? = nil) async throws -> (Int, Date?) {
-        guard AuthenticationManager.shared.isAuthenticated else {
-            throw APIRequestError.notAuthenticated
-        }
-        guard NetworkMonitor.isNetworkAvailable else {
-            throw APIRequestError.networkUnavailable
-        }
-
         self.willSaveAllOnBeamObjectApi()
 
         let localTimer = Date()
@@ -67,13 +60,6 @@ extension BeamObjectManagerDelegate {
     @discardableResult
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
                               force: Bool = false) async throws -> [BeamObjectType] {
-        guard AuthenticationManager.shared.isAuthenticated else {
-            throw APIRequestError.notAuthenticated
-        }
-        guard NetworkMonitor.isNetworkAvailable else {
-            throw APIRequestError.networkUnavailable
-        }
-
         let beamObjectTypes = Set(objects.map { type(of: $0).beamObjectType.rawValue }).joined(separator: ", ")
         Logger.shared.logDebug("saveOnBeamObjectsAPI called with \(objects.count) objects of type \(beamObjectTypes)",
                                category: .beamObjectNetwork)
@@ -122,13 +108,6 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func deleteFromBeamObjectAPI(object: BeamObjectType) async throws -> Bool {
-        guard AuthenticationManager.shared.isAuthenticated else {
-            throw APIRequestError.notAuthenticated
-        }
-        guard NetworkMonitor.isNetworkAvailable else {
-            throw APIRequestError.networkUnavailable
-        }
-
         try await objectManager.delete(object: object)
 
         return true
@@ -136,13 +115,6 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func deleteFromBeamObjectAPI(objects: [BeamObjectType]) async throws -> Bool {
-        guard AuthenticationManager.shared.isAuthenticated else {
-            throw APIRequestError.notAuthenticated
-        }
-        guard NetworkMonitor.isNetworkAvailable else {
-            throw APIRequestError.networkUnavailable
-        }
-
         var errors: [Error] = []
 
         for object in objects {
@@ -161,13 +133,6 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func deleteAllFromBeamObjectAPI() async throws -> Bool {
-        guard AuthenticationManager.shared.isAuthenticated else {
-            throw APIRequestError.notAuthenticated
-        }
-        guard NetworkMonitor.isNetworkAvailable else {
-            throw APIRequestError.networkUnavailable
-        }
-
         try await objectManager.deleteAll(BeamObjectType.beamObjectType)
         return true
     }
@@ -175,13 +140,6 @@ extension BeamObjectManagerDelegate {
     @discardableResult
     func refreshFromBeamObjectAPI(_ object: BeamObjectType,
                                   _ forced: Bool = false) async throws -> BeamObjectType? {
-        guard AuthenticationManager.shared.isAuthenticated else {
-            throw APIRequestError.notAuthenticated
-        }
-        guard NetworkMonitor.isNetworkAvailable else {
-            throw APIRequestError.networkUnavailable
-        }
-        
         return try await objectQueue.addOperation(for: [object]) { _ in
             guard !forced else {
                 do {
@@ -216,37 +174,13 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func fetchAllFromBeamObjectAPI(raisePrivateKeyError: Bool = false) async throws -> [BeamObjectType] {
-        guard AuthenticationManager.shared.isAuthenticated else {
-            throw APIRequestError.notAuthenticated
-        }
-        guard NetworkMonitor.isNetworkAvailable else {
-            throw APIRequestError.networkUnavailable
-        }
-
-        return try await objectManager.fetchAllObjects(raisePrivateKeyError: raisePrivateKeyError)
+        try await objectManager.fetchAllObjects(raisePrivateKeyError: raisePrivateKeyError)
     }
 
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
                              force: Bool = false) async throws {
-        guard AuthenticationManager.shared.isAuthenticated else {
-            throw APIRequestError.notAuthenticated
-        }
-        guard NetworkMonitor.isNetworkAvailable else {
-            throw APIRequestError.networkUnavailable
-        }
-
         Logger.shared.logDebug("saveOnBeamObjectAPI called. Object \(object.beamObjectId), type: \(type(of: object).beamObjectType)",
                                category: .beamObjectNetwork)
-
-        let fullSyncRunning = objectManager.lock { () -> Bool in
-            if objectManager.fullSyncRunning {
-                addChangedObject(object)
-                return true
-            }
-            return false
-        }
-
-        guard !fullSyncRunning else { return }
 
         try await objectQueue.addOperation(for: [object]) { _ in
             do {
@@ -351,7 +285,7 @@ extension BeamObjectManagerDelegate {
             return objects
         }
         if !objects.isEmpty {
-            Logger.shared.logDebug("syncAllFromAPI: saving \(objects.count) changed objects.", category: .sync)
+            Logger.shared.logDebug("saveChangedObjects: saving \(objects.count) changed objects.", category: .beamObjectNetwork)
             try await saveOnBeamObjectsAPI(objects)
         }
     }

@@ -13,7 +13,7 @@ class EmbedContentAPIStrategyTests: XCTestCase {
     let st = EmbedContentAPIStrategy()
 
     override func setUp() {
-        Configuration.setAPIEndPointsToStaging()
+        Configuration.reset()
     }
 
     override class func tearDown() {

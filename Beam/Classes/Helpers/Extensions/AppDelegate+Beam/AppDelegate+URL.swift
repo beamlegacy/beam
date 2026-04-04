@@ -113,23 +113,6 @@ extension AppDelegate {
 
         switch urlPath.dropFirst() {
         case "configuration":
-            guard let params = components.queryItems else { break }
-
-            if let apiHostname = params.first(where: { $0.name == "apiHostname" })?.value {
-                Logger.shared.logDebug("Found apiHostname: \(apiHostname)", category: .general)
-                Configuration.apiHostname = apiHostname
-            }
-
-            if let publicAPIpublishServer = params.first(where: { $0.name == "publicAPIpublishServer" })?.value {
-                Logger.shared.logDebug("Found publicAPIpublishServer: \(publicAPIpublishServer)", category: .general)
-                Configuration.publicAPIpublishServer = publicAPIpublishServer
-            }
-
-            if let publicAPIembed = params.first(where: { $0.name == "publicAPIembed" })?.value {
-                Logger.shared.logDebug("Found publicAPIembed: \(publicAPIembed)", category: .general)
-                Configuration.publicAPIembed = publicAPIembed
-            }
-
             return
         case "callback":
             if let url = components.url {

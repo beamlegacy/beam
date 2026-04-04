@@ -48,16 +48,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     @Published public private(set) var databases: [UUID: BeamDatabase] = [:]
     @Published public private(set) var allDatabases: [BeamDatabase] = []
 
-    private var synchronizationTask: Task<Bool, Error>?
-    private var synchronizationSubject = PassthroughSubject<Bool, Never>()
-
-    var isSynchronizationRunning: Bool { synchronizationTask != nil }
-
     var checkPrivateKeyTask:Task<Bool, Never>?
-
-    var isSynchronizationRunningPublisher: AnyPublisher<Bool, Never> {
-        synchronizationSubject.eraseToAnyPublisher()
-    }
 
     public var objectManager: BeamObjectManager {
         data.objectManager
@@ -112,7 +103,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
         try postMigrationSetup()
 
         try refreshDatabases()
-        setupSync()
 
         DispatchQueue.main.async {
             do {
@@ -230,9 +220,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     }
 
     private func createPath() throws {
-        if !FileManager.default.fileExists(atPath: path) {
-            accountWillBeCreated()
-        }
         try FileManager.default.createDirectory(at: URL(fileURLWithPath: path), withIntermediateDirectories: true)
     }
 
@@ -287,7 +274,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     }
 
     func unload() throws {
-        uninitSync()
         try allDatabases.forEach {
             try $0.unload()
         }
@@ -324,42 +310,9 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
         Self.accountDeleted.send(BeamDeletedAccount(source, self, id))
     }
 
-    // MARK: Sync
-    var databaseSynchroniser: BeamDatabaseSynchronizer?
-    var documentSynchroniser: BeamDocumentSynchronizer?
-
-    public static func disableSync() {
-        syncDisabled = true
-    }
-
-    public static func enableSync() {
-        syncDisabled = false
-    }
-
-    var syncSetup = false
-    private static var syncDisabled = true
-    public func setupSync() {
-        guard !syncSetup, !Self.syncDisabled else { return }
-        databaseSynchroniser = BeamDatabaseSynchronizer(account: self, objectManager: objectManager)
-        documentSynchroniser = BeamDocumentSynchronizer(account: self, objectManager: objectManager)
-        data.registerSyncDelegates()
-        syncSetup = true
-    }
-
-    private func uninitSync() {
-        databaseSynchroniser = nil
-        documentSynchroniser = nil
-        syncSetup = false
-    }
-
     func clear() {
         databases.values.forEach { $0.clear() }
         clearManagersDB()
-    }
-
-    private func accountWillBeCreated() {
-        Persistence.Sync.BeamObjects.last_received_at = nil
-        Persistence.Sync.BeamObjects.last_updated_at = nil
     }
 
     public func checkAndRepairIntegrity() {
@@ -403,87 +356,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
         objectManager.disconnectLiveSync()
     }
 
-    // MARK: - Database
-    @MainActor
-    func syncDataWithBeamObject(force: Bool = false, showAlert: Bool = true) async throws -> Bool {
-        let isRunningUnitTests = Configuration.env == .test && !ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument)
-        guard !isRunningUnitTests,
-              AuthenticationManager.shared.isAuthenticated,
-              NetworkMonitor.isNetworkAvailable else {
-            return false
-        }
-
-        if let task = synchronizationTask {
-            Logger.shared.logDebug("syncTask already running", category: .beamObjectNetwork)
-            return try await task.value
-        }
-
-        let task = launchSynchronizationTask(force, showAlert)
-
-        synchronizationTask = task
-        synchronizationIsRunningDidUpdate()
-
-        return try await task.value
-    }
-
-    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool) -> Task<Bool, Error> {
-        Task { @MainActor in
-            let localTimer = Date()
-            let initialDBs = Set(allDatabases)
-            Logger.shared.logInfo("syncAllFromAPI calling", category: .sync)
-            do {
-                try await objectManager.syncAllFromAPI(force: force, prepareBeforeSaveAll: {
-                    self.mergeAllDatabases(initialDBs: initialDBs)
-                })
-            } catch {
-                Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
-                                      category: .sync,
-                                      localTimer: localTimer)
-                self.synchronizationTaskDidStop()
-                throw error
-            }
-
-            Logger.shared.logInfo("syncAllFromAPI called",
-                                  category: .sync,
-                                  localTimer: localTimer)
-            self.synchronizationTaskDidStop()
-            return true
-        }
-    }
-
-    public func stopSynchronization() {
-        if let task = synchronizationTask {
-            task.cancel()
-        }
-    }
-
-    @MainActor
-    private func synchronizationTaskDidStop() {
-        Logger.shared.logInfo("synchronizationTaskDidStop", category: .beamObjectNetwork)
-        synchronizationTask = nil
-        synchronizationIsRunningDidUpdate()
-    }
-
-    private func synchronizationIsRunningDidUpdate() {
-        synchronizationSubject.send(isSynchronizationRunning)
-    }
-
-    private func indexAllNotes() {
-        DispatchQueue.main.async {
-            BeamNote.indexAllNotes(interactive: false)
-        }
-    }
-
-    private func deleteEmptyDatabases(showAlert: Bool = true,
-                                      _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        do {
-            try deleteEmptyDatabases()
-            completionHandler?(.success(true))
-        } catch {
-            Logger.shared.logInfo("deleteEmptyDatabases failed: \(error)", category: .database)
-            completionHandler?(.failure(error))
-        }
-    }
 }
 
 @available(*, deprecated, message: "This method has been kept to make tests pass but will probably be removed soon.")

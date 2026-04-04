@@ -10,7 +10,7 @@ struct GoogleButton<Content: View>: View {
     var onFailure: (() -> Void)?
     var label: ((_ title: String) -> Content)?
 
-    private let type = IdentityRequest.Provider.google
+    private let type = OAuthIdentityProvider.google
 
     private let authClient = OAuth2Swift(
         consumerKey: EnvironmentVariables.Oauth.Google.consumerKey,

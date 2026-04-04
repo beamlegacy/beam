@@ -267,7 +267,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
 extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
     static var uploadType: BeamObjectRequestUploadType {
-        Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+        .multipartUpload
     }
 
     private func deduplicated(records: [FrecencyNoteRecord]) -> [FrecencyNoteRecord] {

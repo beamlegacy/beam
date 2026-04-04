@@ -143,7 +143,7 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
     
     static let tableName = "link"
     static var uploadType: BeamObjectRequestUploadType {
-        Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+        .multipartUpload
     }
 
     private var overridenManager: LinksDBManager?

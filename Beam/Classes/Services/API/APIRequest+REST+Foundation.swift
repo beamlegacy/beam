@@ -21,61 +21,7 @@ extension APIRequest {
                                                                   postParams: C? = nil,
                                                                   authenticatedCall: Bool? = nil,
                                                                   completionHandler: @escaping (Result<T, Error>) -> Void) throws -> Foundation.URLSessionDataTask {
-        guard FeatureFlags.current.syncEnabled else {
-            throw APIRequestError.syncDisabledByFeatureFlag
-        }
-
-        let path: String = {
-            switch path {
-            case .fetchAll:
-                return "/api/v1/beam_objects/fetch_all"
-            case .deleteAll:
-                return "/api/v1/beam_objects/delete_all"
-            }
-        }()
-
-        let request = try makeRestUrlRequest(path: path,
-                                             httpMethod: httpMethod,
-                                             queryParams: queryParams,
-                                             postParams: postParams,
-                                             authenticatedCall: authenticatedCall)
-        let filename = "rest call: \(Configuration.restApiHostname)\(path)"
-        #if DEBUG
-        Self.networkCallFilesLock {
-            Self.networkCallFiles.append(filename)
-        }
-
-        if !Self.expectedCallFiles.isEmpty, !Self.expectedCallFiles.starts(with: Self.networkCallFiles) {
-            Logger.shared.logDebug("Expected network calls: \(Self.expectedCallFiles)", category: .network)
-            Logger.shared.logDebug("Current network calls: \(Self.networkCallFiles)", category: .network)
-            Logger.shared.logError("Current network calls is different from expected", category: .network)
-        }
-        #endif
-
-        if Configuration.env == .test, !BeamURLSession.shouldNotBeVinyled, !(BeamURLSession.shared is Turntable), Configuration.env != .uiTest {
-            fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
-        }
-
-        let localTimer = Date()
-
-        #if DEBUG
-        Logger.shared.logDebug("Calling \(filename)", category: .network)
-        #endif
-
-        dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
-            self.parseDataTask(data: data,
-                               response: response,
-                               error: error,
-                               filename: filename,
-                               authenticatedCall: authenticatedCall,
-                               localTimer: localTimer,
-                               completionHandler: completionHandler)
-        }
-
-        dataTask?.resume()
-        if self.cancelRequest { dataTask?.cancel() }
-
-        return dataTask!
+        throw APIRequestError.networkUnavailable
     }
 
     func makeRestUrlRequest<C: Codable>(path: String,
@@ -83,7 +29,7 @@ extension APIRequest {
                                         queryParams: [[String: String]]? = nil,
                                         postParams: C? = nil,
                                         authenticatedCall: Bool?) throws -> URLRequest {
-        let fullLink = "\(Configuration.restApiHostname)\(path)"
+        let fullLink = "about:blank\(path)"
         var request: URLRequest
 
         var headers: [String: String] = [

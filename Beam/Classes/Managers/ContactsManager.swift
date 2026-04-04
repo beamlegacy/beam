@@ -178,7 +178,7 @@ class ContactsManager {
 extension ContactsManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
     static var uploadType: BeamObjectRequestUploadType {
-        Configuration.directUploadAllObjects ? .directUpload : .multipartUpload
+        .multipartUpload
     }
     func willSaveAllOnBeamObjectApi() {}
 

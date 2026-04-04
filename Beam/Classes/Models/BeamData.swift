@@ -147,15 +147,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     let browsingTreeStoreManager: BrowsingTreeStoreManager
     let linkDB: BeamLinkDB
 
-    func registerSyncDelegates() {
-        self.contactsManager.registerOnBeamObjectManager(objectManager)
-        self.passwordManager.registerOnBeamObjectManager(objectManager)
-        self.privateKeySignatureManager.registerOnBeamObjectManager(objectManager)
-        //self.browsingTreeStoreManager.registerOnBeamObjectManager(objectManager)
-        ((self.noteFrecencyScorer as? ExponentialFrecencyScorer)?.storage as? GRDBNoteFrecencyStorage)?.registerOnBeamObjectManager(objectManager)
-        self.linkDB.registerOnBeamObjectManager(objectManager)
-    }
-
     override init() {
         self.contactsManager = ContactsManager(objectManager: objectManager)
         self.passwordManager = PasswordManager(objectManager: objectManager)
