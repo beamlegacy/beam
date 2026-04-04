@@ -13,9 +13,15 @@ struct ExternalDraggingSession {
     var draggingSource: ExternalDraggingSource
     var draggingItem: NSDraggingItem?
     var draggingSession: NSDraggingSession?
-    var dropHandledByBeamUI = false
+    var dropHandledByBeamUI: Bool = false {
+        didSet {
+            guard dropHandledByBeamUI != oldValue, let draggingSession else { return }
+            draggingSource.updateDropHandledByBeamUI(dropHandledByBeamUI, session: draggingSession)
+        }
+    }
 }
 
 protocol ExternalDraggingSource: NSDraggingSource {
     func endDraggingItem()
+    func updateDropHandledByBeamUI(_ handled: Bool, session: NSDraggingSession)
 }

@@ -14,7 +14,6 @@ protocol WindowInfoCapable {
 
 class BeamWindowInfo: ObservableObject {
     @Published var windowIsResizing = false
-    var undraggableWindowRects: [CGRect] = []
     @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
     weak var window: NSWindow?

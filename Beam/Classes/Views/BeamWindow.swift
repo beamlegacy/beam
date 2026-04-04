@@ -85,6 +85,7 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
             setFrame(frameRect(forContentRect: contentRect), display: false)
         }
 
+        self.setNiceTahoeCorners()
         self.setupWindowButtons()
         self.setTitleBarAccessoryView()
 
@@ -307,17 +308,9 @@ class BeamWindow: NSWindow, NSDraggingDestination, Codable, WindowInfoCapable {
         self.setTrafficLightsLayout()
     }
 
-    private var _isMovable = true
     override var isMovable: Bool {
-        get {
-            if let currentEvent = NSApp.currentEvent, currentEvent.type == .leftMouseDown, !allowsWindowDragging(with: currentEvent) {
-                return false
-            }
-            return _isMovable
-        }
-        set {
-            _isMovable = newValue
-        }
+        get { false }
+        set { }
     }
 
     override func makeTouchBar() -> NSTouchBar? {
@@ -504,30 +497,9 @@ extension BeamWindow: NSWindowDelegate {
 // MARK: - Title Bar
 class TitleBarViewControllerWithMouseDown: NSTitlebarAccessoryViewController {
 
-    override func mouseDown(with event: NSEvent) {
-        if (self.view.window as? BeamWindow)?.allowsWindowDragging(with: event) != false {
-            super.mouseDown(with: event)
-        }
-        // NSTitlebarAccessoryViewController steal mouseDown events
-        // But we need them for the view placed below the title bar
-        // See touch down state of toolbar buttons
-        self.parent?.mouseDown(with: event)
-    }
 }
 
 extension BeamWindow {
-    fileprivate func allowsWindowDragging(with event: NSEvent) -> Bool {
-        if state.mode == .web && state.omniboxInfo.isFocused && state.omniboxInfo.wasFocusedFromTab, let searchField = self.firstResponder as? BeamTextFieldViewFieldEditor {
-            let omniboxFrame = omniboxFrameFromSearchField(searchField)
-            return !omniboxFrame.contains(event.locationInWindow)
-        } else if state.mode == .web && !windowInfo.undraggableWindowRects.isEmpty &&
-                    windowInfo.undraggableWindowRects.contains(where: {
-                        $0.contains(event.locationInWindow.flippedPointToTopLeftOrigin(in: self))
-                    }) {
-            return false
-        }
-        return true
-    }
 
     private func omniboxFrameFromSearchField(_ searchField: BeamTextFieldViewFieldEditor) -> CGRect {
         let minHeight = Omnibox.defaultHeight
@@ -546,6 +518,15 @@ extension BeamWindow {
         ]
     }
 
+    private func setNiceTahoeCorners() {
+        if #available(macOS 26, *) {
+          /// by adding a toolbar on macOS 26
+          /// we get nice 26pt corner radiuses
+          let toolbar = NSToolbar()
+          self.toolbar = toolbar
+        }
+    }
+
     private func setTitleBarAccessoryView() {
         let dummyAccessoryViewController = TitleBarViewControllerWithMouseDown()
         dummyAccessoryViewController.view = NSView()
@@ -560,7 +541,11 @@ extension BeamWindow {
             let originY = trafficLight!.superview!.frame.height / 2 - trafficLight!.frame.height / 2
             var frame = trafficLight!.frame
 
-            frame.origin.y = Constants.runningOnBigSur ? originY + 2 : originY
+            if #available(macOS 26.0, *) {
+                frame.origin.y = originY + 25
+            } else {
+                frame.origin.y = Constants.runningOnBigSur ? originY + 2 : originY
+            }
             frame.origin.x = trafficLightLeftMargin + CGFloat(index) * (frame.width + 6)
 
             trafficLight?.frame = frame
@@ -571,6 +556,10 @@ extension BeamWindow {
         guard let titlebarAccessoryView = titlebarAccessoryViewControllers.first else { return }
         titlebarAccessoryView.isHidden.toggle()
         self.state.isFullScreen.toggle()
+    }
+
+    func window(_ window: NSWindow, willUseFullScreenPresentationOptions proposedOptions: NSApplication.PresentationOptions = []) -> NSApplication.PresentationOptions {
+        return proposedOptions.union([.autoHideToolbar])
     }
 }
 

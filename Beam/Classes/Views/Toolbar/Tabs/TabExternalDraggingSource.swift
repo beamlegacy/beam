@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import AppKit
 import UniformTypeIdentifiers
 import SwiftUI
@@ -80,7 +79,6 @@ final class TabExternalDraggingSource: NSObject {
     private weak var state: BeamState?
     private weak var delegate: TabExternalDraggingSourceDelegate?
     private var browserTab: BrowserTab?
-    private var cancellables = Set<AnyCancellable>()
 
     private var isDropHandledByBeamUI = false
     private var draggingImage: NSImage?
@@ -90,10 +88,6 @@ final class TabExternalDraggingSource: NSObject {
         self.state = state
         self.delegate = delegate
         super.init()
-        state.data.$currentDraggingSession.sink { [weak self] dataSession in
-            guard let dataSession = dataSession, let draggingSession = dataSession.draggingSession else { return }
-            self?.willBeHandledByBeamUI(dataSession.dropHandledByBeamUI, session: draggingSession)
-        }.store(in: &cancellables)
     }
 
     private func draggingItemFrame(location: CGPoint, convertToWindow window: NSWindow?) -> CGRect {
@@ -125,16 +119,14 @@ final class TabExternalDraggingSource: NSObject {
         return dragItem
     }
 
-    func endDraggingItem() {
-        cancellables.removeAll()
-    }
+    func endDraggingItem() { }
 
     func updateInitialDragginItemLocation(_ dragItem: NSDraggingItem, location: CGPoint) {
         let itemFrame = draggingItemFrame(location: location, convertToWindow: state?.associatedWindow)
         dragItem.setDraggingFrame(itemFrame, contents: self.draggingImage)
     }
 
-    private func willBeHandledByBeamUI(_ handled: Bool, session: NSDraggingSession) {
+    func updateDropHandledByBeamUI(_ handled: Bool, session: NSDraggingSession) {
         guard handled != self.isDropHandledByBeamUI else { return }
         isDropHandledByBeamUI = handled
         session.enumerateDraggingItems(options: .concurrent,
@@ -158,7 +150,7 @@ extension TabExternalDraggingSource: ExternalDraggingSource {
 
     func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
         self.endDraggingItem()
-        state?.data.currentDraggingSession = nil
+        self.state?.data.currentDraggingSession = nil
         delegate?.tabExternalDragSessionEnded()
         guard let tab = self.browserTab, !self.isDropHandledByBeamUI else {
             if state?.associatedWindow?.isVisible == false && state?.browserTabsManager.tabs.filter({ !$0.isPinned }).isEmpty == true {
@@ -174,7 +166,7 @@ extension TabExternalDraggingSource: ExternalDraggingSource {
             let frameOrigin = CGPoint(x: max(0, screenPoint.x - (window.frame.width / 2)),
                                       y: max(0, screenPoint.y - window.frame.height + (Toolbar.height / 2)))
             window.setFrameOrigin(frameOrigin)
-            
+
             window.state.browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: true)
             window.state.mode = .web
             window.makeKeyAndOrderFront(nil)
