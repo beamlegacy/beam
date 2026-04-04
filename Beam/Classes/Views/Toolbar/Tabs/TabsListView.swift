@@ -88,11 +88,7 @@ struct TabsListView: View {
     @State private var isChangingTabsCountWhileHovering: Bool = false
     @State private var scrollOffset: CGFloat = 0
     @State private var scrollContentSize: CGFloat = 0
-    @State private var draggableTabsAreas: [CGRect] = [] {
-        didSet {
-            windowInfo.undraggableWindowRects = draggableTabsAreas
-        }
-    }
+    @State private var draggableTabsAreas: [CGRect] = []
 
     @StateObject private var dragModel = TabsDragModel()
     @StateObject private var externalDragModel = TabsListExternalDragViewModel()

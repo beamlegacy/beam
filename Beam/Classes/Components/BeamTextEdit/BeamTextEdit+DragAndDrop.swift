@@ -512,4 +512,8 @@ extension BeamTextEdit: ExternalDraggingSource {
             return .copy
         }
     }
+
+    func updateDropHandledByBeamUI(_ handled: Bool, session: NSDraggingSession) {
+
+    }
 }

@@ -54,24 +54,30 @@ struct Toolbar: View {
 
     var body: some View {
         let mode = state.mode
-        ToolbarContentView(downloadList: state.data.downloadManager.downloadList)
-            .environmentObject(state.autocompleteManager)
-            .zIndex(11)
-            .background(ClickCatchingView(onDoubleTap: { _ in
-                state.associatedWindow?.zoomOrMiniaturize(nil)
-            }))
-            .background(
-                VisualEffectView(material: state.mode == .web ? .popover : .headerView)
-                    .overlay(blurOverlay)
-                    .opacity(!isMainWindow || !viewModel.allowTransparentBackground || isAboveContent ? 1 : 0)
-            )
-            .zIndex(10)
-            .onChange(of: mode) { [mode] newMode in
-                updateBackgroundVisibility(mode: newMode, previousMode: mode)
-            }
-            .onAppear {
-                viewModel.allowTransparentBackground = mode != .web
-            }
+        if #available(macOS 15.0, *) {
+            ToolbarContentView(downloadList: state.data.downloadManager.downloadList)
+                .environmentObject(state.autocompleteManager)
+                .zIndex(11)
+                .background(ClickCatchingView(onDoubleTap: { _ in
+                    state.associatedWindow?.zoomOrMiniaturize(nil)
+                }))
+                .background(
+                    VisualEffectView(material: state.mode == .web ? .popover : .headerView)
+                        .overlay(blurOverlay)
+                        .opacity(!isMainWindow || !viewModel.allowTransparentBackground || isAboveContent ? 1 : 0)
+                )
+                .zIndex(10)
+                .onChange(of: mode) { [mode] newMode in
+                    updateBackgroundVisibility(mode: newMode, previousMode: mode)
+                }
+                .onAppear {
+                    viewModel.allowTransparentBackground = mode != .web
+                }
+                .gesture(WindowDragGesture())
+        } else {
+            EmptyView()
+        }
+
     }
 
     private func updateBackgroundVisibility(mode: Mode, previousMode: Mode) {

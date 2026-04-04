@@ -98,6 +98,8 @@ final class TabGroupExternalDraggingSource: NSObject {
 
     func endDraggingItem() { }
 
+    func updateDropHandledByBeamUI(_ handled: Bool, session: NSDraggingSession) { }
+
     func updateInitialDragginItemLocation(_ dragItem: NSDraggingItem, location: CGPoint) {
         let itemFrame = draggingItemFrame(location: location, convertToWindow: state?.associatedWindow)
         dragItem.setDraggingFrame(itemFrame, contents: self.draggingImage)

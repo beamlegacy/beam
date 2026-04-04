@@ -391,7 +391,6 @@
 		524299E725A480A300F4DBF5 /* CalendarsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299E225A480A300F4DBF5 /* CalendarsView.swift */; };
 		524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */; };
 		524A57EB2770FDE300DF8324 /* String+CamelCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524A57EA2770FDE300DF8324 /* String+CamelCase.swift */; };
-		524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */; };
 		524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6C925F2735D007312F0 /* EncryptionManager.swift */; };
 		524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6CD25F27609007312F0 /* KeychainStorable.swift */; };
 		524CF6D725F28F97007312F0 /* EncryptionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */; };
@@ -2090,7 +2089,6 @@
 		524299ED25A488E000F4DBF5 /* AdvancedPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPreferencesView.swift; sourceTree = "<group>"; };
 		524A57EA2770FDE300DF8324 /* String+CamelCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+CamelCase.swift"; sourceTree = "<group>"; };
 		524A57F12772168400DF8324 /* Beam10.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam10.xcdatamodel; sourceTree = "<group>"; };
-		524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMAnagedObjectContext+performAndWait.swift"; sourceTree = "<group>"; };
 		524CF6C925F2735D007312F0 /* EncryptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionManager.swift; sourceTree = "<group>"; };
 		524CF6CD25F27609007312F0 /* KeychainStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorable.swift; sourceTree = "<group>"; };
 		524CF6D625F28F97007312F0 /* EncryptionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionManagerTests.swift; sourceTree = "<group>"; };
@@ -4423,7 +4421,6 @@
 				417628A425B05DFB0082FFDF /* NSBezierPath+CGPath.swift */,
 				A5946825265D29350044A892 /* CGPath+Union.swift */,
 				41FAD34E25E5742800D78B36 /* CALayer+Extension.swift */,
-				524B856C25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift */,
 				524CF6DA25F29119007312F0 /* SymmetricKey+Serialize.swift */,
 				96319D6C26163AAD00D1CF31 /* BeamNote+CommandManager.swift */,
 				A5DE141B26491F840023F753 /* WKWebview+Zoom.swift */,
@@ -9236,7 +9233,6 @@
 				8A0DFAC127551E950044515B /* EmbedNodeMessageHandler.swift in Sources */,
 				A03CE0EC25F954CB00D767B0 /* BeamNoteDataHolder.swift in Sources */,
 				96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */,
-				524B856D25D2DD0700BB7C7A /* NSMAnagedObjectContext+performAndWait.swift in Sources */,
 				A01030AA25F149EA00D740C5 /* TextEditorCommand.swift in Sources */,
 				5298EB0526272D400033862C /* NSManagedObjectModel+Extension.swift in Sources */,
 				A558577A28C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift in Sources */,
@@ -10841,7 +10837,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Beta;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				BEAM_ENABLE_MOCK_HTTP_SERVER = 0;
 				CLANG_ENABLE_MODULES = YES;

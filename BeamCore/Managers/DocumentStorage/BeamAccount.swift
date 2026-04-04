@@ -337,7 +337,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     }
 
     var syncSetup = false
-    private static var syncDisabled = false
+    private static var syncDisabled = true
     public func setupSync() {
         guard !syncSetup, !Self.syncDisabled else { return }
         databaseSynchroniser = BeamDatabaseSynchronizer(account: self, objectManager: objectManager)
