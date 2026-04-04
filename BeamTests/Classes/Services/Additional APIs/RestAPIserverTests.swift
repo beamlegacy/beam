@@ -27,7 +27,7 @@ class RestAPIserverTests: QuickSpec {
 
                 it("Returns the env url") {
                     Configuration.reset()
-                    XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.embed))
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIembed))
                 }
             }
 
@@ -36,7 +36,7 @@ class RestAPIserverTests: QuickSpec {
 
                 it("Returns the env url") {
                     Configuration.reset()
-                    XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.embed))
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIembed))
                 }
             }
 
@@ -49,7 +49,7 @@ class RestAPIserverTests: QuickSpec {
 
                 it("Returns the env url") {
                     Configuration.reset()
-                    XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.publishServer))
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIpublishServer))
                 }
             }
 
@@ -58,7 +58,7 @@ class RestAPIserverTests: QuickSpec {
 
                 it("Returns the env url") {
                     Configuration.reset()
-                    XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.publishServer))
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIpublishServer))
                 }
             }
 
@@ -71,7 +71,7 @@ class RestAPIserverTests: QuickSpec {
 
                 it("Returns the env url") {
                     Configuration.reset()
-                    XCTAssertEqual(request.baseURL, URL.init(string: EnvironmentVariables.PublicAPI.publishServer))
+                        XCTAssertEqual(request.baseURL, URL.init(string: Configuration.publicAPIpublishServer))
                 }
             }
         }

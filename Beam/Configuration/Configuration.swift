@@ -14,7 +14,8 @@ struct Configuration {
     static private(set) var testAccountEmail = EnvironmentVariables.Account.testEmail
     static private(set) var testAccountPassword = EnvironmentVariables.Account.testPassword
     static private(set) var autoUpdate = EnvironmentVariables.autoUpdate
-    static private(set) var networkStubs = EnvironmentVariables.networkStubs
+    /// Vinyl network recording is only used in unit tests (`ENV = test`).
+    static var networkStubs: Bool { env == .test }
     static private(set) var updateFeedURL: String = Configuration.value(for: "SUFeedURL")
 
     static private(set) var uiTestModeLaunchArgument = "XCUITest"
@@ -50,9 +51,9 @@ struct Configuration {
         return []
     }()
 
-    /// Publish/embed endpoints from build configuration only (no runtime override).
-    static var publicAPIpublishServer: String { EnvironmentVariables.PublicAPI.publishServer }
-    static var publicAPIembed: String { EnvironmentVariables.PublicAPI.embed }
+    /// Publish/embed HTTP client uses this base URL; remote Beam public API is not configured.
+    static let publicAPIpublishServer = "about:blank"
+    static let publicAPIembed = "about:blank"
 
     static var stateRestorationEnabledDefault = false
     static private var stateRestorationEnabledKey = "stateRestorationEnabled"

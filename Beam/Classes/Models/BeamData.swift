@@ -167,13 +167,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         cookieManager = CookiesManager()
         versionChecker = Self.createVersionChecker()
 
-        let treeConfig = BrowsingTreeSenderConfig(
-            dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
-            dataStoreApiToken: EnvironmentVariables.BrowsingTree.accessToken,
-            waitTimeOut: 2.0,
-            anonymized: Configuration.branchType != .develop
-        )
-        browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
+        browsingTreeSender = nil
         super.init()
         BeamNote.idForNoteNamed = { [weak self] title in
             guard let collection = self?.currentDocumentCollection,
