@@ -109,6 +109,6 @@ extension Configuration {
 
 extension Configuration {
     struct MockHttpServer {
-        static let port = EnvironmentVariables.MockHttpServer.port
+        static let port = 9000
     }
 }

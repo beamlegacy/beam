@@ -23,7 +23,7 @@ class FrecencyNoteStorageTest: XCTestCase {
         BeamTestsHelper.logout()
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
-        let store = GRDBStore.empty()
+        let store = try GRDBStore.empty()
         db = try BeamNoteLinksAndRefsManager(store: store)
         try store.migrate()
     }
@@ -114,7 +114,7 @@ class FrecencyNoteStorageWithNetworkTest: XCTestCase {
         BeamTestsHelper.logout()
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
-        let store = GRDBStore.empty()
+        let store = try GRDBStore.empty()
         db = try BeamNoteLinksAndRefsManager(store: store)
         try store.migrate()
         objectManager.disableSendingObjects = false
@@ -126,41 +126,6 @@ class FrecencyNoteStorageWithNetworkTest: XCTestCase {
         await stopNetworkTests()
         await MainActor.run {
             Configuration.reset()
-        }
-    }
-
-    func testApiSaveLimiterIntegration() throws {
-        //We at least check that rate limiter doesnt prevent sending on api til save limit.
-        let storage = GRDBNoteFrecencyStorage(db: db, objectManager: objectManager)
-        storage.resetApiSaveLimiter()
-        let noteIds = ["DFD2D24E-89C6-4B01-9386-2050B6D34257", "BD278D35-40D1-4C83-9C6F-6AA672B3FA9B", "D0ADB50E-7345-4154-888C-E1A1297CBF48", "A640B420-8AF3-4CAE-AE06-9686E222C785", "0EB709BF-BF5D-4F5F-A529-17300E70D78D", "6709F6C4-AC3A-4F0A-AF3E-3EE10AFE1FF0", "49BF4022-CBD2-4616-9013-425145D1A767", "1635FB36-2255-4967-A1F4-04680E8CEBFD", "FE311DF4-2062-41CC-896A-6404E0A59DC9", "9216D178-C6D9-4D56-9BFC-2FE55F8B18A5"].map {try! UUID(value: $0)}
-        var correspondingRecords = [FrecencyNoteRecord]()
-        print("testApiSaveLimiterIntegration \(noteIds)")
-        for noteId in noteIds {
-            // This save is required to fix FrecencyNoteRecord.id between runs
-            try db.saveFrecencyNote(FrecencyNoteRecord(id: noteId, noteId: noteId, lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 2, frecencyKey: .note30d0))
-            let score = FrecencyScore(id: noteId, lastTimestamp: BeamDate.now, lastScore: 1, sortValue: 2)
-            try storage.save(score: score, paramKey: .note30d0)
-            let correspondingRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteId, paramKey: .note30d0))
-            correspondingRecords.append(correspondingRecord)
-        }
-        expect(storage.batchSaveOnApiCompleted).toEventually(beTrue(), timeout: .seconds(2))
-
-        let records = correspondingRecords
-        waitUntil(timeout: .seconds(10)) { done in
-            DispatchQueue(label: "tests.testApiSaveLimiterIntegration").async {
-                Task {
-                    for record in records {
-                        do {
-                            let fetchedRecord = try await self.beamObjectHelper.fetchOnAPI(record)
-                            XCTAssertNotNil(fetchedRecord)
-                        } catch {
-                            XCTFail(error.localizedDescription)
-                        }
-                    }
-                    done()
-                }
-            }
         }
     }
 

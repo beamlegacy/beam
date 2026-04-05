@@ -129,16 +129,6 @@ class BeamTestsHelper {
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
 
-        waitUntil(timeout: .seconds(60)) { done in
-            accountManager.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
-                if case .failure(let error) = result {
-                    fail(error.localizedDescription)
-                }
-                expect { try result.get() } == true
-                done()
-            })
-        }
-
         if let current = QuickSpec.current {
             let before = current.continueAfterFailure
             current.continueAfterFailure = false
@@ -157,6 +147,5 @@ class BeamTestsHelper {
     static func logout() {
         BeamData.shared.objectManager.clearNetworkCalls()
         guard AuthenticationManager.shared.isAuthenticated else { return }
-        AppData.shared.currentAccount!.logout()
     }
 }

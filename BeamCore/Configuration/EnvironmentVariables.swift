@@ -39,7 +39,7 @@ public struct EnvironmentVariables {
     }
 
     public struct MockHttpServer {
-        static public private(set) var port = NSString("$(MOCK_HTTP_PORT)").integerValue
+        static public private(set) var port = 3000
     }
 
     static public private(set) var env = "debug" //"$(ENV)"

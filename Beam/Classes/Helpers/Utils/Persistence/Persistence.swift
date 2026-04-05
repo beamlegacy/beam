@@ -133,14 +133,8 @@ struct Persistence {
     }
 
     static func emailOrRaiseError() -> String {
-        guard let email = Persistence.Authentication.email else {
-            fatalError("Email is nil and it should not")
-        }
-
-        guard !email.isEmpty else {
-            fatalError("Email is empty and it should not")
-        }
-
-        return email
+        // Account/login has been removed. Return a fixed local identifier
+        // used as the keychain key for the encryption private key.
+        return Persistence.Authentication.email ?? "local@beam.app"
     }
 }

@@ -11,7 +11,7 @@ import XCTest
 @testable import Beam
 @testable import BeamCore
 
-class TestWebPage: WebPage {
+class TestWebPage: Beam.WebPage {
     var events: [String] = []
     private(set) var originalQuery: String?
     private(set) var pointAndShootInstalled: Bool = true
@@ -75,7 +75,7 @@ class TestWebPage: WebPage {
         events.append("addJS \(source.hashValue) \(String(describing: when))")
     }
 
-    func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, rect: NSRect) -> WebPage? {
+    func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, rect: NSRect) -> Beam.WebPage? {
         events.append("createNewTab \(String(describing: request.url)) \(setCurrent))")
         return TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: webAutofillController, pns: pointAndShoot,
                            fileStorage: storage, downloadManager: downloadManager, navigationHandler: webViewNavigationHandler)

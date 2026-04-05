@@ -23,7 +23,7 @@ class BeamDocumentCollectionValidationTest: XCTestCase, BeamDocumentSource {
         try super.setUpWithError()
         let dbPath = "file::memory:"
         let db = try DatabaseQueue(path: dbPath)
-        store = GRDBStore(writer: db)
+        store = try GRDBStore(writer: db)
         try store.erase()
         documentCollection = try BeamDocumentCollection(holder: nil, objectManager: objectManager, store: store)
         try store.migrate()

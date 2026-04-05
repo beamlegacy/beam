@@ -8,7 +8,7 @@ import Combine
 @testable import BeamCore
 
 class BrowsingScorerMock: NSObject, WebPageRelated, BrowsingScorer {
-    weak var page: WebPage?
+    weak var page: Beam.WebPage?
     var debouncedUpdateScrollingScore = PassthroughSubject<WebFrames.FrameInfo, Never>()
     private(set) var currentScore: BeamCore.Score = Score()
 

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import TLDExtract
+import TLDExtractSwift
 
 private extension CharacterSet {
     static var beamURLQueryAllowed: CharacterSet {

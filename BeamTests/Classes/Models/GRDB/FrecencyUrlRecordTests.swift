@@ -7,7 +7,7 @@ import XCTest
 
 class FrecencyUrlRecordTests: XCTestCase {
     func testSave() throws {
-        let store = GRDBStore(writer: DatabaseQueue())
+        let store = try GRDBStore(writer: DatabaseQueue())
         let db = try LinksDBManager(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate()
 
@@ -36,7 +36,7 @@ class FrecencyUrlRecordTests: XCTestCase {
         }
     }
     func testFetchNanSortScore() throws {
-        let store = GRDBStore(writer: DatabaseQueue())
+        let store = try GRDBStore(writer: DatabaseQueue())
         let db = try LinksDBManager(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate()
 
@@ -49,7 +49,7 @@ class FrecencyUrlRecordTests: XCTestCase {
     }
 
     func testGetMany() throws {
-        let store = GRDBStore(writer: DatabaseQueue())
+        let store = try GRDBStore(writer: DatabaseQueue())
         let db = try LinksDBManager(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate()
 

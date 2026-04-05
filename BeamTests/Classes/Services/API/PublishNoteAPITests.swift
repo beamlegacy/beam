@@ -24,7 +24,6 @@ class PublishNoteAPITests: XCTestCase, BeamDocumentSource {
     let fileManager = BeamData.shared.fileDBManager!
 
     override func setUpWithError() throws {
-        AppData.shared.currentAccount?.logout() // will force clean up data
 
         BeamTestsHelper.logout()
         BeamDate.freeze("2022-04-18T06:00:03Z")

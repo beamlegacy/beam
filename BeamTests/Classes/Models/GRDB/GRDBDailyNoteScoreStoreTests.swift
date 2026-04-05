@@ -16,7 +16,7 @@ class GRDBDailyNoteScoreStoreTests: XCTestCase {
 
     func testKeyChainToGRDBMigration() throws {
         BeamDate.freeze("2001-01-01T00:01:00+000")
-        let db = GRDBStore.empty()
+        let db = try GRDBStore.empty()
         let manager = try NoteStatsDBManager(store: db)
         let noteId = UUID()
         let day0 = BeamDate.now.localDayString()!
@@ -39,7 +39,7 @@ class GRDBDailyNoteScoreStoreTests: XCTestCase {
     }
     func testStoreScore() throws {
         BeamDate.freeze("2001-01-01T00:01:00+000")
-        let db = GRDBStore.empty()
+        let db = try GRDBStore.empty()
         let manager = try NoteStatsDBManager(store: db)
         try db.migrate()
         let store = GRDBDailyNoteScoreStore(db: manager)
@@ -62,7 +62,7 @@ class GRDBDailyNoteScoreStoreTests: XCTestCase {
 
     func testStoreWordCountChangeDay() throws {
         BeamDate.freeze("2001-01-01T00:01:00+000")
-        let db = GRDBStore.empty()
+        let db = try GRDBStore.empty()
         let manager = try NoteStatsDBManager(store: db)
         try db.migrate()
         let store = GRDBDailyNoteScoreStore(db: manager)

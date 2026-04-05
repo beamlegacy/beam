@@ -15,7 +15,7 @@ class DailyUrlStorageTest: XCTestCase {
     var urlHistoryDb: LinksDBManager!
 
     override func setUpWithError() throws {
-        let store = GRDBStore.empty()
+        let store = try GRDBStore.empty()
         urlStatsDb = try UrlStatsDBManager(store: store)
         urlHistoryDb = try LinksDBManager(objectManager: objectManager, store: store)
         try store.migrate()

@@ -82,10 +82,6 @@ class TabGroupingManagerTests: XCTestCase {
         setUpWithClusteringType(.legacy)
         await _testBuildTabGroupsWith1Cluster()
     }
-    func testBuildTabGroupsWith1Cluster_smart() async {
-        setUpWithClusteringType(.smart)
-        await _testBuildTabGroupsWith1Cluster()
-    }
     func _testBuildTabGroupsWith1Cluster() async {
         setupDefaultOpenPages()
         setupClusters()
@@ -104,10 +100,6 @@ class TabGroupingManagerTests: XCTestCase {
     func testBuildTabGroupsWith1ClusterIsReused_legacy() async {
         setUpWithClusteringType(.legacy)
         await _testBuildTabGroupsWith1Cluster()
-    }
-    func testBuildTabGroupsWith1ClusterIsReused_smart() async {
-        setUpWithClusteringType(.smart)
-        await _testBuildTabGroupsWith1ClusterIsReused()
     }
     func _testBuildTabGroupsWith1ClusterIsReused() async {
         setupDefaultOpenPages()
@@ -130,10 +122,6 @@ class TabGroupingManagerTests: XCTestCase {
     // MARK: -
     func testBuildTabGroupsAddRemovePageToClusterGroup_legacy() async {
         setUpWithClusteringType(.legacy)
-        await _testBuildTabGroupsAddRemovePageToClusterGroup()
-    }
-    func testBuildTabGroupsAddRemovePageToClusterGroup_smart() async {
-        setUpWithClusteringType(.smart)
         await _testBuildTabGroupsAddRemovePageToClusterGroup()
     }
     func _testBuildTabGroupsAddRemovePageToClusterGroup() async {
@@ -179,10 +167,6 @@ class TabGroupingManagerTests: XCTestCase {
         setUpWithClusteringType(.legacy)
         await _testBuildTabGroupsWith1ManualGroup1Cluster()
     }
-    func testBuildTabGroupsWith1ManualGroup1Cluster_smart() async {
-        setUpWithClusteringType(.smart)
-        await _testBuildTabGroupsWith1ManualGroup1Cluster()
-    }
     func _testBuildTabGroupsWith1ManualGroup1Cluster() async {
         setupDefaultOpenPages()
         setupClusters()
@@ -211,10 +195,6 @@ class TabGroupingManagerTests: XCTestCase {
         setUpWithClusteringType(.legacy)
         await _testBuildTabGroupsMoveWholeClusterToManualGroup()
     }
-    func testBuildTabGroupsMoveWholeClusterToManualGroup_smart() async {
-        setUpWithClusteringType(.smart)
-        await _testBuildTabGroupsMoveWholeClusterToManualGroup()
-    }
     func _testBuildTabGroupsMoveWholeClusterToManualGroup() async {
         setupDefaultOpenPages()
         await setupManualGroup()
@@ -241,10 +221,6 @@ class TabGroupingManagerTests: XCTestCase {
     // MARK: -
     func testForcedOutOfGroup_legacy() async {
         setUpWithClusteringType(.legacy)
-        await _testForcedOutOfGroup()
-    }
-    func testForcedOutOfGroup_smart() async {
-        setUpWithClusteringType(.smart)
         await _testForcedOutOfGroup()
     }
     func _testForcedOutOfGroup() async {
@@ -294,6 +270,7 @@ class TabGroupingManagerTests: XCTestCase {
     }
 
     // MARK: -
+    @MainActor
     func testFetchOrCreateTabGroupNote() async throws {
         let group = TabGroup(pageIds: [UUID(), UUID()], title: "Group A")
         let pages = group.pageIds.map { TabGroupBeamObject.PageInfo(id: $0, url: URL(string: "beamapp.co")!, title: $0.uuidString) }

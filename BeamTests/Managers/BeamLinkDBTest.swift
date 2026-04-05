@@ -51,7 +51,7 @@ class BeamLinkDBTests: XCTestCase {
             Link(url: "http://blabla.fr/", title: nil, content: nil, destination: nil, frecencyVisitSortScore: 5),
             destinationLink,
         ]
-        let store = GRDBStore(writer: DatabaseQueue())
+        let store = try GRDBStore(writer: DatabaseQueue())
         let db = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         try store.migrate()
 
@@ -70,8 +70,8 @@ class BeamLinkDBTests: XCTestCase {
     func testMoveFrecencyToLinkDB() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let creationDate = BeamDate.now
-        let dbQueue = DatabaseQueue()
-        let store = GRDBStore(writer: dbQueue)
+        let dbQueue = try DatabaseQueue()
+        let store = try GRDBStore(writer: dbQueue)
         let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         try store.migrate(upTo: "flattenBrowsingTrees")
 
@@ -118,8 +118,8 @@ class BeamLinkDBTests: XCTestCase {
     }
 
     func testReceivedLinkFrecencyOverwrite() throws {
-        let dbQueue = DatabaseQueue()
-        let store = GRDBStore(writer: dbQueue)
+        let dbQueue = try DatabaseQueue()
+        let store = try GRDBStore(writer: dbQueue)
         let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         let db = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
         try store.migrate()
@@ -150,8 +150,8 @@ class BeamLinkDBTests: XCTestCase {
     }
     
     func testFrecencyStore() throws {
-        let dbQueue = DatabaseQueue()
-        let store = GRDBStore(writer: dbQueue)
+        let dbQueue = try DatabaseQueue()
+        let store = try GRDBStore(writer: dbQueue)
         let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         let linkstore = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
         let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb, objectManager: objectManager, linkStore: linkstore)
@@ -215,7 +215,7 @@ class BeamLinkDBTests: XCTestCase {
     }
 
     func testConflictManagement() throws {
-        let store = GRDBStore(writer: DatabaseQueue())
+        let store = try GRDBStore(writer: DatabaseQueue())
         let db = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
         let linkstore = BeamLinkDB(objectManager: objectManager, overridenManager: db)
         try store.migrate()
@@ -264,7 +264,7 @@ class BeamLinkDBTests: XCTestCase {
     func testYoutubeAliasesCleanup() throws {
         BeamDate.freeze("2001-01-01T12:21:03Z")
         let t0 = BeamDate.now
-        let grdbStore = GRDBStore.empty()
+        let grdbStore = try GRDBStore.empty()
         let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(),store: grdbStore)
         try grdbStore.migrate(upTo: "createUrlHistoryManager")
         let youtubeLink = linksDBManager.visit(url: "https://www.youtube.com/abc", content: nil, destination: nil)
@@ -302,7 +302,7 @@ class BeamLinkDBTests: XCTestCase {
     func testGmailAliasesCleanup() throws {
         BeamDate.freeze("2001-01-01T12:21:03Z")
         let t0 = BeamDate.now
-        let grdbStore = GRDBStore.empty()
+        let grdbStore = try GRDBStore.empty()
         let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(),store: grdbStore)
         try grdbStore.migrate(upTo: "createUrlHistoryManager")
         let gmailLink = linksDBManager.visit(url: "https://mail.google.com/abc", content: nil, destination: nil)
@@ -340,7 +340,7 @@ class BeamLinkDBTests: XCTestCase {
     func testGoogleUrlAliasesCleanup() throws {
         BeamDate.freeze("2001-01-01T12:21:03Z")
         let t0 = BeamDate.now
-        let grdbStore = GRDBStore.empty()
+        let grdbStore = try GRDBStore.empty()
         let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(),store: grdbStore)
         try grdbStore.migrate(upTo: "linkAliasesCleanup")
         let AliasLessGoogleUrlLink = linksDBManager.visit(url: "https://www.google.com/search?q=https%3A%2F%2Fabc.com%2F", content: nil, destination: nil)
