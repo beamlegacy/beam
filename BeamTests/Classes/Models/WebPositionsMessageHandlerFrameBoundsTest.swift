@@ -12,15 +12,20 @@ import Nimble
 @testable import Beam
 @testable import BeamCore
 
+/// On macOS 26+, WKFrameInfo crashes on dealloc when created without WebKit internals.
+/// Keep instances alive in a static array to prevent deallocation.
 private class MockFrameInfo: WKFrameInfo {
-    private var isMain: Bool
+    private static var leakedInstances: [MockFrameInfo] = []
+    private var _isMain: Bool
 
     init(isMain: Bool) {
-        self.isMain = isMain
+        self._isMain = isMain
+        super.init()
+        MockFrameInfo.leakedInstances.append(self)
     }
 
     override var isMainFrame: Bool {
-        isMain
+        _isMain
     }
 }
 
