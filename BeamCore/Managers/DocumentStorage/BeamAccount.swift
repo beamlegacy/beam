@@ -69,8 +69,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     public var managers = [UUID: BeamManager]()
     public static var registeredManagers = [BeamManager.Type]()
 
-    let userSessionRequest = UserSessionRequest()
-    let userInfoRequest = UserInfoRequest()
 
     public let data = BeamData.shared
 

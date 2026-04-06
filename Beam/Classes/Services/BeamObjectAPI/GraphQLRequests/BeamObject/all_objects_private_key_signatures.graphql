@@ -1,9 +1,0 @@
-query AllObjectsPrivateKeySignature {
-    me {
-        beamObjects {
-            id
-            type
-            privateKeySignature
-        }
-    }
-}

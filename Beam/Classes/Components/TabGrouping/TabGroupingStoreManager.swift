@@ -10,28 +10,16 @@ import BeamCore
 import GRDB
 
 class TabGroupingStoreManager: GRDBHandler, BeamManager {
-    var changedObjects: [UUID: TabGroupBeamObject] = [:]
-    let objectQueue = BeamObjectQueue<TabGroupBeamObject>()
-
     static var id = UUID()
     static var name = "TabGroupingStoreManager"
 
     override var tableNames: [String] { [TabGroupBeamObject.databaseTableName] }
 
     weak var owner: BeamManagerOwner?
-    let objectManager: BeamObjectManager
 
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.owner = holder
-        self.objectManager = objectManager
         try super.init(store: store)
-
-        // Do not register now, as every new instance will override the current instance owned
-        // by BeamObjectManager.
-        // Not that we should do better and avoid having a global BeamObjectManager
-        // and multiple accounts
-
-//         registerOnBeamObjectManager(objectManager)
     }
 
     enum GroupUpdateOrigin {
@@ -86,13 +74,6 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
         let object = Self.convertGroupToBeamObject(group, pages: pages)
         Logger.shared.logInfo("Saving Tab Group '\(object.title ?? "untitled")' (\(pages.count) pages)", category: .tabGrouping)
         save(groups: [object])
-        if AuthenticationManager.shared.isAuthenticated {
-            do {
-                try self.saveOnNetwork(object)
-            } catch {
-                Logger.shared.logError("Cannot send '\(object.title ?? "untitled")' (\(pages.count) pages): \(error)", category: .tabGrouping)
-            }
-        }
         return true
     }
 
@@ -223,56 +204,6 @@ extension TabGroupingStoreManager {
     }
 }
 
-// MARK: - Synchronisation
-extension TabGroupingStoreManager: BeamObjectManagerDelegate {
-    static var conflictPolicy: BeamObjectConflictResolution = .replace
-    static var uploadType: BeamObjectRequestUploadType {
-        .multipartUpload
-    }
-    func willSaveAllOnBeamObjectApi() {}
-
-    func manageConflict(_ object: TabGroupBeamObject, _ remoteObject: TabGroupBeamObject) throws -> TabGroupBeamObject {
-        fatalError("Managed by BeamObjectManager")
-    }
-
-    func saveObjectsAfterConflict(_ groups: [TabGroupBeamObject]) throws {
-        save(groups: groups)
-    }
-
-    func receivedObjects(_ groups: [TabGroupBeamObject]) throws {
-        save(groups: groups)
-    }
-
-    func allObjects(updatedSince: Date?) throws -> [TabGroupBeamObject] {
-        allRecords(updatedSince)
-    }
-
-    func saveAllOnNetwork(_ groups: [TabGroupBeamObject], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                try await saveOnBeamObjectsAPI(groups)
-                Logger.shared.logDebug("Saved tab groups on the BeamObject API", category: .tabGrouping)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the tab groups on the BeamObject API", category: .tabGrouping)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    private func saveOnNetwork(_ group: TabGroupBeamObject, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                try await saveOnBeamObjectAPI(group)
-                Logger.shared.logDebug("Saved tab group on the BeamObject API", category: .tabGrouping)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the tab group on the BeamObject API with error: \(error.localizedDescription)", category: .tabGrouping)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-}
 // MARK: - Database
 extension TabGroupingStoreManager {
 

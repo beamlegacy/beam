@@ -17,13 +17,13 @@ class PasswordsDBTests: XCTestCase {
     static let password = "BeamRocksss"
     let beamHelper = BeamTestsHelper()
     let beamObjectHelper = BeamObjectTestsHelper()
-    let passwordManager = PasswordManager(objectManager: BeamObjectManager())
+    let passwordManager = PasswordManager()
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
         BeamTestsHelper.logout()
-        passwordManager.deleteAll(includedRemote: false)
+        passwordManager.deleteAll()
         try EncryptionManager.shared.storeLocalPrivateKey(Configuration.testPrivateKey)
     }
 
@@ -74,46 +74,6 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(subdomainEntries.last?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(subdomainEntries.last?.username, Self.username)
         cleanupPasswordsAfterTest()
-    }
-
-    func testDecodeOldObjectVersion() throws {
-        let data = """
-            {
-              "created_at": "2021-07-13T08:55:06Z",
-              "entry_id": "facebook.com foo@gmail.com",
-              "host": "facebook.com",
-              "name": "foo@gmail.com",
-              "password": "",
-              "updated_at": "2021-09-17T09:15:59Z",
-              "uuid": "000008B1-9BF7-4D11-8CFC-381A81A30EA0"
-            }
-            """.asData
-        let beamObject = BeamObject(id: UUID(uuidString: "000008B1-9BF7-4D11-8CFC-381A81A30EA0")!, beamObjectType: "password")
-        beamObject.data = data
-
-        let passwordRecord: RemotePasswordRecord = try beamObject.decodeBeamObject()
-        XCTAssertEqual(passwordRecord.username, "foo@gmail.com")
-        XCTAssertEqual(passwordRecord.hostname, "facebook.com")
-    }
-
-    func testDecodeNewObjectVersion() throws {
-        let data = """
-            {
-              "created_at": "2021-07-13T08:55:06Z",
-              "entry_id": "facebook.com foo@gmail.com",
-              "hostname": "facebook.com",
-              "username": "foo@gmail.com",
-              "password": "",
-              "updated_at": "2021-09-17T09:15:59Z",
-              "uuid": "000008B1-9BF7-4D11-8CFC-381A81A30EA0"
-            }
-            """.asData
-        let beamObject = BeamObject(id: UUID(uuidString: "000008B1-9BF7-4D11-8CFC-381A81A30EA0")!, beamObjectType: "password")
-        beamObject.data = data
-
-        let passwordRecord: RemotePasswordRecord = try beamObject.decodeBeamObject()
-        XCTAssertEqual(passwordRecord.username, "foo@gmail.com")
-        XCTAssertEqual(passwordRecord.hostname, "facebook.com")
     }
 
     func testFindEntriesForHost() {
@@ -191,6 +151,6 @@ class PasswordsDBTests: XCTestCase {
     }
 
     private func cleanupPasswordsAfterTest() {
-        passwordManager.deleteAll(includedRemote: false)
+        passwordManager.deleteAll()
     }
 }

@@ -134,9 +134,6 @@ class NoteFrecencyApiSaveLimiter {
 }
 
 public class GRDBNoteFrecencyStorage: FrecencyStorage {
-    var changedObjects: [UUID: FrecencyNoteRecord] = [:]
-    let objectQueue = BeamObjectQueue<FrecencyNoteRecord>()
-
     let providedDb: BeamNoteLinksAndRefsManager?
     var db: BeamNoteLinksAndRefsManager? {
         let currentDb = providedDb ?? BeamData.shared.noteLinksAndRefsManager
@@ -145,22 +142,9 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         }
         return currentDb
     }
-    private static let apiSaveLimiter = NoteFrecencyApiSaveLimiter()
 
-    private(set) var batchSaveOnApiCompleted = false
-    private(set) var softDeleteCompleted = false
-
-    let objectManager: BeamObjectManager
-
-    init(db providedDb: BeamNoteLinksAndRefsManager? = nil, objectManager: BeamObjectManager) {
+    init(db providedDb: BeamNoteLinksAndRefsManager? = nil) {
         self.providedDb = providedDb
-        self.objectManager = objectManager
-
-        registerOnBeamObjectManager(objectManager)
-    }
-
-    func resetApiSaveLimiter() {
-        Self.apiSaveLimiter.reset()
     }
     public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         guard let db = db else { return nil }
@@ -211,19 +195,6 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         let existingRecord = try? db.fetchOneFrecencyNote(noteId: score.id, paramKey: paramKey)
         let recordToSave = createOrUpdate(record: existingRecord, score: score, paramKey: paramKey)
         try db.saveFrecencyNote(recordToSave)
-
-        if AuthenticationManager.shared.isAuthenticated &&
-            NetworkMonitor.isNetworkAvailable {
-
-            Self.apiSaveLimiter.add(record: recordToSave)
-
-            if let recordsToSaveOnNetwork = Self.apiSaveLimiter.recordsToSave {
-                batchSaveOnApiCompleted = false
-                try saveAllOnNetwork(recordsToSaveOnNetwork) { _ in
-                    self.batchSaveOnApiCompleted = true
-                }
-            }
-        }
     }
 
     public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
@@ -234,129 +205,30 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         }
         let recordsToSave = scores.map { createOrUpdate(record: recordsToUpdate[$0.id], score: $0, paramKey: paramKey) }
         try db.save(noteFrecencies: recordsToSave)
-
-        guard AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable else { return }
-        try saveAllOnNetwork(recordsToSave)
     }
 
-    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    public func deleteAll() {
         guard let db = db else { return }
         do {
             try db.clearNoteFrecencies()
-            if AuthenticationManager.shared.isAuthenticated && includedRemote {
-                Task {
-                    do {
-                        try await self.deleteAllFromBeamObjectAPI()
-                        networkCompletion?(.success(true))
-                    } catch {
-                        Logger.shared.logError("Error while deleting all contacts: \(error)", category: .contactsDB)
-                        networkCompletion?(.success(false))
-                    }
-                }
-            } else {
-                networkCompletion?(.success(false))
-            }
-            return
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .fileDB)
         }
-        networkCompletion?(.success(false))
-    }
-}
-
-extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
-    static var conflictPolicy: BeamObjectConflictResolution = .replace
-    static var uploadType: BeamObjectRequestUploadType {
-        .multipartUpload
     }
 
-    private func deduplicated(records: [FrecencyNoteRecord]) -> [FrecencyNoteRecord] {
-        let keyValues = records.map { ($0.uniqueKey, $0) }
-        let deduplicatedDict = Dictionary(
-            keyValues,
-            uniquingKeysWith: { (leftRec, rightRec) in
-                leftRec.lastAccessAt > rightRec.lastAccessAt ? leftRec : rightRec
-            }
-        )
-        return Array(deduplicatedDict.values)
-    }
-    func remoteSoftDelete(noteId: UUID, completionHandler: (() -> Void)? = nil) {
+    func softDelete(noteId: UUID) {
         guard let db = db else { return }
-        softDeleteCompleted = false
         let frecencies = db.fetchNoteFrecencies(noteId: noteId)
         let now = BeamDate.now
         let softDeleted = frecencies.map { (frecency) -> FrecencyNoteRecord in
             var softDeleted = frecency
             softDeleted.deletedAt = now
-            Self.apiSaveLimiter.remove(record: frecency)
             return softDeleted
         }
-
-        let syncedOnceNoteFrecencies = softDeleted.filter {
-            $0.hasBeenSyncedOnce == true
-        }
-
         do {
             try db.save(noteFrecencies: softDeleted)
-            try saveAllOnNetwork(syncedOnceNoteFrecencies) { _ in
-                self.softDeleteCompleted = true
-                completionHandler?()
-            }
         } catch {
             Logger.shared.logError("Couldn't soft delete \(noteId) note frecencies \(error)", category: .frecencyNetwork)
-            completionHandler?()
-        }
-    }
-
-    func receivedObjects(_ objects: [FrecencyNoteRecord]) throws {
-        guard let db = db else { return }
-        try db.save(noteFrecencies: deduplicated(records: objects))
-    }
-
-    func allObjects(updatedSince: Date?) throws -> [FrecencyNoteRecord] {
-        guard let db = db else { return [FrecencyNoteRecord]() }
-        return try db.allNoteFrecencies(updatedSince: updatedSince)
-    }
-
-    func willSaveAllOnBeamObjectApi() {}
-
-    func manageConflict(_ object: FrecencyNoteRecord,
-                        _ remoteObject: FrecencyNoteRecord) throws -> FrecencyNoteRecord {
-        fatalError("Managed by BeamObjectManager")
-    }
-
-    func saveObjectsAfterConflict(_ objects: [FrecencyNoteRecord]) throws {
-        guard let db = db else { return }
-        try db.save(noteFrecencies: objects)
-    }
-
-    func saveAllOnNetwork(_ frecencies: [FrecencyNoteRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                try await saveOnBeamObjectsAPI(frecencies)
-                Logger.shared.logDebug("Saved note frecencies on the BeamObject API",
-                                       category: .frecencyNetwork)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving note frecencies on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .frecencyNetwork)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    private func saveOnNetwork(_ frecency: FrecencyNoteRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                try await saveOnBeamObjectAPI(frecency)
-                Logger.shared.logDebug("Saved note frecency on the BeamObject API",
-                                       category: .frecencyNetwork)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving note frecency on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .frecencyNetwork)
-                networkCompletion?(.failure(error))
-            }
         }
     }
 }

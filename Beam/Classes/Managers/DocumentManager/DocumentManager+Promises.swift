@@ -69,24 +69,6 @@ extension DocumentManager1 {
                     }
                     try documentManager.saveContext()
 
-                    // Ping others about the update
-                    let savedDocumentStruct = DocumentStruct(document: document)
-
-                    guard AuthenticationManager.shared.isAuthenticated,
-                          Configuration.networkEnabled else {
-                        return Promise(true)
-                    }
-
-                    /*
-                     Something is broken around here, but I'll leave it as it is for now since promises are not used for
-                     saving documents yet.
-
-                     The completionHandler save() allows to get 2 handlers: one for saving, one for network call. The
-                     promise version doesn't give any way to receive callbacks for network calls.
-                     */
-
-                    self.saveAndThrottle(savedDocumentStruct)
-
                     return Promise(true)
                 }
             }.always {
@@ -96,26 +78,16 @@ extension DocumentManager1 {
         return result
     }
 
-    func deleteAll(includedRemote: Bool = true) -> Promise<Bool> {
+    func deleteAll() -> Promise<Bool> {
         do {
             try deleteAll(databaseId: nil)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
         }
-
-        guard includedRemote else {
-            return Promise(true)
-        }
-
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(false)
-        }
-        Self.cancelAllPreviousThrottledAPICall()
-
-        return deleteAllFromBeamObjectAPI()
+        return Promise(true)
     }
 
-    func delete(document: DocumentStruct, _ networkDelete: Bool = true) -> Promise<Bool> {
+    func delete(document: DocumentStruct) -> Promise<Bool> {
         Self.cancelPreviousThrottledAPICall(document.id)
 
         return coreDataManager.background()
@@ -129,65 +101,17 @@ extension DocumentManager1 {
                     if let database = try? Database.fetchWithId(context, cdDocument.database_id) {
                         database.updated_at = BeamDate.now
                     } else {
-                        // We should always have a connected database
                         Logger.shared.logError("No connected database", category: .document)
                     }
 
                     documentManager.context.delete(cdDocument)
                     try documentManager.saveContext()
-
-                    guard AuthenticationManager.shared.isAuthenticated,
-                          Configuration.networkEnabled,
-                          networkDelete else {
-                        return Promise(false)
-                    }
-
-                    return self.deleteFromBeamObjectAPI(object: document)
+                    return Promise(true)
                 }
             }
     }
 
     func saveAllOnAPI() -> Promise<Bool> {
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
-            return Promise(false)
-        }
-
-        let promise: Promise<NSManagedObjectContext> = coreDataManager.background()
-
-        return promise.then(on: backgroundQueue) { _ -> Promise<Bool> in
-            let documentManager = DocumentManager()
-            return try documentManager.context.performAndWait {
-                let documents = try documentManager.fetchAll(filters: [.includeDeleted])
-                Logger.shared.logDebug("Uploading \(documents.count) documents", category: .documentNetwork)
-                if documents.isEmpty {
-                    return Promise(true)
-                }
-
-                // Cancel previous saves as we're saving all of the objects anyway
-                Self.cancelAllPreviousThrottledAPICall()
-
-                let documentStructs = documents.map { DocumentStruct(document: $0) }
-                let savePromise: Promise<[DocumentStruct]> = self.saveOnBeamObjectsAPI(documentStructs)
-
-                return savePromise.then(on: self.backgroundQueue) { savedDocumentStructs -> Promise<Bool> in
-                    guard savedDocumentStructs.count == documents.count else {
-                        return Promise(false)
-                    }
-                    return Promise(true)
-                }
-            }
-        }
-    }
-
-    func saveOnApi(_ documentStruct: DocumentStruct) -> Promise<Bool> {
-        let document_id = documentStruct.id
-        let promise: Promise<DocumentStruct> = self.saveOnBeamObjectAPI(documentStruct)
-        return promise.then(on: backgroundQueue) { _ -> Promise<Bool> in
-            Self.networkTasksSemaphore.wait()
-            Self.networkTasks.removeValue(forKey: document_id)
-            Self.networkTasksSemaphore.signal()
-
-            return Promise(true)
-        }
+        return Promise(true)
     }
 }

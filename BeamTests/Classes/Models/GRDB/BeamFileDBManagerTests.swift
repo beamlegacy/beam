@@ -3,12 +3,11 @@ import XCTest
 import GRDB
 
 class BeamFileDBManagerTests: XCTestCase {
-    let objectManager = BeamObjectManager()
     var fileDB: BeamFileDBManager!
 
     override func setUpWithError() throws {
         let store = try GRDBStore(writer: DatabaseQueue())
-        fileDB = try BeamFileDBManager(holder: nil, objectManager: objectManager, store: store)
+        fileDB = try BeamFileDBManager(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate()
         XCTAssertNil(try fileDB.fetchRandom())
         XCTAssertEqual(try fileDB.fileCount(), 0)

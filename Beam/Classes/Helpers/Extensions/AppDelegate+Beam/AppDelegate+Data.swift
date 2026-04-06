@@ -35,26 +35,18 @@ extension AppDelegate {
         data.currentAccount?.data.clearCookiesAndCache()
 
         // BeamFile
-        AppData.shared.currentAccount?.fileDBManager?.deleteAll(includedRemote: false) { _ in }
+        AppData.shared.currentAccount?.fileDBManager?.deleteAll()
         // Link Store
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
+        LinkStore.shared.deleteAll()
         //Contacts
-        data.currentAccount?.data.contactsManager.deleteAll(includedRemote: false) { _ in }
+        data.currentAccount?.data.contactsManager.deleteAll()
         // Passwords
-        data.currentAccount?.data.passwordManager.deleteAll(includedRemote: false) { _ in }
+        data.currentAccount?.data.passwordManager.deleteAll()
         // Note Frecency
-        if let objectManager = data.currentAccount?.data.objectManager {
-            GRDBNoteFrecencyStorage(objectManager: objectManager).deleteAll(includedRemote: false) { _ in }
-        }
-        // BeamObject Coredata Checksum
-        do {
-            try BeamObjectChecksum.deleteAll()
-        } catch {
-            Logger.shared.logError("Could not delete BeamObjectChecksum", category: .general)
-        }
+        GRDBNoteFrecencyStorage().deleteAll()
 
         // Notes and Databases
-        self.deleteDocumentsAndDatabases(includedRemote: false)
+        self.deleteDocumentsAndDatabases()
 
         // GRDB
         do {
@@ -65,10 +57,10 @@ extension AppDelegate {
     }
 
     @IBAction func resetDatabase(_ sender: Any) {
-        deleteDocumentsAndDatabases(includedRemote: true)
+        deleteDocumentsAndDatabases()
     }
 
-    func deleteDocumentsAndDatabases(includedRemote: Bool) {
+    func deleteDocumentsAndDatabases() {
         // Documents and Databases
         BeamNote.clearFetchedNotes()
         guard let account = data.currentAccount else {

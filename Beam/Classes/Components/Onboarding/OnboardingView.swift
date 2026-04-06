@@ -33,20 +33,8 @@ struct OnboardingView: View {
                         model.advanceToNextStep(nextStep)
                     }
                     switch currentStep.type {
-                    case .profile:
-                        OnboardingProfileCreationView(actions: $model.actions, finish: finishCallback)
-                    case .emailConnect:
-                        OnboardingEmailConnectView(actions: $model.actions, finish: finishCallback)
-                    case .emailConfirm:
-                        OnboardingEmailConfirmationView(actions: $model.actions, finish: finishCallback)
                     case .imports:
                         OnboardingImportsView(actions: $model.actions, finish: finishCallback)
-                    case .setupPrivateKey:
-                        OnboardingSetupPrivateKey(actions: $model.actions, finish: finishCallback)
-                    case .lostPrivateKey:
-                        OnboardingLostPrivateKey(finish: finishCallback)
-                    case .savePrivateKey:
-                        OnboardingSaveEncryptionView(actions: $model.actions, finish: finishCallback)
                     case .welcome:
                         OnboardingWelcomeView(welcoming: !model.onlyConnect, viewIsLoading: $model.viewIsLoading, finish: finishCallback)
                     case .setupCalendar:

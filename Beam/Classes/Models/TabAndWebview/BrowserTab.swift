@@ -285,7 +285,7 @@ import BeamCore
             return BrowsingTree(
                 origin,
                 linkStore: LinkStore.shared,
-                frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage(objectManager: BeamData.shared.objectManager)),
+                frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
                 domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
                 dailyScoreStore: GRDBDailyUrlScoreStore()
             )
@@ -336,7 +336,7 @@ import BeamCore
         webPositions = WebPositions(webFrames: webFrames)
         super.init()
         tree.set(
-            frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage(objectManager: data.objectManager)),
+            frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
             domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(),
             dailyScoreStore: GRDBDailyUrlScoreStore()
         )

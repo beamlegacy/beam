@@ -1,8 +1,0 @@
-query BeamObjectUpdatedAt($id: ID!) {
-  beamObject(id: $id) {
-    id
-    type
-    checksum
-    updatedAt
-  }
-}

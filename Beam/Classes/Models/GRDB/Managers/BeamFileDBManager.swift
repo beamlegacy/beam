@@ -168,9 +168,6 @@ protocol BeamFileStorage {
 }
 
 class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoImportDisabler {
-    let objectManager: BeamObjectManager
-    var changedObjects: [UUID: BeamFileRecord] = [:]
-    let objectQueue = BeamObjectQueue<BeamFileRecord>()
     static var id = UUID()
     static var name = "BeamFileDBManager"
 
@@ -185,18 +182,8 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
 
     required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
         self.owner = holder
-        self.objectManager = objectManager
         self.grdbStore = store
         try super.init(store: store)
-
-
-        // Do not register now, as every new instance will override the current instance owned
-        // by BeamObjectManager.
-        // Not that we should do better and avoid having a global BeamObjectManager
-        // and multiple accounts
-
-//         registerOnBeamObjectManager(objectManager)
-
     }
 
     override func prepareMigration(migrator: inout DatabaseMigrator) throws {
@@ -265,9 +252,6 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
             try f.insert(db)
             Self.fileSaved.send(f)
         }
-        if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
-            try self.saveOnNetwork(file)
-        }
         return uid
     }
 
@@ -279,10 +263,6 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                     try fileToInsert.insert(db)
                     Self.fileSaved.send(fileToInsert)
                 }
-            }
-
-            if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
-                try self.saveAllOnNetwork(files)
             }
         } catch let error {
             Logger.shared.logError("Error while inserting files \(files): \(error)", category: .fileDB)
@@ -303,27 +283,12 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
         }
     }
 
-    func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func deleteAll() {
         do {
             try self.clear()
-            if AuthenticationManager.shared.isAuthenticated && includedRemote {
-                Task {
-                    do {
-                        try await self.deleteAllFromBeamObjectAPI()
-                        networkCompletion?(.success(true))
-                    } catch {
-                        Logger.shared.logError("Error while deleting all contacts: \(error)", category: .contactsDB)
-                        networkCompletion?(.success(false))
-                    }
-                }
-            } else {
-                networkCompletion?(.success(false))
-            }
-            return
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .fileDB)
         }
-        networkCompletion?(.success(false))
     }
 
     func allRecords(_ updatedSince: Date? = nil) throws -> [BeamFileRecord] {
@@ -357,9 +322,6 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                             file.deletedAt = BeamDate.now
                             file.updatedAt = BeamDate.now
                             try file.save(db)
-                            if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
-                                try self.saveOnNetwork(file)
-                            }
                         }
                     }
                 } catch {
@@ -406,9 +368,6 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                         file.deletedAt = BeamDate.now
                         file.updatedAt = BeamDate.now
                         try file.save(db)
-                        if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
-                            try self.saveOnNetwork(file)
-                        }
 
                     } catch {
                         Logger.shared.logError("Unable to delete unreferenced file \(fileId)", category: .fileDB)
@@ -419,9 +378,6 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                         file.deletedAt = nil
                         file.updatedAt = BeamDate.now
                         try file.save(db)
-                        if AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable {
-                            try self.saveOnNetwork(file)
-                        }
                     } catch {
                         Logger.shared.logError("Unable to undelete file \(fileId)", category: .fileDB)
                     }
@@ -456,11 +412,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
 
     func refresh(_ file: BeamFileRecord) async throws {
         do {
-            if let remoteFile = try await self.refreshFromBeamObjectAPI(file, true) {
-                try self.insert(files: [remoteFile])
-            } else {
-                Logger.shared.logError("Unable to get remoteFile \(file.id)", category: .fileDB)
-            }
+            // Remote sync removed — no-op
         } catch {
             Logger.shared.logError("Unable to refresh file \(file.id): \(error)", category: .fileDB)
         }
@@ -471,67 +423,6 @@ enum BeamFileDBManagerError: Error, Equatable {
     case localFileNotFound
 }
 
-extension BeamFileDBManager: BeamObjectManagerDelegate {
-    static var conflictPolicy: BeamObjectConflictResolution = .replace
-    static var uploadType: BeamObjectRequestUploadType {
-        .directUpload
-    }
-
-    func willSaveAllOnBeamObjectApi() {}
-
-    func receivedObjects(_ files: [BeamFileRecord]) throws {
-        try insert(files: files)
-    }
-
-    func allObjects(updatedSince: Date?) throws -> [BeamFileRecord] {
-        try allRecords(updatedSince)
-    }
-
-    func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [weak self] in
-            do {
-                let localTimer = Date()
-                try await self?.saveOnBeamObjectsAPI(files)
-                Logger.shared.logDebug("Saved \(files.count) files on the BeamObject API",
-                                       category: .fileNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the files on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .fileNetwork)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    private func saveOnNetwork(_ file: BeamFileRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-
-        Task.detached(priority: .userInitiated) { [weak self] in
-            do {
-                let localTimer = Date()
-                try await self?.saveOnBeamObjectAPI(file)
-                Logger.shared.logDebug("Saved file \(file.name) on the BeamObject API",
-                                       category: .fileNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the file on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .fileNetwork)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    func manageConflict(_ object: BeamFileRecord,
-                        _ remoteObject: BeamFileRecord) throws -> BeamFileRecord {
-        fatalError("Managed by BeamObjectManager")
-    }
-
-    func saveObjectsAfterConflict(_ objects: [BeamFileRecord]) throws {
-        try insert(files: objects)
-    }
-
-}
 
 extension BeamFileRecord: Identifiable {
     public var id: UUID { uid }

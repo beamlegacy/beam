@@ -1,5 +1,0 @@
-query AccountExists($email: Email!) {
-  accountExists(email: $email) {
-    exists
-  }
-}

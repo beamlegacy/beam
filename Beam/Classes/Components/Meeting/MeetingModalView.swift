@@ -309,7 +309,7 @@ extension MeetingModalView {
         }
 
         private func saveContacts(for attendee: Meeting.Attendee, and attendeeNote: BeamNote) {
-            guard let contactRecord = BeamData.shared.contactsManager.save(email: attendee.email, to: attendeeNote.id, networkCompletion: { _ in }) else { return }
+            guard let contactRecord = BeamData.shared.contactsManager.save(email: attendee.email, to: attendeeNote.id) else { return }
             attendeeNote.contactId = contactRecord.uuid
             _ = attendeeNote.save(self)
         }

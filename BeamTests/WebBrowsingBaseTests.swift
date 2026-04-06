@@ -46,7 +46,7 @@ class WebBrowsingBaseTests: XCTestCase {
         state.data = BeamData()
         state.data.objectManager.disableSendingObjects = true
 
-        linkStore.deleteAll(includedRemote: false, nil)
+        linkStore.deleteAll()
         webView = WKWebView()
 
         mockIndexingDelegate = MockWebIndexingDelegate()

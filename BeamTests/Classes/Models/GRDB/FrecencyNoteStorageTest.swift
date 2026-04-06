@@ -32,7 +32,7 @@ class FrecencyNoteStorageTest: XCTestCase {
         //Checks that createdAt is written once at creation and then updated at each create/Update
         BeamDate.freeze("2001-01-01T00:00:00+000")
 
-        let storage = GRDBNoteFrecencyStorage(db: db, objectManager: objectManager)
+        let storage = GRDBNoteFrecencyStorage(db: db)
 
         let score = FrecencyScore(id: UUID(), lastTimestamp: BeamDate.now, lastScore: 1, sortValue: 2)
         try storage.save(score: score, paramKey: .note30d0)
@@ -83,107 +83,4 @@ class FrecencyNoteStorageTest: XCTestCase {
         XCTAssertNil(limiter.recordsToSave)
     }
 
-    func testReceivedDeduplication() throws {
-        let noteId = UUID()
-        let now = BeamDate.now
-        let storage = GRDBNoteFrecencyStorage(db: db, objectManager: objectManager)
-
-        let records = [
-            FrecencyNoteRecord(noteId: noteId, lastAccessAt: now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: .note30d0),
-            FrecencyNoteRecord(noteId: noteId, lastAccessAt: now + 1, frecencyScore: 2, frecencySortScore: 2, frecencyKey: .note30d0),
-            FrecencyNoteRecord(noteId: noteId, lastAccessAt: now, frecencyScore: 3, frecencySortScore: 3, frecencyKey: .note30d1),
-        ]
-        try storage.receivedObjects(records)
-        let score0 = try XCTUnwrap(storage.fetchOne(id: noteId, paramKey: .note30d0))
-        XCTAssertEqual(score0.lastScore, 2) //highest last access at is kept
-        let score1 = try XCTUnwrap(storage.fetchOne(id: noteId, paramKey: .note30d1))
-        XCTAssertEqual(score1.lastScore, 3)
-    }
-}
-
-class FrecencyNoteStorageWithNetworkTest: XCTestCase {
-
-    let beamHelper = BeamTestsHelper()
-    let beamObjectHelper = BeamObjectTestsHelper()
-    var db: BeamNoteLinksAndRefsManager!
-    let objectManager = BeamData.shared.objectManager
-
-    override func setUpWithError() throws {
-        super.setUp()
-
-        BeamTestsHelper.logout()
-        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
-
-        let store = try GRDBStore.empty()
-        db = try BeamNoteLinksAndRefsManager(store: store)
-        try store.migrate()
-        objectManager.disableSendingObjects = false
-        beforeNetworkTests()
-
-    }
-
-    override func tearDown() async throws {
-        await stopNetworkTests()
-        await MainActor.run {
-            Configuration.reset()
-        }
-    }
-
-    @MainActor
-    func testSoftDelete() async throws {
-        let noteIds = [UUID(), UUID()]
-        let storage = GRDBNoteFrecencyStorage(db: db, objectManager: objectManager)
-        let now = BeamDate.now
-        let records = [
-            FrecencyNoteRecord(noteId: noteIds[0], lastAccessAt: BeamDate.now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d0),
-            FrecencyNoteRecord(noteId: noteIds[0], lastAccessAt: BeamDate.now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d1),
-            FrecencyNoteRecord(noteId: noteIds[1], lastAccessAt: BeamDate.now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d0),
-        ]
-        try db.save(noteFrecencies: records)
-        await remoteSoftDelete(storage, noteIds[0])
-        //it soft deletes locally and remotelly
-        XCTAssertTrue(storage.softDeleteCompleted)
-
-        var localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[0], paramKey: .note30d0))
-        XCTAssertEqual(localRecord.deletedAt, now)
-        var fetchedRecord = try await self.beamObjectHelper.fetchOnAPI(localRecord)
-        XCTAssertNil(fetchedRecord)
-
-        localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[0], paramKey: .note30d1))
-        XCTAssertEqual(localRecord.deletedAt, now)
-        fetchedRecord = try await self.beamObjectHelper.fetchOnAPI(localRecord)
-        XCTAssertNil(fetchedRecord)
-
-        localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[1], paramKey: .note30d0))
-        XCTAssertNil(localRecord.deletedAt)
-        let res = try await self.beamObjectHelper.fetchOnAPI(localRecord)
-        XCTAssertNil(res)
-    }
-
-    private func remoteSoftDelete(_ storage: GRDBNoteFrecencyStorage, _ id: UUID) async {
-        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            DispatchQueue(label: "tests.remoteSoftDelete").async {
-                storage.remoteSoftDelete(noteId: id) {
-                    continuation.resume()
-                }
-            }
-        }
-    }
-
-    private func beforeNetworkTests() {
-        // Need to freeze date to compare objects, as `createdAt` would be different from the network stubs we get
-        // back from Vinyl.
-        BeamDate.freeze("2021-03-19T12:21:03Z")
-
-        BeamTestsHelper.logout()
-        beamHelper.beginNetworkRecording(test: self)
-        BeamTestsHelper.login()
-        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
-    }
-
-    private func stopNetworkTests() async {
-        await BeamObjectTestsHelper().deleteAll()
-        beamHelper.endNetworkRecording()
-        BeamDate.reset()
-    }
 }

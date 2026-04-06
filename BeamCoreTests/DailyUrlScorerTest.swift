@@ -23,11 +23,11 @@ private class FakeDailyScoreStore: DailyUrlScoreStoreProtocol {
 class DailyUrlScorerTest: XCTestCase {
 
     override func setUpWithError() throws {
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in}
+        LinkStore.shared.deleteAll()
     }
 
     override func tearDownWithError() throws {
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
+        LinkStore.shared.deleteAll()
     }
 
     func testUrlGrouping() throws {

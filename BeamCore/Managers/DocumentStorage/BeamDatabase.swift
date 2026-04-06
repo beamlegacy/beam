@@ -261,13 +261,9 @@ extension BeamDatabase {
 }
 
 extension BeamDatabase {
-    var previousChecksum: String? {
-        BeamObjectChecksum.previousChecksum(object: self)
-    }
+    var previousChecksum: String? { nil }
 
-    var hasBeenSyncedOnce: Bool {
-        previousChecksum != nil
-    }
+    var hasBeenSyncedOnce: Bool { false }
 
     var fileDBManager: BeamFileDBManager? {
         try? manager(BeamFileDBManager.self)

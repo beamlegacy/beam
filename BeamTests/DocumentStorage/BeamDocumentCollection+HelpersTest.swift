@@ -13,7 +13,6 @@ import GRDB
 
 class BeamDocumentCollectionHelpersTest: XCTestCase, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
-    let objectManager = BeamObjectManager()
     var store: GRDBStore!
     var documentCollection: BeamDocumentCollection!
 
@@ -26,7 +25,7 @@ class BeamDocumentCollectionHelpersTest: XCTestCase, BeamDocumentSource {
         let db = try DatabaseQueue(path: dbPath)
         store = try GRDBStore(writer: db)
         try store.erase()
-        documentCollection = try BeamDocumentCollection(holder: nil, objectManager: objectManager, store: store)
+        documentCollection = try BeamDocumentCollection(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate()
 
         for index in 1...10 {

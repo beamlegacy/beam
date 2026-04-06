@@ -149,10 +149,6 @@ protocol BrowsingTreeStoreProtocol {
 }
 
 class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
-    let objectManager: BeamObjectManager
-
-    var changedObjects: [UUID : BrowsingTreeRecord] = [:]
-    let objectQueue = BeamObjectQueue<BrowsingTreeRecord>()
     let providedDb: BrowsingTreeDBManager?
     var db: BrowsingTreeDBManager? {
         let currentDb = providedDb ?? BeamData.shared.browsingTreeDBManager
@@ -166,10 +162,8 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     let groupTimeOut: Double = 2
     let treeProcessor = BrowsingTreeProcessor()
 
-    init(db: BrowsingTreeDBManager? = nil, objectManager: BeamObjectManager) {
-        self.objectManager = objectManager
+    init(db: BrowsingTreeDBManager? = nil) {
         self.providedDb = db
-
     }
 
     func process(tree: BrowsingTree) {
@@ -259,102 +253,10 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
         }
     }
 
-    func remoteDeleteAll(_ completion: ((Result<Bool, Error>) -> Void)? = nil) {
-        Logger.shared.logInfo("Deleting browsing trees from API", category: .browsingTreeNetwork)
-        Task {
-            do {
-                try await deleteAllFromBeamObjectAPI()
-                completion?(.success(true))
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .database)
-                completion?(.failure(error))
-            }
-        }
-    }
 }
+
 enum BrowsingTreeStoreManagerError: Error, Equatable {
     case localFileNotFound
-}
-
-extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
-    static var conflictPolicy: BeamObjectConflictResolution = .replace
-    static var uploadType: BeamObjectRequestUploadType {
-        .multipartUpload
-    }
-
-    func willSaveAllOnBeamObjectApi() {}
-
-    func receivedObjects(_ records: [BrowsingTreeRecord]) throws {
-        guard let db = db else { return }
-        treeProcessingCompleted = false
-        let statuses = db.browsingTreeProcessingStatuses(ids: records.map { $0.rootId })
-        let flattenedRecordsWithDbStatus = records.map { (record) -> BrowsingTreeRecord in
-            var newRecord = record.flattened
-            newRecord.processingStatus = statuses[record.rootId] ?? .toDo //record not already in db are to be processed
-            return newRecord
-        }
-        try save(browsingTreeRecords: flattenedRecordsWithDbStatus)
-        let recordsToProcess = flattenedRecordsWithDbStatus.filter { $0.processingStatus == .toDo }
-        DispatchQueue.database.async {
-            for record in recordsToProcess {
-                guard let db = self.db else { return }
-                if let flattenedTree = record.flattenedData,
-                   let tree = BrowsingTree(flattenedTree: flattenedTree) {
-                    db.update(record: record, status: .started)
-                    self.process(tree: tree)
-                    db.update(record: record, status: .done)
-                }
-            }
-            self.treeProcessingCompleted = true
-        }
-    }
-
-    func allObjects(updatedSince: Date?) throws -> [BrowsingTreeRecord] {
-        try getAllBrowsingTrees(updatedSince: updatedSince)
-    }
-
-    private func saveOnNetwork(_ record: BrowsingTreeRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                let localTimer = Date()
-                try await saveOnBeamObjectAPI(record)
-                Logger.shared.logDebug("Saved tree \(record.rootId) on the BeamObject API",
-                                       category: .fileNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the tree on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .fileNetwork)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    func saveAllOnNetwork(_ records: [BrowsingTreeRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                let localTimer = Date()
-                try await saveOnBeamObjectsAPI(records)
-                Logger.shared.logDebug("Saved \(records.count) trees on the BeamObject API",
-                                       category: .fileNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the trees on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .fileNetwork)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    func manageConflict(_ object: BrowsingTreeRecord,
-                        _ remoteObject: BrowsingTreeRecord) throws -> BrowsingTreeRecord {
-        fatalError("Managed by BeamObjectManager")
-    }
-
-    func saveObjectsAfterConflict(_ objects: [BrowsingTreeRecord]) throws {
-        try save(browsingTreeRecords: objects)
-    }
 }
 
 extension BrowsingTreeStoreManager {
@@ -388,16 +290,6 @@ extension BrowsingTreeStoreManager {
             completion?(.failure(error))
             return
         }
-        //remote cleanup
-        Task {
-            do {
-                try await deleteFromBeamObjectAPI(objects: legacyObjects)
-                Logger.shared.logInfo("Successfully deleted \(legacyObjects.count) legacy tree(s) from API", category: .browsingTreeNetwork)
-                completion?(.success(true))
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .browsingTreeNetwork)
-                completion?(.failure(error))
-            }
-        }
+        completion?(.success(true))
     }
 }

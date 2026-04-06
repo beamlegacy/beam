@@ -240,9 +240,8 @@ struct LegacyDataImporter: BeamDocumentSource {
 
     private func verifyPasswords(store: GRDBStore) throws -> PasswordManager.SanityDigest {
         let objectManager = account.objectManager
-
         let passwordsDB = try PasswordsDB(holder: nil, objectManager: objectManager, store: store)
-        let passwordManager = PasswordManager(overridePasswordDB: passwordsDB, objectManager: objectManager)
+        let passwordManager = PasswordManager(overridePasswordDB: passwordsDB)
         return try passwordManager.sanityDigest()
     }
 

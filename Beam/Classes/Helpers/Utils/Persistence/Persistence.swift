@@ -8,12 +8,9 @@ struct Persistence {
     enum Device {
         @StandardStorable("device.id") static var id: UUID?
     }
+
     enum Authentication {
-        @KeychainStorable("authentication.accessToken") static var accessToken: String?
-        @KeychainStorable("authentication.refreshToken") static var refreshToken: String?
-        @KeychainStorable("authentication.userId") static var userId: String?
         @KeychainStorable("authentication.email") static var email: String?
-        @KeychainStorable("authentication.password") static var password: String?
 
         @KeychainStorable("authentication.google.tokens", synchronizable: false) static var googleCalendarTokens: [String: String]?
         @StandardStorable("authentication.apple.calendar") static var hasAppleCalendarConnection: Bool?
@@ -21,11 +18,6 @@ struct Persistence {
         @StandardStorable("authentication.username") static var username: String?
         @StandardStorable("authentication.hasSeenOnboarding") static var hasSeenOnboarding: Bool?
         @StandardStorable("authentication.hasSeenWebTutorial") static var hasSeenWelcomeTour: Bool?
-    }
-
-    enum Development {
-        @StandardStorable("development.endpoint") static var endpoint: String?
-        @StandardStorable("development.lastLogin") static var lastLogin: Date?
     }
 
     enum PointShoot {
@@ -41,7 +33,6 @@ struct Persistence {
         // This is not saved in the keychain
         @KeychainStorable("encryption.privateKeyCreationDate") static var creationDate: Date?
         @KeychainStorable("encryption.privateKeyUpdateDate") static var updateDate: Date?
-
     }
 
     enum BrowsingTree {
@@ -56,7 +47,6 @@ struct Persistence {
     enum ContinueTo {
         @StandardStorable("summary") static var summary: String?
     }
-
 
     enum Database {
         @StandardStorable("currentDatabaseId") static var currentDatabaseId: UUID?
@@ -90,6 +80,7 @@ struct Persistence {
             return decodedMaxDateByBrowser[browserType]
         }
     }
+
     enum NoteScores {
         @StandardStorable("NoteScores.daily") static var daily: Data?
         @StandardStorable("NoteScores.lastWordCountChange") static var lastWordCountChange: Data?
@@ -100,41 +91,21 @@ struct Persistence {
         @StandardStorable("currentDatabase.id") static var currentDatabaseId: UUID?
     }
 
-    enum Sync {
-        enum BeamObjects {
-            @StandardStorable("sync.beam_objects.last_received_at") static var last_received_at: Date?
-            @StandardStorable("sync.beam_objects.last_updated_at") static var last_updated_at: Date?
-        }
-
-        /// Clean all stored informations on logout
-        static func cleanUp() {
-            Persistence.Sync.BeamObjects.last_received_at = nil
-            Persistence.Sync.BeamObjects.last_updated_at = nil
-        }
-    }
-
     enum SpellChecking {
         @StandardStorable("spellChecking.enable") static var enable: Bool?
         @StandardStorable("spellChecking.ignored") static var ignoredWords: [String]?
     }
 
-    /// Clean all stored informations on logout
+    /// Clean stored data
     static func cleanUp() {
-        Persistence.Authentication.accessToken = nil
-        Persistence.Authentication.refreshToken = nil
-        Persistence.Authentication.userId = nil
         Persistence.Authentication.email = nil
         Persistence.Authentication.username = nil
-        Persistence.Authentication.password = nil
         Persistence.Authentication.googleCalendarTokens = nil
         Persistence.Authentication.hasAppleCalendarConnection = nil
         Persistence.ImportedBrowserHistory.maxDateByBrowser = nil
-        Sync.cleanUp()
     }
 
     static func emailOrRaiseError() -> String {
-        // Account/login has been removed. Return a fixed local identifier
-        // used as the keychain key for the encryption private key.
         return Persistence.Authentication.email ?? "local@beam.app"
     }
 }

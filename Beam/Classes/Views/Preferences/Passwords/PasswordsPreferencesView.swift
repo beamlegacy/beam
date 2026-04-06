@@ -63,7 +63,7 @@ struct PasswordsPreferencesView: View {
 
 struct PasswordsPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordManager: PasswordManager(objectManager: BeamObjectManager()), showNeverSavedEntries: true), creditCardsViewModel: CreditCardListViewModel())
+        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordManager: PasswordManager(), showNeverSavedEntries: true), creditCardsViewModel: CreditCardListViewModel())
     }
 }
 

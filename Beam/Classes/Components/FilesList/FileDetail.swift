@@ -148,37 +148,24 @@ struct FileDetail: View {
         }
     }
 
-    private func delete(_ remoteDelete: Bool = true) {
+    private func delete() {
         deleted = true
 
         do {
             try fileManager.remove(uid: file.uid)
-
-            if remoteDelete {
-                Task {
-                    do {
-                        try await fileManager.deleteFromBeamObjectAPI(object: file)
-                    } catch {
-                        Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
-                    }
-                }
-            }
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
         }
     }
 
     private func softDelete() {
-        Task {
-            file.deletedAt = BeamDate.now
-            file.updatedAt = BeamDate.now
+        file.deletedAt = BeamDate.now
+        file.updatedAt = BeamDate.now
 
-            do {
-                try fileManager.insert(files: [file])
-                try await fileManager.saveOnBeamObjectAPI(file)
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
-            }
+        do {
+            try fileManager.insert(files: [file])
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
         }
     }
 
@@ -200,15 +187,7 @@ struct FileDetail: View {
 
     private var SaveButton: some View {
         Button(action: {
-            saving = true
-            Task {
-                do {
-                    try await fileManager.saveOnBeamObjectAPI(file, force: true)
-                } catch {
-                    Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
-                }
-                saving = false
-            }
+            // No-op: remote sync removed
         }, label: {
             Text("Save").frame(minWidth: 100)
         }).disabled(deleted || saving)
@@ -232,7 +211,7 @@ struct FileDetail: View {
     }
     private var LocalDeleteButton: some View {
         Button(action: {
-            delete(false)
+            delete()
         }, label: {
             Text("Local Delete").frame(minWidth: 100)
         }).disabled(deleted)

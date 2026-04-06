@@ -1,9 +1,0 @@
-mutation DeleteAllBeamObjects($beamObjectType: String) {
-  deleteAllBeamObjects(input: {beamObjectType: $beamObjectType}) {
-    success
-    errors {
-      path
-      message
-    }
-  }
-}

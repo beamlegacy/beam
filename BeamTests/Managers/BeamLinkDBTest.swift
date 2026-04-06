@@ -13,7 +13,7 @@ class BeamLinkDBTests: XCTestCase {
 
     override func tearDown() {
         super.tearDown()
-        linkDB.deleteAll(includedRemote: false)
+        linkDB.deleteAll()
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
     }
 
@@ -52,7 +52,7 @@ class BeamLinkDBTests: XCTestCase {
             destinationLink,
         ]
         let store = try GRDBStore(writer: DatabaseQueue())
-        let db = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
+        let db = try LinksDBManager(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate()
 
         try db.insert(links: links)
@@ -72,12 +72,12 @@ class BeamLinkDBTests: XCTestCase {
         let creationDate = BeamDate.now
         let dbQueue = try DatabaseQueue()
         let store = try GRDBStore(writer: dbQueue)
-        let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
+        let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: BeamObjectManager(), store: store)
         try store.migrate(upTo: "flattenBrowsingTrees")
 
         //insertion of separated link and frecency records
         let urls = ["http://abc.com", "http://def.fr"]
-        let linkStore = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
+        let linkStore = BeamLinkDB(overridenManager: inMemoryGrdb)
         let ids = urls.map { _ in UUID() }
         try zip(urls, ids).forEach { (url, id) in
             try dbQueue.write { db in
@@ -117,44 +117,13 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.reset()
     }
 
-    func testReceivedLinkFrecencyOverwrite() throws {
-        let dbQueue = try DatabaseQueue()
-        let store = try GRDBStore(writer: dbQueue)
-        let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
-        let db = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
-        try store.migrate()
-        let now = BeamDate.now
-        let urls = ["http://coucou.fr", "http://hello.fr"]
-        let localRecord0 = Link(url: urls[0], title: nil, content: nil, frecencyVisitLastAccessAt: now, frecencyVisitScore: 1.0, frecencyVisitSortScore: 1.0)
-        let localRecord1 = Link(url: urls[1], title: nil, content: nil, frecencyVisitLastAccessAt: now, frecencyVisitScore: 1.0, frecencyVisitSortScore: 1.0)
-        try inMemoryGrdb.insert(links: [localRecord0, localRecord1])
-        let remoteRecord0 = Link(url: urls[0], title: "coucou", content: nil, frecencyVisitLastAccessAt: nil, frecencyVisitScore: nil, frecencyVisitSortScore: nil)
-        let remoteRecord1 = Link(url: urls[1], title: "hello", content: nil, frecencyVisitLastAccessAt: now + Double(1), frecencyVisitScore: 2.0, frecencyVisitSortScore: 2.0)
-        try db.receivedObjects([remoteRecord0, remoteRecord1])
-
-        //link frecency fields are not reset to nil when receiving a frecencyless record
-        let savedRecord0 = try XCTUnwrap(db.linkFor(url: urls[0]))
-        XCTAssertEqual(savedRecord0.title, "coucou")
-        let lastAccessAt0 = try XCTUnwrap(savedRecord0.frecencyVisitLastAccessAt)
-        XCTAssert(abs(lastAccessAt0.timeIntervalSince(now)) < 0.001)
-        XCTAssertEqual(savedRecord0.frecencyVisitScore, 1.0)
-        XCTAssertEqual(savedRecord0.frecencyVisitSortScore, 1.0)
-
-        //link frecency fields are updated when receiving a link with frecency
-        let savedRecord1 = try XCTUnwrap(db.linkFor(url: urls[1]))
-        XCTAssertEqual(savedRecord1.title, "hello")
-        let lastAccessAt1 = try XCTUnwrap(savedRecord1.frecencyVisitLastAccessAt)
-        XCTAssert(abs(lastAccessAt1.timeIntervalSince(now + Double(1))) < 0.001)
-        XCTAssertEqual(savedRecord1.frecencyVisitScore, 2.0)
-        XCTAssertEqual(savedRecord1.frecencyVisitSortScore, 2.0)
-    }
     
     func testFrecencyStore() throws {
         let dbQueue = try DatabaseQueue()
         let store = try GRDBStore(writer: dbQueue)
-        let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
-        let linkstore = BeamLinkDB(objectManager: objectManager, overridenManager: inMemoryGrdb)
-        let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb, objectManager: objectManager, linkStore: linkstore)
+        let inMemoryGrdb = try LinksDBManager(holder: nil, objectManager: BeamObjectManager(), store: store)
+        let linkstore = BeamLinkDB(overridenManager: inMemoryGrdb)
+        let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb, linkStore: linkstore)
         try store.migrate()
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let t0 = BeamDate.now
@@ -214,43 +183,8 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.reset()
     }
 
-    func testConflictManagement() throws {
-        let store = try GRDBStore(writer: DatabaseQueue())
-        let db = try LinksDBManager(holder: nil, objectManager: objectManager, store: store)
-        let linkstore = BeamLinkDB(objectManager: objectManager, overridenManager: db)
-        try store.migrate()
-        let now = BeamDate.now
-        let remoteLink = Link(
-            url: "httpl://abc.fr/",
-            title: "Alphabet", content: nil,
-            destination: nil,
-            frecencyVisitLastAccessAt: nil,
-            frecencyVisitScore: nil,
-            frecencyVisitSortScore: nil,
-            createdAt: now,
-            updatedAt: now
-        )
-        let link = Link(
-            url: "httpl://abc.fr/",
-            title: "Something Else", content: nil,
-            destination: nil,
-            frecencyVisitLastAccessAt: now,
-            frecencyVisitScore: 2,
-            frecencyVisitSortScore: 1,
-            createdAt: now,
-            updatedAt: now - Double(1)
-        )
-        let postConflictLink = try linkstore.manageConflict(link, remoteLink)
-
-        //local non nul frecency fields are kept
-        XCTAssertEqual(postConflictLink.frecencyVisitScore, 2)
-        XCTAssertEqual(postConflictLink.frecencyVisitSortScore, 1)
-        XCTAssertEqual(postConflictLink.frecencyVisitLastAccessAt, now)
-        //while remote more recent fields are chosen
-        XCTAssertEqual(postConflictLink.title, "Alphabet")
-    }
     func testTitleNotReplacedByEmpty() throws {
-        let linkstore = BeamLinkDB(objectManager: objectManager)
+        let linkstore = BeamLinkDB()
 
         var link = linkstore.visit("http://site.cool/page", title: "A page", content: nil, destination: nil)
         link = linkstore.visit("http://site.cool/page", title: nil, content: nil, destination: nil)
@@ -265,7 +199,7 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.freeze("2001-01-01T12:21:03Z")
         let t0 = BeamDate.now
         let grdbStore = try GRDBStore.empty()
-        let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(),store: grdbStore)
+        let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(), store: grdbStore)
         try grdbStore.migrate(upTo: "createUrlHistoryManager")
         let youtubeLink = linksDBManager.visit(url: "https://www.youtube.com/abc", content: nil, destination: nil)
         let otherLink = linksDBManager.visit(url: "https://www.somewhere.else/abc", content: nil, destination: youtubeLink.url)
@@ -303,7 +237,7 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.freeze("2001-01-01T12:21:03Z")
         let t0 = BeamDate.now
         let grdbStore = try GRDBStore.empty()
-        let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(),store: grdbStore)
+        let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(), store: grdbStore)
         try grdbStore.migrate(upTo: "createUrlHistoryManager")
         let gmailLink = linksDBManager.visit(url: "https://mail.google.com/abc", content: nil, destination: nil)
         let aliasToErase = linksDBManager.visit(url: "https://www.some.thing/truc", content: nil, destination: gmailLink.url)
@@ -341,7 +275,7 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.freeze("2001-01-01T12:21:03Z")
         let t0 = BeamDate.now
         let grdbStore = try GRDBStore.empty()
-        let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(),store: grdbStore)
+        let linksDBManager = try LinksDBManager(objectManager: BeamObjectManager(), store: grdbStore)
         try grdbStore.migrate(upTo: "linkAliasesCleanup")
         let AliasLessGoogleUrlLink = linksDBManager.visit(url: "https://www.google.com/search?q=https%3A%2F%2Fabc.com%2F", content: nil, destination: nil)
         linksDBManager.updateLinkFrecency(id: AliasLessGoogleUrlLink.id, lastAccessAt: t0, score: 1, sortScore: 1)
