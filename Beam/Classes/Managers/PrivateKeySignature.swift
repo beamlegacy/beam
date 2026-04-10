@@ -1,47 +1,31 @@
-import Foundation
-import UUIDKit
-import BeamCore
+//
+//  PrivateKeySignature.swift
+//  Beam
+//
+//  Created by Jean-Louis Darmon on 21/06/2021.
+//
 
-struct PrivateKeySignature: Codable, Hashable, Equatable {
-    var id = UUID.null
-    var signature: String
+import Foundation
+import BeamCore
+import UUIDKit
+
+struct PrivateKeySignature: Codable, Identifiable, Hashable {
+    static var beamObjectType: BeamObjectObjectType = .privateKeySignature
+
+    var id: UUID = UUID()
+    var beamObjectId: UUID {
+        get { id }
+        set { id = newValue }
+    }
+    var publicKey: String = "none"
     var createdAt: Date = BeamDate.now
     var updatedAt: Date = BeamDate.now
     var deletedAt: Date?
 
-    init() {
-        let pkey = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
-        id = UUID.v5(name: pkey, namespace: .url)
-        signature = pkey
-        if let date = Persistence.Encryption.creationDate {
-            createdAt = date
-        }
-        if let date = Persistence.Encryption.updateDate {
-            updatedAt = date
-        }
-    }
-
-    var isCurrent: Bool {
-        signature == EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case signature
-        case createdAt
-        case updatedAt
-        case deletedAt
-    }
-}
-
-extension PrivateKeySignature: BeamObjectProtocol {
-    static var beamObjectType: BeamObjectObjectType { .privateKeySignature }
-
-    var beamObjectId: UUID { get { id } set { id = newValue } }
-
-    func copy() throws -> Self {
+    func copy() -> PrivateKeySignature {
         var pks = PrivateKeySignature()
         pks.id = id
-        pks.signature = signature
+        pks.publicKey = publicKey
         pks.createdAt = createdAt
         pks.updatedAt = updatedAt
         pks.deletedAt = deletedAt
@@ -49,16 +33,7 @@ extension PrivateKeySignature: BeamObjectProtocol {
     }
 }
 
-class PrivateKeySignatureManager: BeamObjectManagerDelegate {
-    let objectManager: BeamObjectManager
-
-    var changedObjects: [UUID: PrivateKeySignature] = [:]
-    let objectQueue = BeamObjectQueue<PrivateKeySignature>()
-    
-    internal static var conflictPolicy: BeamObjectConflictResolution = .replace
-    static var uploadType: BeamObjectRequestUploadType {
-        .multipartUpload
-    }
+class PrivateKeySignatureManager {
     var privateKeySignature: PrivateKeySignature { PrivateKeySignature() }
 
     enum DistantKeyStatus {
@@ -67,41 +42,9 @@ class PrivateKeySignatureManager: BeamObjectManagerDelegate {
         case none
     }
 
-    init(objectManager: BeamObjectManager) {
-        self.objectManager = objectManager
-
-        registerOnBeamObjectManager(objectManager)
-    }
+    init() {}
 
     func distantKeyStatus() async throws -> DistantKeyStatus {
         .none
-    }
-
-    func willSaveAllOnBeamObjectApi() {}
-
-    func saveObjectsAfterConflict(_ signatures: [PrivateKeySignature]) throws {
-        Logger.shared.logDebug("Ignoring saveObjectsAfterConflict for private key signatures \(signatures)", category: .privateKeySignature)
-    }
-
-    func manageConflict(_ dbStruct: PrivateKeySignature,
-                        _ remoteDbStruct: PrivateKeySignature) throws -> PrivateKeySignature {
-        Logger.shared.logDebug("Ignoring private key signature conflict", category: .privateKeySignature)
-        return dbStruct
-    }
-
-    func receivedObjects(_ signatures: [PrivateKeySignature]) throws {
-        // We don't really care about distant signature
-    }
-
-    static var sendLocalSignature = true
-    func allObjects(updatedSince: Date?) throws -> [PrivateKeySignature] {
-        guard Self.sendLocalSignature else { return [] }
-        guard let updatedSince = updatedSince else { return [privateKeySignature] }
-        return [privateKeySignature].filter { $0.updatedAt >= updatedSince }
-    }
-
-    func saveOnNetwork(_ signature: PrivateKeySignature) async throws {
-        try await saveOnBeamObjectAPI(signature, force: true)
-        Logger.shared.logDebug("Saved signature on the BeamObject API", category: .privateKeySignature)
     }
 }

@@ -14,14 +14,16 @@ let package = Package(
             targets: ["MockHttpServer"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/Kitura/Kitura.git", from: "2.9.0"),
-        .package(name: "KituraStencil", url: "https://github.com/Kitura/Kitura-StencilTemplateEngine.git", from: "2.0.0"),
-        .package(name: "LoggingOSLog", url: "https://github.com/chrisaljoudi/swift-log-oslog.git", from: "0.2.1"),
+        .package(url: "https://github.com/httpswift/swifter.git", from: "1.5.0"),
+        .package(url: "https://github.com/stencilproject/Stencil.git", from: "0.15.1"),
     ],
     targets: [
         .target(
             name: "MockHttpServer",
-            dependencies: ["Kitura", "KituraStencil", "LoggingOSLog"],
+            dependencies: [
+                .product(name: "Swifter", package: "swifter"),
+                "Stencil",
+            ],
             resources: [.copy("Resources")]
         ),
     ]

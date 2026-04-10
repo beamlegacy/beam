@@ -250,7 +250,7 @@ class DownloadItemTests: XCTestCase {
         downloadProxyMock.progress.completedUnitCount = 50_000_000
 
         wait(for: [expectation], timeout: 10)
-        XCTAssertEqual(description, "50 MB of 100 MB")
+        XCTAssertEqual(description, "50,0 MB of 100,0 MB")
     }
 
     func testProgressDescriptionOnCompletion() {

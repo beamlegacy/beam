@@ -148,13 +148,13 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     let linkDB: BeamLinkDB
 
     override init() {
-        self.contactsManager = ContactsManager(objectManager: objectManager)
-        self.passwordManager = PasswordManager(objectManager: objectManager)
-        self.privateKeySignatureManager = PrivateKeySignatureManager(objectManager: objectManager)
-        self.browsingTreeStoreManager = BrowsingTreeStoreManager(objectManager: objectManager)
-        self.linkDB = BeamLinkDB(objectManager: objectManager)
+        self.contactsManager = ContactsManager()
+        self.passwordManager = PasswordManager()
+        self.privateKeySignatureManager = PrivateKeySignatureManager()
+        self.browsingTreeStoreManager = BrowsingTreeStoreManager()
+        self.linkDB = BeamLinkDB()
 
-        self.noteFrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage(objectManager: objectManager))
+        self.noteFrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
 
         LinkStore.shared = LinkStore(linkManager: linkDB)
         NoteScorer.shared = NoteScorer(dailyStorage: GRDBDailyNoteScoreStore.shared)
@@ -248,7 +248,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
                 guard let self = self else { return }
                 let scorer = self.noteFrecencyScorer as? ExponentialFrecencyScorer
                 let storage = scorer?.storage as? GRDBNoteFrecencyStorage
-                storage?.remoteSoftDelete(noteId: deletedDocument.id)
+                storage?.softDelete(noteId: deletedDocument.id)
 
                 guard deletedDocument.database == self.currentDatabase else { return }
 
@@ -665,8 +665,6 @@ extension BeamData {
         if let grdbStore = currentDatabase?.grdbStore {
             self.fileDBManager?.grdbStore = grdbStore
         }
-        self.fileDBManager?.registerOnBeamObjectManager(objectManager)
-        self.tabGroupingManager.storeManager?.registerOnBeamObjectManager(objectManager)
 
         BeamNote.clearFetchedNotes()
 

@@ -50,10 +50,6 @@ class TabGroupingManagerURLGroupsManipulationsTests: XCTestCase {
         setUpWithClusteringType(.legacy)
         _testRemoveClosedPages()
     }
-    func testRemoveClosedPages_smart() {
-        setUpWithClusteringType(.smart)
-        _testRemoveClosedPages()
-    }
     func _testRemoveClosedPages() {
         let newUrlGroups = sut.removeClosedPages(urlGroups: self.urlGroups, openPages: self.openPages)
         XCTAssertEqual(Set(newUrlGroups), Set([[pageIDs[0]], [pageIDs[1]], [pageIDs[2]], [pageIDs[4], pageIDs[5]]]))
@@ -62,10 +58,6 @@ class TabGroupingManagerURLGroupsManipulationsTests: XCTestCase {
     // MARK: -
     func testRemoveSingles_legacy() {
         setUpWithClusteringType(.legacy)
-        _testRemoveSingles()
-    }
-    func testRemoveSingles_smart() {
-        setUpWithClusteringType(.smart)
         _testRemoveSingles()
     }
     func _testRemoveSingles() {
@@ -77,10 +69,6 @@ class TabGroupingManagerURLGroupsManipulationsTests: XCTestCase {
     func testRemoveSinglesKeepSingleGroupWhenMultipleTabs_legacy() {
         setUpWithClusteringType(.legacy)
         _testRemoveSingles()
-    }
-    func testRemoveSinglesKeepSingleGroupWhenMultipleTabs_smart() {
-        setUpWithClusteringType(.smart)
-        _testRemoveSinglesKeepSingleGroupWhenMultipleTabs()
     }
     func _testRemoveSinglesKeepSingleGroupWhenMultipleTabs() {
         // page0 is opened multiple times, so it's a group
@@ -103,10 +91,6 @@ class TabGroupingManagerURLGroupsManipulationsTests: XCTestCase {
         setUpWithClusteringType(.legacy)
         await _testAllWithOpenPages()
     }
-    func testAllWithOpenPages_smart() async {
-        setUpWithClusteringType(.smart)
-        await _testAllWithOpenPages()
-    }
     func _testAllWithOpenPages() async {
         await sut.updateAutomaticClustering(urlGroups: urlGroups, openPages: openPages)
         XCTAssertEqual(sut.builtPagesGroups.values.count, 2)
@@ -118,10 +102,6 @@ class TabGroupingManagerURLGroupsManipulationsTests: XCTestCase {
     // MARK: -
     func testAllWithoutOpenPages_legacy() async {
         setUpWithClusteringType(.legacy)
-        await _testAllWithoutOpenPages()
-    }
-    func testAllWithoutOpenPages_smart() async {
-        setUpWithClusteringType(.smart)
         await _testAllWithoutOpenPages()
     }
     func _testAllWithoutOpenPages() async {

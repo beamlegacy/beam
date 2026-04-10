@@ -135,27 +135,16 @@ struct LinkWithFrecency: FetchableRecord {
     }
 }
 
-public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
-    let objectManager: BeamObjectManager
-
-    var changedObjects: [UUID : Link] = [:]
-    let objectQueue = BeamObjectQueue<Link>()
-    
+public class BeamLinkDB: LinkManagerProtocol {
     static let tableName = "link"
-    static var uploadType: BeamObjectRequestUploadType {
-        .multipartUpload
-    }
 
     private var overridenManager: LinksDBManager?
     private var manager: LinksDBManager? {
         overridenManager ?? BeamData.shared.linksDBManager
     }
 
-    init(objectManager: BeamObjectManager, overridenManager: LinksDBManager? = nil) {
-        self.objectManager = objectManager
+    init(overridenManager: LinksDBManager? = nil) {
         self.overridenManager = overridenManager
-
-        registerOnBeamObjectManager(objectManager)
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
@@ -173,15 +162,12 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
         return manager?.getOrCreateId(for: url, title: title, content: content, destination: destination) ?? UUID.null
     }
 
-    private func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        try store(links: [link], shouldSaveOnNetwork: shouldSaveOnNetwork, networkCompletion: networkCompletion)
+    private func store(link: Link) throws {
+        try store(links: [link])
     }
 
-    private func store(links: [Link], shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+    private func store(links: [Link]) throws {
         try manager?.insert(links: links)
-
-        guard shouldSaveOnNetwork else { return }
-        saveOnNetwork(links, networkCompletion)
     }
 
     public func linkFor(id: UUID) -> Link? {
@@ -218,31 +204,15 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
     @discardableResult
     public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link {
         guard let link: Link = manager?.visit(url: url, title: title, content: content, destination: destination) else { return Link(url: url, title: title, content: content) }
-        saveOnNetwork(link)
         return link
     }
 
-    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    public func deleteAll() {
         do {
             try manager?.deleteAll()
-            if AuthenticationManager.shared.isAuthenticated && includedRemote {
-                Task {
-                    do {
-                        try await self.deleteAllFromBeamObjectAPI()
-                        networkCompletion?(.success(true))
-                    } catch {
-                        Logger.shared.logError("Error while deleting all contacts: \(error)", category: .contactsDB)
-                        networkCompletion?(.success(false))
-                    }
-                }
-            } else {
-                networkCompletion?(.success(false))
-            }
-            return
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .linkNetwork)
         }
-        networkCompletion?(.success(false))
     }
 
     public func updateFrecency(id: UUID, lastAccessAt: Date, score: Float, sortScore: Float) {
@@ -264,107 +234,7 @@ public class BeamLinkDB: LinkManagerProtocol, BeamObjectManagerDelegate {
         }
     }
 
-    // MARK: Sync
-    static var conflictPolicy: BeamObjectConflictResolution = .fetchRemoteAndError
-
-    func willSaveAllOnBeamObjectApi() {}
-
-    func receivedObjects(_ links: [Link]) throws {
-        let ids = links.map { $0.id }
-        let existingLinks: [UUID: Link] = (try? manager?.getLinks(ids: ids)) ?? [UUID: Link]()
-        let linksToStore = links.map { (link) -> Link in
-            var newLink = link
-            //if received frecency fields are nil and local links exist, dont overwrite existing fields.
-            newLink.frecencyVisitScore = link.frecencyVisitScore ?? existingLinks[link.id]?.frecencyVisitScore
-            newLink.frecencyVisitSortScore = link.frecencyVisitSortScore ?? existingLinks[link.id]?.frecencyVisitSortScore
-            newLink.frecencyVisitLastAccessAt = link.frecencyVisitLastAccessAt ?? existingLinks[link.id]?.frecencyVisitLastAccessAt
-            return newLink
-        }
-        try store(links: linksToStore, shouldSaveOnNetwork: false)
-    }
-
-    func allObjects(updatedSince: Date?) throws -> [Link] {
-        return try manager?.allLinks(updatedSince: updatedSince) ?? []
-    }
-
     func fetchWithIds(_ ids: [UUID], includeDeleted: Bool = false) throws -> [Link] {
         return try manager?.getLinks(ids: ids, includeDeleted: includeDeleted) ?? []
-    }
-
-    func saveAllOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                let localTimer = Date()
-                try await saveOnBeamObjectsAPI(links)
-                Logger.shared.logDebug("Saved \(links.count) links on the BeamObject API",
-                                       category: .linkNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the links on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .linkNetwork)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    private func saveOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
-        guard AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable else { return }
-
-        Logger.shared.logDebug("Will save links \(links) on the BeamObject API",
-                               category: .linkNetwork)
-
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                let localTimer = Date()
-                try await saveOnBeamObjectsAPI(links)
-                Logger.shared.logDebug("Saved links \(links) on the BeamObject API",
-                                       category: .linkNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the link on the BeamObjects API with error: \(error.localizedDescription)",
-                                       category: .linkNetwork)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    private func saveOnNetwork(_ link: Link, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
-        guard AuthenticationManager.shared.isAuthenticated, NetworkMonitor.isNetworkAvailable else { return }
-
-        Logger.shared.logDebug("Will save link \(link.url) [\(link.id)] on the BeamObject API",
-                               category: .linkNetwork)
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                let localTimer = Date()
-
-                try await saveOnBeamObjectAPI(link)
-                Logger.shared.logDebug("Saved link \(link.url) [\(link.id)] on the BeamObject API",
-                                       category: .linkNetwork,
-                                       localTimer: localTimer)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the link on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .linkNetwork)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    func manageConflict(_ object: Link,
-                        _ remoteObject: Link) throws -> Link {
-        var result = object
-        if remoteObject.updatedAt > object.updatedAt {
-            result = remoteObject
-        }
-        result.frecencyVisitScore = remoteObject.frecencyVisitScore ?? object.frecencyVisitScore
-        result.frecencyVisitSortScore = remoteObject.frecencyVisitSortScore ?? object.frecencyVisitSortScore
-        result.frecencyVisitLastAccessAt = remoteObject.frecencyVisitLastAccessAt ?? object.frecencyVisitLastAccessAt
-        return result
-    }
-
-    func saveObjectsAfterConflict(_ objects: [Link]) throws {
-        try store(links: objects, shouldSaveOnNetwork: false)
     }
 }

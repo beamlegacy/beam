@@ -58,16 +58,13 @@ struct WebContentDeletionManager {
 
         // dailyURLScore
         GRDBDailyUrlScoreStore().cleanup(afterDate: date)
-        let links = try accountData.linkDB.allObjects(updatedSince: date)
+        let links = try linksDBManager?.allLinks(updatedSince: date) ?? []
         let linksIds = links.map { $0.id }
 
         // mnemonic
         try mnemonicManager?.deleteAll(forLinks: linksIds)
         // url + frecencyUrlRecord
-        try linksDBManager?.softDeleteAll(links.map { $0.id })
-
-        let updated = try accountData.linkDB.fetchWithIds(linksIds, includeDeleted: true)
-        try accountData.linkDB.saveAllOnNetwork(updated)
+        try linksDBManager?.softDeleteAll(linksIds)
     }
 
     /// Clears webkit content and favicon cache

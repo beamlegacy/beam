@@ -138,7 +138,7 @@ extension CreditCardEntry {
     }
 
     var isValidNumber: Bool {
-        guard let digits = try? cardNumber.map(String.init).map(Int.init), digits.luhnSum.isMultiple(of: 10) else { return false }
+        guard let digits = try? cardNumber.map(String.init).compactMap(Int.init), digits.luhnSum.isMultiple(of: 10), digits.count == cardNumber.count else { return false }
         switch cardType {
         case .visa:
             return cardNumber.count == 13 || cardNumber.count == 16

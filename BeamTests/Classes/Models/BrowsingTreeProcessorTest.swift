@@ -12,13 +12,13 @@ import XCTest
 class BrowsingTreeProcessorTest: XCTestCase {
 
     override func setUpWithError() throws {
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
+        LinkStore.shared.deleteAll()
         try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         Persistence.cleanUp()
     }
 
     override func tearDownWithError() throws {
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
+        LinkStore.shared.deleteAll()
         try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         Persistence.cleanUp()
      }

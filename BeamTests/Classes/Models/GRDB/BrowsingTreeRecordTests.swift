@@ -21,7 +21,7 @@ class BrowsingTreeRecordTests: XCTestCase {
     }
 
     func testRecordNewManager() throws {
-        let store = GRDBStore.empty()
+        let store = try GRDBStore.empty()
         let db = try BrowsingTreeDBManager(store: store)
         try store.migrate()
         let appSessionId = UUID()

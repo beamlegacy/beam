@@ -105,7 +105,7 @@ final class CreditCardAutofillManager {
         }
     }
 
-    func deleteAll(includedRemote: Bool) {
+    func deleteAll() {
         guard let creditCardsDB = creditCardsDB else {
             return
         }

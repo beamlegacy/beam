@@ -41,7 +41,7 @@ class WebContentDeletionManagerTests: XCTestCase {
     private func setUpHistory() throws {
         resetDate()
 
-        let browsingTreeStore = try XCTUnwrap(BrowsingTreeStoreManager(objectManager: BeamObjectManager()))
+        let browsingTreeStore = try XCTUnwrap(BrowsingTreeStoreManager())
         let tabPinSuggestions = data.tabPinSuggestionDBManager
 
         // 1 minute old

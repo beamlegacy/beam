@@ -39,10 +39,10 @@ class NoteScoreTriggerTests: XCTestCase {
 
     class FakeBrowsingScorer: BrowsingScorer {
         var debouncedUpdateScrollingScore = PassthroughSubject<WebFrames.FrameInfo, Never>()
-        weak var page: WebPage?
+        weak var page: Beam.WebPage?
         var currentScore: Score = Score()
 
-        init(page: WebPage) {
+        init(page: Beam.WebPage) {
             self.page = page
         }
         func updateScore() {}
@@ -51,7 +51,7 @@ class NoteScoreTriggerTests: XCTestCase {
         func updateScrollingScore(_ frame: WebFrames.FrameInfo) {}
     }
 
-    class FakeWebPage: WebPage {
+    class FakeWebPage: Beam.WebPage {
 
         var webView: BeamWebView
 

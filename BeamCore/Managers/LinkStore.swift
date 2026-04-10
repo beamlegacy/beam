@@ -62,7 +62,7 @@ public protocol LinkManagerProtocol {
     func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID
     func linkFor(id: UUID) -> Link?
     func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link
-    func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)?)
+    func deleteAll()
     func isDomain(id: UUID) -> Bool
     func getDomainId(id: UUID) -> UUID?
     func insertOrIgnore(links: [Link])
@@ -93,7 +93,7 @@ public class FakeLinkManager: LinkManagerProtocol {
     public func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID { UUID.null }
     public func linkFor(id: UUID) -> Link? { nil }
     public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link { Link(url: url, title: title, content: content, destination: nil) }
-    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)?) { }
+    public func deleteAll() { }
     public func isDomain(id: UUID) -> Bool { false }
     public func getDomainId(id: UUID) -> UUID? { UUID.null }
     public func insertOrIgnore(links: [Link]) { }
@@ -126,10 +126,8 @@ public class LinkStore: LinkManagerProtocol {
     }
     public func isDomain(id: UUID) -> Bool { linkManager.isDomain(id: id) }
     public func getDomainId(id: UUID) -> UUID? { linkManager.getDomainId(id: id) }
-    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)?) {
-        linkManager.deleteAll(includedRemote: includedRemote) { networkResult in
-            networkCompletion?(networkResult)
-        }
+    public func deleteAll() {
+        linkManager.deleteAll()
     }
     public func insertOrIgnore(links: [Link]) {
         linkManager.insertOrIgnore(links: links.filter { $0.id != Link.missing.id })
@@ -203,7 +201,7 @@ public class InMemoryLinkManager: LinkManagerProtocol {
         return link
     }
 
-    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)?) {
+    public func deleteAll() {
         linksById = [UUID: Link]()
     }
 

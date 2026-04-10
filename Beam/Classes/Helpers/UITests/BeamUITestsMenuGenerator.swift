@@ -171,7 +171,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         BeamUserDefaultsManager.clear()
 
         try? BeamData.shared.currentDocumentCollection?.delete(self, filters: [])
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
+        LinkStore.shared.deleteAll()
         AppDelegate.main.deleteSessionData()
         PinnedBrowserTabsManager().savePinnedTabs(tabs: [])
         ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }
@@ -363,11 +363,11 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     }
 
     private func clearPasswordsDatabase() {
-        currentAccount?.data.passwordManager.deleteAll(includedRemote: false)
+        currentAccount?.data.passwordManager.deleteAll()
     }
 
     private func clearCreditCardsDatabase() {
-        CreditCardAutofillManager.shared.deleteAll(includedRemote: false)
+        CreditCardAutofillManager.shared.deleteAll()
     }
 
     private func startMockHttpServer() {
@@ -384,14 +384,7 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     }
 
     private func deleteAllRemoteObjects() {
-        Task { @MainActor in
-            do {
-                try await BeamObjectManager().deleteAll(nil)
-                AppDelegate.main.deleteAllLocalData()
-            } catch {
-                Logger.shared.logError("Cannot deleted data: \(error)", category: .database)
-            }
-        }
+        AppDelegate.main.deleteAllLocalData()
     }
 
     private func connectToStagingServer() {

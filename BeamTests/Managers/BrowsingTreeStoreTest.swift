@@ -13,59 +13,20 @@ import Nimble
 class BrowsingTreeStoreTest: XCTestCase {
 
     override func setUpWithError() throws {
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
+        LinkStore.shared.deleteAll()
         try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         try BeamData.shared.browsingTreeDBManager?.clearBrowsingTrees()
     }
 
     override func tearDownWithError() throws {
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in}
+        LinkStore.shared.deleteAll()
         try BeamData.shared.linksDBManager?.clearUrlFrecencies()
         try BeamData.shared.browsingTreeDBManager?.clearBrowsingTrees()
     }
 
-    func testTreeProcessTrigger() throws {
-        let store = try XCTUnwrap(BrowsingTreeStoreManager(objectManager: BeamObjectManager()))
-
-        let tree = BrowsingTree(nil)
-        tree.navigateTo(url: "http://hello", title: nil, startReading: false, isLinkActivation: false)
-        let record = try XCTUnwrap(tree.toRecord())
-
-        let savedTree = BrowsingTree(nil)
-        savedTree.navigateTo(url: "http://world", title: nil, startReading: false, isLinkActivation: false)
-        let savedRecord = try XCTUnwrap(savedTree.toRecord())
-        try BeamData.shared.browsingTreeDBManager?.save(browsingTreeRecord: savedRecord)
-
-        let alreadyProcessingTree = BrowsingTree(nil)
-        alreadyProcessingTree.navigateTo(url: "http://beam", title: nil, startReading: false, isLinkActivation: false)
-        var alreadyProcessingRecord = try XCTUnwrap(alreadyProcessingTree.toRecord())
-        alreadyProcessingRecord.processingStatus = .started
-        try BeamData.shared.browsingTreeDBManager?.save(browsingTreeRecord: alreadyProcessingRecord)
-
-        try store.receivedObjects([record, savedRecord, alreadyProcessingRecord])
-        expect(store.treeProcessingCompleted).toEventually(beTrue())
-
-        //received tree not already stored in db should trigger tree processsing
-        guard let treeFrecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: tree.current.link) else {
-            throw BeamDataError.databaseNotFound
-        }
-        XCTAssert(treeFrecencies.count > 0)
-
-        //tree record already in db with done should not trigger processing when received
-        guard let savedTreeFrecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: savedTree.current.link) else {
-            throw BeamDataError.databaseNotFound
-        }
-        XCTAssertEqual(savedTreeFrecencies.count, 0)
-
-        //tree record already in db with started status should not trigger processing when received
-        guard let processingTreeFrecencies = try BeamData.shared.linksDBManager?.fetchOneFrecency(fromUrl: alreadyProcessingTree.current.link) else {
-            throw BeamDataError.databaseNotFound
-        }
-        XCTAssertEqual(processingTreeFrecencies.count, 0)
-    }
 
     func testSaveFetchLocal() throws {
-        let store = try XCTUnwrap(BrowsingTreeStoreManager(objectManager: BeamObjectManager()))
+        let store = try XCTUnwrap(BrowsingTreeStoreManager())
         let tree = BrowsingTree(nil)
         let rootId = try XCTUnwrap(tree.rootId)
         try store.save(browsingTree: tree)
@@ -75,36 +36,10 @@ class BrowsingTreeStoreTest: XCTestCase {
         XCTAssertEqual(tree.flattened, flattened)
     }
 
-    func testRemoteFlattening() throws {
-        BeamDate.freeze("2001-01-01T00:00:00+000")
-        let store = try XCTUnwrap(BrowsingTreeStoreManager(objectManager: BeamObjectManager()))
-        let tree0 = BrowsingTree(nil)
-        let rootId = try XCTUnwrap(tree0.rootId)
-        let rootCreatedAt = try XCTUnwrap(tree0.root.events.first?.date)
-        let recursiveRecord = BrowsingTreeRecord(rootId: rootId, rootCreatedAt: rootCreatedAt, appSessionId: nil, data: tree0, flattenedData: nil)
-
-        let tree1 = BrowsingTree(nil)
-        let flattenedRecord = try XCTUnwrap(tree1.toRecord())
-        BeamDate.travel(1)
-        try store.receivedObjects([recursiveRecord, flattenedRecord])
-
-        //a downward synced former recursive tree should have it's updatedAt changed
-        let savedRecursiveRecord = try XCTUnwrap(try store.getBrowsingTree(rootId: recursiveRecord.rootId))
-        XCTAssertNil(savedRecursiveRecord.data)
-        XCTAssertNotNil(savedRecursiveRecord.flattened)
-        XCTAssert(savedRecursiveRecord.createdAt < savedRecursiveRecord.updatedAt)
-
-        //a downward synced already flattened tree should have it's updatedAt untouched
-        let savedFlattenedRecord = try XCTUnwrap(try store.getBrowsingTree(rootId: flattenedRecord.rootId))
-        XCTAssertNil(savedFlattenedRecord.data)
-        XCTAssertNotNil(savedFlattenedRecord.flattened)
-        XCTAssertEqual(savedFlattenedRecord.createdAt, savedFlattenedRecord.updatedAt)
-        BeamDate.reset()
-    }
 
     func testSoftDelete() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
-        let store = try XCTUnwrap(BrowsingTreeStoreManager(objectManager: BeamObjectManager()))
+        let store = try XCTUnwrap(BrowsingTreeStoreManager())
 
         //absolute date based soft deletion
         let tree0 = BrowsingTree(nil)

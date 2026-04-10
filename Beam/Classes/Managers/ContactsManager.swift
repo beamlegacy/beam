@@ -20,18 +20,9 @@ struct Email: Codable, Hashable {
 }
 
 class ContactsManager {
-    var changedObjects: [UUID: ContactRecord] = [:]
-    let objectQueue = BeamObjectQueue<ContactRecord>()
-    
     private var contactsDB: ContactsDB? { BeamData.shared.contactsDB }
 
-    let objectManager: BeamObjectManager
-
-    init(objectManager: BeamObjectManager) {
-        self.objectManager = objectManager
-
-        registerOnBeamObjectManager(objectManager)
-    }
+    init() {}
 
     // MARK: Fetch
     func fetch(for id: UUID) -> ContactRecord? {
@@ -101,11 +92,8 @@ class ContactsManager {
     }
 
     // MARK: Save & Update
-    func save(email: String, to noteId: UUID, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> ContactRecord? {
-        guard email.mayBeEmail else {
-            networkCompletion?(.success(false))
-            return nil
-        }
+    func save(email: String, to noteId: UUID) -> ContactRecord? {
+        guard email.mayBeEmail else { return nil }
         do {
             var contactRecord: ContactRecord?
             if let previousContactRecord = try? contactsDB?.contact(for: noteId) {
@@ -117,111 +105,31 @@ class ContactsManager {
             } else {
                 contactRecord = try contactsDB?.save([Email(value: email, type: .none)], to: noteId)
             }
-            if let contactRecord = contactRecord, AuthenticationManager.shared.isAuthenticated {
-                try self.saveOnNetwork(contactRecord, networkCompletion)
-            } else {
-                networkCompletion?(.success(false))
-            }
             return contactRecord
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .contactsDB)
         }
-        networkCompletion?(.success(false))
         return nil
     }
 
     // MARK: Delete
-    func markDeleted(noteId: UUID, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func markDeleted(noteId: UUID) {
         do {
-
-            if let contactRecord = try contactsDB?.markDeleted(noteId: noteId),
-               AuthenticationManager.shared.isAuthenticated {
-                try self.saveOnNetwork(contactRecord, networkCompletion)
-            } else {
-                networkCompletion?(.success(false))
-            }
-            return
+            try contactsDB?.markDeleted(noteId: noteId)
         } catch ContactsDBError.cantDeleteContact(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting contacts for \(noteId): \(errorMsg)", category: .contactsDB)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription)", category: .contactsDB)
         }
-        networkCompletion?(.success(false))
     }
 
-    func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func deleteAll() {
         do {
             try contactsDB?.deleteAll()
-            if AuthenticationManager.shared.isAuthenticated && includedRemote {
-                Task {
-                    do {
-                        try await self.deleteAllFromBeamObjectAPI()
-                        networkCompletion?(.success(true))
-                    } catch {
-                        Logger.shared.logError("Error while deleting all contacts: \(error)", category: .contactsDB)
-                        networkCompletion?(.success(false))
-                    }
-                }
-            } else {
-                networkCompletion?(.success(false))
-            }
-            return
         } catch ContactsDBError.cantDeleteContact(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting all contacts: \(errorMsg)", category: .contactsDB)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .contactsDB)
-        }
-        networkCompletion?(.success(false))
-    }
-}
-
-extension ContactsManager: BeamObjectManagerDelegate {
-    static var conflictPolicy: BeamObjectConflictResolution = .replace
-    static var uploadType: BeamObjectRequestUploadType {
-        .multipartUpload
-    }
-    func willSaveAllOnBeamObjectApi() {}
-
-    func saveObjectsAfterConflict(_ contacts: [ContactRecord]) throws {
-        try self.contactsDB?.save(contacts: contacts)
-    }
-
-    func manageConflict(_ dbStruct: ContactRecord,
-                        _ remoteDbStruct: ContactRecord) throws -> ContactRecord {
-        fatalError("Managed by BeamObjectManager")
-    }
-
-    func receivedObjects(_ contacts: [ContactRecord]) throws {
-        try self.contactsDB?.save(contacts: contacts)
-    }
-
-    func allObjects(updatedSince: Date?) throws -> [ContactRecord] {
-        (try self.contactsDB?.allRecords(updatedSince)) ?? []
-    }
-
-    func saveAllOnNetwork(_ contacts: [ContactRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                try await saveOnBeamObjectsAPI(contacts)
-                Logger.shared.logDebug("Saved contacts on the BeamObject API", category: .contactsDB)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the contacts on the BeamObject API", category: .contactsDB)
-                networkCompletion?(.failure(error))
-            }
-        }
-    }
-
-    private func saveOnNetwork(_ contact: ContactRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Task.detached(priority: .userInitiated) { [self] in
-            do {
-                try await saveOnBeamObjectAPI(contact)
-                Logger.shared.logDebug("Saved contact on the BeamObject API", category: .contactsDB)
-                networkCompletion?(.success(true))
-            } catch {
-                Logger.shared.logDebug("Error when saving the contact on the BeamObject API with error: \(error.localizedDescription)", category: .contactsDB)
-                networkCompletion?(.failure(error))
-            }
         }
     }
 }

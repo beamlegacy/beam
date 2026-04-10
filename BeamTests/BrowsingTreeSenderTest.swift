@@ -46,11 +46,11 @@ class BrowsingTreeSenderTest: XCTestCase {
         )
         appSessionId = UUID()
         subject = BrowsingTreeSender(session: session, config: testConfig, appSessionId: appSessionId)
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
+        LinkStore.shared.deleteAll()
     }
     override func tearDownWithError() throws {
         PreferencesManager.isPrivacyFilterEnabled = PreferencesManager.privacyFilterDefault
-        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
+        LinkStore.shared.deleteAll()
     }
 
     func sentData(session: MockURLSession) throws  -> BrowsingTreeSendData {

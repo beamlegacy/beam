@@ -38,16 +38,8 @@ class ContentBlockingManager {
     /// - Returns: true if a synchronization happened
     @discardableResult
     func synchronizeIfNeeded() -> Bool {
-        guard radBlockPreferences.synchronizeInterval != .disabled else { return false }
-        if FilterManager.default.state.lastSynchronizeDate == nil {
-            Logger.shared.logInfo("Radblock never synced, starting synchronization", category: .contentBlocking)
-            synchronize()
-            return true
-        } else if let nextSchedulingDate = FilterManager.default.state.nextSynchronizeDate, nextSchedulingDate.timeIntervalSinceNow < 0 {
-            Logger.shared.logInfo("Radblock sync interval reached, starting synchronization", category: .contentBlocking)
-            synchronize()
-            return true
-        }
+        // Remote sync server (radblock.beamapp.co) has been decommissioned.
+        // Use locally bundled filter lists only.
         return false
     }
 

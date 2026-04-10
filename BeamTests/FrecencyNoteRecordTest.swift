@@ -14,7 +14,7 @@ class FrecencyNoteRecordTest: XCTestCase {
     var db: BeamNoteLinksAndRefsManager!
 
     override func setUpWithError() throws {
-        let store = GRDBStore.empty()
+        let store = try GRDBStore.empty()
         try db = BeamNoteLinksAndRefsManager(store: store)
         try store.migrate()
     }

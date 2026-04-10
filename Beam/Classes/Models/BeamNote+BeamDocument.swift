@@ -275,19 +275,8 @@ public extension BeamNote {
 
     static func instanciateNoteWithPreviousData(_ document: BeamDocument,
                                                 decodeChildren: Bool = true) throws -> BeamNote? {
-        let decoder = BeamJSONDecoder()
-        if decodeChildren == false {
-            decoder.userInfo[BeamElement.recursiveCoding] = false
-        }
-
-        guard let previousData = BeamObjectChecksum.sentData(object: document) else { return nil }
-
-        let note = try decoder.decode(BeamNote.self, from: previousData)
-        note.version = document.version
-        note.owner = document.database
-        note.updateDate = document.updatedAt
-
-        return note
+        // Remote sync checksum removed — no previous data available
+        return nil
     }
 
     static func fetch(title: String,

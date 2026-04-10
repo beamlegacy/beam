@@ -109,7 +109,7 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
 
 class LinkStoreFrecencyUrlStorage: FrecencyStorage {
     weak var linkStore: BeamLinkDB?
-    init(overridenManager: LinksDBManager? = nil, objectManager: BeamObjectManager, linkStore: BeamLinkDB? = nil) {
+    init(overridenManager: LinksDBManager? = nil, linkStore: BeamLinkDB? = nil) {
         self.linkStore = linkStore ?? BeamData.shared.linkDB
     }
     func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {

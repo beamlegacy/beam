@@ -30,7 +30,7 @@ class BatchHistoryImporter {
     var maxDate = Date.distantPast
     let timer = BeamTimer()
     let browsingTree: BrowsingTree
-    let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: LinkStoreFrecencyUrlStorage(objectManager: BeamData.shared.objectManager))
+    let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: LinkStoreFrecencyUrlStorage())
     let sourceBrowser: BrowserType
     let localLinkStore = LinkStore(linkManager: InMemoryLinkManager())
     let browsingTreeStoreManager: BrowsingTreeStoreManager
@@ -45,7 +45,7 @@ class BatchHistoryImporter {
     private func saveBatch() {
         let linksToSave = localLinkStore.allLinks
         LinkStore.shared.insertOrIgnore(links: linksToSave)
-        localLinkStore.deleteAll(includedRemote: false) { _ in }
+        localLinkStore.deleteAll()
         timer.record(stepName: "frecencySave") {
             frecencyUpdater.saveAll()
         }

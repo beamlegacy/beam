@@ -13,7 +13,7 @@ class DomainPath0Test: XCTestCase {
     var db: TabPinSuggestionDBManager!
     
     override func setUpWithError() throws {
-        let store = GRDBStore.empty()
+        let store = try GRDBStore.empty()
         db = try TabPinSuggestionDBManager(store: store)
         try store.migrate()
     }
