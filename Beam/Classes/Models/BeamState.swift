@@ -454,6 +454,10 @@ import BeamCore
 
     func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, request: URLRequest? = nil, loadRequest: Bool = true, webView: BeamWebView? = nil) -> BrowserTab {
         Logger.shared.logDebug("\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: request))", category: .tracking)
+        var webView = webView
+        if webView == nil, let url = request?.url, Thread.isMainThread, #available(macOS 15.4, *) {
+            webView = MainActor.assumeIsolated { WebExtensionsManager.shared.makeWebViewForExtensionPage(url) }
+        }
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: setCurrent, withURLRequest: request, loadRequest: loadRequest)
         if setCurrent {

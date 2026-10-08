@@ -361,6 +361,16 @@ final class WebExtensionsManager: NSObject, ObservableObject {
 
     // MARK: - Helpers
 
+    /// A web view able to display `url` if it is a page of a loaded extension (vault, options, …).
+    /// Extension pages only load in web views created from their extension context's configuration.
+    func makeWebViewForExtensionPage(_ url: URL) -> BeamWebView? {
+        guard url.scheme?.lowercased() == "webkit-extension",
+              let configuration = controller.extensionContext(for: url)?.webViewConfiguration else { return nil }
+        let webView = BeamWebView(frame: .zero, configuration: configuration)
+        webView.hostsExtensionPages = true
+        return webView
+    }
+
     @discardableResult
     func openTab(with url: URL?, in window: BeamWindow?, active: Bool) -> BrowserTab? {
         guard let window = window ?? AppDelegate.main.window ?? AppDelegate.main.windows.first ?? AppDelegate.main.createWindow(frame: nil) else { return nil }

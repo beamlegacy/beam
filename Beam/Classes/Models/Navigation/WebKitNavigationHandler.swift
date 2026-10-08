@@ -62,6 +62,16 @@ extension WebKitNavigationHandler {
             return
         }
 
+        // Extension pages only load in web views created from their extension configuration: open them in a new tab.
+        if let url = navigationAction.request.url, url.scheme?.lowercased() == "webkit-extension",
+           navigationAction.targetFrame?.isMainFrame != false,
+           (webView as? BeamWebView)?.hostsExtensionPages != true,
+           let state = (page as? BrowserTab)?.state {
+            decisionHandler(.cancel, preferences)
+            state.createTab(withURLRequest: navigationAction.request)
+            return
+        }
+
         // Handle opening the targetURL in a newTab if all conditions are met
         if openNewTab(navigationAction) {
             decisionHandler(.cancel, preferences)
