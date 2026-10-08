@@ -75,7 +75,8 @@ class DeleteText: TextEditorCommand {
             self.range = range.lowerBound ..< (range.lowerBound + range.count + deleteText.range.count)
             oldText.append(deleteText.oldText)
         } else {
-            self.range = deleteText.range.lowerBound ..< (range.lowerBound + range.count + deleteText.range.count)
+            // Backward delete just before the previous one: the merged range spans both, in the original text.
+            self.range = deleteText.range.lowerBound ..< range.upperBound
             oldText.insert(deleteText.oldText, at: 0)
         }
         return true
