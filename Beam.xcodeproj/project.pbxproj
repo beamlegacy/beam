@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7D37DEB3BB9059A372C73B03 /* ExtensionsPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C878142FD6512E57D37DEB3 /* ExtensionsPreferencesView.swift */; };
+		E06EBCB8858B521568C08EF0 /* ToolbarWebExtensionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 566C2382BF8FAF05E06EBCB8 /* ToolbarWebExtensionsView.swift */; };
 		94F1394D5148900C031396F5 /* BrowserTab+WebExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A42FB43D0D550DE94F1394D /* BrowserTab+WebExtension.swift */; };
 		12CCFEC9CF07D21F34CF760D /* WebExtensionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9122F2BECB933BD12CCFEC9 /* WebExtensionsManager.swift */; };
 		022843362617C4C3001C062E /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
@@ -1560,6 +1561,7 @@
 
 /* Begin PBXFileReference section */
 		2C878142FD6512E57D37DEB3 /* ExtensionsPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ExtensionsPreferencesView.swift"; sourceTree = "<group>"; };
+		566C2382BF8FAF05E06EBCB8 /* ToolbarWebExtensionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ToolbarWebExtensionsView.swift"; sourceTree = "<group>"; };
 		1A42FB43D0D550DE94F1394D /* BrowserTab+WebExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrowserTab+WebExtension.swift"; sourceTree = "<group>"; };
 		D9122F2BECB933BD12CCFEC9 /* WebExtensionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebExtensionsManager.swift"; sourceTree = "<group>"; };
 		0325624726051D3A006513E4 /* RBCodeSignature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBCodeSignature.h; sourceTree = "<group>"; };
@@ -7169,6 +7171,7 @@
 		A5B7184B274B929D0010FE8E /* Toolbar */ = {
 			isa = PBXGroup;
 			children = (
+				566C2382BF8FAF05E06EBCB8 /* ToolbarWebExtensionsView.swift */,
 				A5D885B0274F9F5200F37859 /* Toolbar.swift */,
 				418171DA2581107C00317ED8 /* ToolbarContentView.swift */,
 				A5D8859D274EA78800F37859 /* ToolbarButton.swift */,
@@ -8627,6 +8630,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D37DEB3BB9059A372C73B03 /* ExtensionsPreferencesView.swift in Sources */,
+				E06EBCB8858B521568C08EF0 /* ToolbarWebExtensionsView.swift in Sources */,
 				94F1394D5148900C031396F5 /* BrowserTab+WebExtension.swift in Sources */,
 				12CCFEC9CF07D21F34CF760D /* WebExtensionsManager.swift in Sources */,
 				3318B44028534D08002ACA34 /* EditorTabGroupsContainerView.swift in Sources */,

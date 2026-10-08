@@ -150,6 +150,9 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
                         return Color.clear
                     })
             }
+            if #available(macOS 15.4, *), state.mode == .web {
+                ToolbarWebExtensionsView(tabsManager: state.browserTabsManager, isIncognito: state.isIncognito)
+            }
             ToolbarButton(icon: "nav-omnibox", action: {
                 if state.omniboxInfo.isFocused {
                     state.stopFocusOmnibox()
