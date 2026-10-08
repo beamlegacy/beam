@@ -42,7 +42,7 @@ struct OnboardingImportsView: View {
 
     @ViewBuilder
     private func sourcePickerOption(_ source: ImportSource) -> some View {
-        if source == .passwordsCSV {
+        if source == .applePasswords || (source == .passwordsCSV && !availableSources.contains(.applePasswords)) {
             Divider()
         }
         HStack {
@@ -143,7 +143,7 @@ struct OnboardingImportsView: View {
                     Separator(horizontal: true)
                         .padding(.bottom, 16)
                     VStack(alignment: .leading, spacing: BeamSpacing._100) {
-                        if selectedSource == .passwordsCSV {
+                        if selectedSource.isPasswordsCSVOnly {
                             passwordCSVContent
                         } else {
                             browsersContent
@@ -318,13 +318,14 @@ extension OnboardingImportsView {
         case chrome = "Google Chrome"
         case firefox = "Mozilla Firefox"
         case brave = "Brave Browser"
+        case applePasswords = "Apple Passwords" // Passwords app, macOS 15 and later
         case passwordsCSV = "Passwords CSV File"
 
         var icon: String {
             switch self {
             case .safari, .safariOld, .chrome, .firefox, .brave:
                 return "field-web"
-            case .passwordsCSV:
+            case .applePasswords, .passwordsCSV:
                 return "autofill-password_xs"
             }
         }
@@ -339,6 +340,8 @@ extension OnboardingImportsView {
                 return "Firefox"
             case .brave:
                 return "Brave Browser"
+            case .applePasswords:
+                return "Passwords"
             case .passwordsCSV:
                 return nil
             }
@@ -354,6 +357,8 @@ extension OnboardingImportsView {
                 return "org.mozilla.firefox"
             case .brave:
                 return "com.brave.Browser"
+            case .applePasswords:
+                return "com.apple.Passwords"
             case .passwordsCSV:
                 return nil
             }
@@ -369,7 +374,7 @@ extension OnboardingImportsView {
             switch self {
             case .passwordsCSV:
                 return true
-            case .chrome, .firefox, .brave:
+            case .chrome, .firefox, .brave, .applePasswords:
                 return appURL != nil
             case .safari, .safariOld:
                 guard let url = appURL,
@@ -389,16 +394,21 @@ extension OnboardingImportsView {
             switch self {
             case .safari, .safariOld, .firefox, .chrome, .brave:
                 return true
-            case .passwordsCSV:
+            case .applePasswords, .passwordsCSV:
                 return false
             }
+        }
+
+        /// Sources whose passwords are imported from a CSV export, without any history to import.
+        var isPasswordsCSVOnly: Bool {
+            !supportsHistoryImport
         }
 
         var supportsAutomaticPasswordImport: Bool {
             switch self {
             case .chrome, .brave:
                 return true
-            case .safari, .safariOld, .firefox, .passwordsCSV:
+            case .safari, .safariOld, .firefox, .applePasswords, .passwordsCSV:
                 return false
             }
         }
@@ -409,7 +419,7 @@ extension OnboardingImportsView {
                 return ChromiumPasswordImporter(browser: .chrome)
             case .brave:
                 return ChromiumPasswordImporter(browser: .brave)
-            case .firefox, .safari, .safariOld, .passwordsCSV:
+            case .firefox, .safari, .safariOld, .applePasswords, .passwordsCSV:
                 return nil
             }
         }
@@ -424,7 +434,7 @@ extension OnboardingImportsView {
                 return ChromiumHistoryImporter(browser: .brave)
             case .firefox:
                 return FirefoxImporter()
-            case .passwordsCSV:
+            case .applePasswords, .passwordsCSV:
                 return nil
             }
         }
@@ -447,7 +457,7 @@ extension OnboardingImportsView {
                 switch self {
                 case .chrome, .brave, .firefox:
                     return true
-                case .safari, .safariOld, .passwordsCSV:
+                case .safari, .safariOld, .applePasswords, .passwordsCSV:
                     return false
                 }
             }
@@ -455,7 +465,7 @@ extension OnboardingImportsView {
                 switch self {
                 case .safari, .safariOld, .chrome, .brave, .firefox:
                     return true
-                case .passwordsCSV:
+                case .applePasswords, .passwordsCSV:
                     return false
                 }
             }

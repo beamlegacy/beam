@@ -281,7 +281,7 @@ struct Passwords: View {
 
     private func updateAvailableSources() {
         availableImportSources = OnboardingImportsView.ImportSource.allCases
-            .filter { $0 == .passwordsCSV || $0.supportsAutomaticPasswordImport }
+            .filter { $0.isPasswordsCSVOnly || $0.supportsAutomaticPasswordImport }
             .filter { $0.isAvailable }
     }
 
@@ -334,7 +334,7 @@ struct Passwords: View {
         openPanel.canDownloadUbiquitousContents = false
         openPanel.allowsMultipleSelection = false
         openPanel.allowedFileTypes = ["csv", "txt"]
-        openPanel.message = "Select a csv file exported from Beam, Chrome, Firefox or Safari"
+        openPanel.message = "Select a csv file exported from Beam, Apple Passwords, Chrome, Firefox or Safari"
         openPanel.begin { result in
             let url = result == .OK ? openPanel.url : nil
             openPanel.close()
