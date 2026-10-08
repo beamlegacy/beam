@@ -76,7 +76,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate {
         guard let tab = settingsController.tab(for: itemIdentifier.rawValue) else { return nil }
         let item = NSToolbarItem(itemIdentifier: itemIdentifier)
         item.label = itemIdentifier.rawValue
-        item.image = NSImage(named: tab.imageName)!
+        item.image = NSImage(named: tab.imageName) ?? NSImage(systemSymbolName: tab.imageName, accessibilityDescription: tab.label)
         item.target = self
         item.action = #selector(selectItem(_:))
         return item
