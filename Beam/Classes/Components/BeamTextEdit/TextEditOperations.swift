@@ -173,6 +173,8 @@ extension TextRoot {
         }
 
         if let textNode = node as? TextNode {
+            // Locked nodes (e.g. block references) can't be edited, nor merged with the next node.
+            guard !textNode.readOnly else { return }
             if cursorPosition == textNode.textCount && state.selectedTextRange.isEmpty {
                 guard let nextNode = node.nextVisibleNode(ElementNode.self) else {
                     return
@@ -371,6 +373,7 @@ extension TextRoot {
             deleteForward()
             return
         }
+        guard !node.readOnly else { return }
         guard selectedTextRange.isEmpty else {
             cmdManager.deleteText(in: node, for: selectedTextRange)
             return
@@ -385,6 +388,7 @@ extension TextRoot {
             deleteBackward()
             return
         }
+        guard !node.readOnly else { return }
         guard selectedTextRange.isEmpty else {
             cmdManager.deleteText(in: node, for: selectedTextRange)
             return
@@ -399,6 +403,7 @@ extension TextRoot {
             deleteBackward()
             return
         }
+        guard !node.readOnly else { return }
         guard selectedTextRange.isEmpty else {
             cmdManager.deleteText(in: node, for: selectedTextRange)
             return
@@ -413,6 +418,7 @@ extension TextRoot {
             deleteForward()
             return
         }
+        guard !node.readOnly else { return }
         guard selectedTextRange.isEmpty else {
             cmdManager.deleteText(in: node, for: selectedTextRange)
             return
