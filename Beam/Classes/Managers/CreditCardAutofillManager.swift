@@ -24,8 +24,15 @@ final class CreditCardAutofillManager {
     }
 
     private func creditCardEntries(for records: [CreditCardRecord]) throws -> [CreditCardEntry] {
-        try records.map { record in
-            let cardNumber = try record.decryptedCardNumber()
+        // Skip cards that can't be decrypted (e.g. encrypted with a previous local key) instead of hiding all of them.
+        records.compactMap { record in
+            let cardNumber: String
+            do {
+                cardNumber = try record.decryptedCardNumber()
+            } catch {
+                Logger.shared.logError("Couldn't decrypt credit card \(record.uuid): \(error)", category: .creditCardsDB)
+                return nil
+            }
             return CreditCardEntry(databaseID: record.uuid, cardDescription: record.cardDescription, cardNumber: cardNumber, cardHolder: record.cardHolder, expirationMonth: record.expirationMonth, expirationYear: record.expirationYear)
         }
     }
