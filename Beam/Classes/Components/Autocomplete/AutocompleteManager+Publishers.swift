@@ -334,7 +334,7 @@ extension AutocompleteManager {
 
     // MARK: - Search Engine
     private func autocompleteSearchEngineResults(for searchText: String, searchEngine: SearchEngineAutocompleter) -> Future<[AutocompleteResult], Error> {
-        Future { promise in
+        Future { [self] promise in
             let start = DispatchTime.now()
             var promiseReturnedAlready = false
 

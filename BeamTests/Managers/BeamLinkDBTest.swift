@@ -67,7 +67,7 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let creationDate = BeamDate.now
         let dbQueue = try DatabaseQueue()
-        let store = try GRDBStore(writer: dbQueue)
+        let store = GRDBStore(writer: dbQueue)
         let inMemoryGrdb = try LinksDBManager(holder: nil, store: store)
         try store.migrate(upTo: "flattenBrowsingTrees")
 
@@ -116,7 +116,7 @@ class BeamLinkDBTests: XCTestCase {
     
     func testFrecencyStore() throws {
         let dbQueue = try DatabaseQueue()
-        let store = try GRDBStore(writer: dbQueue)
+        let store = GRDBStore(writer: dbQueue)
         let inMemoryGrdb = try LinksDBManager(holder: nil, store: store)
         let linkstore = BeamLinkDB(overridenManager: inMemoryGrdb)
         let frecencyStorage = LinkStoreFrecencyUrlStorage(overridenManager: inMemoryGrdb, linkStore: linkstore)

@@ -9,6 +9,7 @@ import Combine
 import BeamCore
 import AutoUpdate
 import ZIPFoundation
+import UniformTypeIdentifiers
 
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, BeamDocumentSource {
     // Will be removed for multi-account, do not use!
@@ -584,8 +585,8 @@ public extension BeamData {
         let bundleID = _bundleID as CFString
         LSSetDefaultHandlerForURLScheme("http" as CFString, bundleID)
         LSSetDefaultHandlerForURLScheme("https" as CFString, bundleID)
-        LSSetDefaultRoleHandlerForContentType(kUTTypeHTML, .viewer, bundleID)
-        LSSetDefaultRoleHandlerForContentType(kUTTypeURL, .viewer, bundleID)
+        LSSetDefaultRoleHandlerForContentType(UTType.html.identifier as CFString, .viewer, bundleID)
+        LSSetDefaultRoleHandlerForContentType(UTType.url.identifier as CFString, .viewer, bundleID)
     }
 }
 

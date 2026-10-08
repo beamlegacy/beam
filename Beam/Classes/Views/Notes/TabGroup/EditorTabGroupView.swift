@@ -160,7 +160,7 @@ struct EditorTabGroupView: View {
 
     private func showContextMenu(with event: NSEvent) {
         let menu = NSMenu()
-        weak var state = self.state
+        weak let state = self.state
 
         let nameAndColorView = TabClusteringNameColorPickerView(
             groupName: tabGroup.title ?? "",

@@ -95,7 +95,7 @@ struct NoteView: View {
                 }
             )
             .accessibility(identifier: "noteView")
-            .animation(nil)
+            .transaction { $0.animation = nil }
         }
         .overlay(searchView, alignment: .top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

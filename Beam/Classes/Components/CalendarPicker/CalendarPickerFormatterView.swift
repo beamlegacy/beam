@@ -31,7 +31,7 @@ private struct CalendarPickerFormatterContainerView: View {
             .frame(width: Self.idealSize.width)
             .fixedSize(horizontal: false, vertical: true)
             .frame(height: Self.idealSize.height, alignment: .topLeading)
-            .animation(BeamAnimation.easeInOut(duration: 0.15))
+            .animation(BeamAnimation.easeInOut(duration: 0.15), value: selectedDate)
             .formatterViewBackgroundAnimation(with: viewModel)
     }
 

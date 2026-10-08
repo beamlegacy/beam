@@ -56,7 +56,7 @@ struct Omnibox: View {
                         OmniboxSearchField(isEditing: isEditingBinding,
                                            modifierFlagsPressed: $modifierFlagsPressed)
                         .animation(.easeInOut(duration: 0.2), value: state.sideNote)
-                        .animation(nil)
+                        .transaction { $0.animation = nil }
                         .frame(height: Self.defaultHeight)
                         .frame(maxWidth: .infinity)
                         if !autocompleteManager.searchQuery.isEmpty {

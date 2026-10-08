@@ -110,7 +110,7 @@ public extension CALayer {
             return root
         }
 
-        let initLayout: (TextRoot) -> Void = { root in
+        let initLayout: (TextRoot) -> Void = { [self] root in
             self.sign.begin(Signs.updateLayout_initLayout)
             defer { self.sign.end(Signs.updateLayout_initLayout) }
 
@@ -743,7 +743,7 @@ public extension CALayer {
         rootNode?.unmarkText()
     }
 
-    public func insertText(string: String, replacementRange: Range<Int>?) {
+    @nonobjc public func insertText(string: String, replacementRange: Range<Int>?) {
         guard let rootNode = rootNode,
               let node = focusedWidget as? ElementNode, !node.readOnly
         else { return }

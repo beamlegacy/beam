@@ -52,6 +52,7 @@ extension TabGroupingManager: BeamDocumentSource {
         }
     }
 
+    @MainActor
     func findNoteContainingGroup(_ groupId: TabGroup.GroupID) async -> [BeamNote] {
         await withCheckedContinuation { continuation in
             BeamData.shared.noteLinksAndRefsManager?.search(containingTabGroup: groupId) { result in

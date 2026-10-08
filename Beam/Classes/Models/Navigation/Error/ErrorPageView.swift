@@ -82,6 +82,6 @@ struct ErrorPageView: View {
         }
         .frame(maxWidth: .infinity)
         .background(BeamColor.Nero.swiftUI)
-        .animation(nil)
+        .transaction { $0.animation = nil }
     }
 }

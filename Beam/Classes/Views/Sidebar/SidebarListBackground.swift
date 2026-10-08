@@ -19,7 +19,7 @@ struct SidebarListBackground: View {
         RoundedRectangle(cornerRadius: 6)
                         .foregroundColor(cellBackground)
                         .blendModeLightMultiplyDarkScreen()
-                        .animation(nil)
+                        .transaction { $0.animation = nil }
     }
 
     private var cellBackground: Color {

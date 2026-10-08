@@ -87,7 +87,7 @@ class BreadCrumb: Widget, BeamDocumentSource {
     }
 
     func setupLayers(with note: BeamNote) {
-        performLayerChanges {
+        performLayerChanges { [self] in
             self.containerLayer.cornerRadius = 3
             self.container = Layer(name: "containerLayer", layer: self.containerLayer, hovered: { _ in })
 

@@ -323,7 +323,7 @@ struct TabsListView: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
+        GeometryReader { [state] geometry in
             let widthProvider = widthProvider(for: geometry, sections: sections)
             let selectedIndex = selectedIndex
             let hasSingleOtherTab = sections.unpinnedItems.count == 1 && sections.unpinnedItems.first?.isATab == true

@@ -64,7 +64,7 @@ private struct HyperlinkEditorView: View {
                 }
                 .frame(height: Self.sectionHeight)
             }
-            .animation(nil)
+            .transaction { $0.animation = nil }
             .padding(.horizontal, BeamSpacing._100)
         }
         .accessibilityElement(children: .contain)

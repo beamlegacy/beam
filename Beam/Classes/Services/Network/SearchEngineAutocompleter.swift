@@ -19,7 +19,7 @@ class SearchEngineAutocompleter: ObservableObject {
     }
 
     public func complete(query: String) -> Future<[AutocompleteResult], Never> {
-        Future { promise in
+        Future { [self] promise in
             guard !query.isEmpty,
                   let url = self.searchEngine.suggestionsURL(forQuery: query)
             else {

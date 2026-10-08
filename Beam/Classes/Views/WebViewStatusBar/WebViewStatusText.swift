@@ -10,7 +10,7 @@ struct WebViewStatusText: View {
             .foregroundColor(textColor)
             .lineLimit(1)
             .blendModeLightMultiplyDarkScreen()
-            .animation(nil)
+            .transaction { $0.animation = nil }
             .accessibilityIdentifier("webview-status-text")
     }
 

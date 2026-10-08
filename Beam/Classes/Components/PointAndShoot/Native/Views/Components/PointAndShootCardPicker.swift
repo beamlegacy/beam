@@ -290,11 +290,11 @@ extension PointAndShootCardPicker {
                             .overlay(
                                 BeamColor.NotePicker.selected.swiftUI
                                     .cornerRadius(4.0)
-                                    .animation(.easeInOut(duration: 0.1))
+                                    .animation(.easeInOut(duration: 0.1), value: autocompleteText)
                             )
-                            .animation(nil)
+                            .transaction { $0.animation = nil }
                         Spacer()
-                    }.animation(nil)
+                    }.transaction { $0.animation = nil }
                 }
             }.opacity(!completed ? 1 : 0)
             .animation(.easeInOut(duration: 0.05), value: completed)

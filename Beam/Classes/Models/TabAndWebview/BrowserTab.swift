@@ -802,7 +802,7 @@ import BeamCore
             let pasteboard = NSPasteboard.general
             guard pasteboard.string(forType: .string) == urlString else { return }
             let bTextHolder = BeamTextHolder(bText: fetchedTitle)
-            let beamTextData = try PropertyListEncoder().encode(bTextHolder)
+            guard let beamTextData = try? PropertyListEncoder().encode(bTextHolder) else { return }
             pasteboard.setData(beamTextData, forType: .bTextHolder)
         }
     }

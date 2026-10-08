@@ -65,9 +65,9 @@ private struct WebContentTransitionModifier: ViewModifier {
         content
             .scaleEffect(scale)
             .offsetEffect(offset)
-            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.1).delay(delay))
+            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.1).delay(delay), value: scale)
             .opacity(opacity)
-            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.07).delay(opacityDelay))
+            .animation(isResizing ? nil : Animation.easeInOut(duration: 0.07).delay(opacityDelay), value: opacity)
     }
 }
 
@@ -106,7 +106,7 @@ private struct NoteContentTransitionModifier: ViewModifier {
         content
             .scaleEffect(scale)
             .offsetEffect(offset)
-            .animation(enableTransition ? Animation.easeInOut(duration: 0.1).delay(delay) : nil)
+            .animation(enableTransition ? Animation.easeInOut(duration: 0.1).delay(delay) : nil, value: scale)
     }
 }
 

@@ -274,18 +274,20 @@ extension TabGroupingManager {
 
     @MainActor
     func updateAutomaticClustering(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageID?]? = nil) async {
-        let openTabs = allOpenTabs()
+        // The grouping itself runs on `myQueue`, off the main actor.
+        nonisolated(unsafe) let manager = self
+        nonisolated(unsafe) let openTabs = allOpenTabs()
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             myQueue.async {
                 var groupsOfOpen = urlGroups
                 if let openPages = openPages {
-                    groupsOfOpen = self.removeClosedPages(urlGroups: urlGroups, openPages: openPages)
-                    groupsOfOpen = self.removeSingles(urlGroups: groupsOfOpen, openTabs: openTabs)
+                    groupsOfOpen = manager.removeClosedPages(urlGroups: urlGroups, openPages: openPages)
+                    groupsOfOpen = manager.removeSingles(urlGroups: groupsOfOpen, openTabs: openTabs)
                     // TODO: Consider coloring lone tabs that are in a group with a note
                     // TODO: Consider merging groups based on active sources as well
                     // TODO: Consider using similarity scores with notes/active-sources to split groups (similar to sources that are not to be suggested despite being in the correct group)
                 }
-                self.buildTabGroups(receivingClusters: groupsOfOpen, allOpenTabs: openTabs)
+                manager.buildTabGroups(receivingClusters: groupsOfOpen, allOpenTabs: openTabs)
                 continuation.resume()
             }
         }

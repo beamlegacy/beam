@@ -417,7 +417,7 @@ struct TabView: View {
     }
 
     var body: some View {
-        GeometryReader { proxy in
+        GeometryReader { [tab] proxy in
             HStack {
                 content(isHovering: isHovering, containerGeometry: proxy)
                     .font(font)
@@ -507,7 +507,7 @@ private struct FileDropDelegate: DropDelegate {
         guard let onFileDrop = onFileDrop, let item = info.itemProviders(for: [UTType.fileURL]).first else {
             return false
         }
-        item.loadItem(forTypeIdentifier: kUTTypeFileURL as String, options: nil) { data, error in
+        item.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { data, error in
             do {
                 let url = try (Result(data, error).get() as? Data)
                     .flatMap { String(data: $0, encoding: .utf8) }

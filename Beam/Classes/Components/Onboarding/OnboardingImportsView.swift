@@ -225,7 +225,7 @@ extension OnboardingImportsView {
         openPanel.canChooseDirectories = false
         openPanel.canDownloadUbiquitousContents = false
         openPanel.allowsMultipleSelection = false
-        openPanel.allowedFileTypes = ["csv", "txt"]
+        openPanel.allowedContentTypes = BeamUniformTypeIdentifiers.csvOrTextTypes
         openPanel.title = title
         openPanel.begin { result in
             openPanel.close()

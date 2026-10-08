@@ -190,7 +190,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             if currentHyperlinkView.canBeAutomaticallyDismissed && targetRange != formatterTargetRange {
                 // another link view is present, dismiss it before the new one
                 BeamTextEdit.isExitingLink = true
-                hideInlineFormatter {
+                hideInlineFormatter { [self] in
                     BeamTextEdit.isExitingLink = false
                     DispatchQueue.main.asyncAfter(deadline: .now() + FormatterView.disappearAnimationDuration) { [weak self] in
                         guard let self = self else { return }

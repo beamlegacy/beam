@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import UniformTypeIdentifiers
 
 struct DownloadCell<ListItem, List: DownloadListProtocol>: View where ListItem == List.Element {
 
@@ -113,7 +114,7 @@ struct DownloadCell<ListItem, List: DownloadListProtocol>: View where ListItem =
     }
 
     private func icon(for fileExtension: String) -> NSImage {
-        NSWorkspace.shared.icon(forFileType: fileExtension)
+        NSWorkspace.shared.icon(for: UTType(filenameExtension: fileExtension) ?? .data)
     }
 
     private func pauseDownload() {

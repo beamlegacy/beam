@@ -97,7 +97,7 @@ private struct MeetingFormatterContainerView: View {
                                 guard let m = m else { return }
                                 viewModel.onSelectMeeting?(m)
                             }), searchQuery: viewModel.searchText, isLoading: viewModel.isLoading)
-                                .animation(nil)
+                                .transaction { $0.animation = nil }
                                 .onAppear {
                                     viewModel.scrollViewProxy = proxy
                                 }
@@ -115,7 +115,7 @@ private struct MeetingFormatterContainerView: View {
             .frame(width: Self.idealSize.width)
             .fixedSize(horizontal: false, vertical: true)
             .frame(height: Self.idealSize.height, alignment: .topLeading)
-            .animation(BeamAnimation.easeInOut(duration: 0.15))
+            .animation(BeamAnimation.easeInOut(duration: 0.15), value: viewModel.selectedDate)
             .formatterViewBackgroundAnimation(with: viewModel)
         }
     }

@@ -22,7 +22,7 @@ class BeamDocumentCollectionTest: XCTestCase, BeamDocumentSource {
         try super.setUpWithError()
         let dbPath = "file::memory:"
         let db = try DatabaseQueue(path: dbPath)
-        store = try GRDBStore(writer: db)
+        store = GRDBStore(writer: db)
         try store.erase()
         account = try BeamAccount(id: UUID(), email: "test@beamapp.co", name: "testAccount", path: nil)
         database = BeamDatabase(account: account, id: UUID(), name: "testDB")

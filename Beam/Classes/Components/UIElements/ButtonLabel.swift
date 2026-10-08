@@ -161,7 +161,7 @@ struct ButtonLabel: View {
         .padding(.vertical, style.verticalPadding)
         .background(backgroundColor)
         .if(style.disableAnimations) {
-            $0.animation(nil)
+            $0.transaction { $0.animation = nil }
         }
         .roundedCorners(radius: style.backgroundCornerRadius, corners: style.radiusCorners)
         .onHover { hovering in

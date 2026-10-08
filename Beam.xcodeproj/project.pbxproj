@@ -703,7 +703,6 @@
 		9693FD5227995D7A00EB024A /* StringCommonPrefixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9693FD5127995D7A00EB024A /* StringCommonPrefixTests.swift */; };
 		9693FD5D27A07CAD00EB024A /* BeamFileDBManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9693FD5C27A07CAC00EB024A /* BeamFileDBManagerTests.swift */; };
 		9694B28F26FDD59C008AD52B /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
-		96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */; };
 		969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */; };
 		96A06EBD27836F69006ECF46 /* MnemonicRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A06EBC27836F69006ECF46 /* MnemonicRecord.swift */; };
 		96A1C67626F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A1C67526F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift */; };
@@ -1007,7 +1006,6 @@
 		A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */; };
 		A54A45422768A72400B9AE1B /* ImportsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A45412768A72400B9AE1B /* ImportsManager.swift */; };
 		A54E75F3283BC657002B9254 /* TabGroupingColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54E75F2283BC657002B9254 /* TabGroupingColor.swift */; };
-		A552DF2925F0E22B00570C85 /* DestinationNotePickerBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */; };
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A55760822665501000DEE86C /* TableViewColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55760812665501000DEE86C /* TableViewColumn.swift */; };
 		A558577A28C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A558577928C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift */; };
@@ -2539,7 +2537,6 @@
 		9693FD5127995D7A00EB024A /* StringCommonPrefixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringCommonPrefixTests.swift; sourceTree = "<group>"; };
 		9693FD5C27A07CAC00EB024A /* BeamFileDBManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFileDBManagerTests.swift; sourceTree = "<group>"; };
 		96956D30258BF3F50069C9C1 /* LinkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStore.swift; sourceTree = "<group>"; };
-		96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePicker.swift; sourceTree = "<group>"; };
 		969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteType.swift; sourceTree = "<group>"; };
 		96A06EA62781F315006ECF46 /* ReleaseDebugable.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = ReleaseDebugable.xcconfig; sourceTree = "<group>"; };
 		96A06EBC27836F69006ECF46 /* MnemonicRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MnemonicRecord.swift; sourceTree = "<group>"; };
@@ -2851,7 +2848,6 @@
 		A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowBottomToolBar.swift; sourceTree = "<group>"; };
 		A54A45412768A72400B9AE1B /* ImportsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportsManager.swift; sourceTree = "<group>"; };
 		A54E75F2283BC657002B9254 /* TabGroupingColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupingColor.swift; sourceTree = "<group>"; };
-		A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePickerBackground.swift; sourceTree = "<group>"; };
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A55760812665501000DEE86C /* TableViewColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewColumn.swift; sourceTree = "<group>"; };
 		A558577928C01F1E00382BFF /* CrossTargetHiddenNotificationsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetHiddenNotificationsBuilder.swift; sourceTree = "<group>"; };
@@ -6918,8 +6914,6 @@
 				A5347A622763B3E7006EEF8C /* ToolbarModeSwitcher.swift */,
 				A5011E492754E6E800A76667 /* ToolbarCapsuleButton.swift */,
 				A5FE1614264AD64900B7526D /* CardSwitcher.swift */,
-				96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */,
-				A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */,
 				A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */,
 				A5FDFA2827DB82160066A670 /* DestinationNoteAutocompleteListModel.swift */,
 				A5C1F049276BEF6A00EF750D /* Tabs */,
@@ -8353,7 +8347,6 @@
 				4181720E2581107C00317ED8 /* NoteBackForwardList.swift in Sources */,
 				A5B71852274B92E70010FE8E /* Omnibox.swift in Sources */,
 				A52393AA26541A18008D4C85 /* ModeView.swift in Sources */,
-				A552DF2925F0E22B00570C85 /* DestinationNotePickerBackground.swift in Sources */,
 				0553079D28902A0A0037BECE /* NSAlert+async.swift in Sources */,
 				37F5DC1327F29A02003D91DC /* EmbedLoadingImageView.swift in Sources */,
 				A0A84FF1263835D3008F0326 /* PasswordsTableView.swift in Sources */,
@@ -8441,7 +8434,6 @@
 				4181727B258110D100317ED8 /* AppDelegate+Data.swift in Sources */,
 				A073534F28F41AB00030A347 /* OnboardingCalendarView.swift in Sources */,
 				DA3A84BE2805C3D500092200 /* NoteDailySummary.swift in Sources */,
-				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
 				A57BFEA12615B45C00CFB646 /* BeamTableCellView.swift in Sources */,
 				A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */,
 				522D489D2719D1C00038DB81 /* LoggerNSWindow.swift in Sources */,
@@ -9647,6 +9639,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = Test;
 		};
@@ -9669,6 +9662,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = Test;
 		};
@@ -9719,6 +9713,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = Test;
 		};
@@ -9869,6 +9864,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = BetaDebug;
 		};
@@ -9891,6 +9887,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = BetaDebug;
 		};
@@ -9940,6 +9937,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = BetaDebug;
 		};
@@ -10099,6 +10097,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = BetaRelease;
 		};
@@ -10121,6 +10120,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = BetaRelease;
 		};
@@ -10169,6 +10169,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = BetaRelease;
 		};
@@ -10340,6 +10341,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = PublicDebug;
 		};
@@ -10362,6 +10364,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = PublicDebug;
 		};
@@ -10411,6 +10414,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = PublicDebug;
 		};
@@ -10570,6 +10574,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = PublicRelease;
 		};
@@ -10592,6 +10597,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = PublicRelease;
 		};
@@ -10640,6 +10646,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = PublicRelease;
 		};
@@ -10738,6 +10745,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = Debug;
 		};
@@ -10760,6 +10768,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = Release;
 		};
@@ -11019,6 +11028,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = Debug;
 		};
@@ -11048,6 +11058,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = Release;
 		};
@@ -11070,6 +11081,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = Debug;
 		};
@@ -11092,6 +11104,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = Release;
 		};
@@ -11232,6 +11245,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = ReleaseDebugable;
 		};
@@ -11254,6 +11268,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Beam;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = ReleaseDebugable;
 		};
@@ -11303,6 +11318,7 @@
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Beam.app/Contents/MacOS/Beam";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 			};
 			name = ReleaseDebugable;
 		};

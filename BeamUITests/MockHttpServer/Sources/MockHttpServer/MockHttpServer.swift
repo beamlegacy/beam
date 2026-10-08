@@ -3,25 +3,11 @@ import Swifter
 import Stencil
 import PathKit
 
-// MARK: - Helpers
-
-private extension HttpRequest {
-    func queryParam(_ name: String) -> String? {
-        queryParams.first(where: { $0.0 == name })?.1
-    }
-
-    var hostname: String {
-        headers["host"]?.split(separator: ":").first.map(String.init) ?? ""
-    }
-
-    var cookies: [String: String] {
-        guard let cookieHeader = headers["cookie"] else { return [:] }
-        var result: [String: String] = [:]
-        for pair in cookieHeader.split(separator: ";") {
-            let parts = pair.split(separator: "=", maxSplits: 1)
-            if parts.count == 2 {
-                result[parts[0].trimmingCharacters(in: .whitespaces)] = String(parts[1])
-            }
+private class SlowStaticFileServer: StaticFileServer {
+    override func handle(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
+        let fileName = request.urlURL.lastPathComponent
+        if fileName.starts(with: "slow_") {
+            Thread.sleep(forTimeInterval: 0.5)
         }
         return result
     }

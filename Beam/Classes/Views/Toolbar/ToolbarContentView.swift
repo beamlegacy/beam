@@ -128,12 +128,12 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
                 ToolbarButton(icon: "nav-journal", action: goToJournal)
                     .tooltipOnHover(LocalizedStringKey(Shortcut.AvailableShortcut.showJournal.description))
                     .accessibilityIdentifier("journal")
-                    .animation(nil)
+                    .transaction { $0.animation = nil }
             } else if state.useSidebar {
                 Spacer().frame(width: 28, height: 28) // Spacer to ensure no overlap between sidebar buttons and chevrons
             }
             ToolbarChevrons()
-                .animation(nil)
+                .transaction { $0.animation = nil }
         }
     }
 

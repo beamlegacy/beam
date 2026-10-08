@@ -71,7 +71,7 @@ struct DestinationNoteAutocompleteList: View {
                     }
                     .id(item.id)
                     .transition(.identity)
-                    .animation(nil)
+                    .transaction { $0.animation = nil }
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
                             model.select(result: item)

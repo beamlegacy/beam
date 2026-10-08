@@ -55,7 +55,7 @@ extension AppDelegate {
         openPanel.canChooseDirectories = false
         openPanel.canDownloadUbiquitousContents = false
         openPanel.allowsMultipleSelection = false
-        openPanel.allowedFileTypes = ["csv", "txt"]
+        openPanel.allowedContentTypes = BeamUniformTypeIdentifiers.csvOrTextTypes
         openPanel.title = "Select a csv file exported from Firefox or Safari"
         openPanel.begin { result in
             openPanel.close()

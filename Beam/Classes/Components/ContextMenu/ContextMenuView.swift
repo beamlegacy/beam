@@ -131,7 +131,7 @@ struct ContextMenuItemView: View {
             } else {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(BeamColor.ContextMenu.hover.swiftUI.opacity(highlight ? 1.0 : 0.0))
-                    .animation(nil)
+                    .transaction { $0.animation = nil }
                 VStack(alignment: .leading) {
                     HStack(spacing: BeamSpacing._60) {
                         if item.iconPlacement == .leading {

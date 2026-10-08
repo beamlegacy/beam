@@ -333,7 +333,7 @@ struct Passwords: View {
         openPanel.canChooseDirectories = false
         openPanel.canDownloadUbiquitousContents = false
         openPanel.allowsMultipleSelection = false
-        openPanel.allowedFileTypes = ["csv", "txt"]
+        openPanel.allowedContentTypes = BeamUniformTypeIdentifiers.csvOrTextTypes
         openPanel.message = "Select a csv file exported from Beam, Apple Passwords, Chrome, Firefox or Safari"
         openPanel.begin { result in
             let url = result == .OK ? openPanel.url : nil

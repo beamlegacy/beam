@@ -37,7 +37,7 @@ struct ToastView<Content: View>: View {
                         })
                 }
             }
-            .animation(.easeInOut(duration: 0.15))
+            .animation(.easeInOut(duration: 0.15), value: isPresented)
         }
     }
 }
