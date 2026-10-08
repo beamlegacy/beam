@@ -490,8 +490,10 @@ extension TextRoot {
         }
 
         if let replacementRange = replacementRange {
-            let low = rangeToReplace.lowerBound + replacementRange.lowerBound
-            let high = low + replacementRange.count
+            // Like in insertText, AppKit's replacement range is absolute in the text (e.g. the "e" replaced by
+            // the press-and-hold accent menu), not relative to the current selection.
+            let low = min(max(0, replacementRange.lowerBound), node.text.count)
+            let high = min(max(low, replacementRange.upperBound), node.text.count)
             rangeToReplace = low ..< high
         }
 
