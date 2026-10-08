@@ -61,7 +61,12 @@ public extension String {
 
     // MARK: - URL checking
     var mayBeURL: Bool {
-        return mayBeWebURL || mayBeFileURL || mayBeIP || isLocalhost
+        return mayBeWebURL || mayBeFileURL || mayBeIP || isLocalhost || mayBeWebExtensionURL
+    }
+
+    /// Pages served by web extensions, e.g. `webkit-extension://<id>/options.html`.
+    var mayBeWebExtensionURL: Bool {
+        URL(string: self)?.scheme?.lowercased() == "webkit-extension"
     }
 
     var mayBeWebURL: Bool {
