@@ -96,15 +96,20 @@ struct Persistence {
         @KeychainStorable("authentication.userId") private static var userId: String?
         @KeychainStorable("authentication.email") private static var email: String?
         @KeychainStorable("authentication.password") private static var password: String?
+        @KeychainStorable("encryption.privateKeys") private static var syncPrivateKeys: [String: String]?
+        @KeychainStorable("encryption.privateKey") private static var sharedPrivateKey: String?
+        @KeychainStorable("encryption.privateKeyCreationDate") private static var privateKeyCreationDate: Date?
+        @KeychainStorable("encryption.privateKeyUpdateDate") private static var privateKeyUpdateDate: Date?
         @StandardStorable("authentication.username") private static var username: String?
         @StandardStorable("development.endpoint") private static var endpoint: String?
         @StandardStorable("development.lastLogin") private static var lastLogin: Date?
         @StandardStorable("browsingTree.userId") private static var browsingTreeUserId: String?
         @StandardStorable("sync.beam_objects.last_received_at") private static var lastReceivedAt: Date?
         @StandardStorable("sync.beam_objects.last_updated_at") private static var lastUpdatedAt: Date?
-        @StandardStorable("legacyAccountData.removed") private static var removed: Bool?
+        @StandardStorable("legacyAccountData.removed.v2") private static var removed: Bool?
 
-        /// Removes the stored credentials (email, password, tokens) and sync state, once.
+        /// Removes the stored credentials (email, password, tokens), sync encryption keys and sync state, once.
+        /// The local private key encrypting saved passwords (`encryption.localPrivateKey`) is not affected.
         static func removeIfNeeded() {
             guard removed != true else { return }
             accessToken = nil
@@ -112,6 +117,10 @@ struct Persistence {
             userId = nil
             email = nil
             password = nil
+            syncPrivateKeys = nil
+            sharedPrivateKey = nil
+            privateKeyCreationDate = nil
+            privateKeyUpdateDate = nil
             username = nil
             endpoint = nil
             lastLogin = nil
