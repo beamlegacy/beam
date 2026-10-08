@@ -84,9 +84,18 @@ extension BeamTextEdit {
         return strNodes
     }
 
+    /// Whether a copy would put anything in the pasteboard. Copying with just a caret must keep the pasteboard untouched.
+    private var hasCopyableSelection: Bool {
+        guard let rootNode = rootNode else { return false }
+        if let nodes = rootNode.state.nodeSelection?.sortedNodes, !nodes.isEmpty {
+            return true
+        }
+        return focusedWidget is TextNode && !selectedTextRange.isEmpty
+    }
+
     // MARK: - Cut
     @IBAction func cut(_ sender: Any) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode, hasCopyableSelection else { return }
         setPasteboard()
         if let nodes = rootNode.state.nodeSelection?.sortedNodes, !nodes.isEmpty {
             rootNode.eraseNodeSelection(createEmptyNodeInPlace: nodes.count == rootNode.element.children.count)
@@ -98,6 +107,7 @@ extension BeamTextEdit {
 
     // MARK: - Copy
     @IBAction func copy(_ sender: Any) {
+        guard hasCopyableSelection else { return }
         setPasteboard()
     }
 
