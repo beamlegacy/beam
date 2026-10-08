@@ -184,7 +184,7 @@ extension TextRoot {
                 if let nextTextNode = nextNode as? TextNode {
                     let pos = textNode.textCount
                     focusedCmdManager.insertText(nextTextNode.elementText, in: textNode, at: pos)
-                    moveChildrenOf(nextTextNode, to: textNode)
+                    moveChildrenOf(nextTextNode, to: textNode, atOffset: mergedChildrenOffset(of: nextTextNode, into: textNode))
                     focusedCmdManager.deleteElement(for: nextTextNode)
                     return
                 }
@@ -229,6 +229,13 @@ extension TextRoot {
                 focusedCmdManager.deleteElement(for: node)
             }
         }
+    }
+
+    /// Where the children of `node` go when it is merged into `target`: in place of `node` when `target` is its
+    /// parent (keeps them before node's next siblings), otherwise at the end of `target`'s children.
+    func mergedChildrenOffset(of node: ElementNode, into target: ElementNode) -> Int? {
+        guard node.displayedElement.parent === target.displayedElement else { return nil }
+        return node.displayedElement.indexInParent
     }
 
     func moveChildrenOf(_ node: ElementNode, to newParent: ElementNode, atOffset: Int? = nil) {
@@ -305,7 +312,7 @@ extension TextRoot {
                     if prevTextNode.displayedElement.children.isEmpty {
                         prevTextNode.open = textNode.open
                     }
-                    moveChildrenOf(textNode, to: prevTextNode)
+                    moveChildrenOf(textNode, to: prevTextNode, atOffset: mergedChildrenOffset(of: textNode, into: prevTextNode))
                     cmdManager.focusElement(prevTextNode, cursorPosition: pos)
                     cmdManager.deleteElement(for: textNode)
                     return
