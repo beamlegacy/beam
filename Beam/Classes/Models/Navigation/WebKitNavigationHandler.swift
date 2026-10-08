@@ -163,10 +163,8 @@ extension WebKitNavigationHandler {
             } else {
                 self.page?.authenticationViewModel = viewModel
             }
-        case NSURLAuthenticationMethodServerTrust:
-            let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!)
-            completionHandler(.useCredential, cred)
         default:
+            // Includes server trust: let WebKit evaluate the certificate instead of accepting any of them.
             completionHandler(.performDefaultHandling, nil)
         }
     }
