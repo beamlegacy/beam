@@ -11998,8 +11998,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gumob/TLDExtractSwift";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = exactVersion;
+				version = 2.1.1;
 			};
 		};
 		A5F782EE2C629C00007431FC /* XCRemoteSwiftPackageReference "Clustering" */ = {
