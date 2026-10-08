@@ -3412,20 +3412,6 @@
 			path = ..;
 			sourceTree = "<group>";
 		};
-		057E9FC328408C7100FEF477 /* Additional APIs */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = "Additional APIs";
-			sourceTree = "<group>";
-		};
-		05BE536C27F2E3CE00399DA7 /* Fixtures */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Fixtures;
-			sourceTree = "<group>";
-		};
 		05EBF1FE2845416C000889F0 /* ThreeWayMergeTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -3553,13 +3539,6 @@
 				9645489F2523B3550064D062 /* CloudKit.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		3303E0E326F8C8FF00E175AC /* Additional APIs */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = "Additional APIs";
 			sourceTree = "<group>";
 		};
 		3312202D2809736D006A5EA1 /* Update */ = {
@@ -3842,10 +3821,7 @@
 		418171592581107C00317ED8 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				5230609D27426BC600A03844 /* BeamObjectAPI */,
 				A07C01362705ECFC00D91750 /* GoogleCalendar */,
-				3303E0E326F8C8FF00E175AC /* Additional APIs */,
-				4181715C2581107C00317ED8 /* API */,
 				4181715A2581107C00317ED8 /* Network */,
 				A51F555127329829002C5584 /* EmbedContentBuilder.swift */,
 				8AF4F7D2275A67960081B6B5 /* EmbedContent.swift */,
@@ -3865,38 +3841,6 @@
 				A5297F3927AC3465006B3E1F /* SearchEngineAutocompleter.swift */,
 			);
 			path = Network;
-			sourceTree = "<group>";
-		};
-		4181715C2581107C00317ED8 /* API */ = {
-			isa = PBXGroup;
-			children = (
-				4181715D2581107C00317ED8 /* GraphqlRequestsTypes */,
-				418171662581107C00317ED8 /* GraphqlRequests */,
-			);
-			path = API;
-			sourceTree = "<group>";
-		};
-		4181715D2581107C00317ED8 /* GraphqlRequestsTypes */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = GraphqlRequestsTypes;
-			sourceTree = "<group>";
-		};
-		418171662581107C00317ED8 /* GraphqlRequests */ = {
-			isa = PBXGroup;
-			children = (
-				52F4E48226417ED90067B017 /* Identities */,
-				418171672581107C00317ED8 /* UserSession */,
-			);
-			path = GraphqlRequests;
-			sourceTree = "<group>";
-		};
-		418171672581107C00317ED8 /* UserSession */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = UserSession;
 			sourceTree = "<group>";
 		};
 		4181716B2581107C00317ED8 /* Models */ = {
@@ -4312,7 +4256,6 @@
 				52842D4C2715B2FF0099602C /* FilesList */,
 				33AC9D9626AFF43E004E7EF4 /* FocusableTextField */,
 				414B98EE25A239C6002E81A3 /* FormatterView */,
-				CE304C2627DB542D005AE274 /* GoogleCloudPlatform */,
 				33353EB326F0EA6B00063078 /* Help and Feedback */,
 				52DB025C2716CEBD00F3881D /* Logger */,
 				A5B5324127035246007FC8B8 /* Meeting */,
@@ -4455,13 +4398,6 @@
 			path = Fonts;
 			sourceTree = "<group>";
 		};
-		5224CD3D2685FF6D00D4179E /* BeamObject */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = BeamObject;
-			sourceTree = "<group>";
-		};
 		52301D62261C880200ED2238 /* Migrations */ = {
 			isa = PBXGroup;
 			children = (
@@ -4473,46 +4409,6 @@
 				A0642C3126D9979300B49054 /* Beam5ToBeam6Migration.xcmappingmodel */,
 			);
 			path = Migrations;
-			sourceTree = "<group>";
-		};
-		5230609D27426BC600A03844 /* BeamObjectAPI */ = {
-			isa = PBXGroup;
-			children = (
-				523060A627426C7400A03844 /* GraphQLRequests */,
-				523060A527426C2800A03844 /* Requests */,
-				523060A427426C0F00A03844 /* Models */,
-				523060A327426BF700A03844 /* Managers */,
-			);
-			path = BeamObjectAPI;
-			sourceTree = "<group>";
-		};
-		523060A327426BF700A03844 /* Managers */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Managers;
-			sourceTree = "<group>";
-		};
-		523060A427426C0F00A03844 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		523060A527426C2800A03844 /* Requests */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Requests;
-			sourceTree = "<group>";
-		};
-		523060A627426C7400A03844 /* GraphQLRequests */ = {
-			isa = PBXGroup;
-			children = (
-				5224CD3D2685FF6D00D4179E /* BeamObject */,
-			);
-			path = GraphQLRequests;
 			sourceTree = "<group>";
 		};
 		523A32C72677648700606768 /* Configuration */ = {
@@ -4559,14 +4455,6 @@
 				05EE1CC42818459300B174BB /* Quick+AsyncAwait.swift */,
 			);
 			path = Helpers;
-			sourceTree = "<group>";
-		};
-		5273C65625DA834600B00EC3 /* API */ = {
-			isa = PBXGroup;
-			children = (
-				05BE536C27F2E3CE00399DA7 /* Fixtures */,
-			);
-			path = API;
 			sourceTree = "<group>";
 		};
 		5273C66B25DA856900B00EC3 /* UITests */ = {
@@ -4647,8 +4535,6 @@
 		5298647A25D151AD00D27A80 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				057E9FC328408C7100FEF477 /* Additional APIs */,
-				5273C65625DA834600B00EC3 /* API */,
 				5298648F25D151B600D27A80 /* Network */,
 				A51F55602733333D002C5584 /* EmbedContentBuilderTests.swift */,
 				A501B4CE2734397E00407F3E /* EmbedContentLocalStrategyTests.swift */,
@@ -4752,13 +4638,6 @@
 				52A94E2625E90084004BAC93 /* Extensions */,
 			);
 			path = Helpers;
-			sourceTree = "<group>";
-		};
-		52F4E48226417ED90067B017 /* Identities */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Identities;
 			sourceTree = "<group>";
 		};
 		52FC003B25E426F100ABECB0 /* UITests */ = {
@@ -5299,7 +5178,6 @@
 			children = (
 				8A27DBD227EDC7430044A9A2 /* dist */,
 				8A27DBED27EDC7430044A9A2 /* jest.config.js */,
-				8A27DBEE27EDC7430044A9A2 /* tests */,
 				8A27DBEF27EDC7430044A9A2 /* babel.config.js */,
 				8A27DBF027EDC7430044A9A2 /* package.json */,
 				8A27DBF227EDC7430044A9A2 /* tsconfig.json */,
@@ -5348,13 +5226,6 @@
 			path = src;
 			sourceTree = "<group>";
 		};
-		8A27DBEE27EDC7430044A9A2 /* tests */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = tests;
-			sourceTree = "<group>";
-		};
 		8A27DBF327EDC7430044A9A2 /* src */ = {
 			isa = PBXGroup;
 			children = (
@@ -5375,7 +5246,6 @@
 			children = (
 				8A27DBFD27EDC7430044A9A2 /* dist */,
 				8A27DC3C27EDC7430044A9A2 /* jest.config.js */,
-				8A27DC3D27EDC7430044A9A2 /* tests */,
 				8A27DC3E27EDC7430044A9A2 /* package.json */,
 				8A27DC4027EDC7430044A9A2 /* tsconfig.json */,
 				8A27DC4127EDC7430044A9A2 /* src */,
@@ -5457,13 +5327,6 @@
 				8A27DC3B27EDC7430044A9A2 /* EventsMock.js.map */,
 			);
 			path = src;
-			sourceTree = "<group>";
-		};
-		8A27DC3D27EDC7430044A9A2 /* tests */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = tests;
 			sourceTree = "<group>";
 		};
 		8A27DC4127EDC7430044A9A2 /* src */ = {
@@ -5572,13 +5435,6 @@
 				8A27DC7827EDC7E60044A9A2 /* WebPositionsUIMock.ts */,
 			);
 			path = Test;
-			sourceTree = "<group>";
-		};
-		8A27DC7A27EDC7E60044A9A2 /* tests */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = tests;
 			sourceTree = "<group>";
 		};
 		8A27DC7E27EDC8290044A9A2 /* Web */ = {
@@ -5922,7 +5778,6 @@
 				8A27DC7927EDC7E60044A9A2 /* package.json */,
 				8A27DC7127EDC7E50044A9A2 /* src */,
 				8A27DC7727EDC7E60044A9A2 /* Test */,
-				8A27DC7A27EDC7E60044A9A2 /* tests */,
 				8A27DC7B27EDC7E60044A9A2 /* tsconfig.json */,
 				8A27DC7C27EDC7E60044A9A2 /* webpack.config.js */,
 			);
@@ -6456,17 +6311,9 @@
 			path = GRDB;
 			sourceTree = "<group>";
 		};
-		96DDEE1E282C8F4F00D9101A /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Extensions;
-			sourceTree = "<group>";
-		};
 		96EFDA392817FC4900A8DF8E /* DocumentStorage */ = {
 			isa = PBXGroup;
 			children = (
-				96DDEE1E282C8F4F00D9101A /* Extensions */,
 				96D794D62833F55F002F9A1A /* GRDB */,
 				96DDEE08282B2AA900D9101A /* BeamAccount.swift */,
 				054F149F2864665E0069B159 /* BeamAccount+Merge.swift */,
@@ -6784,13 +6631,6 @@
 				A3E7B4BF27AC462E0074C9BB /* PasswordPreferencesTests.swift */,
 			);
 			path = Passwords;
-			sourceTree = "<group>";
-		};
-		A3EE7D55284F236B00DD3EBB /* Synchronization */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Synchronization;
 			sourceTree = "<group>";
 		};
 		A50241CB26D8FA5500C93E1E /* Gutter */ = {
@@ -7445,10 +7285,8 @@
 				D77A5AA6287EB42200652727 /* TabGrouping */,
 				A3B6C9602861C48900E7F78C /* HelpersTests */,
 				6E8393CA287C9CC7004633BC /* Application */,
-				A3EE7D55284F236B00DD3EBB /* Synchronization */,
 				D71D7485282B9C7600D8D6F5 /* Privacy */,
 				B51C99A82805C44100A2577E /* Incognito mode */,
-				B5FB3A1727E8C16400037FD5 /* SignInOut */,
 				8AA5F0BF27ABE50900D25A13 /* BrokenSites */,
 				B5792588275E46F50093B32B /* ImportExport */,
 				B5CDFF26274E38E800742CC9 /* Onboarding */,
@@ -7645,13 +7483,6 @@
 			path = Shortcuts;
 			sourceTree = "<group>";
 		};
-		B5FB3A1727E8C16400037FD5 /* SignInOut */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = SignInOut;
-			sourceTree = "<group>";
-		};
 		BAA67051B37A3398BDF678AB /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
@@ -7713,13 +7544,6 @@
 				8AC2EFCF266F837C00049005 /* Native */,
 			);
 			path = PointAndShoot;
-			sourceTree = "<group>";
-		};
-		CE304C2627DB542D005AE274 /* GoogleCloudPlatform */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = GoogleCloudPlatform;
 			sourceTree = "<group>";
 		};
 		D71D7485282B9C7600D8D6F5 /* Privacy */ = {
