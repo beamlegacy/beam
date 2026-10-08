@@ -451,6 +451,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
             }
         } catch let error {
             Logger.shared.logError("Error while fetching password entries for \(hostname): \(error)", category: .passwordsDB)
+            completion([])
         }
     }
 }
