@@ -29,11 +29,19 @@ public enum BeamNoteType: Codable, Equatable {
         }
     }
 
+    /// Parsing dates is expensive and journal dates are read a lot (e.g. in comparators sorting the journal).
+    private static let journalDateCache = NSCache<NSString, NSDate>()
+
     public var journalDate: Date? {
         switch self {
         case .journal(let dateString):
             guard !dateString.isEmpty else { return nil }
-            return Self.dateFormater.date(from: dateString)
+            if let cachedDate = Self.journalDateCache.object(forKey: dateString as NSString) {
+                return cachedDate as Date
+            }
+            guard let date = Self.dateFormater.date(from: dateString) else { return nil }
+            Self.journalDateCache.setObject(date as NSDate, forKey: dateString as NSString)
+            return date
         default:
             return nil
         }
@@ -65,6 +73,7 @@ public enum BeamNoteType: Codable, Equatable {
         NotificationCenter.default.addObserver(forName: .NSSystemTimeZoneDidChange, object: nil, queue: nil) { _ in
             NSTimeZone.resetSystemTimeZone()
             formater.timeZone = .current
+            BeamNoteType.journalDateCache.removeAllObjects()
         }
         return formater
     }()
