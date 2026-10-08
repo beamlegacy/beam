@@ -299,6 +299,15 @@ final class WebExtensionsManager: NSObject, ObservableObject {
 
     // MARK: - Tabs and windows events
 
+    /// Runs `block` on the main actor, synchronously when already on the main thread.
+    nonisolated static func performOnMain(_ block: @escaping @MainActor () -> Void) {
+        if Thread.isMainThread {
+            MainActor.assumeIsolated(block)
+        } else {
+            DispatchQueue.main.async { MainActor.assumeIsolated(block) }
+        }
+    }
+
     func tabsDidChange(from oldTabs: [BrowserTab], to newTabs: [BrowserTab]) {
         let oldIds = Set(oldTabs.map(ObjectIdentifier.init))
         let newIds = Set(newTabs.map(ObjectIdentifier.init))

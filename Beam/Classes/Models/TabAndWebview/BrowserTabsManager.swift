@@ -39,7 +39,7 @@ class BrowserTabsManager: ObservableObject {
         didSet {
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
             if #available(macOS 15.4, *) {
-                MainActor.assumeIsolated { WebExtensionsManager.shared.tabsDidChange(from: oldValue, to: tabs) }
+                WebExtensionsManager.performOnMain { [tabs] in WebExtensionsManager.shared.tabsDidChange(from: oldValue, to: tabs) }
             }
 
             if let state = state, !state.isIncognito {
@@ -76,7 +76,7 @@ class BrowserTabsManager: ObservableObject {
     @Published private(set) var currentTab: BrowserTab? {
         didSet {
             if #available(macOS 15.4, *) {
-                MainActor.assumeIsolated { WebExtensionsManager.shared.currentTabDidChange(from: oldValue, to: currentTab) }
+                WebExtensionsManager.performOnMain { [currentTab] in WebExtensionsManager.shared.currentTabDidChange(from: oldValue, to: currentTab) }
             }
             if tabsAreVisible {
                 oldValue?.switchToOtherTab()

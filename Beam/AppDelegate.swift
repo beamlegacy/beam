@@ -34,7 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var windows: [BeamWindow] = [] {
         didSet {
             if #available(macOS 15.4, *) {
-                MainActor.assumeIsolated { WebExtensionsManager.shared.windowsDidChange(from: oldValue, to: windows) }
+                WebExtensionsManager.performOnMain { [windows] in WebExtensionsManager.shared.windowsDidChange(from: oldValue, to: windows) }
             }
             if windows.count == 0 {
                 data.allWindowsDidClose()
