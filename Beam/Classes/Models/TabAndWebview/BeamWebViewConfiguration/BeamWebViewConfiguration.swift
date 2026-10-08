@@ -69,6 +69,9 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
         super.init()
 
         applicationNameForUserAgent = Constants.SafariApplicationNameForUserAgent
+        if #available(macOS 15.4, *) {
+            webExtensionController = WebExtensionsManager.shared.controller
+        }
         preferences.javaScriptCanOpenWindowsAutomatically = true
         preferences.tabFocusesLinks = PreferencesManager.isTabToHighlightOn
         //        preferences.plugInsEnabled = true

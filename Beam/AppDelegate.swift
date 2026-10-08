@@ -33,6 +33,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     var windows: [BeamWindow] = [] {
         didSet {
+            if #available(macOS 15.4, *) {
+                MainActor.assumeIsolated { WebExtensionsManager.shared.windowsDidChange(from: oldValue, to: windows) }
+            }
             if windows.count == 0 {
                 data.allWindowsDidClose()
             }
@@ -110,6 +113,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         ContentBlockingManager.shared.setup()
+
+        if #available(macOS 15.4, *), !isRunningTests {
+            WebExtensionsManager.shared.loadInstalledExtensions()
+        }
 
         //TODO: - Remove when everyone has its local links data moved from old db to grdb
         data.setup()

@@ -38,6 +38,9 @@ class BrowserTabsManager: ObservableObject {
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
+            if #available(macOS 15.4, *) {
+                MainActor.assumeIsolated { WebExtensionsManager.shared.tabsDidChange(from: oldValue, to: tabs) }
+            }
 
             if let state = state, !state.isIncognito {
                 updateClusteringOpenPages()
@@ -72,6 +75,9 @@ class BrowserTabsManager: ObservableObject {
 
     @Published private(set) var currentTab: BrowserTab? {
         didSet {
+            if #available(macOS 15.4, *) {
+                MainActor.assumeIsolated { WebExtensionsManager.shared.currentTabDidChange(from: oldValue, to: currentTab) }
+            }
             if tabsAreVisible {
                 oldValue?.switchToOtherTab()
                 currentTab?.tabDidAppear(withState: state)

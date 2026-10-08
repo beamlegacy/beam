@@ -434,6 +434,9 @@ extension BeamWindow: NSWindowDelegate {
             return
         }
         windowInfo.windowIsMain = true
+        if #available(macOS 15.4, *) {
+            WebExtensionsManager.shared.windowDidBecomeMain(self)
+        }
         for window in AppDelegate.main.windows where window != self {
             window.windowInfo.windowIsMain = false
         }

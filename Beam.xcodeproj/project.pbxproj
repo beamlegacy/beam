@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		94F1394D5148900C031396F5 /* BrowserTab+WebExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A42FB43D0D550DE94F1394D /* BrowserTab+WebExtension.swift */; };
+		12CCFEC9CF07D21F34CF760D /* WebExtensionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9122F2BECB933BD12CCFEC9 /* WebExtensionsManager.swift */; };
 		022843362617C4C3001C062E /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
 		0325628E26051D3B006513E4 /* RBZip.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624A26051D3A006513E4 /* RBZip.m */; };
 		0325628F26051D3B006513E4 /* RBSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624B26051D3A006513E4 /* RBSQLite.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -1556,6 +1558,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1A42FB43D0D550DE94F1394D /* BrowserTab+WebExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrowserTab+WebExtension.swift"; sourceTree = "<group>"; };
+		D9122F2BECB933BD12CCFEC9 /* WebExtensionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebExtensionsManager.swift"; sourceTree = "<group>"; };
 		0325624726051D3A006513E4 /* RBCodeSignature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBCodeSignature.h; sourceTree = "<group>"; };
 		0325624826051D3A006513E4 /* RBUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBUtils.h; sourceTree = "<group>"; };
 		0325624926051D3A006513E4 /* RBDigest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RBDigest.h; sourceTree = "<group>"; };
@@ -4322,6 +4326,7 @@
 		418171E62581107C00317ED8 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				D9122F2BECB933BD12CCFEC9 /* WebExtensionsManager.swift */,
 				96EFDA392817FC4900A8DF8E /* DocumentStorage */,
 				5298EADE26272C2C0033862C /* CoreData */,
 				418171E72581107C00317ED8 /* AuthenticationManager.swift */,
@@ -7032,6 +7037,7 @@
 		A58645DD26FB10BD00D7FF86 /* TabAndWebview */ = {
 			isa = PBXGroup;
 			children = (
+				1A42FB43D0D550DE94F1394D /* BrowserTab+WebExtension.swift */,
 				418171822581107C00317ED8 /* BrowserTab.swift */,
 				A510580F2786E7E600E4F1F2 /* BrowserTab+WebPage.swift */,
 				A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */,
@@ -8617,6 +8623,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				94F1394D5148900C031396F5 /* BrowserTab+WebExtension.swift in Sources */,
+				12CCFEC9CF07D21F34CF760D /* WebExtensionsManager.swift in Sources */,
 				3318B44028534D08002ACA34 /* EditorTabGroupsContainerView.swift in Sources */,
 				37B85B8027A2C81B003871F9 /* DownloadListProtocol.swift in Sources */,
 				525098EA264E9824002D1548 /* HyperlinkFormatterView.swift in Sources */,
