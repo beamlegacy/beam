@@ -68,6 +68,7 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
     override init() {
         super.init()
 
+        applicationNameForUserAgent = Constants.SafariApplicationNameForUserAgent
         preferences.javaScriptCanOpenWindowsAutomatically = true
         preferences.tabFocusesLinks = PreferencesManager.isTabToHighlightOn
         //        preferences.plugInsEnabled = true

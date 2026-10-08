@@ -37,6 +37,7 @@ extension WebKitManualDownloadProxy: DownloadProxy {
 
     func startDownload(using request: URLRequest, completionHandler: @escaping (WebKitManualDownloadProxy) -> Void) {
         let tempWebView = WKWebView()
+        tempWebView.customUserAgent = Constants.SafariUserAgent
 
         tempWebView.startDownload(using: request) { [weak self] download in
             self?.download = download
@@ -48,6 +49,7 @@ extension WebKitManualDownloadProxy: DownloadProxy {
 
     func resumeDownload(fromResumeData resumeData: Data, completionHandler: @escaping (WebKitManualDownloadProxy) -> Void) {
         let tempWebView = WKWebView()
+        tempWebView.customUserAgent = Constants.SafariUserAgent
 
         tempWebView.resumeDownload(fromResumeData: resumeData) { [weak self] download in
             self?.download = download
