@@ -435,9 +435,10 @@ extension BeamTextEdit {
             Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
             return
         }
+        // Check before opening the group: returning with a group open makes the next undo fatalError.
+        guard let node = focusedWidget as? TextNode else { return }
         let cmdManager = mngrNode.cmdManager
         cmdManager.beginGroup(with: "Paste Text")
-        guard let node = focusedWidget as? TextNode else { return }
         var lastInserted: ElementNode? = node
         let parent = node.parent as? ElementNode ?? node
         var insertedElements: [BeamText] = []
