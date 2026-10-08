@@ -99,8 +99,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         case .createFakeDailySummary: createFakeDailySummary()
         case .createNote: createNote()
         case .createAndOpenNote: createNote(open: true)
-        case .createPublishedNote: createPublishedNote()
-        case .createAndOpenPublishedNote: createPublishedNote(open: true)
         case .startBeamOnTabs: setStartBeamOn(.webTabs)
         case .startBeamOnDefault: setStartBeamOn(nil)
         case .populateDBWithJournal: populateWithJournalNote(count: 10)
@@ -487,18 +485,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
             self.open(note: note)
         }
         return note
-    }
-
-    private func createPublishedNote(open: Bool = false) {
-        guard let fileManager = currentAccount?.fileDBManager else { return }
-        let note = createNote()
-        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, fileManager: fileManager) { _ in
-            if open {
-                DispatchQueue.main.async {
-                    self.open(note: note)
-                }
-            }
-        }
     }
 
     private func open(note: BeamNote) {

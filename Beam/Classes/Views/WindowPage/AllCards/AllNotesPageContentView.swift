@@ -12,16 +12,11 @@ import Combine
 struct AllNotesPageContentView: View, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
     @EnvironmentObject var state: BeamState
-    @EnvironmentObject var data: BeamData
     @EnvironmentObject var windowInfo: BeamWindowInfo
     @Environment(\.undoManager) var undoManager
 
-    private var listType: ListType {
-        return state.allNotesListType
-    }
-
     private var currentNotesList: [NoteTableViewItem] {
-        return model.getCurrentNotesList(for: listType)
+        model.allNotesItems
     }
 
     @StateObject private var model = AllNotesPageViewModel()
@@ -51,9 +46,6 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
         TableViewColumn(key: ColumnID.title.rawValue, title: loc("Title"),
                         editable: true, isLink: true,
                         sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 200, font: BeamFont.light(size: 13).nsFont),
-        TableViewColumn(key: ColumnID.isPublic.rawValue, title: "URL", type: .IconButton, editable: false, isLink: false, sortable: true,
-                        resizable: false, width: 53, font: Self.secondaryCellFont,
-                        foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor),
         TableViewColumn(key: ColumnID.words.rawValue, title: loc("Words"), resizable: false,
                         width: 58, font: Self.secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
@@ -75,39 +67,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
     ]
 
     private var cardsFilters: some View {
-        switch listType {
-        case .allNotes:
-            return Text("All (\(model.getCurrentNotesList(for: .allNotes).count))")
-        case .privateNotes:
-            return Text("Private (\(model.getCurrentNotesList(for: .privateNotes).count))")
-        case .publicNotes:
-            return Text("Published (\(model.getCurrentNotesList(for: .publicNotes).count))")
-        case .onProfileNotes:
-            return Text("On Profile (\(model.getCurrentNotesList(for: .onProfileNotes).count))")
-        }
-    }
-
-    private var pageTitle: String {
-        guard model.isAuthenticated, let username = model.username else {
-            return "All Notes"
-        }
-        return username
-    }
-
-    private var creationRowPlaceholder: String {
-        if let publishingNoteTitle = model.publishingNoteTitle {
-            return loc("Publishing '\(publishingNoteTitle)'...")
-        }
-
-        if listType == .publicNotes {
-            return model.publicNotesItems.count == 0 ? loc("You haven’t published any note yet. Start today!") : loc("New Published Note")
-        }
-
-        if listType == .onProfileNotes {
-            return model.onProfileNotesItems.count == 0 ? loc("You haven’t published any note to your profile yet. Start today!") : loc("New Published on Profile Note")
-        }
-
-        return loc("New Private Note")
+        Text("All (\(model.allNotesItems.count))")
     }
 
     private var compactWindowWidth: Bool {
@@ -134,7 +94,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: BeamSpacing._80) {
-                        Text(pageTitle)
+                        Text("All Notes")
                             .font(BeamFont.regular(size: 24).swiftUI)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                         Icon(name: "editor-options", width: 16, color: BeamColor.LightStoneGray.swiftUI)
@@ -146,34 +106,6 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                     }))
 
                     HStack {
-                        if let profileLink = BeamNoteSharingUtils.getProfileLink() {
-                            ButtonLabel(customView: { hovered, _ in
-                                AnyView(
-                                    Text(profileLink.urlStringWithoutScheme)
-                                        .underline(hovered, color: BeamColor.Niobium.swiftUI)
-                                        .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
-                                        .cursorOverride(hovered ? .pointingHand : .arrow)
-                                )
-                            }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
-                                if let state = AppDelegate.main.windows.first?.state {
-                                    state.mode = .web
-                                    _ = state.createTab(withURLRequest: URLRequest(url: profileLink), originalQuery: nil)
-                                }
-                            })
-                            .frame(height: 13)
-                            .cursorOverride(.pointingHand)
-                        } else {
-                            ButtonLabel(customView: { hovered, _ in
-                                AnyView(
-                                    Text("Sign up to publish your notes")
-                                        .underline(hovered, color: BeamColor.Niobium.swiftUI)
-                                        .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
-                                )
-                            }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
-                                model.showConnectWindow(withConfirmationAlert: false)
-                            })
-                            .accessibilityIdentifier("signUpToPublishBtn")
-                        }
                         Spacer()
 
                         ButtonLabel(customView: { hovered, _ in
@@ -206,8 +138,8 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                 TableView(hasSeparator: false,
                           items: currentNotesList,
                           columns: tableColumns(for: proxy.frame(in: .local).size.width),
-                          creationRowTitle: creationRowPlaceholder,
-                          isCreationRowLoading: model.publishingNoteTitle != nil,
+                          creationRowTitle: loc("New Note"),
+                          isCreationRowLoading: false,
                           shouldReloadData: $model.shouldReloadData,
                           sortDescriptor: $state.allNotesSortDescriptor) { (newText, row) in
                     onEditingText(self, newText, row: row, in: currentNotesList)
@@ -245,7 +177,6 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
                 }
             )
             .padding(.leading, -25)
-            .disabled(model.publishingNoteTitle != nil)
             .frame(maxHeight: .infinity)
             .background(Color.clear
                 .onHover { hovering in
@@ -266,7 +197,6 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             model.setShowTabGroupNotes(newValue)
         }
         .onAppear {
-            model.data = data
             model.setShowDailyNotes(state.showDailyNotes)
             model.refreshAllNotes()
         }
@@ -305,7 +235,7 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             selectedNotes = notes.enumerated().filter { i, _ in selectedRowsIndexes.contains(i) }.compactMap({ _, item -> BeamNote? in item.getNote()
             })
         }
-        let handler = AllNotesPageContextualMenu(data: data, selectedNotes: selectedNotes, onFinish: { shouldReload in
+        let handler = AllNotesPageContextualMenu(selectedNotes: selectedNotes, onFinish: { shouldReload in
             if shouldReload {
                 model.refreshAllNotes()
             }
@@ -328,33 +258,8 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
             return
         }
         if row >= notesList.count {
-            guard let newNote = try? state.fetchOrCreateNoteForQuery(title),
-                  let fileManager = data.fileDBManager
-            else { return }
-            let isPublic = listType == .publicNotes
-            let publishOnProfile = listType == .onProfileNotes
-
-            //If we create a public note, publish it right after creation, else just save it
-            if isPublic || publishOnProfile {
-                model.publishingNoteTitle = newNote.title
-                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true, publicationGroups: publishOnProfile ? ["profile"] : nil, fileManager: fileManager) { result in
-                    DispatchQueue.main.async {
-                        model.publishingNoteTitle = nil
-                        switch result {
-                        case .failure(let e):
-                            UserAlert.showError(message: loc("Could not publish note. Try again from the note view."), error: e)
-                            // Saving the private note at least and showing it to user.
-                            newNote.publicationStatus = .unpublished
-                            _ = newNote.save(source)
-                            state.allNotesListType = .privateNotes
-                        case .success:
-                            model.refreshAllNotes()
-                        }
-                    }
-                }
-            } else {
-                _ = newNote.save(source)
-            }
+            guard let newNote = try? state.fetchOrCreateNoteForQuery(title) else { return }
+            _ = newNote.save(source)
         } else {
             let item = notesList[row]
             guard let note = try? BeamNote.fetchOrCreate(source, title: item.title) else { return }
@@ -368,8 +273,8 @@ struct AllNotesPageContentView: View, BeamDocumentSource {
     private func tableColumns(for width: CGFloat) -> [TableViewColumn] {
         let isSmallWidth = width < 465
         var columns = self.columns
-        columns[3].hidden = isSmallWidth
-        columns[4].hidden = isSmallWidth
+        columns[2].hidden = isSmallWidth // words
+        columns[3].hidden = isSmallWidth // links
         return columns
     }
 }
@@ -388,7 +293,6 @@ struct AllNotesPageContentView_Previews: PreviewProvider {
 private enum ColumnID: String {
     case checkbox
     case title
-    case isPublic
     case words
     case links
     case createdAt

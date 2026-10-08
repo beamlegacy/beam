@@ -260,26 +260,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
                 self.maybeRemoveFromJournal(deletedDocument)
                 BeamNote.purgeDeletedNode(self, deletedDocument.id)
             }.store(in: &scope)
-
-        PreferencesManager.$alwaysShowBullets
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] alwaysShowBullets in
-                guard let collection = BeamData.shared.currentDocumentCollection else { return }
-                let allDocuments = (try? collection.fetch(filters: [.isPublic(true)])) ?? []
-
-                var allPublicNotes: [BeamNote] = []
-                let newBulletVisibility: BulletPointType = alwaysShowBullets ? .regular : .empty
-                for document in allDocuments {
-                    guard let note = BeamNote.getFetchedNote(document.id), note.publicationStatus.isPublic else { continue }
-                    note.noteSettings?.bulletPointVisibility = newBulletVisibility
-                    allPublicNotes.append(note)
-                }
-
-                guard let fileManager = self?.fileDBManager else { return }
-                allPublicNotes.forEach { note in
-                    BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, publicationGroups: note.publicationStatus.publicationGroups, fileManager: fileManager)
-                }
-        }.store(in: &scope)
     }
 
     func allWindowsDidClose() {

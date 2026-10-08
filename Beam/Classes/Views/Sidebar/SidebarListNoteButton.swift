@@ -25,8 +25,6 @@ struct SidebarListNoteButton: View {
     @State var isHovering: Bool = false
     @State var isPressed: Bool = false
 
-    @State var isHoveringTrailingIcon: Bool = false
-    @State var justCopied = false
 
     var body: some View {
         HStack(spacing: 6) {
@@ -51,14 +49,6 @@ struct SidebarListNoteButton: View {
                     action?()
                 })
             }
-            if note.publicationStatus.isPublic {
-                ButtonLabel(icon: "editor-url_link", customStyle: buttonLabelStyle) {
-                    BeamNoteSharingUtils.copyLinkToClipboard(for: note, completion: nil)
-                    justCopied = true
-                }.onHover(perform: { h in
-                    isHoveringTrailingIcon = h
-                })
-            }
         }
         .foregroundColor(foregroundColor)
         .font(textFont)
@@ -73,10 +63,6 @@ struct SidebarListNoteButton: View {
                 isPressed = false
             }
         }.contextMenu { BeamNote.contextualMenu(for: note, state: state, undoManager: undoManager) }
-        .overlay(!isHoveringTrailingIcon ? nil : Tooltip(title: justCopied ? "Link Copied" : "Copy Link", icon: justCopied ? "tool-keep" : nil)
-                    .fixedSize()
-                    .offset(x: -30, y: 0)
-                    .transition(Tooltip.defaultTransition), alignment: .trailing)
     }
 
     private var textFont: Font {
@@ -85,10 +71,6 @@ struct SidebarListNoteButton: View {
 
     private var foregroundColor: Color {
         BeamColor.Niobium.swiftUI
-    }
-
-    private var buttonLabelStyle: ButtonLabelStyle {
-        ButtonLabelStyle(horizontalPadding: 0, verticalPadding: 0, activeBackgroundColor: .clear)
     }
 
     private var smallButtonLabelStyle: ButtonLabelStyle {

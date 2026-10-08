@@ -27,7 +27,7 @@ struct EmbedContentBuilder {
     }
 
     init() {
-        strategies = [EmbedContentLocalStrategy(), EmbedContentAPIStrategy()]
+        strategies = [EmbedContentLocalStrategy()]
     }
 
     private func cachedEmbed(for url: URL) -> EmbedContent? {

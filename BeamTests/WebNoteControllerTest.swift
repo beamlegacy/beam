@@ -4,30 +4,12 @@ import XCTest
 @testable import BeamCore
 
 class WebNoteControllerTest: XCTestCase {
-    class MockSocialTitleFetcher: SocialTitleFetcher {
-        static func getDefaultLinkTitle(url: URL) -> String {
-            "\(url.hostname ?? "") Enterprise Solutions"
-        }
-        func getMockTitle(_ url: URL) throws -> SocialTitle? {
-            SocialTitle(url: url, title: "\(url.hostname ?? "") Enterprise Solutions")
-        }
-        override func fetch(for url: URL, completion: @escaping (Result<SocialTitle?, SocialTitleFetcherError>) -> Void) {
-            let result = Result(catching: {
-                try getMockTitle(url)
-            }).mapError({ _ in
-                SocialTitleFetcherError.failedRequest
-            })
-            completion(result)
-        }
-    }
-
     var words = WordsFile()
     var note = try! BeamNote(title: "Sample note")
     var data = BeamData.shared
 
     override func setUpWithError() throws {
         note = try BeamNote(title: "Sample note")
-        SocialTitleFetcher.shared = MockSocialTitleFetcher()
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
 
@@ -335,7 +317,7 @@ class WebNoteControllerTest: XCTestCase {
 
     func testWhenBulletHasMoreContentThanOnlyTheSourceLinkDontUseThatBulletAsSourceLink() async throws {
         let sourceLink1 = URL(string: "https://go.dev/doc/")!
-        let defaultLinkTitle = MockSocialTitleFetcher.getDefaultLinkTitle(url: sourceLink1)
+        let defaultLinkTitle = sourceLink1.absoluteString // link text when the page has no title
         let updatedLinkTitle = "\(defaultLinkTitle) bla bla bla golang is super cool"
         let paragraph1 = createMockParagraph()
         let paragraph2 = createMockParagraph()

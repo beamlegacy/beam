@@ -50,10 +50,6 @@ extension BeamNote {
             Button(isPinned ? "Unpin" : "Pin") {
                 state.data.pinnedManager.togglePin(note)
             }
-            Button(note.publicationStatus.isPublic ? "Unpublish" : "Publish") {
-                guard let fileManager = state.data.fileDBManager else { return }
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: !note.publicationStatus.isPublic, fileManager: fileManager) { _ in }
-            }
             if sections.contains(.export) {
                 Divider()
             }
@@ -106,10 +102,6 @@ extension BeamNote {
             let isPinned = state.data.pinnedManager.isPinned(note)
             menu.addItem(withTitle: isPinned ? loc("Unpin") : loc("Pin")) { _ in
                 state.data.pinnedManager.togglePin(note)
-            }
-            menu.addItem(withTitle: note.publicationStatus.isPublic ? loc("Unpublish") : loc("Publish")) { _ in
-                guard let fileManager = state.data.fileDBManager else { return }
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: !note.publicationStatus.isPublic, fileManager: fileManager) { _ in }
             }
 
             if sections.contains(.export) {

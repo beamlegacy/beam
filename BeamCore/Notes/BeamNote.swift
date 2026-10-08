@@ -49,90 +49,11 @@ public struct BeamNoteReference: Codable, Equatable, Hashable {
     }
 }
 
-public enum PublicationStatus: Codable, Equatable {
-    case unpublished
-    case published(URL, URL?, Date, [String])
-
-    public var isPublic: Bool {
-        switch self {
-        case .published:
-            return true
-        default:
-            return false
-        }
-    }
-
-    public var isOnPublicProfile: Bool {
-        switch self {
-        case .published(_, _, _, let publicationGroups):
-            return publicationGroups.contains(where: {$0 == "profile"})
-        default:
-            return false
-        }
-    }
-
-    public var publicationGroups: [String]? {
-        guard self.isPublic else { return nil }
-        switch self {
-        case .published(_, _, _, let publicationGroups):
-            return publicationGroups
-        default:
-            return nil
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        switch self {
-        case .unpublished:
-            try container.encode(PublicationState.unpublished, forKey: .status)
-        case .published(let publicationURL, let publicationUrlShort, let publicationDate, let publicationGroups):
-            try container.encode(PublicationState.published, forKey: .status)
-            try container.encode(publicationURL, forKey: .publicationUrl)
-            try container.encode(publicationDate, forKey: .publicationDate)
-            try container.encode(publicationUrlShort, forKey: .publicationUrlShort)
-            try container.encode(publicationGroups, forKey: .publicationGroups)
-        }
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let status = try container.decode(PublicationState.self, forKey: .status)
-
-        switch status {
-        case .unpublished:
-            self = .unpublished
-        case .published:
-            let publicationDate = try container.decode(Date.self, forKey: .publicationDate)
-            let publicationURL = try container.decode(URL.self, forKey: .publicationUrl)
-            let publicationUrlShort = try container.decodeIfPresent(URL.self, forKey: .publicationUrlShort)
-            let publicationGroups = try container.decodeIfPresent([String].self, forKey: .publicationGroups)
-            self = .published(publicationURL, publicationUrlShort, publicationDate, publicationGroups ?? [])
-        }
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case status
-        case publicationUrl
-        case publicationUrlShort
-        case publicationDate
-        case publicationGroups
-    }
-
-    private enum PublicationState: String, Codable {
-        case unpublished
-        case published
-    }
-}
-
 // Document:
 public class BeamNote: BeamElement {
     @Published public var title: String { didSet { change(.text) } }
     @Published public var type: BeamNoteType = .note { didSet { change(.meta) } }
 
-    @Published public var publicationStatus: PublicationStatus = .unpublished { didSet { change(.meta) } }
-    public var ongoingPublicationOperation = false
 
     /// Search queries whose results were used to populate this note
     @Published public var searchQueries: [String] = [] { didSet { change(.meta) } }
@@ -236,7 +157,6 @@ public class BeamNote: BeamElement {
         case searchQueries
         case visitedSearchResults
         case sources
-        case publicationStatus
         case browsingSessionIds
         case contactId
         case tombstones
@@ -259,9 +179,6 @@ public class BeamNote: BeamElement {
 
         searchQueries = try container.decode([String].self, forKey: .searchQueries)
         visitedSearchResults = try container.decode([VisitedPage].self, forKey: .visitedSearchResults)
-        if container.contains(.publicationStatus) {
-            publicationStatus = try container.decode(PublicationStatus.self, forKey: .publicationStatus)
-        }
 
         try super.init(from: decoder)
         changePropagationEnabled = false
@@ -312,7 +229,6 @@ public class BeamNote: BeamElement {
         try container.encode(type, forKey: .type)
         try container.encode(searchQueries, forKey: .searchQueries)
         try container.encode(visitedSearchResults, forKey: .visitedSearchResults)
-        try container.encode(publicationStatus, forKey: .publicationStatus)
         try container.encode(browsingSessionIds, forKey: .browsingSessionIds)
         try container.encode(contactId, forKey: .contactId)
         try container.encode(noteSettings, forKey: .noteSettings)
@@ -336,7 +252,6 @@ public class BeamNote: BeamElement {
         newNote.updateDate = updateDate
         newNote.type = type
         newNote.version = version
-        newNote.publicationStatus = publicationStatus
         newNote.noteSettings = noteSettings
         newNote.tabGroups = tabGroups
         if !withNewId { // We don't need to copy the tombstones if we create a separate new note
@@ -519,12 +434,6 @@ public class BeamNote: BeamElement {
 
     var sourceObserver: Cancellable?
 
-    public var shouldUpdatePublishedVersion: Bool {
-        guard case .published(_, _, let publicationDate, _) = publicationStatus else { return false }
-        let timeInterval = self.updateDate.timeIntervalSince(publicationDate)
-        return timeInterval > 2
-    }
-
     public static var signPost = SignPost("BeamNote")
     public var sign: SignPostId!
 
@@ -549,8 +458,6 @@ public class BeamNote: BeamElement {
     public func updateWith(_ other: BeamNote) {
         self.title = other.title
         self.type = other.type
-        self.publicationStatus = other.publicationStatus
-        self.ongoingPublicationOperation = other.ongoingPublicationOperation
         self.searchQueries = other.searchQueries
         self.visitedSearchResults = other.visitedSearchResults
         self.browsingSessionIds = other.browsingSessionIds

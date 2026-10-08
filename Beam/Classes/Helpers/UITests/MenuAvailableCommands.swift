@@ -61,8 +61,6 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case separatorInNotesB
     case createNote = "Create Note"
     case createAndOpenNote = "Create and Open Note"
-    case createPublishedNote = "Create Published Note"
-    case createAndOpenPublishedNote = "Create and Open Published Note"
 
     // Links
     case create1000Links = "Create 1,000 Links"
@@ -107,7 +105,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .webTabs
         case .populateDBWithJournal, .insertTextInCurrentNote,
                 .create100Notes, .create100NormalNotes, .create100JournalNotes, .create10Notes, .create10NormalNotes, .create10JournalNotes,
-                .createFakeDailySummary, .createNote, .createAndOpenNote, .createPublishedNote, .createAndOpenPublishedNote,
+                .createFakeDailySummary, .createNote, .createAndOpenNote,
                 .separatorInNotesA, .separatorInNotesB:
             return .notes
         case .create1000Links, .create10000Links, .create50000Links:
@@ -162,8 +160,6 @@ public enum UITestsHiddenMenuAvailableCommands: String, CaseIterable {
 
     case tabGroupCaptured
     case tabGroupCapturedNamed
-    case tabGroupCapturedAndShared
-    case tabGroupCapturedNamedAndShared
     case tabGroupsCaptured
     case tabGroupsCapturedNamed
 

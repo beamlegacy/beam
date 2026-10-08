@@ -17,7 +17,6 @@ struct NoteHeaderView: View {
     static let topPadding: CGFloat = PreferencesManager.editorHeaderTopPadding
     @StateObject var model: NoteHeaderView.ViewModel = NoteHeaderView.ViewModel()
     @ObservedObject var pinnedManager: PinnedNotesManager
-    @EnvironmentObject var data: BeamData
     @EnvironmentObject var windowInfo: BeamWindowInfo
     @Environment(\.undoManager) var undoManager
 
@@ -26,6 +25,7 @@ struct NoteHeaderView: View {
     private var textColor: BeamColor {
         model.isTitleTaken.value ? errorColor : BeamColor.Generic.text
     }
+
 
     private var titleView: some View {
         ZStack(alignment: .leading) {

@@ -76,10 +76,6 @@ class CrossTargetHiddenNotificationsBuilder {
                 createTabGroupsCaptured(count: 1)
             case .tabGroupCapturedNamed:
                 createTabGroupsCaptured(named: true, count: 1)
-            case .tabGroupCapturedAndShared:
-                createTabGroupsCaptured(count: 1, shared: true)
-            case .tabGroupCapturedNamedAndShared:
-                createTabGroupsCaptured(named: true, count: 1, shared: true)
             case .tabGroupsCaptured:
                 createTabGroupsCaptured(count: 4)
             case .tabGroupsCapturedNamed:
@@ -130,7 +126,7 @@ class CrossTargetHiddenNotificationsBuilder {
         ][identifier]
     }
 
-    func createTabGroupsCaptured(named: Bool = false, count: Int = 1, shared: Bool = false) {
+    func createTabGroupsCaptured(named: Bool = false, count: Int = 1) {
         Task { @MainActor in
             let tabGroupingManager = data?.tabGroupingManager
             guard let note = try? BeamNote.fetchOrCreate(BeamUITestsMenuGeneratorSource(), title: "Note With Tab Groups") else { return }
@@ -149,35 +145,6 @@ class CrossTargetHiddenNotificationsBuilder {
                 })
                 data?.tabGroupingDBManager?.save(groups: [groupObject])
                 _ = await tabGroupingManager?.addGroup(group, toNote: note)
-
-                if shared {
-                    guard let capturedGroupObject = data?.tabGroupingDBManager?.fetch(copiesOfGroup: group.id).first,
-                          let state = AppDelegate.main.window?.state else {
-                        fatalError("Group was not copied to insert into note?")
-                    }
-                    let capturedGroup = TabGroupingStoreManager.convertBeamObjectToGroup(capturedGroupObject)
-                    // Calling shareGroup with a timeout of 10s using task groups
-                    _ = try await withThrowingTaskGroup(of: Bool.self) { group -> Bool in
-                        group.addTask {
-                            await withUnsafeContinuation { continuation in
-                                tabGroupingManager?.shareGroup(capturedGroup, state: state, completion: { _ in
-                                    continuation.resume(returning: true)
-                                })
-                            }
-                        }
-                        group.addTask {
-                            try await Task.sleep(nanoseconds: 10_000_000_000) // 10s
-                            throw CancellationError()
-                        }
-
-                        guard let value = try await group.next() else {
-                            return false
-                        }
-
-                        group.cancelAll()
-                        return value
-                    }
-                }
             }
             AppDelegate.main.window?.state.navigateToNote(note)
         }

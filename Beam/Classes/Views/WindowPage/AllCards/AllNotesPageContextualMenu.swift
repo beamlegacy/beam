@@ -9,7 +9,6 @@ import Foundation
 import BeamCore
 
 protocol AllNotesPageContextualMenuDelegate: AnyObject {
-    func contextualMenuShouldPublishNote() -> Bool
     func contextualMenuWillUndoRedoDeleteDocuments()
     func contextualMenuWillDeleteDocuments(ids: [UUID], all: Bool)
 }
@@ -20,13 +19,11 @@ final class AllNotesPageContextualMenu {
     private let onLoadBlock: ((_ isLoading: Bool) -> Void)?
     private let onFinishBlock: ((_ needReload: Bool) -> Void)?
     private let cmdManager = CommandManagerAsync<BeamDocumentCollection>()
-    private var data: BeamData
 
     var undoManager: UndoManager?
     weak var delegate: AllNotesPageContextualMenuDelegate?
 
-    init(data: BeamData, selectedNotes: [BeamNote], onLoad: ((_ isLoading: Bool) -> Void)? = nil, onFinish: ((_ needReload: Bool) -> Void)? = nil) {
-        self.data = data
+    init(selectedNotes: [BeamNote], onLoad: ((_ isLoading: Bool) -> Void)? = nil, onFinish: ((_ needReload: Bool) -> Void)? = nil) {
         self.selectedNotes = selectedNotes
         self.onLoadBlock = onLoad
         self.onFinishBlock = onFinish
@@ -73,37 +70,6 @@ final class AllNotesPageContextualMenu {
                                         keyEquivalent: ""))
             }
 
-            if let first = selectedNotes.first, first.publicationStatus.isPublic {
-                menu.addItem(NSMenuItem(
-                    title: "Unpublish\(countSuffix)",
-                    action: #selector(makePrivate),
-                    keyEquivalent: ""
-                ))
-            } else {
-                menu.addItem(NSMenuItem(
-                    title: "Publish\(countSuffix)",
-                    action: #selector(makePublic),
-                    keyEquivalent: ""
-                ))
-            }
-
-            if selectedNotes.allSatisfy({ !$0.publicationStatus.isOnPublicProfile && $0.publicationStatus.isPublic }) {
-                menu.addItem(NSMenuItem.separator())
-                menu.addItem(NSMenuItem(
-                    title: "Publish\(countSuffix) on Profile",
-                    action: #selector(publishOnProfile),
-                    keyEquivalent: ""
-                ))
-            }
-
-            if selectedNotes.allSatisfy({ $0.publicationStatus.isOnPublicProfile }) {
-                menu.addItem(NSMenuItem.separator())
-                menu.addItem(NSMenuItem(
-                    title: "Unpublish\(countSuffix) from Profile",
-                    action: #selector(unpublishFromProfile),
-                    keyEquivalent: ""
-                ))
-            }
             menu.addItem(NSMenuItem.separator())
         }
 
@@ -238,78 +204,6 @@ final class AllNotesPageContextualMenu {
     @objc
     private func exportNotesToMarkdown() {
         AppDelegate.main.exportNotesToMarkdown(selectedNotes)
-    }
-
-    @objc
-    private func publishOnProfile() {
-        Task { @MainActor in
-            await updateProfileGroup(publish: true)
-            self.onFinishBlock?(true)
-        }
-    }
-
-    @objc
-    private func unpublishFromProfile() {
-        Task { @MainActor in
-            await updateProfileGroup(publish: false)
-            self.onFinishBlock?(true)
-        }
-    }
-
-    private func updateProfileGroup(publish: Bool) async {
-        guard let fileManager = await data.fileDBManager else { return }
-        await withTaskGroup(of: Void.self, body: { group in
-            for note in selectedNotes where note.publicationStatus.isPublic {
-                group.addTask {
-                    await withCheckedContinuation { continuation in
-
-                        var publicationGroups = note.publicationStatus.publicationGroups ?? []
-                        if note.publicationStatus.isOnPublicProfile {
-                            guard let idx = publicationGroups.firstIndex(where: { $0 == "profile" }) else { return }
-                            publicationGroups.remove(at: idx)
-                        } else {
-                            publicationGroups.append("profile")
-                        }
-
-                        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: publicationGroups, fileManager: fileManager) { _ in
-                            continuation.resume()
-                        }
-                    }
-                }
-            }
-        })
-    }
-
-    @objc private func makePublic() {
-        guard delegate?.contextualMenuShouldPublishNote() != false else {
-            return
-        }
-        Task { @MainActor in
-            await makeNotes(isPublic: true)
-            self.onFinishBlock?(true)
-        }
-    }
-
-    @objc private func makePrivate() {
-        Task { @MainActor in
-            await makeNotes(isPublic: false)
-            self.onFinishBlock?(true)
-        }
-    }
-
-    private func makeNotes(isPublic: Bool) async {
-        guard let fileManager = await data.fileDBManager else { return }
-        await withTaskGroup(of: Void.self, body: { group in
-            _ = selectedNotes.map { note in
-                group.addTask {
-                    await withCheckedContinuation { continuation in
-                        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: isPublic, fileManager: fileManager) { _ in
-                            continuation.resume()
-                        }
-                    }
-                }
-            }
-        })
     }
 
     @objc private func deleteNotes() {

@@ -39,12 +39,10 @@ class HiddenCommandHelper {
     }
 
     @discardableResult
-    func createTabGroupsCaptured(named: Bool = false, multiple: Bool = false, shared: Bool = false) -> NoteTestView {
+    func createTabGroupsCaptured(named: Bool = false, multiple: Bool = false) -> NoteTestView {
         var identifier: UITestsHiddenMenuAvailableCommands
         if multiple {
             identifier = named ? .tabGroupsCapturedNamed : .tabGroupsCaptured
-        } else if shared {
-            identifier = named ? .tabGroupCapturedNamedAndShared : .tabGroupCapturedAndShared
         } else {
             identifier = named ? .tabGroupCapturedNamed : .tabGroupCaptured
         }

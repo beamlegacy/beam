@@ -12,15 +12,6 @@ final class AllNotesPageFiltersContextualMenu {
     private var viewModel: AllNotesPageViewModel
     private var state: BeamState
 
-    private var listType: ListType {
-        get {
-            state.allNotesListType
-        }
-        set {
-            state.allNotesListType = newValue
-        }
-    }
-
     init(viewModel: AllNotesPageViewModel, state: BeamState) {
         self.viewModel = viewModel
         self.state = state
@@ -30,41 +21,6 @@ final class AllNotesPageFiltersContextualMenu {
         guard let window = AppDelegate.main.window else { return }
         let menu = NSMenu()
         menu.font = BeamFont.regular(size: 13).nsFont
-
-        let allNotesItem = NSMenuItem(
-            title: "All (\(viewModel.getCurrentNotesList(for: .allNotes).count))",
-            action: #selector(selectAllNotes),
-            keyEquivalent: ""
-        )
-        allNotesItem.isEnabled = true
-        allNotesItem.state = listType == .allNotes ? .on : .off
-        menu.addItem(allNotesItem)
-
-        let privateNotesItem = NSMenuItem(
-            title: "Private (\(viewModel.getCurrentNotesList(for: .privateNotes).count))",
-            action: #selector(selectPrivateNotes),
-            keyEquivalent: ""
-        )
-        privateNotesItem.state = listType == .privateNotes ? .on : .off
-        menu.addItem(privateNotesItem)
-
-        let publishedNotesItem = NSMenuItem(
-            title: "Published (\(viewModel.getCurrentNotesList(for: .publicNotes).count))",
-            action: #selector(selectPublishedNotes),
-            keyEquivalent: ""
-        )
-        publishedNotesItem.state = listType == .publicNotes ? .on : .off
-        menu.addItem(publishedNotesItem)
-
-        let onProfileNotesItem = NSMenuItem(
-            title: "On Profile (\(viewModel.getCurrentNotesList(for: .onProfileNotes).count))",
-            action: #selector(selectOnProfileNotes),
-            keyEquivalent: ""
-        )
-        onProfileNotesItem.state = listType == .onProfileNotes ? .on : .off
-        menu.addItem(onProfileNotesItem)
-
-        menu.addItem(NSMenuItem.separator())
 
         let showDailyNotesItem = NSMenuItem(
             title: state.showDailyNotes ? loc("Hide Daily Notes") : loc("Show Daily Notes"),
@@ -99,26 +55,6 @@ final class AllNotesPageFiltersContextualMenu {
     }
 
     // MARK: - Action
-
-    @objc
-    private func selectAllNotes() {
-        listType = .allNotes
-    }
-
-    @objc
-    private func selectPrivateNotes() {
-        listType = .privateNotes
-    }
-
-    @objc
-    private func selectPublishedNotes() {
-        listType = .publicNotes
-    }
-
-    @objc
-    private func selectOnProfileNotes() {
-        listType = .onProfileNotes
-    }
 
     @objc
     private func showDailyNotes() {

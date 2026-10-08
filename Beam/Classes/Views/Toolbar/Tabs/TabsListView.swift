@@ -36,9 +36,7 @@ struct TabsListItem: Identifiable, CustomStringConvertible, Equatable {
     func displayedText(allowingStatus: Bool = true) -> String {
         if isAGroupCapsule, let group = group {
             var title = group.title ?? ""
-            if case .sharing = group.status, allowingStatus {
-                title = loc("Sharing...")
-            } else if group.collapsed, let count = count, count > 0 {
+            if group.collapsed, let count = count, count > 0 {
                 if title.isEmpty {
                     title = "\(count)"
                 } else {
@@ -109,10 +107,6 @@ struct TabsListView: View {
 
     private var isDraggingATabGroup: Bool {
         dragModel.draggingOverIndex != nil && dragModel.draggedItem?.isAGroupCapsule == true
-    }
-
-    private var loadingTabGroup: TabGroup? {
-        contextMenuManager.tabGroupIsSharing
     }
 
     private var selectedIndex: Int {
@@ -248,7 +242,6 @@ struct TabsListView: View {
                     TabClusteringGroupCapsuleView(displayedText: item.displayedText,
                                                   groupTitle: group.title, color: color,
                                                   collapsed: group.collapsed,
-                                                  loading: loadingTabGroup == group,
                                                   itemsCount: item.count ?? group.pageIds.count,
                                                   onTap: { (isRightMouse, event, frame) in
                         if isRightMouse {

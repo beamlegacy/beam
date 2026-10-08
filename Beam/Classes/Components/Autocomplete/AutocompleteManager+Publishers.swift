@@ -407,17 +407,10 @@ extension AutocompleteManager {
             }))
 
             if query.isEmpty {
-                results.append(
-                    AutocompleteResult(text: loc("Share Tab Group"), source: .action,
-                                       customIcon: "social-share", score: 0, displayTopDivider: true,
-                                       handler: { beamState, result in
-                                           beamState.shareTabGroup(group, fromOmniboxResult: result)
-                                       })
-                )
                 let isForgettable = self.noteIdsContaingTabGroup(group).isEmpty
                 results.append(
                     AutocompleteResult(text: isForgettable ? loc("Forget Tab Group") : loc("Delete Tab Group"), source: .action,
-                                       customIcon: "editor-delete", iconColor: BeamColor.Munsell.nsColor, score: 0,
+                                       customIcon: "editor-delete", iconColor: BeamColor.Munsell.nsColor, score: 0, displayTopDivider: true,
                                        handler: { beamState, result in
                                            Task { @MainActor in
                                                if await beamState.data.tabGroupingManager.deleteTabGroup(group) {

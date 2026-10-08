@@ -50,16 +50,7 @@ struct SidebarFooterView: View {
     }
 
     private var contextMenuItems: [ContextMenuItem] {
-        var menu = [ContextMenuItem(title: "Account Settings", action: openAccountPreferences)]
-        if let url = BeamNoteSharingUtils.getProfileLink() {
-            menu.append(ContextMenuItem(title: "Public Profile", action: { showPublicProfile(at: url) }))
-        }
-        return menu
-    }
-
-    private func showPublicProfile(at url: URL) {
-        state.showSidebar = false
-        state.createTab(withURLRequest: URLRequest(url: url))
+        [ContextMenuItem(title: "Account Settings", action: openAccountPreferences)]
     }
 
     private func openAccountPreferences() {

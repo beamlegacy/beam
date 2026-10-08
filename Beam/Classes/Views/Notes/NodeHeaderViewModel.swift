@@ -10,11 +10,6 @@ import BeamCore
 import Combine
 
 extension NoteHeaderView {
-    enum CopyLinkSource {
-        case fromLinkIcon
-        case fromPublishButton
-    }
-
     final class ViewModel: ObservableObject, BeamDocumentSource {
         static var sourceId: String { "NoteHeaderView_\(Self.self)" }
 
@@ -33,10 +28,6 @@ extension NoteHeaderView {
         @Published var isTitleTaken: (value: Bool, animated: Bool) = (false, true)
         @Published var wiggleValue: CGFloat = .zero
 
-        @Published var justCopiedLinkFrom: NoteHeaderView.CopyLinkSource?
-
-        private var publishingDispatchItem: DispatchWorkItem?
-        private var copyLinkDispatchItem: DispatchWorkItem?
         private var noteObservers = Set<AnyCancellable>()
 
         @Published private(set) var tabGroupObjects: [TabGroupBeamObject]

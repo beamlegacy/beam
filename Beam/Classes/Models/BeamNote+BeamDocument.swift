@@ -48,7 +48,7 @@ public extension BeamNote {
                             data: Data(),
                             documentType: DocumentType(from: type),
                             version: version,
-                            isPublic: publicationStatus.isPublic,
+                            isPublic: false, // notes can't be published anymore, column kept for existing databases
                             journalDate: JournalDateConverter.toInt(from: type.journalDateString ?? "0"),
                             tabGroupId: type.tabGroupId,
                             isEmpty: isEntireNoteEmpty()
