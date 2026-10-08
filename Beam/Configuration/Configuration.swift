@@ -11,8 +11,6 @@ struct Configuration {
     // Build configuration
     static private(set) var bundleIdentifier: String = Configuration.value(for: "CFBundleIdentifier")
     static private(set) var env = ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument) ? .uiTest : Configuration.Env(rawValue: EnvironmentVariables.env) ?? .debug
-    static private(set) var testAccountEmail = EnvironmentVariables.Account.testEmail
-    static private(set) var testAccountPassword = EnvironmentVariables.Account.testPassword
     static private(set) var autoUpdate = EnvironmentVariables.autoUpdate
     /// Vinyl network recording is only used in unit tests (`ENV = test`).
     static var networkStubs: Bool { env == .test }
@@ -38,9 +36,6 @@ struct Configuration {
     /// When false, code paths that require general network access short-circuit (tests may toggle).
     static var networkEnabled = true
 
-    /// Max number of beam objects for checksums query (tests only)
-    static private(set) var checksumsChunkSize = 10_000
-
     static let topDomainsVersion = "0.1"
 
     static var topDomains: [String] = {
@@ -50,10 +45,6 @@ struct Configuration {
         }
         return []
     }()
-
-    /// Publish/embed HTTP client uses this base URL; remote Beam public API is not configured.
-    static let publicAPIpublishServer = "about:blank"
-    static let publicAPIembed = "about:blank"
 
     static var stateRestorationEnabledDefault = false
     static private var stateRestorationEnabledKey = "stateRestorationEnabled"
@@ -83,13 +74,6 @@ struct Configuration {
         return value
     }
 
-    static func setChecksumsChunkSize(_ size: Int) {
-        guard Configuration.env == .test else {
-            fatalError("This parameter can only be set in test mode")
-        }
-
-        Self.checksumsChunkSize = size
-    }
 }
 
 extension Configuration {

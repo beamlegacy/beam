@@ -16,7 +16,6 @@ class OmniboxAnalyticsTests: XCTestCase {
 
     override func setUpWithError() throws {
         AppDelegate.main.deleteAllLocalData()
-        BeamData.shared.objectManager.disableSendingObjects = true
         state = BeamState()
         state.data = BeamData()
         analyticsBackend = InMemoryAnalyticsBackend()

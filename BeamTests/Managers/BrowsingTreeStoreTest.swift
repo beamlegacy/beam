@@ -24,7 +24,6 @@ class BrowsingTreeStoreTest: XCTestCase {
         try BeamData.shared.browsingTreeDBManager?.clearBrowsingTrees()
     }
 
-
     func testSaveFetchLocal() throws {
         let store = try XCTUnwrap(BrowsingTreeStoreManager())
         let tree = BrowsingTree(nil)
@@ -35,7 +34,6 @@ class BrowsingTreeStoreTest: XCTestCase {
         let flattened = try XCTUnwrap(fetchedRecord.flattenedData)
         XCTAssertEqual(tree.flattened, flattened)
     }
-
 
     func testSoftDelete() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")

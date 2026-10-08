@@ -121,7 +121,7 @@ final class CreditCardAutofillManager {
             try creditCardsDB.deleteAll()
             changeSubject.send()
         } catch CreditCardsDBError.cantDelete(errorMsg: let errorMsg) {
-            Logger.shared.logError("Error while deleting all passwords: \(errorMsg)", category: .creditCardsDB)
+            Logger.shared.logError("Error while deleting all credit cards: \(errorMsg)", category: .creditCardsDB)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .creditCardsDB)
         }

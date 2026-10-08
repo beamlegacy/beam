@@ -12,12 +12,10 @@ enum AllNotesViewLocators {
     enum Buttons: String, CaseIterable, UIElement {
         case newNoteButton = "tool new"
         case journalButton = "journal"
-        case urlIcon = "URL-row"
     }
     
     enum SortButtons: String, CaseIterable, UIElement {
         case title = "Title"
-        case url = "URL"
         case words = "Words"
         case links = "Links"
         case updated = "Updated"
@@ -25,10 +23,6 @@ enum AllNotesViewLocators {
     
     enum TextFields: String, CaseIterable, UIElement {
         case newPrivateNote = "New Private Note"
-        case newPublishedNote = "New Published Note"
-        case newFirstPublishedNote = "You haven’t published any note yet. Start today!"
-        case newPublishedProfileNote = "New Published on Profile Note"
-        case newFirstPublishedProfileNote = "You haven’t published any note to your profile yet. Start today!"
     }
     
     enum ColumnCells: String, CaseIterable, UIElement {
@@ -53,26 +47,16 @@ enum AllNotesViewLocators {
         case exportSingleNote = "exportNotesToBeamNote"
         case pinNote = "pin"
         case unpinNote = "unpin"
-        case publish = "makePublic"
-        case unpublish = "makePrivate"
-        case publishOnProfile = "publishOnProfile"
-        case unpublishFromProfile = "unpublishFromProfile"
     }
     
     enum ViewMenuItems: String, CaseIterable, UIElement {
         case allNotes = "selectAllNotes"
         case privateNotes = "selectPrivateNotes"
-        case publishedNotes = "selectPublishedNotes"
-        case profileNotes = "selectOnProfileNotes"
         case dailyNotes = "showDailyNotes"
     }
     
     enum Others: String, CaseIterable, UIElement {
         case referenceSection = "ReferencesSection"
         case disclosureTriangle = "disclosure triangle"
-    }
-    
-    enum StaticTexts: String, CaseIterable, UIElement {
-        case publishInstruction = "signUpToPublishBtn"
     }
 }

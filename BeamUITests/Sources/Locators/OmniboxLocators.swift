@@ -19,7 +19,6 @@ enum OmniboxLocators {
         case collectTab = "Capture Page"
         case createNote = "Create Note..."
         case createNotePrefix = "Create Note:"
-        case shareTabGroup = "Share Tab Group"
         case forgetTabGroup = "Forget Tab Group"
         case deleteTabGroup = "Delete Tab Group"
     }

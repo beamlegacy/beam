@@ -21,7 +21,6 @@ class BeamNote_BeamDocumentTests: QuickSpec, BeamDocumentSource {
         let prefix = "My Note"
 
         beforeEach {
-            BeamTestsHelper.logout()
             try! AppData.shared.clearAllAccountsAndSetupDefaultAccount()
         }
 

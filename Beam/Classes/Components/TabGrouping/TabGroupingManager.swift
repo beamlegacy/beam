@@ -103,20 +103,6 @@ extension TabGroupingManager {
         return newGroup
     }
 
-    /// creates a copy of the tab group beam object as is, and save it into DB.
-    func copyForSharing(_ group: TabGroup) async -> TabGroup {
-        var title: String = group.title ?? ""
-        if title.isEmpty {
-            title = TabGroupingStoreManager.suggestedDefaultTitle(for: group, withTabs: allOpenTabs(inGroup: group), truncated: false)
-        }
-        if let copy = storeManager?.makeLockedCopy(group, title: title) {
-            return copy
-        } else if group.title?.isEmpty != false, let existingCopy = storeManager?.fetch(copiesOfGroup: group.id).first {
-            return TabGroup(id: existingCopy.id, pageIds: group.pageIds, title: title, color: group.color, isLocked: true, parentGroup: group.id)
-        }
-        return await copyForNoteInsertion(group, newTitle: title)
-    }
-
     func renameGroup(_ group: TabGroup, title: String) {
         group.changeTitle(title)
         Logger.shared.logInfo("Tab Group renamed to '\(title)' (\(group.id))", category: .tabGrouping)

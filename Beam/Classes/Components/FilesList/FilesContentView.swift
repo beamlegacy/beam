@@ -9,7 +9,7 @@ struct FilesContentView: View {
 
     var body: some View {
         FilesList(selectedFile: $selectedFile,
-                  files: (try? fileManager.allRecords()) ?? [],
+                  files: (try? fileManager.allRecords(nil)) ?? [],
                   fileManager: fileManager)
     }
 }

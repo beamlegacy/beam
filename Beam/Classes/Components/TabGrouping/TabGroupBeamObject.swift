@@ -9,8 +9,8 @@ import Foundation
 import BeamCore
 import GRDB
 
-/// Database representation of a Tab Group (aka `Beam.TabGroup`), conforming to BeamObjectProtocol.
-struct TabGroupBeamObject: Identifiable {
+/// Database representation of a Tab Group (aka `Beam.TabGroup`).
+struct TabGroupBeamObject: Codable, Hashable, Identifiable {
 
     var id: UUID = UUID()
     var title: String?
@@ -42,11 +42,7 @@ struct TabGroupBeamObject: Identifiable {
 }
 
 // MARK: - BeamObject Conformance
-extension TabGroupBeamObject: BeamObjectProtocol {
-    static var beamObjectType: BeamObjectObjectType {
-        BeamObjectObjectType.tabGroup
-    }
-
+extension TabGroupBeamObject {
     static func == (lhs: TabGroupBeamObject, rhs: TabGroupBeamObject) -> Bool {
         lhs.id == rhs.id && lhs.title == rhs.title && lhs.color == rhs.color && lhs.pages == rhs.pages
     }
@@ -56,11 +52,6 @@ extension TabGroupBeamObject: BeamObjectProtocol {
         hasher.combine(title)
         hasher.combine(color)
         hasher.combine(pages)
-    }
-
-    var beamObjectId: UUID {
-        get { id }
-        set { id = newValue }
     }
 
     enum CodingKeys: String, CodingKey {

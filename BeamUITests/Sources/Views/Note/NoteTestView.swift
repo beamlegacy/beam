@@ -104,57 +104,10 @@ class NoteTestView: TextEditorContextTestView {
         return OmniBoxTestView()
     }
     
-    @discardableResult
-    func publishNote() -> NoteTestView {
-        waitForNoteViewToLoad()
-        button(NoteViewLocators.Buttons.publishNoteButton.accessibilityIdentifier).clickOnExistence()
-        return self
-    }
-    
-    @discardableResult
-    func unpublishNote() -> NoteTestView {
-        waitForNoteViewToLoad()
-        clickPublishedMenuDisclosureTriangle()
-        app.staticTexts[NoteViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier].clickOnExistence()
-        app.windows.sheets["alert"].buttons[NoteViewLocators.Buttons.unpublishNoteButton.accessibilityIdentifier].clickOnHittable()
-        return self
-    }
-    
-    @discardableResult
-    func clickPublishedMenuDisclosureTriangle() -> NoteTestView {
-        image(NoteViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
-        return self
-    }
-    
-    @discardableResult
-    func clickAddToProfileToggle() -> NoteTestView {
-        app.staticTexts[NoteViewLocators.StaticTexts.addToProfile.accessibilityIdentifier].clickOnExistence()
-        return self
-    }
-    
-    @discardableResult
-    func sharePublishedNoteMenuDisplay() -> NoteTestView {
-        app.staticTexts[NoteViewLocators.StaticTexts.sharePublishedNote.accessibilityIdentifier].hoverInTheMiddle()
-        return self
-    }
-    
-    @discardableResult
-    func sharePublishedNoteAction(_ item: NoteViewLocators.SharePublishedNote) -> NoteTestView {
-        // hover first item to not dismiss the menu
-        app.staticTexts[NoteViewLocators.SharePublishedNote.shareCopyURL.accessibilityIdentifier].hoverInTheMiddle()
-        app.staticTexts[item.accessibilityIdentifier].clickOnExistence()
-        return self
-    }
-    
     func getNoteElementsQueryForVisiblePart() -> XCUIElementQuery {
         return app.windows.textViews.matching(identifier: NoteViewLocators.TextFields.textNode.accessibilityIdentifier)
     }
 
-    func addNoteToProfile() -> NoteTestView {
-        image(NoteViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
-        return self
-    }
-    
     func getNoteTextsForVisiblePart() -> [String] {
         let notesElements = getNoteNodesForVisiblePart()
         var names = [String]()
@@ -441,15 +394,6 @@ class NoteTestView: TextEditorContextTestView {
     func getCheckboxAtTextNote(_ noteNumber: Int) -> XCUIElement {
         let index = noteNumber - 1
         return getTextNodeByIndex(nodeIndex: index).buttons[NoteViewLocators.Buttons.checkbox.accessibilityIdentifier]
-    }
-    
-    func getAddToProfileToggleElement() -> XCUIElement {
-        return app.otherElements[NoteViewLocators.OtherElements.addToProfileToggle.accessibilityIdentifier].firstMatch
-    }
-    
-    func getStagingProfileLinkElement() -> XCUIElement {
-        let staginEnvPredicate = NSPredicate(format: "value BEGINSWITH '\(BaseTest().stagingEnvironmentServerAddress)'")
-        return app.staticTexts.matching(staginEnvPredicate).firstMatch
     }
     
     @discardableResult

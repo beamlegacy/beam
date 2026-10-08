@@ -48,7 +48,7 @@ extension FlatennedBrowsingTree: @retroactive Hashable {
     }
 }
 
-struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
+struct BrowsingTreeRecord: Codable, Hashable {
 
     enum ProcessingStatus: Int, Codable, DatabaseValueConvertible {
         case toDo = 0
@@ -56,7 +56,6 @@ struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
         case done = 2
     }
 
-    static var beamObjectType = BeamObjectObjectType.browsingTree
 
     public enum CodingKeys: String, CodingKey {
         case rootId, rootCreatedAt, appSessionId, data, flattenedData, createdAt, updatedAt, deletedAt
@@ -72,10 +71,6 @@ struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
     var updatedAt: Date = BeamDate.now
     var deletedAt: Date?
     var processingStatus: ProcessingStatus = .done
-    var beamObjectId: UUID {
-        get { rootId }
-        set { rootId = newValue }
-    }
     var flattened: BrowsingTreeRecord {
         BrowsingTreeRecord(
             rootId: rootId,
@@ -157,7 +152,6 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
         }
         return currentDb
     }
-    public var treeProcessingCompleted = false
     public let group = DispatchGroup()
     let groupTimeOut: Double = 2
     let treeProcessor = BrowsingTreeProcessor()

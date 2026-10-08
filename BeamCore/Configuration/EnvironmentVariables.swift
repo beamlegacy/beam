@@ -10,32 +10,13 @@ public struct EnvironmentVariables {
             static public private(set) var callbackURL = "$(GOOGLE_REDIRECT_URL)"
          }
 
-        public struct Github {
-            static public private(set) var consumerKey = "$(GITHUB_CONSUMER_KEY)"
-            static public private(set) var consumerSecret = "$(GITHUB_CONSUMER_SECRET)"
-            static public private(set) var callbackURL = "$(GITHUB_REDIRECT_URL)"
-        }
-
         public struct Facebook {
             static public private(set) var appID = "$(FACEBOOK_APP_ID)"
         }
     }
 
-    public struct GoogleCloudPlatform {
-        public struct Authentication {
-            static public private(set) var privateKey = "$(GCP_SERVICE_ACCOUNT_PRIVATE_KEY)"
-            static public private(set) var clientEmail = "$(GCP_SERVICE_ACCOUNT_CLIENT_EMAIL)"
-            static public private(set) var tokenURI = "$(GCP_SERVICE_ACCOUNT_TOKEN_URI)"
-        }
-    }
-
     public struct Clustering {
         static public private(set) var tabColoring = NSString("$(TAB_COLORING)").boolValue
-    }
-
-    public struct Account {
-        static public private(set) var testPassword = "$(TEST_ACCOUNT_PASSWORD)"
-        static public private(set) var testEmail = "$(TEST_ACCOUNT_EMAIL)"
     }
 
     public struct MockHttpServer {

@@ -22,7 +22,6 @@ struct Email: Codable, Hashable {
 class ContactsManager {
     private var contactsDB: ContactsDB? { BeamData.shared.contactsDB }
 
-    init() {}
 
     // MARK: Fetch
     func fetch(for id: UUID) -> ContactRecord? {
@@ -93,7 +92,9 @@ class ContactsManager {
 
     // MARK: Save & Update
     func save(email: String, to noteId: UUID) -> ContactRecord? {
-        guard email.mayBeEmail else { return nil }
+        guard email.mayBeEmail else {
+            return nil
+        }
         do {
             var contactRecord: ContactRecord?
             if let previousContactRecord = try? contactsDB?.contact(for: noteId) {
@@ -115,7 +116,7 @@ class ContactsManager {
     // MARK: Delete
     func markDeleted(noteId: UUID) {
         do {
-            try contactsDB?.markDeleted(noteId: noteId)
+            _ = try contactsDB?.markDeleted(noteId: noteId)
         } catch ContactsDBError.cantDeleteContact(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting contacts for \(noteId): \(errorMsg)", category: .contactsDB)
         } catch {
@@ -133,3 +134,4 @@ class ContactsManager {
         }
     }
 }
+

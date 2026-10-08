@@ -19,7 +19,7 @@ struct OnboardingView: View {
     var currentStep: OnboardingStep {
         displayedStep ?? model.currentStep
     }
-    @State private var stepOffset: [OnboardingStep.StepType: CGFloat] = [.welcome: -24]
+    @State private var stepOffset: [OnboardingStep.StepType: CGFloat] = [:]
     @State private var stepOpacity: [OnboardingStep.StepType: CGFloat] = [:]
     private let estimatedSafeAreaInsets = NSEdgeInsets(top: 38, left: 0, bottom: 0, right: 0) // invisible toolbar
     private let contentWidth: Double = 512
@@ -35,11 +35,9 @@ struct OnboardingView: View {
                     switch currentStep.type {
                     case .imports:
                         OnboardingImportsView(actions: $model.actions, finish: finishCallback)
-                    case .welcome:
-                        OnboardingWelcomeView(welcoming: !model.onlyConnect, viewIsLoading: $model.viewIsLoading, finish: finishCallback)
                     case .setupCalendar:
                         OnboardingCalendarView(actions: $model.actions, finish: finishCallback)
-                    default:
+                    case .minimalWelcome:
                         OnboardingMinimalWelcomeView(finish: finishCallback)
                     }
                 }
@@ -90,9 +88,6 @@ struct OnboardingView: View {
             }
             withAnimation(BeamAnimation.easeInOut(duration: 0.3)) {
                 stepOffset[newType] = 0
-                if newType == .welcome {
-                    stepOffset[newType] = -24
-                }
             }
         }
     }
@@ -105,35 +100,8 @@ struct OnboardingView: View {
         return .custom(style)
     }
 
-    private struct TextLink: View {
-        var text: String
-        var action: () -> Void
-        @State private var isHovering = false
-        var body: some View {
-            Text(text)
-                .foregroundColor((isHovering ? BeamColor.Corduroy : BeamColor.AlphaGray).swiftUI)
-                .onTapGesture(perform: action)
-                .onHover { isHovering = $0 }
-        }
-    }
-
     private var bottomBar: some View {
         ZStack(alignment: .bottom) {
-            if !model.viewIsLoading && [.welcome].contains(currentStep.type) {
-                HStack(spacing: 0) {
-                    TextLink(text: "Terms and Conditions") {
-                        openExternalURL(Configuration.beamTermsConditionsLink, title: "Terms and Conditions")
-                    }
-                    Text(" • ")
-                    TextLink(text: "Privacy Policy") {
-                        openExternalURL(Configuration.beamPrivacyPolicyLink, title: "Privacy Policy")
-                    }
-                }
-                .font(BeamFont.medium(size: 11).swiftUI)
-                .foregroundColor(BeamColor.AlphaGray.swiftUI)
-                .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.15)))
-                .padding(.bottom, 30)
-            }
             HStack(spacing: 0) {
                 if model.stepsHistory.count > 0 {
                     BackButton()
@@ -180,11 +148,6 @@ struct OnboardingView: View {
                 model.advanceToNextStep()
             }
         })
-    }
-
-    private func openExternalURL(_ urlString: String, title: String) {
-        guard let url = URL(string: urlString) else { return }
-        AppDelegate.main.openMinimalistWebWindow(url: url, title: title)
     }
 
     struct TitleText: View {
@@ -307,7 +270,7 @@ struct OnboardingView_Previews: PreviewProvider {
 
     static var onboardingManager: OnboardingManager {
         let mngr = OnboardingManager()
-        mngr.advanceToNextStep(.init(type: .welcome))
+        mngr.advanceToNextStep(.init(type: .minimalWelcome))
         return mngr
     }
     static var previews: some View {

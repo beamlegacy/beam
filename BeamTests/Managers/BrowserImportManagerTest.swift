@@ -79,7 +79,7 @@ class BrowserImportManagerTest: XCTestCase {
         expect(manager.isImporting).toEventually(beFalse())
         //expects one tree to be saved
         XCTAssertEqual(BeamData.shared.browsingTreeStoreManager.countBrowsingTrees, 1)
-        let treeRecord = try BeamData.shared.browsingTreeStoreManager.getAllBrowsingTrees()[0]
+        let treeRecord = try BeamData.shared.browsingTreeStoreManager.getAllBrowsingTrees(updatedSince: nil)[0]
         let flattenedData = try XCTUnwrap(treeRecord.flattenedData)
         //with right tree origin
         let tree = try XCTUnwrap(BrowsingTree(flattenedTree: flattenedData))
@@ -124,7 +124,7 @@ class BrowserImportManagerTest: XCTestCase {
         batchImporter.finalize {}
         //expects one tree to be saved
         XCTAssertEqual(BeamData.shared.browsingTreeStoreManager.countBrowsingTrees, 1)
-        let treeRecord = try BeamData.shared.browsingTreeStoreManager.getAllBrowsingTrees()[0]
+        let treeRecord = try BeamData.shared.browsingTreeStoreManager.getAllBrowsingTrees(updatedSince: nil)[0]
         let flattenedData = try XCTUnwrap(treeRecord.flattenedData)
         //with right tree origin
         let tree = try XCTUnwrap(BrowsingTree(flattenedTree: flattenedData))

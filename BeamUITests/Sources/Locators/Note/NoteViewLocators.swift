@@ -36,8 +36,6 @@ enum NoteViewLocators {
         case linkRefNoteExpandButton = "refNote_arrow"
         case linkAllButton = "link-all-references-button"
         case deleteNoteButton = "editor-delete"
-        case publishNoteButton = "NoteHeaderPublishButton"
-        case unpublishNoteButton = "Unpublish"
         case linkNamesButton = "cardTitleLayer"
         case sourceButton = "source"
         case expandButton = "toggle"
@@ -62,27 +60,13 @@ enum NoteViewLocators {
     }
     
     enum StaticTexts: String, CaseIterable, UIElement {
-        case privateLabel = "Private"
-        case publishedLabel = "Published"
         case linkCopiedLabel = "Link Copied"
-        case publishLabel = "ContextMenuItem-publish"
-        case unpublishLabel = "ContextMenuItem-unpublish"
         case copyLinkLabel = "ContextMenuItem-copy link"
         case blockRefLock = "ContextMenuItem-lock"
         case blockRefUnlock = "ContextMenuItem-unlock"
         case blockRefRemove = "ContextMenuItem-remove"
         case blockRefOrigin = "ContextMenuItem-view origin"
-        case addToProfile = "ContextMenuItem-add to profile"
-        case sharePublishedNote = "ContextMenuItem-share"
         case backgroundTabOpened = "Opened in background"
-    }
-    
-    enum SharePublishedNote: String, CaseIterable, UIElement {
-        case shareTwitter = "ContextMenuItem-twitter"
-        case shareFacebook = "ContextMenuItem-facebook"
-        case shareLinkedin = "ContextMenuItem-linkedin"
-        case shareReddit = "ContextMenuItem-reddit"
-        case shareCopyURL = "ContextMenuItem-copy url"
     }
     
     enum TextViews: String, CaseIterable, UIElement {
@@ -94,7 +78,6 @@ enum NoteViewLocators {
     enum OtherElements: String, CaseIterable, UIElement {
         case breadCrumb = "BreadCrumb"
         case beginningPartOfContextItem = "ContextMenuItem-"
-        case addToProfileToggle = "ContextMenuItem-add to profile-toggle"
     }
     
     enum Splitters: String, CaseIterable, UIElement {

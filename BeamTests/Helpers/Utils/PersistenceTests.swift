@@ -1,23 +1,24 @@
 import Foundation
 import XCTest
-import Fakery
 import Quick
 import Nimble
-import Combine
 
 @testable import Beam
 class PersistenceTests: QuickSpec {
     override func spec() {
-        let email = "foobar"
-        it("saves email") {
-            Persistence.Authentication.email = email
-            expect(Persistence.Authentication.email).to(equal(email))
+        it("saves a standard value") {
+            let previous = Persistence.Authentication.hasAppleCalendarConnection
+            Persistence.Authentication.hasAppleCalendarConnection = true
+            expect(Persistence.Authentication.hasAppleCalendarConnection) == true
+            Persistence.Authentication.hasAppleCalendarConnection = previous
         }
 
-        let text = String.randomTitle()
-        it("saves privateKey") {
-            Persistence.Encryption.privateKey = text
-            expect(Persistence.Encryption.privateKey) == text
+        it("saves a keychain value") {
+            let previous = Persistence.Authentication.googleCalendarTokens
+            let tokens = ["token": String.randomTitle()]
+            Persistence.Authentication.googleCalendarTokens = tokens
+            expect(Persistence.Authentication.googleCalendarTokens) == tokens
+            Persistence.Authentication.googleCalendarTokens = previous
         }
     }
 }

@@ -62,7 +62,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     var scope = Set<AnyCancellable>()
     var checkForUpdateCancellable: AnyCancellable?
     let sessionId = UUID()
-    var browsingTreeSender: BrowsingTreeSender?
     var noteFrecencyScorer: FrecencyScorer
     var versionChecker: VersionChecker
     lazy var onboardingManager = OnboardingManager(analyticsCollector: analyticsCollector)
@@ -140,17 +139,14 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     static var idToTitle: [UUID: String] = [:]
     static var titleToId: [String: UUID] = [:]
 
-    let objectManager = BeamObjectManager()
     let contactsManager: ContactsManager
     let passwordManager: PasswordManager
-    let privateKeySignatureManager: PrivateKeySignatureManager
     let browsingTreeStoreManager: BrowsingTreeStoreManager
     let linkDB: BeamLinkDB
 
     override init() {
         self.contactsManager = ContactsManager()
         self.passwordManager = PasswordManager()
-        self.privateKeySignatureManager = PrivateKeySignatureManager()
         self.browsingTreeStoreManager = BrowsingTreeStoreManager()
         self.linkDB = BeamLinkDB()
 
@@ -162,12 +158,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         sessionExporter = ClusteringSessionExporter()
         tabGroupingManager = TabGroupingManager()
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId, tabGroupingManager: tabGroupingManager, objectManager: objectManager)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId, tabGroupingManager: tabGroupingManager)
         noteAutoSaveService = NoteAutoSaveService()
         cookieManager = CookiesManager()
         versionChecker = Self.createVersionChecker()
 
-        browsingTreeSender = nil
         super.init()
         BeamNote.idForNoteNamed = { [weak self] title in
             guard let collection = self?.currentDocumentCollection,

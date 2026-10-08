@@ -13,7 +13,7 @@ import Swime
 import Combine
 
 // The new version of the BeamFileRecord (where uid is an UUID)
-struct BeamFileRecord: Equatable, Hashable {
+struct BeamFileRecord: Codable, Equatable, Hashable {
     var name: String
     var uid: UUID
     var data: Data
@@ -67,17 +67,7 @@ extension BeamFileRecord: MutablePersistableRecord {
     }
 }
 
-extension BeamFileRecord: BeamObjectProtocol {
-    static var beamObjectType = BeamObjectObjectType.file
-
-    var beamObjectId: UUID {
-        get {
-            uid
-        }
-        set {
-            uid = newValue
-        }
-    }
+extension BeamFileRecord {
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -180,7 +170,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
 
     var grdbStore: GRDBStore
 
-    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.owner = holder
         self.grdbStore = store
         try super.init(store: store)
@@ -246,7 +236,6 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
     func insert(name: String, data: Data, type: String? = nil) throws -> UUID {
         let uid = Self.uuidFor(data: data)
         let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
-        let file = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType, size: data.count)
         try write { db in
             var f = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType, size: data.count)
             try f.insert(db)
@@ -264,6 +253,7 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                     Self.fileSaved.send(fileToInsert)
                 }
             }
+
         } catch let error {
             Logger.shared.logError("Error while inserting files \(files): \(error)", category: .fileDB)
             throw error
@@ -368,7 +358,6 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
                         file.deletedAt = BeamDate.now
                         file.updatedAt = BeamDate.now
                         try file.save(db)
-
                     } catch {
                         Logger.shared.logError("Unable to delete unreferenced file \(fileId)", category: .fileDB)
                     }
@@ -410,19 +399,11 @@ class BeamFileDBManager: GRDBHandler, BeamFileStorage, BeamManager, LegacyAutoIm
         }
     }
 
-    func refresh(_ file: BeamFileRecord) async throws {
-        do {
-            // Remote sync removed — no-op
-        } catch {
-            Logger.shared.logError("Unable to refresh file \(file.id): \(error)", category: .fileDB)
-        }
-    }
 }
 
 enum BeamFileDBManagerError: Error, Equatable {
     case localFileNotFound
 }
-
 
 extension BeamFileRecord: Identifiable {
     public var id: UUID { uid }

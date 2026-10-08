@@ -70,7 +70,7 @@ class ClusteringManager: ObservableObject {
     public var continueToPage: PageID?
     private var resultProcessQueue = DispatchQueue(label: "ClusteringManagerResultProcessing", target: .userInitiated)
     // swiftlint:disable:next function_body_length
-    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, tabGroupingManager: TabGroupingManager?, objectManager: BeamObjectManager, forcedClusteringType: ClusteringType? = nil) {
+    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, tabGroupingManager: TabGroupingManager?, forcedClusteringType: ClusteringType? = nil) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text
@@ -579,11 +579,11 @@ extension ClusteringManager {
 
     /// - Parameters:
     ///   - sessionExporter: TBD
-    ///   - to: local URL to save the file
+    ///   - to: local folder to save the file
     ///   - allPages: opened tab pages.
     ///   - initialBuiltGroups: The initial grouping when opening the feedback window. Before any change.
     ///   - correctedPages: The changes suggested by the user in the feedback window.
-    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL?, allPages: [PageID],
+    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL, allPages: [PageID],
                               initialBuiltGroups: [PageID: TabGroup.GroupID],
                               correctedPages: [ClusteringFeedbackCorrectedPage]?) {
         for pageId in allPages {
@@ -616,8 +616,7 @@ extension ClusteringManager {
             sessionExporter.add(anyUrl: exportObject)
         }
 
-        let pathUrl: URL = to ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        sessionExporter.export(to: pathUrl, sessionId: self.sessionId, keepFile: (to != nil))
+        sessionExporter.export(to: to, sessionId: self.sessionId)
         sessionExporter.urls = [ClusteringExportAnyURL]()
     }
 }

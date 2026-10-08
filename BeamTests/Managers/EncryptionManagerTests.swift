@@ -12,13 +12,11 @@ class EncryptionManagerTests: QuickSpec {
     override func spec() {
         let sut = EncryptionManager()
         let text = "✔ \(String.randomTitle()) ✅"
-        beforeEach {
-            sut.resetPrivateKeys(andMigrateOldSharedKey: false)
-        }
+        let key = sut.generateKey()
 
         describe("encryptData()") {
             it("generates a longer encrypted string") {
-                guard let encryptedData = try sut.encryptData(text.asData, sut.privateKey(for: Configuration.testAccountEmail)) else {
+                guard let encryptedData = try sut.encryptData(text.asData, key) else {
                     fail("Can't encrypt data")
                     return
                 }
@@ -27,12 +25,12 @@ class EncryptionManagerTests: QuickSpec {
             }
 
             it("encrypts") {
-                guard let encryptedData = try sut.encryptData(text.asData, sut.privateKey(for: Configuration.testAccountEmail)) else {
+                guard let encryptedData = try sut.encryptData(text.asData, key) else {
                     fail("Can't encrypt data")
                     return
                 }
 
-                guard let encryptedData2 = try sut.encryptData(text.asData, sut.privateKey(for: Configuration.testAccountEmail)) else {
+                guard let encryptedData2 = try sut.encryptData(text.asData, key) else {
                     fail("Can't encrypt data")
                     return
                 }
@@ -45,7 +43,7 @@ class EncryptionManagerTests: QuickSpec {
 
         describe("encryptString()") {
             it("generates a longer encrypted string") {
-                guard let encryptedString = try sut.encryptString(text, sut.privateKey(for: Configuration.testAccountEmail)) else {
+                guard let encryptedString = try sut.encryptString(text, key) else {
                     fail("Can't encrypt string")
                     return
                 }
@@ -54,12 +52,12 @@ class EncryptionManagerTests: QuickSpec {
             }
 
             it("encrypts") {
-                guard let encryptedString = try sut.encryptString(text, sut.privateKey(for: Configuration.testAccountEmail)) else {
+                guard let encryptedString = try sut.encryptString(text, key) else {
                     fail("Can't encrypt string")
                     return
                 }
 
-                guard let encryptedString2 = try sut.encryptString(text, sut.privateKey(for: Configuration.testAccountEmail)) else {
+                guard let encryptedString2 = try sut.encryptString(text, key) else {
                     fail("Can't encrypt string")
                     return
                 }
@@ -70,18 +68,18 @@ class EncryptionManagerTests: QuickSpec {
 
                 // Used to get new samples
                 Logger.shared.logDebug(text, category: .encryption)
-                Logger.shared.logDebug(sut.privateKey(for: Configuration.testAccountEmail).asString(), category: .encryption)
+                Logger.shared.logDebug(key.asString(), category: .encryption)
                 Logger.shared.logDebug(encryptedString, category: .encryption)
             }
         }
 
         describe("decryptData()") {
             it("decrypts data") {
-                guard let encryptedData = try sut.encryptData(text.asData, sut.privateKey(for: Configuration.testAccountEmail)) else {
+                guard let encryptedData = try sut.encryptData(text.asData, key) else {
                     fail("Can't encrypt data")
                     return
                 }
-                guard let decryptedData = try sut.decryptData(encryptedData, sut.privateKey(for: Configuration.testAccountEmail)) else {
+                guard let decryptedData = try sut.decryptData(encryptedData, key) else {
                     fail("Can't decrypt data")
                     return
                 }
@@ -94,9 +92,8 @@ class EncryptionManagerTests: QuickSpec {
                 let encryptedString = "kgm0JIcnycUQgRFidnEGMoMJFCkT+Y4WVK3SIhVGQjlFwJu7Wu9ZBDbH1nwKI+oVjY+jbyT9PPV2nKlLMemglR9NnkY9cN6QO9KaxbRong5qB1ahBU6jY++0rIs="
                 let clearText = "Ergonomic Cotton Gloves Jj7rvg9rigKdl9XfWKp8FdfcjExxmOzitrzz0NUT"
                 it("decrypts previously encrypted data") {
-                    let key = SymmetricKey(base64EncodedString: keyString)
-
-                    guard let encryptedData = Data(base64Encoded: encryptedString),
+                    guard let key = SymmetricKey(base64EncodedString: keyString),
+                          let encryptedData = Data(base64Encoded: encryptedString),
                           let decryptedData = try sut.decryptData(encryptedData,
                                                                   key,
                                                                   using: EncryptionManager.Algorithm.ChaChaPoly) else {
@@ -113,9 +110,8 @@ class EncryptionManagerTests: QuickSpec {
                 let encryptedString = "6ykpONKB2A8zXqNbjpSTURkwpGHQgR2mF3fv+l8Jc5MNfFIm1CeaUuUad9U5PXP40mTXGazQCLQ/Xkq4efWEfRpezPZL2c8tJlBNYLuOtgyoJFGprr/cE9fltey4fUBVUWoSwCZ5yA=="
                 let clearText = "✔ Ergonomic Granite Computer 7svhQcDlj4LraUa9BuC2p9Ek5OagBet2JpptTbls ✅"
                 it("decrypts previously encrypted data") {
-                    let key = SymmetricKey(base64EncodedString: keyString)
-
-                    guard let encryptedData = Data(base64Encoded: encryptedString),
+                    guard let key = SymmetricKey(base64EncodedString: keyString),
+                          let encryptedData = Data(base64Encoded: encryptedString),
                           let decryptedData = try sut.decryptData(encryptedData,
                                                                   key,
                                                                   using: EncryptionManager.Algorithm.AES_GCM) else {
@@ -125,15 +121,6 @@ class EncryptionManagerTests: QuickSpec {
 
                     expect(clearText) == decryptedData.asString
                 }
-            }
-        }
-
-        describe("privateKey()") {
-            let key1 = sut.privateKey(for: Configuration.testAccountEmail)
-            let key2 = sut.privateKey(for: Configuration.testAccountEmail)
-
-            it("gives the same key") {
-                expect(key1) == key2
             }
         }
 

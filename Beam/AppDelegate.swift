@@ -113,13 +113,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         ContentBlockingManager.shared.setup()
+        Persistence.LegacyAccountData.removeIfNeeded()
 
         if #available(macOS 15.4, *), !isRunningTests {
             WebExtensionsManager.shared.loadInstalledExtensions()
         }
-
-        //TODO: - Remove when everyone has its local links data moved from old db to grdb
-        data.setup()
 
         // Check localPrivateKey
         do {
@@ -168,22 +166,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 break
             case .reachable:
                 Task { @MainActor [weak self] in
-                    await self?.checkPrivateKey()
                     self?.window?.state.reloadOfflineTabs()
                 }
             }
         }.store(in: &cancellableScope)
-    }
-
-    // MARK: - Private Key Check
-    @MainActor
-    func checkPrivateKey() async {
-        await data.currentAccount?.checkPrivateKey()
-    }
-
-    // MARK: - Web sockets
-    func disconnectWebSockets() {
-        data.currentAccount?.disconnectWebSockets()
     }
 
     // MARK: -
@@ -494,14 +480,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let flags = NSEvent.modifierFlags
         if flags.contains(.shift), flags.contains(.command), flags.contains(.option), flags.contains(.control) {
-            if Persistence.Authentication.email != nil {
-                UserAlert.showAlert(message: "Logout from account \(Persistence.emailOrRaiseError())", informativeText: "Do you want to logout?", buttonTitle: "Cancel", secondaryButtonTitle: "Logout", secondaryButtonAction: {
-                    UserAlert.showAlert(message: "Reset all private keys", informativeText: "Do you want to reset all accounts? (make sure your private keys are backuped first!). The following accounts will be removed:\n\(EncryptionManager.shared.accounts.joined(separator: "\n"))", buttonTitle: "Cancel", secondaryButtonTitle: "Reset all accounts", secondaryButtonAction: {
-                        EncryptionManager.shared.resetPrivateKeys(andMigrateOldSharedKey: false)
-                    }, style: .critical)
-                }, style: .critical)
-            }
-
             UserAlert.showAlert(message: "Erase all local contents", informativeText: "Do you want to eraase all local contents?", buttonTitle: "Cancel", secondaryButtonTitle: "Erase local contents", secondaryButtonAction: {
                 self.deleteAllLocalDataAtStartup = true
             }, style: .critical)
@@ -536,7 +514,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         data.saveData()
 
-        _ = data.currentAccount?.data.browsingTreeSender?.groupWait()
         _ = data.currentAccount?.data.browsingTreeStoreManager.groupWait()
         // Save changes in the application's managed object context before the application terminates.
         let context = CoreDataManager.shared.mainContext

@@ -273,12 +273,6 @@ public extension BeamNote {
         }
     }
 
-    static func instanciateNoteWithPreviousData(_ document: BeamDocument,
-                                                decodeChildren: Bool = true) throws -> BeamNote? {
-        // Remote sync checksum removed — no previous data available
-        return nil
-    }
-
     static func fetch(title: String,
                       keepInMemory: Bool = true,
                       decodeChildren: Bool = true) -> BeamNote? {
@@ -700,15 +694,6 @@ public extension BeamNote {
         static let indexAllNotes: StaticString = "indexAllNotes"
         static let rebuildAllNotes: StaticString = "rebuildAllNotes"
         static let loadNotes: StaticString = "loadNotes"
-    }
-}
-
-public extension BeamDocument {
-    func previousTextDescription() throws -> String? {
-        if let beamNote = try BeamNote.instanciateNoteWithPreviousData(self, decodeChildren: true) {
-            return beamNote.textDescription()
-        }
-        return nil
     }
 }
 

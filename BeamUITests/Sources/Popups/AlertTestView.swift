@@ -29,17 +29,6 @@ class AlertTestView: BaseView {
     }
     
     @discardableResult
-    func signOutButtonClick() -> BaseView {
-        let cancelButton = button(AlertViewLocators.Buttons.signOutButton.accessibilityIdentifier).clickOnHittable()
-        waitForDoesntExist(cancelButton)
-        return self
-    }
-    
-    func getDeleteAllCheckbox() -> XCUIElement {
-        return checkBox("Delete all data on this device")
-    }
-    
-    @discardableResult
     func confirmRemoveFromDialogSheets() -> Bool {
         let deleteButton = getAlertDialogFromSheets().buttons[AlertViewLocators.Buttons.removeButton.accessibilityIdentifier].clickOnExistence()
         return waitForDoesntExist(deleteButton)

@@ -27,7 +27,7 @@ class CalendarsViewModel: ObservableObject {
     }
 }
 
-/// The main view of “Accounts” preference pane.
+/// The main view of the “Calendars” preference pane.
 struct CalendarsView: View {
     @ObservedObject var viewModel: CalendarsViewModel
 

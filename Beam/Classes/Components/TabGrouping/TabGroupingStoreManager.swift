@@ -17,7 +17,7 @@ class TabGroupingStoreManager: GRDBHandler, BeamManager {
 
     weak var owner: BeamManagerOwner?
 
-    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.owner = holder
         try super.init(store: store)
     }
@@ -206,14 +206,6 @@ extension TabGroupingStoreManager {
 // MARK: - Database
 extension TabGroupingStoreManager {
 
-    func makeLockedCopy(_ group: TabGroup, title: String) -> TabGroup? {
-        guard let beamObject = fetch(byIds: [group.id]).first else { return nil }
-        var copy = beamObject.makeLockedCopy()
-        copy.title = title
-        save(groups: [copy])
-        return Self.convertBeamObjectToGroup(copy)
-    }
-
     func delete(groups: [TabGroupBeamObject]) {
         do {
             try write { db in
@@ -310,13 +302,6 @@ extension TabGroupingStoreManager {
         } catch {
             Logger.shared.logError("Couldn't delete all tab groups", category: .database)
         }
-    }
-}
-
-private extension TabGroupBeamObject {
-    func makeLockedCopy() -> TabGroupBeamObject {
-        TabGroupBeamObject(title: title, color: color, pages: pages, isLocked: true, parentGroup: id,
-                           createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
     }
 }
 

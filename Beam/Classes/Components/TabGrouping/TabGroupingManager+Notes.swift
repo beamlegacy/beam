@@ -12,11 +12,6 @@ import BeamCore
 extension TabGroupingManager: BeamDocumentSource {
     static var sourceId: String { "TabGroupingManager" }
 
-    enum TabGroupSharingError: Error {
-        case couldntCreateNote
-        case couldntSaveNote
-    }
-
     /// checks if group is already shared and in a tab group note.
     func fetchTabGroupNote(for group: TabGroup) -> (note: BeamNote, group: TabGroup)? {
         guard storeManager?.fetch(byIds: [group.id]).first != nil else { return nil }
@@ -36,29 +31,6 @@ extension TabGroupingManager: BeamDocumentSource {
             }
         }
         guard let note = note else { return nil }
-        return (note, groupUsed)
-    }
-
-    @MainActor
-    func fetchOrCreateTabGroupNote(for group: TabGroup) async throws -> (note: BeamNote, group: TabGroup) {
-        let result = fetchTabGroupNote(for: group)
-        var note = result?.note
-        var groupUsed = result?.group ?? group
-        if result == nil {
-            let frozenGroup = await self.copyForSharing(group)
-            groupUsed = frozenGroup
-            do {
-                note = try BeamNote.fetchOrCreate(self, tabGroupId: frozenGroup.id)
-            } catch {
-                throw TabGroupSharingError.couldntCreateNote
-            }
-            guard note?.save(self) == true else {
-                throw TabGroupSharingError.couldntSaveNote
-            }
-        }
-        guard let note = note else {
-            throw TabGroupSharingError.couldntCreateNote
-        }
         return (note, groupUsed)
     }
 

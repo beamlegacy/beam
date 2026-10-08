@@ -19,7 +19,7 @@ enum CreditCardsDBError: Error {
     case errorSearchingCreditCards(errorMsg: String)
 }
 
-struct CreditCardRecord {
+struct CreditCardRecord: Codable, Hashable {
     internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
 
     var uuid: UUID = .null
@@ -36,13 +36,7 @@ struct CreditCardRecord {
     var privateKeySignature: String?
 }
 
-extension CreditCardRecord: BeamObjectProtocol {
-    static let beamObjectType = BeamObjectObjectType.creditCard
-
-    var beamObjectId: UUID {
-        get { uuid }
-        set { uuid = newValue }
-    }
+extension CreditCardRecord {
 
     // Used for encoding this into BeamObject
     enum CodingKeys: String, CodingKey {
@@ -160,7 +154,7 @@ class CreditCardsDB: GRDBHandler, CreditCardStore, BeamManager, LegacyAutoImport
     static let tableName = "creditCardRecord"
     var grdbStore: GRDBStore
 
-    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.owner = holder
         self.grdbStore = store
 

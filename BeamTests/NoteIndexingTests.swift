@@ -15,7 +15,6 @@ import Combine
 class NoteIndexingTests: XCTestCase, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
     override func setUpWithError() throws {
-        BeamTestsHelper.logout()
         try AppData.shared.clearAllAccountsAndSetupDefaultAccount()
 
         expect(try BeamData.shared.noteLinksAndRefsManager?.countBidirectionalLinks()) == 0

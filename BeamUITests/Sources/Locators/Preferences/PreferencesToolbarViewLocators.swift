@@ -15,7 +15,6 @@ enum PreferencesToolbarViewLocators {
         case notesButton = "Notes"
         case privacyButton = "Privacy"
         case passwordsButton = "Passwords"
-        case accountButton = "Account"
         case aboutButton = "About"
         case advancedButton = "Advanced"
     }

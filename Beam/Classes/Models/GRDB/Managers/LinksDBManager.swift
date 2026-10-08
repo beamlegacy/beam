@@ -15,7 +15,7 @@ class LinksDBManager: GRDBHandler, BeamManager {
 
     static var name = "LinksDBManager"
 
-    required init(holder: BeamManagerOwner? = nil, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner? = nil, store: GRDBStore) throws {
         self.owner = holder
         try super.init(store: store)
     }

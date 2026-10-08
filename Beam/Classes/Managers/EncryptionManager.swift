@@ -41,125 +41,6 @@ class EncryptionManager {
         SymmetricKey(size: .bits256)
     }
 
-    // MARK: - Private Keys
-    func clearPrivateKey(for email: String) {
-        lock.write {
-            guard var privateKeys = Persistence.Encryption.privateKeys else { return }
-
-            privateKeys.removeValue(forKey: email)
-            Persistence.Encryption.privateKeys = privateKeys
-            Persistence.Encryption.updateDate = BeamDate.now
-
-            Logger.shared.logWarning("Private key for user \(email) has been cleared", category: .encryption)
-        }
-    }
-
-    func resetPrivateKeys(andMigrateOldSharedKey: Bool) {
-        lock.write {
-            Logger.shared.logWarning("Private keys has been reset", category: .encryption)
-            if andMigrateOldSharedKey {
-                Persistence.Encryption.privateKeys = [:]
-                if let email = Persistence.Authentication.email {
-                    _ = self.privateKey(for: email)
-                } else {
-                    Persistence.Encryption.updateDate = BeamDate.now
-                }
-            } else {
-                Persistence.Encryption.privateKeys = nil
-                Persistence.Encryption.updateDate = BeamDate.now
-            }
-        }
-    }
-
-    func replacePrivateKey(for email: String, with base64EncodedString: String) throws {
-        try lock.write {
-            guard let key = SymmetricKey(base64EncodedString: base64EncodedString) else {
-                throw EncryptionManagerError.keyError
-            }
-
-            guard var privateKeys = Persistence.Encryption.privateKeys else { return }
-
-            privateKeys.updateValue(key.asString(), forKey: email)
-
-            Persistence.Encryption.privateKeys = privateKeys
-            Persistence.Encryption.updateDate = BeamDate.now
-
-            Logger.shared.logWarning("Private key for user \(email) has been replaced", category: .encryption)
-        }
-    }
-
-    func readPrivateKey(for email: String) -> SymmetricKey? {
-        guard !email.isEmpty else {
-            fatalError("No Email provided to read PrivateKey, it should never happen")
-        }
-
-        return lock.read {
-            if let privateKeys = Persistence.Encryption.privateKeys,
-               let privateKeyData = privateKeys[email],
-               let result = SymmetricKey(base64EncodedString: privateKeyData) {
-                return result
-            }
-            return nil
-        }
-    }
-
-    @discardableResult
-    func privateKey(for email: String) -> SymmetricKey {
-        guard !email.isEmpty else {
-            fatalError("No Email provided to get PrivateKey, it should never happen")
-        }
-
-        return lock.write {
-            if let privateKeys = Persistence.Encryption.privateKeys,
-               let privateKeyData = privateKeys[email],
-               let result = SymmetricKey(base64EncodedString: privateKeyData) {
-                return result
-            }
-            Logger.shared.logWarning("Private key for user \(email) doesn't exist, creating new one",
-                                     category: .encryption)
-            let key = self.generateKey()
-            self.savePrivateKey(for: email, with: key.asString())
-            return key
-        }
-    }
-
-    func existingPrivateKey(for email: String) -> SymmetricKey? {
-        guard !email.isEmpty else {
-            fatalError("No Email provided to get PrivateKey, it should never happen")
-        }
-
-        return lock.write {
-            if let privateKeys = Persistence.Encryption.privateKeys,
-               let privateKeyData = privateKeys[email],
-               let result = SymmetricKey(base64EncodedString: privateKeyData) {
-                return result
-            }
-
-            return nil
-        }
-    }
-
-    var accounts: [String] {
-        return lock.read {
-            guard let pkeys = Persistence.Encryption.privateKeys else { return [] }
-            return Array(pkeys.keys)
-        }
-    }
-
-    private func savePrivateKey(for email: String, with key: String) {
-        lock.write {
-            if var privateKeys = Persistence.Encryption.privateKeys {
-                privateKeys.updateValue(key, forKey: email)
-                Persistence.Encryption.privateKeys = privateKeys
-            } else {
-                Persistence.Encryption.privateKeys = [email: key]
-                Persistence.Encryption.creationDate = BeamDate.now
-
-            }
-            Persistence.Encryption.updateDate = BeamDate.now
-        }
-    }
-
     // MARK: - Local Private Key
     private var cachedLocalPrivateKey: String? // avoid hitting the keychain for each request
 
@@ -197,8 +78,7 @@ class EncryptionManager {
     }
 
     // MARK: - Encrypt / Decrypt
-    func encryptString(_ string: String, _ key: SymmetricKey? = nil, using: Algorithm = .AES_GCM) throws -> String? {
-        let key = key ?? privateKey(for: Persistence.emailOrRaiseError())
+    func encryptString(_ string: String, _ key: SymmetricKey, using: Algorithm = .AES_GCM) throws -> String? {
         switch using {
         case .ChaChaPoly:
             return try ChaChaPoly
@@ -213,12 +93,11 @@ class EncryptionManager {
         }
     }
 
-    func decryptString(_ encryptedString: String, _ key: SymmetricKey? = nil, using: Algorithm = .AES_GCM) throws -> String? {
+    func decryptString(_ encryptedString: String, _ key: SymmetricKey, using: Algorithm = .AES_GCM) throws -> String? {
         guard let encryptedData = Data(base64Encoded: encryptedString) else {
             Logger.shared.logError("Couldn't change String to Data", category: .encryption)
             throw EncryptionManagerError.stringEncodingError
         }
-        let key = key ?? privateKey(for: Persistence.emailOrRaiseError())
 
         do {
             switch using {
@@ -236,8 +115,7 @@ class EncryptionManager {
         }
     }
 
-    func encryptData(_ data: Data, _ key: SymmetricKey? = nil, using: Algorithm = .AES_GCM) throws -> Data? {
-        let key = key ?? privateKey(for: Persistence.emailOrRaiseError())
+    func encryptData(_ data: Data, _ key: SymmetricKey, using: Algorithm = .AES_GCM) throws -> Data? {
 
         switch using {
         case .ChaChaPoly:
@@ -249,8 +127,7 @@ class EncryptionManager {
         }
     }
 
-    func decryptData(_ encryptedData: Data, _ key: SymmetricKey? = nil, using: Algorithm = .AES_GCM) throws -> Data? {
-        let key = key ?? privateKey(for: Persistence.emailOrRaiseError())
+    func decryptData(_ encryptedData: Data, _ key: SymmetricKey, using: Algorithm = .AES_GCM) throws -> Data? {
 
         switch using {
         case .ChaChaPoly:

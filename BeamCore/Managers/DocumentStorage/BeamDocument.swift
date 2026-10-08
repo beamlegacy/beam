@@ -46,10 +46,6 @@ public struct BeamDocument {
     public var version = BeamVersion()
     public var isPublic: Bool = false
 
-    public var beamObjectId: UUID {
-        get { id }
-        set { id = newValue }
-    }
     public var journalDate: Int64 {
         didSet {
             assert((journalDate == 0 && documentType == .note) || (journalDate != 0 && documentType == .journal))
@@ -117,7 +113,7 @@ public struct BeamDocument {
 }
 
 public extension BeamDocument {
-    // Used for encoding this into BeamObject. Update `encode` and `init()` when adding values here
+    // Update `encode` and `init()` when adding values here
     enum CodingKeys: String, CodingKey {
         case id
         case databaseId
@@ -140,8 +136,7 @@ public extension BeamDocument {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         try Self.checkFormatVersion(try container.decodeIfPresent(String.self, forKey: .formatVersion))
-        let syncDatabaseId = decoder.userInfo[BeamObject.beamObjectId] as? UUID ?? UUID.null
-        id = (try container.decodeIfPresent(UUID.self, forKey: .id)) ?? syncDatabaseId
+        id = (try container.decodeIfPresent(UUID.self, forKey: .id)) ?? UUID.null
         databaseId = try container.decode(UUID.self, forKey: .databaseId)
         source = (try container.decodeIfPresent(String.self, forKey: .source)) ?? "decoder"
         title = try container.decode(String.self, forKey: .title)
@@ -184,11 +179,8 @@ public extension BeamDocument {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        let syncCoding = encoder.userInfo[BeamObject.beamObjectCoding] as? Bool ?? false
-        if !syncCoding {
-            try container.encode(id, forKey: .id)
-            try container.encode(source, forKey: .source)
-        }
+        try container.encode(id, forKey: .id)
+        try container.encode(source, forKey: .source)
         if let dbId = database?.id ?? databaseId {
             try container.encode(dbId, forKey: .databaseId)
         }

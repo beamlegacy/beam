@@ -167,10 +167,6 @@ class AllNotesTestView: BaseView {
         return JournalTestView()
     }
     
-    func getPublishInstructionsLabel() -> XCUIElement {
-        return label(AllNotesViewLocators.StaticTexts.publishInstruction.accessibilityIdentifier)
-    }
-    
     @discardableResult
     func openTableView(_ item: AllNotesViewLocators.ViewMenuItems) -> AllNotesTestTable {
         if !menuItem(item.accessibilityIdentifier).exists {
@@ -193,7 +189,7 @@ class AllNotesTestView: BaseView {
     }
     
     func getViewCountValue() -> Int {
-        let predicate = NSPredicate(format: "value BEGINSWITH 'All (' OR value BEGINSWITH 'Private (' OR value BEGINSWITH 'Published (' OR value BEGINSWITH 'On Profile ('")
+        let predicate = NSPredicate(format: "value BEGINSWITH 'All (' OR value BEGINSWITH 'Private ('")
         let viewCounterElement = app.windows.staticTexts.matching(predicate).firstMatch
         let viewStringValue = viewCounterElement.getStringValue().slice(from: "(", to: ")")!
         return Int(viewStringValue) ?? 0
@@ -209,14 +205,8 @@ class AllNotesTestView: BaseView {
         self.clickSortingDropDownExpandTriangle()
         sortingCounterValues = SortingCounterValues(
             all: getSortingCounterValue(.allNotes),
-            privat: getSortingCounterValue(.privateNotes),
-            published: getSortingCounterValue(.publishedNotes),
-            publishedProfile: getSortingCounterValue(.profileNotes))
+            privat: getSortingCounterValue(.privateNotes))
         return self
-    }
-    
-    func getURLiconElementFor(rowIndex: Int) -> XCUIElement {
-        return button(AllNotesViewLocators.Buttons.urlIcon.accessibilityIdentifier + String(rowIndex))
     }
     
     func getSortingCounterValue(_ item: AllNotesViewLocators.ViewMenuItems) -> Int {
@@ -225,31 +215,13 @@ class AllNotesTestView: BaseView {
         return integerValue
     }
     
-    func getProfileHyperlinkElement(username: String) -> XCUIElement {
-        return staticText("\(BaseTest().stagingEnvironmentServerAddress)/\(username)")
-    }
-    
-    func getSignUpToPublishHyperlinkElement() -> XCUIElement {
-        return staticText(AllNotesViewLocators.StaticTexts.publishInstruction.accessibilityIdentifier)
-    }
-    
-    func waitForPublishingProcessToStartAndFinishFor(_ noteName: String) -> Bool {
-        let publishStatusElement = textField("Publishing '\(noteName)'...")
-        _ = publishStatusElement.waitForExistence(timeout: implicitWaitTimeout)
-        return waitForDoesntExist(publishStatusElement)
-    }
-    
     class SortingCounterValues: BaseRow {
         var all: Int!
         var privat: Int!
-        var published: Int!
-        var publishedProfile: Int!
         
-        init(all: Int, privat: Int, published: Int, publishedProfile: Int) {
+        init(all: Int, privat: Int) {
             self.all = all
             self.privat = privat
-            self.published = published
-            self.publishedProfile = publishedProfile
         }
     }
     

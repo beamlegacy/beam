@@ -25,7 +25,7 @@ class BeamDocumentCollectionHelpersTest: XCTestCase, BeamDocumentSource {
         let db = try DatabaseQueue(path: dbPath)
         store = try GRDBStore(writer: db)
         try store.erase()
-        documentCollection = try BeamDocumentCollection(holder: nil, objectManager: BeamObjectManager(), store: store)
+        documentCollection = try BeamDocumentCollection(holder: nil, store: store)
         try store.migrate()
 
         for index in 1...10 {

@@ -105,7 +105,7 @@ private struct TabDropDelegate: DropDelegate {
 struct TabGroupingFeedbackContentView: View {
     @ObservedObject var viewModel: TabGroupingFeedbackViewModel
 
-    func triggerSendFeedback(saveToURL url: URL?) {
+    func saveFeedback(to url: URL) {
         let correctedPages = viewModel.buildCorrectedPagesForExport()
         viewModel.clusteringManager.exportSession(sessionExporter: BeamData.shared.sessionExporter,
                                                   to: url,
@@ -115,7 +115,7 @@ struct TabGroupingFeedbackContentView: View {
         AppDelegate.main.tabGroupingFeedbackWindow?.close()
     }
 
-    func triggerSaveAndSendFeedback() {
+    func chooseLocationAndSaveFeedback() {
         let savePanel = NSSavePanel()
         savePanel.canCreateDirectories = true
         savePanel.showsTagField = false
@@ -124,7 +124,7 @@ struct TabGroupingFeedbackContentView: View {
                 savePanel.close()
                 return
             }
-            triggerSendFeedback(saveToURL: url)
+            saveFeedback(to: url)
         }
     }
 
@@ -172,14 +172,9 @@ struct TabGroupingFeedbackContentView: View {
             HStack {
                 Spacer()
                 Button {
-                    triggerSendFeedback(saveToURL: nil)
+                    chooseLocationAndSaveFeedback()
                 } label: {
-                    Text("Send Feedback")
-                }.buttonStyle(.automatic)
-                Button {
-                    triggerSaveAndSendFeedback()
-                } label: {
-                    Text("Save and send Feedback")
+                    Text("Save Feedback…")
                 }.buttonStyle(.automatic)
             }.frame(height: 50)
 

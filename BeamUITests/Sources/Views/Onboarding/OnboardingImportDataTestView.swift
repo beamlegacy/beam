@@ -17,12 +17,6 @@ class OnboardingImportDataTestView: BaseView {
     }
     
     @discardableResult
-    func clickBackButton() -> OnboardingLandingTestView {
-        staticText(OnboardingImportDataViewLocators.Buttons.backButton.accessibilityIdentifier).clickOnExistence()
-        return OnboardingLandingTestView()
-    }
-    
-    @discardableResult
     func waitForImportDataViewLoad() -> Bool {
         return staticText(OnboardingImportDataViewLocators.StaticTexts.viewTitle.accessibilityIdentifier).waitForExistence(timeout: maximumWaitTimeout)
     }

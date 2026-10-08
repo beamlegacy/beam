@@ -14,26 +14,13 @@ struct OnboardingStep: Equatable {
     enum StepType: String {
         case minimalWelcome
         case setupCalendar
-        case welcome
-        case profile
-        case emailConnect
-        case setupPrivateKey
-        case lostPrivateKey
-        case emailConfirm
         case imports
-        case savePrivateKey
-        case loading
     }
 
     let type: StepType
 
     var canGoBack: Bool {
-        switch type {
-        case .welcome, .profile, .imports, .savePrivateKey, .loading, .minimalWelcome, .setupCalendar:
-            return false
-        default:
-            return true
-        }
+        false
     }
 }
 
@@ -69,14 +56,8 @@ class OnboardingManager: ObservableObject {
     let onboardingNoteCreator = OnboardingNoteCreator()
 
     var currentStepIsFromHistory = false
-    var onlyConnect: Bool = false
     var onlyImport: Bool = false
     weak var delegate: OnboardingManagerDelegate?
-    /// Did the user just signed up through the onboarding
-    var userDidSignUp: Bool = false
-    var temporaryCredentials: (email: String, password: String)?
-
-    var checkedEmail: (email: String, exists: Bool) = ("", false)
 
     private weak var window: NSWindow?
     private var cancellables = Set<AnyCancellable>()
@@ -88,21 +69,12 @@ class OnboardingManager: ObservableObject {
         var step: OnboardingStep?
         if needsToDisplayOnboard {
             step = OnboardingStep(type: .minimalWelcome)
-//            if AuthenticationManager.shared.isAuthenticated {
-//                if AuthenticationManager.shared.username != nil {
-//                    step = OnboardingStep(type: .imports)
-//                } else {
-//                    step = OnboardingStep(type: .profile)
-//                }
-//            } else {
-//                step = OnboardingStep(type: .welcome)
-//            }
         }
         if onlyImport {
             step = OnboardingStep(type: .imports)
         }
         self.needsToDisplayOnboard = needsToDisplayOnboard
-        currentStep = step ?? OnboardingStep(type: .welcome)
+        currentStep = step ?? OnboardingStep(type: .minimalWelcome)
     }
 
     func resetOnboarding() {
@@ -112,9 +84,6 @@ class OnboardingManager: ObservableObject {
         cancellables.removeAll()
         currentStepIsFromHistory = false
         viewIsLoading = false
-        temporaryCredentials = nil
-        userDidSignUp = false
-        onlyConnect = false
         onlyImport = false
     }
 
@@ -122,26 +91,6 @@ class OnboardingManager: ObservableObject {
         resetOnboarding()
         needsToDisplayOnboard = true
         Persistence.Authentication.hasSeenOnboarding = false
-    }
-
-    private func prepareForConnectOnly() {
-        resetOnboarding()
-        needsToDisplayOnboard = true
-        onlyConnect = true
-        currentStep = OnboardingStep(type: .welcome)
-    }
-
-    func showOnboardingForConnectOnly(withConfirmationAlert: Bool = false, message: String? = nil) {
-        let presentBlock: () -> Void = {
-            self.prepareForConnectOnly()
-            self.presentOnboardingWindow()
-        }
-        if withConfirmationAlert {
-            UserAlert.showAlert(message: loc("Connect to Beam"), informativeText: message ?? loc("Connect to Beam to sync, encrypt and publish your notes."),
-                                buttonTitle: loc("Connect"), secondaryButtonTitle: loc("Cancel"), buttonAction: presentBlock)
-        } else {
-            presentBlock()
-        }
     }
 
     func backToPreviousStep() {
@@ -173,40 +122,10 @@ class OnboardingManager: ObservableObject {
 
     private func stepAfter(step: OnboardingStep) -> OnboardingStep? {
         switch step.type {
-        case .welcome, .emailConnect, .emailConfirm:
-            if AuthenticationManager.shared.isAuthenticated && !userHasUsername() {
-                return OnboardingStep(type: .profile)
-            }
-            return stepAfterProfile()
-        case .profile:
-            return stepAfterProfile()
-        case .savePrivateKey:
-            return importStepIfNeeded(onlyConnect: onlyConnect)
-        case .setupPrivateKey:
-            return stepAfterProfile()
-        case .imports, .loading, .lostPrivateKey, .setupCalendar:
-            return nil
         case .minimalWelcome:
             return OnboardingStep(type: .setupCalendar)
-        }
-    }
-
-    private func stepAfterProfile() -> OnboardingStep? {
-        encryptionKeyStepIfNeeded() ?? importStepIfNeeded(onlyConnect: onlyConnect)
-    }
-
-    private func encryptionKeyStepIfNeeded() -> OnboardingStep? {
-        if userDidSignUp {
-            return OnboardingStep(type: .savePrivateKey)
-        }
-        return nil
-    }
-
-    private func importStepIfNeeded(onlyConnect: Bool) -> OnboardingStep? {
-        if onlyConnect || userHasPasswordsData() {
+        case .imports, .setupCalendar:
             return nil
-        } else {
-            return OnboardingStep(type: .imports)
         }
     }
 
@@ -215,31 +134,13 @@ class OnboardingManager: ObservableObject {
     }
 
     private func onboardingDidFinish() {
-        let isNewUser = userDidSignUp || (!onlyConnect && !onlyImport)
+        let isNewUser = !onlyImport
         delegate?.onboardingManagerDidFinish(isNewUser: isNewUser)
         if isNewUser {
             onboardingNoteCreator.createOnboardingNotes(data: BeamData.shared)
         }
         Persistence.Authentication.hasSeenOnboarding = true
         resetOnboarding()
-    }
-
-    func userHasUsername() -> Bool {
-        AuthenticationManager.shared.username != nil
-    }
-
-    private func userHasPasswordsData() -> Bool {
-        BeamData.shared.passwordManager.count() > 0
-    }
-
-    func checkForPrivateKey(completionHandler: @escaping (OnboardingStep?) -> Void, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
-        Task { @MainActor in
-            if let _ = AppData.shared.currentAccount {
-                completionHandler(OnboardingStep(type: .setupPrivateKey))
-            } else {
-                assert(false)
-            }
-        }
     }
 }
 
@@ -268,7 +169,7 @@ extension OnboardingManager {
     }
 
     func windowDidClose() {
-        guard onlyConnect || onlyImport else { return }
+        guard onlyImport else { return }
         resetOnboarding()
         needsToDisplayOnboard = false
     }

@@ -92,43 +92,16 @@ struct ClusteringExportAnyURL: CsvRow {
 
 class ClusteringSessionExporter {
     var urls: [ClusteringExportAnyURL] = [ClusteringExportAnyURL]()
-    let fileManager = FileManager.default
-    var gcsManager: GCSObjectManager?
-
-    init() {
-        do {
-            gcsManager = try GCSObjectManager(bucket: "clustering-beam-exports")
-        } catch let err {
-            Logger.shared.logError(err.localizedDescription, category: .general)
-        }
-    }
 
     func add(anyUrl: ClusteringExportAnyURL) {
         urls.append(anyUrl)
     }
 
-    func export(to: URL, sessionId: UUID, keepFile: Bool) {
+    func export(to: URL, sessionId: UUID) {
         let destination = to.appendingPathComponent("beam_clustering_session-\(sessionId)-\(BeamDate.now).csv")
         let writer = CsvRowsWriter(header: ClusteringExportAnyURL.header, rows: self.urls)
         do {
             try writer.overWrite(to: destination)
-            let clusteringVersion = ClusteringType.current.versionRepresentation
-            if let gcsManager = gcsManager,
-               let email = Persistence.Authentication.email,
-               let filename = ("\(clusteringVersion)/\(email)/" + destination.lastPathComponent).addingPercentEncoding(withAllowedCharacters: .alphanumerics) {
-                Task {
-                    do {
-                        _ = try await gcsManager.uploadFile(filename: filename, path: destination)
-                        if !keepFile {
-                            try fileManager.removeItem(atPath: destination.path)
-                        }
-                    } catch let err as GCSObjectManagerErrors where err == GCSObjectManagerErrors.disabledService {
-                        Logger.shared.logWarning(err.localizedDescription, category: .general)
-                    } catch let err {
-                        Logger.shared.logError(err.localizedDescription, category: .general)
-                    }
-                }
-            }
         } catch {
             Logger.shared.logError("Unable to save session urls to \(destination)", category: .web)
         }

@@ -80,8 +80,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         case .omniboxFillHistory: fillHistory()
         case .omniboxEnableSearchInHistoryContent: omniboxSetEnableSearchInHistoryContent(enabled: true)
         case .omniboxDisableSearchInHistoryContent: omniboxSetEnableSearchInHistoryContent(enabled: false)
-        case .signInWithTestAccount: signInWithTestAccount()
-        case .signUpWithRandomTestAccount: signUpWithRandomTestAccount()
         case .showWebViewCount: showWebViewCount()
         case .showOnboarding: showOnboarding()
         case .resetCollectAlert: resetCollectAlert()
@@ -91,11 +89,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         case .stopMockHttpServer: stopMockHttpServer()
         case .enableCreateJournalOnce: setCreateJournalOnce(enabled: true)
         case .disableCreateJournalOnce: setCreateJournalOnce(enabled: false)
-        case .deletePrivateKeys: deletePrivateKeys()
-        case .deleteAllRemoteObjects: deleteAllRemoteObjects()
-        case .resetAPIEndpoints: connectToProductionServer()
-        case .setAPIEndpointsToStaging: connectToStagingServer()
-        case .deleteRemoteAccount: deleteRemoteAccount()
         case .createFakeDailySummary: createFakeDailySummary()
         case .createNote: createNote()
         case .createAndOpenNote: createNote(open: true)
@@ -299,35 +292,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
         try? BeamData.shared.linksDBManager?.saveFrecencyUrl(frecency)
     }
 
-    private func signInWithTestAccount() {
-        signInWithTestAccount { [weak self] signedIn in
-            guard signedIn else { return }
-            self?.beeper.beep(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue)
-        }
-    }
-
-    private func signInWithTestAccount(completionHandler: @escaping (Bool) -> Void) {
-        guard !AuthenticationManager.shared.isAuthenticated else {
-            completionHandler(false)
-            return
-        }
-    }
-
-    private func signUpWithRandomTestAccount() {
-        signUpWithRandomTestAccount { [weak self] signedIn in
-            guard signedIn else { return }
-            self?.beeper.beep(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue)
-        }
-    }
-
-    private func signUpWithRandomTestAccount(completionHandler: @escaping (Bool) -> Void) {
-        guard !AuthenticationManager.shared.isAuthenticated else {
-            showAlert("Already authenticated", "You are already authenticated")
-            completionHandler(false)
-            return
-        }
-    }
-
     private func showAlert(_ title: String, _ content: String) {
         let alert = NSAlert()
         alert.messageText = title
@@ -351,7 +315,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     private func showOnboarding() {
         logout()
         clearPasswordsDatabase()
-        AuthenticationManager.shared.username = nil
         let onboarding = currentAccount?.data.onboardingManager
         onboarding?.forceDisplayOnboarding()
         AppDelegate.main.windows.forEach { window in
@@ -375,32 +338,6 @@ class BeamUITestsMenuGenerator: BeamDocumentSource, CrossTargetBeeperDelegate {
     private func stopMockHttpServer() {
         MockHttpServer.stop()
     }
-
-    private func deletePrivateKeys() {
-        Persistence.Encryption.privateKeys = nil
-        Persistence.Encryption.updateDate = BeamDate.now
-    }
-
-    private func deleteAllRemoteObjects() {
-        AppDelegate.main.deleteAllLocalData()
-    }
-
-    private func connectToStagingServer() {
-        for window in AppDelegate.main.windows {
-            window.state.closeAllTabs(closePinnedTabs: true)
-        }
-        AppDelegate.main.deleteAllLocalData()
-    }
-
-    private func connectToProductionServer() {
-        for window in AppDelegate.main.windows {
-            window.state.closeAllTabs(closePinnedTabs: true)
-        }
-        Configuration.reset()
-        AppDelegate.main.deleteAllLocalData()
-    }
-
-    private func deleteRemoteAccount() {}
 
     private func resetUserPreferences() {
         BeamUserDefaultsManager.clear()

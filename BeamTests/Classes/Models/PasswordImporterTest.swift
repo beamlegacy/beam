@@ -12,7 +12,6 @@ import XCTest
 class PasswordImporterTest: XCTestCase {
     override func setUp() {
         super.setUp()
-        BeamTestsHelper.logout()
         BeamData.shared.passwordManager.markDeleted(hostname: "test1.com", for: "user1")
         BeamData.shared.passwordManager.markDeleted(hostname: "test2.com", for: "user2")
         BeamData.shared.passwordManager.markDeleted(hostname: "test3.com", for: "user3")

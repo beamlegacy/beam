@@ -73,25 +73,6 @@ extension Link: @retroactive MutablePersistableRecord {
     }
 }
 
-extension Link: BeamObjectProtocol {
-    static var beamObjectType = BeamObjectObjectType.link
-
-    var beamObjectId: UUID {
-        get {
-            id
-        }
-        set {
-            id = newValue
-        }
-    }
-
-    public func copy() throws -> Link {
-        Link(url: url, title: title, content: "", frecencyVisitLastAccessAt: frecencyVisitLastAccessAt,
-             frecencyVisitScore: frecencyVisitScore, frecencyVisitSortScore: frecencyVisitSortScore,
-             createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
-    }
-}
-
 extension Link: @retroactive Equatable {
     static public func == (lhs: Link, rhs: Link) -> Bool {
         lhs.id == rhs.id
@@ -136,6 +117,7 @@ struct LinkWithFrecency: FetchableRecord {
 }
 
 public class BeamLinkDB: LinkManagerProtocol {
+
     static let tableName = "link"
 
     private var overridenManager: LinksDBManager?
@@ -145,6 +127,7 @@ public class BeamLinkDB: LinkManagerProtocol {
 
     init(overridenManager: LinksDBManager? = nil) {
         self.overridenManager = overridenManager
+
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
@@ -160,14 +143,6 @@ public class BeamLinkDB: LinkManagerProtocol {
     }
     public func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID {
         return manager?.getOrCreateId(for: url, title: title, content: content, destination: destination) ?? UUID.null
-    }
-
-    private func store(link: Link) throws {
-        try store(links: [link])
-    }
-
-    private func store(links: [Link]) throws {
-        try manager?.insert(links: links)
     }
 
     public func linkFor(id: UUID) -> Link? {
@@ -211,7 +186,7 @@ public class BeamLinkDB: LinkManagerProtocol {
         do {
             try manager?.deleteAll()
         } catch {
-            Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .linkNetwork)
+            Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .linkDB)
         }
     }
 
@@ -232,6 +207,10 @@ public class BeamLinkDB: LinkManagerProtocol {
         for link in allLinks.sorted(by: { (lhs, rhs) in lhs.url < rhs.url }) {
             Logger.shared.logDebug("id: \(link.id) - url: \(link.url)", category: .linkDB)
         }
+    }
+
+    func allObjects(updatedSince: Date?) throws -> [Link] {
+        return try manager?.allLinks(updatedSince: updatedSince) ?? []
     }
 
     func fetchWithIds(_ ids: [UUID], includeDeleted: Bool = false) throws -> [Link] {

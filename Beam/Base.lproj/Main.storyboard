@@ -1302,9 +1302,6 @@ DQ
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Account" id="cn4-7f-vHg" userLabel="Account">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                            </menuItem>
                             <menuItem title="Help" id="wpr-3q-Mcd">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">

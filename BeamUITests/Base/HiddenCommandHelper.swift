@@ -52,19 +52,3 @@ class HiddenCommandHelper {
     }
 }
 
-class HiddenNotificationHelper {
-
-    let beeper: CrossTargetBeeper = CrossTargetNotificationCenterBeeper()
-
-    init() { }
-
-    func waitForUserSignIn(timeout: TimeInterval) {
-        let dispatchGroup = DispatchGroup()
-        dispatchGroup.enter()
-        beeper.register(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue) {
-            dispatchGroup.leave()
-            self.beeper.unregister(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue)
-        }
-        _ = dispatchGroup.wait(timeout: .now() + timeout)
-    }
-}
