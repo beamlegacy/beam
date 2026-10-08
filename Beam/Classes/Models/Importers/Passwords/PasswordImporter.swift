@@ -66,7 +66,8 @@ enum PasswordImporter {
             let url = columns[urlIndex]
             let username = columns[usernameIndex]
             let password = columns[passwordIndex]
-            guard !url.isEmpty, !username.isEmpty, !password.isEmpty else { return nil }
+            // Entries without a username (password only) are valid, e.g. in Apple Passwords exports.
+            guard !url.isEmpty, !password.isEmpty else { return nil }
             return Entry(url: url, username: username, password: password)
         }
     }
@@ -80,8 +81,8 @@ enum PasswordImporter {
 
         var importedCount = 0
         for record in parser {
-            if let entry = decoder.decode(record) {
-                BeamData.shared.passwordManager.save(hostname: entry.hostname, username: entry.username, password: entry.password)
+            if let entry = decoder.decode(record), !entry.hostname.isEmpty,
+               BeamData.shared.passwordManager.save(hostname: entry.hostname, username: entry.username, password: entry.password) != nil {
                 importedCount += 1
             }
         }
