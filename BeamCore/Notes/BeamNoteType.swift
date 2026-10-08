@@ -61,6 +61,11 @@ public enum BeamNoteType: Codable, Equatable {
         let formater = ISO8601DateFormatter()
         formater.timeZone = .current
         formater.formatOptions = .withFullDate
+        // `.current` is a snapshot: follow time zone changes (e.g. when traveling) so journal days stay right.
+        NotificationCenter.default.addObserver(forName: .NSSystemTimeZoneDidChange, object: nil, queue: nil) { _ in
+            NSTimeZone.resetSystemTimeZone()
+            formater.timeZone = .current
+        }
         return formater
     }()
 
