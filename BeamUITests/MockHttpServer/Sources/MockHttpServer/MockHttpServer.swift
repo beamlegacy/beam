@@ -168,8 +168,9 @@ public class MockHttpServer {
             self?.renderStencil("redirection/youtube_redirected", params: [:]) ?? .notFound
         }
 
-        // File download handler (catch-all for root-level paths)
-        server.GET["/:param"] = { [weak self] request in
+        // File download handler for any other path. Swifter tries variable segments before literal ones,
+        // so a "/:param" route would shadow every single-segment route above (e.g. /redirection).
+        server.notFoundHandler = { [weak self] request in
             self?.fileDownloadOrRootHandler(request: request) ?? .notFound
         }
     }
