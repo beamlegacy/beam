@@ -363,6 +363,15 @@ public class ElementNode: Widget {
         }
     }
 
+    // `dispatchHover` sets `hover` before `frontmostHover`, so the layers must also be refreshed here,
+    // otherwise nested nodes show the move handle of the previously hovered node.
+    override var frontmostHover: Bool {
+        didSet {
+            guard frontmostHover != oldValue else { return }
+            updateElementLayers()
+        }
+    }
+
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
         if mouseInfo.position.x < contentsFrame.width / 2 {
             focus(position: 0)
