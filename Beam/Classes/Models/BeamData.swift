@@ -441,11 +441,7 @@ extension BeamData {
 extension BeamData {
     private static func createVersionChecker() -> VersionChecker {
         let enableUpdateAutoCheck = false
-        if let feed = URL(string: Configuration.updateFeedURL) {
-            return VersionChecker(feedURL: feed, autocheckEnabled: enableUpdateAutoCheck)
-        } else {
-            return VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: enableUpdateAutoCheck)
-        }
+        return VersionChecker(gitHubRepo: "beamlegacy/beam", assetName: "Beam.zip", autocheckEnabled: enableUpdateAutoCheck)
     }
 
     private func configureAutoUpdate() {
