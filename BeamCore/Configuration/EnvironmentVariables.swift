@@ -20,7 +20,7 @@ public struct EnvironmentVariables {
     }
 
     public struct MockHttpServer {
-        static public private(set) var port = 3000
+        static public private(set) var port = 9980 // $(MOCK_HTTP_PORT)
     }
 
     static public private(set) var env = "debug" //"$(ENV)"

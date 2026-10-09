@@ -36,6 +36,10 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
+        handleMessage(messageName: messageName, messageBody: messageBody, from: webPage, isMainFrame: frameInfo?.isMainFrame ?? false)
+    }
+
+    func handleMessage(messageName: String, messageBody: Any?, from webPage: WebPage, isMainFrame: Bool) {
         do {
             guard let messageKey = WebPositionsMessages(rawValue: messageName) else {
                 Logger.shared.logError("Unsupported message '\(messageName)' for WebPostions message handler", category: .web)
@@ -73,7 +77,7 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
                     frames: webPage.webFrames,
                     positions: webPage.webPositions,
                     href: href,
-                    isMain: frameInfo?.isMainFrame ?? false
+                    isMain: isMainFrame
                 )
             }
 

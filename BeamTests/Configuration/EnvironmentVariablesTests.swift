@@ -15,9 +15,8 @@ class EnvironmentVariablesTests: QuickSpec {
             // To be used the day Swift + Mirror + static works
 //            let mirror = Mirror(reflecting: EnvironmentVariables.self)
 
-            expect(EnvironmentVariables.Oauth.Google.consumerKey) != "$(GOOGLE_CONSUMER_KEY)"
-            expect(EnvironmentVariables.Oauth.Google.consumerSecret) != "$(GOOGLE_CONSUMER_SECRET)"
-            expect(EnvironmentVariables.Oauth.Google.callbackURL) != "$(GOOGLE_REDIRECT_URL)"
+            // Values are no longer injected at build time: the ones the tests rely on must be set in the file.
+            expect(EnvironmentVariables.MockHttpServer.port) > 0
 
         }
     }
