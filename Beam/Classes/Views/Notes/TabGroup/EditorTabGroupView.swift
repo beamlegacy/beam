@@ -18,8 +18,6 @@ struct EditorTabGroupView: View {
     @Binding var hoveredGroupColor: Color?
 
     @State private var isHoverArrow: Bool = false
-    @State private var isLoading: Bool = false
-    @State private var showShareConfirmation: Bool = false
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var windowInfo: BeamWindowInfo
 
@@ -35,27 +33,21 @@ struct EditorTabGroupView: View {
                 ZStack {
                     HStack {
                         title
-                        Spacer(minLength: isLoading ? BeamSpacing._160 : BeamSpacing._80)
+                        Spacer(minLength: BeamSpacing._80)
                     }
                     HStack {
                         Spacer()
-                        if isLoading {
-                            ProgressView()
-                                .scaleEffect(0.375, anchor: .center)
-                                .frame(width: 12, height: 16)
-                        } else {
-                            ButtonLabel(icon: "tabs-group_open", customStyle: arrowButtonStyle) {
-                                openAllTabs()
-                            }
-                            .accessibilityElement()
-                            .accessibilityLabel("Open tab group")
-                            .accessibilityIdentifier("open-tabGroup")
-                            .accessibilityAction {
-                                openAllTabs()
-                            }
-                            .onHover {
-                                isHoverArrow = $0
-                            }
+                        ButtonLabel(icon: "tabs-group_open", customStyle: arrowButtonStyle) {
+                            openAllTabs()
+                        }
+                        .accessibilityElement()
+                        .accessibilityLabel("Open tab group")
+                        .accessibilityIdentifier("open-tabGroup")
+                        .accessibilityAction {
+                            openAllTabs()
+                        }
+                        .onHover {
+                            isHoverArrow = $0
                         }
                     }
                     .blendModeLightMultiplyDarkScreen()
@@ -94,10 +86,6 @@ struct EditorTabGroupView: View {
             .padding(.top, 5)
         }
         .background(background)
-        .overlay(!showShareConfirmation ? nil :
-                    Tooltip(title: "Link Copied")
-            .offset(x: 0, y: -(Tooltip.defaultHeight + 4))
-            .transition(Tooltip.defaultTransition), alignment: .top)
         .frame(minWidth: 100, maxWidth: 200, idealHeight: Self.height)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("\(tabGroup.title ?? "Unnamed") tab group")
@@ -172,7 +160,7 @@ struct EditorTabGroupView: View {
 
     private func showContextMenu(with event: NSEvent) {
         let menu = NSMenu()
-        weak var state = self.state
+        weak let state = self.state
 
         let nameAndColorView = TabClusteringNameColorPickerView(
             groupName: tabGroup.title ?? "",
@@ -205,9 +193,6 @@ struct EditorTabGroupView: View {
         menu.addItem(nameAndColorItem)
         menu.addItem(.fullWidthSeparator())
 
-        addShareGroupSubMenu(in: menu)
-        menu.addItem(.separator())
-
         menu.addItem(withTitle: "Open in Background") { _ in
             openAllTabs(options: [.inBackground])
         }
@@ -235,42 +220,6 @@ struct EditorTabGroupView: View {
     private func openAllTabs(options: Set<BeamState.TabOpeningOption> = []) {
         let group = TabGroupingStoreManager.convertBeamObjectToGroup(tabGroup)
         state.openTabGroup(group, openingOption: options)
-    }
-
-    private func addShareGroupSubMenu(in menu: NSMenu) {
-        let subMenu = NSMenu()
-        let handlerForService: (ShareService) -> HandlerMenuItem.Handler = { service in
-            return { _ in self.shareGroup(shareService: service) }
-        }
-        var subItems = [
-            HandlerMenuItem(title: "Copy Link", icon: "editor-url_link", handler: handlerForService(.copy)),
-            NSMenuItem.separator()
-        ]
-        subItems.append(contentsOf: ShareService.allCases(except: [.copy]).map {
-            HandlerMenuItem(title: $0.title, icon: $0.icon, handler: handlerForService($0))
-        })
-        subItems.forEach { subMenu.addItem($0) }
-        let menuItem = NSMenuItem(title: "Share Group", action: nil, keyEquivalent: "")
-        menu.setSubmenu(subMenu, for: menuItem)
-        menu.addItem(menuItem)
-    }
-
-    private func shareGroup(shareService: ShareService) {
-        isLoading = true
-        let group = TabGroupingStoreManager.convertBeamObjectToGroup(tabGroup)
-        state.data.tabGroupingManager.shareGroup(group, shareService: shareService, state: state) { result in
-            isLoading = false
-            switch result {
-            case .success:
-                showShareConfirmation = shareService == .copy
-                DispatchQueue.main.asyncAfter(deadline: .now () + .seconds(2)) {
-                    showShareConfirmation = false
-                }
-                break
-            case .failure:
-                break
-            }
-        }
     }
 }
 

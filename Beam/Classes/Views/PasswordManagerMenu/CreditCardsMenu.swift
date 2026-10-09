@@ -39,10 +39,10 @@ struct CreditCardsMenu: View {
             .onPreferenceChange(HeightKey.self) {
                 self.height = $0
             }
-            .animation(nil)
+            .transaction { $0.animation = nil }
         }
         .frame(width: 305, height: height, alignment: .top)
-        .animation(nil)
+        .transaction { $0.animation = nil }
     }
 
     @ViewBuilder

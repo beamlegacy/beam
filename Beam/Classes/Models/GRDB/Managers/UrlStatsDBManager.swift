@@ -19,7 +19,7 @@ class UrlStatsDBManager: GRDBHandler, BeamManager {
     static var id = UUID()
     static var name = "UrlStatsDBManager"
 
-    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
             self.owner = holder
             try super.init(store: store)
         }

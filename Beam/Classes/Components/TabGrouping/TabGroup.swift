@@ -11,17 +11,12 @@ final class TabGroup: Identifiable {
 
     typealias GroupID = UUID
 
-    enum Status {
-        case `default`, sharing
-    }
-
     private(set) var id = GroupID()
     private(set) var title: String?
     private(set) var color: TabGroupingColor?
     private(set) var pageIds: [ClusteringManager.PageID]
     private(set) var collapsed = false
     private(set) var isLocked: Bool = false
-    var status = Status.default
     private(set) var parentGroup: UUID?
 
     /// Whether or not the group should allow the clustering to append / remove pages.

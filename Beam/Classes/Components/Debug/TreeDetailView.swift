@@ -47,7 +47,7 @@ class TreeDetailView: NSView {
             stackView.autoresizingMask = [.width, .height]
             addSubview(stackView)
 
-            let displayType = NSSegmentedControl(labels: ["Note", "JSON", "Synced JSON"], trackingMode: .selectOne, target: self, action: #selector(displayTypeChanged))
+            let displayType = NSSegmentedControl(labels: ["Note", "JSON"], trackingMode: .selectOne, target: self, action: #selector(displayTypeChanged))
             displayType.selectedSegment = 0
             displayType.autoresizingMask = [.width, .height]
             displayType.sizeToFit()
@@ -90,8 +90,6 @@ class TreeDetailView: NSView {
             setupEditor(forDocument: documentNode, in: scrollView)
         case 1:
             setupJSONView(forDocument: documentNode, in: scrollView)
-        case 2:
-            setupSyncedJSONView(forDocument: documentNode, in: scrollView)
         default:
             break
         }
@@ -107,11 +105,6 @@ class TreeDetailView: NSView {
 
     func setupJSONView(forDocument documentNode: DocumentTreeNode, in scrollView: NSScrollView) {
         guard let string = documentNode.document?.data.asString else { return }
-        setupTextView(string: string, in: scrollView)
-    }
-
-    func setupSyncedJSONView(forDocument documentNode: DocumentTreeNode, in scrollView: NSScrollView) {
-        guard let string = documentNode.document?.previousSavedObject?.data.asString else { return }
         setupTextView(string: string, in: scrollView)
     }
 

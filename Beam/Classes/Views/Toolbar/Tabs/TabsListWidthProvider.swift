@@ -90,12 +90,6 @@ final class TabsListWidthProvider {
                 } else if !displayText.isEmpty {
                     width = max(width, widthForText(displayText) + (hPadding*2))
                 }
-                if case .sharing = group.status {
-                    let textWithStatus = item.displayedText(allowingStatus: true)
-                    var widthWithStatus = widthForText(textWithStatus) + (hPadding*2)
-                    widthWithStatus += 16 // showing the loader
-                    width = max(width, widthWithStatus)
-                }
                 customWidths[item.id] = min(maximumGroupItemWidth, width)
             }
         }

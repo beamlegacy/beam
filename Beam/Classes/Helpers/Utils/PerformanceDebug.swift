@@ -87,15 +87,6 @@ class PerformanceDebug {
         debug("\(preMessage ?? "") DONE".trimmingCharacters(in: .whitespaces))
     }
 
-    func extraInfos() -> [String: Any] {
-        // Add details for Alamofire errors (loosing details when casted to NSError)
-        let tokensInfo: [String: Any] = AuthenticationManager.shared.hashTokensInfos()
-        var extraInfo: [String: Any] = [:]
-        extraInfo.merge(tokensInfo) { (current, _) in current }
-
-        return extraInfo
-    }
-
     static func debugLog(_ category: PerformanceDebugCategory,
                          _ message: String,
                          _ forced: Bool = false,

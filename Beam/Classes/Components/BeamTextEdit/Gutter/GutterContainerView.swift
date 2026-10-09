@@ -108,6 +108,10 @@ class GutterContainerView: NSView {
         let view = NSHostingView(rootView: GutterView(isLeading: isLeading,
                                                       leadingGutterViewType: leadingGutterViewType,
                                                       trailingGutterViewModel: trailingGutterViewModel))
+        if #available(macOS 13.0, *) {
+            // Pinned on all sides below: SwiftUI size constraints would fight with them and loop the layout.
+            view.sizingOptions = []
+        }
         view.translatesAutoresizingMaskIntoConstraints = false
         view.wantsLayer = true
         view.layer?.masksToBounds = false

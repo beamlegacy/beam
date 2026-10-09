@@ -13,7 +13,6 @@ class NoteDailySummaryTest: XCTestCase, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
 
     override func setUpWithError() throws {
-        BeamTestsHelper.logout()
     }
 
     override func tearDownWithError() throws {

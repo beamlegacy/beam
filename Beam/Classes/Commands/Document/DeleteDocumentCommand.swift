@@ -66,9 +66,6 @@ class DeleteDocument: DocumentCommand, BeamDocumentSource {
             }
         } else {
             saveDocumentsLinks().forEach { notesToUpdate.insert($0.noteID) }
-            if let fileManager = context?.owner?.data.fileDBManager {
-                unpublishNotes(in: documents, fileManager: fileManager)
-            }
 
             var notes = Set<BeamNote>()
             for id in documentIds {
@@ -114,26 +111,6 @@ class DeleteDocument: DocumentCommand, BeamDocumentSource {
             _ = try? context.save(self, document, indexDocument: true)
         }
         completion?(true)
-    }
-
-    private func unpublishNotes(in docs: [BeamDocument], fileManager: BeamFileDBManager) {
-        let toUnpublish = docs.filter({ $0.isPublic })
-        toUnpublish.forEach { doc in
-            if let note = BeamNote.getFetchedNote(doc.id) {
-                if note.publicationStatus.isOnPublicProfile {
-                    BeamNoteSharingUtils.removeFromProfile(note, fileManager: fileManager) { result in
-                        switch result {
-                        case .success:
-                            BeamNoteSharingUtils.unpublishNote(with: doc.id, fileManager: fileManager, completion: { _ in })
-                        case .failure:
-                            break
-                        }
-                    }
-                } else {
-                    BeamNoteSharingUtils.unpublishNote(with: doc.id, fileManager: fileManager, completion: { _ in })
-                }
-            }
-        }
     }
 
     private func saveDocumentsLinks() -> [BeamNoteReference] {

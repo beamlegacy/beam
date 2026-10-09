@@ -9,6 +9,7 @@ import XCTest
 import BeamCore
 @testable import Beam
 
+@MainActor
 class ShareHelperTests: XCTestCase {
     private let baseURL = URL(string: "http://sharehelpertests.com")!
     private let timeout: TimeInterval = 2
@@ -29,7 +30,7 @@ class ShareHelperTests: XCTestCase {
             expectation.fulfill()
         }
         await sut.shareContent(content, originURL: baseURL, service: .twitter)
-        await waitForExpectations(timeout: timeout, handler: nil)
+        await fulfillment(of: [expectation], timeout: timeout)
 
         let resultURL = receivedURL?.absoluteString ?? ""
         XCTAssertTrue(resultURL.starts(with: "https://twitter.com/intent/tweet?"))
@@ -52,7 +53,7 @@ class ShareHelperTests: XCTestCase {
             expectation.fulfill()
         }
         await sut.shareContent(content, originURL: baseURL, service: .twitter)
-        await waitForExpectations(timeout: timeout, handler: nil)
+        await fulfillment(of: [expectation], timeout: timeout)
 
         let fullText = [text, text, text].joined(separator: .lineSeparator)
         let resultURL = receivedURL?.absoluteString ?? ""

@@ -48,7 +48,7 @@ public extension BeamNote {
                             data: Data(),
                             documentType: DocumentType(from: type),
                             version: version,
-                            isPublic: publicationStatus.isPublic,
+                            isPublic: false, // notes can't be published anymore, column kept for existing databases
                             journalDate: JournalDateConverter.toInt(from: type.journalDateString ?? "0"),
                             tabGroupId: type.tabGroupId,
                             isEmpty: isEntireNoteEmpty()
@@ -271,12 +271,6 @@ public extension BeamNote {
         } catch {
             Logger.shared.logError("Error while updating file references for note \(self.titleAndId)", category: .document)
         }
-    }
-
-    static func instanciateNoteWithPreviousData(_ document: BeamDocument,
-                                                decodeChildren: Bool = true) throws -> BeamNote? {
-        // Remote sync checksum removed — no previous data available
-        return nil
     }
 
     static func fetch(title: String,
@@ -700,15 +694,6 @@ public extension BeamNote {
         static let indexAllNotes: StaticString = "indexAllNotes"
         static let rebuildAllNotes: StaticString = "rebuildAllNotes"
         static let loadNotes: StaticString = "loadNotes"
-    }
-}
-
-public extension BeamDocument {
-    func previousTextDescription() throws -> String? {
-        if let beamNote = try BeamNote.instanciateNoteWithPreviousData(self, decodeChildren: true) {
-            return beamNote.textDescription()
-        }
-        return nil
     }
 }
 

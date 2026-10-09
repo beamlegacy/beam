@@ -213,7 +213,7 @@ class WebAutofillController: NSObject, WebPageRelated {
             return completion()
         }
 
-        Task {
+        Task { [self] in
             page.executeJS("installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal) { [weak self] _ in
                 _ = self?.lock.write {
                     self?.framesWithInstalledSubmitHandler.insert(frameHref)
@@ -245,7 +245,7 @@ class WebAutofillController: NSObject, WebPageRelated {
             return
         }
         guard let autofillGroup = fieldClassifiers?.autofillGroup(for: elementId, frameInfo: frameInfo) else {
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [self] in
                 self.clearInputFocus()
                 Task.init {
                     self.page?.executeJS("sendTextFields(null)", objectName: self.JSObjectName, frameInfo: frameInfo, successLogCategory: .webAutofillInternal) { [weak self] _ in

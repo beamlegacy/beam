@@ -100,7 +100,7 @@ struct CalendarView: View, BeamDocumentSource {
             isNotConnectedView
                 .padding(.leading, 16)
                 .foregroundColor(isHoveringNotConnect ? BeamColor.Niobium.swiftUI : BeamColor.Generic.placeholder.swiftUI)
-                .animation(.easeInOut(duration: 0.3))
+                .animation(.easeInOut(duration: 0.3), value: isHoveringNotConnect)
                 .onHover { isHoveringNotConnect = $0 }
                 .onTapGesture {
                     openCalendarsPreferences()

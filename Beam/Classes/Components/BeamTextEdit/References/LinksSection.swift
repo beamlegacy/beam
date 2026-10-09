@@ -61,7 +61,7 @@ class LinksSection: Widget {
     }
 
     func setupUI(openChildren: Bool) {
-        performLayerChanges {
+        performLayerChanges { [self] in
             self.sign.begin(Signs.setupUI)
             defer { self.sign.end(Signs.setupUI) }
 

@@ -39,12 +39,25 @@ extension OnboardingImportsView {
 
         private var safariInstructions: some View {
             VStack(alignment: .leading, spacing: vStackSpacing) {
-                bulletPoints([
-                    "Open Safari Preferences -> Passwords.",
-                    "Click on “•••” and choose “Export...”",
-                    "Click on Choose CSV File button and select the exported CSV file."
-                ])
+                if ImportSource.applePasswords.isAvailable {
+                    applePasswordsInstructions
+                } else {
+                    bulletPoints([
+                        "Open Safari Preferences -> Passwords.",
+                        "Click on “•••” and choose “Export...”",
+                        "Click on Choose CSV File button and select the exported CSV file."
+                    ])
+                }
             }
+        }
+
+        // Since macOS 15, Safari passwords are managed by the Passwords app.
+        private var applePasswordsInstructions: some View {
+            bulletPoints([
+                "Open the Passwords app.",
+                "Choose File -> Export All Passwords to File…",
+                "Click on Choose CSV File button and select the exported CSV file."
+            ])
         }
 
         private var safariOldInstructions: some View {
@@ -109,6 +122,8 @@ extension OnboardingImportsView {
                         safariInstructions
                     } else if source == .safariOld {
                         safariOldInstructions
+                    } else if source == .applePasswords {
+                        applePasswordsInstructions
                     } else if source == .firefox {
                         firefoxInstructions
                     } else if source == .passwordsCSV {

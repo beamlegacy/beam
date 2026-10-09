@@ -394,7 +394,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
 
     func shareShootToService(group: ShootGroup, service: ShareService) {
         guard let page = self.page, let sourceUrl = page.url else { return }
-        Task { @MainActor in
+        Task { @MainActor [self] in
             let helper = ShareHelper(sourceUrl, data: data) { [weak self] url in
                 let webView = self?.page?.createNewWindow(URLRequest(url: url), page.webView.configuration, windowFeatures: ShareWindowFeatures(for: service), setCurrent: true)
                 _ = webView?.load(URLRequest(url: url))

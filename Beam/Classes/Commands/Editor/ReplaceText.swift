@@ -53,7 +53,9 @@ class ReplaceText: TextEditorCommand {
         guard let insertText = command as? InsertText,
               insertText.text.text != "\n",
               insertText.noteId == noteId,
-              insertText.elementId == elementId
+              insertText.elementId == elementId,
+              // Only text typed right after the replacement can extend it.
+              insertText.cursorPosition == range.lowerBound + text.count
         else { return false }
 
         self.text.append(insertText.text)

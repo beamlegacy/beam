@@ -15,7 +15,7 @@ enum ContactsDBError: Error {
     case cantDeleteContact(errorMsg: String)
 }
 
-struct ContactRecord: Decodable {
+struct ContactRecord: Codable {
     internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
 
     var uuid: UUID = .null
@@ -38,16 +38,7 @@ extension ContactRecord: Hashable {
     }
 }
 
-extension ContactRecord: BeamObjectProtocol {
-    static var beamObjectType: BeamObjectObjectType {
-        BeamObjectObjectType.contact
-    }
-
-    var beamObjectId: UUID {
-        get { uuid }
-        set { uuid = newValue }
-    }
-
+extension ContactRecord {
     enum CodingKeys: String, CodingKey {
         case noteId
         case emails
@@ -140,7 +131,7 @@ class ContactsDB: GRDBHandler, BeamManager, LegacyAutoImportDisabler {
     weak var owner: BeamManagerOwner?
     override var tableNames: [String] { [ContactsDB.tableName] }
 
-    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.owner = holder
         try super.init(store: store)
     }

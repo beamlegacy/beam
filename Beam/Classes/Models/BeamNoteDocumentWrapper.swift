@@ -89,7 +89,10 @@ final class BeamNoteDocumentWrapper: NSDocument {
                     self.files[id.uuidString] = File(id: id, name: id.uuidString, data: data)
                     continue
                 }
-                let name = filename.count > 36 ? String(filename.prefix(filename.count - 36)) : filename
+                // Exported as "<file id>-<name>", see fileWrapper(ofType:).
+                let idPrefixLength = 37
+                let hasIdPrefix = filename.count > idPrefixLength && UUID(uuidString: String(filename.prefix(idPrefixLength - 1))) != nil
+                let name = hasIdPrefix ? String(filename.dropFirst(idPrefixLength)) : filename
                 let id = BeamFileDBManager.uuidFor(data: data)
                 self.files[id.uuidString] = File(id: id, name: name, data: data)
             }

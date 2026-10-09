@@ -5,7 +5,14 @@ enum BeamUniformTypeIdentifiers {
 
     static let passwordsExportType: UTType = .commaSeparatedText
 
-    static let roamAllowedFileTypes: [String] = [Self.markdownExtension] + (UTType.json.preferredFilenameExtension.map { [$0] } ?? [])
+    static let roamAllowedContentTypes: [UTType] = [Self.markdownType, .json]
+
+    /// CSV and plain text files, as accepted by the passwords and history importers.
+    static let csvOrTextTypes: [UTType] = [.commaSeparatedText, .plainText]
+
+    /// Document packages exported by Beam (declared in Info.plist).
+    static let beamNoteType = UTType(exportedAs: "co.beamapp.note", conformingTo: .package)
+    static let beamNoteCollectionType = UTType(exportedAs: "co.beamapp.notecollection", conformingTo: .package)
 
     private static let supportedSuperTypes: [UTType] = [
         .audiovisualContent,
@@ -40,4 +47,5 @@ enum BeamUniformTypeIdentifiers {
 extension BeamUniformTypeIdentifiers {
     /// Markdown file extension (there are no provided Markdown UTType yet)
     static let markdownExtension: String = "md"
+    static let markdownType = UTType(filenameExtension: markdownExtension) ?? .plainText
 }

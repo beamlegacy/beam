@@ -12,16 +12,10 @@ import Nimble
 
 class FrecencyNoteStorageTest: XCTestCase {
 
-    let beamHelper = BeamTestsHelper()
-    let beamObjectHelper = BeamObjectTestsHelper()
     var db: BeamNoteLinksAndRefsManager!
-    let objectManager = BeamData.shared.objectManager
 
     override func setUpWithError() throws {
         super.setUp()
-
-        BeamTestsHelper.logout()
-        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
         let store = try GRDBStore.empty()
         db = try BeamNoteLinksAndRefsManager(store: store)
@@ -52,35 +46,26 @@ class FrecencyNoteStorageTest: XCTestCase {
         BeamDate.reset()
     }
 
-    func testApiSaveLimiter() throws {
-        let limiter = NoteFrecencyApiSaveLimiter(saveOnApiLimit: 2)
-        let ids = (0...2).map { _ in UUID() }
-        let before = BeamDate.now
-        let after = before + 1
+    func testSoftDelete() throws {
+        BeamDate.freeze("2021-03-19T12:21:03Z")
+        defer { BeamDate.reset() }
+        let noteIds = [UUID(), UUID()]
+        let storage = GRDBNoteFrecencyStorage(db: db)
+        let now = BeamDate.now
+        let records = [
+            FrecencyNoteRecord(noteId: noteIds[0], lastAccessAt: BeamDate.now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: noteIds[0], lastAccessAt: BeamDate.now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d1),
+            FrecencyNoteRecord(noteId: noteIds[1], lastAccessAt: BeamDate.now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d0)
+        ]
+        try db.save(noteFrecencies: records)
 
-        //First case: we add 2 records with same ids, after 2nd call there is 1 record to save as we deduplicate on id
-        limiter.add(record: FrecencyNoteRecord(id: ids[0], noteId: UUID(), lastAccessAt: after, frecencyScore: 1, frecencySortScore: 1, frecencyKey: .note30d0))
-        //Under limit, no records to save
-        XCTAssertNil(limiter.recordsToSave)
-        limiter.add(record: FrecencyNoteRecord(id: ids[0], noteId: UUID(), lastAccessAt: before, frecencyScore: 1, frecencySortScore: 1, frecencyKey: .note30d0))
-        //Limit reached, record to save exists
-        var records = try XCTUnwrap(limiter.recordsToSave)
-        XCTAssertEqual(records.count, 1)
-        XCTAssertEqual(records[0].id, ids[0])
-        XCTAssertEqual(records[0].lastAccessAt, after)
-        //after accessing recordsToSave, limiter gets emptied
-        XCTAssertNil(limiter.recordsToSave)
+        storage.softDelete(noteId: noteIds[0])
 
-        //First case: we add 2 records with distinct ids
-        limiter.add(record: FrecencyNoteRecord(id: ids[1], noteId: UUID(), lastAccessAt: after, frecencyScore: 1, frecencySortScore: 1, frecencyKey: .note30d0))
-        //Under limit, no records to save
-        XCTAssertNil(limiter.recordsToSave)
-        limiter.add(record: FrecencyNoteRecord(id: ids[2], noteId: UUID(), lastAccessAt: after, frecencyScore: 1, frecencySortScore: 1, frecencyKey: .note30d0))
-        //Limit reached, record to save exists
-        records = try XCTUnwrap(limiter.recordsToSave)
-        //after accessing recordsToSave, limiter gets emptied
-        XCTAssertEqual(records.count, 2)
-        XCTAssertNil(limiter.recordsToSave)
+        var localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[0], paramKey: .note30d0))
+        XCTAssertEqual(localRecord.deletedAt, now)
+        localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[0], paramKey: .note30d1))
+        XCTAssertEqual(localRecord.deletedAt, now)
+        localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[1], paramKey: .note30d0))
+        XCTAssertNil(localRecord.deletedAt)
     }
-
 }

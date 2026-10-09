@@ -17,71 +17,6 @@ enum PasswordDBError: Error {
     case errorSearchingPassword(errorMsg: String)
 }
 
-struct RemotePasswordRecord {
-    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
-
-    var uuid: UUID = .null
-    var entryId: String
-    var hostname: String
-    var host: String? // TODO: Remove the support of old keys
-    var name: String? // TODO: Remove the support of old keys
-    var username: String
-    var password: String
-    var disabledForHost: Bool
-    var createdAt: Date
-    var updatedAt: Date
-    var usedAt: Date
-    var deletedAt: Date?
-    var privateKeySignature: String?
-}
-
-extension RemotePasswordRecord: BeamObjectProtocol {
-    static let beamObjectType = BeamObjectObjectType.password
-
-    var beamObjectId: UUID {
-        get { uuid }
-        set { uuid = newValue }
-    }
-
-    // Used for encoding this into BeamObject
-    enum CodingKeys: String, CodingKey {
-        case entryId
-        case hostname
-        case host // TODO: Remove the support of old keys
-        case username
-        case name // TODO: Remove the support of old keys
-        case password
-        case disabledForHost
-        case createdAt
-        case updatedAt
-        case usedAt
-        case deletedAt
-        case privateKeySignature
-    }
-
-    func copy() -> Self {
-        self
-    }
-
-    // TODO: Remove the support of old keys
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        entryId = try container.decode(String.self, forKey: .entryId)
-
-        hostname = try (try? container.decode(String.self, forKey: .hostname)) ?? (try container.decode(String.self, forKey: .host))
-        username = try (try? container.decode(String.self, forKey: .username)) ?? (try container.decode(String.self, forKey: .name))
-
-        password = try container.decode(String.self, forKey: .password)
-        disabledForHost = try container.decodeIfPresent(Bool.self, forKey: .disabledForHost) ?? false
-        createdAt = try container.decode(Date.self, forKey: .createdAt)
-        updatedAt = try container.decode(Date.self, forKey: .updatedAt)
-        usedAt = try container.decodeIfPresent(Date.self, forKey: .usedAt) ?? BeamDate.now
-        deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
-        privateKeySignature = try? container.decode(String.self, forKey: .privateKeySignature)
-    }
-}
-
 struct LocalPasswordRecord {
     internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
 
@@ -162,7 +97,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
 
     static let tableName = "passwordRecord"
 
-    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.owner = holder
         self.grdbStore = store
         try super.init(store: store)
@@ -451,6 +386,7 @@ class PasswordsDB: GRDBHandler, PasswordStore, BeamManager, LegacyAutoImportDisa
             }
         } catch let error {
             Logger.shared.logError("Error while fetching password entries for \(hostname): \(error)", category: .passwordsDB)
+            completion([])
         }
     }
 }

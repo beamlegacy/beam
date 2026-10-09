@@ -70,21 +70,28 @@ class BatchHistoryImporter {
         }
     }
 
-    func finalize(onError: () -> Void ) {
+    /// - Returns: whether the imported history was saved.
+    @discardableResult
+    func finalize(onError: () -> Void ) -> Bool {
         if !stepCount.isMultiple(of: batchSize) {
             saveBatch()
         }
+        var saved = true
         timer.record(stepName: "treeSave") {
             do {
                 try browsingTreeStoreManager.save(browsingTree: browsingTree)
             } catch {
                 Logger.shared.logError("Couldn't save tree: \(error)", category: .browserImport)
+                saved = false
                 onError()
             }
         }
+        defer { browsingTree.erase() } //required to avoid BAD_EXC runtime crash when used in Combine
+        // Only remember how far we imported once saved, otherwise the next import would skip this history.
+        guard saved else { return false }
         Persistence.ImportedBrowserHistory.save(maxDate: maxDate, browserType: sourceBrowser)
         Logger.shared.logInfo("Import finished successfully", category: .browserImport)
         timer.log(category: .browserImport)
-        browsingTree.erase() //required to avoid BAD_EXC runtime crash when used in Combine
+        return true
     }
 }

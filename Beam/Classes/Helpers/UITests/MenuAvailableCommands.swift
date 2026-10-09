@@ -5,15 +5,11 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     // Clean up
     case destroyDB = "Destroy Databases"
     case deleteLogs = "Delete Logs"
-    case deletePrivateKeys = "Delete Private Keys"
-    case deleteAllRemoteObjects = "Delete All Remote Objects"
 
     case showOnboarding = "Reset Onboarding"
     case resetCollectAlert = "Reset Collect Alert"
 
     // Account
-    case signInWithTestAccount = "Sign in with Test Account"
-    case signUpWithRandomTestAccount = "Sign up with Random Test Account"
     case logout = "Logout"
 
     // Preferences
@@ -61,8 +57,6 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case separatorInNotesB
     case createNote = "Create Note"
     case createAndOpenNote = "Create and Open Note"
-    case createPublishedNote = "Create Published Note"
-    case createAndOpenPublishedNote = "Create and Open Published Note"
 
     // Links
     case create1000Links = "Create 1,000 Links"
@@ -86,11 +80,6 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case omniboxEnableSearchInHistoryContent = "Search in history content: Enable"
     case omniboxDisableSearchInHistoryContent = "Search in history content: Disable"
 
-    // Remote server
-    case resetAPIEndpoints = "Set API Endpoints to production server"
-    case setAPIEndpointsToStaging = "Set API Endpoints to staging server"
-    case deleteRemoteAccount = "Delete remote account"
-
     // Others
     case separatorB
     case setAutoUpdateToMock = "Set Autoupdate to Mock"
@@ -107,7 +96,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .webTabs
         case .populateDBWithJournal, .insertTextInCurrentNote,
                 .create100Notes, .create100NormalNotes, .create100JournalNotes, .create10Notes, .create10NormalNotes, .create10JournalNotes,
-                .createFakeDailySummary, .createNote, .createAndOpenNote, .createPublishedNote, .createAndOpenPublishedNote,
+                .createFakeDailySummary, .createNote, .createAndOpenNote,
                 .separatorInNotesA, .separatorInNotesB:
             return .notes
         case .create1000Links, .create10000Links, .create50000Links:
@@ -120,12 +109,10 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .mockHttpServer
         case .omniboxFillHistory, .omniboxEnableSearchInHistoryContent, .omniboxDisableSearchInHistoryContent:
             return .omniboxSetup
-        case .resetAPIEndpoints, .setAPIEndpointsToStaging, .deleteRemoteAccount:
-            return .remoteServer
         case .separatorInPreferencesA, .startBeamOnDefault, .startBeamOnTabs, .enableCreateJournalOnce, .disableCreateJournalOnce,
                 .enableBrowsingSessionCollection, .disableBrowsingSessionCollection, .resetUserPreferences:
             return .preferences
-        case .signInWithTestAccount, .signUpWithRandomTestAccount, .logout:
+        case .logout:
             return .account
         default:
             return nil
@@ -149,7 +136,6 @@ public enum UITestMenuGroup: String, CaseIterable {
     case passwordsAndCards = "Passwords & Credit Cards"
     case mockHttpServer = "Mock HTTP Server"
     case resizeWindow = "Resize Window"
-    case remoteServer = "Remote server"
     case preferences = "Preferences"
 }
 
@@ -162,17 +148,10 @@ public enum UITestsHiddenMenuAvailableCommands: String, CaseIterable {
 
     case tabGroupCaptured
     case tabGroupCapturedNamed
-    case tabGroupCapturedAndShared
-    case tabGroupCapturedNamedAndShared
     case tabGroupsCaptured
     case tabGroupsCapturedNamed
 
     static func openNoteIdentifier(title: String) -> String {
         UITestsHiddenMenuAvailableCommands.openNotePrefix.rawValue + title
     }
-}
-
-/// Notifications sent from the App to UITests through the beeper
-public enum UITestsHiddenMenuAvailableNotifications: String, CaseIterable {
-    case userDidSignIn
 }

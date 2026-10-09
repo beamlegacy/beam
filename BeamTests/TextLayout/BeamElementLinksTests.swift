@@ -13,7 +13,6 @@ import Foundation
 class BeamElementLinks: XCTestCase {
 
     override func setUpWithError() throws {
-        BeamTestsHelper.logout()
         try AppData.shared.clearAllAccountsAndSetupDefaultAccount()
     }
 

@@ -39,12 +39,10 @@ class HiddenCommandHelper {
     }
 
     @discardableResult
-    func createTabGroupsCaptured(named: Bool = false, multiple: Bool = false, shared: Bool = false) -> NoteTestView {
+    func createTabGroupsCaptured(named: Bool = false, multiple: Bool = false) -> NoteTestView {
         var identifier: UITestsHiddenMenuAvailableCommands
         if multiple {
             identifier = named ? .tabGroupsCapturedNamed : .tabGroupsCaptured
-        } else if shared {
-            identifier = named ? .tabGroupCapturedNamedAndShared : .tabGroupCapturedAndShared
         } else {
             identifier = named ? .tabGroupCapturedNamed : .tabGroupCaptured
         }
@@ -54,19 +52,3 @@ class HiddenCommandHelper {
     }
 }
 
-class HiddenNotificationHelper {
-
-    let beeper: CrossTargetBeeper = CrossTargetNotificationCenterBeeper()
-
-    init() { }
-
-    func waitForUserSignIn(timeout: TimeInterval) {
-        let dispatchGroup = DispatchGroup()
-        dispatchGroup.enter()
-        beeper.register(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue) {
-            dispatchGroup.leave()
-            self.beeper.unregister(identifier: UITestsHiddenMenuAvailableNotifications.userDidSignIn.rawValue)
-        }
-        _ = dispatchGroup.wait(timeout: .now() + timeout)
-    }
-}

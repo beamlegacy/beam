@@ -173,7 +173,7 @@ final class VideoCallsViewModel: NSObject, ObservableObject {
         }
 
         if let faviconProvider = faviconProvider {
-            weak var weakWebView = detailsClient.webView
+            weak let weakWebView = detailsClient.webView
             detailsClient
                 .urlPublisher
                 .flatMap { url in

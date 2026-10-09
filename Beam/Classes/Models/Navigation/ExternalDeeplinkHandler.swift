@@ -9,7 +9,8 @@ import Foundation
 
 class ExternalDeeplinkHandler {
     static let internalSchemes: Set<String> = {
-        let schemes: Set<String> = ["http", "https", "file", "blob", "about", "beam"]
+        // "webkit-extension" serves web extension pages (popups, options, vaults) opened in tabs.
+        let schemes: Set<String> = ["http", "https", "file", "blob", "about", "beam", "webkit-extension"]
         return schemes.union(NavigationRouter.customSchemes)
     }()
 

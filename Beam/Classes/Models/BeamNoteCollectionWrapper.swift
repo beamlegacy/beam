@@ -17,6 +17,7 @@ final class BeamNoteCollectionWrapper: NSDocument {
     private(set) var noteDocuments = Set<BeamNoteDocumentWrapper>()
 
     init(fileWrapper: FileWrapper, data: BeamData?) throws {
+        self.data = data
         super.init()
         try read(from: fileWrapper, ofType: Self.documentTypeName)
     }
@@ -32,10 +33,13 @@ final class BeamNoteCollectionWrapper: NSDocument {
     }
 
     override init() {
-        guard let collection = BeamData.shared.currentDocumentCollection else { super.init(); return }
+        let data = BeamData.shared
+        self.data = data
+        guard let collection = data.currentDocumentCollection else { super.init(); return }
         for id in (try? collection.fetchIds(filters: [])) ?? [] {
             guard let note = BeamNote.fetch(id: id) else { continue }
-            noteDocuments.insert(BeamNoteDocumentWrapper(note: note, data: nil))
+            // The data is needed to fetch the note's media files.
+            noteDocuments.insert(BeamNoteDocumentWrapper(note: note, data: data))
         }
         super.init()
     }

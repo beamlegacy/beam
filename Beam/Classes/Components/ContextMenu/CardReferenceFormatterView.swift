@@ -35,7 +35,7 @@ private struct CardReferenceFormatterContainerView: View {
         .frame(width: computedSize.width)
         .fixedSize(horizontal: false, vertical: true)
         .frame(height: computedSize.height, alignment: .topLeading)
-        .animation(BeamAnimation.easeInOut(duration: 0.15))
+        .animation(BeamAnimation.easeInOut(duration: 0.15), value: computedSize)
         .formatterViewBackgroundAnimation(with: viewModel)
     }
 }

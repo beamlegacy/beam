@@ -16,15 +16,6 @@ class TabGroupDeleteTests: BaseTest {
     let tabGroupView = TabGroupView()
     let tabGroupNamed = "Test1"
     
-    private func setUpSharedNotCapturedTabGroup() {
-        signUpStagingWithRandomAccount()
-        createTabGroupAndSwitchToWeb(named: true)
-        tabGroupView.openTabGroupMenu(index: 0)
-            .clickTabGroupMenu(.tabGroupShareGroup)
-            .shareTabGroupAction(copyLinkShareAction)
-        XCTAssertTrue(webView.staticText(TabGroupMenuViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
-    }
-    
     private func setUpCapturedNotSharedTabGroup() {
         createTabGroupAndSwitchToWeb(named: true)
         captureGroupToNoteAndOpenNote()
@@ -35,7 +26,7 @@ class TabGroupDeleteTests: BaseTest {
         omniboxView.searchInOmniBox(tabGroupNamed, false)
         XCTAssertTrue(omniboxView.isTabGroupResultDisplayed(tabGroupName: tabGroupNamed))
         omniboxView.selectAutocompleteResult(autocompleteResult: tabGroupNamed)
-        XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 7))
+        XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 6))
     }
     
     private func deleteTabGroupFromOmnibox(captured: Bool, shouldBeVisibleInBrowser: Bool = true) {
@@ -100,61 +91,6 @@ class TabGroupDeleteTests: BaseTest {
         step("And can now be forgotten") {
             displayTabGroupInOmnibox()
             XCTAssertTrue(omniboxView.isAutocompleteResultDisplayed(autocompleteResult: OmniboxLocators.Labels.forgetTabGroup.accessibilityIdentifier))
-        }
-    }
-    
-    func testTabGroupDeleteCapturedShared() throws {
-        testrailId("C1175")
-
-        step("Given I have a shared captured group in a note") {
-            setUpSharedNotCapturedTabGroup()
-            captureGroupToNoteAndOpenNote()
-        }
-        
-        deleteTabGroupFromOmnibox(captured: true)
-        
-        step("And can still be deleted because still shared") {
-            displayTabGroupInOmnibox()
-            XCTAssertTrue(omniboxView.isAutocompleteResultDisplayed(autocompleteResult: OmniboxLocators.Labels.deleteTabGroup.accessibilityIdentifier))
-        }
-    }
-    
-    func testTabGroupDeleteNotCapturedShared() throws {
-        testrailId("C1178")
-
-        step("Given I have a shared tab group") {
-            setUpSharedNotCapturedTabGroup()
-        }
-        
-        deleteTabGroupFromOmnibox(captured: false, shouldBeVisibleInBrowser: false)
-        
-        step("And original group has been deleted") {
-            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
-            omniboxView.searchInOmniBox(tabGroupNamed, false)
-            XCTAssertFalse(omniboxView.isTabGroupResultDisplayed(tabGroupName: tabGroupNamed))
-        }
-    }
-    
-    func testTabGroupDeleteSharedFromNote() throws {
-        testrailId("C1177")
-        
-        step("Given I have a shared captured group in a note") {
-            setUpSharedNotCapturedTabGroup()
-            captureGroupToNoteAndOpenNote()
-        }
-                
-        step("When I delete tab groups from right click menu") {
-            noteView.openTabGroupMenu(index: 0)
-                .deleteTabGroupFromNoteAction()
-        }
-        
-        step("Then tab group is deleted on note") {
-            XCTAssertFalse(noteView.isTabGroupDisplayed(index: 0))
-        }
-        
-        step("And can still be deleted because still shared") {
-            displayTabGroupInOmnibox()
-            XCTAssertTrue(omniboxView.isAutocompleteResultDisplayed(autocompleteResult: OmniboxLocators.Labels.deleteTabGroup.accessibilityIdentifier))
         }
     }
     

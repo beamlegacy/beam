@@ -9,6 +9,7 @@ import Combine
 import BeamCore
 import AutoUpdate
 import ZIPFoundation
+import UniformTypeIdentifiers
 
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, BeamDocumentSource {
     // Will be removed for multi-account, do not use!
@@ -62,7 +63,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     var scope = Set<AnyCancellable>()
     var checkForUpdateCancellable: AnyCancellable?
     let sessionId = UUID()
-    var browsingTreeSender: BrowsingTreeSender?
     var noteFrecencyScorer: FrecencyScorer
     var versionChecker: VersionChecker
     lazy var onboardingManager = OnboardingManager(analyticsCollector: analyticsCollector)
@@ -140,17 +140,14 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
     static var idToTitle: [UUID: String] = [:]
     static var titleToId: [String: UUID] = [:]
 
-    let objectManager = BeamObjectManager()
     let contactsManager: ContactsManager
     let passwordManager: PasswordManager
-    let privateKeySignatureManager: PrivateKeySignatureManager
     let browsingTreeStoreManager: BrowsingTreeStoreManager
     let linkDB: BeamLinkDB
 
     override init() {
         self.contactsManager = ContactsManager()
         self.passwordManager = PasswordManager()
-        self.privateKeySignatureManager = PrivateKeySignatureManager()
         self.browsingTreeStoreManager = BrowsingTreeStoreManager()
         self.linkDB = BeamLinkDB()
 
@@ -162,12 +159,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         sessionExporter = ClusteringSessionExporter()
         tabGroupingManager = TabGroupingManager()
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId, tabGroupingManager: tabGroupingManager, objectManager: objectManager)
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId, tabGroupingManager: tabGroupingManager)
         noteAutoSaveService = NoteAutoSaveService()
         cookieManager = CookiesManager()
         versionChecker = Self.createVersionChecker()
 
-        browsingTreeSender = nil
         super.init()
         BeamNote.idForNoteNamed = { [weak self] title in
             guard let collection = self?.currentDocumentCollection,
@@ -260,26 +256,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver, Be
                 self.maybeRemoveFromJournal(deletedDocument)
                 BeamNote.purgeDeletedNode(self, deletedDocument.id)
             }.store(in: &scope)
-
-        PreferencesManager.$alwaysShowBullets
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] alwaysShowBullets in
-                guard let collection = BeamData.shared.currentDocumentCollection else { return }
-                let allDocuments = (try? collection.fetch(filters: [.isPublic(true)])) ?? []
-
-                var allPublicNotes: [BeamNote] = []
-                let newBulletVisibility: BulletPointType = alwaysShowBullets ? .regular : .empty
-                for document in allDocuments {
-                    guard let note = BeamNote.getFetchedNote(document.id), note.publicationStatus.isPublic else { continue }
-                    note.noteSettings?.bulletPointVisibility = newBulletVisibility
-                    allPublicNotes.append(note)
-                }
-
-                guard let fileManager = self?.fileDBManager else { return }
-                allPublicNotes.forEach { note in
-                    BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, publicationGroups: note.publicationStatus.publicationGroups, fileManager: fileManager)
-                }
-        }.store(in: &scope)
     }
 
     func allWindowsDidClose() {
@@ -465,11 +441,7 @@ extension BeamData {
 extension BeamData {
     private static func createVersionChecker() -> VersionChecker {
         let enableUpdateAutoCheck = false
-        if let feed = URL(string: Configuration.updateFeedURL) {
-            return VersionChecker(feedURL: feed, autocheckEnabled: enableUpdateAutoCheck)
-        } else {
-            return VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: enableUpdateAutoCheck)
-        }
+        return VersionChecker(gitHubRepo: "beamlegacy/beam", assetName: "Beam.zip", autocheckEnabled: enableUpdateAutoCheck)
     }
 
     private func configureAutoUpdate() {
@@ -609,8 +581,8 @@ public extension BeamData {
         let bundleID = _bundleID as CFString
         LSSetDefaultHandlerForURLScheme("http" as CFString, bundleID)
         LSSetDefaultHandlerForURLScheme("https" as CFString, bundleID)
-        LSSetDefaultRoleHandlerForContentType(kUTTypeHTML, .viewer, bundleID)
-        LSSetDefaultRoleHandlerForContentType(kUTTypeURL, .viewer, bundleID)
+        LSSetDefaultRoleHandlerForContentType(UTType.html.identifier as CFString, .viewer, bundleID)
+        LSSetDefaultRoleHandlerForContentType(UTType.url.identifier as CFString, .viewer, bundleID)
     }
 }
 

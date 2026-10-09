@@ -172,7 +172,7 @@ struct OmniboxSearchField: View {
                                 // text length might end up "in between pixels", so we need to offset that point-pixel roundup.
                                 .offset(x: pixelRoundUp, y: 0)
                                 .layoutPriority(0)
-                                .animation(nil)
+                                .transaction { $0.animation = nil }
                             }
                             .frame(maxHeight: .infinity)
                         }

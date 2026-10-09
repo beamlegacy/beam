@@ -53,7 +53,7 @@ struct TabPreview: View {
         }
         .frame(width: 180)
         .background(background)
-        .animation(nil)
+        .transaction { $0.animation = nil }
         .transition(.opacity.animation(.easeInOut(duration: 0.15)))
         .onAppear {
             setFavicon(for: tab.url)

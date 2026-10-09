@@ -84,9 +84,18 @@ extension BeamTextEdit {
         return strNodes
     }
 
+    /// Whether a copy would put anything in the pasteboard. Copying with just a caret must keep the pasteboard untouched.
+    private var hasCopyableSelection: Bool {
+        guard let rootNode = rootNode else { return false }
+        if let nodes = rootNode.state.nodeSelection?.sortedNodes, !nodes.isEmpty {
+            return true
+        }
+        return focusedWidget is TextNode && !selectedTextRange.isEmpty
+    }
+
     // MARK: - Cut
     @IBAction func cut(_ sender: Any) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode, hasCopyableSelection else { return }
         setPasteboard()
         if let nodes = rootNode.state.nodeSelection?.sortedNodes, !nodes.isEmpty {
             rootNode.eraseNodeSelection(createEmptyNodeInPlace: nodes.count == rootNode.element.children.count)
@@ -98,6 +107,7 @@ extension BeamTextEdit {
 
     // MARK: - Copy
     @IBAction func copy(_ sender: Any) {
+        guard hasCopyableSelection else { return }
         setPasteboard()
     }
 
@@ -435,9 +445,10 @@ extension BeamTextEdit {
             Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
             return
         }
+        // Check before opening the group: returning with a group open makes the next undo fatalError.
+        guard let node = focusedWidget as? TextNode else { return }
         let cmdManager = mngrNode.cmdManager
         cmdManager.beginGroup(with: "Paste Text")
-        guard let node = focusedWidget as? TextNode else { return }
         var lastInserted: ElementNode? = node
         let parent = node.parent as? ElementNode ?? node
         var insertedElements: [BeamText] = []

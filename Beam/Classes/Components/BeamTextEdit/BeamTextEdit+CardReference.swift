@@ -96,6 +96,10 @@ extension BeamTextEdit {
         cmdManager.replaceText(in: node, for: replacementStart..<replacementEnd, with: BeamText(text: title, attributes: []))
 
         let (_, linkedNoteId) = node.unproxyElement.makeInternalLink(self, replacementStart..<linkEnd)
+        // makeInternalLink edits the text outside of the command manager: record the linked text in a command
+        // too, otherwise redo replays the plain title without the link.
+        let linkedText = node.unproxyElement.text.extract(range: replacementStart..<linkEnd)
+        cmdManager.replaceText(in: node, for: replacementStart..<linkEnd, with: linkedText)
         if let linkedNoteId = linkedNoteId {
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d0)
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d1)

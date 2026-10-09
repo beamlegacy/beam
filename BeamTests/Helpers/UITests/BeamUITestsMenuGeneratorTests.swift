@@ -9,7 +9,6 @@ class BeamUITestsMenuGeneratorTests: QuickSpec {
 
     override func spec() {
         beforeEach {
-            BeamTestsHelper.logout()
         }
         describe(".populateWithJournalNote()") {
             it("is fast") {

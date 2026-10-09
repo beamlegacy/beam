@@ -15,14 +15,11 @@ class PasswordsDBTests: XCTestCase {
     static let subdomain1 = URL(string: "http://subdomain.github.com/signin")!
     static let username = "beamdev@beam.co"
     static let password = "BeamRocksss"
-    let beamHelper = BeamTestsHelper()
-    let beamObjectHelper = BeamObjectTestsHelper()
     let passwordManager = PasswordManager()
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
-        BeamTestsHelper.logout()
         passwordManager.deleteAll()
         try EncryptionManager.shared.storeLocalPrivateKey(Configuration.testPrivateKey)
     }
@@ -147,6 +144,18 @@ class PasswordsDBTests: XCTestCase {
 
         let password = try passwordManager.password(hostname: Self.host.minimizedHost!, username: Self.username)
         XCTAssertEqual(password, Self.password)
+        cleanupPasswordsAfterTest()
+    }
+
+    func testDelete() {
+        passwordManager.save(hostname: Self.host.minimizedHost!,
+                             username: Self.username,
+                             password: Self.password,
+                             uuid: UUID(uuidString: "20D1B800-4436-4D25-8919-E23EF58FA13A"))
+        passwordManager.markDeleted(hostname: Self.host.minimizedHost!, for: Self.username)
+
+        let entries = passwordManager.entries(for: Self.host.minimizedHost!, options: .exact)
+        XCTAssertEqual(entries.count, 0)
         cleanupPasswordsAfterTest()
     }
 

@@ -45,8 +45,7 @@ class AllNotesSortingTests: BaseTest {
     
     func testSortNotesByTitlesAndWordsAndLinks() {
         
-        step("GIVEN I setup staging environment and open All cards") {
-            signUpStagingWithRandomAccount()
+        step("GIVEN I create 10 random notes and open All cards") {
             uiMenu.invoke(.create10Notes)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView.waitForAllNotesViewToLoad()

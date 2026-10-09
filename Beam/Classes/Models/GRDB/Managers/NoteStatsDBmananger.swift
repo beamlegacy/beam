@@ -21,7 +21,7 @@ class NoteStatsDBManager: GRDBHandler, BeamManager {
 
     public override var tableNames: [String] { ["DailyNoteScoreRecord", "NoteLastWordCountChangeDayRecord"] }
 
-    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.owner = holder
         try super.init(store: store)
     }

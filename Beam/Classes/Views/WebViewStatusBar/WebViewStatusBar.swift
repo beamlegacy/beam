@@ -31,7 +31,7 @@ private struct WebViewStatusBar<Content: View>: View {
                 .overlay(BeamColor.WebViewStatusBar.background.swiftUI)
                 .cornerRadius(4)
         }
-        .animation(nil)
+        .transaction { $0.animation = nil }
         .accessibilityIdentifier("webview-status-bar")
     }
 

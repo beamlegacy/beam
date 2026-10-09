@@ -7,9 +7,7 @@ import GRDB
 struct FileDetail: View {
     @State var file: BeamFileRecord
     @State private var cancellable: DatabaseCancellable?
-    @State private var refreshing = false
     @State private var deleted = false
-    @State private var saving = false
 
     let fileManager: BeamFileDBManager
     private let formatter = ByteCountFormatter()
@@ -20,11 +18,8 @@ struct FileDetail: View {
         } else {
             ScrollView {
                 HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
-                    RefreshButton
                     SoftDeleteButton
-                    LocalDeleteButton
                     DeleteButton
-                    SaveButton
                     PurgeUnlinked
                     PurgeUndo
                     Spacer()
@@ -35,17 +30,7 @@ struct FileDetail: View {
                         VStack {
                             HStack {
                                 Text("ID:").bold()
-                                Text(file.beamObjectId.uuidString)
-                                Spacer()
-                            }
-                            HStack {
-                                Text("Checksum:").bold()
-                                Text(file.previousChecksum ?? "-")
-                                Spacer()
-                            }
-                            HStack {
-                                Text("Previous Checksum:").bold()
-                                Text(file.previousChecksum ?? "-")
+                                Text(file.uid.uuidString)
                                 Spacer()
                             }
                             HStack {
@@ -134,47 +119,23 @@ struct FileDetail: View {
         }
     }
 
-    private func refresh() {
-        refreshing = true
-        Task {
-            do {
-                defer {
-                    refreshing = false
-                }
-                try await fileManager.refresh(file)
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
-            }
-        }
-    }
-
     private func delete() {
         deleted = true
-
         do {
             try fileManager.remove(uid: file.uid)
         } catch {
-            Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+            Logger.shared.logError(error.localizedDescription, category: .fileDB)
         }
     }
 
     private func softDelete() {
         file.deletedAt = BeamDate.now
         file.updatedAt = BeamDate.now
-
         do {
             try fileManager.insert(files: [file])
         } catch {
-            Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+            Logger.shared.logError(error.localizedDescription, category: .fileDB)
         }
-    }
-
-    private var RefreshButton: some View {
-        Button(action: {
-            refresh()
-        }, label: {
-            Text(refreshing ? "Refreshing" : "Refresh").frame(minWidth: 100)
-        }).disabled(refreshing || deleted)
     }
 
     private var DeleteButton: some View {
@@ -183,14 +144,6 @@ struct FileDetail: View {
         }, label: {
             Text("Delete").frame(minWidth: 100)
         }).disabled(deleted)
-    }
-
-    private var SaveButton: some View {
-        Button(action: {
-            // No-op: remote sync removed
-        }, label: {
-            Text("Save").frame(minWidth: 100)
-        }).disabled(deleted || saving)
     }
 
     private var PurgeUnlinked: some View {
@@ -209,14 +162,6 @@ struct FileDetail: View {
         }
 
     }
-    private var LocalDeleteButton: some View {
-        Button(action: {
-            delete()
-        }, label: {
-            Text("Local Delete").frame(minWidth: 100)
-        }).disabled(deleted)
-    }
-
     private var SoftDeleteButton: some View {
         Button(action: {
             softDelete()

@@ -14,7 +14,6 @@ import BeamCore
     var data: BeamData
 
     @Published var allNotesSortDescriptor: NSSortDescriptor?
-    @Published var allNotesListType: ListType = .allNotes
     @Published var showDailyNotes = true
 
     public static var sourceId: String { "\(Self.self)" }
@@ -140,10 +139,6 @@ import BeamCore
             stopFocusOmnibox()
             if oldValue == .today {
                 stopShowingOmniboxInJournal()
-            }
-
-            if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion, let fileManager = data.fileDBManager {
-                BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true, publicationGroups: leavingNote.publicationStatus.publicationGroups, fileManager: fileManager)
             }
 
             updateWindowTitle()
@@ -454,6 +449,10 @@ import BeamCore
 
     func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, request: URLRequest? = nil, loadRequest: Bool = true, webView: BeamWebView? = nil) -> BrowserTab {
         Logger.shared.logDebug("\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: request))", category: .tracking)
+        var webView = webView
+        if webView == nil, let url = request?.url, Thread.isMainThread, #available(macOS 15.4, *) {
+            webView = MainActor.assumeIsolated { WebExtensionsManager.shared.makeWebViewForExtensionPage(url) }
+        }
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: setCurrent, withURLRequest: request, loadRequest: loadRequest)
         if setCurrent {
@@ -820,7 +819,6 @@ import BeamCore
         case tabGroups
         case tabGroupIDs
         case backForwardList
-        case allNotesMode
         case allNotesSortDescriptor
         case showDailyNotes
         case sideNote
@@ -839,9 +837,6 @@ import BeamCore
                                                   ascending: descriptor.ascending,
                                                   selector: sortSelector)
             allNotesSortDescriptor = sortDescriptor
-        }
-        if let mode = try? container.decode(ListType.self, forKey: .allNotesMode) {
-            allNotesListType = mode
         }
         if let showJournal = try? container.decode(Bool.self, forKey: .showDailyNotes) {
             showDailyNotes = showJournal
@@ -907,7 +902,6 @@ import BeamCore
                                             caseInsensitiveCompare: sortDescriptor.selector == #selector(NSString.caseInsensitiveCompare))
             try container.encode(descriptor, forKey: .allNotesSortDescriptor)
         }
-        try container.encode(allNotesListType, forKey: .allNotesMode)
         try container.encode(showDailyNotes, forKey: .showDailyNotes)
 
         if let note = currentNote {
@@ -1220,38 +1214,6 @@ extension BeamState {
         }
         stopFocusOmnibox()
     }
-
-    func shareTabGroup(_ group: TabGroup, fromOmniboxResult: AutocompleteResult? = nil) {
-        if let result = fromOmniboxResult {
-            autocompleteManager.autocompleteLoadingResult = result
-        }
-        data.tabGroupingManager.shareGroup(group, state: self) { [weak self] result in
-            guard let self = self else { return }
-            self.autocompleteManager.autocompleteLoadingResult = nil
-            switch result {
-            case .success:
-                guard fromOmniboxResult != nil else { break }
-                let previousMode = self.autocompleteManager.mode
-                let groupTitle = group.title ?? "Tab Group"
-                let view = OmniboxCustomStatusView(title: "Shared ", suffix: groupTitle,
-                                                   suffixColor: group.color?.mainColor?.swiftUI ?? .red).asAnyView
-                let customMode: AutocompleteManager.Mode = .customView(view: view)
-                self.autocompleteManager.animateToMode(customMode)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    guard case .customView = self.autocompleteManager.mode else { return }
-                    if case .tabGroup(let group) = previousMode {
-                        let shared = self.data.tabGroupingManager.fetchTabGroupNote(for: group)
-                        self.autocompleteManager.resetAutocompleteMode(to: .tabGroup(group: shared?.group ?? group), updateResults: true)
-                    } else {
-                        self.autocompleteManager.resetAutocompleteMode(to: previousMode)
-                    }
-
-                }
-            case .failure:
-                break
-            }
-        }
-    } 
 }
 
 // MARK: - Notes focused state
@@ -1277,13 +1239,6 @@ extension BeamState {
                                                 isReference: isReference,
                                                 nodeSelectionState: nodeSelectionState)
     }
-}
-
-enum ListType: String, Codable {
-    case allNotes
-    case privateNotes
-    case publicNotes
-    case onProfileNotes
 }
 
 private struct SortDescriptor: Codable {

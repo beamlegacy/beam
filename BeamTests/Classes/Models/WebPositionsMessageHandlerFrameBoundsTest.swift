@@ -12,23 +12,6 @@ import Nimble
 @testable import Beam
 @testable import BeamCore
 
-/// On macOS 26+, WKFrameInfo crashes on dealloc when created without WebKit internals.
-/// Keep instances alive in a static array to prevent deallocation.
-private class MockFrameInfo: WKFrameInfo {
-    private static var leakedInstances: [MockFrameInfo] = []
-    private var _isMain: Bool
-
-    init(isMain: Bool) {
-        self._isMain = isMain
-        super.init()
-        MockFrameInfo.leakedInstances.append(self)
-    }
-
-    override var isMainFrame: Bool {
-        _isMain
-    }
-}
-
 class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
     let windowHref = TestWebPage.urlStr
     var browserTabConfiguration: BeamWebViewConfigurationBase!
@@ -88,7 +71,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         let positions = page.webPositions
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send bounds of windowFrame
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -97,7 +80,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: true)
+            isMainFrame: true
         )
 
         XCTAssertEqual(positions.framesInfo.count, 1, "webPositions should contain 1 frameInfo")
@@ -149,7 +132,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         // Send iframe event
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe.com/about-us",
@@ -166,10 +149,10 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -187,7 +170,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: true)
+            isMainFrame: true
         )
 
         XCTAssertEqual(positions.framesInfo.count, 2, "webPositions should contain 2 frameInfos")
@@ -244,7 +227,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -262,13 +245,13 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: true)
+            isMainFrame: true
         )
 
         // Send iframe event
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe.com/about-us",
@@ -285,7 +268,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
 
         XCTAssertEqual(positions.framesInfo.count, 2, "webPositions should contain 2 frameInfos")
@@ -350,7 +333,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send frameBounds "iFrame2"
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
@@ -367,14 +350,14 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: nil
+            isMainFrame: false
         )
         //
         // Send frameBounds "iFrame1"
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
@@ -400,11 +383,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: nil
+            isMainFrame: false
         )
         //
         // Send onLoad "windowHref"
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -422,7 +405,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: nil
+            isMainFrame: false
         )
         //
         // ASSERTS
@@ -496,7 +479,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -514,14 +497,14 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: true)
+            isMainFrame: true
         )
 
         // Send iframe1 event
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
@@ -547,11 +530,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
 
         // Send iframe3 event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
@@ -568,7 +551,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
 
         XCTAssertEqual(positions.framesInfo.count, 3, "webPositions should contain 3 frameInfos")
@@ -641,7 +624,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send iframe3 event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
@@ -658,13 +641,13 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
         // Send iframe1 event
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
@@ -690,10 +673,10 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -711,7 +694,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: true)
+            isMainFrame: true
         )
         XCTAssertEqual(positions.framesInfo.count, 3, "webPositions should contain 3 frameInfos")
 
@@ -770,7 +753,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         // +----------------------------------------+
         //
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -779,11 +762,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: true)
+            isMainFrame: true
         )
         XCTAssertEqual(positions.framesInfo.count, 1, "webPositions should contain 1 frameInfos")
         // Send windowFrame scroll event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_scroll.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -794,7 +777,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "y": 200
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: true)
+            isMainFrame: true
         )
         XCTAssertEqual(positions.framesInfo.count, 1, "webPositions should still contain 1 frameInfos")
         let expectedWindowFrameInfo = WebFrames.FrameInfo(
@@ -839,7 +822,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
         // We expect to start with zero frames
         XCTAssertEqual(positions.framesInfo.count, 0, "webPositions should contain no frameInfo")
         // Send iframe3 event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
@@ -856,13 +839,13 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
         // Send iframe1 event
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
         //       The bounds provided by the parent should be leading
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
@@ -888,10 +871,10 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
         // Send windowFrame event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_frameBounds.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -909,11 +892,11 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 ]
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: true)
+            isMainFrame: true
         )
         XCTAssertEqual(positions.framesInfo.count, 3, "webPositions should contain 3 frameInfos")
         // Send windowFrame scroll event
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_scroll.rawValue,
             messageBody: [
                 "href": windowHref,
@@ -924,10 +907,10 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "y": 200
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: true)
+            isMainFrame: true
         )
 
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_scroll.rawValue,
             messageBody: [
                 "href": "https://www.iframe1.com/about-us",
@@ -938,10 +921,10 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "y": 330
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
 
-        self.webPositionsMessageHandler.onMessage(
+        self.webPositionsMessageHandler.handleMessage(
             messageName: WebPositionsMessages.WebPositions_scroll.rawValue,
             messageBody: [
                 "href": "https://www.iframe2.com",
@@ -952,7 +935,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "y": 30
             ],
             from: page,
-            frameInfo: MockFrameInfo(isMain: false)
+            isMainFrame: false
         )
 
         let expectedWindowFrameInfo = WebFrames.FrameInfo(

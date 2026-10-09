@@ -10,7 +10,6 @@ import BeamCore
 
 final class TabsListContextMenuBuilder: ObservableObject {
     private weak var state: BeamState?
-    @Published var tabGroupIsSharing: TabGroup?
 
     init() { }
     func setup(withState state: BeamState) {
@@ -82,35 +81,6 @@ extension TabsListContextMenuBuilder {
         }
     }
 
-    private func shareGroup(_ group: TabGroup, itemFrame: CGRect?, shareService: ShareService) {
-        guard let state = state else { return }
-        let tabGroupingManager = state.browserTabsManager.tabGroupingManager
-        let startTime = BeamDate.now
-        let canShare = tabGroupingManager.shareGroup(group, shareService: shareService, state: state) { [weak self] result in
-            // let's make sure the loading state was visible for at least 2s to avoid blinking.
-            let delayInSeconds: Int = max(0, 2 + Int(startTime.timeIntervalSinceNow))
-            var previousStatus: TabGroup.Status?
-            if case .success = result, delayInSeconds > 0 {
-                previousStatus = group.status
-                group.status = .sharing
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(delayInSeconds)) {
-                self?.tabGroupIsSharing = nil
-                if let previousStatus = previousStatus {
-                    group.status = previousStatus
-                }
-                guard shareService == .copy, let itemFrame = itemFrame else { return }
-                switch result {
-                case .success:
-                    let point = CGPoint(x: itemFrame.midX, y: itemFrame.maxY + (Tooltip.defaultHeight / 2) + 3)
-                    self?.state?.overlayViewModel.presentTooltip(text: "Link Copied", at: point)
-                case .failure:
-                    break
-                }
-            }
-        }
-        tabGroupIsSharing = canShare ? group : nil
-    }
 }
 
 // MARK: - Tab Context Menu
@@ -296,14 +266,11 @@ extension TabsListContextMenuBuilder {
 extension TabsListContextMenuBuilder {
 
     func showContextMenu(forGroup group: TabGroup, with event: NSEvent?, itemFrame: CGRect?) {
-        guard group.status != .sharing else { return }
         let menu = NSMenu()
 
         let nameAndColorItem = buildNameAndColorPickerItem(in: menu, forGroup: group)
         menu.addItem(nameAndColorItem)
         menu.addItem(.fullWidthSeparator())
-
-        addShareGroupSubMenu(in: menu, forGroup: group, itemFrame: itemFrame)
 
         menu.addItem(withTitle: "Copy Links") { [weak self] _ in
             self?.state?.browserTabsManager.copyAllLinks(ofGroup: group)
@@ -336,24 +303,6 @@ extension TabsListContextMenuBuilder {
         }
 
         menu.popUp(positioning: nil, at: event?.locationInWindow ?? .zero, in: event?.window?.contentView)
-    }
-
-    private func addShareGroupSubMenu(in menu: NSMenu, forGroup group: TabGroup, itemFrame: CGRect?) {
-        let subMenu = NSMenu()
-        let handlerForService: (ShareService) -> HandlerMenuItem.Handler = { [weak self] service in
-            return { _ in self?.shareGroup(group, itemFrame: itemFrame, shareService: service) }
-        }
-        var subItems = [
-            HandlerMenuItem(title: "Copy Link", icon: "editor-url_link", handler: handlerForService(.copy)),
-            NSMenuItem.separator()
-        ]
-        subItems.append(contentsOf: ShareService.allCases(except: [.copy]).map {
-            HandlerMenuItem(title: $0.title, icon: $0.icon, handler: handlerForService($0))
-        })
-        subItems.forEach { subMenu.addItem($0) }
-        let menuItem = NSMenuItem(title: "Share Group", action: nil, keyEquivalent: "")
-        menu.setSubmenu(subMenu, for: menuItem)
-        menu.addItem(menuItem)
     }
 
     private func buildNameAndColorPickerItem(in menu: NSMenu, forGroup group: TabGroup) -> ContentViewMenuItem<TabClusteringNameColorPickerView> {

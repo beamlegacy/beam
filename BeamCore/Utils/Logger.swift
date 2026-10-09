@@ -11,10 +11,8 @@ public enum LogCategory: String, CaseIterable {
     case coredataDebug
     case database
     case databaseDebug
-    case databaseNetwork
     case document
     case documentNotification
-    case documentNetwork
     case documentMerge
     case documentDebug
     case memory
@@ -35,26 +33,16 @@ public enum LogCategory: String, CaseIterable {
     case fileDB
     case linkDB
     case oauth
-    case webSocket
     case creditCardsDB
     case creditCardAutofill
     case passwordsDB
     case passwordManager
     case webAutofillInternal
-    case passwordNetwork
-    case frecencyNetwork
-    case fileNetwork
-    case linkNetwork
     case clustering
     case commandManager
-    case beamObject
-    case beamObjectNetwork
-    case beamObjectDebug
-    case beamObjectChecksum
     case downloader
     case autocompleteManager
     case topDomain
-    case browsingTreeSender
     case browsingTreeNetwork
     case notePublishing
     case eventCalendar
@@ -65,7 +53,6 @@ public enum LogCategory: String, CaseIterable {
     case browserImport
     case autoUpdate
     case accountManager
-    case privateKeySignature
     case tabPinSuggestion
     case tabGrouping
     case analyticsCollection

@@ -15,7 +15,7 @@ class TabPinSuggestionDBManager: GRDBHandler, BeamManager {
 
     static var name = "TabPinSuggestionDBManager"
 
-    required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.owner = holder
         try super.init(store: store)
     }

@@ -29,7 +29,6 @@ public enum DocumentFilter {
     case tabGroups([UUID])
     case updatedSince(Date)
     case updatedBetween(Date, Date)
-    case isPublic(Bool)
     case isEmpty(Bool)
 
     case limit(Int, offset: Int?)
@@ -68,7 +67,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
 
     public override var tableNames: [String] { [BeamDocument.databaseTableName] }
 
-    public required init(holder: BeamManagerOwner?, objectManager: BeamObjectManager, store: GRDBStore) throws {
+    public required init(holder: BeamManagerOwner?, store: GRDBStore) throws {
         self.owner = holder
         try super.init(store: store)
     }
@@ -319,8 +318,6 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
 
             case let .limit(limit, offset: offset):
                 request = request.limit(limit, offset: offset)
-            case let .isPublic(isPublic):
-                request = request.filter(BeamDocument.Columns.isPublic == isPublic)
 
             case let .isEmpty(isEmpty):
                 request = request.filter(BeamDocument.Columns.isEmpty == isEmpty)
@@ -389,7 +386,7 @@ public class BeamDocumentCollection: GRDBHandler, LegacyAutoImportDisabler {
                                     data: noteData,
                                     documentType: DocumentType(from: note.type),
                                     version: note.version,
-                                    isPublic: note.publicationStatus.isPublic,
+                                    isPublic: false, // notes can't be published anymore, column kept for existing databases
                                     journalDate: JournalDateConverter.toInt(from: note.type.journalDateString ?? "0"),
                                     tabGroupId: note.type.tabGroupId,
                                     isEmpty: note.isEntireNoteEmpty()

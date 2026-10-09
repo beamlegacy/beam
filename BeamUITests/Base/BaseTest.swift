@@ -22,46 +22,29 @@ class BaseTest: XCTestCase {
     let emptyString = ""
     let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
     let uiTestModeLaunchArgument = "XCUITest"
-    let incorrectEmail = "qa+automationtest@beamappa.co"
-    let incorrectPassword = "Incorrect1"
     let username = "AutomationTestSignin"
     let host = "form.lvh.me"
-    let stagingEnvironmentServerAddress = "staging-web-server.ew.r.appspot.com"
-    let tempURLToRedirectedReactNativeApp = "legendary-strudel.netlify.app"
     
     let uiTestPageOne = "Point And Shoot Test Fixture Ultralight Beam"
     let uiTestPageTwo = "Point And Shoot Test Fixture I-Beam"
     let uiTestPageThree = "Point And Shoot Test Fixture Cursor"
     let uiTestPageFour = "Point And Shoot Test Fixture Background image"
     
-    let copyLinkShareAction = "Copy Link"
-    
-    let welcomeTourURL = "https://welcometour.beamapp.co"
     let meetingTestUrl = "https://zoom.us/wc/join/99166381562?wpk=wcpk3fe593748f47c7b9774ebde3650dae7d&_x_zm_rtaid=X_itykmcS52hw4BpB-NwCQ.1664430384941.f58312bdec889b861646d2e27f8794ea&_x_zm_rhtaid=711"
     
     let uiMenu = UITestsMenuBar()
     let hiddenCommand = HiddenCommandHelper()
-    let hiddenNotification = HiddenNotificationHelper()
     let shortcutHelper = ShortcutsHelper()
     let mockPage = MockHTTPWebPages()
     let passwordManagerHelper = PasswordManagerHelper()
     var webView = WebTestView()
     var app = XCUIApplication()
 
-    struct AccountInformation {
-        let email: String
-        let username: String
-        let password: String
-        let pk: String
-    }
-    
     override func tearDown() {
-        uiMenu.invoke(.deleteRemoteAccount)
         if isAppRunning() {
             storeScreenshot()
         }
         uiMenu.invoke(.destroyDB)
-        uiMenu.invoke(.deletePrivateKeys)
         self.clearPasteboard()
     }
     
@@ -117,13 +100,8 @@ class BaseTest: XCTestCase {
     }
     
     @discardableResult
-    func launchAndOpenAllNotes(signedIn: Bool = false) -> AllNotesTestView {
+    func launchAndOpenAllNotes() -> AllNotesTestView {
         launchApp().waitForJournalViewToLoad()
-        if signedIn {
-            uiMenu.invoke(.setAPIEndpointsToStaging)
-            uiMenu.invoke(.signUpWithRandomTestAccount)
-            _ = webView.waitForTabUrlAtIndexToEqual(index: 0, expectedString: welcomeTourURL)
-        }
         shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
         let allNotesView = AllNotesTestView()
         allNotesView.waitForAllNotesViewToLoad()
@@ -189,26 +167,6 @@ class BaseTest: XCTestCase {
     func isBigSurOS() -> Bool {
         let osVersion = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
         return osVersion < 12
-    }
-    
-    @discardableResult
-    func signUpStagingWithRandomAccount() -> JournalTestView {
-        uiMenu.invoke(.signUpWithRandomTestAccount)
-        let journalView = JournalTestView()
-        journalView.waitForJournalViewToLoad()
-        return journalView
-    }
-
-    func getCredentials() -> AccountInformation? {
-        shortcutHelper.shortcutActionInvoke(action: .openPreferences)
-        PreferencesBaseView().navigateTo(preferenceView: .account)
-        let accountView = AccountTestView()
-        accountView.clickCopyAccountInfos()
-        if let content = NSPasteboard.general.string(forType: .string) {
-            let elements = content.components(separatedBy: "\n")
-            return AccountInformation(email: elements[0], username: elements[1], password: elements[2], pk: elements[3])
-        }
-        return nil
     }
     
     func getRandomSearchTerm() -> String {
@@ -302,21 +260,6 @@ class BaseTest: XCTestCase {
         let expectedTextAfterChange = "Type xt at"
         return expectedTextAfterChange
     }
-    
-    func signInWithoutPkKeyCheck(email: String, password: String) -> OnboardingImportDataTestView {
-        let onboardingView = OnboardingLandingTestView()
-        let onboardingUsernameView = OnboardingUsernameTestView()
-        
-        onboardingView.getEmailTextField().tapInTheMiddle()
-        onboardingView.getEmailTextField().typeText(email)
-        onboardingView.clickContinueWithEmailButton()
-        
-        onboardingUsernameView.getPasswordTextField().tapInTheMiddle()
-        onboardingUsernameView.getPasswordTextField().typeText(password)
-        onboardingUsernameView.typeKeyboardKey(.escape) //get rid of the pop-up window if exists
-        onboardingUsernameView.clickConnectButton()
-        return OnboardingImportDataTestView()
-    }
 }
 
 extension XCTest {
@@ -345,7 +288,7 @@ extension XCTest {
     }
 }
 
-extension XCUIElementQuery: Sequence {
+extension XCUIElementQuery: @retroactive Sequence {
     public typealias Iterator = AnyIterator<XCUIElement>
     public func makeIterator() -> Iterator {
         var index = UInt(0)

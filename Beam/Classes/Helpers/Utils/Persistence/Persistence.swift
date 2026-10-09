@@ -10,12 +10,9 @@ struct Persistence {
     }
 
     enum Authentication {
-        @KeychainStorable("authentication.email") static var email: String?
-
         @KeychainStorable("authentication.google.tokens", synchronizable: false) static var googleCalendarTokens: [String: String]?
         @StandardStorable("authentication.apple.calendar") static var hasAppleCalendarConnection: Bool?
 
-        @StandardStorable("authentication.username") static var username: String?
         @StandardStorable("authentication.hasSeenOnboarding") static var hasSeenOnboarding: Bool?
         @StandardStorable("authentication.hasSeenWebTutorial") static var hasSeenWelcomeTour: Bool?
     }
@@ -26,17 +23,6 @@ struct Persistence {
 
     enum Encryption {
         static let localPrivateKeyName = Configuration.env.rawValue + ".encryption.localPrivateKey"
-        @KeychainStorable("encryption.privateKeys") static var privateKeys: [String: String]?
-
-        // This is deprecated but we keep it as for now
-        @KeychainStorable("encryption.privateKey") static var privateKey: String?
-        // This is not saved in the keychain
-        @KeychainStorable("encryption.privateKeyCreationDate") static var creationDate: Date?
-        @KeychainStorable("encryption.privateKeyUpdateDate") static var updateDate: Date?
-    }
-
-    enum BrowsingTree {
-        @StandardStorable("browsingTree.userId") static var userId: String?
     }
 
     enum TopDomains {
@@ -96,16 +82,52 @@ struct Persistence {
         @StandardStorable("spellChecking.ignored") static var ignoredWords: [String]?
     }
 
-    /// Clean stored data
+    /// Clean calendar connections and browser import state
     static func cleanUp() {
-        Persistence.Authentication.email = nil
-        Persistence.Authentication.username = nil
         Persistence.Authentication.googleCalendarTokens = nil
         Persistence.Authentication.hasAppleCalendarConnection = nil
         Persistence.ImportedBrowserHistory.maxDateByBrowser = nil
     }
 
-    static func emailOrRaiseError() -> String {
-        return Persistence.Authentication.email ?? "local@beam.app"
+    /// Account and sync data stored by versions of Beam that had an online service.
+    enum LegacyAccountData {
+        @KeychainStorable("authentication.accessToken") private static var accessToken: String?
+        @KeychainStorable("authentication.refreshToken") private static var refreshToken: String?
+        @KeychainStorable("authentication.userId") private static var userId: String?
+        @KeychainStorable("authentication.email") private static var email: String?
+        @KeychainStorable("authentication.password") private static var password: String?
+        @KeychainStorable("encryption.privateKeys") private static var syncPrivateKeys: [String: String]?
+        @KeychainStorable("encryption.privateKey") private static var sharedPrivateKey: String?
+        @KeychainStorable("encryption.privateKeyCreationDate") private static var privateKeyCreationDate: Date?
+        @KeychainStorable("encryption.privateKeyUpdateDate") private static var privateKeyUpdateDate: Date?
+        @StandardStorable("authentication.username") private static var username: String?
+        @StandardStorable("development.endpoint") private static var endpoint: String?
+        @StandardStorable("development.lastLogin") private static var lastLogin: Date?
+        @StandardStorable("browsingTree.userId") private static var browsingTreeUserId: String?
+        @StandardStorable("sync.beam_objects.last_received_at") private static var lastReceivedAt: Date?
+        @StandardStorable("sync.beam_objects.last_updated_at") private static var lastUpdatedAt: Date?
+        @StandardStorable("legacyAccountData.removed.v2") private static var removed: Bool?
+
+        /// Removes the stored credentials (email, password, tokens), sync encryption keys and sync state, once.
+        /// The local private key encrypting saved passwords (`encryption.localPrivateKey`) is not affected.
+        static func removeIfNeeded() {
+            guard removed != true else { return }
+            accessToken = nil
+            refreshToken = nil
+            userId = nil
+            email = nil
+            password = nil
+            syncPrivateKeys = nil
+            sharedPrivateKey = nil
+            privateKeyCreationDate = nil
+            privateKeyUpdateDate = nil
+            username = nil
+            endpoint = nil
+            lastLogin = nil
+            browsingTreeUserId = nil
+            lastReceivedAt = nil
+            lastUpdatedAt = nil
+            removed = true
+        }
     }
 }

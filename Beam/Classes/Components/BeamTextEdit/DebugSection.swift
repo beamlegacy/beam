@@ -83,12 +83,10 @@ class DebugSection: Widget {
         if open {
             guard let nodeIdLayer = layers["noteIdBtn"],
                   let noteDatabaseLayer = layers["noteDatabaseIdBtn"],
-                  let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"],
-                  let previousChecksumLayer = layers["previousChecksum"] else { return 30 }
+                  let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"] else { return 30 }
             return 30 + nodeIdLayer.bounds.height +
                 noteDatabaseLayer.bounds.height +
-                defaultDatabaseIdLayer.bounds.height +
-                previousChecksumLayer.bounds.height
+                defaultDatabaseIdLayer.bounds.height
         }
         return 30
     }
@@ -96,19 +94,16 @@ class DebugSection: Widget {
     func updateLayerVisibility() {
         guard let nodeIdLayer = layers["noteIdBtn"],
               let noteDatabaseLayer = layers["noteDatabaseIdBtn"],
-              let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"],
-              let previousChecksumLayer = layers["previousChecksum"] else { return }
+              let defaultDatabaseIdLayer = layers["defaultDatabaseIdBtn"] else { return }
         nodeIdLayer.layer.isHidden = !open
         noteDatabaseLayer.layer.isHidden = !open
         defaultDatabaseIdLayer.layer.isHidden = !open
-        previousChecksumLayer.layer.isHidden = !open
         separatorLayer.isHidden = !open
 
     }
 
     private func setupDebugInfoLayer() {
         let nodeDatabaseId = self.note.document?.databaseId?.uuidString ?? "-"
-        let previousChecksum = self.note.document?.previousChecksum ?? "-"
 
         let defaultDatabaseId = BeamData.shared.currentDatabase?.id.uuidString
         let databaseTextColor = nodeDatabaseId == defaultDatabaseId ? BeamColor.Generic.text.nsColor : BeamColor.Shiraz.nsColor
@@ -139,15 +134,6 @@ class DebugSection: Widget {
         }, hovered: { [unowned self] hovered in
             self.layers["defaultDatabaseIdBtn"]?.layer.backgroundColor = hovered ? BeamColor.Cursor.cache.selection.cgColor : NSColor.clear.cgColor
         }), origin: CGPoint(x: 0, y: 70))
-
-        let previousChecksumIdLayer = Layer.text("Previous Checksum: \(previousChecksum)", color: BeamColor.Generic.text.nsColor, size: 12)
-        addLayer(ButtonLayer("previousChecksum", previousChecksumIdLayer, activated: { _ in
-            let pasteboard = NSPasteboard.general
-            pasteboard.clearContents()
-            pasteboard.setString(previousChecksum, forType: .string)
-        }, hovered: { [unowned self] hovered in
-            self.layers["previousChecksum"]?.layer.backgroundColor = hovered ? BeamColor.Cursor.cache.selection.cgColor : NSColor.clear.cgColor
-        }), origin: CGPoint(x: 0, y: 90))
     }
 
     public func setupContinueWidget(with notes: [BeamNote], and link: Link?) {
@@ -155,7 +141,7 @@ class DebugSection: Widget {
         let notesStr: String = notes.map({ $0.title }).joined(separator: " ")
         let continueNotesLayer = Layer.text(named: "continueNotes", "Continue to Notes: \(notesStr)", color: BeamColor.Generic.text.nsColor, size: 12)
         if hasNotes {
-            addLayer(continueNotesLayer, origin: CGPoint(x: 0, y: 110))
+            addLayer(continueNotesLayer, origin: CGPoint(x: 0, y: 90))
         }
 
         if let linkTitle = link?.title, let linkUrl = link?.url {

@@ -575,13 +575,14 @@ public struct BeamText: Codable {
         var start = 0
         for range in ranges {
             let length = range.string.count
-            if index >= start && index <= start + length {
+            if index >= start && index < start + length {
                 let i = range.string.index(range.string.startIndex, offsetBy: index - start)
                 return range.string[i]
             }
             start += length
         }
-        return Character("")
+        // Out of bounds. `Character("")` would trap: a Character can't be empty.
+        return "\0"
     }
 
     public func extract(range: Swift.Range<Int>) -> BeamText {

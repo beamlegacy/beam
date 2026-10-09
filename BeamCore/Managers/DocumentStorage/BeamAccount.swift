@@ -48,12 +48,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     @Published public private(set) var databases: [UUID: BeamDatabase] = [:]
     @Published public private(set) var allDatabases: [BeamDatabase] = []
 
-    var checkPrivateKeyTask:Task<Bool, Never>?
-
-    public var objectManager: BeamObjectManager {
-        data.objectManager
-    }
-
     public var defaultDatabase: BeamDatabase {
         return getOrCreateDefaultDatabase()
     }
@@ -69,10 +63,7 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     public var managers = [UUID: BeamManager]()
     public static var registeredManagers = [BeamManager.Type]()
 
-
     public let data = BeamData.shared
-
-    public internal(set) var signedIn = false
 
     /// Only use nil as a path for testing purposes
     public init(id: UUID, email: String, name: String, path: String?, overrideDatabasePath: String? = nil, migrate: Bool = true) throws {
@@ -282,14 +273,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
             store.close()
             self.grdbStore = nil
         }
-
-        // Do not unregister objectManager managers here.
-        // For every BeamAccount created (for example during the check for legacy data migration))
-        // we create a temp instance of BeamAccount
-        // When this instance is deallocated, the BeamObject manager will loose all existing registered managers
-        
-//        objectManager.unregisterAll()
-
     }
 
     func delete(_ source: BeamDocumentSource) throws {
@@ -344,16 +327,6 @@ public class BeamAccount: ObservableObject, Equatable, Codable, BeamManagerOwner
     static func hasValidAccount(in url: URL) -> Bool {
         !loadAccounts(from: url, stopAtFirst: true).isEmpty
     }
-
-    // MARK: - Private Key Check
-    @MainActor
-    func checkPrivateKey() async {}
-
-    // MARK: - Web sockets
-    func disconnectWebSockets() {
-        objectManager.disconnectLiveSync()
-    }
-
 }
 
 extension BeamAccount {

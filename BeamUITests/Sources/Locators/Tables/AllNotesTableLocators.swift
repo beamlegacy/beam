@@ -11,7 +11,6 @@ enum AllNotesTableLocators {
     
     enum SortButtons: String, CaseIterable, UIElement {
         case title = "Title"
-        case URL = "URL"
         case words = "Words"
         case links = "Links"
         case updated = "Updated"

@@ -15,7 +15,6 @@ struct TabClusteringGroupCapsuleView: View {
     var groupTitle: String?
     var color: TabGroupingColor
     var collapsed = false
-    var loading = false
     var itemsCount: Int = 0
     var onTap: ((Bool, NSEvent?, CGRect) -> Void)?
 
@@ -62,14 +61,6 @@ struct TabClusteringGroupCapsuleView: View {
                 HStack(spacing: 0) {
                     Text(displayedText)
                         .truncationMode(.middle)
-                    if loading {
-                        Spacer(minLength: BeamSpacing._40)
-                        LottieView(animation: .named("status-update_restart"))
-                            .playing(loopMode: .loop)
-                            .setColor(color.textColor?.nsColor ?? .black)
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                    }
                 }
 
             }
@@ -155,7 +146,7 @@ struct TabClusteringGroupCapsuleView_Previews: PreviewProvider {
 
     static func renderGroup(_ title: String, color: TabGroupingColor, collapsed: Bool = false, count: Int = 0) -> some View {
         TabClusteringGroupCapsuleView(displayedText: title, color: color,
-                                      collapsed: collapsed, loading: false, itemsCount: count)
+                                      collapsed: collapsed, itemsCount: count)
             .fixedSize()
             .overlay(
                 TabViewGroupUnderline(color: color),

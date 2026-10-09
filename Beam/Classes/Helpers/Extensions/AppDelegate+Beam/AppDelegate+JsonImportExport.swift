@@ -26,7 +26,7 @@ extension AppDelegate {
     func exportOneNoteToBeamNote(note: BeamNote) {
         let savePanel = NSSavePanel()
         // TODO: i18n
-        savePanel.allowedFileTypes = [BeamNoteDocumentWrapper.fileExtension]
+        savePanel.allowedContentTypes = [BeamUniformTypeIdentifiers.beamNoteType]
         savePanel.allowsOtherFileTypes = true
         savePanel.title = loc("Choose the file to export \(note.title)")
         savePanel.nameFieldStringValue = BeamNoteDocumentWrapper.preferredFilename(for: note, withExtension: true)
@@ -101,7 +101,7 @@ extension AppDelegate {
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
         openPanel.title = loc("Choose the files to import") // TODO: i18n
-        openPanel.allowedFileTypes = [BeamNoteDocumentWrapper.fileExtension]
+        openPanel.allowedContentTypes = [BeamUniformTypeIdentifiers.beamNoteType]
         openPanel.begin { [weak openPanel] result in
             guard result == .OK
             else { openPanel?.close(); return }

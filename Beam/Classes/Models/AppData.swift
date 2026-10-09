@@ -34,7 +34,6 @@ final class AppData: ObservableObject {
             currentAccount = account
         }
         try account.setCurrentDatabase(database)
-        AuthenticationManager.shared.account = currentAccount
         Persistence.Account.currentAccountId = account.id
     }
 
@@ -139,8 +138,6 @@ final class AppData: ObservableObject {
         try clearAllAccounts()
         try setupCurrentAccount()
 
-        currentAccount?.data.objectManager.setup()
-
         if let account = currentAccount {
             guard let db = currentAccount?.getOrCreateDefaultDatabase() else { return }
             try? setCurrentAccount(account, database: db)
@@ -234,10 +231,6 @@ final class AppData: ObservableObject {
 
     func allWindowsDidClose() {
         currentAccount?.data.allWindowsDidClose()
-    }
-
-    func setup() {
-        currentAccount?.data.objectManager.setup()
     }
 
     func softDeleteBrowsingTreeStore() {

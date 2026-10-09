@@ -80,7 +80,6 @@ class PreferencesBaseView: BaseView {
         case notes = "Notes"
         case privacy = "Privacy"
         case passwords = "Passwords"
-        case account = "Account"
         case about = "About"
         case beta = "Beta"
         case advanced = "Advanced"
@@ -90,10 +89,6 @@ class PreferencesBaseView: BaseView {
         self.app.toolbars.buttons.matching(identifier: preferenceView.rawValue).firstMatch.clickOnHittable()
     }
     
-    func waitForPreferencesToBeDisplayedAfterSync() -> Bool {
-        return waitFor(PredicateFormat.isHittable.rawValue, self.app.toolbars.buttons.matching(identifier: PreferenceMenus.account.rawValue).firstMatch, BaseTest.maximumWaitTimeout)
-    }
-
     func getPreferenceWindow(_ preferenceView: PreferenceMenus) -> XCUIElement {
         return app.windows[preferenceView.rawValue]
     }

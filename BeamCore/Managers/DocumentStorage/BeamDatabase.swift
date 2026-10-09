@@ -55,16 +55,6 @@ public class BeamDatabase: CustomStringConvertible, Codable, Identifiable, Equat
 
     var grdbStore: GRDBStore!
 
-    public var objectManager: BeamObjectManager {
-        // It's not clear how to get rid of this forced unwrap, it seems like `account` should not be an optional.
-        account!.objectManager
-    }
-
-    public var beamObjectId: UUID {
-        get { id }
-        set { id = newValue }
-    }
-
     /// This publisher is triggered anytime we store a database
     static let databaseSaved = PassthroughSubject<BeamDatabase, Never>()
     /// This publisher is triggered anytime we are completely removing a database
@@ -98,9 +88,7 @@ public class BeamDatabase: CustomStringConvertible, Codable, Identifiable, Equat
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let syncDatabaseId = decoder.userInfo[BeamObject.beamObjectId] as? UUID ?? UUID.null
-
-        id = (try container.decodeIfPresent(UUID.self, forKey: .id)) ?? syncDatabaseId
+        id = (try container.decodeIfPresent(UUID.self, forKey: .id)) ?? UUID.null
         source = (try container.decodeIfPresent(String.self, forKey: .source)) ?? "decoder"
 
         title = try container.decode(String.self, forKey: .title)
@@ -110,12 +98,8 @@ public class BeamDatabase: CustomStringConvertible, Codable, Identifiable, Equat
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        let syncCoding = encoder.userInfo[BeamObject.beamObjectCoding] as? Bool ?? false
-
-        if !syncCoding {
-            try container.encode(id, forKey: .id)
-            try container.encode(source, forKey: .source)
-        }
+        try container.encode(id, forKey: .id)
+        try container.encode(source, forKey: .source)
 
         try container.encode(title, forKey: .title)
         try container.encode(createdAt, forKey: .createdAt)
@@ -261,10 +245,6 @@ extension BeamDatabase {
 }
 
 extension BeamDatabase {
-    var previousChecksum: String? { nil }
-
-    var hasBeenSyncedOnce: Bool { false }
-
     var fileDBManager: BeamFileDBManager? {
         try? manager(BeamFileDBManager.self)
     }

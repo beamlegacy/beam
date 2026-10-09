@@ -64,7 +64,7 @@ struct WebContentDeletionManager {
         // mnemonic
         try mnemonicManager?.deleteAll(forLinks: linksIds)
         // url + frecencyUrlRecord
-        try linksDBManager?.softDeleteAll(linksIds)
+        try linksDBManager?.softDeleteAll(links.map { $0.id })
     }
 
     /// Clears webkit content and favicon cache

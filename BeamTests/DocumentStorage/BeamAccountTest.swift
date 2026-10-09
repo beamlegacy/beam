@@ -14,7 +14,7 @@ import GRDB
 
 class BeamAccountTest: XCTestCase, BeamDocumentSource {
     static var sourceId: String { "\(Self.self)" }
-    let basePath = "test-\(UUID())"
+    let basePath = NSTemporaryDirectory() + "test-\(UUID())"
 
     func testGetOrCreateDefaultDatabase() throws {
         let account = try BeamAccount(id: UUID(), email: "test@beamapp.co", name: "test", path: basePath)

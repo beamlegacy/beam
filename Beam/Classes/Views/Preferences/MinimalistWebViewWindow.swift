@@ -28,6 +28,7 @@ class MinimalistWebViewWindowController: NSObject, WKNavigationDelegate {
 
     init(contentRect: NSRect) {
         webView = WKWebView(frame: contentRect)
+        webView.customUserAgent = Constants.SafariUserAgent
         webView.loadHTMLString("<html><body><p>Loading...</p></body></html>", baseURL: nil)
     }
 

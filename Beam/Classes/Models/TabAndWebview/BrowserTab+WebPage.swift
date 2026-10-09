@@ -41,7 +41,8 @@ extension BrowserTab: WebPage {
 
     // MARK: Tab handling
     private func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, state: BeamState, rect: NSRect) -> WebPage {
-        let newWebView = BeamWebView(frame: rect, configuration: configuration ?? Self.webViewConfiguration)
+        let defaultConfiguration = state.isIncognito ? Self.incognitoWebViewConfiguration : Self.webViewConfiguration
+        let newWebView = BeamWebView(frame: rect, configuration: configuration ?? defaultConfiguration)
         newWebView.wantsLayer = true
         newWebView.allowsMagnification = true
 
@@ -85,7 +86,7 @@ extension BrowserTab: WebPage {
         var newWebView: BeamWebView
         var newWindow: NSWindow
         if menubar && statusBar && toolBars && resizing,
-           let newBeamWindow = AppDelegate.main.createWindow(frame: windowFeatures.toRect()) {
+           let newBeamWindow = AppDelegate.main.createWindow(frame: windowFeatures.toRect(), isIncognito: state?.isIncognito ?? false) {
             // we are being asked for the full browser experience, give it to them...
             let tab = createNewTab(
                 request,

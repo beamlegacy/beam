@@ -60,7 +60,7 @@ private struct TextFormatterViewSwiftUI: View {
                     }
                 }
             }
-            .animation(nil)
+            .transaction { $0.animation = nil }
             .padding(BeamSpacing._40)
         }
         .onHover { hovering in

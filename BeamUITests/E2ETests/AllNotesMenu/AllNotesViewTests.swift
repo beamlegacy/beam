@@ -39,31 +39,6 @@ class AllNotesViewTests: BaseTest {
         noteView.waitForNoteViewToLoad()
     }
     
-    func testAllNotesTableViewHeaderForSignedAccount() {
-        testrailId("C737, C738")
-        step ("GIVEN I open All notes") {
-            launchAndOpenAllNotes(signedIn: true)
-        }
-        
-        let expectedUsername = getCredentials()!.username
-        let profileHyperlink = allNotesView.getProfileHyperlinkElement(username: expectedUsername)
-        
-        step ("THEN I see correct Table title and Profile link as a signed in user") {
-            shortcutHelper.shortcutActionInvoke(action: .close)
-            allNotesView.waitForAllNotesViewToLoad()
-            XCTAssertTrue(allNotesView.staticText(expectedUsername).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertTrue(profileHyperlink.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-        }
-        
-        step("THEN User's Profile is opened on profile hyperlink click") {
-            profileHyperlink.hoverAndTapInTheMiddle()
-            webView.waitForWebViewToLoad()
-            webView.activateSearchFieldFromTab(index: 1)
-            let tabURL = webView.getTabUrlAtIndex(index: 1)
-            XCTAssertEqual(tabURL, profileHyperlink.getStringValue())
-        }
-    }
-    
     func testNoteRenamingAppliedInAllNotes() {
         testrailId("C1180")
         let noteName = "Capture"
@@ -114,35 +89,6 @@ class AllNotesViewTests: BaseTest {
         step ("THEN links counter is updated correctly for \(linkedNoteName)") {
             let row = openAllNotesAndGetRowFor(noteTitle: linkedNoteName)
             XCTAssertEqual(row.links, 1)
-        }
-    }
-    
-    //To be refactored with automatically published new note via https://linear.app/beamapp/issue/BE-4445/created-published-note-via-uitest-menu-is-not-recognized-as-published
-    func testAllNotesURLCounter() throws {
-        testrailId("C723")
-        try XCTSkipIf(isBigSurOS(), "issue that happens only on Big Sur - https://linear.app/beamapp/issue/BE-5098/note-is-removed-from-all-notes-table-on-publish-from-all-notes-on-big. Until issue is fixed -> it is skipped for Big Sur")
-        
-        let rowIndex = 0
-        
-        step ("GIVEN I open All notes") {
-            launchAndOpenAllNotes(signedIn: true)
-        }
-        
-        step ("WHEN I publish first note") {
-            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
-            allNotesView.waitForAllNotesViewToLoad()
-            allNotesView
-                .openMenuForSingleNote(rowIndex)
-                .selectActionInMenu(.publish)
-        }
-        
-        step ("THEN URL icon appears for the first note") {
-            XCTAssertTrue(allNotesView.getURLiconElementFor(rowIndex: rowIndex).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
-        }
-        
-        step ("THEN Link copied icon appears on the icon click") {
-            allNotesView.getURLiconElementFor(rowIndex: rowIndex).hoverAndTapInTheMiddle()
-            XCTAssertTrue(allNotesView.app.staticTexts["Link Copied"].waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
     }
     

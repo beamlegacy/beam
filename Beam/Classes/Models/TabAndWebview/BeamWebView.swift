@@ -62,6 +62,9 @@ class BeamWebView: WKWebView {
 
     var userInteractionEnabled: Bool = true
 
+    /// Created from a web extension context configuration, so it can display that extension's pages.
+    var hostsExtensionPages = false
+
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
         Self.setURLSchemeHandlers(in: configuration)
         currentConfiguration = configuration

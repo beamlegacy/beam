@@ -17,7 +17,6 @@ struct NoteHeaderView: View {
     static let topPadding: CGFloat = PreferencesManager.editorHeaderTopPadding
     @StateObject var model: NoteHeaderView.ViewModel = NoteHeaderView.ViewModel()
     @ObservedObject var pinnedManager: PinnedNotesManager
-    @EnvironmentObject var data: BeamData
     @EnvironmentObject var windowInfo: BeamWindowInfo
     @Environment(\.undoManager) var undoManager
 
@@ -26,6 +25,7 @@ struct NoteHeaderView: View {
     private var textColor: BeamColor {
         model.isTitleTaken.value ? errorColor : BeamColor.Generic.text
     }
+
 
     private var titleView: some View {
         ZStack(alignment: .leading) {
@@ -60,9 +60,9 @@ struct NoteHeaderView: View {
         .contentShape(Rectangle())
         .gesture(TapGesture().onEnded(model.onTap))
         .simultaneousGesture(TapGesture(count: 2).onEnded(model.onDoubleTap))
-        .animation(nil)
+        .transaction { $0.animation = nil }
         .wiggleEffect(animatableValue: model.wiggleValue)
-        .animation(model.wiggleValue > 0 ? BeamAnimation.easeInOut(duration: 0.3) : nil)
+        .animation(model.wiggleValue > 0 ? BeamAnimation.easeInOut(duration: 0.3) : nil, value: model.wiggleValue)
         .onDisappear {
             model.commitRenameCard(fromTextField: false)
         }

@@ -8,10 +8,6 @@ import Combine
 @testable import Beam
 class ConfigurationTests: QuickSpec {
     override func spec() {
-        it("has test env") {
-            expect(Configuration.env.rawValue).to(equal("test"))
-        }
-
         it("doesn't have sparkle") {
             expect(Configuration.autoUpdate).to(beFalse())
         }

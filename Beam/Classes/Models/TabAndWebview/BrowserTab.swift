@@ -769,16 +769,6 @@ import BeamCore
         return snapshot
     }
 
-    internal func sendTree(grouped: Bool = false) {
-        guard let state = state, !state.isIncognito else { return }
-        guard let sender = state.data.browsingTreeSender else { return }
-        if grouped {
-            sender.groupSend(browsingTree: browsingTree)
-        } else {
-            sender.send(browsingTree: browsingTree)
-        }
-    }
-
     internal func saveTree(grouped: Bool = false) {
         guard let state = state, !state.isIncognito else { return }
         let appSessionId = state.data.sessionId
@@ -812,7 +802,7 @@ import BeamCore
             let pasteboard = NSPasteboard.general
             guard pasteboard.string(forType: .string) == urlString else { return }
             let bTextHolder = BeamTextHolder(bText: fetchedTitle)
-            let beamTextData = try PropertyListEncoder().encode(bTextHolder)
+            guard let beamTextData = try? PropertyListEncoder().encode(bTextHolder) else { return }
             pasteboard.setData(beamTextData, forType: .bTextHolder)
         }
     }

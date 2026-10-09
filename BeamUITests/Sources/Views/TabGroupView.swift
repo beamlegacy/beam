@@ -139,45 +139,10 @@ class TabGroupView: BaseView {
     }
     
     @discardableResult
-    func waitForShareMenuToBeDisplayed() -> Bool {
-        return menuItem(TabGroupMenuViewLocators.ShareTabGroupMenu.shareCopyLink.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-    }
-    
-    func isShareTabMenuDisplayed() -> Bool {
-        waitForShareMenuToBeDisplayed()
-        var result = true
-        for item in TabGroupMenuViewLocators.ShareTabGroupMenu.allCases {
-            result = result && menuItem(item.accessibilityIdentifier).isEnabled
-        }
-        return result
-    }
-    
-    @discardableResult
-    func shareTabGroupAction(_ item: String) -> WebTestView {
-        // hover first item to not dismiss the menu
-        app.menuItems[TabGroupMenuViewLocators.ShareTabGroupMenu.shareCopyLink.accessibilityIdentifier].hoverInTheMiddle()
-        app.menuItems[item].clickOnExistence()
-        return WebTestView()
-    }
-    
-    @discardableResult
     func deleteTabGroupFromNoteAction() -> NoteTestView {
         // hover first item to not dismiss the menu
         app.menuItems[TabGroupMenuViewLocators.MenuItems.tabGroupDeleteGroup.accessibilityIdentifier].hoverAndTapInTheMiddle()
         return NoteTestView()
-    }
-    
-    func isTabGroupLinkInPasteboard() -> Bool {
-        let regex = try! NSRegularExpression(pattern: "https://" + BaseTest().stagingEnvironmentServerAddress + "/.*/.*")
-        let pasteboardContent = NSPasteboard.general.pasteboardItems?.first?.string(forType: NSPasteboard.PasteboardType.string)
-        let range = NSRange(location: 0, length: pasteboardContent!.utf16.count)
-        return regex.firstMatch(in: pasteboardContent!, options: [], range: range) != nil
-    }
-    
-    func isMatchingFullURL(_ URLtoMatch: String) -> Bool {
-        let regex = try! NSRegularExpression(pattern: "https://(" + BaseTest().tempURLToRedirectedReactNativeApp + "|" + BaseTest().stagingEnvironmentServerAddress + ")/.*/tabgroup/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/.*")
-        let range = NSRange(location: 0, length: URLtoMatch.utf16.count)
-        return regex.firstMatch(in: URLtoMatch, options: [], range: range) != nil
     }
     
     @discardableResult

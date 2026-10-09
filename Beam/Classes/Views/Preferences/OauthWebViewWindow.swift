@@ -36,8 +36,7 @@ class OauthController: MinimalistWebViewWindowController, OAuthSwiftURLHandlerTy
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         // Google doesn't allow our own scheme :(
-        let oauthBeamSchemes = [EnvironmentVariables.Oauth.Google.callbackURL.components(separatedBy: ":").first,
-                                EnvironmentVariables.Oauth.Github.callbackURL.components(separatedBy: ":").first]
+        let oauthBeamSchemes = [EnvironmentVariables.Oauth.Google.callbackURL.components(separatedBy: ":").first]
         // Assigning it to an optional to check if we have a value
         // see: https://linear.app/beamapp/issue/BE-4279/exc-breakpoint-exception-6-code-2765529536-subcode-8
         let optionalRequest: URLRequest? = navigationAction.request

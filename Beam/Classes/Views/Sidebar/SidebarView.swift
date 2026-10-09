@@ -118,7 +118,7 @@ struct SidebarView: View {
     }
 
     @ViewBuilder private var footer: some View {
-        SidebarFooterView(username: AuthenticationManager.shared.username)
+        SidebarFooterView()
             .frame(height: 38)
             .padding(.bottom, 8)
             .padding(.leading, 8)

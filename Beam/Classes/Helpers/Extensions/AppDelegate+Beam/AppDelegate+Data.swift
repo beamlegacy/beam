@@ -126,7 +126,7 @@ extension AppDelegate {
         openPanel.canChooseDirectories = false
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
-        openPanel.allowedFileTypes = [BeamNoteCollectionWrapper.fileExtension]
+        openPanel.allowedContentTypes = [BeamUniformTypeIdentifiers.beamNoteCollectionType]
 
         // TODO: i18n
         openPanel.title = "Select the note collection"
@@ -155,7 +155,7 @@ extension AppDelegate {
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
         openPanel.title = loc("Choose your ROAM JSON Export") // TODO: i18n
-        openPanel.allowedFileTypes = BeamUniformTypeIdentifiers.roamAllowedFileTypes
+        openPanel.allowedContentTypes = BeamUniformTypeIdentifiers.roamAllowedContentTypes
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let selectedPath = openPanel?.url?.path,
                   let database = BeamData.shared.currentDatabase
@@ -188,7 +188,7 @@ extension AppDelegate {
         openPanel.canChooseDirectories = false
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
-        openPanel.allowedFileTypes = [BeamUniformTypeIdentifiers.markdownExtension]
+        openPanel.allowedContentTypes = [BeamUniformTypeIdentifiers.markdownType]
         // TODO: i18n
         openPanel.title = loc("Choose your Markdown file")
         openPanel.begin { [weak openPanel] result in

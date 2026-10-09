@@ -233,7 +233,7 @@ protocol WebIndexControllerDelegate: AnyObject {
 ///
 /// The operation can be stopped before the end of the delay,
 /// to not perform the second read while still sending the information of the first read.
-private final class DelayedReadWebViewOperation: Operation {
+private final class DelayedReadWebViewOperation: Operation, @unchecked Sendable {
 
     private let url: URL
     private let firstRead: Readability?

@@ -9,7 +9,7 @@ import Foundation
 import GRDB
 import BeamCore
 
-public struct FrecencyNoteRecord: Codable, BeamObjectProtocol {
+public struct FrecencyNoteRecord: Codable, Hashable {
     struct UniqueKey: Hashable {
         let frecencyKey: FrecencyParamKey
         let noteId: UUID
@@ -19,7 +19,6 @@ public struct FrecencyNoteRecord: Codable, BeamObjectProtocol {
     }
 
     public static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
-    static var beamObjectType: BeamObjectObjectType = .noteFrecency
     static let BeamElementForeignKey = ForeignKey([FrecencyNoteRecord.Columns.noteId], to: [BeamElementRecord.Columns.noteId])
 
     var id: UUID = UUID()
@@ -33,11 +32,6 @@ public struct FrecencyNoteRecord: Codable, BeamObjectProtocol {
     var createdAt: Date = BeamDate.now
     var updatedAt: Date = BeamDate.now
     var deletedAt: Date?
-
-    var beamObjectId: UUID {
-        get { id }
-        set { id = newValue }
-    }
 
     enum CodingKeys: String, CodingKey {
         case noteId
@@ -100,39 +94,6 @@ extension FrecencyNoteRecord: TableRecord {
     }
 }
 
-class NoteFrecencyApiSaveLimiter {
-    private let saveOnApiLimit: Int // Save on Api every x local saves
-    private var saveCount: Int = 0
-    private var records = [UUID: FrecencyNoteRecord]()
-
-    init(saveOnApiLimit: Int = 10) {
-        self.saveOnApiLimit = saveOnApiLimit
-    }
-
-    func add(record: FrecencyNoteRecord) {
-        if let previousRecord = records[record.id],
-           record.lastAccessAt >= previousRecord.lastAccessAt {
-            records[record.id] = record
-        }
-        if records[record.id] == nil {
-            records[record.id] = record
-        }
-        saveCount += 1
-    }
-    func remove(record: FrecencyNoteRecord) {
-        records.removeValue(forKey: record.id)
-    }
-    func reset() {
-        saveCount = 0
-        records = [UUID: FrecencyNoteRecord]()
-    }
-    var recordsToSave: [FrecencyNoteRecord]? {
-        guard saveCount >= saveOnApiLimit else { return nil }
-        defer { reset() }
-        return Array(records.values)
-    }
-}
-
 public class GRDBNoteFrecencyStorage: FrecencyStorage {
     let providedDb: BeamNoteLinksAndRefsManager?
     var db: BeamNoteLinksAndRefsManager? {
@@ -146,6 +107,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
     init(db providedDb: BeamNoteLinksAndRefsManager? = nil) {
         self.providedDb = providedDb
     }
+
     public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         guard let db = db else { return nil }
         do {
@@ -207,6 +169,22 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         try db.save(noteFrecencies: recordsToSave)
     }
 
+    /// Marks the frecency records of a deleted note as deleted.
+    public func softDelete(noteId: UUID) {
+        guard let db = db else { return }
+        let now = BeamDate.now
+        let softDeleted = db.fetchNoteFrecencies(noteId: noteId).map { frecency -> FrecencyNoteRecord in
+            var softDeleted = frecency
+            softDeleted.deletedAt = now
+            return softDeleted
+        }
+        do {
+            try db.save(noteFrecencies: softDeleted)
+        } catch {
+            Logger.shared.logError("Couldn't soft delete frecencies of note \(noteId): \(error)", category: .database)
+        }
+    }
+
     public func deleteAll() {
         guard let db = db else { return }
         do {
@@ -215,20 +193,5 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .fileDB)
         }
     }
-
-    func softDelete(noteId: UUID) {
-        guard let db = db else { return }
-        let frecencies = db.fetchNoteFrecencies(noteId: noteId)
-        let now = BeamDate.now
-        let softDeleted = frecencies.map { (frecency) -> FrecencyNoteRecord in
-            var softDeleted = frecency
-            softDeleted.deletedAt = now
-            return softDeleted
-        }
-        do {
-            try db.save(noteFrecencies: softDeleted)
-        } catch {
-            Logger.shared.logError("Couldn't soft delete \(noteId) note frecencies \(error)", category: .frecencyNetwork)
-        }
-    }
 }
+

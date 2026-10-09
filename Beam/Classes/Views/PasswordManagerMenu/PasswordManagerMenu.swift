@@ -40,10 +40,10 @@ struct PasswordManagerMenu: View {
             .onPreferenceChange(HeightKey.self) {
                 self.height = $0
             }
-            .animation(nil)
+            .transaction { $0.animation = nil }
         }
         .frame(width: width, height: height, alignment: .top)
-        .animation(nil)
+        .transaction { $0.animation = nil }
     }
 
     @ViewBuilder

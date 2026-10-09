@@ -173,6 +173,8 @@ extension TextRoot {
         }
 
         if let textNode = node as? TextNode {
+            // Locked nodes (e.g. block references) can't be edited, nor merged with the next node.
+            guard !textNode.readOnly else { return }
             if cursorPosition == textNode.textCount && state.selectedTextRange.isEmpty {
                 guard let nextNode = node.nextVisibleNode(ElementNode.self) else {
                     return
@@ -182,7 +184,7 @@ extension TextRoot {
                 if let nextTextNode = nextNode as? TextNode {
                     let pos = textNode.textCount
                     focusedCmdManager.insertText(nextTextNode.elementText, in: textNode, at: pos)
-                    moveChildrenOf(nextTextNode, to: textNode)
+                    moveChildrenOf(nextTextNode, to: textNode, atOffset: mergedChildrenOffset(of: nextTextNode, into: textNode))
                     focusedCmdManager.deleteElement(for: nextTextNode)
                     return
                 }
@@ -227,6 +229,13 @@ extension TextRoot {
                 focusedCmdManager.deleteElement(for: node)
             }
         }
+    }
+
+    /// Where the children of `node` go when it is merged into `target`: in place of `node` when `target` is its
+    /// parent (keeps them before node's next siblings), otherwise at the end of `target`'s children.
+    func mergedChildrenOffset(of node: ElementNode, into target: ElementNode) -> Int? {
+        guard node.displayedElement.parent === target.displayedElement else { return nil }
+        return node.displayedElement.indexInParent
     }
 
     func moveChildrenOf(_ node: ElementNode, to newParent: ElementNode, atOffset: Int? = nil) {
@@ -303,7 +312,7 @@ extension TextRoot {
                     if prevTextNode.displayedElement.children.isEmpty {
                         prevTextNode.open = textNode.open
                     }
-                    moveChildrenOf(textNode, to: prevTextNode)
+                    moveChildrenOf(textNode, to: prevTextNode, atOffset: mergedChildrenOffset(of: textNode, into: prevTextNode))
                     cmdManager.focusElement(prevTextNode, cursorPosition: pos)
                     cmdManager.deleteElement(for: textNode)
                     return
@@ -371,6 +380,7 @@ extension TextRoot {
             deleteForward()
             return
         }
+        guard !node.readOnly else { return }
         guard selectedTextRange.isEmpty else {
             cmdManager.deleteText(in: node, for: selectedTextRange)
             return
@@ -385,6 +395,7 @@ extension TextRoot {
             deleteBackward()
             return
         }
+        guard !node.readOnly else { return }
         guard selectedTextRange.isEmpty else {
             cmdManager.deleteText(in: node, for: selectedTextRange)
             return
@@ -399,6 +410,7 @@ extension TextRoot {
             deleteBackward()
             return
         }
+        guard !node.readOnly else { return }
         guard selectedTextRange.isEmpty else {
             cmdManager.deleteText(in: node, for: selectedTextRange)
             return
@@ -413,6 +425,7 @@ extension TextRoot {
             deleteForward()
             return
         }
+        guard !node.readOnly else { return }
         guard selectedTextRange.isEmpty else {
             cmdManager.deleteText(in: node, for: selectedTextRange)
             return
@@ -484,8 +497,10 @@ extension TextRoot {
         }
 
         if let replacementRange = replacementRange {
-            let low = rangeToReplace.lowerBound + replacementRange.lowerBound
-            let high = low + replacementRange.count
+            // Like in insertText, AppKit's replacement range is absolute in the text (e.g. the "e" replaced by
+            // the press-and-hold accent menu), not relative to the current selection.
+            let low = min(max(0, replacementRange.lowerBound), node.text.count)
+            let high = min(max(low, replacementRange.upperBound), node.text.count)
             rangeToReplace = low ..< high
         }
 

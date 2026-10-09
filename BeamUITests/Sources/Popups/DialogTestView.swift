@@ -18,11 +18,6 @@ class DialogTestView: BaseView{
         return app.dialogs.buttons[locator.accessibilityIdentifier]
     }
     
-    func isConnectTabGroupDisplayed() -> Bool {
-        _ = app.staticTexts[ AlertViewLocators.StaticTexts.connectBeam.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-        return app.staticTexts[ AlertViewLocators.StaticTexts.connectDescriptionTabGroups.accessibilityIdentifier].exists && app.staticTexts[ AlertViewLocators.StaticTexts.connectBeam.accessibilityIdentifier].exists
-    }
-    
     func isForgetTabGroupAlertDisplayed(tabGroupName: String) -> Bool {
         _ = app.staticTexts[ AlertViewLocators.StaticTexts.forgetTabGroupTitle.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         let bodyString = AlertViewLocators.StaticTexts.forgetTabGroupBody.accessibilityIdentifier

@@ -76,7 +76,7 @@ class ReferencesSection: LinksSection {
     }
 
     func createLinkAllLayer() {
-        performLayerChanges {
+        performLayerChanges { [self] in
             let linkContentLayer = CALayer()
             linkContentLayer.addSublayer(self.linkActionLayer)
 

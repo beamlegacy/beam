@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 enum SettingTab: String, CaseIterable {
-    case general, browser, notes, privacy, passwords, calendars, about, beta, advanced, editor, clustering
+    case general, browser, notes, privacy, passwords, extensions, calendars, about, beta, advanced, editor, clustering
 
     var label: String {
         switch self {
@@ -20,6 +20,7 @@ enum SettingTab: String, CaseIterable {
         case .notes: return "Notes"
         case .privacy: return "Privacy"
         case .passwords: return "Passwords"
+        case .extensions: return "Extensions"
         case .beta: return "Beta"
         case .advanced: return "Advanced"
         case .editor: return "Editor UI Debug"
@@ -36,6 +37,7 @@ enum SettingTab: String, CaseIterable {
         case .notes: return "preferences-cards"
         case .privacy: return "preferences-privacy"
         case .passwords: return "preferences-passwords"
+        case .extensions: return "puzzlepiece.extension" // SF Symbol
         case .beta: return "preferences-developer"
         case .advanced: return "preferences-developer"
         case .editor: return "preferences-editor-debug"
@@ -51,6 +53,11 @@ enum SettingTab: String, CaseIterable {
         case .privacy: return NSHostingView(rootView: PrivacyPreferencesView().fixedSize())
         case .passwords:
             return NSHostingView(rootView: PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(passwordManager: BeamData.shared.passwordManager, showNeverSavedEntries: true), creditCardsViewModel: CreditCardListViewModel()).fixedSize())
+        case .extensions:
+            if #available(macOS 15.4, *) {
+                return NSHostingView(rootView: ExtensionsPreferencesView().fixedSize())
+            }
+            return NSHostingView(rootView: Text("Extensions require macOS 15.4 or later.").padding(40).fixedSize())
         case .calendars: return NSHostingView(rootView: CalendarsView(viewModel: CalendarsViewModel(calendarManager: BeamData.shared.calendarManager)).fixedSize())
         case .about: return NSHostingView(rootView: AboutPreferencesView().fixedSize())
         case .beta:
@@ -62,6 +69,9 @@ enum SettingTab: String, CaseIterable {
     }
 
     static var userSettings: [SettingTab] {
+        if #available(macOS 15.4, *) {
+            return [.general, .browser, .notes, .privacy, .passwords, .extensions, .calendars, .about, .beta]
+        }
         return [.general, .browser, .notes, .privacy, .passwords, .calendars, .about, .beta]
     }
 

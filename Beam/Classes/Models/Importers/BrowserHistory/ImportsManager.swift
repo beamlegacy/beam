@@ -78,9 +78,10 @@ public class ImportsManager: NSObject, ObservableObject {
                 guard let self = self else { return }
                 switch completion {
                 case .finished:
-                    batchImporter.finalize {
+                    let saved = batchImporter.finalize {
                         self.sendError(ErrorType.saveError, action: .history, source: .browser(importer.sourceBrowser))
                     }
+                    guard saved else { break }
                     let end = BeamDate.now
                     self.sendSuccess(action: .history, source: .browser(importer.sourceBrowser), count: receivedCount)
                     Logger.shared.logInfo("Import finished successfully", category: .browserImport)

@@ -164,12 +164,6 @@ class OmniBoxTestView: BaseView {
     }
     
     @discardableResult
-    func shareTabGroup() -> NoteTestView {
-        app.links.matching(NSPredicate(format: "identifier CONTAINS '\(OmniboxLocators.Labels.shareTabGroup.accessibilityIdentifier)'")).firstMatch.clickInTheMiddle()
-        return NoteTestView()
-    }
-    
-    @discardableResult
     func forgetTabGroup() -> NoteTestView {
         app.links.matching(NSPredicate(format: "identifier CONTAINS '\(OmniboxLocators.Labels.forgetTabGroup.accessibilityIdentifier)'")).firstMatch.clickInTheMiddle()
         return NoteTestView()

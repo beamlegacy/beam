@@ -103,20 +103,6 @@ extension TabGroupingManager {
         return newGroup
     }
 
-    /// creates a copy of the tab group beam object as is, and save it into DB.
-    func copyForSharing(_ group: TabGroup) async -> TabGroup {
-        var title: String = group.title ?? ""
-        if title.isEmpty {
-            title = TabGroupingStoreManager.suggestedDefaultTitle(for: group, withTabs: allOpenTabs(inGroup: group), truncated: false)
-        }
-        if let copy = storeManager?.makeLockedCopy(group, title: title) {
-            return copy
-        } else if group.title?.isEmpty != false, let existingCopy = storeManager?.fetch(copiesOfGroup: group.id).first {
-            return TabGroup(id: existingCopy.id, pageIds: group.pageIds, title: title, color: group.color, isLocked: true, parentGroup: group.id)
-        }
-        return await copyForNoteInsertion(group, newTitle: title)
-    }
-
     func renameGroup(_ group: TabGroup, title: String) {
         group.changeTitle(title)
         Logger.shared.logInfo("Tab Group renamed to '\(title)' (\(group.id))", category: .tabGrouping)
@@ -288,18 +274,20 @@ extension TabGroupingManager {
 
     @MainActor
     func updateAutomaticClustering(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageID?]? = nil) async {
-        let openTabs = allOpenTabs()
+        // The grouping itself runs on `myQueue`, off the main actor.
+        nonisolated(unsafe) let manager = self
+        nonisolated(unsafe) let openTabs = allOpenTabs()
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             myQueue.async {
                 var groupsOfOpen = urlGroups
                 if let openPages = openPages {
-                    groupsOfOpen = self.removeClosedPages(urlGroups: urlGroups, openPages: openPages)
-                    groupsOfOpen = self.removeSingles(urlGroups: groupsOfOpen, openTabs: openTabs)
+                    groupsOfOpen = manager.removeClosedPages(urlGroups: urlGroups, openPages: openPages)
+                    groupsOfOpen = manager.removeSingles(urlGroups: groupsOfOpen, openTabs: openTabs)
                     // TODO: Consider coloring lone tabs that are in a group with a note
                     // TODO: Consider merging groups based on active sources as well
                     // TODO: Consider using similarity scores with notes/active-sources to split groups (similar to sources that are not to be suggested despite being in the correct group)
                 }
-                self.buildTabGroups(receivingClusters: groupsOfOpen, allOpenTabs: openTabs)
+                manager.buildTabGroups(receivingClusters: groupsOfOpen, allOpenTabs: openTabs)
                 continuation.resume()
             }
         }

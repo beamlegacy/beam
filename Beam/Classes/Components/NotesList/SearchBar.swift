@@ -22,9 +22,9 @@ struct SearchBar: View {
                 })
                 .padding(.trailing, BeamSpacing._100)
                 .transition(.move(edge: .trailing))
-                .animation(.default)
             }
         }
+        .animation(.default, value: isEditing)
         .onTapGesture {
             self.isEditing = true
         }

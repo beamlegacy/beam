@@ -84,8 +84,10 @@ extension BeamTextEdit {
                 }
                 return true
             },
-            "]": {
-                guard node.text.count >= 2 else { return true }
+            "]": { [unowned self] in
+                // "-[]" typed at the start of a bullet turns it into a checkbox. Only when "]" closes that "-[",
+                // not for any "]" typed later in a bullet starting with "-[" (e.g. "-[1, 2, 3]").
+                guard node.text.count >= 2, inputDetectorGetPositionAndPrecedingChar(in: node).0 == 2 else { return true }
                 let cmdManager = rootNode.focusedCmdManager
                 let startRange = 0..<2
                 let substr = node.text.extract(range: startRange)

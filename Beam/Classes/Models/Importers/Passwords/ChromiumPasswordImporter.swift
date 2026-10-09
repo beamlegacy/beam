@@ -136,7 +136,7 @@ final class ChromiumPasswordImporter: ChromiumImporter {
             ivData.withUnsafeBytes { (ivBuffer: UnsafeRawBufferPointer) in
                 payloadData.withUnsafeBytes { (payloadBuffer: UnsafeRawBufferPointer) in
                     decryptedData.withUnsafeMutableBytes { (decrypted: UnsafeMutableRawBufferPointer) in
-                        CCCrypt(CCOperation(kCCDecrypt), CCAlgorithm(kCCAlgorithmAES128), CCOptions(kCCOptionPKCS7Padding), symmetricKeyBuffer.baseAddress, symmetricKeyBuffer.count, ivBuffer.baseAddress, payloadBuffer.baseAddress, payloadBuffer.count, decrypted.baseAddress, 64, &dataMoved)
+                        CCCrypt(CCOperation(kCCDecrypt), CCAlgorithm(kCCAlgorithmAES128), CCOptions(kCCOptionPKCS7Padding), symmetricKeyBuffer.baseAddress, symmetricKeyBuffer.count, ivBuffer.baseAddress, payloadBuffer.baseAddress, payloadBuffer.count, decrypted.baseAddress, decrypted.count, &dataMoved)
                     }
                 }
             }

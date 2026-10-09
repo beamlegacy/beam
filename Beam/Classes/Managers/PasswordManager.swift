@@ -48,11 +48,13 @@ final class PasswordManager {
     private var passwordsDB: PasswordStore? { overridePasswordDB ?? BeamData.shared.passwordDB }
     private var changeSubject: PassthroughSubject<Void, Never>
 
+
     init(overridePasswordDB: PasswordStore? = nil,
          hostLookup: HostnameCanonicalizer = .shared) {
         self.overridePasswordDB = overridePasswordDB
         self.hostnameCanonicalizer = hostLookup
         self.changeSubject = PassthroughSubject<Void, Never>()
+
     }
 
     private func passwordManagerEntries(for passwordsRecord: [LocalPasswordRecord]) -> [PasswordManagerEntry] {
@@ -167,7 +169,9 @@ final class PasswordManager {
               password: String,
               disabledForHost: Bool = false,
               uuid: UUID? = nil) -> LocalPasswordRecord? {
-        guard let passwordsDB = passwordsDB else { return nil }
+        guard let passwordsDB = passwordsDB else {
+            return nil
+        }
 
         do {
             let previousHostname: String
@@ -218,7 +222,7 @@ final class PasswordManager {
     func markDeleted(hostname: String, for username: String) {
         guard let passwordsDB = passwordsDB else { return }
         do {
-            try passwordsDB.markDeleted(hostname: hostname, username: username)
+            _ = try passwordsDB.markDeleted(hostname: hostname, username: username)
             changeSubject.send()
         } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting password for \(hostname) - \(username): \(errorMsg)", category: .passwordsDB)
@@ -230,7 +234,7 @@ final class PasswordManager {
     func markAllDeleted() {
         guard let passwordsDB = passwordsDB else { return }
         do {
-            try passwordsDB.markAllDeleted()
+            _ = try passwordsDB.markAllDeleted()
             changeSubject.send()
         } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while deleting all passwords: \(errorMsg)", category: .passwordsDB)
@@ -240,8 +244,8 @@ final class PasswordManager {
     }
 
     func deleteAll() {
-        guard let passwordsDB = passwordsDB else { return }
         do {
+            guard let passwordsDB = passwordsDB else { return }
             try passwordsDB.deleteAll()
             changeSubject.send()
         } catch PasswordDBError.cantDeletePassword(errorMsg: let errorMsg) {
