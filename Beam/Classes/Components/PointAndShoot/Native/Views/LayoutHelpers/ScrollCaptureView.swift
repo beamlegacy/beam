@@ -24,6 +24,10 @@ struct ScrollCaptureView<Content>: NSViewRepresentable where Content: View {
     func makeNSView(context: Context) -> ScrollCaptureNSView {
         let parent = ScrollCaptureNSView()
         let child = NSHostingController(rootView: content)
+        if #available(macOS 13.0, *) {
+            // The content fills the parent, its size never comes from SwiftUI.
+            child.sizingOptions = []
+        }
         parent.addSubviewWithConstraintsOnEachSide(subView: child.view)
         parent.autoresizingMask = [.width, .height]
         // First, add the view of the child to the view of the parent

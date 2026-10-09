@@ -134,7 +134,13 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     private func buildHeaderView(_ scrollView: NSViewType, context: Context) {
         guard let documentView = scrollView.documentView else { return }
         context.coordinator.headerHostingView?.removeFromSuperview()
-        let hosting = NSHostingController(rootView: headerView()).view
+        let hostingController = NSHostingController(rootView: headerView())
+        if #available(macOS 13.0, *) {
+            // Width and position come from the constraints below, only the height comes from SwiftUI.
+            // Extra min/max size constraints feed back into the outer SwiftUI layout and can loop.
+            hostingController.sizingOptions = [.intrinsicContentSize]
+        }
+        let hosting = hostingController.view
         hosting.translatesAutoresizingMaskIntoConstraints = false
         hosting.frame = documentView.bounds
         documentView.addSubview(hosting)
