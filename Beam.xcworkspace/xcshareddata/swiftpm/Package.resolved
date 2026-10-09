@@ -222,8 +222,8 @@
         "repositoryURL": "https://github.com/gumob/PunycodeSwift.git",
         "state": {
           "branch": null,
-          "revision": "7f2db0a965408a1bc81fb094d4a3f6680162687c",
-          "version": "2.1.1"
+          "revision": "30a462bdb4398ea835a3585472229e0d74b36ba5",
+          "version": "3.0.0"
         }
       },
       {
@@ -401,9 +401,9 @@
         "package": "TLDExtractSwift",
         "repositoryURL": "https://github.com/gumob/TLDExtractSwift",
         "state": {
-          "branch": null,
-          "revision": "2f3d0a72490f9f8cce44e189bfcbffb0f7261d8d",
-          "version": "2.1.1"
+          "branch": "main",
+          "revision": "c9a0f5d2942516162ab273b736a84c21ada12184",
+          "version": null
         }
       },
       {

@@ -1138,8 +1138,6 @@
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		A5FF15FD2888332B0089D76E /* DeviceAuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FF15FC2888332B0089D76E /* DeviceAuthenticationManager.swift */; };
 		AA0001012605000000000001 /* OAuthIdentityProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0001022605000000000001 /* OAuthIdentityProvider.swift */; };
-		AA0002012605000000000001 /* BeamURLSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0002022605000000000001 /* BeamURLSession.swift */; };
-		AA0003012605000000000001 /* BeamObjectProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0003022605000000000001 /* BeamObjectProtocol.swift */; };
 		AA0004012605000000000001 /* BeamNoteSharingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0004022605000000000001 /* BeamNoteSharingUtils.swift */; };
 		AA0005012605000000000001 /* BeamObjectQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0005022605000000000001 /* BeamObjectQueue.swift */; };
 		AA0006012605000000000001 /* AnalyticsCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0006022605000000000001 /* AnalyticsCollector.swift */; };
@@ -2976,8 +2974,6 @@
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		A5FF15FC2888332B0089D76E /* DeviceAuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceAuthenticationManager.swift; sourceTree = "<group>"; };
 		AA0001022605000000000001 /* OAuthIdentityProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OAuthIdentityProvider.swift; sourceTree = "<group>"; };
-		AA0002022605000000000001 /* BeamURLSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamURLSession.swift; sourceTree = "<group>"; };
-		AA0003022605000000000001 /* BeamObjectProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BeamObjectProtocol.swift; path = Beam/Classes/Services/BeamObjectAPI/Models/BeamObjectProtocol.swift; sourceTree = SOURCE_ROOT; };
 		AA0004022605000000000001 /* BeamNoteSharingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BeamNoteSharingUtils.swift; path = Beam/Classes/Models/BeamNoteSharingUtils.swift; sourceTree = SOURCE_ROOT; };
 		AA0005022605000000000001 /* BeamObjectQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BeamObjectQueue.swift; path = Beam/Classes/Services/BeamObjectAPI/Managers/BeamObjectQueue.swift; sourceTree = SOURCE_ROOT; };
 		AA0006022605000000000001 /* AnalyticsCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AnalyticsCollector.swift; path = Beam/Classes/Models/Analytics/AnalyticsCollector.swift; sourceTree = SOURCE_ROOT; };
@@ -4171,7 +4167,6 @@
 				418171D52581107C00317ED8 /* NoteView.swift */,
 				A5DE143126496F250023F753 /* NoteHeaderView.swift */,
 				A5D88595274E919300F37859 /* NodeHeaderViewModel.swift */,
-				A0F49B3928293C4B00D75330 /* SocialShareContextMenu.swift */,
 				3318B4322852818C002ACA34 /* TabGroup */,
 			);
 			path = Notes;
@@ -4881,7 +4876,6 @@
 		75706A412F84467C00CBA279 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
-				AA0003022605000000000001 /* BeamObjectProtocol.swift */,
 				AA0004022605000000000001 /* BeamNoteSharingUtils.swift */,
 				DA3A84C42805DCCD00092200 /* NoteDailySummaryTest.swift */,
 				AA0005022605000000000001 /* BeamObjectQueue.swift */,
@@ -8659,6 +8653,7 @@
 				8AA2BC59270339DD00B99B71 /* ScrollCaptureView.swift in Sources */,
 				4181721E2581107C00317ED8 /* OSLog+Beam.swift in Sources */,
 				418171F72581107C00317ED8 /* BeamData.swift in Sources */,
+				AA0006012605000000000001 /* AnalyticsCollector.swift in Sources */,
 				3330D7CD265E95E0008C9E20 /* LinearProgressView.swift in Sources */,
 				A57C745826709C8000840BBA /* BeamTextEdit+SlashMenu.swift in Sources */,
 				A53C9873267B4B6400D4AE90 /* AnimatableOffsetEffect.swift in Sources */,
@@ -9233,6 +9228,8 @@
 				DAF063F527D21492000406DE /* DomainPath0Tests.swift in Sources */,
 				BAA67A6498E4E69779855E19 /* DownloadManagerTests.swift in Sources */,
 				05EDC3E5284DD126008FF545 /* BeamDatabaseTest.swift in Sources */,
+				05874022287F0D93007DBA40 /* BeamAccount+InitialStateTest.swift in Sources */,
+				05EDC3DE284DD126008FF545 /* BeamAccountTest.swift in Sources */,
 				05D4A7D927DBAF1B00CA1310 /* Date+iso8601millisecondsTests.swift in Sources */,
 				BAA6734B9E1478E3084B0A3A /* WebNoteControllerTest.swift in Sources */,
 				0D4EC94526838FA800487B75 /* FrecencyUrlRecordTests.swift in Sources */,
@@ -11662,8 +11659,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/gumob/TLDExtractSwift";
 			requirement = {
-				kind = exactVersion;
-				version = 2.1.1;
+				branch = main;
+				kind = branch;
 			};
 		};
 		A5F782EE2C629C00007431FC /* XCRemoteSwiftPackageReference "Clustering" */ = {

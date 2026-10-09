@@ -12,8 +12,19 @@ import MockHttpServer
 
 // Testing the navigation flow from the BrowserTab to the LinkStore
 // to check what ends up in the indexing when doing different kind of navigation
+class BrowserTabIndexingTests: WebBrowsingBaseTests {
+    private func performAndTestAliasRedirection(ofType type: MockHttpServer.RedirectionType,
+                                                expectedNumberOfIndexingCalls: Int,
+                                                initialURLShouldBeAlias: Bool = true,
+                                                destinationTitle: String) {
+        let initialURL = redirectURL(for: type)
 
-// Commented since sync engne removal
+        let expectation = expectation(description: "done_indexing_\(UUID())")
+        expectation.expectedFulfillmentCount = expectedNumberOfIndexingCalls
+        mockIndexingDelegate?.onIndexingFinished = { _ in
+            expectation.fulfill()
+        }
+        tab.load(request: URLRequest(url: initialURL))
 
         waitForExpectations(timeout: defaultTimeout, handler: nil)
 
